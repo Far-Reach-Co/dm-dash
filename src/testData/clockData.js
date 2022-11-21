@@ -2,7 +2,7 @@ export default [
   {
     id: 1,
     title: 'wyrld present',
-    currentTimeInMilliseconds: 714300000
+    currentTimeInMilliseconds: 86390000
   },
   // {
   //   id: 2,
