@@ -1,3 +1,5 @@
+import createElement from './lib/createElement.js'
+
 export default class ClockComponent {
   constructor (props) {
     this.domComponent = props.domComponent
@@ -71,37 +73,23 @@ export default class ClockComponent {
 
   render = () => {
     if(this.edit) {
-      const timeInput = document.createElement('input')
-      timeInput.id = `time-input-${this.id}`
-      timeInput.type = 'time'
-      timeInput.value = '13:30'
+      const timeInput = createElement('input', {'id': `time-input-${this.id}`, 'value': '13:30', 'type': 'time'})
       this.domComponent.appendChild(timeInput)
       return
     }
-    const titleDiv = document.createElement('div')
-    titleDiv.innerText = this.title
-
-    const currentTimeDiv = document.createElement('div')
-    currentTimeDiv.id = `current-time-${this.id}`
-
-
-    const startButton = document.createElement('button')
+    
+    const titleDiv = createElement('div', {}, this.title)
+    const currentTimeDiv = createElement('div', {id: `current-time-${this.id}`})
+    const startButton = createElement('button', {}, 'Start')
     startButton.addEventListener('click', this.start)
-    startButton.innerText = 'Start'
-
-    const stopButton = document.createElement('button')
+    const stopButton = createElement('button', {}, 'Stop')
     stopButton.addEventListener('click', this.stop)
-    stopButton.innerText = 'Stop'
-
-    const resetButton = document.createElement('button')
+    const resetButton = createElement('button', {}, 'Reset')
     resetButton.addEventListener('click', this.reset)
-    resetButton.innerText = 'Reset'
-
-    this.domComponent.appendChild(titleDiv)
-    this.domComponent.appendChild(currentTimeDiv)
+    // append    
+    const fragment = document.createDocumentFragment() // try fragment method
+    fragment.append(titleDiv, currentTimeDiv, startButton, stopButton, resetButton)
+    this.domComponent.appendChild(fragment)
     this.renderDisplayTime()
-    this.domComponent.appendChild(startButton)
-    this.domComponent.appendChild(stopButton)
-    this.domComponent.appendChild(resetButton)
   }
 }

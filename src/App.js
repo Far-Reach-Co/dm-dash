@@ -1,4 +1,6 @@
 import ClockComponent from './ClockComponent.js'
+import createElement from './lib/createElement.js'
+
 import clockData from './testData/clockData.js'
 
 class App {
@@ -11,8 +13,7 @@ class App {
     // clock component
     clockData.forEach(clock => {
       // create element
-      const clockComponentDomElement = document.createElement('div')
-      clockComponentDomElement.id = `clock-component-${clock.id}`
+      const clockComponentDomElement = createElement('div', {'div': `clock-component-${clock.id}`})
       // append
       this.domComponent.appendChild(clockComponentDomElement)
       // instantiate javascript
