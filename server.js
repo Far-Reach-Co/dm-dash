@@ -1,0 +1,33 @@
+const dotenv = require('dotenv')
+dotenv.config()
+const express = require('express')
+const cors = require("cors")
+const routes = require("./src/api/routes.js")
+
+var app = express()
+
+//Set CORS
+app.use(cors())
+
+//Set JSON parser
+app.use(express.json())
+
+// Routes
+app.use('/api', routes)
+
+//Error
+app.use((error, req, res, next) => {
+  console.error(error)
+  res.status(error.status || 500)
+  res.json({
+    error: {
+      message: error.message || "Internal Server Error"
+    }
+  })
+})
+
+//Run
+var PORT = 4000
+app.listen({port: PORT}, async () => {
+  console.log(`Server Running at http://localhost:${PORT}`)
+})
