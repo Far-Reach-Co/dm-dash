@@ -2,7 +2,10 @@ const dotenv = require('dotenv')
 dotenv.config()
 const express = require('express')
 const cors = require("cors")
+var path = require('path');
+const bodyParser = require("body-parser")
 const routes = require("./src/api/routes.js")
+var public = path.join(__dirname, 'public');
 
 var app = express()
 
@@ -10,10 +13,15 @@ var app = express()
 app.use(cors())
 
 //Set JSON parser
-app.use(express.json())
+// app.use(express.json())
+
+// Body Parse
+app.use(bodyParser.json());
 
 // Routes
 app.use('/api', routes)
+// Static 
+app.use(express.static('public'))
 
 //Error
 app.use((error, req, res, next) => {
