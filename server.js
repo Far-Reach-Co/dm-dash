@@ -26,6 +26,8 @@ app.use(express.static('public'))
 //Error
 app.use((error, req, res, next) => {
   console.error(error)
+  // code for unique constraint on user registration email
+  if(error.code == 23505) error.status = 400
   res.status(error.status || 500)
   res.json({
     error: {

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DM Dashboard | Register</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <nav>DM Dashboard</nav>
+    <form id="register-form">
+      <div class="form-item">
+        <label for="email">Email</label>
+        <input
+          type="text"
+          name="email"
+          id="email"
+          placeholder="name@whatever.com"
+          required
+        />
+      </div>
+      <div class="form-item">
+        <label for="email">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="Yeah!LetMeIn1"
+          required
+        />
+      </div>
+      <br />
+      <div>
+        <button type="submit">Register</button>
+      </div>
+      <a href="./login.html"><small>Login</small></a>
+    </form>
+  </body>
+  <script>
+    document
+      .getElementById('register-form')
+      .addEventListener('submit', register)
+    async function register(e) {
+      e.preventDefault()
+      const formData = new FormData(e.target)
+      const formProps = Object.fromEntries(formData)
+      try {
+        const res = await fetch(`http://localhost:4000/api/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formProps)
+        })
+        const resData = await res.json()
+        if(res.status === 201) {
+          const token = resData.token
+          localStorage.setItem('token', token)
+          window.location.pathname = '/dashboard.html'
+        } else if(res.status === 400) {
+          alert("Email has already been registered")
+        } else {
+          throw resData.error
+        }
+      } catch(err) {
+        alert("Failed to register")
+        console.log(err)
+      }
+    }
+  </script>
+</html>

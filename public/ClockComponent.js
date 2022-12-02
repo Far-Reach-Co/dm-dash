@@ -47,6 +47,7 @@ export default class ClockComponent {
 
   stop = () => {
     clearInterval(this.runClock)
+    clearInterval(this.runAutoSave)
     this.isRunning = false
     this.saveClock()
   }
@@ -82,7 +83,7 @@ export default class ClockComponent {
 
   saveClock = async () => {
     const res = await fetch(`http://localhost:4000/api/edit_clock/${this.id}`, {
-      method: 'PUT',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         title: this.title,

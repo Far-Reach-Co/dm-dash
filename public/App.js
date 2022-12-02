@@ -10,6 +10,7 @@ class App {
       return true
     }
     this.domComponent = props.domComponent
+    this.domComponent.className = 'app'
     this.render()
   }
 

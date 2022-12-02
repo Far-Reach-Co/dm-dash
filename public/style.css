@@ -1,39 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap');
+
+:root {
+  --main-white: rgb(208, 208, 208);
+  --blue: rgb(73, 102, 139);
+	--blue2:rgb(95, 132, 156);
+  --blue3: rgb(51, 62, 80);
+  --link-blue: rgb(144, 211, 255);
+	--purple: rgb(68, 54, 93);
+	--pink: rgb(255, 192, 229);
+	--yellow: rgb(253, 255, 152);
+	--orange: rgb(166, 100, 13);
+	--orange2:rgb(217, 154, 71);
+}
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-size: 30px;
-  color: white;
+  font-size: 22px;
+  color: var(--main-white);
 }
 body {
   height: 100vh;
-  background-color: rgb(29, 29, 29);
+  background-color: rgb(38, 42, 49);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-start;
+  /* align-items: center; */
+  /* justify-content: center; */
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--blue2);
+  /* border-bottom: 1px solid black; */
+  padding: 5px;
+  font-weight: bold;
+}
+a {
+  color: var(--link-blue);
+  cursor: pointer;
+  text-decoration: none;
+}
+a small {
+  color: inherit;
+}
+a:hover {
+  color: var(--pink)
 }
 small {
   font-size: 15px;
-  color: rgb(255, 47, 120)
+  color: var(--pink);
 }
 button {
-  margin: 10px;
-  padding: 5px;
-  background-color: rgb(117, 64, 170);
+  margin: 5px;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+	color: inherit;
+	border: 0.1px solid #275f94;
+	border-radius: var(--border-radius);
+	padding: 5px 10px;
+	font: inherit;
+	text-shadow: inherit;
+	cursor: pointer;
+}
+form {
+  background-color: var(--blue3);
+  padding: 18px;
+	width: fit-content;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-evenly;
+	/* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
+}
+button:hover {
+	background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
 }
 input {
+  margin-bottom: 10px;
+	border: none;
+	outline: none;
+	background-color: rgb(187, 184, 184);
+  height: 30px;
+	display: inline-block;
+  padding-left: 5px;
+	font-size: inherit;
   color: black;
 }
 select {
-  background-color: rgb(104, 237, 255);
-  color: black;
+  margin: 5px;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+	color: inherit;
+	border: 0.1px solid #275f94;
+	border-radius: var(--border-radius);
+	padding: 5px 10px;
+	font: inherit;
+	text-shadow: inherit;
+	cursor: pointer;
+}
+.app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .clock-component {
-  border: 1px solid rgb(68, 68, 249);
+  background-color: var(--blue3);
+  /* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
   margin: 10px;
   padding: 10px;
+  width: fit-content;
 }
 .clock-title {
-  color: rgb(20, 201, 92);
+  font-weight: bold;
+  font-size: 25px;
+  color: var(--orange2);
+}
+.form-item {
+	width: 30vw;
+	min-width: 250px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
 }

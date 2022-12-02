@@ -4,11 +4,36 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DM DashBoard</title>
-  <link rel="stylesheet" href="./style.css">
-  <script src="./App.js" type="module" defer></script>
+  <title>DM Dashboard</title>
+  <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <div id="app"></div>
+  <nav>DM Dashboard</nav>
+  <div style="display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center;">
+    <h2>Welcome, please <a href="./login.html">login</a> or <a href="./register.html">register</a>.</h2>
+  </div>
 </body>
+<script>
+  async function verifyToken() {
+    const token = localStorage.getItem('token')
+    if(token) {
+      try {
+        const res = await fetch('http://localhost:4000/api/verify_jwt', {
+          headers: {'x-access-token': `Bearer ${token}`}
+        })
+        const resData = await res.json()
+        console.log(resData)
+        if(res.status === 200) {
+          console.log('success')
+          window.location.pathname = '/dashboard.html'
+        } else if(res.status === 400) {
+          console.log('expired')
+        } else throw resData.error
+      } catch(err) {
+        console.log(err)
+      }
+    }
+  }
+  verifyToken()
+</script>
 </html>
