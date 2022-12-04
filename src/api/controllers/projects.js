@@ -11,7 +11,7 @@ async function addProject(req, res, next) {
 
 async function getProjects(req, res, next) {
   try {
-    const data = await getProjectsQuery()
+    const data = await getProjectsQuery(req.params.id)
 
     res.send(data.rows)
   } catch(err) {

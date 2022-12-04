@@ -134,12 +134,12 @@ async function verifyJwt (req, res, next) {
       ? req.headers['x-access-token'].split(' ')[1]
       : null
     if (token) {
-      const userData = verifyUserByToken(token)
+      const userData = await verifyUserByToken(token)
 
       if (!userData)
         return res.status(400).json({ message: "Can't find user by token" })
 
-      res.send({ message: 'Token validated' })
+      res.send(userData.rows[0])
     } else return res.status(400).json({ message: 'No token sent in headers' })
   } catch (err) {
     next(err)

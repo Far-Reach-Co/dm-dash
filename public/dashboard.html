@@ -13,37 +13,8 @@
       <div>DM Dashboard</div>
       <a id="logout-btn">Logout</a>
     </nav>
-    <div id="app"></div>
+    <div class="container">
+      <div id="app"></div>
+    </div>
   </body>
-  <script>
-    // handle logout
-    document.getElementById('logout-btn').addEventListener('click', e => {
-      e.preventDefault()
-      localStorage.removeItem('token')
-      window.location.pathname = '/'
-    })
-    // handle verify
-    async function verifyToken() {
-      const token = localStorage.getItem('token')
-      if (token) {
-        try {
-          const res = await fetch('http://localhost:4000/api/verify_jwt', {
-            headers: { 'x-access-token': `Bearer ${token}` }
-          })
-          const resData = await res.json()
-          console.log(resData)
-          if (res.status === 200) {
-            console.log('success')
-          } else if (res.status === 400) {
-            console.log('expired')
-            window.location.pathname = '/login.html'
-          } else throw resData.error
-        } catch (err) {
-          console.log(err)
-          window.location.pathname = '/login.html'
-        }
-      } else window.location.pathname = '/login.html'
-    }
-    verifyToken()
-  </script>
 </html>

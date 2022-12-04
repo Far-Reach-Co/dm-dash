@@ -82,7 +82,7 @@ export default class ClockComponent {
   }
 
   saveClock = async () => {
-    const res = await fetch(`http://localhost:4000/api/edit_clock/${this.id}`, {
+    const res = await fetch(`${window.location.origin}/api/edit_clock/${this.id}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -94,7 +94,7 @@ export default class ClockComponent {
 
   removeClock = async () => {
     const res = await fetch(
-      `http://localhost:4000/api/remove_clock/${this.id}`,
+      `${window.location.origin}/api/remove_clock/${this.id}`,
       {
         method: 'DELETE'
       }

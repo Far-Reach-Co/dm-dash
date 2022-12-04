@@ -2,10 +2,11 @@ const db = require('../dbconfig')
 
 async function addClockQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Clock" (title, current_time_in_milliseconds) values($1,$2) returning *`,
+    text: /*sql*/ `insert into public."Clock" (title, current_time_in_milliseconds, uuid) values($1,$2,$3) returning *`,
     values: [
       data.title,
       data.current_time_in_milliseconds,
+      data.uuid
     ]
   }
   return await db.query(query)

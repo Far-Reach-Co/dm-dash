@@ -9,8 +9,8 @@
 </head>
 <body>
   <nav>DM Dashboard</nav>
-  <div style="display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center;">
-    <h2>Welcome, please <a href="./login.html">login</a> or <a href="./register.html">register</a>.</h2>
+  <div class="container">
+    <div>Welcome, please <a href="./login.html">login</a> or <a href="./register.html">register</a>.</div>
   </div>
 </body>
 <script>
@@ -18,16 +18,14 @@
     const token = localStorage.getItem('token')
     if(token) {
       try {
-        const res = await fetch('http://localhost:4000/api/verify_jwt', {
+        const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
           headers: {'x-access-token': `Bearer ${token}`}
         })
         const resData = await res.json()
-        console.log(resData)
         if(res.status === 200) {
-          console.log('success')
           window.location.pathname = '/dashboard.html'
         } else if(res.status === 400) {
-          console.log('expired')
+          console.log('expired token')
         } else throw resData.error
       } catch(err) {
         console.log(err)

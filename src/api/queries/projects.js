@@ -11,9 +11,10 @@ async function addProjectQuery(data) {
   return await db.query(query)
 }
 
-async function getProjectsQuery() {
+async function getProjectsQuery(userId) {
   const query = {
-    text: /*sql*/ `select * from public."Project" order by title asc`,
+    text: /*sql*/ `select * from public."Project" where user_id = $1 order by title asc`,
+    values: [userId]
   }
   return await db.query(query)
 }

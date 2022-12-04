@@ -2,16 +2,16 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap');
 
 :root {
-  --main-white: rgb(208, 208, 208);
+  --main-white: rgb(234, 234, 234);
   --blue: rgb(73, 102, 139);
-	--blue2:rgb(95, 132, 156);
-  --blue3: rgb(51, 62, 80);
-  --link-blue: rgb(144, 211, 255);
+	--blue2:rgb(121, 148, 173);
+  --blue3: rgb(47, 57, 73);
+  --link-blue: rgb(182, 226, 255);
 	--purple: rgb(68, 54, 93);
 	--pink: rgb(255, 192, 229);
 	--yellow: rgb(253, 255, 152);
-	--orange: rgb(166, 100, 13);
-	--orange2:rgb(217, 154, 71);
+	--orange: rgb(158, 107, 41);
+	--orange2:rgb(212, 165, 105);
 }
 
 * {
@@ -26,16 +26,15 @@ body {
   background-color: rgb(38, 42, 49);
   display: flex;
   flex-direction: column;
-  /* align-items: center; */
-  /* justify-content: center; */
   font-family: 'IBM Plex Sans', sans-serif;
+  text-shadow: 0.5px 0.5px black;
 }
 nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: var(--blue2);
-  /* border-bottom: 1px solid black; */
+  border-bottom: 0.5px solid white;
   padding: 5px;
   font-weight: bold;
 }
@@ -55,6 +54,7 @@ small {
   color: var(--pink);
 }
 button {
+  width: fit-content;
   margin: 5px;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
 	color: inherit;
@@ -73,6 +73,7 @@ form {
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-evenly;
+  border: 0.5px solid white;
 	/* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
 }
 button:hover {
@@ -87,7 +88,9 @@ input {
 	display: inline-block;
   padding-left: 5px;
 	font-size: inherit;
+  font-family: inherit;
   color: black;
+  border: 0.5px solid white;
 }
 select {
   margin: 5px;
@@ -96,16 +99,29 @@ select {
 	border: 0.1px solid #275f94;
 	border-radius: var(--border-radius);
 	padding: 5px 10px;
-	font: inherit;
+  font-family: inherit;
 	text-shadow: inherit;
 	cursor: pointer;
 }
 .app {
+  padding: 10px;
+  width: 90vw;
+  height: 90vh;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  background-color: var(--blue3);
+  border: 0.5px solid white;
+  /* align-items: center; */
+}
+.container {
+  display: flex; 
+  flex: 1; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center;
 }
 .clock-component {
+  display: inline-block;
   background-color: var(--blue3);
   /* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
   margin: 10px;
@@ -125,4 +141,14 @@ select {
 	flex-wrap: wrap;
 	align-items: center;
 	justify-content: space-between;
+}
+.project-button {
+  width: fit-content;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid var(--blue);
+  cursor: pointer;
 }

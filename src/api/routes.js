@@ -23,13 +23,13 @@ router.delete('/remove_clock/:id', removeClock)
 router.post('/edit_clock/:id', editClock)
 
 // projects
-router.get('/get_projects', getProjects)
+router.get('/get_projects/:id', getProjects)
 router.post('/add_project', addProject)
 router.delete('/remove_project/:id', removeProject)
 router.post('/edit_project/:id', editProject)
 
 // projectModules
-router.get('/get_project_modules', getProjectModules)
+router.get('/get_project_modules/:id', getProjectModules)
 router.post('/add_project_module', addProjectModule)
 router.delete('/remove_project_module/:id', removeProjectModule)
 router.post('/edit_project_module/:id', editProjectModule)
