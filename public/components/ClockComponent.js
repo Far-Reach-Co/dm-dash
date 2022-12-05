@@ -1,5 +1,5 @@
-import createElement from './lib/createElement.js'
-import msToTime from './lib/msToTime.js'
+import createElement from '../lib/createElement.js'
+import msToTime from '../lib/msToTime.js'
 
 export default class ClockComponent {
   constructor (props) {
