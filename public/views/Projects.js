@@ -1,17 +1,22 @@
+import Project from '../components/Project.js'
 import createElement from '../lib/createElement.js'
 import state from '../lib/state.js'
 
-class ProjectsView {
-  constructor(props) {
+export default class ProjectsView {
+  constructor (props) {
     this.domComponent = props.domComponent
+    this.domComponent.className = 'projects-view'
     this.render()
   }
 
   getProjects = async () => {
     try {
-      const res = await fetch(`${window.location.origin}/api/get_projects/${state.user.id}`)
+      const res = await fetch(
+        `${window.location.origin}/api/get_projects/${state.user.id}`
+      )
       const data = await res.json()
       if (res.status === 200) {
+        state.projects = data
         return data
       } else throw new Error()
     } catch (err) {
@@ -25,12 +30,11 @@ class ProjectsView {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: 1,
-          title: 'New Project'
+          user_id: state.user.id,
+          title: `My Project ${state.projects.length + 1}`
         })
       })
-      const data = await res.json()
-      console.log(data)
+      await res.json()
       if (res.status === 201) {
         this.render()
       } else throw new Error()
@@ -41,33 +45,36 @@ class ProjectsView {
   }
 
   render = async () => {
+    this.domComponent.innerHTML = ''
     // add project button
-    const projectButton = createElement('button', {}, '+ Project')
+    const projectButton = createElement('button', {class: 'new-project-btn'}, '+ Project')
     projectButton.addEventListener('click', this.newProject)
     this.domComponent.appendChild(projectButton)
-    const title = createElement('h1', {}, 'List of projects:')
+
+    const title = createElement(
+      'h1',
+      { class: 'projects-view-title' },
+      'Choose your project'
+    )
     this.domComponent.appendChild(title)
+    this.domComponent.appendChild(createElement('hr'))
+
     const projectData = await this.getProjects()
     projectData.forEach(project => {
       // create element
-      const projectDomElement = createElement(
-        'div',
-        {
-          id: `project-${project.id}`,
-          class: 'project-button'
-        },
-        project.title
-      )
-      projectDomElement.addEventListener('click', e => {
-        e.preventDefault()
-        const searchParams = new URLSearchParams(window.location.search)
-        searchParams.set('view', 'clocks')
-        window.location.search = searchParams.toString()
+      const projectComponentElement = createElement('div', {
+        id: `project-component-${project.id}`
       })
       // append
-      this.domComponent.appendChild(projectDomElement)
+      this.domComponent.appendChild(projectComponentElement)
+      // instantiate javascript
+      new Project({
+        domComponent: projectComponentElement,
+        id: project.id,
+        title: project.title,
+        dateCreated: project.date_created,
+        parentRender: this.render
+      })
     })
   }
 }
-
-export default ProjectsView

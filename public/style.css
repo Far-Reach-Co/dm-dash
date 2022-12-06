@@ -1,16 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap');
 
 :root {
   --main-white: rgb(234, 234, 234);
   --blue: rgb(73, 102, 139);
 	--blue2:rgb(121, 148, 173);
   --blue3: rgb(47, 57, 73);
-  --link-blue: rgb(182, 226, 255);
-	--purple: rgb(68, 54, 93);
+  --link-blue: rgb(198, 232, 255);
+	--purple: rgb(48, 42, 73);
 	--pink: rgb(255, 192, 229);
 	--yellow: rgb(253, 255, 152);
-	--orange: rgb(158, 107, 41);
+	--orange: rgb(147, 87, 20);
 	--orange2:rgb(212, 165, 105);
 }
 
@@ -18,23 +18,31 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-size: 22px;
+  font-size: 20px;
   color: var(--main-white);
 }
 body {
   height: 100vh;
   background-color: rgb(38, 42, 49);
   display: flex;
+  flex: 1;
+  overflow: hidden;
   flex-direction: column;
   font-family: 'IBM Plex Sans', sans-serif;
   text-shadow: 0.5px 0.5px black;
+}
+hr {
+  border: 0;
+  height: 1px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+  margin-bottom: 30px;
 }
 nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--blue2);
-  border-bottom: 0.5px solid white;
+  background-color: var(--blue);
+  border-bottom: 0.5px solid var(--main-white);
   padding: 5px;
   font-weight: bold;
 }
@@ -47,7 +55,7 @@ a small {
   color: inherit;
 }
 a:hover {
-  color: var(--pink)
+  color: var(--orange2)
 }
 small {
   font-size: 15px;
@@ -55,7 +63,7 @@ small {
 }
 button {
   width: fit-content;
-  margin: 5px;
+  margin-right: 5px;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
 	color: inherit;
 	border: 0.1px solid #275f94;
@@ -73,7 +81,7 @@ form {
 	flex-direction: column;
 	align-items: center;
 	justify-content: space-evenly;
-  border: 0.5px solid white;
+  border: 0.5px solid var(--main-white);
 	/* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
 }
 button:hover {
@@ -90,7 +98,7 @@ input {
 	font-size: inherit;
   font-family: inherit;
   color: black;
-  border: 0.5px solid white;
+  border: 0.5px solid var(--main-white);
 }
 select {
   margin: 5px;
@@ -103,14 +111,23 @@ select {
 	text-shadow: inherit;
 	cursor: pointer;
 }
+footer {
+  margin-top: auto;
+  padding: 0px 5px 0px 5px;
+  background-color: var(--blue);
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+}
 .app {
   padding: 10px;
-  width: 90vw;
-  height: 90vh;
   display: flex;
   flex-direction: column;
-  background-color: var(--blue3);
-  border: 0.5px solid white;
+  flex: 1;
+  overflow: hidden;
+  /* background-color: var(--blue3); */
+  /* border: 0.5px solid white; */
   /* align-items: center; */
 }
 .container {
@@ -119,6 +136,14 @@ select {
   flex-direction: column; 
   align-items: center; 
   justify-content: center;
+}
+.icon {
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+}
+.icon:hover {
+  opacity: 0.8;
 }
 .clock-component {
   display: inline-block;
@@ -142,13 +167,58 @@ select {
 	align-items: center;
 	justify-content: space-between;
 }
-.project-button {
-  width: fit-content;
+.projects-view {
+  padding: 10px;
+  width: 50%;
+  height: 50%;
+  border: 1px solid var(--main-white);
+  background-color: var(--blue3);
   display: flex;
-  flex-direction: row;
+  flex: 1;
+  flex-direction: column;
+  align-self: center;
+  overflow-y: scroll;
+  font-weight: bold;
+}
+.projects-view-title {
+  align-self: center;
+  letter-spacing: 3px;
+  font-size: 25px;
+  font-weight: bold;
+}
+.new-project-btn {
+  align-self: flex-end;
+}
+.project-btn-container {
+  align-self: center;
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  border: 1px solid var(--blue);
+}
+.project-button {
+  margin-bottom: 10px;
+  margin-right: 20px;
+  letter-spacing: 2px;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  /* align-items: center; */
+  justify-content: center;
+  padding: 10px 20px;
+  border: 2px solid var(--blue);
   cursor: pointer;
+  background-color: var(--purple);
+  color: var(--link-blue);
+}
+.project-button:hover {
+  background-color: var(--blue);
+}
+.project-date {
+  font-size: 12px;
+  color: var(--pink);
+}
+.clocks-view {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 }

@@ -1,9 +1,10 @@
-import ClockComponent from '../components/ClockComponent.js'
+import Clock from '../components/Clock.js'
 import createElement from '../lib/createElement.js'
 
-class ClocksView {
+export default class ClocksView {
   constructor(props) {
     this.domComponent = props.domComponent
+    this.domComponent.className = 'clocks-view'
     this.render()
   }
 
@@ -54,7 +55,7 @@ class ClocksView {
       // append
       this.domComponent.appendChild(clockComponentDomElement)
       // instantiate javascript
-      new ClockComponent({
+      new Clock({
         domComponent: clockComponentDomElement,
         id: clock.id,
         title: clock.title,
@@ -70,5 +71,3 @@ class ClocksView {
     this.domComponent.appendChild(clockSaveMessageDiv)
   }
 }
-
-export default ClocksView

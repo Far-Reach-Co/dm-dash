@@ -3,20 +3,14 @@ import state from './lib/state.js'
 import ProjectsView from './views/Projects.js'
 import ClocksView from './views/Clocks.js'
 
-// import clockData from './testData/clockData.js'
-
 class App {
   constructor (props) {
     this.domComponent = props.domComponent
     this.domComponent.className = 'app'
     this.init()
   }
-  
+
   init = async () => {
-    // Enable navigation prompt
-    // window.onbeforeunload = function () {
-    //   return true
-    // }
     // for logout
     document.getElementById('logout-btn').addEventListener('click', e => {
       e.preventDefault()
@@ -37,6 +31,11 @@ class App {
         const resData = await res.json()
         if (res.status === 200) {
           state.user = resData
+          document
+            .getElementById('footer')
+            .appendChild(
+              createElement('div', { style: 'font-size: 18px' }, resData.email)
+            )
         } else if (res.status === 400) {
           window.location.pathname = '/login.html'
         } else throw resData.error
@@ -49,13 +48,13 @@ class App {
 
   renderClocksView = async () => {
     const element = createElement('div')
-    new ClocksView({domComponent: element})
+    new ClocksView({ domComponent: element })
     this.domComponent.appendChild(element)
   }
 
   renderProjectsView = () => {
     const element = createElement('div')
-    new ProjectsView({domComponent: element})
+    new ProjectsView({ domComponent: element })
     this.domComponent.appendChild(element)
   }
 

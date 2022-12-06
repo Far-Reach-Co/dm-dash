@@ -1,7 +1,7 @@
 import createElement from '../lib/createElement.js'
 import msToTime from '../lib/msToTime.js'
 
-export default class ClockComponent {
+export default class Clock {
   constructor (props) {
     this.domComponent = props.domComponent
     this.domComponent.className = 'clock-component'
