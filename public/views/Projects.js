@@ -25,6 +25,7 @@ export default class ProjectsView {
   }
 
   newProject = async () => {
+    if(!state.projects) return
     try {
       const res = await fetch(`${window.location.origin}/api/add_project`, {
         method: 'POST',

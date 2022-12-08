@@ -12,6 +12,8 @@
 	--yellow: rgb(253, 255, 152);
 	--orange: rgb(147, 87, 20);
 	--orange2:rgb(212, 165, 105);
+  --red1: rgb(225, 75, 75);
+  --red2: rgb(120, 46, 46);
 }
 
 * {
@@ -73,6 +75,9 @@ button {
 	text-shadow: inherit;
 	cursor: pointer;
 }
+.btn-red {
+  background: linear-gradient(var(--red1) 10%, var(--red2) 90%);
+}
 form {
   background-color: var(--blue3);
   padding: 18px;
@@ -88,7 +93,7 @@ button:hover {
 	background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
 }
 input {
-  margin-bottom: 10px;
+  margin-right: 10px;
 	border: none;
 	outline: none;
 	background-color: rgb(187, 184, 184);
@@ -99,6 +104,9 @@ input {
   font-family: inherit;
   color: black;
   border: 0.5px solid var(--main-white);
+}
+.form-item input {
+  margin-bottom: 10px;
 }
 select {
   margin: 5px;

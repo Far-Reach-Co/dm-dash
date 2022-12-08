@@ -101,8 +101,6 @@ export default class Clock {
     )
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
-      this.toggleEdit()
-      this.parentRender()
     } else {
       window.alert('Failed to delete clock...')
     }
@@ -133,10 +131,12 @@ export default class Clock {
       this.toggleEdit()
       this.parentRender()
     })
-    const removeButton = createElement('button', {}, 'Remove')
-    removeButton.addEventListener('click', () => {
+    const removeButton = createElement('button', {class: 'btn-red'}, 'Remove Clock')
+    removeButton.addEventListener('click', async () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        this.removeClock()
+        await this.removeClock()
+        this.toggleEdit()
+        this.parentRender()
       }
     })
     const resetButton = createElement('button', {}, 'Reset')
@@ -149,12 +149,13 @@ export default class Clock {
       }
     })
     // render
+    this.domComponent.appendChild(createElement('div', {}, 'Edit'))
     this.domComponent.appendChild(titleInput)
     this.domComponent.appendChild(timeInput)
     timeInput.focus()
     this.domComponent.appendChild(editButton)
-    this.domComponent.appendChild(removeButton)
     this.domComponent.appendChild(resetButton)
+    this.domComponent.appendChild(removeButton)
   }
 
   render = () => {

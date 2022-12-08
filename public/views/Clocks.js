@@ -1,5 +1,6 @@
 import Clock from '../components/Clock.js'
 import createElement from '../lib/createElement.js'
+import state from '../lib/state.js'
 
 export default class ClocksView {
   constructor(props) {
@@ -13,6 +14,7 @@ export default class ClocksView {
       const res = await fetch(`${window.location.origin}/api/get_clocks`)
       const data = await res.json()
       if (res.status === 200) {
+        state.clocks = data
         return data
       } else throw new Error()
     } catch (err) {
@@ -21,6 +23,7 @@ export default class ClocksView {
   }
 
   newClock = async () => {
+    if(!state.clocks) return
     try {
       const res = await fetch(`${window.location.origin}/api/add_clock`, {
         method: 'POST',
