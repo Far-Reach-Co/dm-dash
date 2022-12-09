@@ -10,8 +10,10 @@ export default class ClocksView {
   }
 
   getClocks = async () => {
+    const searchParams = new URLSearchParams(window.location.search)
+    var projectId = searchParams.get('project')
     try {
-      const res = await fetch(`${window.location.origin}/api/get_clocks`)
+      const res = await fetch(`${window.location.origin}/api/get_clocks/${projectId}`)
       const data = await res.json()
       if (res.status === 200) {
         state.clocks = data
@@ -24,13 +26,17 @@ export default class ClocksView {
 
   newClock = async () => {
     if(!state.clocks) return
+
+    const searchParams = new URLSearchParams(window.location.search)
+    var projectId = parseInt(searchParams.get('project'))
     try {
       const res = await fetch(`${window.location.origin}/api/add_clock`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: 'New Clock',
-          current_time_in_milliseconds: 0
+          current_time_in_milliseconds: 0,
+          project_id: projectId
         })
       })
       const data = await res.json()
@@ -44,10 +50,18 @@ export default class ClocksView {
   }
 
   render = async () => {
-    // add clock button
-    const clockButton = createElement('button', {}, '+ Clock')
-    clockButton.addEventListener('click', this.newClock)
-    this.domComponent.appendChild(clockButton)
+    this.domComponent.innerHTML = ''
+    // new clock button
+    const newClockButton = createElement('button', {style: 'align-self: flex-end;'}, '+ Clock')
+    newClockButton.addEventListener('click', this.newClock)
+    this.domComponent.appendChild(newClockButton)
+
+    const clockSaveMessageDiv = createElement(
+      'small',
+      {style: 'align-self: flex-end;'},
+      '* Clocks are auto saved every 60 seconds while running, or when stop is pressed'
+    )
+    this.domComponent.appendChild(clockSaveMessageDiv)
     // clock component
     const clockData = await this.getClocks()
     clockData.forEach(clock => {
@@ -66,11 +80,5 @@ export default class ClocksView {
         parentRender: this.render
       })
     })
-    const clockSaveMessageDiv = createElement(
-      'small',
-      {},
-      '* Clocks are auto saved every 60 seconds while running, or when stop is pressed'
-    )
-    this.domComponent.appendChild(clockSaveMessageDiv)
   }
 }

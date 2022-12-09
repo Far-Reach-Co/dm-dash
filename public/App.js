@@ -65,8 +65,6 @@ class App {
     const searchParams = new URLSearchParams(window.location.search)
     var view = searchParams.get('view')
     switch (view) {
-      case 'projects':
-        this.renderProjectsView()
       case 'clocks':
         return this.renderClocksView()
       default:

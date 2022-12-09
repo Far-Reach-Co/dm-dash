@@ -48,9 +48,9 @@ export default class ProjectsView {
   render = async () => {
     this.domComponent.innerHTML = ''
     // add project button
-    const projectButton = createElement('button', {class: 'new-project-btn'}, '+ Project')
-    projectButton.addEventListener('click', this.newProject)
-    this.domComponent.appendChild(projectButton)
+    const newProjectButton = createElement('button', {style: 'align-self: flex-end;'}, '+ Project')
+    newProjectButton.addEventListener('click', this.newProject)
+    this.domComponent.appendChild(newProjectButton)
 
     const title = createElement(
       'h1',

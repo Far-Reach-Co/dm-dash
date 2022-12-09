@@ -8,6 +8,7 @@ export default class Project {
     this.title = props.title
     this.dateCreated = props.dateCreated
     this.edit = false
+    this.parentRender = props.parentRender
 
     this.render()
   }
@@ -17,21 +18,50 @@ export default class Project {
     this.render()
   }
 
+  editTitle = () => {
+    this.title = document.getElementById(`edit-project-title-${this.id}`).value
+  }
+
+  saveProject = async () => {
+    const res = await fetch(`${window.location.origin}/api/edit_project/${this.id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: this.title
+      })
+    })
+  }
+
+  removeProject= async () => {
+    const res = await fetch(
+      `${window.location.origin}/api/remove_project/${this.id}`,
+      {
+        method: 'DELETE'
+      }
+    )
+    if (res.status === 204) {
+      // window.alert(`Deleted ${this.title}`)
+    } else {
+      window.alert('Failed to delete project...')
+    }
+  }
+
   renderEditProject = () => {
     const titleInput = createElement('input', {
+      id: `edit-project-title-${this.id}`,
       value: this.title
     })
     const editButton = createElement('button', {}, 'Done')
     editButton.addEventListener('click', async () => {
       this.editTitle()
-      await this.saveClock()
+      await this.saveProject()
       this.toggleEdit()
       this.parentRender()
     })
     const removeButton = createElement('button', {class: 'btn-red'}, 'Delete Project')
     removeButton.addEventListener('click', async () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        await this.removeClock()
+        await this.removeProject()
         this.toggleEdit()
         this.parentRender()
       }
@@ -71,7 +101,9 @@ export default class Project {
     )
     projectButton.addEventListener('click', e => {
       e.preventDefault()
+      // push to project
       const searchParams = new URLSearchParams(window.location.search)
+      searchParams.set('project', this.id)
       searchParams.set('view', 'clocks')
       window.location.search = searchParams.toString()
     })

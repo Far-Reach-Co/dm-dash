@@ -1,9 +1,7 @@
-const { v4 } = require('uuid')
 const {addClockQuery, getClocksQuery, removeClockQuery, editClockQuery} = require('../queries/clocks.js')
 
 async function addClock(req, res, next) {
   try {
-    req.body.uuid = v4()
     const data = await addClockQuery(req.body)
     res.status(201).json(data.rows[0])
   } catch(err) {
@@ -13,7 +11,7 @@ async function addClock(req, res, next) {
 
 async function getClocks(req, res, next) {
   try {
-    const data = await getClocksQuery()
+    const data = await getClocksQuery(req.params.project_id)
 
     res.send(data.rows)
   } catch(err) {

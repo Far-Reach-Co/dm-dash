@@ -2,19 +2,20 @@ const db = require('../dbconfig')
 
 async function addClockQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Clock" (title, current_time_in_milliseconds, uuid) values($1,$2,$3) returning *`,
+    text: /*sql*/ `insert into public."Clock" (title, current_time_in_milliseconds, project_id) values($1,$2,$3) returning *`,
     values: [
       data.title,
       data.current_time_in_milliseconds,
-      data.uuid
+      data.project_id
     ]
   }
   return await db.query(query)
 }
 
-async function getClocksQuery() {
+async function getClocksQuery(projectId) {
   const query = {
-    text: /*sql*/ `select * from public."Clock" order by title asc`,
+    text: /*sql*/ `select * from public."Clock" where project_id = $1 order by title asc`,
+    values: [projectId]
   }
   return await db.query(query)
 }

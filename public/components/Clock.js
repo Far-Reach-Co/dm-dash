@@ -70,15 +70,10 @@ export default class Clock {
     const currentTimeDiv = document.getElementById(`current-time-${this.id}`)
 
     var milliseconds = this.currentTimeInMilliseconds
-    var time = msToTime(milliseconds)
+    var twentyFourHourTime = msToTime(milliseconds, false)
+    var twelveHourTime = msToTime(milliseconds, true)
 
-    if (this.edit) {
-      const timeInput = document.getElementById(`time-input-${this.id}`)
-      timeInput.value = time.substring(0, time.length - 2)
-      return
-    }
-
-    currentTimeDiv.innerHTML = time
+    currentTimeDiv.innerHTML = /*html*/`<div>${twentyFourHourTime}</div> <div style="color: var(--light-gray);">${twelveHourTime}</div>`
   }
 
   saveClock = async () => {
@@ -108,7 +103,7 @@ export default class Clock {
 
   renderEditClock = () => {
     var milliseconds = this.currentTimeInMilliseconds
-    var time = msToTime(milliseconds)
+    var time = msToTime(milliseconds, false)
     var valueForInput = time.substring(0, time.length - 2)
 
     const titleInput = createElement('input', {
@@ -168,6 +163,7 @@ export default class Clock {
     }
 
     const titleDiv = createElement('div', { class: 'clock-title' }, this.title)
+
     const currentTimeDiv = createElement('div', {
       id: `current-time-${this.id}`
     })
@@ -187,11 +183,16 @@ export default class Clock {
       createElement('option', { value: 0.5 }, '1/2'),
       createElement('option', { value: 0.25 }, '1/4'),
       createElement('option', { value: 2 }, '2x'),
-      createElement('option', { value: 4 }, '4x')
+      createElement('option', { value: 4 }, '4x'),
+      createElement('option', { value: 10 }, '10x'),
+      createElement('option', { value: 25 }, '25x'),
+      createElement('option', { value: 50 }, '50x'),
+      createElement('option', { value: 100 }, '100x')
     ])
     selectSpeed.addEventListener('change', e => {
       this.stop()
       this.runSpeed = parseFloat(e.target.value)
+      this.start()
     })
 
     // append
