@@ -3,12 +3,13 @@
 
 :root {
   --main-white: rgb(206, 206, 206);
-  --main-gray: rgb(89, 89, 89);
+  --main-gray: rgb(96, 88, 88);
   --light-gray: rgb(161, 161, 161);
   --blue: rgb(59, 82, 113);
   --blue2: rgb(107, 131, 154);
-  --blue3: rgb(36, 44, 59);
-  --link-blue: rgb(195, 212, 224);
+  --blue3: rgb(41, 47, 58);
+  --blue4: rgb(38, 50, 70);
+  --link-blue: rgb(204, 222, 233);
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
   --yellow: rgb(253, 255, 152);
@@ -28,7 +29,7 @@
 
 body {
   height: 100vh;
-  background-color: rgb(18, 18, 18);
+  background-color: rgb(21, 21, 21);
   display: flex;
   flex: 1;
   overflow: hidden;
@@ -46,13 +47,29 @@ hr {
 }
 
 nav {
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: var(--blue);
   border-bottom: 0.5px solid var(--main-gray);
-  padding: 5px;
   font-weight: bold;
+}
+
+nav a {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 5px;
+  padding-right: 5px;
+  border-left: 0.5px solid var(--main-gray);
+  border-right: 0.5px solid var(--main-gray);
+}
+nav a:hover {
+  background-color: var(--purple);
 }
 
 a {
@@ -79,12 +96,16 @@ button {
   margin-right: 5px;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
   color: inherit;
-  border: 0.1px solid #275f94;
+  border: 0.1px solid var(--main-gray);
   border-radius: var(--border-radius);
   padding: 5px 10px;
   font: inherit;
   text-shadow: inherit;
   cursor: pointer;
+}
+
+button:hover {
+  background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
 }
 
 .btn-red {
@@ -101,10 +122,6 @@ form {
   justify-content: space-evenly;
   border: 0.5px solid var(--main-gray);
   /* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
-}
-
-button:hover {
-  background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
 }
 
 input {
@@ -189,7 +206,7 @@ footer {
   margin: 10px;
   padding: 20px;
   min-width: 60%;
-  border: 1px solid var(--main-gray);
+  border: 0.5px solid var(--main-gray);
   background-color: var(--blue3);
   display: flex;
   flex-direction: column;
@@ -239,10 +256,10 @@ footer {
 }
 
 .clocks-view {
-  margin: 10px;
+  margin: 20px;
   padding: 20px;
   min-width: 60%;
-  border: 1px solid var(--main-gray);
+  border: 0.5px solid var(--main-gray);
   background-color: var(--blue3);
   display: flex;
   flex: 1;
@@ -253,11 +270,12 @@ footer {
 
 .clock-component {
   display: inline-block;
-  background-color: var(--blue3);
-  box-shadow: 1px 5px 10px 1px rgb(15, 15, 15);
   margin: 10px;
   padding: 10px;
   width: fit-content;
+  background-color: var(--blue4);
+  border: 0.5px solid var(--main-gray);
+  box-shadow: 1px 5px 10px 1px rgb(15, 15, 15);
 }
 
 .clock-title {
@@ -268,7 +286,7 @@ footer {
 
 .sidebar {
   z-index: 2;
-  width: 200px;
+  width: 120px;
   height: 100%;
   position: absolute;
   background: transparent;
@@ -281,9 +299,24 @@ footer {
   height: 100%;
   flex-direction: column;
   align-items: center;
-  justify-content: space-evenly;
+  /* justify-content: space-evenly; */
   /* padding: 5px 10px; */
-  background-color: var(--blue);
-  transform: translate(0px, 0px);
+  background-color: var(--blue3);
+  transform: translate(-200px, 0px);
   transition: 0.3s all ease-out;
+  border-right: 0.5px solid var(--main-gray);
+}
+
+.sidebar-items-item {
+  border-bottom: 0.5px solid var(--main-gray);
+  width: 100%;
+  height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-items-item:hover {
+  background-color: var(--blue);
 }

@@ -58,7 +58,7 @@ export default class ClocksView {
 
     const clockSaveMessageDiv = createElement(
       'small',
-      {style: 'align-self: flex-end;'},
+      {style: 'align-self: center;'},
       '* Clocks are auto saved every 60 seconds while running, or when stop is pressed'
     )
     this.domComponent.appendChild(clockSaveMessageDiv)

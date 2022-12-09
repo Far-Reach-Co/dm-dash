@@ -2,10 +2,10 @@ import createElement from "../lib/createElement.js";
 
 class SideBar {
   constructor() {
-    this.isVisible = true
+    this.isVisible = false
   }
   render = (parentComponent) => {
-    
+
     const elem = createElement(
       "div",
       { id: "sidebar-elem" },
@@ -18,9 +18,7 @@ class SideBar {
             { class: "sidebar-items-item", id: "sidebar-clocks" },
             "Clocks"
           ),
-          createElement("hr"),
           createElement("a", { class: "sidebar-items-item" }, "Something"),
-          createElement("hr"),
           createElement("a", { class: "sidebar-items-item" }, "Testing"),
         ])
       )
@@ -31,7 +29,7 @@ class SideBar {
 
     const hamburgerElem = createElement("img", {
       id: "hamburger",
-      style: 'z-index: 1; position: absolute;',
+      style: 'z-index: 3; position: absolute;',
       height: "50px",
       width: "50px",
       src: "./assets/hamburger.svg",
