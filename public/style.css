@@ -6,14 +6,14 @@
   --main-gray: rgb(89, 89, 89);
   --light-gray: rgb(161, 161, 161);
   --blue: rgb(59, 82, 113);
-	--blue2:rgb(107, 131, 154);
+  --blue2: rgb(107, 131, 154);
   --blue3: rgb(36, 44, 59);
   --link-blue: rgb(195, 212, 224);
-	--purple: rgb(36, 35, 59);
-	--pink: rgb(220, 175, 201);
-	--yellow: rgb(253, 255, 152);
-	--orange: rgb(147, 87, 20);
-	--orange2:rgb(212, 165, 105);
+  --purple: rgb(36, 35, 59);
+  --pink: rgb(220, 175, 201);
+  --yellow: rgb(253, 255, 152);
+  --orange: rgb(147, 87, 20);
+  --orange2: rgb(212, 165, 105);
   --red1: rgb(225, 75, 75);
   --red2: rgb(120, 46, 46);
 }
@@ -25,6 +25,7 @@
   font-size: 20px;
   color: var(--main-white);
 }
+
 body {
   height: 100vh;
   background-color: rgb(18, 18, 18);
@@ -35,12 +36,15 @@ body {
   font-family: 'IBM Plex Sans', sans-serif;
   text-shadow: 0.5px 0.5px black;
 }
+
 hr {
   border: 0;
   height: 1px;
+  width: 100%;
   background-image: linear-gradient(to right, rgba(255, 255, 255, 0), var(--main-gray), rgba(255, 255, 255, 0));
   margin-bottom: 30px;
 }
+
 nav {
   display: flex;
   align-items: center;
@@ -50,77 +54,89 @@ nav {
   padding: 5px;
   font-weight: bold;
 }
+
 a {
   color: var(--link-blue);
   cursor: pointer;
   text-decoration: none;
 }
+
 a small {
   color: inherit;
 }
+
 a:hover {
   color: var(--orange2)
 }
+
 small {
   font-size: 15px;
   color: var(--pink);
 }
+
 button {
   width: fit-content;
   margin-right: 5px;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
-	color: inherit;
-	border: 0.1px solid #275f94;
-	border-radius: var(--border-radius);
-	padding: 5px 10px;
-	font: inherit;
-	text-shadow: inherit;
-	cursor: pointer;
+  color: inherit;
+  border: 0.1px solid #275f94;
+  border-radius: var(--border-radius);
+  padding: 5px 10px;
+  font: inherit;
+  text-shadow: inherit;
+  cursor: pointer;
 }
+
 .btn-red {
   background: linear-gradient(var(--red1) 10%, var(--red2) 90%);
 }
+
 form {
   background-color: var(--blue3);
   padding: 18px;
-	width: fit-content;
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: space-evenly;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
   border: 0.5px solid var(--main-gray);
-	/* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
+  /* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
 }
+
 button:hover {
-	background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
+  background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
 }
+
 input {
   margin-right: 10px;
-	border: none;
-	outline: none;
-	background-color: rgb(187, 184, 184);
+  border: none;
+  outline: none;
+  background-color: rgb(187, 184, 184);
   height: 30px;
-	display: inline-block;
+  display: inline-block;
   padding-left: 5px;
-	font-size: inherit;
+  font-size: inherit;
   font-family: inherit;
   color: black;
   border: 0.5px solid var(--main-gray);
 }
+
 .form-item input {
   margin-bottom: 10px;
 }
+
 select {
   margin: 5px;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
-	color: inherit;
-	border: 0.1px solid #275f94;
-	border-radius: var(--border-radius);
-	padding: 5px 10px;
+  color: inherit;
+  border: 0.1px solid #275f94;
+  border-radius: var(--border-radius);
+  padding: 5px 10px;
   font-family: inherit;
-	text-shadow: inherit;
-	cursor: pointer;
+  text-shadow: inherit;
+  cursor: pointer;
 }
+
 footer {
   margin-top: auto;
   padding: 0px 5px 0px 5px;
@@ -129,59 +145,66 @@ footer {
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
+  border-top: 0.5px solid var(--main-gray);
 }
+
 .app {
-  padding: 10px;
   display: flex;
   flex-direction: column;
   flex: 1;
   overflow: hidden;
   /* background-color: var(--blue3); */
   /* border: 0.5px solid white; */
-  /* align-items: center; */
 }
+
 .container {
-  display: flex; 
-  flex: 1; 
-  flex-direction: column; 
-  align-items: center; 
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
 }
+
 .icon {
   width: 30px;
   height: 30px;
   cursor: pointer;
 }
+
 .icon:hover {
   opacity: 0.8;
 }
+
 .form-item {
-	width: 30vw;
-	min-width: 250px;
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: space-between;
+  width: 30vw;
+  min-width: 250px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
 }
+
 .projects-view {
-  padding: 10px;
-  width: 50%;
-  height: 50%;
+  margin: 10px;
+  padding: 20px;
+  min-width: 60%;
   border: 1px solid var(--main-gray);
   background-color: var(--blue3);
   display: flex;
-  flex: 1;
   flex-direction: column;
+  flex: 1;
   align-self: center;
   overflow-y: scroll;
 }
+
 .projects-view-title {
   align-self: center;
   letter-spacing: 3px;
   font-size: 25px;
   font-weight: bold;
 }
+
 .project-btn-container {
   align-self: center;
   display: flex;
@@ -189,6 +212,7 @@ footer {
   justify-content: center;
   margin-bottom: 10px;
 }
+
 .project-button {
   margin-right: 20px;
   letter-spacing: 2px;
@@ -204,17 +228,20 @@ footer {
   background-color: var(--purple);
   color: var(--link-blue);
 }
+
 .project-button:hover {
   background-color: var(--blue);
 }
+
 .project-date {
   font-size: 12px;
   color: var(--pink);
 }
+
 .clocks-view {
-  padding: 10px;
-  width: 50%;
-  height: 50%;
+  margin: 10px;
+  padding: 20px;
+  min-width: 60%;
   border: 1px solid var(--main-gray);
   background-color: var(--blue3);
   display: flex;
@@ -223,6 +250,7 @@ footer {
   align-self: center;
   overflow-y: scroll;
 }
+
 .clock-component {
   display: inline-block;
   background-color: var(--blue3);
@@ -231,8 +259,31 @@ footer {
   padding: 10px;
   width: fit-content;
 }
+
 .clock-title {
   font-weight: bold;
   font-size: 25px;
   color: var(--orange2);
+}
+
+.sidebar {
+  z-index: 2;
+  width: 200px;
+  height: 100%;
+  position: absolute;
+  background: transparent;
+  overflow: hidden;
+}
+
+.sidebar-items {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  /* padding: 5px 10px; */
+  background-color: var(--blue);
+  transform: translate(0px, 0px);
+  transition: 0.3s all ease-out;
 }
