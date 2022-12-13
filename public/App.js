@@ -22,6 +22,13 @@ class App {
 
   handleToProject = () => {
     document.getElementById("to-projects-btn").addEventListener("click", () => {
+      // stop all clocks
+      Object.values(state.clockComponents).forEach((project) => {
+        project.forEach((clock) => {
+          clock.stop();
+        });
+      });
+      // navigate to project select
       this.navigate({});
     });
   };
