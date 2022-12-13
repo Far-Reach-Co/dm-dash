@@ -1,7 +1,6 @@
 import Project from '../components/Project.js'
 import createElement from '../lib/createElement.js'
 import state from '../lib/state.js'
-console.log(state)
 
 export default class ProjectsView {
   constructor (props) {
