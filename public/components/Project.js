@@ -61,7 +61,6 @@ export default class Project {
       this.editTitle();
       await this.saveProject();
       this.toggleEdit();
-      this.parentRender();
     });
     const removeButton = createElement(
       "button",
@@ -72,7 +71,7 @@ export default class Project {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
         await this.removeProject();
         this.toggleEdit();
-        this.parentRender();
+        this.domComponent.remove();
       }
     });
     this.domComponent.appendChild(

@@ -1,6 +1,7 @@
 import Project from '../components/Project.js'
 import createElement from '../lib/createElement.js'
 import state from '../lib/state.js'
+console.log(state)
 
 export default class ProjectsView {
   constructor (props) {
@@ -17,6 +18,7 @@ export default class ProjectsView {
       )
       const data = await res.json()
       if (res.status === 200) {
+        state.projects = data;
         return data
       } else throw new Error()
     } catch (err) {

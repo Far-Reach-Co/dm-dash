@@ -39,9 +39,23 @@ export default class ClocksView {
           project_id: projectId,
         }),
       });
-      // const data = await res.json()
+      const data = await res.json()
       if (res.status === 201) {
-        this.render();
+        const clock = data;
+        const clockComponentDomElement = createElement("div", {
+          id: `clock-component-${clock.id}`,
+        });
+        // append
+        this.domComponent.appendChild(clockComponentDomElement);
+        // instantiate
+        const newClock = new Clock({
+          domComponent: clockComponentDomElement,
+          id: clock.id,
+          title: clock.title,
+          currentTimeInMilliseconds: clock.current_time_in_milliseconds,
+          parentRender: this.render,
+        });
+        state.clockComponents[`project-${state.currentProject}`].push(newClock);
       } else throw new Error();
     } catch (err) {
       window.alert("Failed to create new clock...");
