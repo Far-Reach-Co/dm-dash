@@ -56,8 +56,8 @@ export default class Clock {
     this.currentTimeInMilliseconds = 0
   }
 
-  editTitle = () => {
-    this.title = document.getElementById(`edit-clock-title-${this.id}`).value
+  editTitle = (title) => {
+    this.title = title
   }
 
   toggleEdit = () => {
@@ -67,13 +67,12 @@ export default class Clock {
   }
 
   renderDisplayTime = () => {
-    const currentTimeDiv = document.getElementById(`current-time-${this.id}`)
 
     var milliseconds = this.currentTimeInMilliseconds
     var twentyFourHourTime = msToTime(milliseconds, false)
     var twelveHourTime = msToTime(milliseconds, true)
 
-    currentTimeDiv.innerHTML = /*html*/`<div>${twentyFourHourTime}</div> <div style="color: var(--light-gray);">${twelveHourTime}</div>`
+    this.currentTimeDiv.innerHTML = /*html*/`<div>${twentyFourHourTime}</div> <div style="color: var(--light-gray);">${twelveHourTime}</div>`
   }
 
   saveClock = async () => {
@@ -121,7 +120,7 @@ export default class Clock {
     )
     const editButton = createElement('button', {}, 'Done')
     editButton.addEventListener('click', async () => {
-      this.editTitle()
+      this.editTitle(titleInput.value)
       await this.saveClock()
       this.toggleEdit()
       this.parentRender()
@@ -162,11 +161,13 @@ export default class Clock {
       return
     }
 
-    const titleDiv = createElement('div', { class: 'clock-title' }, this.title)
+    const titleDiv = createElement('div', { class: 'clock-title' }, [this.title, createElement("img", {src: "../assets/clock.svg", width: 40, height: 40})])
 
     const currentTimeDiv = createElement('div', {
       id: `current-time-${this.id}`
     })
+
+    this.currentTimeDiv = currentTimeDiv;
 
     const startButton = createElement('button', {}, 'Start')
     startButton.addEventListener('click', this.start)

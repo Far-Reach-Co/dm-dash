@@ -4,8 +4,9 @@ import state from '../lib/state.js'
 
 export default class ProjectsView {
   constructor (props) {
+    this.navigate = props.navigate
     this.domComponent = props.domComponent
-    this.domComponent.className = 'projects-view'
+    this.domComponent.className = 'standard-view'
     this.render()
   }
 
@@ -16,7 +17,6 @@ export default class ProjectsView {
       )
       const data = await res.json()
       if (res.status === 200) {
-        state.projects = data
         return data
       } else throw new Error()
     } catch (err) {
@@ -74,7 +74,8 @@ export default class ProjectsView {
         id: project.id,
         title: project.title,
         dateCreated: project.date_created,
-        parentRender: this.render
+        parentRender: this.render,
+        navigate: this.navigate
       })
     })
   }
