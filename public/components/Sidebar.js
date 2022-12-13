@@ -22,8 +22,8 @@ export default class SideBar {
     const hideButton = createElement("img", {
       class: "close-sidebar",
       src: "../assets/hide.svg",
-      height: 30,
-      width: 30,
+      height: 28,
+      width: 28,
     });
     hideButton.addEventListener("mousedown", () => {
       this.isVisible = false;

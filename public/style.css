@@ -293,7 +293,7 @@ footer {
   align-items: center;
   /* justify-content: space-evenly; */
   /* padding: 5px 10px; */
-  background-color: var(--blue3);
+  background-color: var(--blue4);
   transform: translate(-200px, 0px);
   transition: 0.3s all ease-out;
   border-right: 0.5px solid var(--main-gray);
@@ -320,6 +320,7 @@ footer {
 }
 
 .sidebar-header {
+  letter-spacing: 2px;
   font-weight: bold;
   align-items: center;
   display: flex;

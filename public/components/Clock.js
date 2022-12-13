@@ -139,7 +139,7 @@ export default class Clock {
           this.domComponent.remove();
           const clocksByProject =
             state.clockComponents[`project-${state.currentProject}`];
-          for (var i = 0; clocksByProject.length; i++) {
+          for (var i = 0; i < clocksByProject.length; i++) {
             if (clocksByProject[i].id === this.id) {
               clocksByProject.splice(i, 1);
             }
