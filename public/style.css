@@ -3,13 +3,14 @@
 
 :root {
   --main-white: rgb(206, 206, 206);
+  --main-dark: rgb(21, 21, 21);
   --main-gray: rgb(96, 88, 88);
   --light-gray: rgb(161, 161, 161);
   --blue: rgb(59, 82, 113);
   --blue2: rgb(107, 131, 154);
   --blue3: rgb(41, 47, 58);
   --blue4: rgb(38, 50, 70);
-  --link-blue: rgb(204, 222, 233);
+  --link-blue: rgb(165, 210, 238);
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
   --yellow: rgb(253, 255, 152);
@@ -27,9 +28,13 @@
   color: var(--main-white);
 }
 
+/* div {
+  display: inline-block;
+} */
+
 body {
   height: 100vh;
-  background-color: rgb(21, 21, 21);
+  background-color: var(--main-dark);
   display: flex;
   flex: 1;
   overflow: hidden;
@@ -56,6 +61,13 @@ nav {
   background-color: var(--blue);
   border-bottom: 0.5px solid var(--main-gray);
   font-weight: bold;
+}
+
+.title-anchor {
+  margin-left: 5px;
+  padding-top: 6px;
+  font-family: 'Zen Dots';
+  color: var(--link-blue);
 }
 
 .top-nav-btn {
@@ -121,7 +133,6 @@ form {
   align-items: center;
   justify-content: space-evenly;
   border: 0.5px solid var(--main-gray);
-  /* box-shadow: 1px 5px 10px 1px rgb(29, 29, 29); */
 }
 
 input {
@@ -256,17 +267,21 @@ footer {
   color: var(--pink);
 }
 
-.clock-component {
+.component {
   display: inline-block;
   margin: 10px;
   padding: 10px;
   width: fit-content;
   background-color: var(--blue4);
   border: 0.5px solid var(--main-gray);
-  box-shadow: 1px 5px 10px 1px rgb(15, 15, 15);
+  box-shadow: 1px 5px 10px 1px var(--main-dark);
 }
 
-.clock-title {
+.component button {
+  margin-right: 5px;
+}
+
+.component-title {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -274,6 +289,11 @@ footer {
   font-weight: bold;
   font-size: 25px;
   color: var(--orange2);
+}
+
+.current-date {
+  display: flex;
+  margin-bottom: 5px;
 }
 
 .sidebar {
@@ -293,7 +313,7 @@ footer {
   align-items: center;
   /* justify-content: space-evenly; */
   /* padding: 5px 10px; */
-  background-color: var(--blue4);
+  background-color: var(--blue3);
   transform: translate(-200px, 0px);
   transition: 0.3s all ease-out;
   border-right: 0.5px solid var(--main-gray);
@@ -305,7 +325,7 @@ footer {
 }
 
 .sidebar-item {
-  background-color: var(--purple);
+  background-color: var(--blue4);
   border-bottom: 0.5px solid var(--main-gray);
   width: 100%;
   height: 50px;
@@ -321,7 +341,6 @@ footer {
 
 .sidebar-header {
   letter-spacing: 2px;
-  font-weight: bold;
   align-items: center;
   display: flex;
   justify-content: center;

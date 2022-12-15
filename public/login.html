@@ -8,7 +8,17 @@
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body>
-    <nav><div style="display: flex; align-items: center"><img height="30px" src="./assets/dmlogo.png" alt=""> <a href="./index.html" style="margin-left: 5px; padding-top: 6px; font-family: 'Zen Dots'; color: var(--link-blue);">DM Dashboard</a></div></nav>
+    <nav>
+      <div style="display: flex; align-items: center">
+        <img height="30px" src="./assets/dmlogo.png" alt="" />
+        <a
+          class="title-anchor"
+          href="./index.html"
+
+          >DM Dashboard</a
+        >
+      </div>
+    </nav>
     <div class="container">
       <form id="login-form">
         <div class="form-item">
@@ -40,30 +50,30 @@
     </div>
   </body>
   <script>
-    document.getElementById('login-form').addEventListener('submit', login)
+    document.getElementById("login-form").addEventListener("submit", login);
     async function login(e) {
-      e.preventDefault()
-      const formData = new FormData(e.target)
-      const formProps = Object.fromEntries(formData)
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const formProps = Object.fromEntries(formData);
       try {
         const res = await fetch(`${window.location.origin}/api/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formProps)
-        })
-        const resData = await res.json()
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formProps),
+        });
+        const resData = await res.json();
         if (res.status === 200) {
-          const token = resData.token
-          localStorage.setItem('token', token)
-          window.location.pathname = '/dashboard.html'
+          const token = resData.token;
+          localStorage.setItem("token", token);
+          window.location.pathname = "/dashboard.html";
         } else if (res.status === 400) {
-          alert(resData.message)
+          alert(resData.message);
         } else {
-          throw resData.error
+          throw resData.error;
         }
       } catch (err) {
-        alert('Failed to login')
-        console.log(err)
+        alert("Failed to login");
+        console.log(err);
       }
     }
   </script>

@@ -5,7 +5,7 @@ import state from "../lib/state.js";
 export default class Clock {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "clock-component";
+    this.domComponent.className = "component";
     this.parentRender = props.parentRender;
     this.id = props.id;
     this.title = props.title;
@@ -109,7 +109,6 @@ export default class Clock {
     var valueForInput = time.substring(0, time.length - 2);
 
     const titleInput = createElement("input", {
-      id: `edit-clock-title-${this.id}`,
       value: this.title,
     });
 
@@ -175,7 +174,7 @@ export default class Clock {
       return;
     }
 
-    const titleDiv = createElement("div", { class: "clock-title" }, [
+    const titleDiv = createElement("div", { class: "component-title" }, [
       this.title,
       createElement("img", {
         src: "../assets/clock.svg",

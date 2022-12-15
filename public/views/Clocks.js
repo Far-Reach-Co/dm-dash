@@ -99,7 +99,7 @@ export default class ClocksView {
         });
         // update
         clock.domComponent = clockComponentDomElement;
-        clock.domComponent.className = "clock-component";
+        clock.domComponent.className = "component";
         clock.parentRender = this.render;
         clock.render();
         // append
