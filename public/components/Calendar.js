@@ -30,6 +30,58 @@ export default class Calendar {
     this.render();
   };
 
+  calculateCurrentDayOfTheWeek = () => {
+    if (!this.daysOfTheWeek.length || !this.months.length) return "unknown-day";
+    let totalDaysPassed = 0;
+    // get all the days in one year
+    let daysInYear = 0;
+    this.months.forEach((month) => (daysInYear += month.number_of_days));
+    // get and add all days in all years
+    totalDaysPassed += daysInYear * (this.year - 1);
+    // get and add days from this year
+    let daysPassedInThisYear = 0;
+    const currentMonthIndex = this.calculateCurrentMonth().index;
+    for (const month of this.months) {
+      if (month.index === currentMonthIndex) break;
+      daysPassedInThisYear += month.number_of_days;
+    }
+    daysPassedInThisYear += (this.currentDay -1);
+    totalDaysPassed += daysPassedInThisYear;
+    // get index and return title
+    let indexOfCurrentDay = totalDaysPassed % this.daysOfTheWeek.length;
+    indexOfCurrentDay++;
+    return this.daysOfTheWeek.filter(
+      (day) => day.index === (indexOfCurrentDay)
+    )[0].title;
+  };
+
+  calculateFirstDayOfTheWeekOfMonth = (currentMonthIndex) => {
+    if (!this.daysOfTheWeek.length || !this.months.length) return null;
+    let totalDaysPassed = 0;
+    // get all the days in one year
+    let daysInYear = 0;
+    this.months.forEach((month) => (daysInYear += month.number_of_days));
+    // get and add all days in all years
+    totalDaysPassed += daysInYear * (this.year - 1);
+    // get and add days from this year
+    let daysPassedInThisYear = 0;
+    for (const month of this.months) {
+      if (month.index === currentMonthIndex) break;
+      daysPassedInThisYear += month.number_of_days;
+    }
+    // get day of the week
+    let indexOfCurrentDay = totalDaysPassed % this.daysOfTheWeek.length;
+    indexOfCurrentDay++;
+    return this.daysOfTheWeek.filter(
+      (day) => day.index === indexOfCurrentDay
+    )[0];
+  }
+
+  calculateCurrentMonth = () => {
+    if (!this.months.length) return { title: "unknown-month" };
+    return this.months.filter((month) => month.id === this.currentMonthId)[0];
+  };
+
   updateCalendar = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -81,6 +133,27 @@ export default class Calendar {
     }
   };
 
+  newDay = async () => {
+    try {
+      const res = await fetch(`${window.location.origin}/api/add_day`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          calendar_id: this.id,
+          index: this.daysOfTheWeek.length + 1,
+          title: `Day(${this.daysOfTheWeek.length + 1})`
+        }),
+      });
+      const data = await res.json();
+      if (res.status === 201) {
+        this.daysOfTheWeek.push(data);
+      } else throw new Error();
+    } catch (err) {
+      window.alert("Failed to create new day...");
+      console.log(err);
+    }
+  };
+
   removeMonth = async (monthId) => {
     const res = await fetch(
       `${window.location.origin}/api/remove_month/${monthId}`,
@@ -95,34 +168,18 @@ export default class Calendar {
     }
   };
 
-  calculateDayOfTheWeek = () => {
-    if (!this.daysOfTheWeek.length || !this.months.length) return "unknown-day";
-    let totalDaysPassed = 0;
-    // get all the days in one year
-    let daysInYear = 0;
-    this.months.forEach((month) => (daysInYear += month.number_of_days));
-    // get and add all days in all years
-    totalDaysPassed += daysInYear * this.year;
-    // get and add days from this year
-    let daysPassedInThisYear = 0;
-    const currentMonthIndex = this.calculateCurrentMonth().index;
-    for (const month of this.months) {
-      if (month.index === currentMonthIndex) break;
-      daysPassedInThisYear += month.number_of_days;
+  removeDay = async (dayId) => {
+    const res = await fetch(
+      `${window.location.origin}/api/remove_day/${dayId}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (res.status === 204) {
+      // window.alert(`Deleted ${this.title}`)
+    } else {
+      window.alert("Failed to delete day...");
     }
-    daysPassedInThisYear += this.currentDay;
-    totalDaysPassed += daysPassedInThisYear;
-
-    let indexOfCurrentDay = totalDaysPassed % this.daysOfTheWeek.length;
-    if (indexOfCurrentDay === 0) indexOfCurrentDay++;
-    return this.daysOfTheWeek.filter(
-      (day) => day.index === indexOfCurrentDay
-    )[0].title;
-  };
-
-  calculateCurrentMonth = () => {
-    if (!this.months.length) return { title: "unknown-month" };
-    return this.months.filter((month) => month.id === this.currentMonthId)[0];
   };
 
   updateMonths = async () => {
@@ -158,13 +215,137 @@ export default class Calendar {
     this.months = successListSortedByIndex;
   };
 
+  updateDays = async () => {
+    const dayUpdateSuccessList = [];
+
+    await Promise.all(
+      this.daysOfTheWeek.map(async (day) => {
+        try {
+          const res = await fetch(
+            `${window.location.origin}/api/edit_day/${day.id}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                title: day.title,
+                index: day.index,
+              }),
+            }
+          );
+          const data = await res.json();
+          dayUpdateSuccessList.push(data);
+        } catch (err) {
+          console.log(err);
+          alert("Failed to update day...");
+          this.parentComponentRender();
+        }
+      })
+    );
+    const successListSortedByIndex = dayUpdateSuccessList.sort(
+      (a, b) => a.index - b.index
+    );
+    this.daysOfTheWeek = successListSortedByIndex;
+  };
+
+  renderManageDays = () => {
+    // setup main form div for each day
+    const mainDiv = createElement("div", {});
+    this.daysOfTheWeek.forEach((day, index) => {
+      const dayContainer = createElement("div", { class: "day-container" });
+      // index
+      const indexLabel = createElement(
+        "div",
+        { style: "display: inline-block; margin-right: 10px;" },
+        `Day ${index + 1}`
+      );
+      // title
+      const titleInput = createElement("input", {
+        name: "title",
+        value: day.title,
+      });
+      titleInput.addEventListener("change", (e) => {
+        day.title = e.target.value.trim();
+      });
+
+      // remove
+      const removeDayBtn = createElement(
+        "button",
+        { class: "btn-red" },
+        "Remove Day"
+      );
+      removeDayBtn.addEventListener("click", () => {
+        this.removeDay(day.id);
+        this.daysOfTheWeek.splice(this.daysOfTheWeek.indexOf(day), 1);
+        this.render();
+      });
+      // move index
+      const moveBtnContainer = createElement("div", {
+        style: "display: inline-block;",
+      });
+      const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
+      moveUpBtn.addEventListener("click", async () => {
+        // dec
+        day.index -= 1;
+        if (this.daysOfTheWeek[index - 1]) this.daysOfTheWeek[index - 1].index += 1;
+        await this.updateDays();
+        this.render();
+      });
+      const moveDownBtn = createElement("button", { class: "move-btn" }, "▼");
+      moveDownBtn.addEventListener("click", async () => {
+        // inc
+        day.index += 1;
+        if (this.daysOfTheWeek[index + 1]) this.daysOfTheWeek[index + 1].index -= 1;
+        await this.updateDays();
+        this.render();
+      });
+      // manage render which buttons are available based on index position
+      if (day.index === 1 && this.daysOfTheWeek.length > 1) {
+        moveBtnContainer.append(moveDownBtn);
+      } else if (day.index != this.daysOfTheWeek.length) {
+        moveBtnContainer.append(moveDownBtn);
+        moveBtnContainer.append(moveUpBtn);
+      } else {
+        moveBtnContainer.append(moveUpBtn);
+      }
+      // append
+      dayContainer.append(
+        indexLabel,
+        titleInput,
+        removeDayBtn,
+        moveBtnContainer
+      );
+      mainDiv.append(dayContainer);
+    });
+    // add day
+    const addBtn = createElement("button", {}, "+ Day");
+    addBtn.addEventListener("click", async () => {
+      await this.newDay();
+      this.render();
+    });
+    mainDiv.append(addBtn);
+    // done
+    const doneBtn = createElement("button", {}, "Done");
+    doneBtn.addEventListener("click", async () => {
+      await this.updateDays();
+      this.manageDays = false;
+      this.render();
+    });
+    mainDiv.append(doneBtn);
+    // append
+    this.domComponent.appendChild(mainDiv);
+  };
+
   renderManageMonths = () => {
     // setup main form div for each month
     const mainDiv = createElement("div", {});
     this.months.forEach((month, index) => {
       const monthContainer = createElement("div", { class: "month-container" });
       // index
-      const indexLabel = createElement('div',{style: 'display: inline-block; margin-right: 10px;'},`Month ${index + 1}`)
+      const indexLabel = createElement(
+        "div",
+        { style: "display: inline-block; margin-right: 10px;" },
+        `Month ${index + 1}`
+      );
       // title
       const titleInput = createElement("input", {
         name: "title",
@@ -176,7 +357,7 @@ export default class Calendar {
       // number of days
       const numOfDaysLabel = createElement(
         "label",
-        { for: "number_of_days", style: 'margin-right: 10px;' },
+        { for: "number_of_days", style: "margin-right: 10px;" },
         "Days"
       );
       const numOfDaysInput = createElement("input", {
@@ -276,7 +457,11 @@ export default class Calendar {
         min: "1",
         value: this.year,
       }),
-      createElement("button", { type: "submit", style: "margin-top: 10px;" }, "Done"),
+      createElement(
+        "button",
+        { type: "submit", style: "margin-top: 10px;" },
+        "Done"
+      ),
     ]);
     form.addEventListener("submit", async (e) => {
       await this.updateCalendar(e);
@@ -375,24 +560,30 @@ export default class Calendar {
     for (const day of this.daysOfTheWeek) {
       const elem = createElement(
         "div",
-        {
-          style:
-            "padding: 5px; border: 1px solid var(--main-gray); display: flex; align-items: center; justify-content: center;",
-        },
+        { class: 'calendar-box' },
         day.title
       );
       calendarContainer.append(elem);
     }
-    for (var i = 1; i < this.calculateCurrentMonth().number_of_days; i++) {
+    const firstDayOfTheWeekOfTheMonth = this.calculateFirstDayOfTheWeekOfMonth(this.monthBeingViewed)
+    console.log(firstDayOfTheWeekOfTheMonth)
+    // input empty days
+    for(var i = 1; i<firstDayOfTheWeekOfTheMonth.index;i++) {
       const elem = createElement(
         "div",
-        {
-          style:
-            "padding: 5px; border: 1px solid var(--main-gray); display: flex; align-items: center; justify-content: center;",
-        },
-        i
+        { class: 'calendar-box' },
+        dayNumber
+      );   
+      calendarContainer.append(elem);
+    }
+    // input real days
+    for (var dayNumber = 1; dayNumber < this.calculateCurrentMonth().number_of_days; dayNumber++) {
+      const elem = createElement(
+        "div",
+        { class: 'calendar-box' },
+        dayNumber
       );
-      if (i === this.currentDay) elem.style.backgroundColor = "var(--orange)";
+      if (dayNumber === this.currentDay) elem.style.backgroundColor = "var(--orange)";
       calendarContainer.append(elem);
     }
 
@@ -429,7 +620,7 @@ export default class Calendar {
     const infoContainer = createElement(
       "div",
       { class: "current-date" },
-      `${this.calculateDayOfTheWeek()} ${this.calculateCurrentMonth().title}-${
+      `${this.calculateCurrentDayOfTheWeek()} ${this.calculateCurrentMonth().title}-${
         this.currentDay
       }-${this.year}`
     );

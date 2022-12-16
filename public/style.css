@@ -371,8 +371,24 @@ footer {
   align-self: flex-start;
 }
 
+.day-container {
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid var(--main-gray);
+  background-color: var(--blue3);
+  align-self: flex-start;
+}
+
 .move-btn {
   padding: 5px;
   font-size: small;
 
+}
+
+.calendar-box {
+  padding: 5px;
+  border: 1px solid var(--main-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }

@@ -149,7 +149,7 @@ async function verifyJwt (req, res, next) {
 async function editUser (req, res, next) {
   try {
     const userEditData = await editUserQuery(req.params.id, req.body)
-    res.send(userEditData)
+    res.send(userEditData.rows[0])
   } catch (err) {
     next(err)
   }
