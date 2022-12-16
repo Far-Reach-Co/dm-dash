@@ -34,6 +34,12 @@ const {
   removeMonth,
   editMonth,
 } = require("./controllers/months.js");
+const {
+  getDays,
+  addDay,
+  removeDay,
+  editDay,
+} = require("./controllers/days.js");
 
 var router = express.Router();
 
@@ -54,6 +60,12 @@ router.get("/get_months/:calendar_id", getMonths);
 router.post("/add_month", addMonth);
 router.delete("/remove_month/:id", removeMonth);
 router.post("/edit_month/:id", editMonth);
+
+// days
+router.get("/get_days/:calendar_id", getDays);
+router.post("/add_day", addDay);
+router.delete("/remove_day/:id", removeDay);
+router.post("/edit_day/:id", editDay);
 
 // projects
 router.get("/get_projects/:id", getProjects);

@@ -1,5 +1,6 @@
 const {addCalendarQuery, getCalendarsQuery, removeCalendarQuery, editCalendarQuery} = require('../queries/calendars.js')
 const {getMonthsQuery} = require('../queries/months.js')
+const {getDaysQuery} = require('../queries/days.js')
 
 async function addCalendar(req, res, next) {
   try {
@@ -17,6 +18,10 @@ async function getCalendars(req, res, next) {
     for(const calendar of calendars.rows) {
       const months = await getMonthsQuery(calendar.id)
       calendar.months = months.rows
+    }
+    for(const calendar of calendars.rows) {
+      const days = await getDaysQuery(calendar.id)
+      calendar.days_of_the_week = days.rows
     }
 
     res.send(calendars.rows)

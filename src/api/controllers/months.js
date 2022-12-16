@@ -1,4 +1,4 @@
-const {addMonthQuery, getMonthsQuery, removeMonthQuery, editMonthQuery} = require('../queries/Months.js')
+const {addMonthQuery, getMonthsQuery, removeMonthQuery, editMonthQuery} = require('../queries/months.js')
 
 async function addMonth(req, res, next) {
   try {
@@ -31,7 +31,7 @@ async function removeMonth(req, res, next) {
 async function editMonth(req, res, next) {
   try {
     const data = await editMonthQuery(req.params.id, req.body)
-    res.status(200).send(data)
+    res.status(200).send(data.rows[0])
   } catch(err) {
     next(err)
   }

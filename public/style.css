@@ -81,6 +81,7 @@ nav {
   border-left: 0.5px solid var(--main-gray);
   border-right: 0.5px solid var(--main-gray);
 }
+
 .top-nav-btn:hover {
   background-color: var(--purple);
 }
@@ -147,6 +148,10 @@ input {
   font-family: inherit;
   color: black;
   border: 0.5px solid var(--main-gray);
+}
+
+input[type=number] {
+  width: 100px
 }
 
 .form-item input {
@@ -356,4 +361,18 @@ footer {
   margin-right: 3px;
   margin-top: 3px;
   cursor: pointer;
+}
+
+.month-container {
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid var(--main-gray);
+  background-color: var(--blue3);
+  align-self: flex-start;
+}
+
+.move-btn {
+  padding: 5px;
+  font-size: small;
+
 }

@@ -1,4 +1,4 @@
-const {addProjectQuery, getProjectsQuery, removeProjectQuery, editProjectQuery} = require('../queries/Projects.js')
+const {addProjectQuery, getProjectsQuery, removeProjectQuery, editProjectQuery} = require('../queries/projects.js')
 
 async function addProject(req, res, next) {
   try {

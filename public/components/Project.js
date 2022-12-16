@@ -20,8 +20,8 @@ export default class Project {
     this.render();
   };
 
-  editTitle = () => {
-    this.title = document.getElementById(`edit-project-title-${this.id}`).value;
+  editTitle = (title) => {
+    this.title = title.trim();
   };
 
   saveProject = async () => {
@@ -58,7 +58,7 @@ export default class Project {
     });
     const editButton = createElement("button", {}, "Done");
     editButton.addEventListener("click", async () => {
-      this.editTitle();
+      this.editTitle(titleInput.value);
       await this.saveProject();
       this.toggleEdit();
     });

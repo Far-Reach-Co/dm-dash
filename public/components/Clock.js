@@ -58,7 +58,7 @@ export default class Clock {
   };
 
   editTitle = (title) => {
-    this.title = title;
+    this.title = title.trim();
   };
 
   toggleEdit = () => {

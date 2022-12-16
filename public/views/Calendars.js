@@ -9,11 +9,22 @@ export default class CalendarView {
 
     // creation vars
     this.creatingNewCalendar = false;
-    this.creatingMonths = false;
+    this.creatingNewMOnths = false;
+    this.creatingNewDaysInWeek = false;
     this.calendarBeingCreated = null;
     this.monthsCreated = [];
+    this.daysCreated = [];
 
     this.render();
+  }
+
+  resetCalendarCreation = () => {
+    this.creatingNewCalendar = false;
+    this.creatingNewMOnths = false;
+    this.creatingNewDaysInWeek = false;
+    this.calendarBeingCreated = null;
+    this.monthsCreated = [];
+    this.daysCreated = [];
   }
 
   getCalendars = async () => {
@@ -62,14 +73,14 @@ export default class CalendarView {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           project_id: projectId,
-          title: formProps.title,
+          title: formProps.title.trim(),
           year: parseInt(formProps.year),
         }),
       });
       const data = await res.json();
       if (res.status === 201) {
         this.creatingNewCalendar = false;
-        this.creatingMonths = true;
+        this.creatingNewMOnths = true;
         this.calendarBeingCreated = { title: formProps.title, id: data.id };
         this.render();
       } else throw new Error();
@@ -93,7 +104,7 @@ export default class CalendarView {
         body: JSON.stringify({
           calendar_id: this.calendarBeingCreated.id,
           index: this.monthsCreated.length + 1,
-          title: formProps.title,
+          title: formProps.title.trim(),
           number_of_days: parseInt(formProps.number_of_days),
         }),
       });
@@ -110,6 +121,83 @@ export default class CalendarView {
       console.log(err);
     }
   };
+
+  newDayInWeek = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    try {
+      const res = await fetch(`${window.location.origin}/api/add_day`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          calendar_id: this.calendarBeingCreated.id,
+          index: this.daysCreated.length + 1,
+          title: formProps.title.trim()
+        }),
+      });
+      const data = await res.json();
+      if (res.status === 201) {
+        this.daysCreated.push(data);
+        this.renderNewDaysInWeek();
+      } else throw new Error();
+    } catch (err) {
+      window.alert("Failed to create new day...");
+      console.log(err);
+    }
+  }
+
+  renderNewDaysInWeek = () => {
+    this.domComponent.innerHTML = "";
+
+    const titleOfForm = createElement(
+      "div",
+      { class: "component-title" },
+      `Create days for: ${this.calendarBeingCreated.title}`
+    );
+    this.domComponent.appendChild(titleOfForm);
+
+    const listOfDaysElem = createElement("div", {}, "Days Created:");
+    if (this.daysCreated.length) {
+      this.domComponent.appendChild(listOfDaysElem);
+      this.daysCreated.forEach((days) => {
+        this.domComponent.appendChild(
+          createElement(
+            "div",
+            { style: "color: var(--yellow);" },
+            `#${days.index} ${days.title}`
+          )
+        );
+      });
+    }
+
+    const infoElem = createElement(
+      "small",
+      {},
+      "*You can change/manage days in the 'open' menu for this calendar after creation"
+    );
+    this.domComponent.appendChild(infoElem);
+
+    const form = createElement("form", {}, [
+      createElement("label", { for: "title" }, "Title"),
+      createElement("input", {
+        name: "title",
+        placeholder: "Title of day",
+        required: true,
+      }),
+      createElement("button", { type: "submit" }, "Add"),
+    ]);
+    form.addEventListener("submit", this.newDayInWeek);
+
+    this.domComponent.appendChild(form);
+
+    const completeButton = createElement("button", {}, "Complete");
+    completeButton.addEventListener("click", () => {
+      this.resetCalendarCreation();
+      this.render();
+    });
+    this.domComponent.appendChild(completeButton);
+  }
 
   renderNewMonths = async () => {
     this.domComponent.innerHTML = "";
@@ -128,7 +216,7 @@ export default class CalendarView {
         this.domComponent.appendChild(
           createElement(
             "div",
-            {},
+            { style: "color: var(--yellow);" },
             `#${month.index} ${month.title} ${month.number_of_days}-Days`
           )
         );
@@ -138,7 +226,7 @@ export default class CalendarView {
     const infoElem = createElement(
       "small",
       {},
-      "*You can change the order of your months in the edit menu for this calendar later"
+      "*You can change/manage months in the 'open' menu for this calendar after creation"
     );
     this.domComponent.appendChild(infoElem);
 
@@ -154,6 +242,7 @@ export default class CalendarView {
         name: "number_of_days",
         placeholder: "1",
         type: "number",
+        step: "1",
         min: "1",
         required: true,
       }),
@@ -165,10 +254,8 @@ export default class CalendarView {
 
     const completeButton = createElement("button", {}, "Complete");
     completeButton.addEventListener("click", () => {
-      this.creatingNewCalendar = false;
-      this.creatingMonths = false;
-      this.calendarBeingCreated = null;
-      this.monthsCreated = [];
+      this.creatingNewMOnths = false;
+      this.creatingNewDaysInWeek = true;
       this.render();
     });
     this.domComponent.appendChild(completeButton);
@@ -193,6 +280,7 @@ export default class CalendarView {
         id: "year",
         name: "year",
         type: "number",
+        step: "1",
         min: "1",
         value: "1",
         required: true,
@@ -216,8 +304,13 @@ export default class CalendarView {
     if (this.creatingNewCalendar) {
       return this.renderNewCalendar();
     }
-    if (this.creatingMonths) {
+
+    if (this.creatingNewMOnths) {
       return this.renderNewMonths();
+    }
+    
+    if (this.creatingNewDaysInWeek) {
+      return this.renderNewDaysInWeek();
     }
 
     // new clock button
@@ -244,6 +337,7 @@ export default class CalendarView {
 
       new Calendar({
         domComponent: calendarComponentElement,
+        parentComponentRender: this.render,
         id: calendar.id,
         projectId: calendar.project_id,
         title: calendar.title,
@@ -251,6 +345,7 @@ export default class CalendarView {
         currentMonthId: calendar.current_month_id,
         currentDay: calendar.current_day,
         months: calendar.months,
+        daysOfTheWeek: calendar.days_of_the_week
       });
     });
   };
