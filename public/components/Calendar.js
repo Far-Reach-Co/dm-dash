@@ -539,6 +539,8 @@ export default class Calendar {
   };
 
   renderOpen = async () => {
+    const previousMonth = this.months.filter(month => month.index === (this.monthBeingViewed.index - 1))[0];
+    const nextMonth = this.months.filter(month => month.index === (this.monthBeingViewed.index + 1))[0];
     const title = createElement(
       "div",
       { class: "component-title" },
@@ -547,10 +549,18 @@ export default class Calendar {
     const monthYear = createElement(
       "div",
       {},
-      `${this.calculateCurrentMonth().title} ${this.year}`
+      `${this.monthBeingViewed.title} ${this.year}`
     );
     const arrowButtonLeft = createElement("button", {}, "<");
+    arrowButtonLeft.addEventListener('click', () => {
+      this.monthBeingViewed = previousMonth;
+      this.render();
+    })
     const arrowButtonRight = createElement("button", {}, ">");
+    arrowButtonRight.addEventListener('click', () => {
+      this.monthBeingViewed = nextMonth;
+      this.render();
+    })
 
     const calendarContainer = createElement("div", {});
     calendarContainer.style.display = "grid";
@@ -566,7 +576,6 @@ export default class Calendar {
       calendarContainer.append(elem);
     }
     const firstDayOfTheWeekOfTheMonth = this.calculateFirstDayOfTheWeekOfMonth(this.monthBeingViewed)
-    console.log(firstDayOfTheWeekOfTheMonth)
     // input empty days
     for(var i = 1; i<firstDayOfTheWeekOfTheMonth.index;i++) {
       const elem = createElement(
@@ -583,16 +592,31 @@ export default class Calendar {
         { class: 'calendar-box' },
         dayNumber
       );
-      if (dayNumber === this.currentDay) elem.style.backgroundColor = "var(--orange)";
+      if (dayNumber === this.currentDay && this.monthBeingViewed.id === this.currentMonthId) elem.style.backgroundColor = "var(--orange)";
       calendarContainer.append(elem);
     }
+
+    const closeButton = createElement("button", {}, "Close");
+    closeButton.addEventListener("click", () => {
+      this.open = false;
+      this.render();
+    });
 
     this.domComponent.append(
       title,
       monthYear,
-      arrowButtonLeft,
-      arrowButtonRight,
-      calendarContainer
+      calendarContainer,
+      closeButton
+    );
+    if(previousMonth) {
+      this.domComponent.append(arrowButtonLeft)
+    }
+    if(nextMonth) {
+      this.domComponent.append(arrowButtonRight)
+    }
+    this.domComponent.append(
+      calendarContainer,
+      closeButton
     );
   };
 

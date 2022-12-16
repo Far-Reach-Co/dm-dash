@@ -26,6 +26,7 @@
   box-sizing: border-box;
   font-size: 20px;
   color: var(--main-white);
+  z-index: 2;
 }
 
 /* div {
