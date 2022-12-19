@@ -45,13 +45,13 @@ export default class Calendar {
       if (month.index === currentMonthIndex) break;
       daysPassedInThisYear += month.number_of_days;
     }
-    daysPassedInThisYear += (this.currentDay -1);
+    daysPassedInThisYear += this.currentDay - 1;
     totalDaysPassed += daysPassedInThisYear;
     // get index and return title
     let indexOfCurrentDay = totalDaysPassed % this.daysOfTheWeek.length;
     indexOfCurrentDay++;
     return this.daysOfTheWeek.filter(
-      (day) => day.index === (indexOfCurrentDay)
+      (day) => day.index === indexOfCurrentDay
     )[0].title;
   };
 
@@ -69,13 +69,14 @@ export default class Calendar {
       if (month.index === currentMonthIndex) break;
       daysPassedInThisYear += month.number_of_days;
     }
+    totalDaysPassed += daysPassedInThisYear;
     // get day of the week
     let indexOfCurrentDay = totalDaysPassed % this.daysOfTheWeek.length;
     indexOfCurrentDay++;
     return this.daysOfTheWeek.filter(
       (day) => day.index === indexOfCurrentDay
     )[0];
-  }
+  };
 
   calculateCurrentMonth = () => {
     if (!this.months.length) return { title: "unknown-month" };
@@ -141,7 +142,7 @@ export default class Calendar {
         body: JSON.stringify({
           calendar_id: this.id,
           index: this.daysOfTheWeek.length + 1,
-          title: `Day(${this.daysOfTheWeek.length + 1})`
+          title: `Day(${this.daysOfTheWeek.length + 1})`,
         }),
       });
       const data = await res.json();
@@ -247,6 +248,29 @@ export default class Calendar {
     this.daysOfTheWeek = successListSortedByIndex;
   };
 
+  handleDayClicked = async (dayNumber) => {
+    dayNumber = parseInt(dayNumber);
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/edit_calendar/${this.id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            current_day: dayNumber,
+            current_month_id: this.monthBeingViewed.id
+          }),
+        }
+      );
+      this.currentMonthId = this.monthBeingViewed.id;
+      this.currentDay = dayNumber;
+      this.render();
+    } catch (err) {
+      console.log(err)
+      window.alert("Failed to update current day...")
+    }
+  };
+
   renderManageDays = () => {
     // setup main form div for each day
     const mainDiv = createElement("div", {});
@@ -286,7 +310,8 @@ export default class Calendar {
       moveUpBtn.addEventListener("click", async () => {
         // dec
         day.index -= 1;
-        if (this.daysOfTheWeek[index - 1]) this.daysOfTheWeek[index - 1].index += 1;
+        if (this.daysOfTheWeek[index - 1])
+          this.daysOfTheWeek[index - 1].index += 1;
         await this.updateDays();
         this.render();
       });
@@ -294,7 +319,8 @@ export default class Calendar {
       moveDownBtn.addEventListener("click", async () => {
         // inc
         day.index += 1;
-        if (this.daysOfTheWeek[index + 1]) this.daysOfTheWeek[index + 1].index -= 1;
+        if (this.daysOfTheWeek[index + 1])
+          this.daysOfTheWeek[index + 1].index -= 1;
         await this.updateDays();
         this.render();
       });
@@ -539,8 +565,12 @@ export default class Calendar {
   };
 
   renderOpen = async () => {
-    const previousMonth = this.months.filter(month => month.index === (this.monthBeingViewed.index - 1))[0];
-    const nextMonth = this.months.filter(month => month.index === (this.monthBeingViewed.index + 1))[0];
+    const previousMonth = this.months.filter(
+      (month) => month.index === this.monthBeingViewed.index - 1
+    )[0];
+    const nextMonth = this.months.filter(
+      (month) => month.index === this.monthBeingViewed.index + 1
+    )[0];
     const title = createElement(
       "div",
       { class: "component-title" },
@@ -552,15 +582,15 @@ export default class Calendar {
       `${this.monthBeingViewed.title} ${this.year}`
     );
     const arrowButtonLeft = createElement("button", {}, "<");
-    arrowButtonLeft.addEventListener('click', () => {
+    arrowButtonLeft.addEventListener("click", () => {
       this.monthBeingViewed = previousMonth;
       this.render();
-    })
+    });
     const arrowButtonRight = createElement("button", {}, ">");
-    arrowButtonRight.addEventListener('click', () => {
+    arrowButtonRight.addEventListener("click", () => {
       this.monthBeingViewed = nextMonth;
       this.render();
-    })
+    });
 
     const calendarContainer = createElement("div", {});
     calendarContainer.style.display = "grid";
@@ -568,31 +598,34 @@ export default class Calendar {
       this.daysOfTheWeek.length ? this.daysOfTheWeek.length : 7
     }, 1fr)`;
     for (const day of this.daysOfTheWeek) {
-      const elem = createElement(
-        "div",
-        { class: 'calendar-box' },
-        day.title
-      );
+      const elem = createElement("div", { class: "calendar-box" }, day.title);
       calendarContainer.append(elem);
     }
-    const firstDayOfTheWeekOfTheMonth = this.calculateFirstDayOfTheWeekOfMonth(this.monthBeingViewed)
+    const firstDayOfTheWeekOfTheMonth = this.calculateFirstDayOfTheWeekOfMonth(
+      this.monthBeingViewed.index
+    );
     // input empty days
-    for(var i = 1; i<firstDayOfTheWeekOfTheMonth.index;i++) {
-      const elem = createElement(
-        "div",
-        { class: 'calendar-box' },
-        dayNumber
-      );   
+    for (var i = 1; i < firstDayOfTheWeekOfTheMonth.index; i++) {
+      const elem = createElement("div", { class: "calendar-box" }, dayNumber);
       calendarContainer.append(elem);
     }
     // input real days
-    for (var dayNumber = 1; dayNumber < this.calculateCurrentMonth().number_of_days; dayNumber++) {
+    for (
+      var dayNumber = 1;
+      dayNumber < this.monthBeingViewed.number_of_days;
+      dayNumber++
+    ) {
       const elem = createElement(
         "div",
-        { class: 'calendar-box' },
-        dayNumber
+        { class: "calendar-box clickable-day" },
+        dayNumber,
+        { type: "click", event: () => this.handleDayClicked(elem.innerHTML) }
       );
-      if (dayNumber === this.currentDay && this.monthBeingViewed.id === this.currentMonthId) elem.style.backgroundColor = "var(--orange)";
+      if (
+        dayNumber === this.currentDay &&
+        this.monthBeingViewed.id === this.currentMonthId
+      )
+        elem.style.backgroundColor = "var(--orange)";
       calendarContainer.append(elem);
     }
 
@@ -602,22 +635,14 @@ export default class Calendar {
       this.render();
     });
 
-    this.domComponent.append(
-      title,
-      monthYear,
-      calendarContainer,
-      closeButton
-    );
-    if(previousMonth) {
-      this.domComponent.append(arrowButtonLeft)
+    this.domComponent.append(title, monthYear, calendarContainer, closeButton);
+    if (previousMonth) {
+      this.domComponent.append(arrowButtonLeft);
     }
-    if(nextMonth) {
-      this.domComponent.append(arrowButtonRight)
+    if (nextMonth) {
+      this.domComponent.append(arrowButtonRight);
     }
-    this.domComponent.append(
-      calendarContainer,
-      closeButton
-    );
+    this.domComponent.append(calendarContainer, closeButton);
   };
 
   render = () => {
@@ -644,9 +669,9 @@ export default class Calendar {
     const infoContainer = createElement(
       "div",
       { class: "current-date" },
-      `${this.calculateCurrentDayOfTheWeek()} ${this.calculateCurrentMonth().title}-${
-        this.currentDay
-      }-${this.year}`
+      `${this.calculateCurrentDayOfTheWeek()} ${
+        this.calculateCurrentMonth().title
+      }-${this.currentDay}-${this.year}`
     );
 
     const openButton = createElement("button", {}, "Open");

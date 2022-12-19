@@ -108,6 +108,8 @@ export default class Clock {
     var time = msToTime(milliseconds, false);
     var valueForInput = time.substring(0, time.length - 2);
 
+    const editTitle = createElement("div", {}, "Edit");
+
     const titleInput = createElement("input", {
       value: this.title,
     });
@@ -155,14 +157,15 @@ export default class Clock {
         this.toggleEdit();
       }
     });
-    // render
-    this.domComponent.appendChild(createElement("div", {}, "Edit"));
-    this.domComponent.appendChild(titleInput);
-    this.domComponent.appendChild(timeInput);
-    timeInput.focus();
-    this.domComponent.appendChild(doneButton);
-    this.domComponent.appendChild(resetButton);
-    this.domComponent.appendChild(removeButton);
+    // append
+    this.domComponent.append(
+      editTitle,
+      timeInput,
+      timeInput,
+      doneButton,
+      resetButton,
+      removeButton
+    );
   };
 
   render = () => {
@@ -217,8 +220,7 @@ export default class Clock {
     });
 
     // append
-    const fragment = document.createDocumentFragment(); // try fragment method
-    fragment.append(
+    this.domComponent.append(
       titleDiv,
       currentTimeDiv,
       startButton,
@@ -226,7 +228,6 @@ export default class Clock {
       editButton,
       selectSpeed
     );
-    this.domComponent.appendChild(fragment);
     // Display time
     this.renderDisplayTime();
   };

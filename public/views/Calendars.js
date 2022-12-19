@@ -155,13 +155,13 @@ export default class CalendarView {
       { class: "component-title" },
       `Create days for: ${this.calendarBeingCreated.title}`
     );
-    this.domComponent.appendChild(titleOfForm);
 
-    const listOfDaysElem = createElement("div", {}, "Days Created:");
+    const listOfDaysElems = [];
+    const listOfDaysTitle = createElement("div", {}, "Days Created:");
     if (this.daysCreated.length) {
-      this.domComponent.appendChild(listOfDaysElem);
+      listOfDaysElems.push(listOfDaysTitle);
       this.daysCreated.forEach((days) => {
-        this.domComponent.appendChild(
+        listOfDaysElems.push(
           createElement(
             "div",
             { style: "color: var(--yellow);" },
@@ -176,7 +176,6 @@ export default class CalendarView {
       {},
       "*You can change/manage days in the 'open' menu for this calendar after creation"
     );
-    this.domComponent.appendChild(infoElem);
 
     const form = createElement("form", {}, [
       createElement("label", { for: "title" }, "Title"),
@@ -189,14 +188,20 @@ export default class CalendarView {
     ]);
     form.addEventListener("submit", this.newDayInWeek);
 
-    this.domComponent.appendChild(form);
-
     const completeButton = createElement("button", {}, "Complete");
     completeButton.addEventListener("click", () => {
       this.resetCalendarCreation();
       this.render();
     });
-    this.domComponent.appendChild(completeButton);
+
+    // append
+    this.domComponent.append(
+      titleOfForm,
+      ...listOfDaysElems,
+      infoElem,
+      form,
+      completeButton
+    );
   }
 
   renderNewMonths = async () => {
@@ -207,13 +212,13 @@ export default class CalendarView {
       { class: "component-title" },
       `Create months for: ${this.calendarBeingCreated.title}`
     );
-    this.domComponent.appendChild(titleOfForm);
-
-    const listOfMonthsElem = createElement("div", {}, "Months Created:");
+    
+    const listOfMonthsElements = [];
+    const listOfMonthsTitle = createElement("div", {}, "Months Created:");
     if (this.monthsCreated.length) {
-      this.domComponent.appendChild(listOfMonthsElem);
+      listOfMonthsElements.push(listOfMonthsTitle);
       this.monthsCreated.forEach((month) => {
-        this.domComponent.appendChild(
+        listOfMonthsElements.push(
           createElement(
             "div",
             { style: "color: var(--yellow);" },
@@ -228,7 +233,6 @@ export default class CalendarView {
       {},
       "*You can change/manage months in the 'open' menu for this calendar after creation"
     );
-    this.domComponent.appendChild(infoElem);
 
     const form = createElement("form", {}, [
       createElement("label", { for: "title" }, "Title"),
@@ -250,15 +254,21 @@ export default class CalendarView {
     ]);
     form.addEventListener("submit", this.newMonth);
 
-    this.domComponent.appendChild(form);
-
     const completeButton = createElement("button", {}, "Complete");
     completeButton.addEventListener("click", () => {
       this.creatingNewMOnths = false;
       this.creatingNewDaysInWeek = true;
       this.render();
     });
-    this.domComponent.appendChild(completeButton);
+
+    // append
+    this.domComponent.append(
+      titleOfForm,
+      ...listOfMonthsElements,
+      infoElem,
+      form,
+      completeButton
+    );
   };
 
   renderNewCalendar = () => {
@@ -323,17 +333,17 @@ export default class CalendarView {
       this.creatingNewCalendar = true;
       this.render();
     });
-    this.domComponent.appendChild(newCalendarButton);
 
     const calendarData = await this.getCalendars();
 
+    const calendarElems = [];
     calendarData.forEach((calendar) => {
       // create element
       const calendarComponentElement = createElement("div", {
         id: `calendar-component-${calendar.id}`,
       });
       // append
-      this.domComponent.appendChild(calendarComponentElement);
+      calendarElems.push(calendarComponentElement);
 
       new Calendar({
         domComponent: calendarComponentElement,
@@ -348,5 +358,11 @@ export default class CalendarView {
         daysOfTheWeek: calendar.days_of_the_week
       });
     });
+
+    // append
+    this.domComponent.append(
+      newCalendarButton,
+      ...calendarElems
+    )
   };
 }

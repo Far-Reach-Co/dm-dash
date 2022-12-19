@@ -62,63 +62,69 @@ class App {
 
   renderCalendersView = async () => {
     const element = createElement("div");
-    new CalendarsView({ domComponent: element });
     this.domComponent.appendChild(element);
+    new CalendarsView({ domComponent: element });
   };
 
   renderClocksView = async () => {
     const element = createElement("div");
-    new ClocksView({ domComponent: element });
     this.domComponent.appendChild(element);
+    new ClocksView({ domComponent: element });
   };
 
   renderProjectsView = ({ navigate }) => {
     const element = createElement("div");
-    new ProjectsView({ domComponent: element, navigate });
     this.domComponent.appendChild(element);
+    new ProjectsView({ domComponent: element, navigate });
   };
 
   renderModulesView = () => {
-    const element = createElement("div");
-    element.className = "standard-view";
-    const title = createElement(
-      "h1",
-      {},
-      "<--- Select a module from the sidebar"
+    this.domComponent.appendChild(
+      createElement(
+        "div",
+        { class: "standard-view" },
+        createElement("h1", {}, "<--- Select a module from the sidebar")
+      )
     );
-    element.appendChild(title);
-    this.domComponent.appendChild(element);
   };
 
   renderSidebarAndHamburger = (props) => {
     // ELEMENTS
-    const element = createElement("div", { class: "sidebar" });
-    const hamburgerElem = createElement("img", {
-      id: "hamburger",
-      style: "z-index: 2; position: absolute; cursor: pointer;",
-      height: "50px",
-      width: "50px",
-      src: "./assets/hamburger.svg",
-    });
+    const sidebarElem = createElement("div", { class: "sidebar" });
+    // hamburger
+    const hamburgerElem = createElement(
+      "img",
+      {
+        id: "hamburger",
+        style: "z-index: 2; position: absolute; cursor: pointer;",
+        height: "50px",
+        width: "50px",
+        src: "./assets/hamburger.svg",
+      },
+      null,
+      {
+        type: "click",
+        event: () => {
+          if (sidebar.isVisible) {
+            sidebar.isVisible = false;
+            sidebar.container.style.transform = "translate(-200px, 0px)";
+            sidebar.domComponent.style.zIndex = "1";
+          } else {
+            sidebar.isVisible = true;
+            sidebar.container.style.transform = "translate(0px, 0px)";
+            sidebar.domComponent.style.zIndex = "3";
+          }
+        },
+      }
+    );
+
+    this.domComponent.append(sidebarElem, hamburgerElem);
+
     // SIDEBAR
     const sidebar = new Sidebar({
-      domComponent: element,
+      domComponent: sidebarElem,
       navigate: props.navigate,
     });
-    this.domComponent.appendChild(element);
-    // HAMBURGER
-    hamburgerElem.addEventListener("mousedown", () => {
-      if (sidebar.isVisible) {
-        sidebar.isVisible = false;
-        sidebar.container.style.transform = "translate(-200px, 0px)";
-        sidebar.domComponent.style.zIndex = "1";
-      } else {
-        sidebar.isVisible = true;
-        sidebar.container.style.transform = "translate(0px, 0px)";
-        sidebar.domComponent.style.zIndex = "3";
-      }
-    });
-    this.domComponent.appendChild(hamburgerElem);
   };
 
   navigate = ({ title, sidebar }) => {

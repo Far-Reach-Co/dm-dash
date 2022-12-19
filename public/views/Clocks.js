@@ -64,7 +64,6 @@ export default class ClocksView {
   };
 
   render = async () => {
-    // ********************** STATIC
     this.domComponent.innerHTML = "";
     // new clock button
     const newClockButton = createElement(
@@ -73,19 +72,16 @@ export default class ClocksView {
       "+ Clock"
     );
     newClockButton.addEventListener("click", this.newClock);
-    this.domComponent.appendChild(newClockButton);
 
     const clockSaveMessageDiv = createElement(
       "small",
       { style: "align-self: center;" },
       "* Clocks are auto saved every 60 seconds while running, or when stop is pressed"
     );
-    this.domComponent.appendChild(clockSaveMessageDiv);
-    // ********************* END STATIC
 
     // ******** CLOCKS
-    const fragment = document.createDocumentFragment();
     let clockData = [];
+    const clockElements = [];
     // try to get clocks from state before rendering new ones
     const clocksByProject =
       state.clockComponents[`project-${state.currentProject}`];
@@ -103,7 +99,7 @@ export default class ClocksView {
         clock.parentRender = this.render;
         clock.render();
         // append
-        fragment.appendChild(clockComponentDomElement);
+        clockElements.push(clockComponentDomElement);
       });
     } else {
       clockData = await this.getClocks();
@@ -115,7 +111,7 @@ export default class ClocksView {
           id: `clock-component-${clock.id}`,
         });
         // append
-        fragment.appendChild(clockComponentDomElement);
+        clockElements.push(clockComponentDomElement);
         // instantiate
         const newClock = new Clock({
           domComponent: clockComponentDomElement,
@@ -128,6 +124,10 @@ export default class ClocksView {
       });
     }
     // append
-    this.domComponent.appendChild(fragment);
+    this.domComponent.append(
+      newClockButton,
+      clockSaveMessageDiv,
+      ...clockElements
+    );
   };
 }

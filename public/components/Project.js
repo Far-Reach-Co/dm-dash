@@ -3,7 +3,7 @@ import state from "../lib/state.js";
 
 export default class Project {
   constructor(props) {
-    this.navigate = props.navigate
+    this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "project-btn-container";
     this.id = props.id;
@@ -52,6 +52,12 @@ export default class Project {
   };
 
   renderEditProject = () => {
+    const editTitle = createElement(
+      "div",
+      { style: "margin-right: 10px;" },
+      "Edit"
+    );
+
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
@@ -74,12 +80,9 @@ export default class Project {
         this.domComponent.remove();
       }
     });
-    this.domComponent.appendChild(
-      createElement("div", { style: "margin-right: 10px;" }, "Edit")
-    );
-    this.domComponent.appendChild(titleInput);
-    this.domComponent.appendChild(editButton);
-    this.domComponent.appendChild(removeButton);
+
+    // append
+    this.domComponent.append(editTitle, titleInput, editButton, removeButton);
   };
 
   render = () => {
@@ -111,8 +114,8 @@ export default class Project {
     );
     projectButton.addEventListener("click", () => {
       // push to project
-      state.currentProject = this.id
-      this.navigate({title: 'modules', sidebar: true})
+      state.currentProject = this.id;
+      this.navigate({ title: "modules", sidebar: true });
     });
 
     const editIcon = createElement("img", {
@@ -121,7 +124,7 @@ export default class Project {
     });
     editIcon.addEventListener("click", this.toggleEdit);
 
-    this.domComponent.appendChild(projectButton);
-    this.domComponent.appendChild(editIcon);
+    // append
+    this.domComponent.append(projectButton, editIcon);
   };
 }

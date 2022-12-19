@@ -393,3 +393,10 @@ footer {
   align-items: center;
   justify-content: center;
 }
+
+.clickable-day {
+  cursor: pointer;
+}
+.clickable-day:hover {
+  background-color: var(--blue);
+}

@@ -46,42 +46,45 @@ export default class ProjectsView {
     }
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-    // add project button
-    const newProjectButton = createElement(
-      "button",
-      { style: "align-self: flex-end;" },
-      "+ Project"
-    );
-    newProjectButton.addEventListener("click", this.newProject);
-    this.domComponent.appendChild(newProjectButton);
-
-    const title = createElement(
-      "h1",
-      { class: "projects-view-title" },
-      "Choose your project"
-    );
-    this.domComponent.appendChild(title);
-    this.domComponent.appendChild(createElement("hr"));
-
+  renderProjectsElems = async () => {
     const projectData = await this.getProjects();
-    projectData.forEach((project) => {
+    return projectData.map((project) => {
       // create element
-      const projectComponentElement = createElement("div", {
+      const elem = createElement("div", {
         id: `project-component-${project.id}`,
       });
-      // append
-      this.domComponent.appendChild(projectComponentElement);
       // instantiate javascript
       new Project({
-        domComponent: projectComponentElement,
+        domComponent: elem,
         id: project.id,
         title: project.title,
         dateCreated: project.date_created,
         parentRender: this.render,
         navigate: this.navigate,
       });
+      return elem;
     });
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    const projectElems = await this.renderProjectsElems()
+    // append
+    this.domComponent.append(
+      createElement(
+        "button",
+        { style: "align-self: flex-end;" },
+        "+ Project",
+        {type: "click", event: this.newProject}
+      ),
+      createElement(
+        "h1",
+        { class: "projects-view-title" },
+        "Choose your project"
+      ),
+      createElement("hr"),
+      ...projectElems
+    );
   };
 }
