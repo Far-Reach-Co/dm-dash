@@ -608,7 +608,7 @@ export default class Calendar {
     // input real days
     for (
       var dayNumber = 1;
-      dayNumber < this.monthBeingViewed.number_of_days;
+      dayNumber <= this.monthBeingViewed.number_of_days;
       dayNumber++
     ) {
       const elem = createElement(
@@ -656,11 +656,14 @@ export default class Calendar {
     const fragment = document.createDocumentFragment();
     // calc
 
-    const titleElem = createElement(
-      "div",
-      { class: "component-title" },
-      this.title
-    );
+    const titleDiv = createElement("div", { class: "component-title" }, [
+      this.title,
+      createElement("img", {
+        src: "../assets/calendar.svg",
+        width: 40,
+        height: 40,
+      }),
+    ]);
 
     const infoContainer = createElement(
       "div",
@@ -681,7 +684,7 @@ export default class Calendar {
       this.toggleEdit();
     });
 
-    fragment.append(titleElem, infoContainer, openButton, editButton);
+    fragment.append(titleDiv, infoContainer, openButton, editButton);
 
     this.domComponent.appendChild(fragment);
   };
