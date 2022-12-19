@@ -274,7 +274,7 @@ export default class Calendar {
   renderManageDays = () => {
     // setup main form div for each day
     const mainDiv = createElement("div", {});
-    this.daysOfTheWeek.forEach((day, index) => {
+    this.daysOfTheWeek.sort((a, b) => a.index - b.index).forEach((day, index) => {
       const dayContainer = createElement("div", { class: "day-container" });
       // index
       const indexLabel = createElement(
@@ -312,7 +312,6 @@ export default class Calendar {
         day.index -= 1;
         if (this.daysOfTheWeek[index - 1])
           this.daysOfTheWeek[index - 1].index += 1;
-        await this.updateDays();
         this.render();
       });
       const moveDownBtn = createElement("button", { class: "move-btn" }, "▼");
@@ -321,7 +320,6 @@ export default class Calendar {
         day.index += 1;
         if (this.daysOfTheWeek[index + 1])
           this.daysOfTheWeek[index + 1].index -= 1;
-        await this.updateDays();
         this.render();
       });
       // manage render which buttons are available based on index position
@@ -364,7 +362,7 @@ export default class Calendar {
   renderManageMonths = () => {
     // setup main form div for each month
     const mainDiv = createElement("div", {});
-    this.months.forEach((month, index) => {
+    this.months.sort((a, b) => a.index - b.index).forEach((month, index) => {
       const monthContainer = createElement("div", { class: "month-container" });
       // index
       const indexLabel = createElement(
@@ -416,7 +414,6 @@ export default class Calendar {
         // dec
         month.index -= 1;
         if (this.months[index - 1]) this.months[index - 1].index += 1;
-        await this.updateMonths();
         this.render();
       });
       const moveDownBtn = createElement("button", { class: "move-btn" }, "▼");
@@ -424,7 +421,6 @@ export default class Calendar {
         // inc
         month.index += 1;
         if (this.months[index + 1]) this.months[index + 1].index -= 1;
-        await this.updateMonths();
         this.render();
       });
       // manage render which buttons are available based on index position
