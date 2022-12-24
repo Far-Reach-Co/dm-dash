@@ -48,7 +48,14 @@ async function getSubLocations(req, res, next) {
 
 async function removeLocation(req, res, next) {
   try {
-    const data = await removeLocationQuery(req.params.id);
+    const subLocations = await getSubLocationsQuery(req.params.id);
+    subLocations.rows.forEach(async (location) => {
+      await editLocationQuery(location.id, {
+        parent_location_id: null,
+        is_sub: false,
+      });
+    });
+    const location = await removeLocationQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -70,5 +77,5 @@ module.exports = {
   getSubLocations,
   addLocation,
   removeLocation,
-  editLocation
+  editLocation,
 };
