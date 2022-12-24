@@ -13,7 +13,7 @@
   --link-blue: rgb(165, 210, 238);
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
-  --yellow: rgb(253, 255, 152);
+  --green: rgb(173, 215, 89);
   --orange: rgb(147, 87, 20);
   --orange2: rgb(212, 165, 105);
   --red1: rgb(225, 75, 75);
@@ -48,6 +48,12 @@ hr {
   border: 0;
   height: 1px;
   width: 100%;
+  background-color: var(--light-gray);
+  margin-top: 5px;
+}
+
+.special-hr {
+  background-color: inherit;
   background-image: linear-gradient(to right, rgba(255, 255, 255, 0), var(--main-gray), rgba(255, 255, 255, 0));
   margin-bottom: 30px;
 }
@@ -126,6 +132,14 @@ button:hover {
   background: linear-gradient(var(--red1) 10%, var(--red2) 90%);
 }
 
+.back-button {
+  margin-top: -20px;
+  margin-left: -20px;
+  padding: 5px;
+  /* border-bottom: 0.1px solid var(--light-gray); */
+  width: fit-content;
+}
+
 form {
   background-color: var(--blue3);
   padding: 18px;
@@ -138,7 +152,6 @@ form {
 }
 
 input {
-  margin-right: 10px;
   border: none;
   outline: none;
   background-color: rgb(187, 184, 184);
@@ -170,6 +183,17 @@ select {
   font-family: inherit;
   text-shadow: inherit;
   cursor: pointer;
+}
+
+textarea {
+  border: none;
+  outline: none;
+  background-color: rgb(187, 184, 184);
+  display: inline-block;
+  font-size: inherit;
+  font-family: inherit;
+  color: black;
+  border: 0.5px solid var(--main-gray);
 }
 
 footer {
@@ -291,11 +315,14 @@ footer {
 .component-title {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   font-weight: bold;
   font-size: 25px;
   color: var(--orange2);
+  border-bottom: 1px solid var(--main-gray);
+  padding-bottom: 3px;
+  margin-bottom: 5px;
 }
 
 .current-date {
@@ -398,6 +425,30 @@ footer {
 .clickable-day {
   cursor: pointer;
 }
+
 .clickable-day:hover {
   background-color: var(--blue);
+}
+
+.description {
+  font-size: small;
+  word-wrap: break-word;
+  padding-left: 5px;
+  padding-right: 5px;
+  /* width: 80%; */
+}
+
+.single-location-title {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  font-size: 30px;
+  color: var(--green);
+}
+
+.note-date {
+  font-size: 12px;
+  color: var(--light-gray);
 }

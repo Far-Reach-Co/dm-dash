@@ -83,7 +83,7 @@ export default class ProjectsView {
         { class: "projects-view-title" },
         "Choose your project"
       ),
-      createElement("hr"),
+      createElement("hr", {class: 'special-hr'}),
       ...projectElems
     );
   };

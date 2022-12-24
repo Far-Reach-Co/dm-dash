@@ -668,9 +668,9 @@ export default class Calendar {
     const infoContainer = createElement(
       "div",
       { class: "current-date" },
-      `${this.calculateCurrentDayOfTheWeek()} ${
+      `${this.calculateCurrentDayOfTheWeek()}, ${this.currentDay} of ${
         this.calculateCurrentMonth().title
-      }-${this.currentDay}-${this.year}`
+      } in the year ${this.year}`
     );
 
     const openButton = createElement("button", {}, "Open");
@@ -684,7 +684,7 @@ export default class Calendar {
       this.toggleEdit();
     });
 
-    fragment.append(titleDiv, infoContainer, openButton, editButton);
+    fragment.append(titleDiv, infoContainer, createElement("br"), openButton, editButton);
 
     this.domComponent.appendChild(fragment);
   };

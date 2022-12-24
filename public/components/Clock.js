@@ -160,7 +160,7 @@ export default class Clock {
     // append
     this.domComponent.append(
       editTitle,
-      timeInput,
+      titleInput,
       timeInput,
       doneButton,
       resetButton,
@@ -223,6 +223,7 @@ export default class Clock {
     this.domComponent.append(
       titleDiv,
       currentTimeDiv,
+      createElement("br"),
       startButton,
       stopButton,
       editButton,

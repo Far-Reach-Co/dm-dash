@@ -4,6 +4,9 @@ import ProjectsView from "./views/Projects.js";
 import ClocksView from "./views/Clocks.js";
 import CalendarsView from "./views/Calendars.js";
 import Sidebar from "./components/Sidebar.js";
+import LocationsView from "./views/Locations.js"
+import SingleLocationsView from "./views/SingleLocation.js";
+import NotesView from "./views/Notes.js";
 
 class App {
   constructor(props) {
@@ -60,16 +63,34 @@ class App {
     } else window.location.pathname = "/login.html";
   };
 
-  renderCalendersView = async () => {
+  renderLocationsView = ({ navigate }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new LocationsView({ domComponent: element, navigate });
+  }
+
+  renderSingleLocationView = ({ navigate, params }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new SingleLocationsView({ domComponent: element, navigate, params });
+  }
+
+  renderCalendersView = () => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new CalendarsView({ domComponent: element });
   };
 
-  renderClocksView = async () => {
+  renderClocksView = () => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new ClocksView({ domComponent: element });
+  };
+
+  renderNotesView = () => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new NotesView({ domComponent: element });
   };
 
   renderProjectsView = ({ navigate }) => {
@@ -127,7 +148,7 @@ class App {
     });
   };
 
-  navigate = ({ title, sidebar }) => {
+  navigate = ({ title, sidebar, params }) => {
     // clear
     this.domComponent.innerHTML = "";
     // handle sidebar
@@ -136,8 +157,14 @@ class App {
     switch (title) {
       case "clocks":
         return this.renderClocksView();
+      case "notes":
+        return this.renderNotesView();
       case "calendars":
         return this.renderCalendersView();
+      case "locations":
+        return this.renderLocationsView({navigate: this.navigate});
+      case "single-location":
+        return this.renderSingleLocationView({navigate: this.navigate, params})
       case "modules":
         return this.renderModulesView();
       default:

@@ -27,12 +27,22 @@ export default class SideBar {
 
   renderRoutesElems = () => {
     const routes = [
+      {
+        id: "sidebar-notes",
+        title: "notes",
+        displayTitle: "Notes",
+      },
+      {
+        id: "sidebar-locations",
+        title: "locations",
+        displayTitle: "Locations",
+      },
       { id: "sidebar-clocks", title: "clocks", displayTitle: "Clocks" },
       {
         id: "sidebar-calendars",
         title: "calendars",
         displayTitle: "Calendars",
-      },
+      }
     ];
     return routes.map((route) => {
       const elem = createElement(

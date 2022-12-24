@@ -323,7 +323,6 @@ export default class CalendarView {
       return this.renderNewDaysInWeek();
     }
 
-    // new clock button
     const newCalendarButton = createElement(
       "button",
       { style: "align-self: flex-end;" },

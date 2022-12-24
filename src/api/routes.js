@@ -40,8 +40,38 @@ const {
   removeDay,
   editDay,
 } = require("./controllers/days.js");
+const {
+  getLocation,
+  getLocations,
+  getSubLocations,
+  addLocation,
+  removeLocation,
+  editLocation,
+} = require("./controllers/locations.js");
+const {
+  getNotes,
+  addNote,
+  getNotesByLocation,
+  removeNote,
+  editNote,
+} = require("./controllers/notes.js");
 
 var router = express.Router();
+
+// notes
+router.get("/get_notes/:project_id", getNotes);
+router.get("/get_notes_by_location/:location_id", getNotesByLocation);
+router.post("/add_note", addNote);
+router.delete("/remove_note/:id", removeNote);
+router.post("/edit_note/:id", editNote);
+
+// locations
+router.get("/get_location/:id", getLocation);
+router.get("/get_locations/:project_id", getLocations);
+router.get("/get_sublocations/:parent_location_id", getSubLocations);
+router.post("/add_location", addLocation);
+router.delete("/remove_location/:id", removeLocation);
+router.post("/edit_location/:id", editLocation);
 
 // clocks
 router.get("/get_clocks/:project_id", getClocks);
