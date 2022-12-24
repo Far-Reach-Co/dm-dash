@@ -22,7 +22,7 @@ export default async function locationSelect(selectedLocation) {
   function renderLocationSelectOptions() {
     return locations.map((location) => {
       const elem = createElement("option", { value: location.id }, location.title);
-      if(selectedLocation) elem.selected = selectedLocation;
+      if(selectedLocation === location.id) elem.selected = true;
       return elem;
     });
   }

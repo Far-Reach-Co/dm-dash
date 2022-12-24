@@ -103,7 +103,8 @@ export default class LocationsView {
       new Location({
         domComponent: elem,
         location,
-        navigate: this.navigate
+        navigate: this.navigate,
+        parentRender: this.render
       })
 
       return elem;

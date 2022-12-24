@@ -44,7 +44,6 @@ export default class Note {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.location_id === "0") formProps.location_id = null;
-    console.log(formProps)
     try {
       const res = await fetch(
         `${window.location.origin}/api/edit_note/${this.id}`,

@@ -452,3 +452,8 @@ footer {
   font-size: 12px;
   color: var(--light-gray);
 }
+
+.location-subheading {
+  display: flex;
+  justify-content: space-between;
+}

@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import Location from '../components/Location.js'
+import Location from "../components/Location.js";
+import Note from "../components/Note.js";
 
 export default class SingleLocationsView {
   constructor(props) {
@@ -10,6 +11,19 @@ export default class SingleLocationsView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
+    this.creatingNote = false;
+    this.creatingSubLocation = false;
+
+    this.render();
+  }
+
+  toggleCreatingNote = () => {
+    this.creatingNote = !this.creatingNote;
+    this.render();
+  }
+
+  toggleCreatingSubLocation = () => {
+    this.creatingSubLocation = !this.creatingSubLocation;
     this.render();
   }
 
@@ -39,7 +53,7 @@ export default class SingleLocationsView {
       } else throw new Error();
     } catch (err) {
       console.log(err);
-      return null;
+      return [];
     }
   };
 
@@ -48,38 +62,215 @@ export default class SingleLocationsView {
       id: `location-component-${parentLocation.id}`,
       class: "component",
       style: "max-width: 400px;",
-    })
+    });
 
     new Location({
       domComponent: elem,
       location: parentLocation,
-      navigate: this.navigate
-    })
-    return elem
+      navigate: this.navigate,
+      parentRender: this.render
+    });
+    return elem;
   };
 
-  renderChildLocations = (childLocations) => {
+  renderChildLocations = async () => {
+    const childLocations = await this.getChildLocations();
+
     return childLocations.map((location) => {
       const elem = createElement("div", {
         id: `location-component-${location.id}`,
         class: "component",
         style: "max-width: 400px;",
-      })
-  
+      });
+
       new Location({
         domComponent: elem,
         location,
-        navigate: this.navigate
+        navigate: this.navigate,
+        parentRender: this.render
+      });
+      return elem;
+    });
+  };
+
+  newSubLocation = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    const projectId = state.currentProject;
+    formProps.project_id = projectId;
+    formProps.is_sub = true;
+    formProps.parent_location_id = this.location.id;
+
+    try {
+      const res = await fetch(`${window.location.origin}/api/add_location`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formProps),
+      });
+      await res.json();
+      if (res.status === 201) {
+        this.render();
+      } else throw new Error();
+    } catch (err) {
+      window.alert("Failed to create new location...");
+      console.log(err);
+    }
+  };
+
+  renderCreateSubLocation = async () => {
+    const titleOfForm = createElement(
+      "div",
+      { class: "component-title" },
+      `Create new sub-location for ${this.location.title}`
+    );
+    const form = createElement("form", {}, [
+      createElement("label", { for: "title" }, "Title"),
+      createElement("input", {
+        id: "title",
+        name: "title",
+        placeholder: "Location Title",
+        required: true,
+      }),
+      createElement("label", { for: "description" }, "Description"),
+      createElement("textarea", {
+        id: "description",
+        name: "description",
+      }),
+      createElement("button", { type: "submit" }, "Create"),
+    ]);
+    form.addEventListener("submit", async (e) => {
+      await this.newSubLocation(e);
+      this.toggleCreatingSubLocation();
+    });
+
+    const cancelButton = createElement("button", {}, "Cancel");
+    cancelButton.addEventListener("click", () => {
+      this.toggleCreatingSubLocation();
+    });
+
+    this.domComponent.append(titleOfForm, form, cancelButton);
+  };
+
+  newNote = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    formProps.location_id = this.location.id;
+    const projectId = state.currentProject;
+    formProps.project_id = projectId;
+
+    try {
+      const res = await fetch(`${window.location.origin}/api/add_note`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formProps),
+      });
+      await res.json();
+      if (res.status === 201) {
+      } else throw new Error();
+    } catch (err) {
+      window.alert("Failed to create new note...");
+      console.log(err);
+    }
+  };
+
+  renderCreateNewNote = async () => {
+    this.domComponent.append(
+      createElement("div", { class: "component-title" }, `Create new note for ${this.location.title}`),
+      createElement(
+        "form",
+        {},
+        [
+          createElement("label", { for: "title" }, "Title"),
+          createElement("input", {
+            id: "title",
+            name: "title",
+            placeholder: "Note Title",
+            required: true,
+          }),
+          createElement("label", { for: "description" }, "Description"),
+          createElement("textarea", {
+            id: "description",
+            name: "description",
+            required: true,
+            cols: "30",
+            rows: "7"
+          }),
+          createElement("br"),
+          createElement("button", { type: "submit" }, "Create"),
+        ],
+        {
+          type: "submit",
+          event: async (e) => {
+            await this.newNote(e);
+            this.toggleCreatingNote();
+          },
+        }
+      ),
+      createElement("br"),
+      createElement("button", {}, "Cancel", {
+        type: "click",
+        event: this.toggleCreatingNote,
       })
-      return elem
+    );
+  };
+
+  getNotesByLocation = async () => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_notes_by_location/${this.location.id}`
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  };
+
+  renderLocationNotes = async () => {
+    const notesByLocation = await this.getNotesByLocation();
+    return notesByLocation.map((note) => {
+      const elem = createElement("div", {
+        id: `note-component-${note.id}`,
+        style: "max-width: 500px;",
+      });
+
+      new Note({
+        domComponent: elem,
+        parentRender: this.render,
+        id: note.id,
+        projectId: note.project_id,
+        title: note.title,
+        description: note.description,
+        dateCreated: note.date_created,
+        locationId: note.location_id,
+      });
+
+      return elem;
     });
   };
 
   render = async () => {
     this.domComponent.innerHTML = "";
+
+    if(this.creatingNote) {
+      return this.renderCreateNewNote();
+    }
+    
+    if(this.creatingSubLocation) {
+      return this.renderCreateSubLocation();
+    }
+
     // append
     this.domComponent.append(
-      createElement("a", {class: "back-button"}, "← Locations", {type: "click", event: () => this.navigate({title: "locations", sidebar: true})}),
+      createElement("a", { class: "back-button" }, "← Locations", {
+        type: "click",
+        event: () => this.navigate({ title: "locations", sidebar: true }),
+      }),
       createElement("div", { class: "single-location-title" }, [
         this.location.title,
         createElement("img", {
@@ -89,23 +280,40 @@ export default class SingleLocationsView {
         }),
       ]),
       createElement("div", { class: "description" }, this.location.description),
+      createElement("br"),
+      createElement("div", { class: "location-subheading" }, [
+        "Notes:",
+        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
+          type: "click",
+          event: this.toggleCreatingNote,
+        }),
+      ]),
+      ...(await this.renderLocationNotes()),
       createElement("br")
     );
-
+    // render parent location
     if (this.location.is_sub) {
       const parentLocation = await this.getParentLocation();
       if (parentLocation)
         this.domComponent.append(
-          createElement("div", {}, "Parent-Location:"),
+          createElement(
+            "div",
+            { class: "location-subheading" },
+            "Parent-Location:"
+          ),
           this.renderParentLocation(parentLocation)
         );
     }
-    const childLocations = await this.getChildLocations();
-    if (childLocations && childLocations.length) {
-      this.domComponent.append(
-        createElement("div", {}, "Sub-Locations:"),
-        ...this.renderChildLocations(childLocations)
-      );
-    }
+    // render sub locations
+    this.domComponent.append(
+      createElement("div", { class: "location-subheading" }, [
+        "Sub-Locations:",
+        createElement("button", { style: "align-self: flex-end;" }, "+ Sub-Location", {
+          type: "click",
+          event: this.toggleCreatingSubLocation,
+        }),
+      ]),
+      ...(await this.renderChildLocations())
+    );
   };
 }
