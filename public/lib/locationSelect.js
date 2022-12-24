@@ -1,8 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "./state.js";
 
-export default async function locationSelect(selectedLocation) {
-
+export default async function locationSelect(selectedLocation, locationToSkip) {
   async function getLocations() {
     try {
       const res = await fetch(
@@ -15,16 +14,23 @@ export default async function locationSelect(selectedLocation) {
     } catch (err) {
       console.log(err);
     }
-  };
+  }
 
   const locations = await getLocations();
 
   function renderLocationSelectOptions() {
-    return locations.map((location) => {
-      const elem = createElement("option", { value: location.id }, location.title);
-      if(selectedLocation === location.id) elem.selected = true;
-      return elem;
+    const locationsList = [];
+    locations.forEach((location) => {
+      if (locationToSkip && location.id == locationToSkip.id) return;
+      const elem = createElement(
+        "option",
+        { value: location.id },
+        location.title
+      );
+      if (selectedLocation === location.id) elem.selected = true;
+      locationsList.push(elem);
     });
+    return locationsList;
   }
 
   return createElement(

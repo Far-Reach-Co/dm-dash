@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Location from "../components/Location.js";
 import Note from "../components/Note.js";
+import locationSelect from "../lib/locationSelect.js";
 
 export default class SingleLocationsView {
   constructor(props) {
@@ -13,6 +14,7 @@ export default class SingleLocationsView {
 
     this.creatingNote = false;
     this.creatingSubLocation = false;
+    this.addParentLocation = false;
 
     this.render();
   }
@@ -20,14 +22,20 @@ export default class SingleLocationsView {
   toggleCreatingNote = () => {
     this.creatingNote = !this.creatingNote;
     this.render();
-  }
+  };
 
   toggleCreatingSubLocation = () => {
     this.creatingSubLocation = !this.creatingSubLocation;
     this.render();
-  }
+  };
+
+  toggleAddParentLocation = () => {
+    this.addParentLocation = !this.addParentLocation;
+    this.render();
+  };
 
   getParentLocation = async () => {
+    if (!this.location.parent_location_id) return null;
     try {
       const res = await fetch(
         `${window.location.origin}/api/get_location/${this.location.parent_location_id}`
@@ -68,7 +76,7 @@ export default class SingleLocationsView {
       domComponent: elem,
       location: parentLocation,
       navigate: this.navigate,
-      parentRender: this.render
+      parentRender: this.render,
     });
     return elem;
   };
@@ -87,10 +95,63 @@ export default class SingleLocationsView {
         domComponent: elem,
         location,
         navigate: this.navigate,
-        parentRender: this.render
+        parentRender: this.render,
       });
       return elem;
     });
+  };
+
+  saveLocation = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    formProps.parent_location_id = formProps.location_id;
+    delete formProps.location_id;
+    formProps.is_sub = true;
+
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/edit_location/${this.location.id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formProps),
+        }
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        this.location.parent_location_id = formProps.parent_location_id;
+        this.location.is_sub = true;
+      } else throw new Error();
+    } catch (err) {
+      window.alert("Failed to save location...");
+      console.log(err);
+    }
+  };
+
+  renderAddParentLocation = async () => {
+    this.domComponent.append(
+      createElement("div", {class: 'component-title'}, `Select parent-location for ${this.location.title}`),
+      createElement(
+        "form",
+        {},
+        [
+          await locationSelect(null, this.location),
+          createElement("br"),
+          createElement("button", { type: "submit" }, "Done"),
+        ],
+        {
+          type: "submit",
+          event: async (e) => {
+            await this.saveLocation(e);
+            this.toggleAddParentLocation();
+          },
+        }
+      ),
+      createElement("button", {}, "Cancel", {
+        type: "click", event: this.toggleAddParentLocation
+      })
+    );
   };
 
   newSubLocation = async (e) => {
@@ -177,7 +238,11 @@ export default class SingleLocationsView {
 
   renderCreateNewNote = async () => {
     this.domComponent.append(
-      createElement("div", { class: "component-title" }, `Create new note for ${this.location.title}`),
+      createElement(
+        "div",
+        { class: "component-title" },
+        `Create new note for ${this.location.title}`
+      ),
       createElement(
         "form",
         {},
@@ -195,7 +260,7 @@ export default class SingleLocationsView {
             name: "description",
             required: true,
             cols: "30",
-            rows: "7"
+            rows: "7",
           }),
           createElement("br"),
           createElement("button", { type: "submit" }, "Create"),
@@ -257,12 +322,16 @@ export default class SingleLocationsView {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    if(this.creatingNote) {
+    if (this.creatingNote) {
       return this.renderCreateNewNote();
     }
-    
-    if(this.creatingSubLocation) {
+
+    if (this.creatingSubLocation) {
       return this.renderCreateSubLocation();
+    }
+
+    if (this.addParentLocation) {
+      return this.renderAddParentLocation();
     }
 
     // append
@@ -292,26 +361,43 @@ export default class SingleLocationsView {
       createElement("br")
     );
     // render parent location
-    if (this.location.is_sub) {
-      const parentLocation = await this.getParentLocation();
-      if (parentLocation)
-        this.domComponent.append(
-          createElement(
-            "div",
-            { class: "location-subheading" },
-            "Parent-Location:"
-          ),
-          this.renderParentLocation(parentLocation)
-        );
+    const parentLocation = await this.getParentLocation();
+    if (parentLocation) {
+      this.domComponent.append(
+        createElement(
+          "div",
+          { class: "location-subheading" },
+          "Parent-Location:"
+        ),
+        this.renderParentLocation(parentLocation)
+      );
+    } else {
+      this.domComponent.append(
+        createElement(
+          "button",
+          { style: "align-self: flex-end;" },
+          "+ Parent-Location",
+          {
+            type: "click",
+            event: this.toggleAddParentLocation,
+          }
+        ),
+        createElement("br")
+      );
     }
     // render sub locations
     this.domComponent.append(
       createElement("div", { class: "location-subheading" }, [
         "Sub-Locations:",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Sub-Location", {
-          type: "click",
-          event: this.toggleCreatingSubLocation,
-        }),
+        createElement(
+          "button",
+          { style: "align-self: flex-end;" },
+          "+ Sub-Location",
+          {
+            type: "click",
+            event: this.toggleCreatingSubLocation,
+          }
+        ),
       ]),
       ...(await this.renderChildLocations())
     );

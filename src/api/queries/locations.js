@@ -24,7 +24,7 @@ async function getLocationQuery(id) {
 
 async function getLocationsQuery(projectId) {
   const query = {
-    text: /*sql*/ `select * from public."Location" where project_id = $1 and is_sub = false order by title asc`,
+    text: /*sql*/ `select * from public."Location" where project_id = $1 order by title asc`,
     values: [projectId]
   }
   return await db.query(query)
