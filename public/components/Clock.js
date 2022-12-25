@@ -218,6 +218,12 @@ export default class Clock {
       this.runSpeed = parseFloat(e.target.value);
       this.start();
     });
+    for(var option of selectSpeed.children) {
+      if(option.value == this.runSpeed) {
+        option.selected = true;
+        break;
+      }
+    }
 
     // append
     this.domComponent.append(
