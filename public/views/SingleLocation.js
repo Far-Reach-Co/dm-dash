@@ -130,7 +130,12 @@ export default class SingleLocationsView {
 
   renderAddParentLocation = async () => {
     this.domComponent.append(
-      createElement("div", {class: 'component-title'}, `Select parent-location for ${this.location.title}`),
+      createElement(
+        "div",
+        { class: "component-title" },
+        `Select parent-location for ${this.location.title}`
+      ),
+      createElement("br"),
       createElement(
         "form",
         {},
@@ -147,8 +152,10 @@ export default class SingleLocationsView {
           },
         }
       ),
+      createElement("br"),
       createElement("button", {}, "Cancel", {
-        type: "click", event: this.toggleAddParentLocation
+        type: "click",
+        event: this.toggleAddParentLocation,
       })
     );
   };
@@ -186,6 +193,7 @@ export default class SingleLocationsView {
     );
     const form = createElement("form", {}, [
       createElement("label", { for: "title" }, "Title"),
+      createElement("br"),
       createElement("input", {
         id: "title",
         name: "title",
@@ -197,6 +205,7 @@ export default class SingleLocationsView {
         id: "description",
         name: "description",
       }),
+      createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
@@ -209,7 +218,12 @@ export default class SingleLocationsView {
       this.toggleCreatingSubLocation();
     });
 
-    this.domComponent.append(titleOfForm, form, cancelButton);
+    this.domComponent.append(
+      titleOfForm,
+      form,
+      createElement("br"),
+      cancelButton
+    );
   };
 
   newNote = async (e) => {
@@ -247,6 +261,7 @@ export default class SingleLocationsView {
         {},
         [
           createElement("label", { for: "title" }, "Title"),
+          createElement("br"),
           createElement("input", {
             id: "title",
             name: "title",
@@ -300,7 +315,7 @@ export default class SingleLocationsView {
     return notesByLocation.map((note) => {
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
-        class: "sub-view-component"
+        class: "sub-view-component",
       });
 
       new Note({
@@ -357,7 +372,9 @@ export default class SingleLocationsView {
           event: this.toggleCreatingNote,
         }),
       ]),
-      createElement("div", {class: 'sub-view'}, [...(await this.renderLocationNotes())]),
+      createElement("div", { class: "sub-view" }, [
+        ...(await this.renderLocationNotes()),
+      ]),
       createElement("br")
     );
     // render parent location

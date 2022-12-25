@@ -75,6 +75,7 @@ export default class LocationsView {
         id: "description",
         name: "description",
       }),
+      createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
@@ -87,7 +88,13 @@ export default class LocationsView {
       this.toggleCreatingLocation();
     });
 
-    this.domComponent.append(titleOfForm, form, cancelButton);
+    this.domComponent.append(
+      titleOfForm,
+      createElement("br"),
+      form, 
+      createElement("br"),
+      cancelButton
+    );
   };
 
   renderLocationsElems = async () => {

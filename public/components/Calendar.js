@@ -258,7 +258,7 @@ export default class Calendar {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             current_day: dayNumber,
-            current_month_id: this.monthBeingViewed.id
+            current_month_id: this.monthBeingViewed.id,
           }),
         }
       );
@@ -266,80 +266,82 @@ export default class Calendar {
       this.currentDay = dayNumber;
       this.render();
     } catch (err) {
-      console.log(err)
-      window.alert("Failed to update current day...")
+      console.log(err);
+      window.alert("Failed to update current day...");
     }
   };
 
   renderManageDays = () => {
     // setup main form div for each day
     const mainDiv = createElement("div", {});
-    this.daysOfTheWeek.sort((a, b) => a.index - b.index).forEach((day, index) => {
-      const dayContainer = createElement("div", { class: "day-container" });
-      // index
-      const indexLabel = createElement(
-        "div",
-        { style: "display: inline-block; margin-right: 10px;" },
-        `Day ${index + 1}`
-      );
-      // title
-      const titleInput = createElement("input", {
-        name: "title",
-        value: day.title,
-      });
-      titleInput.addEventListener("change", (e) => {
-        day.title = e.target.value.trim();
-      });
+    this.daysOfTheWeek
+      .sort((a, b) => a.index - b.index)
+      .forEach((day, index) => {
+        const dayContainer = createElement("div", { class: "day-container" });
+        // index
+        const indexLabel = createElement(
+          "div",
+          { style: "display: inline-block; margin-right: 10px;" },
+          `Day ${index + 1}`
+        );
+        // title
+        const titleInput = createElement("input", {
+          name: "title",
+          value: day.title,
+        });
+        titleInput.addEventListener("change", (e) => {
+          day.title = e.target.value.trim();
+        });
 
-      // remove
-      const removeDayBtn = createElement(
-        "button",
-        { class: "btn-red" },
-        "Remove Day"
-      );
-      removeDayBtn.addEventListener("click", () => {
-        this.removeDay(day.id);
-        this.daysOfTheWeek.splice(this.daysOfTheWeek.indexOf(day), 1);
-        this.render();
+        // remove
+        const removeDayBtn = createElement(
+          "button",
+          { class: "btn-red" },
+          "Remove Day"
+        );
+        removeDayBtn.addEventListener("click", () => {
+          this.removeDay(day.id);
+          this.daysOfTheWeek.splice(this.daysOfTheWeek.indexOf(day), 1);
+          this.render();
+        });
+        // move index
+        const moveBtnContainer = createElement("div", {
+          style: "display: inline-block;",
+        });
+        const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
+        moveUpBtn.addEventListener("click", async () => {
+          // dec
+          day.index -= 1;
+          if (this.daysOfTheWeek[index - 1])
+            this.daysOfTheWeek[index - 1].index += 1;
+          this.render();
+        });
+        const moveDownBtn = createElement("button", { class: "move-btn" }, "▼");
+        moveDownBtn.addEventListener("click", async () => {
+          // inc
+          day.index += 1;
+          if (this.daysOfTheWeek[index + 1])
+            this.daysOfTheWeek[index + 1].index -= 1;
+          this.render();
+        });
+        // manage render which buttons are available based on index position
+        if (day.index === 1 && this.daysOfTheWeek.length > 1) {
+          moveBtnContainer.append(moveDownBtn);
+        } else if (day.index != this.daysOfTheWeek.length) {
+          moveBtnContainer.append(moveDownBtn);
+          moveBtnContainer.append(moveUpBtn);
+        } else {
+          moveBtnContainer.append(moveUpBtn);
+        }
+        // append
+        dayContainer.append(
+          indexLabel,
+          titleInput,
+          removeDayBtn,
+          moveBtnContainer
+        );
+        mainDiv.append(dayContainer);
       });
-      // move index
-      const moveBtnContainer = createElement("div", {
-        style: "display: inline-block;",
-      });
-      const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
-      moveUpBtn.addEventListener("click", async () => {
-        // dec
-        day.index -= 1;
-        if (this.daysOfTheWeek[index - 1])
-          this.daysOfTheWeek[index - 1].index += 1;
-        this.render();
-      });
-      const moveDownBtn = createElement("button", { class: "move-btn" }, "▼");
-      moveDownBtn.addEventListener("click", async () => {
-        // inc
-        day.index += 1;
-        if (this.daysOfTheWeek[index + 1])
-          this.daysOfTheWeek[index + 1].index -= 1;
-        this.render();
-      });
-      // manage render which buttons are available based on index position
-      if (day.index === 1 && this.daysOfTheWeek.length > 1) {
-        moveBtnContainer.append(moveDownBtn);
-      } else if (day.index != this.daysOfTheWeek.length) {
-        moveBtnContainer.append(moveDownBtn);
-        moveBtnContainer.append(moveUpBtn);
-      } else {
-        moveBtnContainer.append(moveUpBtn);
-      }
-      // append
-      dayContainer.append(
-        indexLabel,
-        titleInput,
-        removeDayBtn,
-        moveBtnContainer
-      );
-      mainDiv.append(dayContainer);
-    });
     // add day
     const addBtn = createElement("button", {}, "+ Day");
     addBtn.addEventListener("click", async () => {
@@ -362,87 +364,91 @@ export default class Calendar {
   renderManageMonths = () => {
     // setup main form div for each month
     const mainDiv = createElement("div", {});
-    this.months.sort((a, b) => a.index - b.index).forEach((month, index) => {
-      const monthContainer = createElement("div", { class: "month-container" });
-      // index
-      const indexLabel = createElement(
-        "div",
-        { style: "display: inline-block; margin-right: 10px;" },
-        `Month ${index + 1}`
-      );
-      // title
-      const titleInput = createElement("input", {
-        name: "title",
-        value: month.title,
+    this.months
+      .sort((a, b) => a.index - b.index)
+      .forEach((month, index) => {
+        const monthContainer = createElement("div", {
+          class: "month-container",
+        });
+        // index
+        const indexLabel = createElement(
+          "div",
+          { style: "display: inline-block; margin-right: 10px;" },
+          `Month ${index + 1}`
+        );
+        // title
+        const titleInput = createElement("input", {
+          name: "title",
+          value: month.title,
+        });
+        titleInput.addEventListener("change", (e) => {
+          month.title = e.target.value.trim();
+        });
+        // number of days
+        const numOfDaysLabel = createElement(
+          "label",
+          { for: "number_of_days", style: "margin-right: 10px;" },
+          "Days"
+        );
+        const numOfDaysInput = createElement("input", {
+          name: "number_of_days",
+          value: month.number_of_days.toString(),
+          type: "number",
+          step: "1",
+          min: "1",
+        });
+        numOfDaysInput.addEventListener("change", (e) => {
+          month.number_of_days = parseInt(e.target.value);
+        });
+        // remove
+        const removeMonthBtn = createElement(
+          "button",
+          { class: "btn-red" },
+          "Remove Month"
+        );
+        removeMonthBtn.addEventListener("click", () => {
+          this.removeMonth(month.id);
+          this.months.splice(this.months.indexOf(month), 1);
+          this.render();
+        });
+        // move index
+        const moveBtnContainer = createElement("div", {
+          style: "display: inline-block;",
+        });
+        const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
+        moveUpBtn.addEventListener("click", async () => {
+          // dec
+          month.index -= 1;
+          if (this.months[index - 1]) this.months[index - 1].index += 1;
+          this.render();
+        });
+        const moveDownBtn = createElement("button", { class: "move-btn" }, "▼");
+        moveDownBtn.addEventListener("click", async () => {
+          // inc
+          month.index += 1;
+          if (this.months[index + 1]) this.months[index + 1].index -= 1;
+          this.render();
+        });
+        // manage render which buttons are available based on index position
+        if (month.index === 1 && this.months.length > 1) {
+          moveBtnContainer.append(moveDownBtn);
+        } else if (month.index != this.months.length) {
+          moveBtnContainer.append(moveDownBtn);
+          moveBtnContainer.append(moveUpBtn);
+        } else {
+          moveBtnContainer.append(moveUpBtn);
+        }
+        // append
+        monthContainer.append(
+          indexLabel,
+          titleInput,
+          numOfDaysLabel,
+          numOfDaysInput,
+          removeMonthBtn,
+          moveBtnContainer
+        );
+        mainDiv.append(monthContainer);
       });
-      titleInput.addEventListener("change", (e) => {
-        month.title = e.target.value.trim();
-      });
-      // number of days
-      const numOfDaysLabel = createElement(
-        "label",
-        { for: "number_of_days", style: "margin-right: 10px;" },
-        "Days"
-      );
-      const numOfDaysInput = createElement("input", {
-        name: "number_of_days",
-        value: month.number_of_days.toString(),
-        type: "number",
-        step: "1",
-        min: "1",
-      });
-      numOfDaysInput.addEventListener("change", (e) => {
-        month.number_of_days = parseInt(e.target.value);
-      });
-      // remove
-      const removeMonthBtn = createElement(
-        "button",
-        { class: "btn-red" },
-        "Remove Month"
-      );
-      removeMonthBtn.addEventListener("click", () => {
-        this.removeMonth(month.id);
-        this.months.splice(this.months.indexOf(month), 1);
-        this.render();
-      });
-      // move index
-      const moveBtnContainer = createElement("div", {
-        style: "display: inline-block;",
-      });
-      const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
-      moveUpBtn.addEventListener("click", async () => {
-        // dec
-        month.index -= 1;
-        if (this.months[index - 1]) this.months[index - 1].index += 1;
-        this.render();
-      });
-      const moveDownBtn = createElement("button", { class: "move-btn" }, "▼");
-      moveDownBtn.addEventListener("click", async () => {
-        // inc
-        month.index += 1;
-        if (this.months[index + 1]) this.months[index + 1].index -= 1;
-        this.render();
-      });
-      // manage render which buttons are available based on index position
-      if (month.index === 1 && this.months.length > 1) {
-        moveBtnContainer.append(moveDownBtn);
-      } else if (month.index != this.months.length) {
-        moveBtnContainer.append(moveDownBtn);
-        moveBtnContainer.append(moveUpBtn);
-      } else {
-        moveBtnContainer.append(moveUpBtn);
-      }
-      // append
-      monthContainer.append(
-        indexLabel,
-        titleInput,
-        numOfDaysLabel,
-        numOfDaysInput,
-        removeMonthBtn,
-        moveBtnContainer
-      );
-      mainDiv.append(monthContainer);
-    });
     // add month
     const addBtn = createElement("button", {}, "+ Month");
     addBtn.addEventListener("click", async () => {
@@ -534,8 +540,11 @@ export default class Calendar {
 
     manageBtnContainer.append(
       manageCalendarBtn,
+      createElement("br"),
       manageMonthsBtn,
-      manageDaysBtn
+      createElement("br"),
+      manageDaysBtn,
+      createElement("br")
     );
 
     const doneButton = createElement("button", {}, "Done");
@@ -557,7 +566,13 @@ export default class Calendar {
       }
     });
 
-    this.domComponent.append(manageBtnContainer, doneButton, removeButton);
+    this.domComponent.append(
+      createElement("div", {class: "component-title"}, `Edit ${this.title}`),
+      createElement("br"),
+      manageBtnContainer, 
+      doneButton, 
+      removeButton
+    );
   };
 
   renderOpen = async () => {
@@ -631,14 +646,19 @@ export default class Calendar {
       this.render();
     });
 
-    this.domComponent.append(title, monthYear, calendarContainer, closeButton);
+    this.domComponent.append(title, monthYear);
     if (previousMonth) {
       this.domComponent.append(arrowButtonLeft);
     }
     if (nextMonth) {
       this.domComponent.append(arrowButtonRight);
     }
-    this.domComponent.append(calendarContainer, closeButton);
+    this.domComponent.append(
+      createElement("br"),
+      calendarContainer,
+      createElement("br"),
+      closeButton
+    );
   };
 
   render = () => {
@@ -653,39 +673,35 @@ export default class Calendar {
       return this.renderOpen();
     }
 
-    const fragment = document.createDocumentFragment();
-    // calc
-
-    const titleDiv = createElement("div", { class: "component-title" }, [
-      this.title,
-      createElement("img", {
-        src: "../assets/calendar.svg",
-        width: 30,
-        height: 30,
+    this.domComponent.append(
+      createElement("div", { class: "component-title" }, [
+        this.title,
+        createElement("img", {
+          src: "../assets/calendar.svg",
+          width: 30,
+          height: 30,
+        }),
+      ]),
+      createElement(
+        "div",
+        { class: "current-date" },
+        `${this.calculateCurrentDayOfTheWeek()}, ${this.currentDay} of ${
+          this.calculateCurrentMonth().title
+        } in the year ${this.year}`
+      ),
+      createElement("button", {}, "Open", {
+        type: "click",
+        event: () => {
+          this.open = true;
+          this.render();
+        },
       }),
-    ]);
-
-    const infoContainer = createElement(
-      "div",
-      { class: "current-date" },
-      `${this.calculateCurrentDayOfTheWeek()}, ${this.currentDay} of ${
-        this.calculateCurrentMonth().title
-      } in the year ${this.year}`
+      createElement("button", {}, "Edit", {
+        type: "click",
+        event: () => {
+          this.toggleEdit();
+        },
+      })
     );
-
-    const openButton = createElement("button", {}, "Open");
-    openButton.addEventListener("click", () => {
-      this.open = true;
-      this.render();
-    });
-
-    const editButton = createElement("button", {}, "Edit");
-    editButton.addEventListener("click", () => {
-      this.toggleEdit();
-    });
-
-    fragment.append(titleDiv, infoContainer, createElement("br"), openButton, editButton);
-
-    this.domComponent.appendChild(fragment);
   };
 }

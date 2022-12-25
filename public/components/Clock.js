@@ -108,7 +108,7 @@ export default class Clock {
     var time = msToTime(milliseconds, false);
     var valueForInput = time.substring(0, time.length - 2);
 
-    const editTitle = createElement("div", {}, "Edit");
+    const editTitle = createElement("div", {class: "component-title"}, `Edit ${this.title}`);
 
     const titleInput = createElement("input", {
       value: this.title,
@@ -160,8 +160,11 @@ export default class Clock {
     // append
     this.domComponent.append(
       editTitle,
+      createElement("br"),
       titleInput,
+      createElement("br"),
       timeInput,
+      createElement("br"),
       doneButton,
       resetButton,
       removeButton
