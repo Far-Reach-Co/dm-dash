@@ -87,10 +87,10 @@ class App {
     new ClocksView({ domComponent: element });
   };
 
-  renderNotesView = () => {
+  renderNotesView = ({ navigate }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new NotesView({ domComponent: element });
+    new NotesView({ domComponent: element, navigate });
   };
 
   renderProjectsView = ({ navigate }) => {
@@ -158,7 +158,7 @@ class App {
       case "clocks":
         return this.renderClocksView();
       case "notes":
-        return this.renderNotesView();
+        return this.renderNotesView({navigate: this.navigate});
       case "calendars":
         return this.renderCalendersView();
       case "locations":

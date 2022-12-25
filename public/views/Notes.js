@@ -7,6 +7,7 @@ export default class NotesView {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
+    this.navigate = props.navigate;
 
     this.creatingNewNote = false;
 
@@ -102,10 +103,38 @@ export default class NotesView {
     );
   };
 
+  getLocation = async (locationId) => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_location/${locationId}`
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
+
   renderNoteElems = async () => {
     const noteData = await this.getNotes();
+    // get locations in bulk
+    const locationIdList = [];
+    for(var note of noteData) {
+      if(note.location_id && !locationIdList.includes(note.location_id)) {
+        locationIdList.push(note.location_id)
+      }
+    };
+    const locationsList = [];
+    for(var locationId of locationIdList) {
+      const location = await this.getLocation(locationId);
+      locationsList.push(location)
+    }
 
     return noteData.map((note) => {
+      const location = locationsList.filter(item => item.id === note.location_id)[0]
       // create element
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
@@ -121,6 +150,8 @@ export default class NotesView {
         description: note.description,
         dateCreated: note.date_created,
         locationId: note.location_id,
+        location: location ? location : null,
+        navigate: this.navigate
       });
 
       return elem;

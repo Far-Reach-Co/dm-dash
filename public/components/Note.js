@@ -13,6 +13,8 @@ export default class Note {
     this.description = props.description;
     this.dateCreated = props.dateCreated;
     this.locationId = props.locationId;
+    this.navigate = props.navigate;
+    this.location = props.location;
 
     this.edit = false;
 
@@ -22,6 +24,21 @@ export default class Note {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
+  };
+
+  renderLocationInfo = async () => {
+    if (this.location) {
+      return createElement("a", { class: "note-location" }, this.location.title, {
+        type: "click",
+        event: () => this.navigate({
+          title: "single-location",
+          sidebar: true,
+          params: { location: this.location },
+        }),
+      });
+    } else {
+      return createElement("div", { style: "display: none;" });
+    }
   };
 
   removeNote = async () => {
@@ -36,7 +53,7 @@ export default class Note {
     } else {
       window.alert("Failed to delete note...");
     }
-  }
+  };
 
   saveNote = async (e) => {
     e.preventDefault();
@@ -80,12 +97,16 @@ export default class Note {
               id: "description",
               name: "description",
               cols: "30",
-              rows: "7"
+              rows: "7",
             },
             this.description
           ),
           createElement("br"),
-          createElement("label", { for: "location_id" }, "Location Select (Optional)"),
+          createElement(
+            "label",
+            { for: "location_id" },
+            "Location Select (Optional)"
+          ),
           await locationSelect(this.locationId),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
@@ -113,7 +134,7 @@ export default class Note {
     );
   };
 
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -134,6 +155,7 @@ export default class Note {
             minute: "numeric",
           })
         ),
+        await this.renderLocationInfo(),
         createElement("img", {
           src: "../assets/note.svg",
           width: 30,

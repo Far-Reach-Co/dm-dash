@@ -312,6 +312,7 @@ export default class SingleLocationsView {
         description: note.description,
         dateCreated: note.date_created,
         locationId: note.location_id,
+        navigate: this.navigate,
       });
 
       return elem;
