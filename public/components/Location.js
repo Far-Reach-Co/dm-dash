@@ -115,8 +115,8 @@ export default class Location {
         this.location.title,
         createElement("img", {
           src: "../assets/location.svg",
-          width: 40,
-          height: 40,
+          width: 30,
+          height: 30,
         }),
       ]),
       createElement("div", { class: "description" }, this.location.description),

@@ -5,7 +5,6 @@ import state from "../lib/state.js";
 export default class Note {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "component";
 
     this.parentRender = props.parentRender;
     this.id = props.id;
@@ -129,7 +128,7 @@ export default class Note {
           { class: "note-date" },
           new Date(this.dateCreated).toLocaleDateString("en-gb", {
             year: "numeric",
-            month: "long",
+            month: "numeric",
             day: "numeric",
             hour: "numeric",
             minute: "numeric",
@@ -137,8 +136,8 @@ export default class Note {
         ),
         createElement("img", {
           src: "../assets/note.svg",
-          width: 40,
-          height: 40,
+          width: 30,
+          height: 30,
         }),
       ]),
       createElement("div", { class: "description" }, this.description),

@@ -69,22 +69,19 @@ export default class ProjectsView {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    const projectElems = await this.renderProjectsElems()
     // append
     this.domComponent.append(
-      createElement(
-        "button",
-        { style: "align-self: flex-end;" },
-        "+ Project",
-        {type: "click", event: this.newProject}
-      ),
+      createElement("button", { style: "align-self: flex-end;" }, "+ Project", {
+        type: "click",
+        event: this.newProject,
+      }),
       createElement(
         "h1",
         { class: "projects-view-title" },
         "Choose your project"
       ),
-      createElement("hr", {class: 'special-hr'}),
-      ...projectElems
+      createElement("hr", { class: "special-hr" }),
+      ...(await this.renderProjectsElems())
     );
   };
 }

@@ -52,17 +52,12 @@ export default class Project {
   };
 
   renderEditProject = () => {
-    const editTitle = createElement(
-      "div",
-      { style: "margin-right: 10px;" },
-      "Edit"
-    );
-
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
+      style: "margin-right: 10px;"
     });
-    const editButton = createElement("button", {}, "Done");
+    const editButton = createElement("button", {style: "margin-right: 10px;"}, "Done");
     editButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
       await this.saveProject();
@@ -82,49 +77,60 @@ export default class Project {
     });
 
     // append
-    this.domComponent.append(editTitle, titleInput, editButton, removeButton);
+    this.domComponent.append(
+      titleInput, 
+      editButton, 
+      removeButton
+    );
   };
 
   render = () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
-      this.renderEditProject();
-      return;
+      return this.renderEditProject();
     }
 
-    const projectButton = createElement(
-      "div",
-      {
-        id: `project-${this.id}`,
-        class: "project-button",
-      },
-      [
-        this.title,
-        createElement(
-          "div",
-          { class: "project-date" },
-          `Created: ${new Date(this.dateCreated).toLocaleDateString("en-gb", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}`
-        ),
-      ]
-    );
-    projectButton.addEventListener("click", () => {
-      // push to project
-      state.currentProject = this.id;
-      this.navigate({ title: "modules", sidebar: true });
-    });
-
-    const editIcon = createElement("img", {
-      class: "icon",
-      src: "../assets/gears.svg",
-    });
-    editIcon.addEventListener("click", this.toggleEdit);
-
     // append
-    this.domComponent.append(projectButton, editIcon);
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          id: `project-${this.id}`,
+          class: "project-button",
+        },
+        [
+          this.title,
+          createElement(
+            "div",
+            { class: "project-date" },
+            `Created: ${new Date(this.dateCreated).toLocaleDateString("en-gb", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}`
+          ),
+        ],
+        {
+          type: "click",
+          event: () => {
+            state.currentProject = this.id;
+            this.navigate({ title: "modules", sidebar: true });
+          },
+        }
+      ),
+      createElement(
+        "img",
+        {
+          class: "icon",
+          src: "../assets/gears.svg",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
+    );
   };
 }

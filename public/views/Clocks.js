@@ -65,19 +65,6 @@ export default class ClocksView {
 
   render = async () => {
     this.domComponent.innerHTML = "";
-    // new clock button
-    const newClockButton = createElement(
-      "button",
-      { style: "align-self: flex-end;" },
-      "+ Clock"
-    );
-    newClockButton.addEventListener("click", this.newClock);
-
-    const clockSaveMessageDiv = createElement(
-      "small",
-      { style: "align-self: center;" },
-      "* Clocks are auto saved every 60 seconds while running, or when stop is pressed"
-    );
 
     // ******** CLOCKS
     let clockData = [];
@@ -125,8 +112,19 @@ export default class ClocksView {
     }
     // append
     this.domComponent.append(
-      newClockButton,
-      clockSaveMessageDiv,
+      createElement(
+        "button",
+        { style: "align-self: flex-end;" },
+        "+ Clock",
+        {type: "click", event: this.newClock}
+      ),
+      createElement("h1", {style: "align-self: center;"}, "Clocks"),
+      createElement(
+        "small",
+        { style: "align-self: center;" },
+        "* Clocks are auto saved every 60 seconds while running, or when stop is pressed"
+      ),
+      createElement("br"),
       ...clockElements
     );
   };

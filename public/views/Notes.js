@@ -109,7 +109,7 @@ export default class NotesView {
       // create element
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
-        style: "max-width: 500px;",
+        class: "component"
       });
 
       new Note({
@@ -140,6 +140,8 @@ export default class NotesView {
         type: "click",
         event: this.toggleCreatingNote,
       }),
+      createElement("h1", {style: "align-self: center;"}, "Notes"),
+      createElement("br"),
       ...(await this.renderNoteElems())
     );
   };

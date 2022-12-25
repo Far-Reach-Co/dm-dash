@@ -15,7 +15,7 @@ async function addNoteQuery(data) {
 
 async function getNotesQuery(projectId) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where project_id = $1 order by title asc`,
+    text: /*sql*/ `select * from public."Note" where project_id = $1 order by date_created desc`,
     values: [projectId]
   }
   return await db.query(query)
@@ -23,7 +23,7 @@ async function getNotesQuery(projectId) {
 
 async function getNotesByLocationQuery(locationId) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where location_id = $1 order by title asc`,
+    text: /*sql*/ `select * from public."Note" where location_id = $1 order by date_created desc`,
     values: [locationId]
   }
   return await db.query(query)

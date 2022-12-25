@@ -69,7 +69,7 @@ export default class SingleLocationsView {
     const elem = createElement("div", {
       id: `location-component-${parentLocation.id}`,
       class: "component",
-      style: "max-width: 400px;",
+      style: "max-width: 300px;",
     });
 
     new Location({
@@ -88,7 +88,6 @@ export default class SingleLocationsView {
       const elem = createElement("div", {
         id: `location-component-${location.id}`,
         class: "component",
-        style: "max-width: 400px;",
       });
 
       new Location({
@@ -301,7 +300,7 @@ export default class SingleLocationsView {
     return notesByLocation.map((note) => {
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
-        style: "max-width: 500px;",
+        class: "sub-view-component"
       });
 
       new Note({
@@ -344,8 +343,8 @@ export default class SingleLocationsView {
         this.location.title,
         createElement("img", {
           src: "../assets/location.svg",
-          width: 40,
-          height: 40,
+          width: 30,
+          height: 30,
         }),
       ]),
       createElement("div", { class: "description" }, this.location.description),
@@ -357,7 +356,7 @@ export default class SingleLocationsView {
           event: this.toggleCreatingNote,
         }),
       ]),
-      ...(await this.renderLocationNotes()),
+      createElement("div", {class: 'sub-view'}, [...(await this.renderLocationNotes())]),
       createElement("br")
     );
     // render parent location

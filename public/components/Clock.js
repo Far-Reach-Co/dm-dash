@@ -181,8 +181,8 @@ export default class Clock {
       this.title,
       createElement("img", {
         src: "../assets/clock.svg",
-        width: 40,
-        height: 40,
+        width: 30,
+        height: 30,
       }),
     ]);
 

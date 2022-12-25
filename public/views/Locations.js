@@ -97,7 +97,6 @@ export default class LocationsView {
       const elem = createElement("div", {
         id: `location-component-${location.id}`,
         class: "component",
-        style: "max-width: 500px;",
       })
 
       new Location({
@@ -130,6 +129,7 @@ export default class LocationsView {
           event: this.toggleCreatingLocation,
         }
       ),
+      createElement("h1", {style: "align-self: center;"}, "Locations"),
       createElement("br"),
       ...locationElems
     );

@@ -660,8 +660,8 @@ export default class Calendar {
       this.title,
       createElement("img", {
         src: "../assets/calendar.svg",
-        width: 40,
-        height: 40,
+        width: 30,
+        height: 30,
       }),
     ]);
 

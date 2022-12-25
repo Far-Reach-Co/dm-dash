@@ -361,6 +361,8 @@ export default class CalendarView {
     // append
     this.domComponent.append(
       newCalendarButton,
+      createElement("h1", {style: "align-self: center;"}, "Calendars"),
+      createElement("br"),
       ...calendarElems
     )
   };
