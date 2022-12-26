@@ -15,6 +15,7 @@ export default class Note {
     this.locationId = props.locationId;
     this.navigate = props.navigate;
     this.location = props.location;
+    this.type = props.type;
 
     this.edit = false;
 
@@ -28,7 +29,7 @@ export default class Note {
 
   renderLocationInfo = async () => {
     if (this.location) {
-      return createElement("a", { class: "note-location" }, this.location.title, {
+      return createElement("a", { class: "small-clickable" }, this.location.title, {
         type: "click",
         event: () => this.navigate({
           title: "single-location",

@@ -65,22 +65,6 @@ export default class SingleLocationsView {
     }
   };
 
-  renderParentLocation = (parentLocation) => {
-    const elem = createElement("div", {
-      id: `location-component-${parentLocation.id}`,
-      class: "component",
-      style: "max-width: 300px;",
-    });
-
-    new Location({
-      domComponent: elem,
-      location: parentLocation,
-      navigate: this.navigate,
-      parentRender: this.render,
-    });
-    return elem;
-  };
-
   renderChildLocations = async () => {
     const childLocations = await this.getChildLocations();
 
@@ -233,7 +217,7 @@ export default class SingleLocationsView {
     formProps.location_id = this.location.id;
     const projectId = state.currentProject;
     formProps.project_id = projectId;
-    formProps.type = "Note"
+    formProps.type = "Note";
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -312,29 +296,61 @@ export default class SingleLocationsView {
   };
 
   renderLocationNotes = async () => {
-    const notesByLocation = await this.getNotesByLocation();
+    let notesByLocation = await this.getNotesByLocation();
+    notesByLocation = notesByLocation.filter((note) => note.type === "Note");
     return notesByLocation.map((note) => {
-      if(note.type === "Note") {
-        const elem = createElement("div", {
-          id: `note-component-${note.id}`,
-          class: "sub-view-component",
-        });
-  
-        new Note({
-          domComponent: elem,
-          parentRender: this.render,
-          id: note.id,
-          projectId: note.project_id,
-          title: note.title,
-          description: note.description,
-          dateCreated: note.date_created,
-          locationId: note.location_id,
-          navigate: this.navigate,
-        });
-  
-        return elem;
-      }
+      const elem = createElement("div", {
+        id: `note-component-${note.id}`,
+        class: "sub-view-component",
+      });
+
+      new Note({
+        domComponent: elem,
+        parentRender: this.render,
+        id: note.id,
+        projectId: note.project_id,
+        title: note.title,
+        description: note.description,
+        dateCreated: note.date_created,
+        locationId: note.location_id,
+        navigate: this.navigate,
+        type: note.type,
+      });
+
+      return elem;
     });
+  };
+
+  renderParentLocation = async () => {
+    const parentLocation = await this.getParentLocation();
+    if (parentLocation) {
+      return createElement("div", {}, [
+        createElement(
+          "small",
+          {},
+          "Sub-Location of: "
+        ),
+        createElement("a", { class: "small-clickable" }, parentLocation.title, {
+          type: "click",
+          event: () => console.log("uhh"),
+        }),
+      ]);
+    } else {
+      return createElement("button", {}, "+ Parent-Location", {
+        type: "click",
+        event: this.toggleAddParentLocation,
+      });
+    }
+  };
+
+  renderLocationType = () => {
+    if (this.location.type) {
+      return createElement(
+        "small",
+        { style: "color: var(--light-gray);" },
+        this.location.type
+      );
+    } else return createElement("div", { style: "display: none;" });
   };
 
   render = async () => {
@@ -360,12 +376,15 @@ export default class SingleLocationsView {
       }),
       createElement("div", { class: "single-location-title" }, [
         this.location.title,
+        await this.renderParentLocation(),
         createElement("img", {
           src: "../assets/location.svg",
           width: 30,
           height: 30,
         }),
       ]),
+      this.renderLocationType(),
+      createElement("br"),
       createElement("div", { class: "description" }, this.location.description),
       createElement("br"),
       createElement("div", { class: "location-subheading" }, [
@@ -380,31 +399,6 @@ export default class SingleLocationsView {
       ]),
       createElement("br")
     );
-    // render parent location
-    const parentLocation = await this.getParentLocation();
-    if (parentLocation) {
-      this.domComponent.append(
-        createElement(
-          "div",
-          { class: "location-subheading" },
-          "Parent-Location:"
-        ),
-        this.renderParentLocation(parentLocation)
-      );
-    } else {
-      this.domComponent.append(
-        createElement(
-          "button",
-          { style: "align-self: flex-end;" },
-          "+ Parent-Location",
-          {
-            type: "click",
-            event: this.toggleAddParentLocation,
-          }
-        ),
-        createElement("br")
-      );
-    }
     // render sub locations
     this.domComponent.append(
       createElement("div", { class: "location-subheading" }, [

@@ -2,13 +2,14 @@ const db = require('../dbconfig')
 
 async function addLocationQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Location" (project_id, title, description, is_sub, parent_location_id) values($1,$2,$3,$4,$5) returning *`,
+    text: /*sql*/ `insert into public."Location" (project_id, title, description, is_sub, parent_location_id, type) values($1,$2,$3,$4,$5,$6) returning *`,
     values: [
       data.project_id,
       data.title,
       data.description,
       data.is_sub,
-      data.parent_location_id
+      data.parent_location_id,
+      data.type
     ]
   }
   return await db.query(query)

@@ -153,7 +153,8 @@ export default class NotesView {
         dateCreated: note.date_created,
         locationId: note.location_id,
         location: location ? location : null,
-        navigate: this.navigate
+        navigate: this.navigate,
+        type: note.type
       });
 
       return elem;

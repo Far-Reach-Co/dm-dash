@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import Location from '../components/Location.js'
+import Location from "../components/Location.js";
+import locationTypeSelect from "../lib/locationTypeSelect.js";
 
 export default class LocationsView {
   constructor(props) {
@@ -39,6 +40,7 @@ export default class LocationsView {
     const projectId = state.currentProject;
     formProps.project_id = projectId;
     formProps.is_sub = false;
+    if(formProps.type === "None") formProps.type = null;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_location`, {
@@ -76,6 +78,9 @@ export default class LocationsView {
         name: "description",
       }),
       createElement("br"),
+      createElement("div", {}, "Type Select (Optional)"),
+      locationTypeSelect(null, null),
+      createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
@@ -91,30 +96,44 @@ export default class LocationsView {
     this.domComponent.append(
       titleOfForm,
       createElement("br"),
-      form, 
+      form,
       createElement("br"),
       cancelButton
     );
   };
 
   renderLocationsElems = async () => {
-    const locationData = await this.getLocations();
-    return locationData.map((location) => {
+    let locationData = await this.getLocations();
+    if (this.filter) {
+      locationData = locationData.filter((location) => {
+        return (location.type && location.type === this.filter);
+      });
+    }
+    const locationsMap = locationData.map((location) => {
       // create element
       const elem = createElement("div", {
         id: `location-component-${location.id}`,
         class: "component",
-      })
+      });
 
       new Location({
         domComponent: elem,
         location,
         navigate: this.navigate,
-        parentRender: this.render
-      })
+        parentRender: this.render,
+      });
 
       return elem;
     });
+
+    if(locationsMap.length) return locationsMap;
+    else return [createElement("div", {}, "None...")]
+  };
+
+  handleTypeFilterChange = (value) => {
+    if(value === "None") value = null;
+    this.filter = value;
+    this.render();
   };
 
   render = async () => {
@@ -128,15 +147,25 @@ export default class LocationsView {
     // append
     this.domComponent.append(
       createElement(
-        "button",
-        { style: "align-self: flex-end;" },
-        "+ Location",
-        {
-          type: "click",
-          event: this.toggleCreatingLocation,
-        }
+        "div",
+        { style: "display: flex; justify-content: space-between;" },
+        [
+          createElement("div", {}, [
+            createElement("div", {}, "Filter by type"),
+            locationTypeSelect(this.handleTypeFilterChange, this.filter),
+          ]),
+          createElement(
+            "button",
+            { style: "align-self: flex-end;" },
+            "+ Location",
+            {
+              type: "click",
+              event: this.toggleCreatingLocation,
+            }
+          ),
+        ]
       ),
-      createElement("h1", {style: "align-self: center;"}, "Locations"),
+      createElement("h1", { style: "align-self: center;" }, "Locations"),
       createElement("br"),
       ...locationElems
     );

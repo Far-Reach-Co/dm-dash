@@ -1,5 +1,5 @@
 import createElement from "../lib/createElement.js";
-
+import locationTypeSelect from "../lib/locationTypeSelect.js";
 export default class Location {
   constructor(props) {
     this.domComponent = props.domComponent;
@@ -30,12 +30,13 @@ export default class Location {
     } else {
       window.alert("Failed to delete location...");
     }
-  }
+  };
 
   saveLocation = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    if(formProps.type === "None") formProps.type = null;
     try {
       const res = await fetch(
         `${window.location.origin}/api/edit_location/${this.location.id}`,
@@ -73,10 +74,13 @@ export default class Location {
               id: "description",
               name: "description",
               cols: "30",
-              rows: "7"
+              rows: "7",
             },
             this.location.description
           ),
+          createElement("br"),
+          createElement("div", {}, "Type Select (Optional)"),
+          locationTypeSelect(null, this.location.type),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
@@ -93,7 +97,11 @@ export default class Location {
       createElement("button", { class: "btn-red" }, "Remove Location", {
         type: "click",
         event: async () => {
-          if (window.confirm(`Are you sure you want to delete ${this.location.title}`)) {
+          if (
+            window.confirm(
+              `Are you sure you want to delete ${this.location.title}`
+            )
+          ) {
             await this.removeLocation();
             this.toggleEdit();
             this.parentRender();
@@ -101,6 +109,17 @@ export default class Location {
         },
       })
     );
+  };
+
+  renderLocationType = () => {
+    if (this.location.type) {
+      return createElement(
+        "a",
+        { class: "small-clickable" },
+        this.location.type,
+        { type: "click", event: () => console.log(this.location.type) }
+      );
+    } else return createElement("div", { style: "display: none;" });
   };
 
   render = () => {
@@ -113,6 +132,7 @@ export default class Location {
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         this.location.title,
+        this.renderLocationType(),
         createElement("img", {
           src: "../assets/location.svg",
           width: 30,
