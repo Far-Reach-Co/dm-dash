@@ -31,18 +31,38 @@ export default class SideBar {
         id: "sidebar-notes",
         title: "notes",
         displayTitle: "Notes",
+        params: {type: "Note"},
       },
       {
         id: "sidebar-locations",
         title: "locations",
         displayTitle: "Locations",
+        params: {},
       },
-      { id: "sidebar-clocks", title: "clocks", displayTitle: "Clocks" },
+      {
+        id: "sidebar-npcs",
+        title: "notes",
+        displayTitle: "NPCs",
+        params: {type: "NPC"},
+      },
+      {
+        id: "sidebar-items",
+        title: "notes",
+        displayTitle: "Items",
+        params: {type: "Item"},
+      },
+      {
+        id: "sidebar-clocks",
+        title: "clocks",
+        displayTitle: "Clocks",
+        params: {},
+      },
       {
         id: "sidebar-calendars",
         title: "calendars",
         displayTitle: "Calendars",
-      }
+        params: {},
+      },
     ];
     return routes.map((route) => {
       const elem = createElement(
@@ -55,7 +75,7 @@ export default class SideBar {
       );
       // event listener
       elem.addEventListener("click", () => {
-        this.navigate({ title: route.title, sidebar: true });
+        this.navigate({ title: route.title, sidebar: true, params: route.params });
       });
       return elem;
     });

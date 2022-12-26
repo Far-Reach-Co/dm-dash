@@ -233,6 +233,7 @@ export default class SingleLocationsView {
     formProps.location_id = this.location.id;
     const projectId = state.currentProject;
     formProps.project_id = projectId;
+    formProps.type = "Note"
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -313,24 +314,26 @@ export default class SingleLocationsView {
   renderLocationNotes = async () => {
     const notesByLocation = await this.getNotesByLocation();
     return notesByLocation.map((note) => {
-      const elem = createElement("div", {
-        id: `note-component-${note.id}`,
-        class: "sub-view-component",
-      });
-
-      new Note({
-        domComponent: elem,
-        parentRender: this.render,
-        id: note.id,
-        projectId: note.project_id,
-        title: note.title,
-        description: note.description,
-        dateCreated: note.date_created,
-        locationId: note.location_id,
-        navigate: this.navigate,
-      });
-
-      return elem;
+      if(note.type === "Note") {
+        const elem = createElement("div", {
+          id: `note-component-${note.id}`,
+          class: "sub-view-component",
+        });
+  
+        new Note({
+          domComponent: elem,
+          parentRender: this.render,
+          id: note.id,
+          projectId: note.project_id,
+          title: note.title,
+          description: note.description,
+          dateCreated: note.date_created,
+          locationId: note.location_id,
+          navigate: this.navigate,
+        });
+  
+        return elem;
+      }
     });
   };
 

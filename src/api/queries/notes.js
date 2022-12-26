@@ -2,21 +2,22 @@ const db = require('../dbconfig')
 
 async function addNoteQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id) values($1,$2,$3,$4) returning *`,
+    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, type) values($1,$2,$3,$4,$5) returning *`,
     values: [
       data.title,
       data.description,
       data.project_id,
-      data.location_id
+      data.location_id,
+      data.type
     ]
   }
   return await db.query(query)
 }
 
-async function getNotesQuery(projectId) {
+async function getNotesQuery(projectId, type) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where project_id = $1 order by date_created desc`,
-    values: [projectId]
+    text: /*sql*/ `select * from public."Note" where project_id = $1 and type = $2 order by date_created desc`,
+    values: [projectId, type]
   }
   return await db.query(query)
 }
