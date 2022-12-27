@@ -250,6 +250,11 @@ export default class Calendar {
 
   handleDayClicked = async (dayNumber) => {
     dayNumber = parseInt(dayNumber);
+    // updated UI
+    this.currentMonthId = this.monthBeingViewed.id;
+    this.currentDay = dayNumber;
+    this.render();
+    // then send data call
     try {
       const res = await fetch(
         `${window.location.origin}/api/edit_calendar/${this.id}`,
@@ -262,12 +267,10 @@ export default class Calendar {
           }),
         }
       );
-      this.currentMonthId = this.monthBeingViewed.id;
-      this.currentDay = dayNumber;
-      this.render();
+
     } catch (err) {
       console.log(err);
-      window.alert("Failed to update current day...");
+      // window.alert("Failed to update current day...");
     }
   };
 
