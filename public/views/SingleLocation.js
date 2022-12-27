@@ -3,6 +3,7 @@ import state from "../lib/state.js";
 import Location from "../components/Location.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
+import locationTypeSelect from "../lib/locationTypeSelect.js";
 
 export default class SingleLocationsView {
   constructor(props) {
@@ -152,6 +153,7 @@ export default class SingleLocationsView {
     formProps.project_id = projectId;
     formProps.is_sub = true;
     formProps.parent_location_id = this.location.id;
+    if(formProps.type === "None") formProps.type = null;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_location`, {
@@ -189,6 +191,9 @@ export default class SingleLocationsView {
         id: "description",
         name: "description",
       }),
+      createElement("br"),
+      createElement("div", {}, "Type Select (Optional)"),
+      locationTypeSelect(null, null),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
@@ -332,7 +337,7 @@ export default class SingleLocationsView {
         ),
         createElement("a", { class: "small-clickable" }, parentLocation.title, {
           type: "click",
-          event: () => console.log("uhh"),
+          event: () => this.navigate({title: "single-location", sidebar: true, params: {location: parentLocation}}),
         }),
       ]);
     } else {

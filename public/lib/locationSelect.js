@@ -16,21 +16,49 @@ export default async function locationSelect(selectedLocation, locationToSkip) {
     }
   }
 
-  const locations = await getLocations();
+  async function renderLocationSelectOptions() {
+    let locations = await getLocations();
 
-  function renderLocationSelectOptions() {
-    const locationsList = [];
+    const locationElemsList = [];
+
     locations.forEach((location) => {
-      if (locationToSkip && location.id == locationToSkip.id) return;
+      let isInSubHeirarchy = false;
+
+      if (locationToSkip) {
+        // skip location and its sub locations
+        if (location.id === locationToSkip.id) return;
+        // check sublocation lineage and skip
+        let checkingSubHeirachy = true;
+        
+        let locationToCheck = location;
+        while(checkingSubHeirachy) {
+          if (locationToCheck.is_sub) {
+            if (locationToCheck.parent_location_id === locationToSkip.id) {
+              isInSubHeirarchy = true;
+              checkingSubHeirachy = false;
+            } else {
+              const parentLocation = locations.filter(
+                (location) => locationToCheck.parent_location_id === location.id
+              )[0];
+              locationToCheck = parentLocation
+              checkingSubHeirachy = true;
+            }
+          } else checkingSubHeirachy = false;
+        }
+      }
+      
+      if(isInSubHeirarchy) return;
+
       const elem = createElement(
         "option",
         { value: location.id },
         location.title
       );
       if (selectedLocation === location.id) elem.selected = true;
-      locationsList.push(elem);
+      locationElemsList.push(elem);
     });
-    return locationsList;
+    
+    return locationElemsList;
   }
 
   return createElement(
@@ -38,7 +66,7 @@ export default async function locationSelect(selectedLocation, locationToSkip) {
     { id: "location_id", name: "location_id", required: false },
     [
       createElement("option", { value: 0 }, "None"),
-      ...renderLocationSelectOptions(),
+      ...(await renderLocationSelectOptions()),
     ]
   );
 }

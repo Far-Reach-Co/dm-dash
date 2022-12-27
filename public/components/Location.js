@@ -7,6 +7,7 @@ export default class Location {
     this.location = props.location;
     this.navigate = props.navigate;
     this.parentRender = props.parentRender;
+    this.handleTypeFilterChange = props.handleTypeFilterChange ? props.handleTypeFilterChange : null;
 
     this.edit = false;
 
@@ -117,7 +118,11 @@ export default class Location {
         "a",
         { class: "small-clickable" },
         this.location.type,
-        { type: "click", event: () => console.log(this.location.type) }
+        { type: "click", event: () => {
+          if(this.handleTypeFilterChange) {
+            this.handleTypeFilterChange(this.location.type);
+          }
+        } }
       );
     } else return createElement("div", { style: "display: none;" });
   };

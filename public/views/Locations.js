@@ -121,6 +121,7 @@ export default class LocationsView {
         location,
         navigate: this.navigate,
         parentRender: this.render,
+        handleTypeFilterChange: this.handleTypeFilterChange
       });
 
       return elem;
