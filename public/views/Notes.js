@@ -72,7 +72,7 @@ export default class NotesView {
           createElement("input", {
             id: "title",
             name: "title",
-            placeholder: "Note Title",
+            placeholder: "Title",
             required: true,
           }),
           createElement("label", { for: "description" }, "Description"),

@@ -14,6 +14,7 @@ export default class SingleLocationsView {
     this.domComponent.className = "standard-view";
 
     this.creatingNote = false;
+    this.creatingNoteType = "Note";
     this.creatingSubLocation = false;
     this.addParentLocation = false;
 
@@ -222,7 +223,7 @@ export default class SingleLocationsView {
     formProps.location_id = this.location.id;
     const projectId = state.currentProject;
     formProps.project_id = projectId;
-    formProps.type = "Note";
+    formProps.type = this.creatingNoteType;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -234,7 +235,7 @@ export default class SingleLocationsView {
       if (res.status === 201) {
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to create new note...");
+      window.alert(`Failed to create new ${this.creatingNoteType}...`);
       console.log(err);
     }
   };
@@ -244,7 +245,7 @@ export default class SingleLocationsView {
       createElement(
         "div",
         { class: "component-title" },
-        `Create new note for ${this.location.title}`
+        `Create new ${this.creatingNoteType} for ${this.location.title}`
       ),
       createElement(
         "form",
@@ -255,7 +256,7 @@ export default class SingleLocationsView {
           createElement("input", {
             id: "title",
             name: "title",
-            placeholder: "Note Title",
+            placeholder: "Title",
             required: true,
           }),
           createElement("label", { for: "description" }, "Description"),
@@ -300,9 +301,9 @@ export default class SingleLocationsView {
     }
   };
 
-  renderLocationNotes = async () => {
+  renderLocationNotes = async (noteType) => {
     let notesByLocation = await this.getNotesByLocation();
-    notesByLocation = notesByLocation.filter((note) => note.type === "Note");
+    notesByLocation = notesByLocation.filter((note) => note.type === noteType);
     return notesByLocation.map((note) => {
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
@@ -396,11 +397,42 @@ export default class SingleLocationsView {
         "Notes:",
         createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
           type: "click",
-          event: this.toggleCreatingNote,
+          event: () => {
+            this.creatingNoteType = "Note"
+            this.toggleCreatingNote()
+          },
         }),
       ]),
       createElement("div", { class: "sub-view" }, [
-        ...(await this.renderLocationNotes()),
+        ...(await this.renderLocationNotes("Note")),
+      ]),
+      createElement("br"),
+      createElement("div", { class: "location-subheading" }, [
+        "Items:",
+        createElement("button", { style: "align-self: flex-end;" }, "+ Item", {
+          type: "click",
+          event: () => {
+            this.creatingNoteType = "Item"
+            this.toggleCreatingNote()
+          },
+        }),
+      ]),
+      createElement("div", { class: "sub-view" }, [
+        ...(await this.renderLocationNotes("Item")),
+      ]),
+      createElement("br"),
+      createElement("div", { class: "location-subheading" }, [
+        "NPCs:",
+        createElement("button", { style: "align-self: flex-end;" }, "+ NPC", {
+          type: "click",
+          event: () => {
+            this.creatingNoteType = "NPC"
+            this.toggleCreatingNote()
+          },
+        }),
+      ]),
+      createElement("div", { class: "sub-view" }, [
+        ...(await this.renderLocationNotes("NPC")),
       ]),
       createElement("br")
     );
