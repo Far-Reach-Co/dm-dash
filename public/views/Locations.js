@@ -8,6 +8,7 @@ export default class LocationsView {
     this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
+    this.searchTerm = "";
 
     this.creatingLocation = false;
 
@@ -40,7 +41,7 @@ export default class LocationsView {
     const projectId = state.currentProject;
     formProps.project_id = projectId;
     formProps.is_sub = false;
-    if(formProps.type === "None") formProps.type = null;
+    if (formProps.type === "None") formProps.type = null;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_location`, {
@@ -104,11 +105,18 @@ export default class LocationsView {
 
   renderLocationsElems = async () => {
     let locationData = await this.getLocations();
+    // handle fitlers and search
     if (this.filter) {
       locationData = locationData.filter((location) => {
-        return (location.type && location.type === this.filter);
+        return location.type && location.type === this.filter;
       });
     }
+    if (this.searchTerm !== "") {
+      locationData = locationData.filter((location) => {
+        return location.title.toLowerCase().includes(this.searchTerm.toLowerCase());
+      });
+    }
+
     const locationsMap = locationData.map((location) => {
       // create element
       const elem = createElement("div", {
@@ -121,18 +129,18 @@ export default class LocationsView {
         location,
         navigate: this.navigate,
         parentRender: this.render,
-        handleTypeFilterChange: this.handleTypeFilterChange
+        handleTypeFilterChange: this.handleTypeFilterChange,
       });
 
       return elem;
     });
 
-    if(locationsMap.length) return locationsMap;
-    else return [createElement("div", {}, "None...")]
+    if (locationsMap.length) return locationsMap;
+    else return [createElement("div", {}, "None...")];
   };
 
   handleTypeFilterChange = (value) => {
-    if(value === "None") value = null;
+    if (value === "None") value = null;
     this.filter = value;
     this.render();
   };
@@ -149,21 +157,34 @@ export default class LocationsView {
     this.domComponent.append(
       createElement(
         "div",
-        { style: "display: flex; justify-content: space-between;" },
+        { style: "display: flex; justify-content: space-between; align-items: flex-end;" },
         [
           createElement("div", {}, [
             createElement("div", {}, "Filter by type"),
             locationTypeSelect(this.handleTypeFilterChange, this.filter),
           ]),
-          createElement(
-            "button",
-            { style: "align-self: flex-end;" },
-            "+ Location",
-            {
-              type: "click",
-              event: this.toggleCreatingLocation,
-            }
-          ),
+          createElement("div", {style: "display: flex; flex-direction: column;"}, [
+            createElement(
+              "button",
+              { style: "align-self: flex-end; margin-bottom: 10px;" },
+              "+ Location",
+              {
+                type: "click",
+                event: this.toggleCreatingLocation,
+              }
+            ),
+            createElement(
+              "input",
+              { placeholder: "Search Locations", value: this.searchTerm },
+              null,
+              {
+                type: "change",
+                event: (e) => {
+                  (this.searchTerm = e.target.value), this.render();
+                },
+              }
+            ),
+          ])
         ]
       ),
       createElement("h1", { style: "align-self: center;" }, "Locations"),
