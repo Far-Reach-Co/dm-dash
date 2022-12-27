@@ -212,10 +212,9 @@ export default class CalendarView {
     if(this.loading) this.domComponent.append(createElement("div", {}, "Loading..."))
     this.domComponent.append(
       titleOfForm,
+      infoElem,
       createElement("br"),
       ...listOfDaysElems,
-      createElement("br"),
-      infoElem,
       createElement("br"),
       form,
       createElement("br"),
@@ -289,10 +288,9 @@ export default class CalendarView {
     if(this.loading) this.domComponent.append(createElement("div", {}, "Loading..."))
     this.domComponent.append(
       titleOfForm,
+      infoElem,
       createElement("br"),
       ...listOfMonthsElements,
-      createElement("br"),
-      infoElem,
       createElement("br"),
       form,
       createElement("br"),
