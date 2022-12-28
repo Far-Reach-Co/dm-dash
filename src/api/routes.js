@@ -55,6 +55,12 @@ const {
   removeNote,
   editNote,
 } = require("./controllers/notes.js");
+const {
+  getCounters,
+  addCounter,
+  removeCounter,
+  editCounter,
+} = require("./controllers/counters.js");
 
 var router = express.Router();
 
@@ -64,6 +70,12 @@ router.get("/get_notes_by_location/:location_id", getNotesByLocation);
 router.post("/add_note", addNote);
 router.delete("/remove_note/:id", removeNote);
 router.post("/edit_note/:id", editNote);
+
+// counters
+router.get("/get_counters/:project_id", getCounters);
+router.post("/add_counter", addCounter);
+router.delete("/remove_counter/:id", removeCounter);
+router.post("/edit_counter/:id", editCounter);
 
 // locations
 router.get("/get_location/:id", getLocation);

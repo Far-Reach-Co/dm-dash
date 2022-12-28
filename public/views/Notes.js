@@ -10,6 +10,8 @@ export default class NotesView {
     this.navigate = props.navigate;
     this.type = props.type;
 
+    this.searchTerm = "";
+
     this.creatingNewNote = false;
 
     this.render();
@@ -121,7 +123,13 @@ export default class NotesView {
   };
 
   renderNoteElems = async () => {
-    const noteData = await this.getNotes();
+    let noteData = await this.getNotes();
+    // filter by search
+    if (this.searchTerm !== "") {
+      noteData = noteData.filter((note) => {
+        return note.title.toLowerCase().includes(this.searchTerm.toLowerCase());
+      });
+    }
     // get locations in bulk
     const locationIdList = [];
     for(var note of noteData) {
@@ -170,10 +178,23 @@ export default class NotesView {
 
     // append
     this.domComponent.append(
-      createElement("button", { style: "align-self: flex-end;" }, `+ ${this.type}`, {
-        type: "click",
-        event: this.toggleCreatingNote,
-      }),
+      createElement("div", {style: "display: flex; flex-direction: column;"}, [
+        createElement("button", { style: "align-self: flex-end; margin-bottom: 10px;" }, `+ ${this.type}`, {
+          type: "click",
+          event: this.toggleCreatingNote,
+        }),
+        createElement(
+          "input",
+          { placeholder: "Search", value: this.searchTerm, style: "align-self: flex-end;" },
+          null,
+          {
+            type: "change",
+            event: (e) => {
+              (this.searchTerm = e.target.value), this.render();
+            },
+          }
+        ),
+      ]),
       createElement("h1", {style: "align-self: center;"}, `${this.type} list`),
       createElement("br"),
       ...(await this.renderNoteElems())

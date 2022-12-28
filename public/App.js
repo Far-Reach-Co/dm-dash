@@ -7,6 +7,7 @@ import Sidebar from "./components/Sidebar.js";
 import LocationsView from "./views/Locations.js"
 import SingleLocationsView from "./views/SingleLocation.js";
 import NotesView from "./views/Notes.js";
+import CountersView from "./views/Counters.js";
 
 class App {
   constructor(props) {
@@ -87,6 +88,12 @@ class App {
     new ClocksView({ domComponent: element });
   };
 
+  renderCountersView = () => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new CountersView({ domComponent: element });
+  };
+
   renderNotesView = ({ navigate, type }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
@@ -157,6 +164,8 @@ class App {
     switch (title) {
       case "clocks":
         return this.renderClocksView();
+      case "counters":
+        return this.renderCountersView();
       case "notes":
         return this.renderNotesView({navigate: this.navigate, type: params.type });
       case "calendars":

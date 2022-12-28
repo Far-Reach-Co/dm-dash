@@ -271,7 +271,7 @@ footer {
 }
 
 .sub-view {
-  border: 1px solid var(--main-gray);
+  border: 3px solid var(--main-gray);
   /* background-color: var(--blue4); */
   padding: 5px 0px;
   margin: 5px 0px;

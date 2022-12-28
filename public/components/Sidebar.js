@@ -40,16 +40,28 @@ export default class SideBar {
         params: {},
       },
       {
+        id: "sidebar-items",
+        title: "notes",
+        displayTitle: "Items",
+        params: {type: "Item"},
+      },
+      {
         id: "sidebar-npcs",
         title: "notes",
         displayTitle: "NPCs",
         params: {type: "NPC"},
       },
       {
-        id: "sidebar-items",
+        id: "sidebar-enemies",
         title: "notes",
-        displayTitle: "Items",
-        params: {type: "Item"},
+        displayTitle: "Enemies",
+        params: {type: "Enemy"},
+      },
+      {
+        id: "sidebar-counters",
+        title: "counters",
+        displayTitle: "Counters",
+        params: {},
       },
       {
         id: "sidebar-clocks",

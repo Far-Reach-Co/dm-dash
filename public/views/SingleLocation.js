@@ -442,6 +442,20 @@ export default class SingleLocationsView {
       createElement("div", { class: "sub-view" }, [
         ...(await this.renderLocationNotes("NPC")),
       ]),
+      createElement("br"),
+      createElement("div", { class: "location-subheading" }, [
+        "Enemies:",
+        createElement("button", { style: "align-self: flex-end;" }, "+ Enemy", {
+          type: "click",
+          event: () => {
+            this.creatingNoteType = "Enemy";
+            this.toggleCreatingNote();
+          },
+        }),
+      ]),
+      createElement("div", { class: "sub-view" }, [
+        ...(await this.renderLocationNotes("Enemy")),
+      ]),
       createElement("br")
     );
     // render sub locations
