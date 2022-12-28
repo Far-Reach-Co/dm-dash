@@ -2,20 +2,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap');
 
 :root {
-  --main-white: rgb(206, 206, 206);
+  --main-white: rgb(227, 227, 227);
   --main-dark: rgb(21, 21, 21);
   --main-gray: rgb(103, 101, 101);
-  --light-gray: rgb(161, 161, 161);
+  --light-gray: rgb(174, 173, 173);
   --blue: rgb(59, 82, 113);
   --blue2: rgb(107, 131, 154);
   --blue3: rgb(41, 47, 58);
   --blue4: rgb(38, 50, 70);
-  --link-blue: rgb(165, 210, 238);
+  --link-blue: rgb(164, 216, 249);
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
   --green: rgb(173, 215, 89);
   --orange: rgb(147, 87, 20);
-  --orange2: rgb(212, 165, 105);
+  --orange2: rgb(218, 164, 93);
+  --orange3: rgb(216, 193, 157);
   --red1: rgb(225, 75, 75);
   --red2: rgb(120, 46, 46);
 }
@@ -493,4 +494,5 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
+  color: var(--orange3);
 }

@@ -154,7 +154,7 @@ export default class SingleLocationsView {
     formProps.project_id = projectId;
     formProps.is_sub = true;
     formProps.parent_location_id = this.location.id;
-    if(formProps.type === "None") formProps.type = null;
+    if (formProps.type === "None") formProps.type = null;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_location`, {
@@ -331,14 +331,15 @@ export default class SingleLocationsView {
     const parentLocation = await this.getParentLocation();
     if (parentLocation) {
       return createElement("div", {}, [
-        createElement(
-          "small",
-          {},
-          "Sub-Location of: "
-        ),
+        createElement("small", {}, "Sub-Location of: "),
         createElement("a", { class: "small-clickable" }, parentLocation.title, {
           type: "click",
-          event: () => this.navigate({title: "single-location", sidebar: true, params: {location: parentLocation}}),
+          event: () =>
+            this.navigate({
+              title: "single-location",
+              sidebar: true,
+              params: { location: parentLocation },
+            }),
         }),
       ]);
     } else {
@@ -385,21 +386,28 @@ export default class SingleLocationsView {
         await this.renderParentLocation(),
         createElement("img", {
           src: "../assets/location.svg",
-          width: 30,
-          height: 30,
+          width: 45,
+          height: 45,
         }),
       ]),
       this.renderLocationType(),
       createElement("br"),
-      createElement("div", { class: "description" }, this.location.description),
+      createElement("div", {}, [
+        createElement("div", { class: "location-subheading" }, "Description:"),
+        createElement(
+          "div",
+          { class: "description" },
+          `"${this.location.description}"`
+        ),
+      ]),
       createElement("br"),
       createElement("div", { class: "location-subheading" }, [
         "Notes:",
         createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
           type: "click",
           event: () => {
-            this.creatingNoteType = "Note"
-            this.toggleCreatingNote()
+            this.creatingNoteType = "Note";
+            this.toggleCreatingNote();
           },
         }),
       ]),
@@ -412,8 +420,8 @@ export default class SingleLocationsView {
         createElement("button", { style: "align-self: flex-end;" }, "+ Item", {
           type: "click",
           event: () => {
-            this.creatingNoteType = "Item"
-            this.toggleCreatingNote()
+            this.creatingNoteType = "Item";
+            this.toggleCreatingNote();
           },
         }),
       ]),
@@ -426,8 +434,8 @@ export default class SingleLocationsView {
         createElement("button", { style: "align-self: flex-end;" }, "+ NPC", {
           type: "click",
           event: () => {
-            this.creatingNoteType = "NPC"
-            this.toggleCreatingNote()
+            this.creatingNoteType = "NPC";
+            this.toggleCreatingNote();
           },
         }),
       ]),
