@@ -99,7 +99,7 @@ export default class Clock {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete clock...");
+      // window.alert("Failed to delete clock...");
     }
   };
 
@@ -133,10 +133,10 @@ export default class Clock {
       { class: "btn-red" },
       "Remove Clock"
     );
-    removeButton.addEventListener("click", async () => {
+    removeButton.addEventListener("click", () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
         try {
-          await this.removeClock();
+          this.removeClock();
           this.domComponent.remove();
           const clocksByProject =
             state.clockComponents[`project-${state.currentProject}`];

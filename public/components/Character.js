@@ -30,7 +30,7 @@ export default class Character {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete character...");
+      // window.alert("Failed to delete character...");
     }
   };
 
@@ -39,6 +39,10 @@ export default class Character {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if(formProps.type === "None") formProps.type = null;
+    // update UI
+    this.character.title = formProps.title;
+    this.character.description = formProps.description;
+
     try {
       const res = await fetch(
         `${window.location.origin}/api/edit_character/${this.character.id}`,
@@ -52,7 +56,7 @@ export default class Character {
       if (res.status === 200) {
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to save character...");
+      // window.alert("Failed to save character...");
       console.log(err);
     }
   };
@@ -88,25 +92,24 @@ export default class Character {
         ],
         {
           type: "submit",
-          event: async (e) => {
-            await this.saveCharacter(e);
+          event: (e) => {
+            this.saveCharacter(e);
             this.toggleEdit();
-            this.parentRender();
           },
         }
       ),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Character", {
         type: "click",
-        event: async () => {
+        event: () => {
           if (
             window.confirm(
               `Are you sure you want to delete ${this.character.title}`
             )
           ) {
-            await this.removeCharacter();
+            this.removeCharacter();
             this.toggleEdit();
-            this.parentRender();
+            this.domComponent.remove();
           }
         },
       })

@@ -30,7 +30,7 @@ export default class Location {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete location...");
+      // window.alert("Failed to delete location...");
     }
   };
 
@@ -39,6 +39,11 @@ export default class Location {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if(formProps.type === "None") formProps.type = null;
+    // update UI
+    this.location.title = formProps.title;
+    this.location.description = formProps.description;
+    this.location.type = formProps.type;
+
     try {
       const res = await fetch(
         `${window.location.origin}/api/edit_location/${this.location.id}`,
@@ -52,7 +57,7 @@ export default class Location {
       if (res.status === 200) {
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to save location...");
+      // window.alert("Failed to save location...");
       console.log(err);
     }
   };
@@ -88,26 +93,24 @@ export default class Location {
         ],
         {
           type: "submit",
-          event: async (e) => {
-            await this.saveLocation(e);
+          event: (e) => {
+            this.saveLocation(e);
             this.toggleEdit();
-            this.parentRender();
           },
         }
       ),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Location", {
         type: "click",
-        event: async () => {
+        event: () => {
           if (
             window.confirm(
               `Are you sure you want to delete ${this.location.title}`
             )
           ) {
-            await this.removeLocation();
+            this.removeLocation();
             this.toggleEdit();
-            this.parentRender();
-          }
+            this.domComponent.remove();          }
         },
       })
     );

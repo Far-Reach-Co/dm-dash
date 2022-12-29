@@ -34,7 +34,7 @@ export default class Note {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete note...");
+      // window.alert("Failed to delete note...");
     }
   };
 
@@ -42,6 +42,10 @@ export default class Note {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    // update UI
+    this.title = formProps.title;
+    this.description = formProps.description;
+
     try {
       const res = await fetch(
         `${window.location.origin}/api/edit_note/${this.id}`,
@@ -55,7 +59,7 @@ export default class Note {
       if (res.status === 200) {
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to save note...");
+      // window.alert("Failed to save note...");
       console.log(err);
     }
   };
@@ -88,21 +92,21 @@ export default class Note {
         ],
         {
           type: "submit",
-          event: async (e) => {
-            await this.saveNote(e);
+          event: (e) => {
+            this.saveNote(e);
             this.toggleEdit();
-            this.parentRender();
+
           },
         }
       ),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Note", {
         type: "click",
-        event: async () => {
+        event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            await this.removeNote();
+            this.removeNote();
             this.toggleEdit();
-            this.parentRender();
+            this.domComponent.remove();
           }
         },
       })

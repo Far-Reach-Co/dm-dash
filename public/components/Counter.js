@@ -32,7 +32,7 @@ export default class Counter {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete counter...");
+      // window.alert("Failed to delete counter...");
     }
   };
 
@@ -40,6 +40,8 @@ export default class Counter {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    this.currentCount = formProps.current_count;
+    this.title = formProps.title;
 
     try {
       const res = await fetch(
@@ -54,7 +56,7 @@ export default class Counter {
       if (res.status === 200) {
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to save counter...");
+      // window.alert("Failed to save counter...");
       console.log(err);
     }
   };
@@ -84,21 +86,20 @@ export default class Counter {
         ],
         {
           type: "submit",
-          event: async (e) => {
-            await this.saveCounter(e);
+          event: (e) => {
+            this.saveCounter(e);
             this.toggleEdit();
-            this.parentRender();
           },
         }
       ),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Counter", {
         type: "click",
-        event: async () => {
+        event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            await this.removeCounter();
+            this.removeCounter();
             this.toggleEdit();
-            this.parentRender();
+            this.domComponent.remove();
           }
         },
       })

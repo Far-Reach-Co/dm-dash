@@ -47,7 +47,7 @@ export default class Project {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete project...");
+      // window.alert("Failed to delete project...");
     }
   };
 
@@ -60,7 +60,7 @@ export default class Project {
     const editButton = createElement("button", {style: "margin-right: 10px;"}, "Done");
     editButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
-      await this.saveProject();
+      this.saveProject();
       this.toggleEdit();
     });
     const removeButton = createElement(
@@ -68,9 +68,9 @@ export default class Project {
       { class: "btn-red" },
       "Delete Project"
     );
-    removeButton.addEventListener("click", async () => {
+    removeButton.addEventListener("click", () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        await this.removeProject();
+        this.removeProject();
         this.toggleEdit();
         this.domComponent.remove();
       }
