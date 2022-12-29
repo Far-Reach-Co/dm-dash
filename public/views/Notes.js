@@ -8,7 +8,6 @@ export default class NotesView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
     this.navigate = props.navigate;
-    this.type = props.type;
 
     this.searchTerm = "";
 
@@ -27,7 +26,7 @@ export default class NotesView {
 
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes/${this.type}/${projectId}`
+        `${window.location.origin}/api/get_notes/${projectId}`
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -46,7 +45,6 @@ export default class NotesView {
     if(formProps.location_id === "0") delete formProps.location_id;
     const projectId = state.currentProject;
     formProps.project_id = projectId;
-    formProps.type = this.type;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -58,14 +56,14 @@ export default class NotesView {
       if (res.status === 201) {
       } else throw new Error();
     } catch (err) {
-      window.alert(`Failed to create new ${this.type}...`);
+      window.alert("Failed to create new note");
       console.log(err);
     }
   };
 
   renderCreateNewNote = async () => {
     this.domComponent.append(
-      createElement("div", { class: "component-title" }, `Create new ${this.type}`),
+      createElement("div", { class: "component-title" }, "Create new note"),
       createElement(
         "form",
         {},
@@ -162,7 +160,6 @@ export default class NotesView {
         locationId: note.location_id,
         location: location ? location : null,
         navigate: this.navigate,
-        type: note.type
       });
 
       return elem;
@@ -179,7 +176,7 @@ export default class NotesView {
     // append
     this.domComponent.append(
       createElement("div", {style: "display: flex; flex-direction: column;"}, [
-        createElement("button", { style: "align-self: flex-end; margin-bottom: 10px;" }, `+ ${this.type}`, {
+        createElement("button", { style: "align-self: flex-end; margin-bottom: 10px;" }, "+ Note", {
           type: "click",
           event: this.toggleCreatingNote,
         }),
@@ -195,7 +192,7 @@ export default class NotesView {
           }
         ),
       ]),
-      createElement("h1", {style: "align-self: center;"}, `${this.type} list`),
+      createElement("h1", {style: "align-self: center;"}, "Notes"),
       createElement("br"),
       ...(await this.renderNoteElems())
     );

@@ -94,10 +94,10 @@ class App {
     new CountersView({ domComponent: element });
   };
 
-  renderNotesView = ({ navigate, type }) => {
+  renderNotesView = ({ navigate }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new NotesView({ domComponent: element, navigate, type });
+    new NotesView({ domComponent: element, navigate });
   };
 
   renderProjectsView = ({ navigate }) => {
@@ -167,7 +167,7 @@ class App {
       case "counters":
         return this.renderCountersView();
       case "notes":
-        return this.renderNotesView({navigate: this.navigate, type: params.type });
+        return this.renderNotesView({navigate: this.navigate });
       case "calendars":
         return this.renderCalendersView();
       case "locations":

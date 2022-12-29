@@ -65,7 +65,7 @@ const {
 var router = express.Router();
 
 // notes
-router.get("/get_notes/:type/:project_id", getNotes);
+router.get("/get_notes/:project_id", getNotes);
 router.get("/get_notes_by_location/:location_id", getNotesByLocation);
 router.post("/add_note", addNote);
 router.delete("/remove_note/:id", removeNote);

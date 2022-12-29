@@ -121,7 +121,10 @@ export default class Counter {
           height: 30,
         }),
       ]),
-      createElement("div", {}, `Current Count: ${this.currentCount}`),
+      createElement("div", {style: "display: flex;"}, [
+        createElement("div", {style: "margin-right: 5px;"}, "Current Count:"),
+        createElement("div", {style: "color: var(--green)"}, this.currentCount),
+      ]),
       createElement("br"),
       createElement("button", {}, "Edit", {
         type: "click",

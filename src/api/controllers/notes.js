@@ -17,7 +17,7 @@ async function addNote(req, res, next) {
 
 async function getNotes(req, res, next) {
   try {
-    const data = await getNotesQuery(req.params.project_id, req.params.type);
+    const data = await getNotesQuery(req.params.project_id);
 
     res.send(data.rows);
   } catch (err) {

@@ -1,6 +1,5 @@
 import createElement from "../lib/createElement.js";
 import locationSelect from "../lib/locationSelect.js";
-import state from "../lib/state.js";
 
 export default class Note {
   constructor(props) {
@@ -15,7 +14,6 @@ export default class Note {
     this.locationId = props.locationId;
     this.navigate = props.navigate;
     this.location = props.location;
-    this.type = props.type;
 
     this.edit = false;
 
