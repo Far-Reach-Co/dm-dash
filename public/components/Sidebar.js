@@ -31,7 +31,7 @@ export default class SideBar {
         id: "sidebar-notes",
         title: "notes",
         displayTitle: "Notes",
-        params: {type: "Note"},
+        params: {},
       },
       {
         id: "sidebar-locations",
@@ -39,24 +39,18 @@ export default class SideBar {
         displayTitle: "Locations",
         params: {},
       },
-      {
-        id: "sidebar-items",
-        title: "notes",
-        displayTitle: "Items",
-        params: {type: "Item"},
-      },
-      {
-        id: "sidebar-npcs",
-        title: "notes",
-        displayTitle: "NPCs",
-        params: {type: "NPC"},
-      },
-      {
-        id: "sidebar-enemies",
-        title: "notes",
-        displayTitle: "Enemies",
-        params: {type: "Enemy"},
-      },
+      // {
+      //   id: "sidebar-items",
+      //   title: "notes",
+      //   displayTitle: "Items",
+      //   params: {},
+      // },
+      // {
+      //   id: "sidebar-npcs",
+      //   title: "npcs",
+      //   displayTitle: "NPCs",
+      //   params: {},
+      // },
       {
         id: "sidebar-counters",
         title: "counters",
