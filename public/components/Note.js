@@ -1,5 +1,4 @@
 import createElement from "../lib/createElement.js";
-import locationSelect from "../lib/locationSelect.js";
 
 export default class Note {
   constructor(props) {
@@ -12,8 +11,8 @@ export default class Note {
     this.description = props.description;
     this.dateCreated = props.dateCreated;
     this.locationId = props.locationId;
+    this.characterId = props.characterId;
     this.navigate = props.navigate;
-    this.location = props.location;
 
     this.edit = false;
 
@@ -23,21 +22,6 @@ export default class Note {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  renderLocationInfo = async () => {
-    if (this.location) {
-      return createElement("a", { class: "small-clickable" }, this.location.title, {
-        type: "click",
-        event: () => this.navigate({
-          title: "single-location",
-          sidebar: true,
-          params: { location: this.location },
-        }),
-      });
-    } else {
-      return createElement("div", { style: "display: none;" });
-    }
   };
 
   removeNote = async () => {
@@ -58,7 +42,6 @@ export default class Note {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    if (formProps.location_id === "0") formProps.location_id = null;
     try {
       const res = await fetch(
         `${window.location.origin}/api/edit_note/${this.id}`,
@@ -100,13 +83,6 @@ export default class Note {
             },
             this.description
           ),
-          createElement("br"),
-          createElement(
-            "label",
-            { for: "location_id" },
-            "Location Select (Optional)"
-          ),
-          await locationSelect(this.locationId),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
@@ -154,7 +130,6 @@ export default class Note {
             minute: "numeric",
           })
         ),
-        await this.renderLocationInfo(),
         createElement("img", {
           src: "../assets/note.svg",
           width: 30,

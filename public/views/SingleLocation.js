@@ -219,9 +219,8 @@ export default class SingleLocationView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.project_id = state.currentProject;
     formProps.location_id = this.location.id;
-    const projectId = state.currentProject;
-    formProps.project_id = projectId;
     formProps.character_id = null;
 
     try {
@@ -317,6 +316,7 @@ export default class SingleLocationView {
         description: note.description,
         dateCreated: note.date_created,
         locationId: note.location_id,
+        characterId: note.character_id,
         navigate: this.navigate,
       });
 

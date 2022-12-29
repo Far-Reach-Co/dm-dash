@@ -24,10 +24,9 @@ export default class SingleCharacterView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    formProps.character_id = this.character.id;
-    const projectId = state.currentProject;
-    formProps.project_id = projectId;
+    formProps.project_id = state.currentProject;
     formProps.location_id = null;
+    formProps.character_id = this.character.id;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -121,6 +120,7 @@ export default class SingleCharacterView {
         title: note.title,
         description: note.description,
         dateCreated: note.date_created,
+        locationId: note.location_id,
         characterId: note.character_id,
         navigate: this.navigate,
       });

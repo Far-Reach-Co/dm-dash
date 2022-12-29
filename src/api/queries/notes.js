@@ -16,7 +16,7 @@ async function addNoteQuery(data) {
 
 async function getNotesQuery(projectId) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where project_id = $1 order by date_created desc`,
+    text: /*sql*/ `select * from public."Note" where project_id = $1 and location_id is null and character_id is null order by date_created desc`,
     values: [projectId]
   }
   return await db.query(query)
