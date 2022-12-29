@@ -5,9 +5,11 @@ import ClocksView from "./views/Clocks.js";
 import CalendarsView from "./views/Calendars.js";
 import Sidebar from "./components/Sidebar.js";
 import LocationsView from "./views/Locations.js"
-import SingleLocationsView from "./views/SingleLocation.js";
+import SingleLocationView from "./views/SingleLocation.js";
 import NotesView from "./views/Notes.js";
 import CountersView from "./views/Counters.js";
+import CharactersView from "./views/Characters.js"
+import SingleCharacterView from "./views/SingleCharacter.js";
 
 class App {
   constructor(props) {
@@ -73,7 +75,19 @@ class App {
   renderSingleLocationView = ({ navigate, params }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new SingleLocationsView({ domComponent: element, navigate, params });
+    new SingleLocationView({ domComponent: element, navigate, params });
+  }
+
+  renderCharactersView = ({ navigate }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new CharactersView({ domComponent: element, navigate });
+  }
+
+  renderSingleCharacterView = ({ navigate, params }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new SingleCharacterView({ domComponent: element, navigate, params });
   }
 
   renderCalendersView = () => {
@@ -174,6 +188,10 @@ class App {
         return this.renderLocationsView({navigate: this.navigate});
       case "single-location":
         return this.renderSingleLocationView({navigate: this.navigate, params})
+      case "characters":
+        return this.renderCharactersView({navigate: this.navigate});
+      case "single-character":
+        return this.renderSingleCharacterView({navigate: this.navigate, params})
       case "modules":
         return this.renderModulesView();
       default:

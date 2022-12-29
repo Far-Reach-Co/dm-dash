@@ -5,7 +5,7 @@ import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 
-export default class SingleLocationsView {
+export default class SingleLocationView {
   constructor(props) {
     this.navigate = props.navigate;
     this.params = props.params;
@@ -222,6 +222,7 @@ export default class SingleLocationsView {
     formProps.location_id = this.location.id;
     const projectId = state.currentProject;
     formProps.project_id = projectId;
+    formProps.character_id = null;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -377,7 +378,7 @@ export default class SingleLocationsView {
         type: "click",
         event: () => this.navigate({ title: "locations", sidebar: true }),
       }),
-      createElement("div", { class: "single-location-title" }, [
+      createElement("div", { class: "single-item-title" }, [
         this.location.title,
         await this.renderParentLocation(),
         createElement("img", {
@@ -389,7 +390,7 @@ export default class SingleLocationsView {
       this.renderLocationType(),
       createElement("br"),
       createElement("div", {}, [
-        createElement("div", { class: "location-subheading" }, "Description:"),
+        createElement("div", { class: "single-item-subheading" }, "Description:"),
         createElement(
           "div",
           { class: "description" },
@@ -397,7 +398,7 @@ export default class SingleLocationsView {
         ),
       ]),
       createElement("br"),
-      createElement("div", { class: "location-subheading" }, [
+      createElement("div", { class: "single-item-subheading" }, [
         "Notes:",
         createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
           type: "click",
@@ -413,7 +414,7 @@ export default class SingleLocationsView {
     );
     // render sub locations
     this.domComponent.append(
-      createElement("div", { class: "location-subheading" }, [
+      createElement("div", { class: "single-item-subheading" }, [
         "Sub-Locations:",
         createElement(
           "button",

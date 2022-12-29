@@ -45,12 +45,12 @@ export default class SideBar {
       //   displayTitle: "Items",
       //   params: {},
       // },
-      // {
-      //   id: "sidebar-npcs",
-      //   title: "npcs",
-      //   displayTitle: "NPCs",
-      //   params: {},
-      // },
+      {
+        id: "sidebar-characters",
+        title: "characters",
+        displayTitle: "Characters",
+        params: {},
+      },
       {
         id: "sidebar-counters",
         title: "counters",

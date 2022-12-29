@@ -1,11 +1,11 @@
 import createElement from "../lib/createElement.js";
-import locationTypeSelect from "../lib/locationTypeSelect.js";
+import characterTypeSelect from "../lib/characterTypeSelect.js";
 
-export default class Location {
+export default class Character {
   constructor(props) {
     this.domComponent = props.domComponent;
 
-    this.location = props.location;
+    this.character = props.character;
     this.navigate = props.navigate;
     this.parentRender = props.parentRender;
     this.handleTypeFilterChange = props.handleTypeFilterChange ? props.handleTypeFilterChange : null;
@@ -20,9 +20,9 @@ export default class Location {
     this.render();
   };
 
-  removeLocation = async () => {
+  removeCharacter = async () => {
     const res = await fetch(
-      `${window.location.origin}/api/remove_location/${this.location.id}`,
+      `${window.location.origin}/api/remove_character/${this.character.id}`,
       {
         method: "DELETE",
       }
@@ -30,18 +30,18 @@ export default class Location {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete location...");
+      window.alert("Failed to delete character...");
     }
   };
 
-  saveLocation = async (e) => {
+  saveCharacter = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if(formProps.type === "None") formProps.type = null;
     try {
       const res = await fetch(
-        `${window.location.origin}/api/edit_location/${this.location.id}`,
+        `${window.location.origin}/api/edit_character/${this.character.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -52,7 +52,7 @@ export default class Location {
       if (res.status === 200) {
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to save location...");
+      window.alert("Failed to save character...");
       console.log(err);
     }
   };
@@ -67,7 +67,7 @@ export default class Location {
           createElement("input", {
             id: "title",
             name: "title",
-            value: this.location.title,
+            value: this.character.title,
           }),
           createElement("label", { for: "description" }, "Description"),
           createElement(
@@ -78,33 +78,33 @@ export default class Location {
               cols: "30",
               rows: "7",
             },
-            this.location.description
+            this.character.description
           ),
           createElement("br"),
           createElement("div", {}, "Type Select (Optional)"),
-          locationTypeSelect(null, this.location.type),
+          characterTypeSelect(null, this.character.type),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
         {
           type: "submit",
           event: async (e) => {
-            await this.saveLocation(e);
+            await this.saveCharacter(e);
             this.toggleEdit();
             this.parentRender();
           },
         }
       ),
       createElement("br"),
-      createElement("button", { class: "btn-red" }, "Remove Location", {
+      createElement("button", { class: "btn-red" }, "Remove Character", {
         type: "click",
         event: async () => {
           if (
             window.confirm(
-              `Are you sure you want to delete ${this.location.title}`
+              `Are you sure you want to delete ${this.character.title}`
             )
           ) {
-            await this.removeLocation();
+            await this.removeCharacter();
             this.toggleEdit();
             this.parentRender();
           }
@@ -113,15 +113,15 @@ export default class Location {
     );
   };
 
-  renderLocationType = () => {
-    if (this.location.type) {
+  renderCharacterType = () => {
+    if (this.character.type) {
       return createElement(
         "a",
         { class: "small-clickable" },
-        this.location.type,
+        this.character.type,
         { type: "click", event: () => {
           if(this.handleTypeFilterChange) {
-            this.handleTypeFilterChange(this.location.type);
+            this.handleTypeFilterChange(this.character.type);
           }
         } }
       );
@@ -137,23 +137,23 @@ export default class Location {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.location.title,
-        this.renderLocationType(),
+        this.character.title,
+        this.renderCharacterType(),
         createElement("img", {
-          src: "../assets/location.svg",
+          src: "../assets/character.svg",
           width: 30,
           height: 30,
         }),
       ]),
-      createElement("div", { class: "description" }, this.location.description),
+      createElement("div", { class: "description" }, this.character.description),
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",
         event: () =>
           this.navigate({
-            title: "single-location",
+            title: "single-character",
             sidebar: true,
-            params: { location: this.location },
+            params: { character: this.character },
           }),
       }),
       createElement("button", {}, "Edit", {

@@ -43,6 +43,7 @@ export default class NotesView {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if(formProps.location_id === "0") delete formProps.location_id;
+    if(formProps.character_id === "0") delete formProps.character_id;
     const projectId = state.currentProject;
     formProps.project_id = projectId;
 

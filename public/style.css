@@ -470,7 +470,7 @@ footer {
   white-space: pre-line;
 }
 
-.single-location-title {
+.single-item-title {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -490,7 +490,7 @@ footer {
   color: var(--link-blue);
 }
 
-.location-subheading {
+.single-item-subheading {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;

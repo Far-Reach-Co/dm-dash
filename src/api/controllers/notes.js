@@ -2,9 +2,10 @@ const {
   addNoteQuery,
   getNotesQuery,
   getNotesByLocationQuery,
+  getNotesByCharacterQuery,
   removeNoteQuery,
   editNoteQuery,
-} = require("../queries/Notes.js");
+} = require("../queries/notes.js");
 
 async function addNote(req, res, next) {
   try {
@@ -28,6 +29,16 @@ async function getNotes(req, res, next) {
 async function getNotesByLocation(req, res, next) {
   try {
     const data = await getNotesByLocationQuery(req.params.location_id);
+
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getNotesByCharacter(req, res, next) {
+  try {
+    const data = await getNotesByCharacterQuery(req.params.character_id);
 
     res.send(data.rows);
   } catch (err) {
@@ -59,4 +70,5 @@ module.exports = {
   addNote,
   removeNote,
   editNote,
+  getNotesByCharacter
 };

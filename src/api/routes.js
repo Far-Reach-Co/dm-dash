@@ -52,6 +52,7 @@ const {
   getNotes,
   addNote,
   getNotesByLocation,
+  getNotesByCharacter,
   removeNote,
   editNote,
 } = require("./controllers/notes.js");
@@ -61,12 +62,25 @@ const {
   removeCounter,
   editCounter,
 } = require("./controllers/counters.js");
+const {
+  getCharacters,
+  addCharacter,
+  removeCharacter,
+  editCharacter,
+} = require("./controllers/characters.js");
 
 var router = express.Router();
+
+// characters
+router.get("/get_characters/:project_id", getCharacters);
+router.post("/add_character", addCharacter);
+router.delete("/remove_character/:id", removeCharacter);
+router.post("/edit_character/:id", editCharacter);
 
 // notes
 router.get("/get_notes/:project_id", getNotes);
 router.get("/get_notes_by_location/:location_id", getNotesByLocation);
+router.get("/get_notes_by_character/:character_id", getNotesByCharacter);
 router.post("/add_note", addNote);
 router.delete("/remove_note/:id", removeNote);
 router.post("/edit_note/:id", editNote);
