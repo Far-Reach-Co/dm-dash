@@ -9,7 +9,7 @@ export default class CalendarView {
 
     // creation vars
     this.creatingNewCalendar = false;
-    this.creatingNewMOnths = false;
+    this.creatingNewMonths = false;
     this.creatingNewDaysInWeek = false;
     this.calendarBeingCreated = null;
     this.monthsCreated = [];
@@ -21,7 +21,7 @@ export default class CalendarView {
 
   resetCalendarCreation = () => {
     this.creatingNewCalendar = false;
-    this.creatingNewMOnths = false;
+    this.creatingNewMonths = false;
     this.creatingNewDaysInWeek = false;
     this.calendarBeingCreated = null;
     this.monthsCreated = [];
@@ -82,7 +82,7 @@ export default class CalendarView {
       if (res.status === 201) {
         this.loading = false;
         this.creatingNewCalendar = false;
-        this.creatingNewMOnths = true;
+        this.creatingNewMonths = true;
         this.calendarBeingCreated = { title: formProps.title, id: data.id };
         this.render();
       } else throw new Error();
@@ -183,7 +183,7 @@ export default class CalendarView {
     const infoElem = createElement(
       "small",
       {},
-      "You can change/manage days in the 'open' menu for this calendar after creation"
+      "You can change/manage days in the 'edit' menu for this calendar after creation"
     );
 
     const form = createElement("form", {}, [
@@ -199,7 +199,7 @@ export default class CalendarView {
     form.addEventListener("submit", (e) => {
       this.loading = true;
       this.render();
-      this.newDayInWeek(e)
+      this.newDayInWeek(e);
     });
 
     const completeButton = createElement("button", {}, "Complete");
@@ -209,7 +209,7 @@ export default class CalendarView {
     });
 
     // append
-    if(this.loading) this.domComponent.append(createElement("div", {}, "Loading..."))
+    if (this.loading) return this.domComponent.append(createElement("div", {}, "Loading..."));
     this.domComponent.append(
       titleOfForm,
       infoElem,
@@ -249,7 +249,7 @@ export default class CalendarView {
     const infoElem = createElement(
       "small",
       {},
-      "You can change/manage months in the 'open' menu for this calendar after creation"
+      "You can change/manage months in the 'edit' menu for this calendar after creation"
     );
 
     const form = createElement("form", {}, [
@@ -279,13 +279,13 @@ export default class CalendarView {
 
     const completeButton = createElement("button", {}, "Next");
     completeButton.addEventListener("click", () => {
-      this.creatingNewMOnths = false;
+      this.creatingNewMonths = false;
       this.creatingNewDaysInWeek = true;
       this.render();
     });
 
     // append
-    if(this.loading) this.domComponent.append(createElement("div", {}, "Loading..."))
+    if (this.loading) return this.domComponent.append(createElement("div", {}, "Loading..."));
     this.domComponent.append(
       titleOfForm,
       infoElem,
@@ -303,85 +303,60 @@ export default class CalendarView {
       return this.domComponent.append(createElement("div", {}, "Loading..."));
     }
 
-    const titleOfForm = createElement(
-      "div",
-      { class: "component-title" },
-      "Create new calendar"
-    );
-    const infoElem = createElement(
-      "small",
-      { style: "max-width: 600px;" },
-      "First, provide a title and the current year of your new calendar. Next, you can enter a list of month. Last you can enter a list for 'days of the week'."
-    );
-    const form = createElement("form", {}, [
-      createElement("label", { for: "title" }, "Title"),
-      createElement("input", {
-        id: "title",
-        name: "title",
-        placeholder: "Wyrld Calendar",
-        required: true,
-      }),
-      createElement("br"),
-      createElement("label", { for: "year" }, "Current Year"),
-      createElement("input", {
-        id: "year",
-        name: "year",
-        type: "number",
-        step: "1",
-        min: "1",
-        value: "1",
-        required: true,
-      }),
-      createElement("br"),
-      createElement("button", { type: "submit" }, "Next"),
-    ]);
-    form.addEventListener("submit", async (e) => {
-      this.loading = true;
-      this.render();
-      await this.newCalendar(e);
-    });
-
-    const cancelButton = createElement("button", {}, "Cancel");
-    cancelButton.addEventListener("click", () => {
-      this.creatingNewCalendar = false;
-      this.render();
-    });
-
     this.domComponent.append(
-      titleOfForm,
-      infoElem,
+      createElement("div", { class: "component-title" }, "Create new calendar"),
+      createElement(
+        "small",
+        { style: "max-width: 600px;" },
+        "First, provide a title and the current year of your new calendar. Next, you can enter a list of months. Last you can enter a list for 'days of the week'."
+      ),
       createElement("br"),
-      form,
+      createElement(
+        "form",
+        {},
+        [
+          createElement("label", { for: "title" }, "Title"),
+          createElement("input", {
+            id: "title",
+            name: "title",
+            placeholder: "Wyrld Calendar",
+            required: true,
+          }),
+          createElement("br"),
+          createElement("label", { for: "year" }, "Current Year"),
+          createElement("input", {
+            id: "year",
+            name: "year",
+            type: "number",
+            step: "1",
+            min: "1",
+            value: "1",
+            required: true,
+          }),
+          createElement("br"),
+          createElement("button", { type: "submit" }, "Next"),
+        ],
+        {
+          type: "submit",
+          event: (e) => {
+            this.loading = true;
+            this.render();
+            this.newCalendar(e);
+          },
+        }
+      ),
       createElement("br"),
-      cancelButton
+      createElement("button", {}, "Cancel", {
+        type: "click",
+        event: () => {
+          this.creatingNewCalendar = false;
+          this.render();
+        },
+      })
     );
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    if (this.creatingNewCalendar) {
-      return this.renderNewCalendar();
-    }
-
-    if (this.creatingNewMOnths) {
-      return this.renderNewMonths();
-    }
-
-    if (this.creatingNewDaysInWeek) {
-      return this.renderNewDaysInWeek();
-    }
-
-    const newCalendarButton = createElement(
-      "button",
-      { style: "align-self: flex-end;" },
-      "+ Calendar"
-    );
-    newCalendarButton.addEventListener("click", () => {
-      this.creatingNewCalendar = true;
-      this.render();
-    });
-
+  renderCalendarElems = async () => {
     const calendarData = await this.getCalendars();
 
     const calendarElems = [];
@@ -407,12 +382,43 @@ export default class CalendarView {
       });
     });
 
+    if (calendarElems.length) {
+      return calendarElems;
+    } else return [createElement("div", {}, "None...")];
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.creatingNewCalendar) {
+      return this.renderNewCalendar();
+    }
+
+    if (this.creatingNewMonths) {
+      return this.renderNewMonths();
+    }
+
+    if (this.creatingNewDaysInWeek) {
+      return this.renderNewDaysInWeek();
+    }
+
     // append
     this.domComponent.append(
-      newCalendarButton,
+      createElement(
+        "button",
+        { style: "align-self: flex-end;" },
+        "+ Calendar",
+        {
+          type: "click",
+          event: () => {
+            this.creatingNewCalendar = true;
+            this.render();
+          },
+        }
+      ),
       createElement("h1", { style: "align-self: center;" }, "Calendars"),
       createElement("br"),
-      ...calendarElems
+      ...(await this.renderCalendarElems())
     );
   };
 }

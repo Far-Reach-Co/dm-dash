@@ -165,7 +165,7 @@ export default class Calendar {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete month...");
+      // window.alert("Failed to delete month...");
     }
   };
 
@@ -179,7 +179,7 @@ export default class Calendar {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      window.alert("Failed to delete day...");
+      // window.alert("Failed to delete day...");
     }
   };
 
@@ -205,7 +205,7 @@ export default class Calendar {
           monthUpdateSuccessList.push(data);
         } catch (err) {
           console.log(err);
-          alert("Failed to update month...");
+          // alert("Failed to update month...");
           this.parentComponentRender();
         }
       })
@@ -237,7 +237,7 @@ export default class Calendar {
           dayUpdateSuccessList.push(data);
         } catch (err) {
           console.log(err);
-          alert("Failed to update day...");
+          // alert("Failed to update day...");
           this.parentComponentRender();
         }
       })

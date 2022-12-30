@@ -1,5 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300&display=swap'); */
+/* @import url('https://fonts.googleapis.com/css2?family=Zen+Dots&display=swap'); */
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('./assets/fonts/IBM_Plex_Sans/IBMPlexSans-Regular.ttf') format('woff2');
+}
+
+@font-face {
+  font-family: 'Zen Dots';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./assets//fonts//Zen_Dots/ZenDots-Regular.ttf') format('woff2');
+}
 
 :root {
   --main-white: rgb(227, 227, 227);
