@@ -77,7 +77,14 @@ export default class SingleLocationView {
 
       new Location({
         domComponent: elem,
-        location,
+        location: location,
+        id: location.id,
+        title: location.title,
+        description: location.description,
+        type: location.type,
+        isSub: location.is_sub,
+        parentLocationId: location.parent_location_id,
+        projectId: location.project_id,
         navigate: this.navigate,
         parentRender: this.render,
       });
@@ -220,8 +227,10 @@ export default class SingleLocationView {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.project_id = state.currentProject;
+
     formProps.location_id = this.location.id;
     formProps.character_id = null;
+    formProps.item_id = null;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -317,11 +326,90 @@ export default class SingleLocationView {
         dateCreated: note.date_created,
         locationId: note.location_id,
         characterId: note.character_id,
+        itemId: note.item_id,
         navigate: this.navigate,
       });
 
       return elem;
     });
+  };
+
+  getCharactersByLocation = async () => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_characters_by_location/${this.location.id}`
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  };
+
+  renderCharacters = async () => {
+    let charactersByLocation = await this.getCharactersByLocation();
+    
+    const elemMap = charactersByLocation.map((character) => {
+      const elem = createElement(
+        "div",
+        {
+          id: `character-component-${character.id}`,
+          class: "sub-list-item",
+        },
+        [
+          createElement("div", {}, character.title),
+          createElement("small", {style: "margin-left: 5px"}, `${character.type}`)
+        ],
+        {type: "click", event: () => this.navigate({ title: "single-character", sidebar: true, params: {character} })}
+      );
+
+      return elem;
+    });
+
+    if(elemMap.length) return elemMap;
+    else return [createElement("div", {style: "margin-left: 5px;"}, "None...")]
+  };
+
+  getItemsByLocation = async () => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_items_by_location/${this.location.id}`
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  };
+
+  renderItems = async () => {
+    let itemsByLocation = await this.getItemsByLocation();
+    
+    const elemMap = itemsByLocation.map((item) => {
+      const elem = createElement(
+        "div",
+        {
+          id: `item-component-${item.id}`,
+          class: "sub-list-item",
+        },
+        [
+          createElement("div", {}, item.title),
+          createElement("small", {style: "margin-left: 5px"}, `${item.type}`)
+        ],
+        {type: "click", event: () => this.navigate({ title: "single-item", sidebar: true, params: {item} })}
+      );
+
+      return elem;
+    });
+
+    if(elemMap.length) return elemMap;
+    else return [createElement("div", {style: "margin-left: 5px;"}, "None...")]
   };
 
   renderParentLocation = async () => {
@@ -390,13 +478,23 @@ export default class SingleLocationView {
       this.renderLocationType(),
       createElement("br"),
       createElement("div", {}, [
-        createElement("div", { class: "single-item-subheading" }, "Description:"),
+        createElement(
+          "div",
+          { class: "single-item-subheading" },
+          "Description:"
+        ),
         createElement(
           "div",
           { class: "description" },
           `"${this.location.description}"`
         ),
       ]),
+      createElement("br"),
+      createElement("div", { class: "single-item-subheading" }, "Characters:"),
+      ...(await this.renderCharacters()),
+      createElement("br"),
+      createElement("div", { class: "single-item-subheading" }, "Items:"),
+      ...(await this.renderItems()),
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [
         "Notes:",

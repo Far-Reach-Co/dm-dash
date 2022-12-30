@@ -3,6 +3,7 @@ const {
   getNotesQuery,
   getNotesByLocationQuery,
   getNotesByCharacterQuery,
+  getNotesByItemQuery,
   removeNoteQuery,
   editNoteQuery,
 } = require("../queries/notes.js");
@@ -46,6 +47,16 @@ async function getNotesByCharacter(req, res, next) {
   }
 }
 
+async function getNotesByItem(req, res, next) {
+  try {
+    const data = await getNotesByItemQuery(req.params.item_id);
+
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function removeNote(req, res, next) {
   try {
     const data = await removeNoteQuery(req.params.id);
@@ -70,5 +81,6 @@ module.exports = {
   addNote,
   removeNote,
   editNote,
-  getNotesByCharacter
+  getNotesByCharacter,
+  getNotesByItem
 };

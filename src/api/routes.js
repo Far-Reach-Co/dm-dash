@@ -55,6 +55,7 @@ const {
   getNotesByCharacter,
   removeNote,
   editNote,
+  getNotesByItem,
 } = require("./controllers/notes.js");
 const {
   getCounters,
@@ -64,23 +65,43 @@ const {
 } = require("./controllers/counters.js");
 const {
   getCharacters,
+  getCharactersByLocation,
   addCharacter,
   removeCharacter,
   editCharacter,
 } = require("./controllers/characters.js");
 
+const {
+  getItems,
+  getItemsByLocation,
+  getItemsByCharacter,
+  addItem,
+  removeItem,
+  editItem,
+} = require("./controllers/items.js");
+
 var router = express.Router();
 
 // characters
 router.get("/get_characters/:project_id", getCharacters);
+router.get("/get_characters_by_location/:location_id", getCharactersByLocation);
 router.post("/add_character", addCharacter);
 router.delete("/remove_character/:id", removeCharacter);
 router.post("/edit_character/:id", editCharacter);
+
+// items
+router.get("/get_items/:project_id", getItems);
+router.get("/get_items_by_location/:location_id", getItemsByLocation);
+router.get("/get_items_by_character/:character_id", getItemsByCharacter);
+router.post("/add_item", addItem);
+router.delete("/remove_item/:id", removeItem);
+router.post("/edit_item/:id", editItem);
 
 // notes
 router.get("/get_notes/:project_id", getNotes);
 router.get("/get_notes_by_location/:location_id", getNotesByLocation);
 router.get("/get_notes_by_character/:character_id", getNotesByCharacter);
+router.get("/get_notes_by_item/:item_id", getNotesByItem);
 router.post("/add_note", addNote);
 router.delete("/remove_note/:id", removeNote);
 router.post("/edit_note/:id", editNote);

@@ -10,6 +10,8 @@ import NotesView from "./views/Notes.js";
 import CountersView from "./views/Counters.js";
 import CharactersView from "./views/Characters.js"
 import SingleCharacterView from "./views/SingleCharacter.js";
+import ItemsView from "./views/Items.js"
+import SingleItemView from "./views/SingleItem.js";
 
 class App {
   constructor(props) {
@@ -88,6 +90,18 @@ class App {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new SingleCharacterView({ domComponent: element, navigate, params });
+  }
+
+  renderItemsView = ({ navigate }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new ItemsView({ domComponent: element, navigate });
+  }
+
+  renderSingleItemView = ({ navigate, params }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new SingleItemView({ domComponent: element, navigate, params });
   }
 
   renderCalendersView = () => {
@@ -192,6 +206,10 @@ class App {
         return this.renderCharactersView({navigate: this.navigate});
       case "single-character":
         return this.renderSingleCharacterView({navigate: this.navigate, params})
+      case "items":
+        return this.renderItemsView({navigate: this.navigate});
+      case "single-item":
+        return this.renderSingleItemView({navigate: this.navigate, params})
       case "modules":
         return this.renderModulesView();
       default:

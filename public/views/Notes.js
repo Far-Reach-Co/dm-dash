@@ -126,7 +126,8 @@ export default class NotesView {
         description: note.description,
         dateCreated: note.date_created,
         locationId: note.location_id,
-        characterId: note.characterId,
+        characterId: note.character_id,
+        itemId: note.item_id,
         navigate: this.navigate,
       });
 
@@ -150,7 +151,7 @@ export default class NotesView {
         }),
         createElement(
           "input",
-          { placeholder: "Search", value: this.searchTerm, style: "align-self: flex-end;" },
+          { placeholder: "Search Notes", value: this.searchTerm, style: "align-self: flex-end;" },
           null,
           {
             type: "change",

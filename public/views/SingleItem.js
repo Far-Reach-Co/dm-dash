@@ -2,12 +2,13 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
+import characterSelect from "../lib/characterSelect.js";
 
-export default class SingleCharacterView {
+export default class SingleItemView {
   constructor(props) {
     this.navigate = props.navigate;
     this.params = props.params;
-    this.character = this.params.character;
+    this.item = this.params.item;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -22,11 +23,21 @@ export default class SingleCharacterView {
   };
 
   updateCurrentLocation = (newLocationId) => {
-    fetch(`${window.location.origin}/api/edit_character/${this.character.id}`, {
+    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         location_id: newLocationId,
+      }),
+    });
+  };
+
+  updateCurrentCharacter= (newCharacterId) => {
+    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        character_id: newCharacterId,
       }),
     });
   };
@@ -37,9 +48,9 @@ export default class SingleCharacterView {
     const formProps = Object.fromEntries(formData);
     formProps.project_id = state.currentProject;
 
-    formProps.character_id = this.character.id;
+    formProps.item_id = this.item.id;
     formProps.location_id = null;
-    formProps.item_id = null;
+    formProps.character_id = null;
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
@@ -61,7 +72,7 @@ export default class SingleCharacterView {
       createElement(
         "div",
         { class: "component-title" },
-        `Create new note for ${this.character.title}`
+        `Create new note for ${this.item.title}`
       ),
       createElement(
         "form",
@@ -102,10 +113,10 @@ export default class SingleCharacterView {
     );
   };
 
-  getNotesByCharacter = async () => {
+  getNotesByItem = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_character/${this.character.id}`
+        `${window.location.origin}/api/get_notes_by_item/${this.item.id}`
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -117,9 +128,9 @@ export default class SingleCharacterView {
     }
   };
 
-  renderCharacterNotes = async () => {
-    let notesByCharacter = await this.getNotesByCharacter();
-    return notesByCharacter.map((note) => {
+  renderItemNotes = async () => {
+    let notesByItem = await this.getNotesByItem();
+    return notesByItem.map((note) => {
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
         class: "sub-view-component",
@@ -143,53 +154,14 @@ export default class SingleCharacterView {
     });
   };
 
-  renderCharacterType = () => {
-    if (this.character.type) {
+  renderItemType = () => {
+    if (this.item.type) {
       return createElement(
         "small",
         { style: "color: var(--light-gray);" },
-        this.character.type
+        this.item.type
       );
     } else return createElement("div", { style: "display: none;" });
-  };
-
-  getItemsByCharacter = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_items_by_character/${this.character.id}`
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
-  renderItems = async () => {
-    let itemsByCharacter = await this.getItemsByCharacter();
-    
-    const elemMap = itemsByCharacter.map((item) => {
-      const elem = createElement(
-        "div",
-        {
-          id: `item-component-${item.id}`,
-          class: "sub-list-item",
-        },
-        [
-          createElement("div", {}, item.title),
-          createElement("small", {style: "margin-left: 5px"}, `${item.type}`)
-        ],
-        {type: "click", event: () => this.navigate({ title: "single-item", sidebar: true, params: {item} })}
-      );
-
-      return elem;
-    });
-
-    if(elemMap.length) return elemMap;
-    else return [createElement("div", {style: "margin-left: 5px;"}, "None...")]
   };
 
   render = async () => {
@@ -201,31 +173,42 @@ export default class SingleCharacterView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, "← Characters", {
+      createElement("a", { class: "back-button" }, "← Items", {
         type: "click",
-        event: () => this.navigate({ title: "characters", sidebar: true }),
+        event: () => this.navigate({ title: "items", sidebar: true }),
       }),
       createElement("div", { class: "single-item-title" }, [
-        this.character.title,
+        this.item.title,
         createElement(
           "div",
           { style: "display: flex; flex-direction: column;" },
           [
             createElement("small", {}, "Current Location"),
             await locationSelect(
-              this.character.location_id,
+              this.item.location_id,
               null,
               this.updateCurrentLocation
             ),
           ]
         ),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("small", {}, "With Character"),
+            await characterSelect(
+              this.item.character_id,
+              this.updateCurrentCharacter
+            ),
+          ]
+        ),
         createElement("img", {
-          src: "../assets/character.svg",
+          src: "../assets/item.svg",
           width: 45,
           height: 45,
         }),
       ]),
-      this.renderCharacterType(),
+      this.renderItemType(),
       createElement("br"),
       createElement("div", {}, [
         createElement(
@@ -236,12 +219,9 @@ export default class SingleCharacterView {
         createElement(
           "div",
           { class: "description" },
-          `"${this.character.description}"`
+          `"${this.item.description}"`
         ),
       ]),
-      createElement("br"),
-      createElement("div", { class: "single-item-subheading" }, "Items:"),
-      ...(await this.renderItems()),
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [
         "Notes:",
@@ -253,7 +233,7 @@ export default class SingleCharacterView {
         }),
       ]),
       createElement("div", { class: "sub-view" }, [
-        ...(await this.renderCharacterNotes()),
+        ...(await this.renderItemNotes()),
       ]),
       createElement("br")
     );

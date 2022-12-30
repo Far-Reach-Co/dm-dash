@@ -122,9 +122,41 @@ export default class Counter {
           height: 30,
         }),
       ]),
-      createElement("div", {style: "display: flex;"}, [
-        createElement("div", {style: "margin-right: 5px;"}, "Current Count:"),
-        createElement("div", {style: "color: var(--green)"}, this.currentCount),
+      createElement("div", { style: "display: flex;" }, [
+        createElement("div", { style: "margin-right: 5px;" }, "Current Count:"),
+        createElement(
+          "div",
+          { style: "color: var(--green); margin-right: 20px;" },
+          this.currentCount
+        ),
+        createElement("button", { class: "move-btn" }, "▼", {
+          type: "click",
+          event: () => {
+            this.currentCount--;
+            this.render();
+            fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                current_count: this.currentCount,
+              }),
+            });
+          },
+        }),
+        createElement("button", { class: "move-btn" }, "▲", {
+          type: "click",
+          event: () => {
+            this.currentCount++;
+            this.render();
+            fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                current_count: this.currentCount,
+              }),
+            });
+          },
+        }),
       ]),
       createElement("br"),
       createElement("button", {}, "Edit", {

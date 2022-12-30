@@ -1,18 +1,19 @@
 import createElement from "../lib/createElement.js";
-import locationTypeSelect from "../lib/locationTypeSelect.js";
+import itemTypeSelect from "../lib/itemTypeSelect.js";
 
-export default class Location {
+export default class Item {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.location = props.location;
+    this.item = props.item;
     this.id = props.id;
     this.title = props.title;
     this.description = props.description;
-    this.type = props.type;
-    this.isSub = props.isSub;
-    this.parentLocationId = props.parentLocationId;
+    this.title = props.title;
     this.projectId = props.projectId;
-
+    this.locationId = props.locationId;
+    this.characterId = props.characterId;
+    this.type = props.type;
+    
     this.navigate = props.navigate;
     this.parentRender = props.parentRender;
     this.handleTypeFilterChange = props.handleTypeFilterChange ? props.handleTypeFilterChange : null;
@@ -27,9 +28,9 @@ export default class Location {
     this.render();
   };
 
-  removeLocation = async () => {
+  removeItem = async () => {
     const res = await fetch(
-      `${window.origin}/api/remove_location/${this.id}`,
+      `${window.location.origin}/api/remove_item/${this.id}`,
       {
         method: "DELETE",
       }
@@ -37,11 +38,11 @@ export default class Location {
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
     } else {
-      // window.alert("Failed to delete location...");
+      // window.alert("Failed to delete item...");
     }
   };
 
-  saveLocation = async (e) => {
+  saveItem = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
@@ -49,11 +50,10 @@ export default class Location {
     // update UI
     this.title = formProps.title;
     this.description = formProps.description;
-    this.type = formProps.type;
 
     try {
       const res = await fetch(
-        `${window.origin}/api/edit_location/${this.id}`,
+        `${window.location.origin}/api/edit_item/${this.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -64,7 +64,7 @@ export default class Location {
       if (res.status === 200) {
       } else throw new Error();
     } catch (err) {
-      // window.alert("Failed to save location...");
+      // window.alert("Failed to save item...");
       console.log(err);
     }
   };
@@ -94,20 +94,20 @@ export default class Location {
           ),
           createElement("br"),
           createElement("div", {}, "Type Select (Optional)"),
-          locationTypeSelect(null, this.type),
+          itemTypeSelect(null, this.type),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
         {
           type: "submit",
           event: (e) => {
-            this.saveLocation(e);
+            this.saveItem(e);
             this.toggleEdit();
           },
         }
       ),
       createElement("br"),
-      createElement("button", { class: "btn-red" }, "Remove Location", {
+      createElement("button", { class: "btn-red" }, "Remove Item", {
         type: "click",
         event: () => {
           if (
@@ -115,15 +115,16 @@ export default class Location {
               `Are you sure you want to delete ${this.title}`
             )
           ) {
-            this.removeLocation();
+            this.removeItem();
             this.toggleEdit();
-            this.domComponent.remove();          }
+            this.domComponent.remove();
+          }
         },
       })
     );
   };
 
-  renderLocationType = () => {
+  renderItemType = () => {
     if (this.type) {
       return createElement(
         "a",
@@ -148,9 +149,9 @@ export default class Location {
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         this.title,
-        this.renderLocationType(),
+        this.renderItemType(),
         createElement("img", {
-          src: "../assets/location.svg",
+          src: "../assets/item.svg",
           width: 30,
           height: 30,
         }),
@@ -161,9 +162,9 @@ export default class Location {
         type: "click",
         event: () =>
           this.navigate({
-            title: "single-location",
+            title: "single-item",
             sidebar: true,
-            params: { location: this.location },
+            params: { item: this.item },
           }),
       }),
       createElement("button", {}, "Edit", {

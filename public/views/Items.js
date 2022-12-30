@@ -1,29 +1,29 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import Character from "../components/Character.js";
-import characterTypeSelect from "../lib/characterTypeSelect.js";
+import Item from "../components/Item.js";
+import itemTypeSelect from "../lib/itemTypeSelect.js";
 
-export default class CharactersView {
+export default class ItemsView {
   constructor(props) {
     this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
     this.searchTerm = "";
 
-    this.creatingCharacter = false;
+    this.creatingItem = false;
 
     this.render();
   }
 
-  toggleCreatingCharacter = () => {
-    this.creatingCharacter = !this.creatingCharacter;
+  toggleCreatingItem = () => {
+    this.creatingItem = !this.creatingItem;
     this.render();
   };
 
-  getCharacters = async () => {
+  getItems = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_characters/${state.currentProject}`
+        `${window.location.origin}/api/get_items/${state.currentProject}`
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -34,7 +34,7 @@ export default class CharactersView {
     }
   };
 
-  newCharacter = async (e) => {
+  newItem = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
@@ -43,7 +43,7 @@ export default class CharactersView {
     if (formProps.type === "None") formProps.type = null;
 
     try {
-      const res = await fetch(`${window.location.origin}/api/add_character`, {
+      const res = await fetch(`${window.location.origin}/api/add_item`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formProps),
@@ -53,23 +53,23 @@ export default class CharactersView {
         this.render();
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to create new character...");
+      window.alert("Failed to create new item...");
       console.log(err);
     }
   };
 
-  renderCreatingCharacter = async () => {
+  renderCreatingItem = async () => {
     const titleOfForm = createElement(
       "div",
       { class: "component-title" },
-      "Create new character"
+      "Create new item"
     );
     const form = createElement("form", {}, [
       createElement("label", { for: "title" }, "Title"),
       createElement("input", {
         id: "title",
         name: "title",
-        placeholder: "Character Title",
+        placeholder: "Item Title",
         required: true,
       }),
       createElement("label", { for: "description" }, "Description"),
@@ -79,18 +79,18 @@ export default class CharactersView {
       }),
       createElement("br"),
       createElement("div", {}, "Type Select (Optional)"),
-      characterTypeSelect(null, null),
+      itemTypeSelect(null, null),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
-      await this.newCharacter(e);
-      this.toggleCreatingCharacter();
+      await this.newItem(e);
+      this.toggleCreatingItem();
     });
 
     const cancelButton = createElement("button", {}, "Cancel");
     cancelButton.addEventListener("click", () => {
-      this.toggleCreatingCharacter();
+      this.toggleCreatingItem();
     });
 
     this.domComponent.append(
@@ -102,36 +102,37 @@ export default class CharactersView {
     );
   };
 
-  renderCharactersElems = async () => {
-    let characterData = await this.getCharacters();
+  renderItemsElems = async () => {
+    let itemData = await this.getItems();
     // handle fitlers and search
     if (this.filter) {
-      characterData = characterData.filter((character) => {
-        return character.type && character.type === this.filter;
+      itemData = itemData.filter((item) => {
+        return item.type && item.type === this.filter;
       });
     }
     if (this.searchTerm !== "") {
-      characterData = characterData.filter((character) => {
-        return character.title.toLowerCase().includes(this.searchTerm.toLowerCase());
+      itemData = itemData.filter((item) => {
+        return item.title.toLowerCase().includes(this.searchTerm.toLowerCase());
       });
     }
 
-    const charactersMap = characterData.map((character) => {
+    const itemsMap = itemData.map((item) => {
       // create element
       const elem = createElement("div", {
-        id: `character-component-${character.id}`,
+        id: `item-component-${item.id}`,
         class: "component",
       });
 
-      new Character({
+      new Item({
         domComponent: elem,
-        character: character,
-        id: character.id,
-        title: character.title,
-        description: character.description,
-        projectId: character.project_id,
-        locationId: character.location_id,
-        type: character.type,
+        item: item,
+        id: item.id,
+        title: item.title,
+        description: item.description,
+        projectId: item.project_id,
+        locationId: item.location_id,
+        characterId: item.character_id,
+        type: item.type,
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,
@@ -140,7 +141,7 @@ export default class CharactersView {
       return elem;
     });
 
-    if (charactersMap.length) return charactersMap;
+    if (itemsMap.length) return itemsMap;
     else return [createElement("div", {}, "None...")];
   };
 
@@ -153,11 +154,11 @@ export default class CharactersView {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    if (this.creatingCharacter) {
-      return this.renderCreatingCharacter();
+    if (this.creatingItem) {
+      return this.renderCreatingItem();
     }
 
-    const characterElems = await this.renderCharactersElems();
+    const itemElems = await this.renderItemsElems();
     // append
     this.domComponent.append(
       createElement(
@@ -166,21 +167,21 @@ export default class CharactersView {
         [
           createElement("div", {style: "display: flex; flex-direction: column;"}, [
             createElement("small", {}, "Filter by type"),
-            characterTypeSelect(this.handleTypeFilterChange, this.filter),
+            itemTypeSelect(this.handleTypeFilterChange, this.filter),
           ]),
           createElement("div", {style: "display: flex; flex-direction: column;"}, [
             createElement(
               "button",
               { style: "align-self: flex-end; margin-bottom: 10px;" },
-              "+ Character",
+              "+ Item",
               {
                 type: "click",
-                event: this.toggleCreatingCharacter,
+                event: this.toggleCreatingItem,
               }
             ),
             createElement(
               "input",
-              { placeholder: "Search Characters", value: this.searchTerm },
+              { placeholder: "Search Items", value: this.searchTerm },
               null,
               {
                 type: "change",
@@ -192,9 +193,9 @@ export default class CharactersView {
           ])
         ]
       ),
-      createElement("h1", { style: "align-self: center;" }, "Characters"),
+      createElement("h1", { style: "align-self: center;" }, "Items"),
       createElement("br"),
-      ...characterElems
+      ...itemElems
     );
   };
 }

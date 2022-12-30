@@ -1,7 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "./state.js";
 
-export default async function locationSelect(selectedLocation, locationToSkip) {
+export default async function locationSelect(selectedLocation, locationToSkip, onChangeCallback) {
   async function getLocations() {
     try {
       const res = await fetch(
@@ -54,7 +54,7 @@ export default async function locationSelect(selectedLocation, locationToSkip) {
         { value: location.id },
         location.title
       );
-      if (selectedLocation === location.id) elem.selected = true;
+      if (selectedLocation == location.id) elem.selected = true;
       locationElemsList.push(elem);
     });
     
@@ -67,6 +67,9 @@ export default async function locationSelect(selectedLocation, locationToSkip) {
     [
       createElement("option", { value: 0 }, "None"),
       ...(await renderLocationSelectOptions()),
-    ]
+    ],
+    {type: "change", event: (e) => {
+      if(onChangeCallback) onChangeCallback(e.target.value);
+    }}
   );
 }

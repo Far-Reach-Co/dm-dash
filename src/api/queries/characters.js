@@ -2,12 +2,13 @@ const db = require('../dbconfig')
 
 async function addCharacterQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Character" (project_id, title, description, type) values($1,$2,$3,$4) returning *`,
+    text: /*sql*/ `insert into public."Character" (project_id, title, description, type, location_id) values($1,$2,$3,$4,$5) returning *`,
     values: [
       data.project_id,
       data.title,
       data.description,
-      data.type
+      data.type,
+      data.location_id
     ]
   }
   return await db.query(query)
@@ -17,6 +18,14 @@ async function getCharactersQuery(projectId) {
   const query = {
     text: /*sql*/ `select * from public."Character" where project_id = $1 order by title asc`,
     values: [projectId]
+  }
+  return await db.query(query)
+}
+
+async function getCharactersByLocationQuery(locationId) {
+  const query = {
+    text: /*sql*/ `select * from public."Character" where location_id = $1 order by title asc`,
+    values: [locationId]
   }
   return await db.query(query)
 }
@@ -55,6 +64,7 @@ async function editCharacterQuery(id, data) {
 module.exports = {
   addCharacterQuery,
   getCharactersQuery,
+  getCharactersByLocationQuery,
   removeCharacterQuery,
   editCharacterQuery
 }

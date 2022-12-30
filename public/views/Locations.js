@@ -126,7 +126,14 @@ export default class LocationsView {
 
       new Location({
         domComponent: elem,
-        location,
+        location: location,
+        id: location.id,
+        title: location.title,
+        description: location.description,
+        type: location.type,
+        isSub: location.is_sub,
+        parentLocationId: location.parent_location_id,
+        projectId: location.project_id,
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,
@@ -159,8 +166,8 @@ export default class LocationsView {
         "div",
         { style: "display: flex; justify-content: space-between; align-items: flex-end;" },
         [
-          createElement("div", {}, [
-            createElement("div", {}, "Filter by type"),
+          createElement("div", {style: "display: flex; flex-direction: column;"}, [
+            createElement("small", {}, "Filter by type"),
             locationTypeSelect(this.handleTypeFilterChange, this.filter),
           ]),
           createElement("div", {style: "display: flex; flex-direction: column;"}, [

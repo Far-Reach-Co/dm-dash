@@ -12,6 +12,7 @@ export default class Note {
     this.dateCreated = props.dateCreated;
     this.locationId = props.locationId;
     this.characterId = props.characterId;
+    this.itemId = props.itemId;
     this.navigate = props.navigate;
 
     this.edit = false;

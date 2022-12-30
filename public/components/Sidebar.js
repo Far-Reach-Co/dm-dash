@@ -39,12 +39,12 @@ export default class SideBar {
         displayTitle: "Locations",
         params: {},
       },
-      // {
-      //   id: "sidebar-items",
-      //   title: "notes",
-      //   displayTitle: "Items",
-      //   params: {},
-      // },
+      {
+        id: "sidebar-items",
+        title: "items",
+        displayTitle: "Items",
+        params: {},
+      },
       {
         id: "sidebar-characters",
         title: "characters",

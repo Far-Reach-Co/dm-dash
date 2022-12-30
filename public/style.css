@@ -208,6 +208,7 @@ select {
   border-radius: var(--border-radius);
   padding: 2px 4px;
   font: inherit;
+  color: var(--main-white);
   font-size: 18px;
   text-shadow: inherit;
   cursor: pointer;
@@ -496,6 +497,15 @@ footer {
   color: var(--green);
 }
 
+.single-item-title select {
+  font-size: 15px;
+  padding: 1px 2px;
+}
+.single-item-title button {
+  font-size: 15px;
+  padding: 1px 2px;
+}
+
 .note-date {
   font-size: 12px;
   color: var(--light-gray);
@@ -511,4 +521,25 @@ footer {
   justify-content: space-between;
   align-items: flex-end;
   color: var(--orange3);
+}
+
+.sub-list-item {
+  margin: 6px;
+  width: fit-content;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 3px 6px;
+  border: 2px solid var(--blue);
+  cursor: pointer;
+  background-color: var(--purple);
+}
+
+.sub-list-item div {
+  color: var(--link-blue);
+}
+
+.sub-list-item:hover {
+  background-color: var(--blue);
 }

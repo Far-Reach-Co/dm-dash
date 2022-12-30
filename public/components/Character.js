@@ -6,6 +6,14 @@ export default class Character {
     this.domComponent = props.domComponent;
 
     this.character = props.character;
+    this.id = props.id;
+    this.title = props.title;
+    this.description = props.description;
+    this.title = props.title;
+    this.projectId = props.projectId;
+    this.locationId = props.locationId;
+    this.type = props.type;
+    
     this.navigate = props.navigate;
     this.parentRender = props.parentRender;
     this.handleTypeFilterChange = props.handleTypeFilterChange ? props.handleTypeFilterChange : null;
@@ -22,7 +30,7 @@ export default class Character {
 
   removeCharacter = async () => {
     const res = await fetch(
-      `${window.location.origin}/api/remove_character/${this.character.id}`,
+      `${window.location.origin}/api/remove_character/${this.id}`,
       {
         method: "DELETE",
       }
@@ -40,12 +48,12 @@ export default class Character {
     const formProps = Object.fromEntries(formData);
     if(formProps.type === "None") formProps.type = null;
     // update UI
-    this.character.title = formProps.title;
-    this.character.description = formProps.description;
+    this.title = formProps.title;
+    this.description = formProps.description;
 
     try {
       const res = await fetch(
-        `${window.location.origin}/api/edit_character/${this.character.id}`,
+        `${window.location.origin}/api/edit_character/${this.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -71,7 +79,7 @@ export default class Character {
           createElement("input", {
             id: "title",
             name: "title",
-            value: this.character.title,
+            value: this.title,
           }),
           createElement("label", { for: "description" }, "Description"),
           createElement(
@@ -82,11 +90,11 @@ export default class Character {
               cols: "30",
               rows: "7",
             },
-            this.character.description
+            this.description
           ),
           createElement("br"),
           createElement("div", {}, "Type Select (Optional)"),
-          characterTypeSelect(null, this.character.type),
+          characterTypeSelect(null, this.type),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
@@ -104,7 +112,7 @@ export default class Character {
         event: () => {
           if (
             window.confirm(
-              `Are you sure you want to delete ${this.character.title}`
+              `Are you sure you want to delete ${this.title}`
             )
           ) {
             this.removeCharacter();
@@ -117,14 +125,14 @@ export default class Character {
   };
 
   renderCharacterType = () => {
-    if (this.character.type) {
+    if (this.type) {
       return createElement(
         "a",
         { class: "small-clickable" },
-        this.character.type,
+        this.type,
         { type: "click", event: () => {
           if(this.handleTypeFilterChange) {
-            this.handleTypeFilterChange(this.character.type);
+            this.handleTypeFilterChange(this.type);
           }
         } }
       );
@@ -140,7 +148,7 @@ export default class Character {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.character.title,
+        this.title,
         this.renderCharacterType(),
         createElement("img", {
           src: "../assets/character.svg",
@@ -148,7 +156,7 @@ export default class Character {
           height: 30,
         }),
       ]),
-      createElement("div", { class: "description" }, this.character.description),
+      createElement("div", { class: "description" }, this.description),
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",

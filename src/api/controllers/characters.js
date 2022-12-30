@@ -1,6 +1,7 @@
 const {
   addCharacterQuery,
   getCharactersQuery,
+  getCharactersByLocationQuery,
   removeCharacterQuery,
   editCharacterQuery,
 } = require("../queries/characters.js");
@@ -17,6 +18,16 @@ async function addCharacter(req, res, next) {
 async function getCharacters(req, res, next) {
   try {
     const data = await getCharactersQuery(req.params.project_id);
+
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getCharactersByLocation(req, res, next) {
+  try {
+    const data = await getCharactersByLocationQuery(req.params.location_id);
 
     res.send(data.rows);
   } catch (err) {
@@ -44,6 +55,7 @@ async function editCharacter(req, res, next) {
 
 module.exports = {
   getCharacters,
+  getCharactersByLocation,
   addCharacter,
   removeCharacter,
   editCharacter,

@@ -2,13 +2,14 @@ const db = require('../dbconfig')
 
 async function addNoteQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, character_id) values($1,$2,$3,$4,$5) returning *`,
+    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, character_id, item_id) values($1,$2,$3,$4,$5,$6) returning *`,
     values: [
       data.title,
       data.description,
       data.project_id,
       data.location_id,
-      data.character_id
+      data.character_id,
+      data.item_id
     ]
   }
   return await db.query(query)
@@ -16,7 +17,7 @@ async function addNoteQuery(data) {
 
 async function getNotesQuery(projectId) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where project_id = $1 and location_id is null and character_id is null order by date_created desc`,
+    text: /*sql*/ `select * from public."Note" where project_id = $1 and location_id is null and character_id is null and item_id is null order by date_created desc`,
     values: [projectId]
   }
   return await db.query(query)
@@ -34,6 +35,14 @@ async function getNotesByCharacterQuery(characterId) {
   const query = {
     text: /*sql*/ `select * from public."Note" where character_id = $1 order by date_created desc`,
     values: [characterId]
+  }
+  return await db.query(query)
+}
+
+async function getNotesByItemQuery(item) {
+  const query = {
+    text: /*sql*/ `select * from public."Note" where item_id = $1 order by date_created desc`,
+    values: [item]
   }
   return await db.query(query)
 }
@@ -74,6 +83,7 @@ module.exports = {
   getNotesQuery,
   getNotesByLocationQuery,
   getNotesByCharacterQuery,
+  getNotesByItemQuery,
   removeNoteQuery,
   editNoteQuery
 }
