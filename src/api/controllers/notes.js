@@ -19,7 +19,12 @@ async function addNote(req, res, next) {
 
 async function getNotes(req, res, next) {
   try {
-    const data = await getNotesQuery(req.params.project_id);
+    const data = await getNotesQuery(
+      req.params.project_id,
+      req.params.limit,
+      req.params.offset,
+      req.params.keyword
+    );
 
     res.send(data.rows);
   } catch (err) {
@@ -82,5 +87,5 @@ module.exports = {
   removeNote,
   editNote,
   getNotesByCharacter,
-  getNotesByItem
+  getNotesByItem,
 };

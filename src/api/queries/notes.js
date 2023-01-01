@@ -15,10 +15,18 @@ async function addNoteQuery(data) {
   return await db.query(query)
 }
 
-async function getNotesQuery(projectId) {
-  const query = {
-    text: /*sql*/ `select * from public."Note" where project_id = $1 and location_id is null and character_id is null and item_id is null order by date_created desc`,
-    values: [projectId]
+async function getNotesQuery(projectId, limit, offset, keyword) {
+  let query;
+  if(!keyword) {
+    query = {
+      text: /*sql*/ `select * from public."Note" where project_id = $1 and location_id is null and character_id is null and item_id is null order by date_created desc limit $2 offset $3`,
+      values: [projectId, limit, offset]
+    }
+    return await db.query(query)
+  }
+  query = {
+    text: /*sql*/ `select * from public."Note" where project_id = $1 and position($4 in lower(title))>0 and location_id is null and character_id is null and item_id is null order by date_created desc limit $2 offset $3`,
+    values: [projectId, limit, offset, keyword]
   }
   return await db.query(query)
 }

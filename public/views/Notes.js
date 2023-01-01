@@ -9,6 +9,8 @@ export default class NotesView {
     this.navigate = props.navigate;
 
     this.searchTerm = "";
+    this.limit = 20;
+    this.offset = 0;
 
     this.creatingNewNote = false;
 
@@ -25,7 +27,7 @@ export default class NotesView {
 
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes/${projectId}`
+        `${window.location.origin}/api/get_notes/${projectId}/${this.limit}/${this.offset}/${this.searchTerm}`
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -44,7 +46,7 @@ export default class NotesView {
     formProps.project_id = state.currentProject;
     formProps.location_id = null;
     formProps.character_id = null;
-    
+
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
         method: "POST",
@@ -80,7 +82,7 @@ export default class NotesView {
             name: "description",
             required: true,
             cols: "30",
-            rows: "7"
+            rows: "7",
           }),
           createElement("br"),
           createElement("button", { type: "submit" }, "Create"),
@@ -103,18 +105,12 @@ export default class NotesView {
 
   renderNoteElems = async () => {
     let noteData = await this.getNotes();
-    // filter by search
-    if (this.searchTerm !== "") {
-      noteData = noteData.filter((note) => {
-        return note.title.toLowerCase().includes(this.searchTerm.toLowerCase());
-      });
-    }
 
     return noteData.map((note) => {
       // create element
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
-        class: "component"
+        class: "component",
       });
 
       new Note({
@@ -144,26 +140,48 @@ export default class NotesView {
 
     // append
     this.domComponent.append(
-      createElement("div", {style: "display: flex; flex-direction: column;"}, [
-        createElement("button", { style: "align-self: flex-end; margin-bottom: 10px;" }, "+ Note", {
-          type: "click",
-          event: this.toggleCreatingNote,
-        }),
-        createElement(
-          "input",
-          { placeholder: "Search Notes", value: this.searchTerm, style: "align-self: flex-end;" },
-          null,
-          {
-            type: "change",
-            event: (e) => {
-              (this.searchTerm = e.target.value), this.render();
+      createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement(
+            "button",
+            { style: "align-self: flex-end; margin-bottom: 10px;" },
+            "+ Note",
+            {
+              type: "click",
+              event: this.toggleCreatingNote,
+            }
+          ),
+          createElement(
+            "input",
+            {
+              placeholder: "Search Notes",
+              value: this.searchTerm,
+              style: "align-self: flex-end;",
             },
-          }
-        ),
-      ]),
-      createElement("h1", {style: "align-self: center;"}, "Notes"),
+            null,
+            {
+              type: "change",
+              event: (e) => {
+                this.offset = 0;
+                this.searchTerm = e.target.value;
+                this.render();
+              },
+            }
+          ),
+        ]
+      ),
+      createElement("h1", { style: "align-self: center;" }, "Notes"),
       createElement("br"),
-      ...(await this.renderNoteElems())
+      ...(await this.renderNoteElems()),
+      createElement("a", { style: "align-self: center;" }, "More", {
+        type: "click",
+        event: async (e) => {
+          this.offset += 20;
+          e.target.before(...(await this.renderNoteElems()));
+        },
+      })
     );
   };
 }

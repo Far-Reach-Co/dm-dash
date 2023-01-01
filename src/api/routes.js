@@ -98,7 +98,8 @@ router.delete("/remove_item/:id", removeItem);
 router.post("/edit_item/:id", editItem);
 
 // notes
-router.get("/get_notes/:project_id", getNotes);
+router.get("/get_notes/:project_id/:limit/:offset", getNotes);
+router.get("/get_notes/:project_id/:limit/:offset/:keyword", getNotes);
 router.get("/get_notes_by_location/:location_id", getNotesByLocation);
 router.get("/get_notes_by_character/:character_id", getNotesByCharacter);
 router.get("/get_notes_by_item/:item_id", getNotesByItem);
