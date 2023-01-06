@@ -184,7 +184,7 @@ export default class NotesView {
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",
         event: async (e) => {
-          this.offset += 5;
+          this.offset += 10;
           e.target.before(...(await this.renderNoteElems()));
         },
       })

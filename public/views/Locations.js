@@ -49,7 +49,7 @@ export default class LocationsView {
       url = `${window.location.origin}/api/get_locations_filter_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
       url = `${window.location.origin}/api/get_locations_filter/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}`;
-      
+
     try {
       const res = await fetch(url);
       const data = await res.json();
@@ -228,7 +228,7 @@ export default class LocationsView {
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",
         event: async (e) => {
-          this.offset += 5;
+          this.offset += 10;
           e.target.before(...(await this.renderLocationsElems()));
         },
       })
