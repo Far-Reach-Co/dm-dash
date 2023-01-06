@@ -115,7 +115,10 @@ router.post("/edit_counter/:id", editCounter);
 
 // locations
 router.get("/get_location/:id", getLocation);
-router.get("/get_locations/:project_id", getLocations);
+router.get("/get_locations/:project_id/:limit/:offset", getLocations);
+router.get("/get_locations_filter/:project_id/:limit/:offset/:filter", getLocations);
+router.get("/get_locations_keyword/:project_id/:limit/:offset/:keyword", getLocations);
+router.get("/get_locations_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getLocations);
 router.get("/get_sublocations/:parent_location_id", getSubLocations);
 router.post("/add_location", addLocation);
 router.delete("/remove_location/:id", removeLocation);

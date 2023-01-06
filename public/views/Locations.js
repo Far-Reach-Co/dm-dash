@@ -8,23 +8,50 @@ export default class LocationsView {
     this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
+
     this.searchTerm = "";
+    this.filter = null;
+    this.limit = state.config.queryLimit;
+    this.offset = 0;
 
     this.creatingLocation = false;
 
     this.render();
   }
 
+  resetFilters = () => {
+    this.searchTerm = "";
+    this.filter = null;
+    this.offset = 0;
+  }
+
   toggleCreatingLocation = () => {
+    this.resetFilters();
     this.creatingLocation = !this.creatingLocation;
     this.render();
   };
 
   getLocations = async () => {
+    let url = `${window.location.origin}/api/get_locations/${state.currentProject}/${this.limit}/${this.offset}`;
+    if (
+      !this.filter &&
+      this.searchTerm &&
+      this.searchTerm !== "" &&
+      this.searchTerm !== " "
+    )
+      url = `${window.location.origin}/api/get_locations_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.searchTerm}`;
+    if (
+      this.filter &&
+      this.searchTerm &&
+      this.searchTerm !== "" &&
+      this.searchTerm !== " "
+    )
+      url = `${window.location.origin}/api/get_locations_filter_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+    if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
+      url = `${window.location.origin}/api/get_locations_filter/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}`;
+      
     try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_locations/${state.currentProject}`
-      );
+      const res = await fetch(url);
       const data = await res.json();
       if (res.status === 200) {
         return data;
@@ -105,17 +132,6 @@ export default class LocationsView {
 
   renderLocationsElems = async () => {
     let locationData = await this.getLocations();
-    // handle fitlers and search
-    if (this.filter) {
-      locationData = locationData.filter((location) => {
-        return location.type && location.type === this.filter;
-      });
-    }
-    if (this.searchTerm !== "") {
-      locationData = locationData.filter((location) => {
-        return location.title.toLowerCase().includes(this.searchTerm.toLowerCase());
-      });
-    }
 
     const locationsMap = locationData.map((location) => {
       // create element
@@ -149,6 +165,7 @@ export default class LocationsView {
   handleTypeFilterChange = (value) => {
     if (value === "None") value = null;
     this.filter = value;
+    this.offset = 0;
     this.render();
   };
 
@@ -159,44 +176,62 @@ export default class LocationsView {
       return this.renderCreatingLocation();
     }
 
-    const locationElems = await this.renderLocationsElems();
     // append
     this.domComponent.append(
       createElement(
         "div",
-        { style: "display: flex; justify-content: space-between; align-items: flex-end;" },
+        {
+          style:
+            "display: flex; justify-content: space-between; align-items: flex-end;",
+        },
         [
-          createElement("div", {style: "display: flex; flex-direction: column;"}, [
-            createElement("small", {}, "Filter by type"),
-            locationTypeSelect(this.handleTypeFilterChange, this.filter),
-          ]),
-          createElement("div", {style: "display: flex; flex-direction: column;"}, [
-            createElement(
-              "button",
-              { style: "align-self: flex-end; margin-bottom: 10px;" },
-              "+ Location",
-              {
-                type: "click",
-                event: this.toggleCreatingLocation,
-              }
-            ),
-            createElement(
-              "input",
-              { placeholder: "Search Locations", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  (this.searchTerm = e.target.value), this.render();
-                },
-              }
-            ),
-          ])
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              createElement("small", {}, "Filter by type"),
+              locationTypeSelect(this.handleTypeFilterChange, this.filter),
+            ]
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              createElement(
+                "button",
+                { style: "align-self: flex-end; margin-bottom: 10px;" },
+                "+ Location",
+                {
+                  type: "click",
+                  event: this.toggleCreatingLocation,
+                }
+              ),
+              createElement(
+                "input",
+                { placeholder: "Search Locations", value: this.searchTerm },
+                null,
+                {
+                  type: "change",
+                  event: (e) => {
+                    this.offset = 0;
+                    (this.searchTerm = e.target.value), this.render();
+                  },
+                }
+              ),
+            ]
+          ),
         ]
       ),
       createElement("h1", { style: "align-self: center;" }, "Locations"),
       createElement("br"),
-      ...locationElems
+      ...(await this.renderLocationsElems()),
+      createElement("a", { style: "align-self: center;" }, "More", {
+        type: "click",
+        event: async (e) => {
+          this.offset += 5;
+          e.target.before(...(await this.renderLocationsElems()));
+        },
+      })
     );
   };
 }

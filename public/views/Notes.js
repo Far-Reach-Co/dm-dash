@@ -9,7 +9,7 @@ export default class NotesView {
     this.navigate = props.navigate;
 
     this.searchTerm = "";
-    this.limit = 20;
+    this.limit = state.config.queryLimit;
     this.offset = 0;
 
     this.creatingNewNote = false;
@@ -17,7 +17,13 @@ export default class NotesView {
     this.render();
   }
 
+  resetFilters = () => {
+    this.searchTerm = "";
+    this.offset = 0;
+  }
+
   toggleCreatingNote = () => {
+    this.resetFilters();
     this.creatingNewNote = !this.creatingNewNote;
     this.render();
   };
@@ -178,7 +184,7 @@ export default class NotesView {
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",
         event: async (e) => {
-          this.offset += 20;
+          this.offset += 5;
           e.target.before(...(await this.renderNoteElems()));
         },
       })

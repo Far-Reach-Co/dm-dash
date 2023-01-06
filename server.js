@@ -12,6 +12,7 @@ var app = express()
 //Set CORS
 app.use(cors())
 
+
 //Set JSON parser
 // app.use(express.json())
 

@@ -1,6 +1,9 @@
 const {
   addLocationQuery,
   getLocationsQuery,
+  getLocationsWithKeywordAndFilterQuery,
+  getLocationsWithKeywordQuery,
+  getLocationsWithFilterQuery,
   getLocationQuery,
   getSubLocationsQuery,
   removeLocationQuery,
@@ -27,12 +30,58 @@ async function getLocation(req, res, next) {
 }
 
 async function getLocations(req, res, next) {
-  try {
-    const data = await getLocationsQuery(req.params.project_id);
-
-    res.send(data.rows);
-  } catch (err) {
-    next(err);
+  if(req.params.keyword && req.params.filter) {
+    try {
+      const data = await getLocationsWithKeywordAndFilterQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        keyword: req.params.keyword,
+        filter: req.params.filter
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else if(req.params.keyword && !req.params.filter) {
+    try {
+      const data = await getLocationsWithKeywordQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        keyword: req.params.keyword,
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else if(req.params.filter && !req.params.keyword) {
+    try {
+      const data = await getLocationsWithFilterQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        filter: req.params.filter
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    try {
+      const data = await getLocationsQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
   }
 }
 
