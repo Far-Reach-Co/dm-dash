@@ -90,7 +90,10 @@ router.delete("/remove_character/:id", removeCharacter);
 router.post("/edit_character/:id", editCharacter);
 
 // items
-router.get("/get_items/:project_id", getItems);
+router.get("/get_items/:project_id/:limit/:offset", getItems);
+router.get("/get_items_filter/:project_id/:limit/:offset/:filter", getItems);
+router.get("/get_items_keyword/:project_id/:limit/:offset/:keyword", getItems);
+router.get("/get_items_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getItems);
 router.get("/get_items_by_location/:location_id", getItemsByLocation);
 router.get("/get_items_by_character/:character_id", getItemsByCharacter);
 router.post("/add_item", addItem);

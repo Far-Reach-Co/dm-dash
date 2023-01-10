@@ -1,6 +1,9 @@
 const {
   addItemQuery,
   getItemsQuery,
+  getItemsWithFilterQuery,
+  getItemsWithKeywordQuery,
+  getItemsWithKeywordAndFilterQuery,
   getItemsByLocationQuery,
   getItemsByCharacterQuery,
   removeItemQuery,
@@ -17,12 +20,58 @@ async function addItem(req, res, next) {
 }
 
 async function getItems(req, res, next) {
-  try {
-    const data = await getItemsQuery(req.params.project_id);
-
-    res.send(data.rows);
-  } catch (err) {
-    next(err);
+  if(req.params.keyword && req.params.filter) {
+    try {
+      const data = await getItemsWithKeywordAndFilterQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        keyword: req.params.keyword,
+        filter: req.params.filter
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else if(req.params.keyword && !req.params.filter) {
+    try {
+      const data = await getItemsWithKeywordQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        keyword: req.params.keyword,
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else if(req.params.filter && !req.params.keyword) {
+    try {
+      const data = await getItemsWithFilterQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        filter: req.params.filter
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    try {
+      const data = await getItemsQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
   }
 }
 

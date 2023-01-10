@@ -10,9 +10,20 @@ export default class ItemsView {
     this.domComponent.className = "standard-view";
     this.searchTerm = "";
 
+    this.searchTerm = "";
+    this.filter = null;
+    this.limit = state.config.queryLimit;
+    this.offset = 0;
+
     this.creatingItem = false;
 
     this.render();
+  }
+
+  resetFilters = () => {
+    this.searchTerm = "";
+    this.filter = null;
+    this.offset = 0;
   }
 
   toggleCreatingItem = () => {
@@ -21,10 +32,26 @@ export default class ItemsView {
   };
 
   getItems = async () => {
+    let url = `${window.location.origin}/api/get_items/${state.currentProject}/${this.limit}/${this.offset}`;
+    if (
+      !this.filter &&
+      this.searchTerm &&
+      this.searchTerm !== "" &&
+      this.searchTerm !== " "
+    )
+      url = `${window.location.origin}/api/get_items_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.searchTerm}`;
+    if (
+      this.filter &&
+      this.searchTerm &&
+      this.searchTerm !== "" &&
+      this.searchTerm !== " "
+    )
+      url = `${window.location.origin}/api/get_items_filter_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+    if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
+      url = `${window.location.origin}/api/get_items_filter/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}`;
+
     try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_items/${state.currentProject}`
-      );
+      const res = await fetch(url);
       const data = await res.json();
       if (res.status === 200) {
         return data;
@@ -104,17 +131,6 @@ export default class ItemsView {
 
   renderItemsElems = async () => {
     let itemData = await this.getItems();
-    // handle fitlers and search
-    if (this.filter) {
-      itemData = itemData.filter((item) => {
-        return item.type && item.type === this.filter;
-      });
-    }
-    if (this.searchTerm !== "") {
-      itemData = itemData.filter((item) => {
-        return item.title.toLowerCase().includes(this.searchTerm.toLowerCase());
-      });
-    }
 
     const itemsMap = itemData.map((item) => {
       // create element
@@ -148,6 +164,7 @@ export default class ItemsView {
   handleTypeFilterChange = (value) => {
     if (value === "None") value = null;
     this.filter = value;
+    this.offset = 0;
     this.render();
   };
 
@@ -158,7 +175,6 @@ export default class ItemsView {
       return this.renderCreatingItem();
     }
 
-    const itemElems = await this.renderItemsElems();
     // append
     this.domComponent.append(
       createElement(
@@ -194,8 +210,14 @@ export default class ItemsView {
         ]
       ),
       createElement("h1", { style: "align-self: center;" }, "Items"),
-      createElement("br"),
-      ...itemElems
+      ...(await this.renderItemsElems()),
+      createElement("a", { style: "align-self: center;" }, "More", {
+        type: "click",
+        event: async (e) => {
+          this.offset += 10;
+          e.target.before(...(await this.renderItemsElems()));
+        },
+      })
     );
   };
 }
