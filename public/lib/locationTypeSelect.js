@@ -9,6 +9,7 @@ export default function locationTypeSelect(onChangeCallback, currentType) {
       "City",
       "Country",
       "Region",
+      "Area",
       "Continent",
       "Planet",
     ];

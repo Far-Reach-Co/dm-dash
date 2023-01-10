@@ -112,7 +112,7 @@ export default class NotesView {
   renderNoteElems = async () => {
     let noteData = await this.getNotes();
 
-    return noteData.map((note) => {
+    const noteMap = noteData.map((note) => {
       // create element
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
@@ -135,6 +135,9 @@ export default class NotesView {
 
       return elem;
     });
+
+    if (noteMap.length) return noteMap;
+    else return [createElement("div", {}, "None...")];
   };
 
   render = async () => {

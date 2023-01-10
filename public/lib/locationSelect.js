@@ -5,7 +5,7 @@ export default async function locationSelect(selectedLocation, locationToSkip, o
   async function getLocations() {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_locations/${state.currentProject}`
+        `${window.location.origin}/api/get_locations/${state.currentProject}/100/0`
       );
       const data = await res.json();
       if (res.status === 200) {
