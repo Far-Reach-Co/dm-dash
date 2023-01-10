@@ -214,7 +214,7 @@ export default class LocationsView {
                   type: "change",
                   event: (e) => {
                     this.offset = 0;
-                    (this.searchTerm = e.target.value), this.render();
+                    (this.searchTerm = e.target.value.toLowerCase()), this.render();
                   },
                 }
               ),

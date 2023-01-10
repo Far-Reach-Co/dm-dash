@@ -83,7 +83,10 @@ const {
 var router = express.Router();
 
 // characters
-router.get("/get_characters/:project_id", getCharacters);
+router.get("/get_characters/:project_id/:limit/:offset", getCharacters);
+router.get("/get_characters_filter/:project_id/:limit/:offset/:filter", getCharacters);
+router.get("/get_characters_keyword/:project_id/:limit/:offset/:keyword", getCharacters);
+router.get("/get_characters_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getCharacters);
 router.get("/get_characters_by_location/:location_id", getCharactersByLocation);
 router.post("/add_character", addCharacter);
 router.delete("/remove_character/:id", removeCharacter);

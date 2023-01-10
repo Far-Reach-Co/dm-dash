@@ -14,10 +14,32 @@ async function addCharacterQuery(data) {
   return await db.query(query)
 }
 
-async function getCharactersQuery(projectId) {
+async function getCharactersWithKeywordAndFilterQuery({projectId, limit, offset, keyword, filter}) {
   const query = {
-    text: /*sql*/ `select * from public."Character" where project_id = $1 order by title asc`,
-    values: [projectId]
+    text: /*sql*/ `select * from public."Character" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3`,
+    values: [projectId, limit, offset, keyword, filter]
+  }
+  return await db.query(query)
+}
+async function getCharactersWithKeywordQuery({projectId, limit, offset, keyword}) {
+  const query = {
+    text: /*sql*/ `select * from public."Character" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3`,
+    values: [projectId, limit, offset, keyword]
+  }
+  return await db.query(query)
+}
+async function getCharactersWithFilterQuery({projectId, limit, offset, filter}) {
+  const query = {
+    text: /*sql*/ `select * from public."Character" where project_id = $1 and type = $4 order by title asc limit $2 offset $3`,
+    values: [projectId, limit, offset, filter]
+  }
+  return await db.query(query)
+}
+
+async function getCharactersQuery({projectId, limit, offset}) {
+  const query = {
+    text: /*sql*/ `select * from public."Character" where project_id = $1 order by title asc limit $2 offset $3`,
+    values: [projectId, limit, offset]
   }
   return await db.query(query)
 }
@@ -64,6 +86,9 @@ async function editCharacterQuery(id, data) {
 module.exports = {
   addCharacterQuery,
   getCharactersQuery,
+  getCharactersWithFilterQuery,
+  getCharactersWithKeywordQuery,
+  getCharactersWithKeywordAndFilterQuery,
   getCharactersByLocationQuery,
   removeCharacterQuery,
   editCharacterQuery

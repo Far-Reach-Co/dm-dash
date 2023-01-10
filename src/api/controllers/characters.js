@@ -1,6 +1,9 @@
 const {
   addCharacterQuery,
   getCharactersQuery,
+  getCharactersWithFilterQuery,
+  getCharactersWithKeywordQuery,
+  getCharactersWithKeywordAndFilterQuery,
   getCharactersByLocationQuery,
   removeCharacterQuery,
   editCharacterQuery,
@@ -16,12 +19,58 @@ async function addCharacter(req, res, next) {
 }
 
 async function getCharacters(req, res, next) {
-  try {
-    const data = await getCharactersQuery(req.params.project_id);
-
-    res.send(data.rows);
-  } catch (err) {
-    next(err);
+  if(req.params.keyword && req.params.filter) {
+    try {
+      const data = await getCharactersWithKeywordAndFilterQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        keyword: req.params.keyword,
+        filter: req.params.filter
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else if(req.params.keyword && !req.params.filter) {
+    try {
+      const data = await getCharactersWithKeywordQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        keyword: req.params.keyword,
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else if(req.params.filter && !req.params.keyword) {
+    try {
+      const data = await getCharactersWithFilterQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+        filter: req.params.filter
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
+  } else {
+    try {
+      const data = await getCharactersQuery({
+        projectId: req.params.project_id,
+        limit: req.params.limit,
+        offset: req.params.offset,
+      });
+  
+      res.send(data.rows);
+    } catch (err) {
+      next(err);
+    }
   }
 }
 
@@ -55,6 +104,9 @@ async function editCharacter(req, res, next) {
 
 module.exports = {
   getCharacters,
+  getCharactersWithFilterQuery,
+  getCharactersWithKeywordQuery,
+  getCharactersWithKeywordAndFilterQuery,
   getCharactersByLocation,
   addCharacter,
   removeCharacter,

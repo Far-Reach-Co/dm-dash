@@ -8,11 +8,21 @@ export default class CharactersView {
     this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
+
     this.searchTerm = "";
+    this.filter = null;
+    this.limit = state.config.queryLimit;
+    this.offset = 0;
 
     this.creatingCharacter = false;
 
     this.render();
+  }
+
+  resetFilters = () => {
+    this.searchTerm = "";
+    this.filter = null;
+    this.offset = 0;
   }
 
   toggleCreatingCharacter = () => {
@@ -21,10 +31,26 @@ export default class CharactersView {
   };
 
   getCharacters = async () => {
+    let url = `${window.location.origin}/api/get_characters/${state.currentProject}/${this.limit}/${this.offset}`;
+    if (
+      !this.filter &&
+      this.searchTerm &&
+      this.searchTerm !== "" &&
+      this.searchTerm !== " "
+    )
+      url = `${window.location.origin}/api/get_characters_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.searchTerm}`;
+    if (
+      this.filter &&
+      this.searchTerm &&
+      this.searchTerm !== "" &&
+      this.searchTerm !== " "
+    )
+      url = `${window.location.origin}/api/get_characters_filter_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+    if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
+      url = `${window.location.origin}/api/get_characters_filter/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}`;
+
     try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_characters/${state.currentProject}`
-      );
+      const res = await fetch(url);
       const data = await res.json();
       if (res.status === 200) {
         return data;
@@ -104,17 +130,6 @@ export default class CharactersView {
 
   renderCharactersElems = async () => {
     let characterData = await this.getCharacters();
-    // handle fitlers and search
-    if (this.filter) {
-      characterData = characterData.filter((character) => {
-        return character.type && character.type === this.filter;
-      });
-    }
-    if (this.searchTerm !== "") {
-      characterData = characterData.filter((character) => {
-        return character.title.toLowerCase().includes(this.searchTerm.toLowerCase());
-      });
-    }
 
     const charactersMap = characterData.map((character) => {
       // create element
@@ -147,6 +162,7 @@ export default class CharactersView {
   handleTypeFilterChange = (value) => {
     if (value === "None") value = null;
     this.filter = value;
+    this.offset = 0;
     this.render();
   };
 
@@ -157,7 +173,6 @@ export default class CharactersView {
       return this.renderCreatingCharacter();
     }
 
-    const characterElems = await this.renderCharactersElems();
     // append
     this.domComponent.append(
       createElement(
@@ -185,7 +200,7 @@ export default class CharactersView {
               {
                 type: "change",
                 event: (e) => {
-                  (this.searchTerm = e.target.value), this.render();
+                  (this.searchTerm = e.target.value.toLowerCase()), this.render();
                 },
               }
             ),
@@ -194,7 +209,14 @@ export default class CharactersView {
       ),
       createElement("h1", { style: "align-self: center;" }, "Characters"),
       createElement("br"),
-      ...characterElems
+      ...(await this.renderCharactersElems()),
+      createElement("a", { style: "align-self: center;" }, "More", {
+        type: "click",
+        event: async (e) => {
+          this.offset += state.config.queryOffset;
+          e.target.before(...(await this.renderCharactersElems()));
+        },
+      })
     );
   };
 }

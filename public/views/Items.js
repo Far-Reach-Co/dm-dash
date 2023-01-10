@@ -202,7 +202,7 @@ export default class ItemsView {
               {
                 type: "change",
                 event: (e) => {
-                  (this.searchTerm = e.target.value), this.render();
+                  (this.searchTerm = e.target.value.toLowerCase()), this.render();
                 },
               }
             ),
