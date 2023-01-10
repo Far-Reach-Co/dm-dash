@@ -228,7 +228,7 @@ export default class LocationsView {
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",
         event: async (e) => {
-          this.offset += 10;
+          this.offset += state.config.queryOffset;
           e.target.before(...(await this.renderLocationsElems()));
         },
       })
