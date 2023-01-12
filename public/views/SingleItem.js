@@ -179,29 +179,31 @@ export default class SingleItemView {
       }),
       createElement("div", { class: "single-item-title" }, [
         this.item.title,
-        createElement(
-          "div",
-          { style: "display: flex; flex-direction: column;" },
-          [
-            createElement("small", {}, "Current Location"),
-            await locationSelect(
-              this.item.location_id,
-              null,
-              this.updateCurrentLocation
-            ),
-          ]
-        ),
-        createElement(
-          "div",
-          { style: "display: flex; flex-direction: column;" },
-          [
-            createElement("small", {}, "With Character"),
-            await characterSelect(
-              this.item.character_id,
-              this.updateCurrentCharacter
-            ),
-          ]
-        ),
+        createElement("div", {style: "margin-left: 5px; margin-right: 5px; display: flex; flex-wrap: wrap;"}, [
+          createElement(
+            "div",
+            { style: "margin-right: 5px; display: flex; flex-direction: column;" },
+            [
+              createElement("small", {}, "Current Location"),
+              await locationSelect(
+                this.item.location_id,
+                null,
+                this.updateCurrentLocation
+              ),
+            ]
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              createElement("small", {}, "With Character"),
+              await characterSelect(
+                this.item.character_id,
+                this.updateCurrentCharacter
+              ),
+            ]
+          ),
+        ]),
         createElement("img", {
           src: "../assets/item.svg",
           width: 45,
