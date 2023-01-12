@@ -30,8 +30,9 @@
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
   --green: rgb(173, 215, 89);
-  --orange: rgb(147, 87, 20);
-  --orange2: rgb(218, 164, 93);
+  --green2: rgb(226, 255, 168);
+  --orange: rgb(147, 69, 0);
+  --orange2: rgb(230, 149, 83);
   --orange3: rgb(216, 193, 157);
   --red1: rgb(225, 75, 75);
   --red2: rgb(120, 46, 46);
@@ -91,7 +92,7 @@ h1 {
 nav {
   padding-left: 10px;
   padding-right: 10px;
-  height: 35px;
+  /* height: 35px; */
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -119,8 +120,14 @@ nav {
   border-right: 0.5px solid var(--main-gray);
 }
 
+.top-nav-btn {
+  transition: .5s;
+}
+
 .top-nav-btn:hover {
-  background-color: var(--purple);
+  color: var(--green);
+  margin-left: 5px;
+  margin-right: 5px;
 }
 
 a {
@@ -134,7 +141,7 @@ a small {
 }
 
 a:hover {
-  color: var(--orange2)
+  color: var(--green)
 }
 
 button {
@@ -152,11 +159,15 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
 }
 
 .btn-red {
   background: linear-gradient(var(--red1) 10%, var(--red2) 90%);
+}
+
+.btn-red:hover {
+  background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
 }
 
 .back-button {

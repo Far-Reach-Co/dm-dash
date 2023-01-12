@@ -139,7 +139,7 @@ class App {
       createElement(
         "div",
         { class: "standard-view" },
-        createElement("h1", {}, "<--- Select a module from the sidebar")
+        createElement("h1", {}, "<-- Select a module from the sidebar")
       )
     );
   };

@@ -209,7 +209,7 @@ export default class SingleCharacterView {
         this.character.title,
         createElement(
           "div",
-          { style: "display: flex; flex-direction: column;" },
+          { style: "margin-left: 5px; margin-right: 5px; display: flex; flex-direction: column;" },
           [
             createElement("small", {}, "Current Location"),
             await locationSelect(
