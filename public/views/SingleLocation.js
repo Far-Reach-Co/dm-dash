@@ -415,7 +415,7 @@ export default class SingleLocationView {
   renderParentLocation = async () => {
     const parentLocation = await this.getParentLocation();
     if (parentLocation) {
-      return createElement("div", {}, [
+      return createElement("div", { style: "margin-left: 5px; margin-right: 5px; display: flex; flex-direction: column;" }, [
         createElement("small", {}, "Sub-Location of: "),
         createElement("a", { class: "small-clickable" }, parentLocation.title, {
           type: "click",
