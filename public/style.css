@@ -25,7 +25,7 @@
   --blue: rgb(59, 82, 113);
   --blue2: rgb(107, 131, 154);
   --blue3: rgb(41, 47, 58);
-  --blue4: rgb(38, 50, 70);
+  --blue4: rgb(42, 58, 82);
   --link-blue: rgb(164, 216, 249);
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
@@ -70,16 +70,18 @@ br {
 }
 
 hr {
-  border: 0;
+  /* border: 0; */
+  border: 0.5px solid var(--main-gray);
   height: 1px;
   width: 100%;
-  background-color: var(--light-gray);
-  margin-top: 5px;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .special-hr {
-  background-color: inherit;
+  border: 0;
   background-image: linear-gradient(to right, rgba(255, 255, 255, 0), var(--main-gray), rgba(255, 255, 255, 0));
+  margin-top: 5px;
   margin-bottom: 30px;
 }
 
@@ -211,10 +213,10 @@ input[type=number] {
 }
 
 select {
+  width: fit-content;
   margin: 0;
   outline: 0;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
-  color: inherit;
   border: 0.5px solid var(--main-gray);
   border-radius: var(--border-radius);
   padding: 2px 4px;
@@ -303,7 +305,7 @@ footer {
   /* background-color: var(--blue4); */
   padding: 5px 0px;
   margin: 5px 0px;
-  min-height: 250px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
@@ -498,14 +500,20 @@ footer {
   white-space: pre-line;
 }
 
-.single-item-title {
+.single-item-title-container {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  /* align-items: center; */
   justify-content: space-between;
-  font-weight: bold;
+}
+
+.single-item-title {
   font-size: 30px;
   color: var(--green);
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: center;
 }
 
 .single-item-title select {
@@ -553,4 +561,25 @@ footer {
 
 .sub-list-item:hover {
   background-color: var(--blue);
+}
+
+.single-info-box {
+  width: 25%;
+  border: 1px solid var(--main-gray);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.single-info-box-subheading {
+  padding-left: 3px;
+  padding-right: 3px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--orange3);
+  background-color: var(--blue4);
+  padding: 3px;
 }

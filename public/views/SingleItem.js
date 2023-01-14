@@ -158,7 +158,7 @@ export default class SingleItemView {
     if (this.item.type) {
       return createElement(
         "small",
-        { style: "color: var(--light-gray);" },
+        { style: "color: var(--light-gray); margin-left: 5px;" },
         this.item.type
       );
     } else return createElement("div", { style: "display: none;" });
@@ -177,32 +177,10 @@ export default class SingleItemView {
         type: "click",
         event: () => this.navigate({ title: "items", sidebar: true }),
       }),
-      createElement("div", { class: "single-item-title" }, [
-        this.item.title,
-        createElement("div", {style: "margin-left: 5px; margin-right: 5px; display: flex; flex-wrap: wrap;"}, [
-          createElement(
-            "div",
-            { style: "margin-right: 5px; display: flex; flex-direction: column;" },
-            [
-              createElement("small", {}, "Current Location"),
-              await locationSelect(
-                this.item.location_id,
-                null,
-                this.updateCurrentLocation
-              ),
-            ]
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              createElement("small", {}, "With Character"),
-              await characterSelect(
-                this.item.character_id,
-                this.updateCurrentCharacter
-              ),
-            ]
-          ),
+      createElement("div", { class: "single-item-title-container" }, [
+        createElement("div", {class: "single-item-title"}, [
+          this.item.title,
+          this.renderItemType(),
         ]),
         createElement("img", {
           src: "../assets/item.svg",
@@ -210,7 +188,31 @@ export default class SingleItemView {
           height: 45,
         }),
       ]),
-      this.renderItemType(),
+      createElement("div", {style: "display: flex; flex-wrap: wrap;"}, [
+        createElement(
+          "div",
+          { style: "margin-right: 5px; display: flex; flex-direction: column;" },
+          [
+            createElement("small", {}, "Current Location"),
+            await locationSelect(
+              this.item.location_id,
+              null,
+              this.updateCurrentLocation
+            ),
+          ]
+        ),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("small", {}, "With Character"),
+            await characterSelect(
+              this.item.character_id,
+              this.updateCurrentCharacter
+            ),
+          ]
+        ),
+      ]),
       createElement("br"),
       createElement("div", {}, [
         createElement(

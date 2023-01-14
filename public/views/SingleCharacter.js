@@ -147,7 +147,7 @@ export default class SingleCharacterView {
     if (this.character.type) {
       return createElement(
         "small",
-        { style: "color: var(--light-gray);" },
+        { style: "color: var(--light-gray); margin-left: 5px;" },
         this.character.type
       );
     } else return createElement("div", { style: "display: none;" });
@@ -205,27 +205,29 @@ export default class SingleCharacterView {
         type: "click",
         event: () => this.navigate({ title: "characters", sidebar: true }),
       }),
-      createElement("div", { class: "single-item-title" }, [
-        this.character.title,
-        createElement(
-          "div",
-          { style: "margin-left: 5px; margin-right: 5px; display: flex; flex-direction: column;" },
-          [
-            createElement("small", {}, "Current Location"),
-            await locationSelect(
-              this.character.location_id,
-              null,
-              this.updateCurrentLocation
-            ),
-          ]
-        ),
+      createElement("div", { class: "single-item-title-container" }, [
+        createElement("div", {class: "single-item-title"}, [
+          this.character.title,
+          this.renderCharacterType(),
+        ]),
         createElement("img", {
           src: "../assets/character.svg",
           width: 45,
           height: 45,
         }),
       ]),
-      this.renderCharacterType(),
+      createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement("small", {}, "Current Location"),
+          await locationSelect(
+            this.character.location_id,
+            null,
+            this.updateCurrentLocation
+          ),
+        ]
+      ),
       createElement("br"),
       createElement("div", {}, [
         createElement(
