@@ -16,9 +16,15 @@ export default class SingleLocationView {
     this.creatingNote = false;
     this.creatingSubLocation = false;
     this.addParentLocation = false;
+    this.edit = false;
 
     this.render();
   }
+
+  toggleEdit = () => {
+    this.edit = !this.edit;
+    this.render();
+  };
 
   toggleCreatingNote = () => {
     this.creatingNote = !this.creatingNote;
@@ -64,28 +70,6 @@ export default class SingleLocationView {
       console.log(err);
       return [];
     }
-  };
-
-  renderSubLocations = async () => {
-    const subLocations = await this.getSubLocations();
-
-    const subLocationsMap = subLocations.map((location) => {
-      const elem = createElement("a", {
-        class: "small-clickable",
-      }, location.title, {
-        type: "click", event: () => {
-          this.navigate({
-            title: "single-location",
-            sidebar: true,
-            params: { location },
-          })
-        }
-      });
-      return elem;
-    });
-
-    if(subLocationsMap.length) return subLocationsMap
-    else return [createElement("small", {}, "None...")]
   };
 
   saveLocation = async (e) => {
@@ -345,28 +329,65 @@ export default class SingleLocationView {
     }
   };
 
+  renderSubLocations = async () => {
+    const subLocations = await this.getSubLocations();
+
+    const subLocationsMap = subLocations.map((location) => {
+      const elem = createElement(
+        "a",
+        {
+          class: "small-clickable",
+          style: "margin: 3px",
+        },
+        location.title,
+        {
+          type: "click",
+          event: () => {
+            this.navigate({
+              title: "single-location",
+              sidebar: true,
+              params: { location },
+            });
+          },
+        }
+      );
+      return elem;
+    });
+
+    if (subLocationsMap.length) return subLocationsMap;
+    else return [createElement("small", {}, "None...")];
+  };
+
   renderCharacters = async () => {
     let charactersByLocation = await this.getCharactersByLocation();
-    
+
     const elemMap = charactersByLocation.map((character) => {
       const elem = createElement(
-        "div",
+        "a",
         {
-          id: `character-component-${character.id}`,
-          // class: "sub-list-item",
+          class: "small-clickable",
+          style: "margin: 3px",
         },
-        [
-          createElement("a", {class: "small-clickable"}, character.title),
-          // createElement("small", {style: "margin-left: 5px"}, `${character.type}`)
-        ],
-        {type: "click", event: () => this.navigate({ title: "single-character", sidebar: true, params: {character} })}
+        character.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-character",
+              sidebar: true,
+              params: { character },
+            }),
+        }
       );
 
       return elem;
     });
 
-    if(elemMap.length) return elemMap;
-    else return [createElement("small", {style: "margin-left: 5px;"}, "None...")]
+    if (elemMap.length) return elemMap;
+    else
+      return [
+        createElement("small", { style: "margin-left: 5px;" }, "None..."),
+      ];
   };
 
   getItemsByLocation = async () => {
@@ -386,34 +407,44 @@ export default class SingleLocationView {
 
   renderItems = async () => {
     let itemsByLocation = await this.getItemsByLocation();
-    
+
     const elemMap = itemsByLocation.map((item) => {
       const elem = createElement(
-        "div",
+        "a",
         {
-          id: `item-component-${item.id}`,
-          // class: "sub-list-item",
+          class: "small-clickable",
+          style: "margin: 3px",
         },
-        [
-          createElement("a", {class: "small-clickable"}, item.title),
-          // createElement("small", {style: "margin-left: 5px"}, `${item.type}`)
-        ],
-        {type: "click", event: () => this.navigate({ title: "single-item", sidebar: true, params: {item} })}
+        item.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-item",
+              sidebar: true,
+              params: { item },
+            }),
+        }
       );
 
       return elem;
     });
 
-    if(elemMap.length) return elemMap;
-    else return [createElement("small", {style: "margin-left: 5px;"}, "None...")]
+    if (elemMap.length) return elemMap;
+    else
+      return [
+        createElement("small", { style: "margin-left: 5px;" }, "None..."),
+      ];
   };
 
   renderParentLocation = async () => {
     const parentLocation = await this.getParentLocation();
     if (parentLocation) {
-      return createElement("div", { style: "display: flex; flex-direction: column;" }, [
-        createElement("small", {}, "Parent Location: "),
-        createElement("a", { class: "small-clickable" }, parentLocation.title, {
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "margin: 3px" },
+        parentLocation.title,
+        {
           type: "click",
           event: () =>
             this.navigate({
@@ -421,8 +452,8 @@ export default class SingleLocationView {
               sidebar: true,
               params: { location: parentLocation },
             }),
-        }),
-      ]);
+        }
+      );
     } else {
       return createElement("button", {}, "+ Parent-Location", {
         type: "click",
@@ -441,8 +472,77 @@ export default class SingleLocationView {
     } else return createElement("div", { style: "display: none;" });
   };
 
+  saveLocation = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    if (formProps.type === "None") formProps.type = null;
+    // update UI
+    this.location.title = formProps.title;
+    this.location.description = formProps.description;
+    this.location.type = formProps.type;
+
+    try {
+      const res = await fetch(`${window.origin}/api/edit_location/${this.location.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formProps),
+      });
+      await res.json();
+      if (res.status === 200) {
+      } else throw new Error();
+    } catch (err) {
+      // window.alert("Failed to save location...");
+      console.log(err);
+    }
+  };
+
+  renderEdit = async () => {
+    this.domComponent.append(
+      createElement(
+        "form",
+        {},
+        [
+          createElement("div", {}, "Type Select (Optional)"),
+          locationTypeSelect(null, this.location.type),
+          createElement("br"),
+          createElement("label", { for: "title" }, "Title"),
+          createElement("input", {
+            id: "title",
+            name: "title",
+            value: this.location.title,
+          }),
+          createElement("label", { for: "description" }, "Description"),
+          createElement(
+            "textarea",
+            {
+              id: "description",
+              name: "description",
+              cols: "30",
+              rows: "7",
+            },
+            this.location.description
+          ),
+          createElement("br"),
+          createElement("button", { type: "submit" }, "Done"),
+        ],
+        {
+          type: "submit",
+          event: (e) => {
+            this.saveLocation(e);
+            this.toggleEdit();
+          },
+        }
+      ),
+    );
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
+
+    if (this.edit) {
+      return this.renderEdit();
+    }
 
     if (this.creatingNote) {
       return this.renderCreateNewNote();
@@ -463,7 +563,7 @@ export default class SingleLocationView {
         event: () => this.navigate({ title: "locations", sidebar: true }),
       }),
       createElement("div", { class: "single-item-title-container" }, [
-        createElement("div", {class: "single-item-title"}, [
+        createElement("div", { class: "single-item-title" }, [
           this.location.title,
           this.renderLocationType(),
         ]),
@@ -473,44 +573,67 @@ export default class SingleLocationView {
           height: 45,
         }),
       ]),
-      await this.renderParentLocation(),
+      createElement(
+        "a",
+        { class: "small-clickable", style: "margin-left: 3px;" },
+        "Edit",
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      ),
       createElement("br"),
-      createElement("div", {style: "display: flex; justify-content: space-between"}, [
-        createElement("div", {}, [
-          createElement(
-            "div",
-            { class: "single-item-subheading" },
-            "Description"
-          ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.location.description}"`
-          ),
-        ]),
-        createElement("div", {class: "single-info-box"}, [
-          createElement("div", { class: "single-info-box-subheading" }, "Characters"),
-          ...(await this.renderCharacters()),
-          createElement("br"),
-          createElement("div", { class: "single-info-box-subheading" }, "Items"),
-          ...(await this.renderItems()),
-          createElement("br"),
-          createElement("div", { class: "single-info-box-subheading" }, [
-            "Sub-Locations",
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start;",
+        },
+        [
+          createElement("div", {}, [
             createElement(
-              "a",
-              { style: "align-self: flex-end;" },
-              "+",
-              {
+              "div",
+              { class: "single-item-subheading" },
+              "Description"
+            ),
+            createElement("div", { class: "description" }, [
+              `"${this.location.description}"`,
+            ]),
+          ]),
+          createElement("div", { class: "single-info-box" }, [
+            createElement(
+              "div",
+              { class: "single-info-box-subheading" },
+              "Characters"
+            ),
+            ...(await this.renderCharacters()),
+            createElement("br"),
+            createElement(
+              "div",
+              { class: "single-info-box-subheading" },
+              "Items"
+            ),
+            ...(await this.renderItems()),
+            createElement("br"),
+            createElement(
+              "div",
+              { class: "single-info-box-subheading" },
+              "Parent Location"
+            ),
+            await this.renderParentLocation(),
+            createElement("br"),
+            createElement("div", { class: "single-info-box-subheading" }, [
+              "Sub-Locations",
+              createElement("a", { style: "align-self: flex-end;" }, "+", {
                 type: "click",
                 event: this.toggleCreatingSubLocation,
-              }
-            ),
+              }),
+            ]),
+            ...(await this.renderSubLocations()),
+            createElement("br"),
           ]),
-          ...(await this.renderSubLocations()),
-          createElement("br")
-        ]),
-      ]),
+        ]
+      ),
       createElement("br"),
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [

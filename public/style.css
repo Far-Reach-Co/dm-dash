@@ -305,7 +305,7 @@ footer {
   /* background-color: var(--blue4); */
   padding: 5px 0px;
   margin: 5px 0px;
-  min-height: 500px;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
@@ -498,12 +498,13 @@ footer {
   padding-right: 5px;
   max-width: 700px;
   white-space: pre-line;
+  margin-bottom: 10px;
 }
 
 .single-item-title-container {
   display: flex;
   flex-direction: row;
-  /* align-items: center; */
+  align-items: flex-end;
   justify-content: space-between;
 }
 
@@ -564,7 +565,7 @@ footer {
 }
 
 .single-info-box {
-  width: 25%;
+  width: 200px;
   border: 1px solid var(--main-gray);
   display: flex;
   flex-direction: column;
