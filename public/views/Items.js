@@ -92,6 +92,9 @@ export default class ItemsView {
       "Create new item"
     );
     const form = createElement("form", {}, [
+      createElement("div", {}, "Type Select (Optional)"),
+      itemTypeSelect(null, null),
+      createElement("br"),
       createElement("label", { for: "title" }, "Title"),
       createElement("input", {
         id: "title",
@@ -104,9 +107,6 @@ export default class ItemsView {
         id: "description",
         name: "description",
       }),
-      createElement("br"),
-      createElement("div", {}, "Type Select (Optional)"),
-      itemTypeSelect(null, null),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);

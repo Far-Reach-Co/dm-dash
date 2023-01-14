@@ -91,6 +91,9 @@ export default class CharactersView {
       "Create new character"
     );
     const form = createElement("form", {}, [
+      createElement("div", {}, "Type Select (Optional)"),
+      characterTypeSelect(null, null),
+      createElement("br"),
       createElement("label", { for: "title" }, "Title"),
       createElement("input", {
         id: "title",
@@ -103,9 +106,6 @@ export default class CharactersView {
         id: "description",
         name: "description",
       }),
-      createElement("br"),
-      createElement("div", {}, "Type Select (Optional)"),
-      characterTypeSelect(null, null),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);

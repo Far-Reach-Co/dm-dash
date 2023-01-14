@@ -75,6 +75,9 @@ export default class Character {
         "form",
         {},
         [
+          createElement("div", {}, "Type Select (Optional)"),
+          characterTypeSelect(null, this.type),
+          createElement("br"),
           createElement("label", { for: "title" }, "Title"),
           createElement("input", {
             id: "title",
@@ -92,9 +95,6 @@ export default class Character {
             },
             this.description
           ),
-          createElement("br"),
-          createElement("div", {}, "Type Select (Optional)"),
-          characterTypeSelect(null, this.type),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],

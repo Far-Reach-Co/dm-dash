@@ -93,6 +93,9 @@ export default class LocationsView {
       "Create new location"
     );
     const form = createElement("form", {}, [
+      createElement("div", {}, "Type Select (Optional)"),
+      locationTypeSelect(null, null),
+      createElement("br"),
       createElement("label", { for: "title" }, "Title"),
       createElement("input", {
         id: "title",
@@ -105,9 +108,6 @@ export default class LocationsView {
         id: "description",
         name: "description",
       }),
-      createElement("br"),
-      createElement("div", {}, "Type Select (Optional)"),
-      locationTypeSelect(null, null),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);

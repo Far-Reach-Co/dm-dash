@@ -68,13 +68,16 @@ export default class Item {
       console.log(err);
     }
   };
-
+  
   renderEdit = async () => {
     this.domComponent.append(
       createElement(
         "form",
         {},
         [
+          createElement("div", {}, "Type Select (Optional)"),
+          itemTypeSelect(null, this.type),
+          createElement("br"),
           createElement("label", { for: "title" }, "Title"),
           createElement("input", {
             id: "title",
@@ -92,9 +95,6 @@ export default class Item {
             },
             this.description
           ),
-          createElement("br"),
-          createElement("div", {}, "Type Select (Optional)"),
-          itemTypeSelect(null, this.type),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],

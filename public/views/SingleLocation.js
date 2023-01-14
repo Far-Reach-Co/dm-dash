@@ -185,6 +185,9 @@ export default class SingleLocationView {
       `Create new sub-location for ${this.location.title}`
     );
     const form = createElement("form", {}, [
+      createElement("div", {}, "Type Select (Optional)"),
+      locationTypeSelect(null, null),
+      createElement("br"),
       createElement("label", { for: "title" }, "Title"),
       createElement("br"),
       createElement("input", {
@@ -198,9 +201,6 @@ export default class SingleLocationView {
         id: "description",
         name: "description",
       }),
-      createElement("br"),
-      createElement("div", {}, "Type Select (Optional)"),
-      locationTypeSelect(null, null),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
