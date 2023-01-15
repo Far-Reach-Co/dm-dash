@@ -19,8 +19,8 @@ const {
   loginUser,
   verifyJwt,
   editUser,
-  // resetPassword,
-  // requestResetEmail
+  resetPassword,
+  requestResetEmail
 } = require("./controllers/users.js");
 const {
   getCalendars,
@@ -168,7 +168,7 @@ router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/verify_jwt", verifyJwt);
 router.post("/edit_user", editUser);
-// router.post('/reset_password', resetPassword)
-// router.post('/request_reset_email', requestResetEmail)
+router.post('/reset_password', resetPassword)
+router.post('/request_reset_email', requestResetEmail)
 
 module.exports = router;
