@@ -10,11 +10,11 @@
 }
 
 @font-face {
-  font-family: 'Zen Dots';
+  font-family: 'Blanka';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('./assets//fonts//Zen_Dots/ZenDots-Regular.ttf') format('woff2');
+  src: url('./assets/fonts/blanka/Blanka-Regular.otf') format('woff2');
 }
 
 :root {
@@ -105,8 +105,8 @@ nav {
 
 .title-anchor {
   margin-left: 5px;
-  padding-top: 6px;
-  font-family: 'Zen Dots';
+  letter-spacing: 3px;
+  font-family: 'Blanka';
   color: var(--link-blue);
 }
 
