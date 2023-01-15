@@ -1,12 +1,13 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-// const mail = require('../smtp/index')
+const mail = require("../smtp/index.js");
 const {
   getUserByIdQuery,
   getAllUsersQuery,
   getUserByEmailQuery,
   registerUserQuery,
   editUserQuery,
+  editUserPasswordQuery
 } = require("../queries/users");
 const { addProjectQuery } = require("../queries/projects");
 
@@ -16,13 +17,13 @@ function generateAccessToken(id, expires) {
   return jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: expires });
 }
 
-// function sendResetEmail (user, token) {
-//   mail.sendMessage({
-//     user: user,
-//     title: 'Reset Password',
-//     message: `Visit the following link to reset your password: <a href="https://localhost:4000/api/reset_password/${token}">Reset Password</a>`
-//   })
-// }
+function sendResetEmail(user, token) {
+  mail.sendMessage({
+    user: user,
+    title: "Reset Password",
+    message: `Visit the following link to reset your password: <a href="http://165.227.88.65/resetpassword.html?token=${token}">Reset Password</a>`,
+  });
+}
 
 async function verifyUserByToken(token) {
   return jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
@@ -157,18 +158,16 @@ async function editUser(req, res, next) {
 
 async function resetPassword(req, res, next) {
   try {
-    // const token = req.body.token
+    const token = req.body.token
     const password = req.body.password;
 
-    // const userData = await verifyUserByToken(token)
-    const userData = true;
+    const userData = await verifyUserByToken(token)
     if (userData) {
       // hash password
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       const user = await editUserPasswordQuery(
-        // userData.rows[0].id,
-        req.body.id,
+        userData.rows[0].id,
         hashedPassword
       );
       res.send({
@@ -180,24 +179,24 @@ async function resetPassword(req, res, next) {
   }
 }
 
-// async function requestResetEmail (req, res, next) {
-//   try {
-//     const userData = await getUserByEmailQuery(req.body.email.toLowerCase())
+async function requestResetEmail(req, res, next) {
+  try {
+    const userData = await getUserByEmailQuery(req.body.email.toLowerCase());
 
-//     if (userData.rows.length !== 0) {
-//       const user = userData.rows[0]
+    if (userData.rows.length !== 0) {
+      const user = userData.rows[0];
 
-//       const token = generateAccessToken(user.id, '30m')
+      const token = generateAccessToken(user.id, "30m");
 
-//       sendResetEmail(userData.rows[0], token)
+      sendResetEmail(userData.rows[0], token);
 
-//       res.send({ message: 'Email has been sent' })
-//     } else
-//       return res.status(400).json({ message: 'No user found by this email' })
-//   } catch (err) {
-//     next(err)
-//   }
-// }
+      res.send({ message: "Email has been sent" });
+    } else
+      return res.status(400).json({ message: "No user found by this email" });
+  } catch (err) {
+    next(err);
+  }
+}
 
 module.exports = {
   getUserByToken,
@@ -208,5 +207,5 @@ module.exports = {
   verifyJwt,
   editUser,
   resetPassword,
-  // requestResetEmail
+  requestResetEmail,
 };

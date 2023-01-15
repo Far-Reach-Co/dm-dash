@@ -72,5 +72,5 @@ module.exports = {
   getUserByEmailQuery,
   registerUserQuery,
   editUserQuery,
-  // editUserPasswordQuery
+  editUserPasswordQuery
 }
