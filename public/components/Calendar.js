@@ -80,7 +80,10 @@ export default class Calendar {
 
   calculateCurrentMonth = () => {
     if (!this.months.length) return { title: "unknown-month" };
-    return this.months.filter((month) => month.id === this.currentMonthId)[0];
+    return this.months.filter((month) => {
+      if (this.currentMonthId)return month.id === this.currentMonthId;
+      else return month.index === 1;
+    })[0];
   };
 
   updateCalendar = async (e) => {
@@ -267,7 +270,6 @@ export default class Calendar {
           }),
         }
       );
-
     } catch (err) {
       console.log(err);
       // window.alert("Failed to update current day...");
@@ -570,10 +572,10 @@ export default class Calendar {
     });
 
     this.domComponent.append(
-      createElement("div", {class: "component-title"}, `Edit ${this.title}`),
+      createElement("div", { class: "component-title" }, `Edit ${this.title}`),
       createElement("br"),
-      manageBtnContainer, 
-      doneButton, 
+      manageBtnContainer,
+      doneButton,
       removeButton
     );
   };
