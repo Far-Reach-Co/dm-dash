@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wyrld Dashboard</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script src="./App.js" type="module" defer></script>
+  </head>
+  <body>
+    <nav>
+      <div style="display: flex; align-items: center">
+        <img height="30px" src="./assets/dmlogo.png" alt="" />
+        <a class="title-anchor" href="./index.html">Wyrld Dashboard</a>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="invite">
+        <h2>Invite</h2>
+        <br>
+        <div id="invite-div">Please wait while we get your invitation...</div>
+      </div>
+    </div>
+  </body>
+  <script>
+    async function verifyToken() {
+      const token = localStorage.getItem("token");
+      if (token) {
+        try {
+          const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
+            headers: { "x-access-token": `Bearer ${token}` },
+          });
+          const resData = await res.json();
+          if (!res.status === 200) {
+            throw new Error();
+          } else return resData;
+        } catch (err) {
+          console.log(err);
+          alert("You aren't logged in. Please login before visiting this page");
+          window.location.pathname = "/login.html";
+        }
+      } else {
+        alert("You aren't logged in. Please login before visiting this page");
+        window.location.pathname = "/login.html";
+      }
+    }
+
+    async function getProject(projectId) {
+      var searchParams = new URLSearchParams(window.location.search);
+      var projectId = searchParams.get("project");
+
+      try {
+        const res = await fetch(
+          `${window.location.origin}/api/get_project/${projectId}`
+        );
+        const data = await res.json();
+        if (res.status === 200) {
+          return data;
+        } else throw new Error();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    void async function init() {
+      const user = await verifyToken();
+      if (user) {
+        console.log(user)
+        const project = await getProject();
+        if (project) {
+          const inviteDiv = document.getElementById("invite-div");
+          const button = document.createElement("button");
+          button.innerText = `Accept invite for ${project.title}`;
+          button.addEventListener("click", () => {
+            console.log()
+          })
+
+          inviteDiv.innerHTML = "";
+          inviteDiv.append(button);
+        } else {
+          alert("Could not find project, something went wrong");
+        }
+      }
+    }();
+  </script>
+</html>

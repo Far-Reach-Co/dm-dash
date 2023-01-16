@@ -1,5 +1,6 @@
 const {
   addProjectQuery,
+  getProjectQuery,
   getProjectsQuery,
   removeProjectQuery,
   editProjectQuery,
@@ -9,6 +10,16 @@ async function addProject(req, res, next) {
   try {
     const data = await addProjectQuery(req.body);
     res.status(201).json(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getProject(req, res, next) {
+  try {
+    const data = await getProjectQuery(req.params.id);
+
+    res.send(data.rows[0]);
   } catch (err) {
     next(err);
   }
@@ -44,6 +55,7 @@ async function editProject(req, res, next) {
 
 module.exports = {
   getProjects,
+  getProject,
   addProject,
   removeProject,
   editProject,

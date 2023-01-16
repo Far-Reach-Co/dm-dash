@@ -52,17 +52,21 @@ export default class Project {
   };
 
   renderEditProject = () => {
+    const inviteLink = `${window.location.origin}/invite.html?project=${this.id}`;
+
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
       style: "margin-right: 10px;"
     });
+
     const editButton = createElement("button", {style: "margin-right: 10px;"}, "Done");
     editButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
       this.saveProject();
       this.toggleEdit();
     });
+
     const removeButton = createElement(
       "button",
       { class: "btn-red" },
@@ -76,11 +80,29 @@ export default class Project {
       }
     });
 
+    const inviteLinkButton = createElement("button", {}, "Copy Invite Link")
+    inviteLinkButton.addEventListener("click", () => {
+      navigator.clipboard.writeText(inviteLink).then(function() {
+        console.log('Copying to clipboard was successful!');
+      }, function(err) {
+        console.error('Could not copy text: ', err);
+      });
+    })
+
     // append
     this.domComponent.append(
-      titleInput, 
-      editButton, 
-      removeButton
+      createElement("div", {class: "project-edit-container"}, [
+        createElement("div", {style: "color: var(--orange3)"}, `Manage ${this.title}`),
+        createElement("br"),
+        titleInput,
+        createElement("br"),
+        editButton, 
+        removeButton,
+        createElement("br"),
+        createElement("div", {style: "color: var(--orange3)"}, "Share Invite Link"),
+        createElement("div", {}, inviteLink),
+        inviteLinkButton
+      ])
     );
   };
 

@@ -6,6 +6,7 @@ const {
   editClock,
 } = require("./controllers/clocks.js");
 const {
+  getProject,
   getProjects,
   addProject,
   removeProject,
@@ -155,6 +156,7 @@ router.delete("/remove_day/:id", removeDay);
 router.post("/edit_day/:id", editDay);
 
 // projects
+router.get("/get_project/:id", getProject);
 router.get("/get_projects/:id", getProjects);
 router.post("/add_project", addProject);
 router.delete("/remove_project/:id", removeProject);

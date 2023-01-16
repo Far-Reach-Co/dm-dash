@@ -11,6 +11,23 @@ async function addProjectQuery(data) {
   return await db.query(query)
 }
 
+async function getProjectQuery(projectId) {
+  const query = {
+    text: /*sql*/ `select * from public."Project" where id = $1 order by title asc`,
+    values: [projectId]
+  }
+  return await db.query(query)
+}
+
+async function removeProjectQuery(id) {
+  const query = {
+    text: /*sql*/ `delete from public."Project" where id = $1`,
+    values: [id]
+  }
+
+  return await db.query(query)
+}
+
 async function getProjectsQuery(userId) {
   const query = {
     text: /*sql*/ `select * from public."Project" where user_id = $1 order by title asc`,
@@ -52,6 +69,7 @@ async function editProjectQuery(id, data) {
 
 module.exports = {
   addProjectQuery,
+  getProjectQuery,
   getProjectsQuery,
   removeProjectQuery,
   editProjectQuery
