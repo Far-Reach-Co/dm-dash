@@ -362,7 +362,7 @@ footer {
   display: inline-block;
   margin: 5px;
   padding: 10px;
-  max-width: 500px;
+  /* max-width: 500px; */
   background-color: var(--blue4);
   border: 0.5px solid var(--main-gray);
   /* box-shadow: 1px 5px 10px 1px var(--main-dark); */
