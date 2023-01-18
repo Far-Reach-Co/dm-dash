@@ -101,6 +101,20 @@
       }
     }
 
+    async function getProjectUsers(userId) {
+      try {
+        const res = await fetch(
+          `${window.location.origin}/api/get_project_users/${userId}`
+        );
+        const data = await res.json();
+        if (res.status === 200) {
+          return data;
+        } else throw new Error();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
     void (async function init() {
       // verify there is a user
       const user = await verifyToken();
@@ -108,9 +122,25 @@
         // get the invite
         const projectInvite = await getProjectInvite();
         if (projectInvite) {
+          // check if user already has this project
+          const projectsJoinedByUserId = await getProjectUsers(user.id);
+          if (projectsJoinedByUserId && projectsJoinedByUserId.length) {
+            const hasJoinedProject = projectsJoinedByUserId.filter(
+              (project => project.project_id === projectInvite.project_id)
+            );
+            if (hasJoinedProject.length) {
+              alert("You already have this project...");
+              return (window.location.pathname = "/dashboard.html");
+            }
+          }
           // get the project name
           const project = await getProject(projectInvite.project_id);
           if (project) {
+            // check if user has this project
+            if (project.user_id === user.id) {
+              alert("You already have this project...");
+              return (window.location.pathname = "/dashboard.html");
+            }
             const inviteDiv = document.getElementById("invite-div");
             const button = document.createElement("button");
             button.innerText = `Accept Invite for "${project.title}"`;
@@ -124,16 +154,15 @@
               if (newProjectUser) {
                 inviteDiv.innerHTML = "";
 
-                const message = document.createElement("div")
-                message.innerText = `Success! You have just joined ${project.title}!`
+                const message = document.createElement("div");
+                message.innerText = `Success! You have just joined ${project.title}!`;
                 const button = document.createElement("button");
                 button.innerText = "Return To Dashboard";
-                button.addEventListener("click", () => window.location.pathname = "/dashboard.html"
-                )
-                inviteDiv.append(
-                  message,
-                  button
+                button.addEventListener(
+                  "click",
+                  () => (window.location.pathname = "/dashboard.html")
                 );
+                inviteDiv.append(message, button);
               }
             });
 
