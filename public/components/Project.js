@@ -13,6 +13,7 @@ export default class Project {
     this.isEditor = props.isEditor;
     this.wasJoined = props.wasJoined;
     this.dateJoined = props.dateJoined;
+    this.projectUserId = props.projectUserId;
 
     this.edit = false;
     this.parentRender = props.parentRender;
@@ -60,6 +61,20 @@ export default class Project {
   removeInvite = async () => {
     const res = await fetch(
       `${window.location.origin}/api/remove_project_invite/${this.projectInvite.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (res.status === 204) {
+      // window.alert(`Deleted ${this.title}`)
+    } else {
+      // window.alert("Failed to delete project...");
+    }
+  };
+
+  leaveProject = async () => {
+    const res = await fetch(
+      `${window.location.origin}/api/remove_project_user/${this.projectUserId}`,
       {
         method: "DELETE",
       }
@@ -189,13 +204,24 @@ export default class Project {
     const removeButton = createElement(
       "button",
       { class: "btn-red" },
-      "Delete Project"
+      `${this.wasJoined ? "Leave" : "Delete"} Project`
     );
-    removeButton.addEventListener("click", () => {
-      if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        this.removeProject();
-        this.toggleEdit();
-        this.domComponent.remove();
+    removeButton.addEventListener("click", async () => {
+      if (
+        window.confirm(
+          `Are you sure you want to ${this.wasJoined ? "leave" : "delete"} ${
+            this.title
+          }`
+        )
+      ) {
+        if (!this.wasJoined) {
+          this.removeProject();
+          this.toggleEdit();
+          this.domComponent.remove();
+        } else {
+          await this.leaveProject();
+          this.parentRender();
+        }
       }
     });
 

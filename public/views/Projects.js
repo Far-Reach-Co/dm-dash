@@ -62,6 +62,7 @@ export default class ProjectsView {
         isEditor: project.is_editor,
         wasJoined: project.was_joined,
         dateJoined: project.date_joined,
+        projectUserId: project.project_user_id,
         projectInvite: project.project_invite,
         parentRender: this.render,
         navigate: this.navigate,

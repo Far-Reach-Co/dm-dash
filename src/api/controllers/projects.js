@@ -42,6 +42,7 @@ async function getProjects(req, res, next) {
         if (projectData && projectData.rows && projectData.rows.length) {
           const project = projectData.rows[0];
           project.was_joined = true;
+          project.project_user_id =projectUser.id;
           project.date_joined = projectUser.date_joined;
           project.is_editor = projectUser.is_editor;
           projectsData.rows.push(project);
@@ -50,7 +51,6 @@ async function getProjects(req, res, next) {
     }
     // get project invites
     for (project of projectsData.rows) {
-      console.log(project);
       const projectInvites = await getProjectInviteQuery(project.id);
       if (projectInvites && projectInvites.rows && projectInvites.rows.length)
         project.project_invite = projectInvites.rows[0];
