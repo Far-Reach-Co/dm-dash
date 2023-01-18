@@ -85,8 +85,21 @@ const {
   addProjectInvite,
   removeProjectInvite
 } = require("./controllers/projectInvites.js");
+const {
+  getProjectUsers,
+  addProjectUser,
+  removeProjectUser,
+  editProjectUser,
+} = require("./controllers/projectUsers.js");
 
 var router = express.Router();
+
+// project users
+// counters
+router.get("/get_project_users/:user_id", getProjectUsers);
+router.post("/add_project_user", addProjectUser);
+router.delete("/remove_project_user/:id", removeProjectUser);
+router.post("/edit_project_user/:id", editProjectUser);
 
 // project invites
 router.get("/get_project_invite/:project_id", getProjectInvite);

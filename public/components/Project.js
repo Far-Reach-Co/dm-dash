@@ -66,7 +66,7 @@ export default class Project {
     } else {
       // window.alert("Failed to delete project...");
     }
-  }
+  };
 
   addInviteLink = async () => {
     try {
@@ -111,7 +111,7 @@ export default class Project {
           type: "click",
           event: async () => {
             this.loadingProjectInvite = true;
-            this.render()
+            this.render();
             await this.addInviteLink();
             this.loadingProjectInvite = false;
             this.render();
@@ -121,7 +121,11 @@ export default class Project {
     } else {
       const inviteLink = `${window.location.origin}/invite.html?invite=${this.projectInvite.uuid}`;
 
-      const inviteLinkButton = createElement("button", {}, "Copy Invite Link");
+      const inviteLinkButton = createElement(
+        "button",
+        { style: "margin-right: 10px;" },
+        "Copy Link"
+      );
       inviteLinkButton.addEventListener("click", () => {
         navigator.clipboard.writeText(inviteLink).then(
           function () {
@@ -133,11 +137,19 @@ export default class Project {
         );
       });
 
-      const removeInviteButton = createElement("button", {class: "btn-red"}, "Delete Invite Link");
+      const removeInviteButton = createElement(
+        "button",
+        { class: "btn-red" },
+        "Delete Link"
+      );
       removeInviteButton.addEventListener("click", () => {
-        this.removeInvite();
-        this.projectInvite = null;
-        this.render();
+        if (
+          window.confirm(`Are you sure you want to delete the invite link?`)
+        ) {
+          this.removeInvite();
+          this.projectInvite = null;
+          this.render();
+        }
       });
 
       return [
@@ -146,10 +158,9 @@ export default class Project {
           { style: "color: var(--orange3)" },
           "Share Invite Link"
         ),
-        // createElement("div", {}, inviteLink),
+        createElement("div", {}, inviteLink),
         inviteLinkButton,
-        createElement("br"),
-        removeInviteButton
+        removeInviteButton,
       ];
     }
   };
@@ -198,8 +209,13 @@ export default class Project {
         createElement("br"),
         editButton,
         removeButton,
-        createElement("br"),
+        createElement("hr"),
         ...this.renderInviteLinkComponent(),
+        createElement("hr"),
+        createElement("button", {}, "Cancel", {
+          type: "click",
+          event: this.toggleEdit,
+        }),
       ])
     );
   };
