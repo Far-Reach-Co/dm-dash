@@ -6,6 +6,7 @@ const {
   editClock,
 } = require("./controllers/clocks.js");
 const {
+  getProject,
   getProjects,
   addProject,
   removeProject,
@@ -70,7 +71,6 @@ const {
   removeCharacter,
   editCharacter,
 } = require("./controllers/characters.js");
-
 const {
   getItems,
   getItemsByLocation,
@@ -79,8 +79,33 @@ const {
   removeItem,
   editItem,
 } = require("./controllers/items.js");
+const {
+  getProjectInvite,
+  getProjectInviteByUUID,
+  addProjectInvite,
+  removeProjectInvite
+} = require("./controllers/projectInvites.js");
+const {
+  getProjectUsers,
+  addProjectUser,
+  removeProjectUser,
+  editProjectUser,
+} = require("./controllers/projectUsers.js");
 
 var router = express.Router();
+
+// project users
+// counters
+router.get("/get_project_users/:user_id", getProjectUsers);
+router.post("/add_project_user", addProjectUser);
+router.delete("/remove_project_user/:id", removeProjectUser);
+router.post("/edit_project_user/:id", editProjectUser);
+
+// project invites
+router.get("/get_project_invite/:project_id", getProjectInvite);
+router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
+router.post("/add_project_invite", addProjectInvite);
+router.delete("/remove_project_invite/:id", removeProjectInvite);
 
 // characters
 router.get("/get_characters/:project_id/:limit/:offset", getCharacters);
@@ -155,6 +180,7 @@ router.delete("/remove_day/:id", removeDay);
 router.post("/edit_day/:id", editDay);
 
 // projects
+router.get("/get_project/:id", getProject);
 router.get("/get_projects/:id", getProjects);
 router.post("/add_project", addProject);
 router.delete("/remove_project/:id", removeProject);

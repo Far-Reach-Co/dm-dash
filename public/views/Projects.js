@@ -48,7 +48,7 @@ export default class ProjectsView {
 
   renderProjectsElems = async () => {
     const projectData = await this.getProjects();
-    return projectData.map((project) => {
+    const map = projectData.map((project) => {
       // create element
       const elem = createElement("div", {
         id: `project-component-${project.id}`,
@@ -59,11 +59,18 @@ export default class ProjectsView {
         id: project.id,
         title: project.title,
         dateCreated: project.date_created,
+        isEditor: project.is_editor,
+        wasJoined: project.was_joined,
+        dateJoined: project.date_joined,
+        projectInvite: project.project_invite,
         parentRender: this.render,
         navigate: this.navigate,
       });
       return elem;
     });
+
+    if (map.length) return map;
+    else return [createElement("div", {}, "None...")];
   };
 
   render = async () => {
@@ -81,7 +88,7 @@ export default class ProjectsView {
         "Choose your project"
       ),
       createElement("hr", { class: "special-hr" }),
-      ...(await this.renderProjectsElems())
+      ...(await this.renderProjectsElems()),
     );
   };
 }

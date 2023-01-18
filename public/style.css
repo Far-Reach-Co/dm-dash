@@ -91,6 +91,10 @@ h1 {
   display: inline-block;
 }
 
+h2 {
+  color: var(--orange3);
+}
+
 nav {
   padding-left: 10px;
   padding-right: 10px;
@@ -355,7 +359,12 @@ footer {
 
 .project-date {
   font-size: 12px;
-  color: var(--pink);
+  color: var(--orange3);
+}
+
+.project-edit-container {
+  border: 1px solid var(--main-gray);
+  padding: 10px;
 }
 
 .component {
@@ -521,6 +530,7 @@ footer {
   font-size: 15px;
   padding: 1px 2px;
 }
+
 .single-item-title button {
   font-size: 15px;
   padding: 1px 2px;
@@ -583,4 +593,15 @@ footer {
   color: var(--orange3);
   background-color: var(--blue4);
   padding: 3px;
+}
+
+.invite {
+  background-color: var(--blue3);
+  padding: 18px;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  border: 0.5px solid var(--main-gray);
 }

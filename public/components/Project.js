@@ -9,8 +9,14 @@ export default class Project {
     this.id = props.id;
     this.title = props.title;
     this.dateCreated = props.dateCreated;
+    this.projectInvite = props.projectInvite;
+    this.isEditor = props.isEditor;
+    this.wasJoined = props.wasJoined;
+    this.dateJoined = props.dateJoined;
+
     this.edit = false;
     this.parentRender = props.parentRender;
+    this.loadingProjectInvite = false;
 
     this.render();
   }
@@ -51,18 +57,135 @@ export default class Project {
     }
   };
 
+  removeInvite = async () => {
+    const res = await fetch(
+      `${window.location.origin}/api/remove_project_invite/${this.projectInvite.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (res.status === 204) {
+      // window.alert(`Deleted ${this.title}`)
+    } else {
+      // window.alert("Failed to delete project...");
+    }
+  };
+
+  addInviteLink = async () => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/add_project_invite`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            project_id: this.id,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (res.status === 201) {
+        this.projectInvite = data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      alert("There was a problem creating your invite link");
+    }
+  };
+
+  renderInviteLinkComponent = () => {
+    if (this.loadingProjectInvite) {
+      return [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          "Share This Project"
+        ),
+        createElement("div", {}, "Loading..."),
+      ];
+    } else if (!this.projectInvite) {
+      return [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          "Share This Project"
+        ),
+        createElement("button", {}, "Create Invite Link", {
+          type: "click",
+          event: async () => {
+            this.loadingProjectInvite = true;
+            this.render();
+            await this.addInviteLink();
+            this.loadingProjectInvite = false;
+            this.render();
+          },
+        }),
+      ];
+    } else {
+      const inviteLink = `${window.location.origin}/invite.html?invite=${this.projectInvite.uuid}`;
+
+      const inviteLinkButton = createElement(
+        "button",
+        { style: "margin-right: 10px;" },
+        "Copy Link"
+      );
+      inviteLinkButton.addEventListener("click", () => {
+        navigator.clipboard.writeText(inviteLink).then(
+          function () {
+            console.log("Copying to clipboard was successful!");
+          },
+          function (err) {
+            console.error("Could not copy text: ", err);
+          }
+        );
+      });
+
+      const removeInviteButton = createElement(
+        "button",
+        { class: "btn-red" },
+        "Delete Link"
+      );
+      removeInviteButton.addEventListener("click", () => {
+        if (
+          window.confirm(`Are you sure you want to delete the invite link?`)
+        ) {
+          this.removeInvite();
+          this.projectInvite = null;
+          this.render();
+        }
+      });
+
+      return [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          "Share Invite Link"
+        ),
+        createElement("div", {}, inviteLink),
+        inviteLinkButton,
+        removeInviteButton,
+      ];
+    }
+  };
+
   renderEditProject = () => {
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
-      style: "margin-right: 10px;"
+      style: "margin-right: 10px;",
     });
-    const editButton = createElement("button", {style: "margin-right: 10px;"}, "Done");
+
+    const editButton = createElement(
+      "button",
+      { style: "margin-right: 10px;" },
+      "Done"
+    );
     editButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
       this.saveProject();
       this.toggleEdit();
     });
+
     const removeButton = createElement(
       "button",
       { class: "btn-red" },
@@ -78,10 +201,45 @@ export default class Project {
 
     // append
     this.domComponent.append(
-      titleInput, 
-      editButton, 
-      removeButton
+      createElement("div", { class: "project-edit-container" }, [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          `Manage ${this.title}`
+        ),
+        createElement("br"),
+        titleInput,
+        createElement("br"),
+        editButton,
+        removeButton,
+        createElement("hr"),
+        ...this.renderInviteLinkComponent(),
+        createElement("hr"),
+        createElement("button", {}, "Cancel", {
+          type: "click",
+          event: this.toggleEdit,
+        }),
+      ])
     );
+  };
+
+  calculateDateDisplay = () => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    if (!this.dateJoined) {
+      return `Created: ${new Date(this.dateCreated).toLocaleDateString(
+        "en-US",
+        options
+      )}`;
+    } else {
+      return `Joined: ${new Date(this.dateJoined).toLocaleDateString(
+        "en-US",
+        options
+      )}`;
+    }
   };
 
   render = () => {
@@ -104,11 +262,7 @@ export default class Project {
           createElement(
             "div",
             { class: "project-date" },
-            `Created: ${new Date(this.dateCreated).toLocaleDateString("en-gb", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}`
+            this.calculateDateDisplay()
           ),
         ],
         {
