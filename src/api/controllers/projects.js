@@ -5,6 +5,7 @@ const {
   removeProjectQuery,
   editProjectQuery,
 } = require("../queries/projects.js");
+const { getProjectInviteQuery } = require("../queries/projectInvites.js");
 
 async function addProject(req, res, next) {
   try {
@@ -28,6 +29,12 @@ async function getProject(req, res, next) {
 async function getProjects(req, res, next) {
   try {
     const data = await getProjectsQuery(req.params.id);
+
+    for (project of data.rows) {
+      console.log(project)
+      const projectInvites = await getProjectInviteQuery(project.id);
+      if(projectInvites && projectInvites.rows && projectInvites.rows.length) project.project_invite = projectInvites.rows[0];
+    }
 
     res.send(data.rows);
   } catch (err) {

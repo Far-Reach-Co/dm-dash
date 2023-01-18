@@ -46,13 +46,13 @@
       }
     }
 
-    async function getProject(projectId) {
+    async function getProjectInvite() {
       var searchParams = new URLSearchParams(window.location.search);
-      var projectId = searchParams.get("project");
+      var inviteUUID = searchParams.get("invite");
 
       try {
         const res = await fetch(
-          `${window.location.origin}/api/get_project/${projectId}`
+          `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`
         );
         const data = await res.json();
         if (res.status === 200) {
@@ -67,19 +67,20 @@
       const user = await verifyToken();
       if (user) {
         console.log(user)
-        const project = await getProject();
-        if (project) {
+        const projectInvite = await getProjectInvite();
+        if (projectInvite) {
           const inviteDiv = document.getElementById("invite-div");
           const button = document.createElement("button");
-          button.innerText = `Accept invite for ${project.title}`;
+          button.innerText = "Accept Invite";
           button.addEventListener("click", () => {
-            console.log()
+            console.log(projectInvite)
+            console.log(projectInvite.project_id, "project id by invite")
           })
 
           inviteDiv.innerHTML = "";
           inviteDiv.append(button);
         } else {
-          alert("Could not find project, something went wrong");
+          alert("Could not find invite, something went wrong");
         }
       }
     }();

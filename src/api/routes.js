@@ -71,7 +71,6 @@ const {
   removeCharacter,
   editCharacter,
 } = require("./controllers/characters.js");
-
 const {
   getItems,
   getItemsByLocation,
@@ -80,8 +79,20 @@ const {
   removeItem,
   editItem,
 } = require("./controllers/items.js");
+const {
+  getProjectInvite,
+  getProjectInviteByUUID,
+  addProjectInvite,
+  removeProjectInvite
+} = require("./controllers/projectInvites.js");
 
 var router = express.Router();
+
+// project invites
+router.get("/get_project_invite/:project_id", getProjectInvite);
+router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
+router.post("/add_project_invite", addProjectInvite);
+router.delete("/remove_project_invite/:id", removeProjectInvite);
 
 // characters
 router.get("/get_characters/:project_id/:limit/:offset", getCharacters);

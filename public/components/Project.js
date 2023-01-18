@@ -9,8 +9,11 @@ export default class Project {
     this.id = props.id;
     this.title = props.title;
     this.dateCreated = props.dateCreated;
+    this.projectInvite = props.projectInvite;
+
     this.edit = false;
     this.parentRender = props.parentRender;
+    this.loadingProjectInvite = false;
 
     this.render();
   }
@@ -51,16 +54,118 @@ export default class Project {
     }
   };
 
-  renderEditProject = () => {
-    const inviteLink = `${window.location.origin}/invite.html?project=${this.id}`;
+  removeInvite = async () => {
+    const res = await fetch(
+      `${window.location.origin}/api/remove_project_invite/${this.projectInvite.id}`,
+      {
+        method: "DELETE",
+      }
+    );
+    if (res.status === 204) {
+      // window.alert(`Deleted ${this.title}`)
+    } else {
+      // window.alert("Failed to delete project...");
+    }
+  }
 
+  addInviteLink = async () => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/add_project_invite`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            project_id: this.id,
+          }),
+        }
+      );
+      const data = await res.json();
+      if (res.status === 201) {
+        this.projectInvite = data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      alert("There was a problem creating your invite link");
+    }
+  };
+
+  renderInviteLinkComponent = () => {
+    if (this.loadingProjectInvite) {
+      return [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          "Share This Project"
+        ),
+        createElement("div", {}, "Loading..."),
+      ];
+    } else if (!this.projectInvite) {
+      return [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          "Share This Project"
+        ),
+        createElement("button", {}, "Create Invite Link", {
+          type: "click",
+          event: async () => {
+            this.loadingProjectInvite = true;
+            this.render()
+            await this.addInviteLink();
+            this.loadingProjectInvite = false;
+            this.render();
+          },
+        }),
+      ];
+    } else {
+      const inviteLink = `${window.location.origin}/invite.html?invite=${this.projectInvite.uuid}`;
+
+      const inviteLinkButton = createElement("button", {}, "Copy Invite Link");
+      inviteLinkButton.addEventListener("click", () => {
+        navigator.clipboard.writeText(inviteLink).then(
+          function () {
+            console.log("Copying to clipboard was successful!");
+          },
+          function (err) {
+            console.error("Could not copy text: ", err);
+          }
+        );
+      });
+
+      const removeInviteButton = createElement("button", {class: "btn-red"}, "Delete Invite Link");
+      removeInviteButton.addEventListener("click", () => {
+        this.removeInvite();
+        this.projectInvite = null;
+        this.render();
+      });
+
+      return [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          "Share Invite Link"
+        ),
+        // createElement("div", {}, inviteLink),
+        inviteLinkButton,
+        createElement("br"),
+        removeInviteButton
+      ];
+    }
+  };
+
+  renderEditProject = () => {
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
-      style: "margin-right: 10px;"
+      style: "margin-right: 10px;",
     });
 
-    const editButton = createElement("button", {style: "margin-right: 10px;"}, "Done");
+    const editButton = createElement(
+      "button",
+      { style: "margin-right: 10px;" },
+      "Done"
+    );
     editButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
       this.saveProject();
@@ -80,28 +185,21 @@ export default class Project {
       }
     });
 
-    const inviteLinkButton = createElement("button", {}, "Copy Invite Link")
-    inviteLinkButton.addEventListener("click", () => {
-      navigator.clipboard.writeText(inviteLink).then(function() {
-        console.log('Copying to clipboard was successful!');
-      }, function(err) {
-        console.error('Could not copy text: ', err);
-      });
-    })
-
     // append
     this.domComponent.append(
-      createElement("div", {class: "project-edit-container"}, [
-        createElement("div", {style: "color: var(--orange3)"}, `Manage ${this.title}`),
+      createElement("div", { class: "project-edit-container" }, [
+        createElement(
+          "div",
+          { style: "color: var(--orange3)" },
+          `Manage ${this.title}`
+        ),
         createElement("br"),
         titleInput,
         createElement("br"),
-        editButton, 
+        editButton,
         removeButton,
         createElement("br"),
-        createElement("div", {style: "color: var(--orange3)"}, "Share Invite Link"),
-        createElement("div", {}, inviteLink),
-        inviteLinkButton
+        ...this.renderInviteLinkComponent(),
       ])
     );
   };

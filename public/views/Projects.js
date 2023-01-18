@@ -59,6 +59,7 @@ export default class ProjectsView {
         id: project.id,
         title: project.title,
         dateCreated: project.date_created,
+        projectInvite: project.project_invite,
         parentRender: this.render,
         navigate: this.navigate,
       });
