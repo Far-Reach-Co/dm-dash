@@ -127,7 +127,7 @@ export default class Note {
         createElement(
           "div",
           { class: "note-date" },
-          new Date(this.dateCreated).toLocaleDateString("en-gb", {
+          new Date(this.dateCreated).toLocaleDateString("en-US", {
             year: "numeric",
             month: "numeric",
             day: "numeric",

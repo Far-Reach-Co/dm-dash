@@ -10,6 +10,9 @@ export default class Project {
     this.title = props.title;
     this.dateCreated = props.dateCreated;
     this.projectInvite = props.projectInvite;
+    this.isEditor = props.isEditor;
+    this.wasJoined = props.wasJoined;
+    this.dateJoined = props.dateJoined;
 
     this.edit = false;
     this.parentRender = props.parentRender;
@@ -220,6 +223,25 @@ export default class Project {
     );
   };
 
+  calculateDateDisplay = () => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    if (!this.dateJoined) {
+      return `Created: ${new Date(this.dateCreated).toLocaleDateString(
+        "en-US",
+        options
+      )}`;
+    } else {
+      return `Joined: ${new Date(this.dateJoined).toLocaleDateString(
+        "en-US",
+        options
+      )}`;
+    }
+  };
+
   render = () => {
     this.domComponent.innerHTML = "";
 
@@ -240,11 +262,7 @@ export default class Project {
           createElement(
             "div",
             { class: "project-date" },
-            `Created: ${new Date(this.dateCreated).toLocaleDateString("en-gb", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}`
+            this.calculateDateDisplay()
           ),
         ],
         {
