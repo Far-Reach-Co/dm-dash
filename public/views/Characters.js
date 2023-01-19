@@ -31,23 +31,23 @@ export default class CharactersView {
   };
 
   getCharacters = async () => {
-    let url = `${window.location.origin}/api/get_characters/${state.currentProject}/${this.limit}/${this.offset}`;
+    let url = `${window.location.origin}/api/get_characters/${state.currentProject.id}/${this.limit}/${this.offset}`;
     if (
       !this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_characters_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.searchTerm}`;
+      url = `${window.location.origin}/api/get_characters_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (
       this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_characters_filter_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+      url = `${window.location.origin}/api/get_characters_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
-      url = `${window.location.origin}/api/get_characters_filter/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}`;
+      url = `${window.location.origin}/api/get_characters_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
     try {
       const res = await fetch(url);
@@ -64,7 +64,7 @@ export default class CharactersView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    const projectId = state.currentProject;
+    const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
 
@@ -166,6 +166,22 @@ export default class CharactersView {
     this.render();
   };
 
+  renderAddButtonOrNull = () => {
+    if(state.currentProject.isEditor === false) {
+      return createElement("div", {style: "visibility: hidden;"});
+    } else return(
+      createElement(
+        "button",
+        { style: "align-self: flex-end; margin-bottom: 10px;" },
+        "+ Character",
+        {
+          type: "click",
+          event: this.toggleCreatingCharacter,
+        }
+      )
+    )
+  }
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -184,15 +200,7 @@ export default class CharactersView {
             characterTypeSelect(this.handleTypeFilterChange, this.filter),
           ]),
           createElement("div", {style: "display: flex; flex-direction: column;"}, [
-            createElement(
-              "button",
-              { style: "align-self: flex-end; margin-bottom: 10px;" },
-              "+ Character",
-              {
-                type: "click",
-                event: this.toggleCreatingCharacter,
-              }
-            ),
+            this.renderAddButtonOrNull(),
             createElement(
               "input",
               { placeholder: "Search Characters", value: this.searchTerm },

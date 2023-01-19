@@ -2,8 +2,9 @@ const db = require('../dbconfig')
 
 async function addCounterQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Counter" (project_id, current_count, title) values($1,$2,$3) returning *`,
+    text: /*sql*/ `insert into public."Counter" (user_id, project_id, current_count, title) values($1,$2,$3,$4) returning *`,
     values: [
+      data.user_id,
       data.project_id,
       data.current_count,
       data.title
@@ -12,10 +13,10 @@ async function addCounterQuery(data) {
   return await db.query(query)
 }
 
-async function getCountersQuery(projectId) {
+async function getCountersQuery(userId, projectId) {
   const query = {
-    text: /*sql*/ `select * from public."Counter" where project_id = $1 order by title asc`,
-    values: [projectId]
+    text: /*sql*/ `select * from public."Counter" where user_id = $1 and project_id = $2 order by title asc`,
+    values: [userId, projectId]
   }
   return await db.query(query)
 }

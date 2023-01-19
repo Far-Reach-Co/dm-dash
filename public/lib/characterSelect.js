@@ -8,7 +8,7 @@ export default async function characterSelect(
   async function getCharacters() {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_characters/${state.currentProject}/100/0`
+        `${window.location.origin}/api/get_characters/${state.currentProject.id}/100/0`
       );
       const data = await res.json();
       if (res.status === 200) {

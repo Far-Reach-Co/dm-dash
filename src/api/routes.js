@@ -139,7 +139,7 @@ router.delete("/remove_note/:id", removeNote);
 router.post("/edit_note/:id", editNote);
 
 // counters
-router.get("/get_counters/:project_id", getCounters);
+router.get("/get_counters/:user_id/:project_id", getCounters);
 router.post("/add_counter", addCounter);
 router.delete("/remove_counter/:id", removeCounter);
 router.post("/edit_counter/:id", editCounter);

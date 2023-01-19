@@ -1,5 +1,6 @@
 import createElement from "../lib/createElement.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
+import state from "../lib/state.js";
 
 export default class Location {
   constructor(props) {
@@ -129,6 +130,19 @@ export default class Location {
     } else return createElement("div", { style: "display: none;" });
   };
 
+  renderEditButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", {style: "visibility: hidden;"});
+    } else {
+      return(
+        createElement("button", {}, "Edit", {
+          type: "click",
+          event: this.toggleEdit,
+        })
+      )
+    }
+  }
+
   render = () => {
     this.domComponent.innerHTML = "";
 
@@ -157,10 +171,7 @@ export default class Location {
             params: { location: this.location },
           }),
       }),
-      createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      })
+      this.renderEditButtonOrNull()
     );
   };
 }

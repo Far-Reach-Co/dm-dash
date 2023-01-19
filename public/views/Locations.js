@@ -32,23 +32,23 @@ export default class LocationsView {
   };
 
   getLocations = async () => {
-    let url = `${window.location.origin}/api/get_locations/${state.currentProject}/${this.limit}/${this.offset}`;
+    let url = `${window.location.origin}/api/get_locations/${state.currentProject.id}/${this.limit}/${this.offset}`;
     if (
       !this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_locations_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.searchTerm}`;
+      url = `${window.location.origin}/api/get_locations_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (
       this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_locations_filter_keyword/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+      url = `${window.location.origin}/api/get_locations_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
-      url = `${window.location.origin}/api/get_locations_filter/${state.currentProject}/${this.limit}/${this.offset}/${this.filter}`;
+      url = `${window.location.origin}/api/get_locations_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
     try {
       const res = await fetch(url);
@@ -65,7 +65,7 @@ export default class LocationsView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    const projectId = state.currentProject;
+    const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     formProps.is_sub = false;
     if (formProps.type === "None") formProps.type = null;
@@ -169,6 +169,22 @@ export default class LocationsView {
     this.render();
   };
 
+  renderAddButtonOrNull = () => {
+    if(state.currentProject.isEditor === false) {
+      return createElement("div", {style: "visibility: hidden;"});
+    } else return(
+      createElement(
+        "button",
+        { style: "align-self: flex-end; margin-bottom: 10px;" },
+        "+ Location",
+        {
+          type: "click",
+          event: this.toggleCreatingLocation,
+        }
+      )
+    )
+  }
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -197,15 +213,7 @@ export default class LocationsView {
             "div",
             { style: "display: flex; flex-direction: column;" },
             [
-              createElement(
-                "button",
-                { style: "align-self: flex-end; margin-bottom: 10px;" },
-                "+ Location",
-                {
-                  type: "click",
-                  event: this.toggleCreatingLocation,
-                }
-              ),
+              this.renderAddButtonOrNull(),
               createElement(
                 "input",
                 { placeholder: "Search Locations", value: this.searchTerm },

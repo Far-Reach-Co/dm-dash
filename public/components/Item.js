@@ -1,5 +1,6 @@
 import createElement from "../lib/createElement.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
+import state from "../lib/state.js";
 
 export default class Item {
   constructor(props) {
@@ -139,6 +140,19 @@ export default class Item {
     } else return createElement("div", { style: "display: none;" });
   };
 
+  renderEditButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", {style: "visibility: hidden;"});
+    } else {
+      return(
+        createElement("button", {}, "Edit", {
+          type: "click",
+          event: this.toggleEdit,
+        })
+      )
+    }
+  }
+
   render = () => {
     this.domComponent.innerHTML = "";
 
@@ -167,10 +181,7 @@ export default class Item {
             params: { item: this.item },
           }),
       }),
-      createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      })
+      this.renderEditButtonOrNull()
     );
   };
 }

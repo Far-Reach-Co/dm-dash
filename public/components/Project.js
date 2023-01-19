@@ -175,6 +175,12 @@ export default class Project {
   };
 
   renderEditProject = () => {
+    const titleInput = createElement("input", {
+      id: `edit-project-title-${this.id}`,
+      value: this.title,
+      style: "margin-right: 10px;",
+    });
+
     const doneButton = createElement(
       "button",
       { style: "margin-right: 10px;" },
@@ -232,11 +238,7 @@ export default class Project {
         createElement("br"),
         createElement("div", {}, [
           createElement("div", {}, "Title"),
-          createElement("input", {
-            id: `edit-project-title-${this.id}`,
-            value: this.title,
-            style: "margin-right: 10px;",
-          }),
+          titleInput,
         ]),
         createElement("br"),
         doneButton,
@@ -296,7 +298,16 @@ export default class Project {
         {
           type: "click",
           event: () => {
-            state.currentProject = this.id;
+            state.currentProject = {
+              id: this.id,
+              title: this.title,
+              dateCreated: this.dateCreated,
+              projectInvite: this.projectInvite,
+              isEditor: this.isEditor,
+              wasJoined: this.wasJoined,
+              dateJoined: this.dateJoined,
+              projectUserId: this.projectUserId,
+            };
             this.navigate({ title: "modules", sidebar: true });
           },
         }

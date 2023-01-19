@@ -10,7 +10,7 @@ export default class ClocksView {
   }
 
   getClocks = async () => {
-    var projectId = state.currentProject;
+    var projectId = state.currentProject.id;
     try {
       const res = await fetch(
         `${window.location.origin}/api/get_clocks/${projectId}`
@@ -31,7 +31,7 @@ export default class ClocksView {
     const clockElements = [];
     // try to get clocks from state before rendering new ones
     const clocksByProject =
-      state.clockComponents[`project-${state.currentProject}`];
+      state.clockComponents[`project-${state.currentProject.id}`];
     if (clocksByProject && clocksByProject.length) {
       clockData = clocksByProject;
       // render
@@ -51,7 +51,7 @@ export default class ClocksView {
     } else {
       clockData = await this.getClocks();
       // render
-      state.clockComponents[`project-${state.currentProject}`] = [];
+      state.clockComponents[`project-${state.currentProject.id}`] = [];
       clockData.forEach((clock) => {
         // create element
         const clockComponentDomElement = createElement("div", {
@@ -67,7 +67,7 @@ export default class ClocksView {
           currentTimeInMilliseconds: clock.current_time_in_milliseconds,
           parentRender: this.render,
         });
-        state.clockComponents[`project-${state.currentProject}`].push(newClock);
+        state.clockComponents[`project-${state.currentProject.id}`].push(newClock);
       });
     }
     return clockElements;
@@ -76,7 +76,7 @@ export default class ClocksView {
   newClock = async () => {
     if (!state.clocks) return;
 
-    var projectId = state.currentProject;
+    var projectId = state.currentProject.id;
     try {
       const res = await fetch(`${window.location.origin}/api/add_clock`, {
         method: "POST",
@@ -103,7 +103,7 @@ export default class ClocksView {
           currentTimeInMilliseconds: clock.current_time_in_milliseconds,
           parentRender: this.render,
         });
-        state.clockComponents[`project-${state.currentProject}`].push(newClock);
+        state.clockComponents[`project-${state.currentProject.id}`].push(newClock);
       } else throw new Error();
     } catch (err) {
       window.alert("Failed to create new clock...");
