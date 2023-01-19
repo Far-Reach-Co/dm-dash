@@ -28,16 +28,6 @@ export default class SingleCharacterView {
     this.render();
   };
 
-  updateCurrentLocation = (newLocationId) => {
-    fetch(`${window.location.origin}/api/edit_character/${this.character.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        location_id: newLocationId,
-      }),
-    });
-  };
-
   newNote = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -178,33 +168,39 @@ export default class SingleCharacterView {
 
   renderItems = async () => {
     let itemsByCharacter = await this.getItemsByCharacter();
-    
+
     const elemMap = itemsByCharacter.map((item) => {
       const elem = createElement(
-        "div",
+        "a",
         {
-          id: `item-component-${item.id}`,
-          class: "sub-list-item",
+          class: "small-clickable",
+          style: "margin: 3px",
         },
-        [
-          createElement("div", {}, item.title),
-          createElement("small", {style: "margin-left: 5px"}, `${item.type}`)
-        ],
-        {type: "click", event: () => this.navigate({ title: "single-item", sidebar: true, params: {item} })}
+        item.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-item",
+              sidebar: true,
+              params: { item },
+            }),
+        }
       );
 
       return elem;
     });
 
-    if(elemMap.length) return elemMap;
-    else return [createElement("div", {style: "margin-left: 5px;"}, "None...")]
+    if (elemMap.length) return elemMap;
+    else
+      return [createElement("div", { style: "margin-left: 5px;" }, "None...")];
   };
 
   saveCharacter = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    if(formProps.type === "None") formProps.type = null;
+    if (formProps.type === "None") formProps.type = null;
     // update UI
     this.character.title = formProps.title;
     this.character.description = formProps.description;
@@ -270,21 +266,19 @@ export default class SingleCharacterView {
 
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
-      return createElement("div", {style: "visibility: hidden;"});
+      return createElement("div", { style: "visibility: hidden;" });
     } else {
-      return(
-        createElement(
-          "a",
-          { class: "small-clickable", style: "margin-left: 3px;" },
-          "Edit",
-          {
-            type: "click",
-            event: this.toggleEdit,
-          }
-        )
-      )
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "margin-left: 3px;" },
+        "Edit",
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      );
     }
-  }
+  };
 
   render = async () => {
     this.domComponent.innerHTML = "";
@@ -297,6 +291,13 @@ export default class SingleCharacterView {
       return this.renderCreateNewNote();
     }
 
+    const currentLocationComponent = createElement("div", {});
+    new CurrentLocationComponent({
+      domComponent: currentLocationComponent,
+      character: this.character,
+      navigate: this.navigate,
+    });
+
     // append
     this.domComponent.append(
       createElement("a", { class: "back-button" }, "← Characters", {
@@ -304,7 +305,7 @@ export default class SingleCharacterView {
         event: () => this.navigate({ title: "characters", sidebar: true }),
       }),
       createElement("div", { class: "single-item-title-container" }, [
-        createElement("div", {class: "single-item-title"}, [
+        createElement("div", { class: "single-item-title" }, [
           this.character.title,
           this.renderCharacterType(),
         ]),
@@ -316,34 +317,32 @@ export default class SingleCharacterView {
       ]),
       this.renderEditButtonOrNull(),
       createElement("br"),
-      createElement(
-        "div",
-        { style: "display: flex; flex-direction: column;" },
-        [
-          createElement("small", {}, "Current Location"),
-          await locationSelect(
-            this.character.location_id,
-            null,
-            this.updateCurrentLocation
+      createElement("div", { class: "single-item-main-section" }, [
+        createElement("div", {}, [
+          createElement(
+            "div",
+            { class: "single-item-subheading" },
+            "Description:"
           ),
-        ]
-      ),
-      createElement("br"),
-      createElement("div", {}, [
-        createElement(
-          "div",
-          { class: "single-item-subheading" },
-          "Description:"
-        ),
-        createElement(
-          "div",
-          { class: "description" },
-          `"${this.character.description}"`
-        ),
+          createElement(
+            "div",
+            { class: "description" },
+            `"${this.character.description}"`
+          ),
+        ]),
+        createElement("div", { class: "single-info-box" }, [
+          currentLocationComponent,
+          createElement("br"),
+          createElement(
+            "div",
+            { class: "single-info-box-subheading" },
+            "Items"
+          ),
+          ...(await this.renderItems()),
+          createElement("br"),
+        ]),
       ]),
       createElement("br"),
-      createElement("div", { class: "single-item-subheading" }, "Items:"),
-      ...(await this.renderItems()),
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [
         "Notes:",
@@ -358,6 +357,122 @@ export default class SingleCharacterView {
         ...(await this.renderCharacterNotes()),
       ]),
       createElement("br")
+    );
+  };
+}
+
+class CurrentLocationComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "current-location-component";
+    this.character = props.character;
+    this.navigate = props.navigate;
+
+    this.editingCurrentLocation = false;
+
+    this.render();
+  }
+
+  toggleEditingCurrentLocation = () => {
+    this.editingCurrentLocation = !this.editingCurrentLocation;
+    this.render();
+  };
+
+  renderEditCurrentLocationButtonOrNull = () => {
+    // dont render if user is not an editor
+    if (state.currentProject.isEditor === false)
+      return createElement("div", { style: "invisibility: hidden;" });
+
+    if (!this.editingCurrentLocation) {
+      return createElement(
+        "a",
+        {
+          class: "small-clickable",
+          style: "align-self: flex-end;",
+        },
+        "Edit",
+        {
+          type: "click",
+          event: this.toggleEditingCurrentLocation,
+        }
+      );
+    } else return createElement("div", { style: "invisibility: hidden;" });
+  };
+
+  updateCurrentLocation = (newLocationId) => {
+    fetch(`${window.location.origin}/api/edit_character/${this.character.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        location_id: newLocationId,
+      }),
+    });
+  };
+
+  getLocation = async () => {
+    if (!this.character.location_id) return null;
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_location/${this.character.location_id}`
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
+
+  renderCurrentLocation = async () => {
+    const location = await this.getLocation();
+
+    if (this.editingCurrentLocation) {
+      return createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        await locationSelect(
+          this.character.location_id,
+          null,
+          (newLocationId) => {
+            this.character.location_id = newLocationId;
+            this.toggleEditingCurrentLocation();
+            this.updateCurrentLocation(newLocationId);
+          }
+        )
+      );
+    }
+
+    if (!location) {
+      return createElement("small", {}, "None...");
+    } else {
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "margin: 3px;" },
+        location.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-location",
+              sidebar: true,
+              params: { location },
+            }),
+        }
+      );
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      createElement("div", { class: "single-info-box-subheading" }, [
+        "Current Location",
+        this.renderEditCurrentLocationButtonOrNull(),
+      ]),
+      await this.renderCurrentLocation()
     );
   };
 }
