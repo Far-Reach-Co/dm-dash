@@ -1,5 +1,9 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
+import {
+  fallbackCopyTextToClipboard,
+  copyTextToClipboard,
+} from "../lib/clipboard.js";
 
 export default class Project {
   constructor(props) {
@@ -111,20 +115,13 @@ export default class Project {
   renderInviteLinkComponent = () => {
     if (this.loadingProjectInvite) {
       return [
-        createElement(
-          "div",
-          { style: "color: var(--orange3)" },
-          "Share This Project"
-        ),
+        createElement("h2", {}, "Share This Project"),
+        createElement("br"),
         createElement("div", {}, "Loading..."),
       ];
     } else if (!this.projectInvite) {
       return [
-        createElement(
-          "div",
-          { style: "color: var(--orange3)" },
-          "Share This Project"
-        ),
+        createElement("h2", {}, "Share This Project"),
         createElement("button", {}, "Create Invite Link", {
           type: "click",
           event: async () => {
@@ -145,14 +142,7 @@ export default class Project {
         "Copy Link"
       );
       inviteLinkButton.addEventListener("click", () => {
-        navigator.clipboard.writeText(inviteLink).then(
-          function () {
-            console.log("Copying to clipboard was successful!");
-          },
-          function (err) {
-            console.error("Could not copy text: ", err);
-          }
-        );
+        copyTextToClipboard(inviteLink);
       });
 
       const removeInviteButton = createElement(
@@ -171,11 +161,8 @@ export default class Project {
       });
 
       return [
-        createElement(
-          "div",
-          { style: "color: var(--orange3)" },
-          "Share Invite Link"
-        ),
+        createElement("h2", {}, "Share Invite Link"),
+        createElement("br"),
         createElement("div", {}, inviteLink),
         inviteLinkButton,
         removeInviteButton,
@@ -184,18 +171,12 @@ export default class Project {
   };
 
   renderEditProject = () => {
-    const titleInput = createElement("input", {
-      id: `edit-project-title-${this.id}`,
-      value: this.title,
-      style: "margin-right: 10px;",
-    });
-
-    const editButton = createElement(
+    const doneButton = createElement(
       "button",
       { style: "margin-right: 10px;" },
       "Done"
     );
-    editButton.addEventListener("click", async () => {
+    doneButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
       this.saveProject();
       this.toggleEdit();
@@ -228,15 +209,18 @@ export default class Project {
     // append
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement(
-          "div",
-          { style: "color: var(--orange3)" },
-          `Manage ${this.title}`
-        ),
+        createElement("h2", {}, `Manage ${this.title}`),
         createElement("br"),
-        titleInput,
+        createElement("div", {}, [
+          createElement("div", {}, "Title"),
+          createElement("input", {
+            id: `edit-project-title-${this.id}`,
+            value: this.title,
+            style: "margin-right: 10px;",
+          }),
+        ]),
         createElement("br"),
-        editButton,
+        doneButton,
         removeButton,
         createElement("hr"),
         ...this.renderInviteLinkComponent(),

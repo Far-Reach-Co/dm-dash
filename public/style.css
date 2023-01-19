@@ -93,6 +93,7 @@ h1 {
 
 h2 {
   color: var(--orange3);
+  font-size: 1.1rem;
 }
 
 nav {
