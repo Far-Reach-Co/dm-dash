@@ -384,10 +384,7 @@ export default class SingleLocationView {
     });
 
     if (elemMap.length) return elemMap;
-    else
-      return [
-        createElement("small", {}, "None..."),
-      ];
+    else return [createElement("small", {}, "None...")];
   };
 
   getItemsByLocation = async () => {
@@ -431,10 +428,7 @@ export default class SingleLocationView {
     });
 
     if (elemMap.length) return elemMap;
-    else
-      return [
-        createElement("small", {}, "None..."),
-      ];
+    else return [createElement("small", {}, "None...")];
   };
 
   renderParentLocation = async () => {
@@ -497,6 +491,17 @@ export default class SingleLocationView {
     } catch (err) {
       // window.alert("Failed to save location...");
       console.log(err);
+    }
+  };
+
+  renderSubLocationsPlusButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else {
+      return createElement("a", { style: "align-self: flex-end;" }, "+", {
+        type: "click",
+        event: this.toggleCreatingSubLocation,
+      });
     }
   };
 
@@ -629,10 +634,7 @@ export default class SingleLocationView {
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, [
             "Sub-Locations",
-            createElement("a", { style: "align-self: flex-end;" }, "+", {
-              type: "click",
-              event: this.toggleCreatingSubLocation,
-            }),
+            this.renderSubLocationsPlusButtonOrNull(),
           ]),
           ...(await this.renderSubLocations()),
           createElement("br"),
