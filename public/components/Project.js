@@ -113,11 +113,6 @@ export default class Project {
   };
 
   renderInviteLinkComponent = () => {
-    // don't show if not allowed
-    if (this.isEditor === false) {
-      return [createElement("div", {style: "visibility: hidden;"}, "")];
-    }
-
     if (this.loadingProjectInvite) {
       return [
         createElement("hr"),
@@ -214,6 +209,21 @@ export default class Project {
         }
       }
     });
+
+    if (this.isEditor === false) {
+      return this.domComponent.append(
+        createElement("div", { class: "project-edit-container" }, [
+          createElement("h2", {}, `Manage ${this.title}`),
+          createElement("br"),
+          removeButton,
+          createElement("hr"),
+          createElement("button", {}, "Cancel", {
+            type: "click",
+            event: this.toggleEdit,
+          }),
+        ])
+      );
+    }
 
     // append
     this.domComponent.append(
