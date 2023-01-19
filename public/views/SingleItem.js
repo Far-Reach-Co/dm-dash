@@ -29,26 +29,6 @@ export default class SingleItemView {
     this.render();
   };
 
-  updateCurrentLocation = (newLocationId) => {
-    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        location_id: newLocationId,
-      }),
-    });
-  };
-
-  updateCurrentCharacter= (newCharacterId) => {
-    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        character_id: newCharacterId,
-      }),
-    });
-  };
-
   newNote = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -269,6 +249,20 @@ export default class SingleItemView {
       return this.renderCreateNewNote();
     }
 
+    const currentLocationComponent = createElement("div", {});
+    new CurrentLocationComponent({
+      domComponent: currentLocationComponent,
+      item: this.item,
+      navigate: this.navigate,
+    });
+
+    const currentCharacterComponent = createElement("div", {});
+    new CurrentCharacterComponent({
+      domComponent: currentCharacterComponent,
+      item: this.item,
+      navigate: this.navigate,
+    });
+
     // append
     this.domComponent.append(
       createElement("a", { class: "back-button" }, "← Items", {
@@ -288,44 +282,27 @@ export default class SingleItemView {
       ]),
       this.renderEditButtonOrNull(),
       createElement("br"),
-      createElement("div", {style: "display: flex; flex-wrap: wrap;"}, [
-        createElement(
-          "div",
-          { style: "margin-right: 5px; display: flex; flex-direction: column;" },
-          [
-            createElement("small", {}, "Current Location"),
-            await locationSelect(
-              this.item.location_id,
-              null,
-              this.updateCurrentLocation
-            ),
-          ]
-        ),
-        createElement(
-          "div",
-          { style: "display: flex; flex-direction: column;" },
-          [
-            createElement("small", {}, "With Character"),
-            await characterSelect(
-              this.item.character_id,
-              this.updateCurrentCharacter
-            ),
-          ]
-        ),
+      createElement("div", { class: "single-item-main-section" }, [
+        createElement("div", {}, [
+          createElement(
+            "div",
+            { class: "single-item-subheading" },
+            "Description:"
+          ),
+          createElement(
+            "div",
+            { class: "description" },
+            `"${this.item.description}"`
+          ),
+        ]),
+        createElement("div", { class: "single-info-box" }, [
+          currentLocationComponent,
+          createElement("br"),
+          currentCharacterComponent,
+          createElement("br"),
+        ]),
       ]),
       createElement("br"),
-      createElement("div", {}, [
-        createElement(
-          "div",
-          { class: "single-item-subheading" },
-          "Description:"
-        ),
-        createElement(
-          "div",
-          { class: "description" },
-          `"${this.item.description}"`
-        ),
-      ]),
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [
         "Notes:",
@@ -340,6 +317,239 @@ export default class SingleItemView {
         ...(await this.renderItemNotes()),
       ]),
       createElement("br")
+    );
+  };
+}
+
+class CurrentLocationComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "current-location-component";
+    this.item = props.item;
+    this.navigate = props.navigate;
+
+    this.editingCurrentLocation = false;
+
+    this.render();
+  }
+
+  toggleEditingCurrentLocation = () => {
+    this.editingCurrentLocation = !this.editingCurrentLocation;
+    this.render();
+  };
+
+  renderEditCurrentLocationButtonOrNull = () => {
+    // dont render if user is not an editor
+    if (state.currentProject.isEditor === false)
+      return createElement("div", { style: "invisibility: hidden;" });
+
+    if (!this.editingCurrentLocation) {
+      return createElement(
+        "a",
+        {
+          class: "small-clickable",
+          style: "align-self: flex-end;",
+        },
+        "Edit",
+        {
+          type: "click",
+          event: this.toggleEditingCurrentLocation,
+        }
+      );
+    } else return createElement("div", { style: "invisibility: hidden;" });
+  };
+
+  updateCurrentLocation = (newLocationId) => {
+    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        location_id: newLocationId,
+      }),
+    });
+  };
+
+  getLocation = async () => {
+    if (!this.item.location_id) return null;
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_location/${this.item.location_id}`
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
+
+  renderCurrentLocation = async () => {
+    const location = await this.getLocation();
+
+    if (this.editingCurrentLocation) {
+      return createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        await locationSelect(
+          this.item.location_id,
+          null,
+          (newLocationId) => {
+            this.item.location_id = newLocationId;
+            this.toggleEditingCurrentLocation();
+            this.updateCurrentLocation(newLocationId);
+          }
+        )
+      );
+    }
+
+    if (!location) {
+      return createElement("small", {}, "None...");
+    } else {
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "margin: 3px;" },
+        location.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-location",
+              sidebar: true,
+              params: { location },
+            }),
+        }
+      );
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      createElement("div", { class: "single-info-box-subheading" }, [
+        "Current Location",
+        this.renderEditCurrentLocationButtonOrNull(),
+      ]),
+      await this.renderCurrentLocation()
+    );
+  };
+}
+
+
+
+class CurrentCharacterComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "current-location-component";
+    this.item = props.item;
+    this.navigate = props.navigate;
+
+    this.editingCurrentCharacter = false;
+
+    this.render();
+  }
+
+  toggleEditingCurrentCharacter = () => {
+    this.editingCurrentCharacter = !this.editingCurrentCharacter;
+    this.render();
+  };
+
+  renderEditCurrentCharacterButtonOrNull = () => {
+    // dont render if user is not an editor
+    if (state.currentProject.isEditor === false)
+      return createElement("div", { style: "invisibility: hidden;" });
+
+    if (!this.editingCurrentCharacter) {
+      return createElement(
+        "a",
+        {
+          class: "small-clickable",
+          style: "align-self: flex-end;",
+        },
+        "Edit",
+        {
+          type: "click",
+          event: this.toggleEditingCurrentCharacter,
+        }
+      );
+    } else return createElement("div", { style: "invisibility: hidden;" });
+  };
+
+  updateCurrentCharacter = (newCharacterId) => {
+    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        character_id: newCharacterId,
+      }),
+    });
+  };
+
+  getCharacter = async () => {
+    if (!this.item.character_id) return null;
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_character/${this.item.character_id}`
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+      return null;
+    }
+  };
+
+  renderCurrentCharacter = async () => {
+    const character = await this.getCharacter();
+
+    if (this.editingCurrentCharacter) {
+      return createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        await characterSelect(
+          this.item.character_id,
+          (newCharacterId) => {
+            this.item.character_id = newCharacterId;
+            this.toggleEditingCurrentCharacter();
+            this.updateCurrentCharacter(newCharacterId);
+          }
+        )
+      );
+    }
+
+    if (!character) {
+      return createElement("small", {}, "None...");
+    } else {
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "margin: 3px;" },
+        character.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-character",
+              sidebar: true,
+              params: { character },
+            }),
+        }
+      );
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      createElement("div", { class: "single-info-box-subheading" }, [
+        "With Character",
+        this.renderEditCurrentCharacterButtonOrNull(),
+      ]),
+      await this.renderCurrentCharacter()
     );
   };
 }

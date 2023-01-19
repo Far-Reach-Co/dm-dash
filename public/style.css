@@ -541,6 +541,13 @@ footer {
   padding: 1px 2px;
 }
 
+.single-item-main-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
 .note-date {
   font-size: 12px;
   color: var(--light-gray);
@@ -580,6 +587,7 @@ footer {
 }
 
 .single-info-box {
+  padding: 0px;
   width: 200px;
   border: 1px solid var(--main-gray);
   display: flex;
@@ -609,4 +617,11 @@ footer {
   align-items: center;
   justify-content: space-evenly;
   border: 0.5px solid var(--main-gray);
+}
+
+.current-location-component {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

@@ -1,5 +1,6 @@
 const {
   addCharacterQuery,
+  getCharacterQuery,
   getCharactersQuery,
   getCharactersWithFilterQuery,
   getCharactersWithKeywordQuery,
@@ -13,6 +14,16 @@ async function addCharacter(req, res, next) {
   try {
     const data = await addCharacterQuery(req.body);
     res.status(201).json(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getCharacter(req, res, next) {
+  try {
+    const data = await getCharacterQuery(req.params.id);
+
+    res.send(data.rows[0]);
   } catch (err) {
     next(err);
   }
@@ -103,6 +114,7 @@ async function editCharacter(req, res, next) {
 }
 
 module.exports = {
+  getCharacter,
   getCharacters,
   getCharactersWithFilterQuery,
   getCharactersWithKeywordQuery,

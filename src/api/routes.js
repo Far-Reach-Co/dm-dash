@@ -65,6 +65,7 @@ const {
   editCounter,
 } = require("./controllers/counters.js");
 const {
+  getCharacter,
   getCharacters,
   getCharactersByLocation,
   addCharacter,
@@ -108,6 +109,7 @@ router.post("/add_project_invite", addProjectInvite);
 router.delete("/remove_project_invite/:id", removeProjectInvite);
 
 // characters
+router.get("/get_character/:id", getCharacter)
 router.get("/get_characters/:project_id/:limit/:offset", getCharacters);
 router.get("/get_characters_filter/:project_id/:limit/:offset/:filter", getCharacters);
 router.get("/get_characters_keyword/:project_id/:limit/:offset/:keyword", getCharacters);

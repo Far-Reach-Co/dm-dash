@@ -1,7 +1,11 @@
 import createElement from "../lib/createElement.js";
 import state from "./state.js";
 
-export default async function locationSelect(selectedLocation, locationToSkip, onChangeCallback) {
+export default async function locationSelect(
+  selectedLocation,
+  locationToSkip,
+  onChangeCallback
+) {
   async function getLocations() {
     try {
       const res = await fetch(
@@ -29,9 +33,9 @@ export default async function locationSelect(selectedLocation, locationToSkip, o
         if (location.id === locationToSkip.id) return;
         // check sublocation lineage and skip
         let checkingSubHeirachy = true;
-        
+
         let locationToCheck = location;
-        while(checkingSubHeirachy) {
+        while (checkingSubHeirachy) {
           if (locationToCheck.is_sub) {
             if (locationToCheck.parent_location_id === locationToSkip.id) {
               isInSubHeirarchy = true;
@@ -40,14 +44,14 @@ export default async function locationSelect(selectedLocation, locationToSkip, o
               const parentLocation = locations.filter(
                 (location) => locationToCheck.parent_location_id === location.id
               )[0];
-              locationToCheck = parentLocation
+              locationToCheck = parentLocation;
               checkingSubHeirachy = true;
             }
           } else checkingSubHeirachy = false;
         }
       }
-      
-      if(isInSubHeirarchy) return;
+
+      if (isInSubHeirarchy) return;
 
       const elem = createElement(
         "option",
@@ -57,7 +61,7 @@ export default async function locationSelect(selectedLocation, locationToSkip, o
       if (selectedLocation == location.id) elem.selected = true;
       locationElemsList.push(elem);
     });
-    
+
     return locationElemsList;
   }
 
@@ -68,8 +72,11 @@ export default async function locationSelect(selectedLocation, locationToSkip, o
       createElement("option", { value: 0 }, "None"),
       ...(await renderLocationSelectOptions()),
     ],
-    {type: "change", event: (e) => {
-      if(onChangeCallback) onChangeCallback(e.target.value);
-    }}
+    {
+      type: "change",
+      event: (e) => {
+        if (onChangeCallback) onChangeCallback(e.target.value);
+      },
+    }
   );
 }
