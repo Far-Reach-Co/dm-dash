@@ -129,11 +129,11 @@ router.delete("/remove_item/:id", removeItem);
 router.post("/edit_item/:id", editItem);
 
 // notes
-router.get("/get_notes/:project_id/:limit/:offset", getNotes);
-router.get("/get_notes/:project_id/:limit/:offset/:keyword", getNotes);
-router.get("/get_notes_by_location/:location_id", getNotesByLocation);
-router.get("/get_notes_by_character/:character_id", getNotesByCharacter);
-router.get("/get_notes_by_item/:item_id", getNotesByItem);
+router.get("/get_notes/:user_id/:project_id/:limit/:offset", getNotes);
+router.get("/get_notes/:user_id/:project_id/:limit/:offset/:keyword", getNotes);
+router.get("/get_notes_by_location/:user_id/:location_id", getNotesByLocation);
+router.get("/get_notes_by_character/:user_id/:character_id", getNotesByCharacter);
+router.get("/get_notes_by_item/:user_id/:item_id", getNotesByItem);
 router.post("/add_note", addNote);
 router.delete("/remove_note/:id", removeNote);
 router.post("/edit_note/:id", editNote);

@@ -33,7 +33,7 @@ export default class NotesView {
 
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes/${projectId}/${this.limit}/${this.offset}/${this.searchTerm}`
+        `${window.location.origin}/api/get_notes/${state.user.id}/${projectId}/${this.limit}/${this.offset}/${this.searchTerm}`
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -49,6 +49,7 @@ export default class NotesView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.user_id = state.user.id;
     formProps.project_id = state.currentProject;
     formProps.location_id = null;
     formProps.character_id = null;

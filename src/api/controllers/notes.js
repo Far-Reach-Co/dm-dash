@@ -20,6 +20,7 @@ async function addNote(req, res, next) {
 async function getNotes(req, res, next) {
   try {
     const data = await getNotesQuery(
+      req.params.user_id,
       req.params.project_id,
       req.params.limit,
       req.params.offset,
@@ -34,7 +35,7 @@ async function getNotes(req, res, next) {
 
 async function getNotesByLocation(req, res, next) {
   try {
-    const data = await getNotesByLocationQuery(req.params.location_id);
+    const data = await getNotesByLocationQuery(req.params.user_id, req.params.location_id);
 
     res.send(data.rows);
   } catch (err) {
@@ -44,7 +45,7 @@ async function getNotesByLocation(req, res, next) {
 
 async function getNotesByCharacter(req, res, next) {
   try {
-    const data = await getNotesByCharacterQuery(req.params.character_id);
+    const data = await getNotesByCharacterQuery(req.params.user_id, req.params.character_id);
 
     res.send(data.rows);
   } catch (err) {
@@ -54,7 +55,7 @@ async function getNotesByCharacter(req, res, next) {
 
 async function getNotesByItem(req, res, next) {
   try {
-    const data = await getNotesByItemQuery(req.params.item_id);
+    const data = await getNotesByItemQuery(req.params.user_id, req.params.item_id);
 
     res.send(data.rows);
   } catch (err) {
