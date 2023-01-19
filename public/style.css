@@ -497,6 +497,10 @@ footer {
   cursor: pointer;
 }
 
+.non-clickable-day {
+  /* cursor: pointer; */
+}
+
 .clickable-day:hover {
   background-color: var(--blue);
 }

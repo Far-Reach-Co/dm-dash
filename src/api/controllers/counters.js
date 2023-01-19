@@ -16,7 +16,7 @@ async function addCounter(req, res, next) {
 
 async function getCounters(req, res, next) {
   try {
-    const data = await getCountersQuery(req.params.project_id);
+    const data = await getCountersQuery(req.params.user_id, req.params.project_id);
 
     res.send(data.rows);
   } catch (err) {

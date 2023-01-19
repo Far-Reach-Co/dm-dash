@@ -108,7 +108,11 @@ export default class Clock {
     var time = msToTime(milliseconds, false);
     var valueForInput = time.substring(0, time.length - 2);
 
-    const editTitle = createElement("div", {class: "component-title"}, `Edit ${this.title}`);
+    const editTitle = createElement(
+      "div",
+      { class: "component-title" },
+      `Edit ${this.title}`
+    );
 
     const titleInput = createElement("input", {
       value: this.title,
@@ -139,7 +143,7 @@ export default class Clock {
           this.removeClock();
           this.domComponent.remove();
           const clocksByProject =
-            state.clockComponents[`project-${state.currentProject}`];
+            state.clockComponents[`project-${state.currentProject.id}`];
           for (var i = 0; i < clocksByProject.length; i++) {
             if (clocksByProject[i].id === this.id) {
               clocksByProject.splice(i, 1);
@@ -171,6 +175,54 @@ export default class Clock {
     );
   };
 
+  renderEditButtonsOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return [createElement("div", { style: "visibility: hidden;" })];
+    } else {
+      const selectSpeed = createElement("select", { name: "speed" }, [
+        createElement("option", { value: 1 }, "--Speed Select--"),
+        createElement("option", { value: 1 }, "1"),
+        createElement("option", { value: 0.5 }, "1/2"),
+        createElement("option", { value: 0.25 }, "1/4"),
+        createElement("option", { value: 2 }, "2x"),
+        createElement("option", { value: 4 }, "4x"),
+        createElement("option", { value: 10 }, "10x"),
+        createElement("option", { value: 25 }, "25x"),
+        createElement("option", { value: 50 }, "50x"),
+        createElement("option", { value: 100 }, "100x"),
+      ]);
+      selectSpeed.addEventListener("change", (e) => {
+        this.stop();
+        this.runSpeed = parseFloat(e.target.value);
+        this.start();
+      });
+      for (var option of selectSpeed.children) {
+        if (option.value == this.runSpeed) {
+          option.selected = true;
+          break;
+        }
+      }
+
+      return [
+        createElement("br"),
+        createElement("button", {}, "Start", {
+          type: "click",
+          event: this.start,
+        }),
+        createElement("button", {}, "Stop", {
+          type: "click",
+          event: this.stop,
+        }),
+        createElement("button", {}, "Edit", {
+          type: "click",
+          event: this.toggleEdit,
+        }),
+        createElement("br"),
+        selectSpeed,
+      ];
+    }
+  };
+
   render = () => {
     // clear
     this.domComponent.innerHTML = "";
@@ -180,63 +232,24 @@ export default class Clock {
       return;
     }
 
-    const titleDiv = createElement("div", { class: "component-title" }, [
-      this.title,
-      createElement("img", {
-        src: "../assets/clock.svg",
-        width: 30,
-        height: 30,
-      }),
-    ]);
-
     const currentTimeDiv = createElement("div", {
       id: `current-time-${this.id}`,
     });
 
     this.currentTimeDiv = currentTimeDiv;
 
-    const startButton = createElement("button", {}, "Start");
-    startButton.addEventListener("click", this.start);
-
-    const stopButton = createElement("button", {}, "Stop");
-    stopButton.addEventListener("click", this.stop);
-
-    const editButton = createElement("button", {}, "Edit");
-    editButton.addEventListener("click", this.toggleEdit);
-
-    const selectSpeed = createElement("select", { name: "speed" }, [
-      createElement("option", { value: 1 }, "--Speed Select--"),
-      createElement("option", { value: 1 }, "1"),
-      createElement("option", { value: 0.5 }, "1/2"),
-      createElement("option", { value: 0.25 }, "1/4"),
-      createElement("option", { value: 2 }, "2x"),
-      createElement("option", { value: 4 }, "4x"),
-      createElement("option", { value: 10 }, "10x"),
-      createElement("option", { value: 25 }, "25x"),
-      createElement("option", { value: 50 }, "50x"),
-      createElement("option", { value: 100 }, "100x"),
-    ]);
-    selectSpeed.addEventListener("change", (e) => {
-      this.stop();
-      this.runSpeed = parseFloat(e.target.value);
-      this.start();
-    });
-    for(var option of selectSpeed.children) {
-      if(option.value == this.runSpeed) {
-        option.selected = true;
-        break;
-      }
-    }
-
     // append
     this.domComponent.append(
-      titleDiv,
+      createElement("div", { class: "component-title" }, [
+        this.title,
+        createElement("img", {
+          src: "../assets/clock.svg",
+          width: 30,
+          height: 30,
+        }),
+      ]),
       currentTimeDiv,
-      createElement("br"),
-      startButton,
-      stopButton,
-      editButton,
-      selectSpeed
+      ...this.renderEditButtonsOrNull()
     );
     // Display time
     this.renderDisplayTime();

@@ -71,7 +71,7 @@ export default class SingleLocationView {
     }
   };
 
-  saveLocation = async (e) => {
+  saveLocationForParent = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
@@ -118,7 +118,7 @@ export default class SingleLocationView {
         {
           type: "submit",
           event: async (e) => {
-            await this.saveLocation(e);
+            await this.saveLocationForParent(e);
             this.toggleAddParentLocation();
           },
         }
@@ -135,7 +135,7 @@ export default class SingleLocationView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    const projectId = state.currentProject;
+    const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     formProps.is_sub = true;
     formProps.parent_location_id = this.location.id;
@@ -206,7 +206,7 @@ export default class SingleLocationView {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject;
+    formProps.project_id = state.currentProject.id;
 
     formProps.location_id = this.location.id;
     formProps.character_id = null;
@@ -537,6 +537,24 @@ export default class SingleLocationView {
     );
   };
 
+  renderEditButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", {style: "visibility: hidden;"});
+    } else {
+      return(
+        createElement(
+          "a",
+          { class: "small-clickable", style: "margin-left: 3px;" },
+          "Edit",
+          {
+            type: "click",
+            event: this.toggleEdit,
+          }
+        )
+      )
+    }
+  }
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -573,15 +591,7 @@ export default class SingleLocationView {
           height: 45,
         }),
       ]),
-      createElement(
-        "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
-        "Edit",
-        {
-          type: "click",
-          event: this.toggleEdit,
-        }
-      ),
+      this.renderEditButtonOrNull(),
       createElement("br"),
       createElement(
         "div",

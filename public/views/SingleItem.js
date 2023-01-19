@@ -3,6 +3,7 @@ import state from "../lib/state.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
+import itemTypeSelect from "../lib/itemTypeSelect.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -13,9 +14,15 @@ export default class SingleItemView {
     this.domComponent.className = "standard-view";
 
     this.creatingNote = false;
+    this.edit = false;
 
     this.render();
   }
+
+  toggleEdit = () => {
+    this.edit = !this.edit;
+    this.render();
+  };
 
   toggleCreatingNote = () => {
     this.creatingNote = !this.creatingNote;
@@ -47,7 +54,7 @@ export default class SingleItemView {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject;
+    formProps.project_id = state.currentProject.id;
 
     formProps.item_id = this.item.id;
     formProps.location_id = null;
@@ -165,8 +172,98 @@ export default class SingleItemView {
     } else return createElement("div", { style: "display: none;" });
   };
 
+  saveItem = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    if(formProps.type === "None") formProps.type = null;
+    // update UI
+    this.item.title = formProps.title;
+    this.item.description = formProps.description;
+    this.item.type = formProps.type;
+
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/edit_item/${this.item.id}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formProps),
+        }
+      );
+      await res.json();
+      if (res.status === 200) {
+      } else throw new Error();
+    } catch (err) {
+      // window.alert("Failed to save item...");
+      console.log(err);
+    }
+  };
+
+  renderEdit = async () => {
+    this.domComponent.append(
+      createElement(
+        "form",
+        {},
+        [
+          createElement("div", {}, "Type Select (Optional)"),
+          itemTypeSelect(null, this.item.type),
+          createElement("br"),
+          createElement("label", { for: "title" }, "Title"),
+          createElement("input", {
+            id: "title",
+            name: "title",
+            value: this.item.title,
+          }),
+          createElement("label", { for: "description" }, "Description"),
+          createElement(
+            "textarea",
+            {
+              id: "description",
+              name: "description",
+              cols: "30",
+              rows: "7",
+            },
+            this.item.description
+          ),
+          createElement("br"),
+          createElement("button", { type: "submit" }, "Done"),
+        ],
+        {
+          type: "submit",
+          event: (e) => {
+            this.saveItem(e);
+            this.toggleEdit();
+          },
+        }
+      )
+    );
+  };
+
+  renderEditButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", {style: "visibility: hidden;"});
+    } else {
+      return(
+        createElement(
+          "a",
+          { class: "small-clickable", style: "margin-left: 3px;" },
+          "Edit",
+          {
+            type: "click",
+            event: this.toggleEdit,
+          }
+        )
+      )
+    }
+  }
+
   render = async () => {
     this.domComponent.innerHTML = "";
+
+    if (this.edit) {
+      return this.renderEdit();
+    }
 
     if (this.creatingNote) {
       return this.renderCreateNewNote();
@@ -189,6 +286,8 @@ export default class SingleItemView {
           height: 45,
         }),
       ]),
+      this.renderEditButtonOrNull(),
+      createElement("br"),
       createElement("div", {style: "display: flex; flex-wrap: wrap;"}, [
         createElement(
           "div",

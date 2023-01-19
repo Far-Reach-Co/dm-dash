@@ -1,4 +1,5 @@
 import createElement from "../lib/createElement.js";
+import state from "../lib/state.js";
 
 export default class Calendar {
   constructor(props) {
@@ -81,7 +82,7 @@ export default class Calendar {
   calculateCurrentMonth = () => {
     if (!this.months.length) return { title: "unknown-month" };
     return this.months.filter((month) => {
-      if (this.currentMonthId)return month.id === this.currentMonthId;
+      if (this.currentMonthId) return month.id === this.currentMonthId;
       else return month.index === 1;
     })[0];
   };
@@ -252,6 +253,9 @@ export default class Calendar {
   };
 
   handleDayClicked = async (dayNumber) => {
+    // dont let non-editors use this
+    if (state.currentProject.isEditor === false) return;
+
     dayNumber = parseInt(dayNumber);
     // updated UI
     this.currentMonthId = this.monthBeingViewed.id;
@@ -633,7 +637,7 @@ export default class Calendar {
     ) {
       const elem = createElement(
         "div",
-        { class: "calendar-box clickable-day" },
+        { class: `calendar-box ${state.currentProject.isEditor === false ? "non-clickable-day" : "clickable-day"}` },
         dayNumber,
         { type: "click", event: () => this.handleDayClicked(elem.innerHTML) }
       );
@@ -664,6 +668,17 @@ export default class Calendar {
       createElement("br"),
       closeButton
     );
+  };
+
+  renderEditButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else {
+      return createElement("button", {}, "Edit", {
+        type: "click",
+        event: this.toggleEdit,
+      });
+    }
   };
 
   render = () => {
@@ -701,12 +716,7 @@ export default class Calendar {
           this.render();
         },
       }),
-      createElement("button", {}, "Edit", {
-        type: "click",
-        event: () => {
-          this.toggleEdit();
-        },
-      })
+      this.renderEditButtonOrNull()
     );
   };
 }

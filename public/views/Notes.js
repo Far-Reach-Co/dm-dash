@@ -29,7 +29,7 @@ export default class NotesView {
   };
 
   getNotes = async () => {
-    const projectId = state.currentProject;
+    const projectId = state.currentProject.id;
 
     try {
       const res = await fetch(
@@ -50,7 +50,7 @@ export default class NotesView {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject;
+    formProps.project_id = state.currentProject.id;
     formProps.location_id = null;
     formProps.character_id = null;
 

@@ -12,7 +12,7 @@ export default class CountersView {
   getCounters = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_counters/${state.currentProject}`
+        `${window.location.origin}/api/get_counters/${state.user.id}/${state.currentProject.id}`
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -31,8 +31,9 @@ export default class CountersView {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          project_id: state.currentProject,
-          title: `My Counter ${state.projects.length + 1}`,
+          user_id: state.user.id,
+          project_id: state.currentProject.id,
+          title: `My Counter ${state.counters.length + 1}`,
           current_count: 1,
         }),
       });
@@ -48,7 +49,7 @@ export default class CountersView {
 
   renderCounterElems = async () => {
     const counterData = await this.getCounters();
-    return counterData.map((counter) => {
+    const map = counterData.map((counter) => {
       // create element
       const elem = createElement("div", {
         id: `counter-component-${counter.id}`,
@@ -60,11 +61,14 @@ export default class CountersView {
         id: counter.id,
         title: counter.title,
         currentCount: counter.current_count,
-        projectId: counter.project_id
-      }) 
+        projectId: counter.project_id,
+      });
 
       return elem;
     });
+
+    if (map.length) return map;
+    else return [createElement("div", {}, "None...")];
   };
 
   render = async () => {

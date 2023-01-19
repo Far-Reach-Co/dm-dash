@@ -31,7 +31,7 @@ export default class CalendarView {
   };
 
   getCalendars = async () => {
-    const projectId = state.currentProject;
+    const projectId = state.currentProject.id;
 
     try {
       const res = await fetch(
@@ -69,7 +69,7 @@ export default class CalendarView {
     if (!state.calendars) return;
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    const projectId = state.currentProject;
+    const projectId = state.currentProject.id;
     try {
       const res = await fetch(`${window.location.origin}/api/add_calendar`, {
         method: "POST",
@@ -565,6 +565,25 @@ export default class CalendarView {
     } else return [createElement("div", {}, "None...")];
   };
 
+  renderAddButtonOrNull = () => {
+    if(state.currentProject.isEditor === false) {
+      return createElement("div", {style: "visibility: hidden;"});
+    } else return(
+      createElement(
+        "button",
+        { style: "align-self: flex-end;" },
+        "+ Calendar",
+        {
+          type: "click",
+          event: () => {
+            this.creatingNewCalendar = true;
+            this.render();
+          },
+        }
+      )
+    )
+  }
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -582,18 +601,7 @@ export default class CalendarView {
 
     // append
     this.domComponent.append(
-      createElement(
-        "button",
-        { style: "align-self: flex-end;" },
-        "+ Calendar",
-        {
-          type: "click",
-          event: () => {
-            this.creatingNewCalendar = true;
-            this.render();
-          },
-        }
-      ),
+      this.renderAddButtonOrNull(),
       createElement("h1", { style: "align-self: center;" }, "Calendars"),
       createElement("br"),
       ...(await this.renderCalendarElems())
