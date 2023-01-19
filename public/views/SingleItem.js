@@ -46,6 +46,7 @@ export default class SingleItemView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.user_id = state.user.id;
     formProps.project_id = state.currentProject;
 
     formProps.item_id = this.item.id;
@@ -116,7 +117,7 @@ export default class SingleItemView {
   getNotesByItem = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_item/${this.item.id}`
+        `${window.location.origin}/api/get_notes_by_item/${state.user.id}/${this.item.id}`
       );
       const data = await res.json();
       if (res.status === 200) {

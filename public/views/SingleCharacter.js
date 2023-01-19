@@ -35,6 +35,7 @@ export default class SingleCharacterView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.user_id = state.user.id;
     formProps.project_id = state.currentProject;
 
     formProps.character_id = this.character.id;
@@ -105,7 +106,7 @@ export default class SingleCharacterView {
   getNotesByCharacter = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_character/${this.character.id}`
+        `${window.location.origin}/api/get_notes_by_character/${state.user.id}/${this.character.id}`
       );
       const data = await res.json();
       if (res.status === 200) {

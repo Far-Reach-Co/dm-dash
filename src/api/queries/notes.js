@@ -2,55 +2,56 @@ const db = require('../dbconfig')
 
 async function addNoteQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, character_id, item_id) values($1,$2,$3,$4,$5,$6) returning *`,
+    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, character_id, item_id, user_id) values($1,$2,$3,$4,$5,$6,$7) returning *`,
     values: [
       data.title,
       data.description,
       data.project_id,
       data.location_id,
       data.character_id,
-      data.item_id
+      data.item_id,
+      data.user_id
     ]
   }
   return await db.query(query)
 }
 
-async function getNotesQuery(projectId, limit, offset, keyword) {
+async function getNotesQuery(userId, projectId, limit, offset, keyword) {
   let query;
   if(!keyword) {
     query = {
-      text: /*sql*/ `select * from public."Note" where project_id = $1 and location_id is null and character_id is null and item_id is null order by date_created desc limit $2 offset $3`,
-      values: [projectId, limit, offset]
+      text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and location_id is null and character_id is null and item_id is null order by date_created desc limit $3 offset $4`,
+      values: [userId, projectId, limit, offset]
     }
     return await db.query(query)
   }
   query = {
-    text: /*sql*/ `select * from public."Note" where project_id = $1 and position($4 in lower(title))>0 and location_id is null and character_id is null and item_id is null order by date_created desc limit $2 offset $3`,
-    values: [projectId, limit, offset, keyword]
+    text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and position($5 in lower(title))>0 and location_id is null and character_id is null and item_id is null order by date_created desc limit $3 offset $4`,
+    values: [userId, projectId, limit, offset, keyword]
   }
   return await db.query(query)
 }
 
-async function getNotesByLocationQuery(locationId) {
+async function getNotesByLocationQuery(userId, locationId) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where location_id = $1 order by date_created desc`,
-    values: [locationId]
+    text: /*sql*/ `select * from public."Note" where user_id = $2 and location_id = $1 order by date_created desc`,
+    values: [locationId, userId]
   }
   return await db.query(query)
 }
 
-async function getNotesByCharacterQuery(characterId) {
+async function getNotesByCharacterQuery(userId, characterId) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where character_id = $1 order by date_created desc`,
-    values: [characterId]
+    text: /*sql*/ `select * from public."Note" where user_id = $2 and character_id = $1 order by date_created desc`,
+    values: [characterId, userId]
   }
   return await db.query(query)
 }
 
-async function getNotesByItemQuery(item) {
+async function getNotesByItemQuery(userId, item) {
   const query = {
-    text: /*sql*/ `select * from public."Note" where item_id = $1 order by date_created desc`,
-    values: [item]
+    text: /*sql*/ `select * from public."Note" where user_id = $2 and item_id = $1 order by date_created desc`,
+    values: [item, userId]
   }
   return await db.query(query)
 }
