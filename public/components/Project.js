@@ -113,15 +113,23 @@ export default class Project {
   };
 
   renderInviteLinkComponent = () => {
+    // don't show if not allowed
+    if (this.isEditor === false) {
+      return [createElement("div", {style: "visibility: hidden;"}, "")];
+    }
+
     if (this.loadingProjectInvite) {
       return [
+        createElement("hr"),
         createElement("h2", {}, "Share This Project"),
         createElement("br"),
         createElement("div", {}, "Loading..."),
       ];
     } else if (!this.projectInvite) {
       return [
+        createElement("hr"),
         createElement("h2", {}, "Share This Project"),
+        createElement("br"),
         createElement("button", {}, "Create Invite Link", {
           type: "click",
           event: async () => {
@@ -161,6 +169,7 @@ export default class Project {
       });
 
       return [
+        createElement("hr"),
         createElement("h2", {}, "Share Invite Link"),
         createElement("br"),
         createElement("div", {}, inviteLink),
@@ -222,7 +231,6 @@ export default class Project {
         createElement("br"),
         doneButton,
         removeButton,
-        createElement("hr"),
         ...this.renderInviteLinkComponent(),
         createElement("hr"),
         createElement("button", {}, "Cancel", {
