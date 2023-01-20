@@ -189,13 +189,13 @@ router.delete("/remove_project/:id", removeProject);
 router.post("/edit_project/:id", editProject);
 
 // users
-router.get("/users", getAllUsers);
-router.get("/get_user", getUserByToken);
-router.get("/get_user_by_id/:id", getUserById);
-router.post("/register", registerUser);
+// router.get("/users", getAllUsers);
+// router.get("/get_user", getUserByToken);
+// router.get("/get_user_by_id/:id", getUserById);
+router.post("/register", registerUser); // needs verification and google login
 router.post("/login", loginUser);
 router.get("/verify_jwt", verifyJwt);
-router.post("/edit_user", editUser);
+// router.post("/edit_user", editUser);
 router.post('/reset_password', resetPassword)
 router.post('/request_reset_email', requestResetEmail)
 
