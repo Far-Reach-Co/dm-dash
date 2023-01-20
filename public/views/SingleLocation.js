@@ -295,7 +295,7 @@ export default class SingleLocationView {
   getNotesByLocation = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_location/${state.user.id}/${this.location.id}`,
+        `${window.location.origin}/api/get_notes_by_location/${this.location.id}`,
         {
           headers: {
             "x-access-token": `Bearer ${localStorage.getItem("token")}`,

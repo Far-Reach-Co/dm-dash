@@ -12,6 +12,14 @@ async function addClockQuery(data) {
   return await db.query(query)
 }
 
+async function getClockQuery(id) {
+  const query = {
+    text: /*sql*/ `select * from public."Clock" where id = $1`,
+    values: [id]
+  }
+  return await db.query(query)
+}
+
 async function getClocksQuery(projectId) {
   const query = {
     text: /*sql*/ `select * from public."Clock" where project_id = $1 order by title asc`,
@@ -54,6 +62,7 @@ async function editClockQuery(id, data) {
 module.exports = {
   addClockQuery,
   getClocksQuery,
+  getClockQuery,
   removeClockQuery,
   editClockQuery
 }

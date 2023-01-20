@@ -107,7 +107,7 @@ export default class SingleItemView {
   getNotesByItem = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_item/${state.user.id}/${this.item.id}`,
+        `${window.location.origin}/api/get_notes_by_item/${this.item.id}`,
         {
           headers: {
             "x-access-token": `Bearer ${localStorage.getItem("token")}`,

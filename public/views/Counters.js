@@ -12,7 +12,7 @@ export default class CountersView {
   getCounters = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_counters/${state.user.id}/${state.currentProject.id}`,
+        `${window.location.origin}/api/get_counters/${state.currentProject.id}`,
         {
           headers: {
             "x-access-token": `Bearer ${localStorage.getItem("token")}`,

@@ -54,8 +54,9 @@
 
       try {
         const res = await fetch(
-          `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`, {
-            headers: { "x-access-token": `Bearer ${token}` }
+          `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`,
+          {
+            headers: { "x-access-token": `Bearer ${token}` },
           }
         );
         const data = await res.json();
@@ -70,8 +71,9 @@
     async function getProject(id) {
       try {
         const res = await fetch(
-          `${window.location.origin}/api/get_project/${id}`, {
-            headers: { "x-access-token": `Bearer ${token}` }
+          `${window.location.origin}/api/get_project/${id}`,
+          {
+            headers: { "x-access-token": `Bearer ${token}` },
           }
         );
         const data = await res.json();
@@ -89,11 +91,12 @@
           `${window.location.origin}/api/add_project_user`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json", "x-access-token": `Bearer ${token}` },
+            headers: {
+              "Content-Type": "application/json",
+              "x-access-token": `Bearer ${token}`,
+            },
             body: JSON.stringify({
               project_id: projectInvite.project_id,
-              user_id: user.id,
-              is_editor: false,
             }),
           }
         );
@@ -106,11 +109,12 @@
       }
     }
 
-    async function getProjectUsers(userId) {
+    async function getProjectUser(projectId) {
       try {
         const res = await fetch(
-          `${window.location.origin}/api/get_project_users/${userId}`, {
-            headers: { "x-access-token": `Bearer ${token}` }
+          `${window.location.origin}/api/get_project_user_by_user_and_project/${projectId}`,
+          {
+            headers: { "x-access-token": `Bearer ${token}` },
           }
         );
         const data = await res.json();
@@ -119,6 +123,7 @@
         } else throw new Error();
       } catch (err) {
         console.log(err);
+        return null;
       }
     }
 
@@ -129,20 +134,15 @@
         // get the invite
         const projectInvite = await getProjectInvite();
         if (projectInvite) {
-          // check if user already has this project
-          const projectsJoinedByUserId = await getProjectUsers(user.id);
-          if (projectsJoinedByUserId && projectsJoinedByUserId.length) {
-            const hasJoinedProject = projectsJoinedByUserId.filter(
-              (project => project.project_id === projectInvite.project_id)
-            );
-            if (hasJoinedProject.length) {
-              alert("You already have this project...");
-              return (window.location.pathname = "/dashboard.html");
-            }
-          }
           // get the project name
           const project = await getProject(projectInvite.project_id);
           if (project) {
+            // check if user already has this project
+            const hasJoinedProject = await getProjectUser(project.id);
+              if (hasJoinedProject) {
+                alert("You already have this project...");
+                return (window.location.pathname = "/dashboard.html");
+              }
             // check if user has this project
             if (project.user_id === user.id) {
               alert("You already have this project...");

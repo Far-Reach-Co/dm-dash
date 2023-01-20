@@ -16,6 +16,14 @@ async function addNoteQuery(data) {
   return await db.query(query)
 }
 
+async function getNoteQuery(id) {
+  const query = {
+    text: /*sql*/ `select * from public."Note" where id = $1`,
+    values: [id]
+  }
+  return await db.query(query)
+}
+
 async function getNotesQuery(userId, projectId, limit, offset, keyword) {
   let query;
   if(!keyword) {
@@ -90,6 +98,7 @@ async function editNoteQuery(id, data) {
 module.exports = {
   addNoteQuery,
   getNotesQuery,
+  getNoteQuery,
   getNotesByLocationQuery,
   getNotesByCharacterQuery,
   getNotesByItemQuery,

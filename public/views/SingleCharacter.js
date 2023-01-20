@@ -106,7 +106,7 @@ export default class SingleCharacterView {
   getNotesByCharacter = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_character/${state.user.id}/${this.character.id}`,
+        `${window.location.origin}/api/get_notes_by_character/${this.character.id}`,
         {
           headers: {
             "x-access-token": `Bearer ${localStorage.getItem("token")}`,

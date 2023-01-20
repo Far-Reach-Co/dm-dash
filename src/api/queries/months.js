@@ -13,6 +13,14 @@ async function addMonthQuery(data) {
   return await db.query(query)
 }
 
+async function getMonthQuery(id) {
+  const query = {
+    text: /*sql*/ `select * from public."Month" where id = $1`,
+    values: [id]
+  }
+  return await db.query(query)
+}
+
 async function getMonthsQuery(calendarId) {
   const query = {
     text: /*sql*/ `select * from public."Month" where calendar_id = $1 order by index asc`,
@@ -55,6 +63,7 @@ async function editMonthQuery(id, data) {
 module.exports = {
   addMonthQuery,
   getMonthsQuery,
+  getMonthQuery,
   removeMonthQuery,
   editMonthQuery
 }

@@ -13,7 +13,7 @@ export default class ProjectsView {
   getProjects = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_projects/${state.user.id}`, {
+        `${window.location.origin}/api/get_projects`, {
           headers: { "x-access-token": `Bearer ${localStorage.getItem("token")}` }
         }
       );
@@ -34,7 +34,6 @@ export default class ProjectsView {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-access-token": `Bearer ${localStorage.getItem("token")}` },
         body: JSON.stringify({
-          user_id: state.user.id,
           title: `My Project ${state.projects.length + 1}`,
         }),
       });

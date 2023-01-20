@@ -13,6 +13,14 @@ async function addCounterQuery(data) {
   return await db.query(query)
 }
 
+async function getCounterQuery(id) {
+  const query = {
+    text: /*sql*/ `select * from public."Counter" where id = $1`,
+    values: [id]
+  }
+  return await db.query(query)
+}
+
 async function getCountersQuery(userId, projectId) {
   const query = {
     text: /*sql*/ `select * from public."Counter" where user_id = $1 and project_id = $2 order by title asc`,
@@ -55,6 +63,7 @@ async function editCounterQuery(id, data) {
 module.exports = {
   addCounterQuery,
   getCountersQuery,
+  getCounterQuery,
   removeCounterQuery,
   editCounterQuery
 }
