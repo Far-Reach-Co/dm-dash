@@ -35,7 +35,12 @@ export default class CalendarView {
 
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_calendars/${projectId}`
+        `${window.location.origin}/api/get_calendars/${projectId}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -53,7 +58,10 @@ export default class CalendarView {
         `${window.location.origin}/api/edit_calendar/${this.calendarBeingCreated.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify({
             current_month_id: monthId,
           }),
@@ -73,7 +81,10 @@ export default class CalendarView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_calendar`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           project_id: projectId,
           title: formProps.title.trim(),
@@ -101,7 +112,10 @@ export default class CalendarView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_day`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           calendar_id: this.calendarBeingCreated.id,
           index: this.daysOfTheWeek.length + 1,
@@ -123,6 +137,9 @@ export default class CalendarView {
       `${window.location.origin}/api/remove_day/${dayId}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -142,7 +159,10 @@ export default class CalendarView {
             `${window.location.origin}/api/edit_day/${day.id}`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+              },
               body: JSON.stringify({
                 title: day.title,
                 index: day.index,
@@ -259,7 +279,8 @@ export default class CalendarView {
 
     const completeButton = createElement("button", {}, "Complete");
     completeButton.addEventListener("click", () => {
-      if (!this.daysOfTheWeek.length) return alert("Please create at least one day");
+      if (!this.daysOfTheWeek.length)
+        return alert("Please create at least one day");
       this.updateDays();
       this.resetCalendarCreation();
       this.render();
@@ -281,6 +302,9 @@ export default class CalendarView {
       `${window.location.origin}/api/remove_month/${monthId}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -300,7 +324,10 @@ export default class CalendarView {
             `${window.location.origin}/api/edit_month/${month.id}`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+              },
               body: JSON.stringify({
                 title: month.title,
                 index: month.index,
@@ -328,7 +355,10 @@ export default class CalendarView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_month`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           calendar_id: this.calendarBeingCreated.id,
           index: this.months.length + 1,
@@ -566,10 +596,10 @@ export default class CalendarView {
   };
 
   renderAddButtonOrNull = () => {
-    if(state.currentProject.isEditor === false) {
-      return createElement("div", {style: "visibility: hidden;"});
-    } else return(
-      createElement(
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else
+      return createElement(
         "button",
         { style: "align-self: flex-end;" },
         "+ Calendar",
@@ -580,9 +610,8 @@ export default class CalendarView {
             this.render();
           },
         }
-      )
-    )
-  }
+      );
+  };
 
   render = async () => {
     this.domComponent.innerHTML = "";

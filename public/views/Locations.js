@@ -23,7 +23,7 @@ export default class LocationsView {
     this.searchTerm = "";
     this.filter = null;
     this.offset = 0;
-  }
+  };
 
   toggleCreatingLocation = () => {
     this.resetFilters();
@@ -51,7 +51,11 @@ export default class LocationsView {
       url = `${window.location.origin}/api/get_locations_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       const data = await res.json();
       if (res.status === 200) {
         return data;
@@ -73,7 +77,10 @@ export default class LocationsView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_location`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();
@@ -170,10 +177,10 @@ export default class LocationsView {
   };
 
   renderAddButtonOrNull = () => {
-    if(state.currentProject.isEditor === false) {
-      return createElement("div", {style: "visibility: hidden;"});
-    } else return(
-      createElement(
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else
+      return createElement(
         "button",
         { style: "align-self: flex-end; margin-bottom: 10px;" },
         "+ Location",
@@ -181,9 +188,8 @@ export default class LocationsView {
           type: "click",
           event: this.toggleCreatingLocation,
         }
-      )
-    )
-  }
+      );
+  };
 
   render = async () => {
     this.domComponent.innerHTML = "";
@@ -222,7 +228,8 @@ export default class LocationsView {
                   type: "change",
                   event: (e) => {
                     this.offset = 0;
-                    (this.searchTerm = e.target.value.toLowerCase()), this.render();
+                    (this.searchTerm = e.target.value.toLowerCase()),
+                      this.render();
                   },
                 }
               ),

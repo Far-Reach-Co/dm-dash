@@ -36,6 +36,7 @@ export default class Character {
       `${window.location.origin}/api/remove_character/${this.id}`,
       {
         method: "DELETE",
+        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
       }
     );
     if (res.status === 204) {
@@ -59,7 +60,10 @@ export default class Character {
         `${window.location.origin}/api/edit_character/${this.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );

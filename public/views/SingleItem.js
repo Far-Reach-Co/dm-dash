@@ -43,7 +43,10 @@ export default class SingleItemView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();
@@ -104,7 +107,12 @@ export default class SingleItemView {
   getNotesByItem = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_item/${state.user.id}/${this.item.id}`
+        `${window.location.origin}/api/get_notes_by_item/${this.item.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -156,7 +164,7 @@ export default class SingleItemView {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    if(formProps.type === "None") formProps.type = null;
+    if (formProps.type === "None") formProps.type = null;
     // update UI
     this.item.title = formProps.title;
     this.item.description = formProps.description;
@@ -167,7 +175,10 @@ export default class SingleItemView {
         `${window.location.origin}/api/edit_item/${this.item.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );
@@ -222,21 +233,19 @@ export default class SingleItemView {
 
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
-      return createElement("div", {style: "visibility: hidden;"});
+      return createElement("div", { style: "visibility: hidden;" });
     } else {
-      return(
-        createElement(
-          "a",
-          { class: "small-clickable", style: "margin-left: 3px;" },
-          "Edit",
-          {
-            type: "click",
-            event: this.toggleEdit,
-          }
-        )
-      )
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "margin-left: 3px;" },
+        "Edit",
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      );
     }
-  }
+  };
 
   render = async () => {
     this.domComponent.innerHTML = "";
@@ -270,7 +279,7 @@ export default class SingleItemView {
         event: () => this.navigate({ title: "items", sidebar: true }),
       }),
       createElement("div", { class: "single-item-title-container" }, [
-        createElement("div", {class: "single-item-title"}, [
+        createElement("div", { class: "single-item-title" }, [
           this.item.title,
           this.renderItemType(),
         ]),
@@ -362,7 +371,10 @@ class CurrentLocationComponent {
   updateCurrentLocation = (newLocationId) => {
     fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+      },
       body: JSON.stringify({
         location_id: newLocationId,
       }),
@@ -373,7 +385,12 @@ class CurrentLocationComponent {
     if (!this.item.location_id) return null;
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.item.location_id}`
+        `${window.location.origin}/api/get_location/${this.item.location_id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -392,15 +409,11 @@ class CurrentLocationComponent {
       return createElement(
         "div",
         { style: "display: flex; flex-direction: column;" },
-        await locationSelect(
-          this.item.location_id,
-          null,
-          (newLocationId) => {
-            this.item.location_id = newLocationId;
-            this.toggleEditingCurrentLocation();
-            this.updateCurrentLocation(newLocationId);
-          }
-        )
+        await locationSelect(this.item.location_id, null, (newLocationId) => {
+          this.item.location_id = newLocationId;
+          this.toggleEditingCurrentLocation();
+          this.updateCurrentLocation(newLocationId);
+        })
       );
     }
 
@@ -436,8 +449,6 @@ class CurrentLocationComponent {
     );
   };
 }
-
-
 
 class CurrentCharacterComponent {
   constructor(props) {
@@ -480,7 +491,10 @@ class CurrentCharacterComponent {
   updateCurrentCharacter = (newCharacterId) => {
     fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+      },
       body: JSON.stringify({
         character_id: newCharacterId,
       }),
@@ -491,7 +505,12 @@ class CurrentCharacterComponent {
     if (!this.item.character_id) return null;
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_character/${this.item.character_id}`
+        `${window.location.origin}/api/get_character/${this.item.character_id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -510,14 +529,11 @@ class CurrentCharacterComponent {
       return createElement(
         "div",
         { style: "display: flex; flex-direction: column;" },
-        await characterSelect(
-          this.item.character_id,
-          (newCharacterId) => {
-            this.item.character_id = newCharacterId;
-            this.toggleEditingCurrentCharacter();
-            this.updateCurrentCharacter(newCharacterId);
-          }
-        )
+        await characterSelect(this.item.character_id, (newCharacterId) => {
+          this.item.character_id = newCharacterId;
+          this.toggleEditingCurrentCharacter();
+          this.updateCurrentCharacter(newCharacterId);
+        })
       );
     }
 

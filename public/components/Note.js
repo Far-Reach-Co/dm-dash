@@ -30,6 +30,9 @@ export default class Note {
       `${window.location.origin}/api/remove_note/${this.id}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -52,7 +55,10 @@ export default class Note {
         `${window.location.origin}/api/edit_note/${this.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );
@@ -96,7 +102,6 @@ export default class Note {
           event: (e) => {
             this.saveNote(e);
             this.toggleEdit();
-
           },
         }
       ),

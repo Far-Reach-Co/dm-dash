@@ -12,6 +12,14 @@ async function addCalendarQuery(data) {
   return await db.query(query)
 }
 
+async function getCalendarQuery(id) {
+  const query = {
+    text: /*sql*/ `select * from public."Calendar" where id = $1`,
+    values: [id]
+  }
+  return await db.query(query)
+}
+
 async function getCalendarsQuery(projectId) {
   const query = {
     text: /*sql*/ `select * from public."Calendar" where project_id = $1 order by title asc`,
@@ -54,6 +62,7 @@ async function editCalendarQuery(id, data) {
 module.exports = {
   addCalendarQuery,
   getCalendarsQuery,
+  getCalendarQuery,
   removeCalendarQuery,
   editCalendarQuery
 }

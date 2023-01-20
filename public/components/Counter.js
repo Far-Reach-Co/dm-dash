@@ -27,6 +27,9 @@ export default class Counter {
       `${window.location.origin}/api/remove_counter/${this.id}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -48,7 +51,10 @@ export default class Counter {
         `${window.location.origin}/api/edit_counter/${this.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );
@@ -136,7 +142,10 @@ export default class Counter {
             this.render();
             fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+              },
               body: JSON.stringify({
                 current_count: this.currentCount,
               }),
@@ -150,7 +159,10 @@ export default class Counter {
             this.render();
             fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+              },
               body: JSON.stringify({
                 current_count: this.currentCount,
               }),

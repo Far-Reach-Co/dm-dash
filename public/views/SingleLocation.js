@@ -44,7 +44,12 @@ export default class SingleLocationView {
     if (!this.location.parent_location_id) return null;
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.location.parent_location_id}`
+        `${window.location.origin}/api/get_location/${this.location.parent_location_id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -59,7 +64,12 @@ export default class SingleLocationView {
   getSubLocations = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_sublocations/${this.location.id}`
+        `${window.location.origin}/api/get_sublocations/${this.location.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -84,7 +94,10 @@ export default class SingleLocationView {
         `${window.location.origin}/api/edit_location/${this.location.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );
@@ -144,7 +157,10 @@ export default class SingleLocationView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_location`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();
@@ -215,7 +231,10 @@ export default class SingleLocationView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();
@@ -276,7 +295,12 @@ export default class SingleLocationView {
   getNotesByLocation = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_location/${state.user.id}/${this.location.id}`
+        `${window.location.origin}/api/get_notes_by_location/${this.location.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -317,7 +341,12 @@ export default class SingleLocationView {
   getCharactersByLocation = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_characters_by_location/${this.location.id}`
+        `${window.location.origin}/api/get_characters_by_location/${this.location.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -390,7 +419,12 @@ export default class SingleLocationView {
   getItemsByLocation = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_items_by_location/${this.location.id}`
+        `${window.location.origin}/api/get_items_by_location/${this.location.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -481,7 +515,10 @@ export default class SingleLocationView {
         `${window.origin}/api/edit_location/${this.location.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );

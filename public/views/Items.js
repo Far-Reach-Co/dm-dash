@@ -24,7 +24,7 @@ export default class ItemsView {
     this.searchTerm = "";
     this.filter = null;
     this.offset = 0;
-  }
+  };
 
   toggleCreatingItem = () => {
     this.creatingItem = !this.creatingItem;
@@ -51,7 +51,11 @@ export default class ItemsView {
       url = `${window.location.origin}/api/get_items_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
     try {
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       const data = await res.json();
       if (res.status === 200) {
         return data;
@@ -72,7 +76,10 @@ export default class ItemsView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_item`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();
@@ -169,10 +176,10 @@ export default class ItemsView {
   };
 
   renderAddButtonOrNull = () => {
-    if(state.currentProject.isEditor === false) {
-      return createElement("div", {style: "visibility: hidden;"});
-    } else return(
-      createElement(
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else
+      return createElement(
         "button",
         { style: "align-self: flex-end; margin-bottom: 10px;" },
         "+ Item",
@@ -180,9 +187,8 @@ export default class ItemsView {
           type: "click",
           event: this.toggleCreatingItem,
         }
-      )
-    )
-  }
+      );
+  };
 
   render = async () => {
     this.domComponent.innerHTML = "";
@@ -195,26 +201,38 @@ export default class ItemsView {
     this.domComponent.append(
       createElement(
         "div",
-        { style: "display: flex; justify-content: space-between; align-items: flex-end;" },
+        {
+          style:
+            "display: flex; justify-content: space-between; align-items: flex-end;",
+        },
         [
-          createElement("div", {style: "display: flex; flex-direction: column;"}, [
-            createElement("small", {}, "Filter by type"),
-            itemTypeSelect(this.handleTypeFilterChange, this.filter),
-          ]),
-          createElement("div", {style: "display: flex; flex-direction: column;"}, [
-            this.renderAddButtonOrNull(),
-            createElement(
-              "input",
-              { placeholder: "Search Items", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  (this.searchTerm = e.target.value.toLowerCase()), this.render();
-                },
-              }
-            ),
-          ])
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              createElement("small", {}, "Filter by type"),
+              itemTypeSelect(this.handleTypeFilterChange, this.filter),
+            ]
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              this.renderAddButtonOrNull(),
+              createElement(
+                "input",
+                { placeholder: "Search Items", value: this.searchTerm },
+                null,
+                {
+                  type: "change",
+                  event: (e) => {
+                    (this.searchTerm = e.target.value.toLowerCase()),
+                      this.render();
+                  },
+                }
+              ),
+            ]
+          ),
         ]
       ),
       createElement("h1", { style: "align-self: center;" }, "Items"),

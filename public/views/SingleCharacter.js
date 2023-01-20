@@ -42,7 +42,10 @@ export default class SingleCharacterView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();
@@ -103,7 +106,12 @@ export default class SingleCharacterView {
   getNotesByCharacter = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_character/${state.user.id}/${this.character.id}`
+        `${window.location.origin}/api/get_notes_by_character/${this.character.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -154,7 +162,12 @@ export default class SingleCharacterView {
   getItemsByCharacter = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_items_by_character/${this.character.id}`
+        `${window.location.origin}/api/get_items_by_character/${this.character.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -211,7 +224,10 @@ export default class SingleCharacterView {
         `${window.location.origin}/api/edit_character/${this.character.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );
@@ -402,7 +418,10 @@ class CurrentLocationComponent {
   updateCurrentLocation = (newLocationId) => {
     fetch(`${window.location.origin}/api/edit_character/${this.character.id}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+      },
       body: JSON.stringify({
         location_id: newLocationId,
       }),
@@ -413,7 +432,12 @@ class CurrentLocationComponent {
     if (!this.character.location_id) return null;
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.character.location_id}`
+        `${window.location.origin}/api/get_location/${this.character.location_id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {

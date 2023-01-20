@@ -11,7 +11,15 @@ async function addProjectInviteQuery(data) {
   return await db.query(query)
 }
 
-async function getProjectInviteQuery(projectId) {
+async function getProjectInviteQuery(id) {
+  const query = {
+    text: /*sql*/ `select * from public."ProjectInvite" where id = $1`,
+    values: [id]
+  }
+  return await db.query(query)
+}
+
+async function getProjectInviteByProjectQuery(projectId) {
   const query = {
     text: /*sql*/ `select * from public."ProjectInvite" where project_id = $1`,
     values: [projectId]
@@ -40,5 +48,6 @@ module.exports = {
   addProjectInviteQuery,
   getProjectInviteQuery,
   getProjectInviteByUUIDQuery,
+  getProjectInviteByProjectQuery,
   removeProjectInviteQuery
 }

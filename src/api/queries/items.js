@@ -15,6 +15,14 @@ async function addItemQuery(data) {
   return await db.query(query)
 }
 
+async function getItemQuery(id) {
+  const query = {
+    text: /*sql*/ `select * from public."Item" where id = $1`,
+    values: [id]
+  }
+  return await db.query(query)
+}
+
 async function getItemsWithKeywordAndFilterQuery({projectId, limit, offset, keyword, filter}) {
   const query = {
     text: /*sql*/ `select * from public."Item" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3`,
@@ -95,6 +103,7 @@ async function editItemQuery(id, data) {
 module.exports = {
   addItemQuery,
   getItemsQuery,
+  getItemQuery,
   getItemsWithFilterQuery,
   getItemsWithKeywordQuery,
   getItemsWithKeywordAndFilterQuery,

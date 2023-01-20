@@ -7,7 +7,7 @@ const {
   getUserByEmailQuery,
   registerUserQuery,
   editUserQuery,
-  editUserPasswordQuery
+  editUserPasswordQuery,
 } = require("../queries/users");
 const { addProjectQuery } = require("../queries/projects");
 
@@ -35,26 +35,6 @@ async function verifyUserByToken(token) {
 
     return userData;
   });
-}
-
-async function getUserByToken(req, res, next) {
-  try {
-    const token = req.headers["x-access-token"]
-      ? req.headers["x-access-token"].split(" ")[1]
-      : null;
-    if (token) {
-      const userData = await verifyUserByToken(token);
-
-      if (!userData)
-        return res.status(400).json({ message: "Cannot get user by token" });
-
-      const data = userData.rows[0];
-
-      res.send(data);
-    } else return res.status(400).json({ message: "No token sent in headers" });
-  } catch (err) {
-    next(err);
-  }
 }
 
 async function getAllUsers(req, res, next) {
@@ -131,9 +111,7 @@ async function loginUser(req, res, next) {
 
 async function verifyJwt(req, res, next) {
   try {
-    const token = req.headers["x-access-token"]
-      ? req.headers["x-access-token"].split(" ")[1]
-      : null;
+    const token = req.token ? req.token : null;
     if (token) {
       const userData = await verifyUserByToken(token);
 
@@ -158,10 +136,10 @@ async function editUser(req, res, next) {
 
 async function resetPassword(req, res, next) {
   try {
-    const token = req.body.token
+    const token = req.body.token;
     const password = req.body.password;
 
-    const userData = await verifyUserByToken(token)
+    const userData = await verifyUserByToken(token);
     if (userData) {
       // hash password
       const salt = await bcrypt.genSalt(10);
@@ -199,7 +177,7 @@ async function requestResetEmail(req, res, next) {
 }
 
 module.exports = {
-  getUserByToken,
+  verifyUserByToken,
   getAllUsers,
   getUserById,
   registerUser,

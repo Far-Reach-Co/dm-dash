@@ -96,7 +96,10 @@ export default class Calendar {
       `${window.location.origin}/api/edit_calendar/${this.id}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       }
     );
@@ -107,6 +110,9 @@ export default class Calendar {
       `${window.location.origin}/api/remove_calendar/${this.id}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -120,7 +126,10 @@ export default class Calendar {
     try {
       const res = await fetch(`${window.location.origin}/api/add_month`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           calendar_id: this.id,
           index: this.months.length + 1,
@@ -142,7 +151,10 @@ export default class Calendar {
     try {
       const res = await fetch(`${window.location.origin}/api/add_day`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           calendar_id: this.id,
           index: this.daysOfTheWeek.length + 1,
@@ -164,6 +176,9 @@ export default class Calendar {
       `${window.location.origin}/api/remove_month/${monthId}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -178,6 +193,9 @@ export default class Calendar {
       `${window.location.origin}/api/remove_day/${dayId}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -197,7 +215,10 @@ export default class Calendar {
             `${window.location.origin}/api/edit_month/${month.id}`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+              },
               body: JSON.stringify({
                 title: month.title,
                 index: month.index,
@@ -230,7 +251,10 @@ export default class Calendar {
             `${window.location.origin}/api/edit_day/${day.id}`,
             {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+              },
               body: JSON.stringify({
                 title: day.title,
                 index: day.index,
@@ -267,7 +291,10 @@ export default class Calendar {
         `${window.location.origin}/api/edit_calendar/${this.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify({
             current_day: dayNumber,
             current_month_id: this.monthBeingViewed.id,
@@ -637,7 +664,13 @@ export default class Calendar {
     ) {
       const elem = createElement(
         "div",
-        { class: `calendar-box ${state.currentProject.isEditor === false ? "non-clickable-day" : "clickable-day"}` },
+        {
+          class: `calendar-box ${
+            state.currentProject.isEditor === false
+              ? "non-clickable-day"
+              : "clickable-day"
+          }`,
+        },
         dayNumber,
         { type: "click", event: () => this.handleDayClicked(elem.innerHTML) }
       );

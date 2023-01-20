@@ -13,7 +13,6 @@ const {
   editProject,
 } = require("./controllers/projects.js");
 const {
-  getUserByToken,
   getAllUsers,
   getUserById,
   registerUser,
@@ -81,13 +80,12 @@ const {
   editItem,
 } = require("./controllers/items.js");
 const {
-  getProjectInvite,
   getProjectInviteByUUID,
   addProjectInvite,
   removeProjectInvite
 } = require("./controllers/projectInvites.js");
 const {
-  getProjectUsers,
+  getProjectUserByUserAndProject,
   addProjectUser,
   removeProjectUser,
   editProjectUser,
@@ -96,28 +94,25 @@ const {
 var router = express.Router();
 
 // project users
-// counters
-router.get("/get_project_users/:user_id", getProjectUsers);
+router.get("/get_project_user_by_user_and_project/:project_id", getProjectUserByUserAndProject);
 router.post("/add_project_user", addProjectUser);
 router.delete("/remove_project_user/:id", removeProjectUser);
 router.post("/edit_project_user/:id", editProjectUser);
 
 // project invites
-router.get("/get_project_invite/:project_id", getProjectInvite);
 router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
 router.post("/add_project_invite", addProjectInvite);
 router.delete("/remove_project_invite/:id", removeProjectInvite);
 
-// characters
-router.get("/get_character/:id", getCharacter)
-router.get("/get_characters/:project_id/:limit/:offset", getCharacters);
-router.get("/get_characters_filter/:project_id/:limit/:offset/:filter", getCharacters);
-router.get("/get_characters_keyword/:project_id/:limit/:offset/:keyword", getCharacters);
-router.get("/get_characters_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getCharacters);
-router.get("/get_characters_by_location/:location_id", getCharactersByLocation);
-router.post("/add_character", addCharacter);
-router.delete("/remove_character/:id", removeCharacter);
-router.post("/edit_character/:id", editCharacter);
+// notes
+router.get("/get_notes/:project_id/:limit/:offset", getNotes);
+router.get("/get_notes/:project_id/:limit/:offset/:keyword", getNotes);
+router.get("/get_notes_by_location/:location_id", getNotesByLocation);
+router.get("/get_notes_by_character/:character_id", getNotesByCharacter);
+router.get("/get_notes_by_item/:item_id", getNotesByItem);
+router.post("/add_note", addNote);
+router.delete("/remove_note/:id", removeNote);
+router.post("/edit_note/:id", editNote);
 
 // items
 router.get("/get_items/:project_id/:limit/:offset", getItems);
@@ -130,21 +125,16 @@ router.post("/add_item", addItem);
 router.delete("/remove_item/:id", removeItem);
 router.post("/edit_item/:id", editItem);
 
-// notes
-router.get("/get_notes/:user_id/:project_id/:limit/:offset", getNotes);
-router.get("/get_notes/:user_id/:project_id/:limit/:offset/:keyword", getNotes);
-router.get("/get_notes_by_location/:user_id/:location_id", getNotesByLocation);
-router.get("/get_notes_by_character/:user_id/:character_id", getNotesByCharacter);
-router.get("/get_notes_by_item/:user_id/:item_id", getNotesByItem);
-router.post("/add_note", addNote);
-router.delete("/remove_note/:id", removeNote);
-router.post("/edit_note/:id", editNote);
-
-// counters
-router.get("/get_counters/:user_id/:project_id", getCounters);
-router.post("/add_counter", addCounter);
-router.delete("/remove_counter/:id", removeCounter);
-router.post("/edit_counter/:id", editCounter);
+// characters
+router.get("/get_character/:id", getCharacter)
+router.get("/get_characters/:project_id/:limit/:offset", getCharacters);
+router.get("/get_characters_filter/:project_id/:limit/:offset/:filter", getCharacters);
+router.get("/get_characters_keyword/:project_id/:limit/:offset/:keyword", getCharacters);
+router.get("/get_characters_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getCharacters);
+router.get("/get_characters_by_location/:location_id", getCharactersByLocation);
+router.post("/add_character", addCharacter);
+router.delete("/remove_character/:id", removeCharacter);
+router.post("/edit_character/:id", editCharacter);
 
 // locations
 router.get("/get_location/:id", getLocation);
@@ -157,17 +147,11 @@ router.post("/add_location", addLocation);
 router.delete("/remove_location/:id", removeLocation);
 router.post("/edit_location/:id", editLocation);
 
-// clocks
-router.get("/get_clocks/:project_id", getClocks);
-router.post("/add_clock", addClock);
-router.delete("/remove_clock/:id", removeClock);
-router.post("/edit_clock/:id", editClock);
-
-// calendars
-router.get("/get_calendars/:project_id", getCalendars);
-router.post("/add_calendar", addCalendar);
-router.delete("/remove_calendar/:id", removeCalendar);
-router.post("/edit_calendar/:id", editCalendar);
+// counters
+router.get("/get_counters/:project_id", getCounters);
+router.post("/add_counter", addCounter);
+router.delete("/remove_counter/:id", removeCounter);
+router.post("/edit_counter/:id", editCounter);
 
 // months
 router.get("/get_months/:calendar_id", getMonths);
@@ -181,9 +165,21 @@ router.post("/add_day", addDay);
 router.delete("/remove_day/:id", removeDay);
 router.post("/edit_day/:id", editDay);
 
+// calendars
+router.get("/get_calendars/:project_id", getCalendars);
+router.post("/add_calendar", addCalendar);
+router.delete("/remove_calendar/:id", removeCalendar);
+router.post("/edit_calendar/:id", editCalendar);
+
+// clocks
+router.get("/get_clocks/:project_id", getClocks);
+router.post("/add_clock", addClock);
+router.delete("/remove_clock/:id", removeClock);
+router.post("/edit_clock/:id", editClock);
+
 // projects
 router.get("/get_project/:id", getProject);
-router.get("/get_projects/:id", getProjects);
+router.get("/get_projects", getProjects);
 router.post("/add_project", addProject);
 router.delete("/remove_project/:id", removeProject);
 router.post("/edit_project/:id", editProject);

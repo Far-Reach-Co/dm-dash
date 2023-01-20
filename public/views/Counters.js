@@ -12,7 +12,12 @@ export default class CountersView {
   getCounters = async () => {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_counters/${state.user.id}/${state.currentProject.id}`
+        `${window.location.origin}/api/get_counters/${state.currentProject.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -29,7 +34,10 @@ export default class CountersView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_counter`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           user_id: state.user.id,
           project_id: state.currentProject.id,
