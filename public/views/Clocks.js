@@ -123,15 +123,27 @@ export default class ClocksView {
     }
   };
 
+  renderAddButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else
+      return createElement(
+        "button",
+        { style: "align-self: flex-end;" },
+        "+ Clock",
+        {
+          type: "click",
+          event: this.newClock,
+        }
+      );
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
     // append
     this.domComponent.append(
-      createElement("button", { style: "align-self: flex-end;" }, "+ Clock", {
-        type: "click",
-        event: this.newClock,
-      }),
+      this.renderAddButtonOrNull(),
       createElement("h1", { style: "align-self: center;" }, "Clocks"),
       createElement(
         "small",
