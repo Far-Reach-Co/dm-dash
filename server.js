@@ -10,7 +10,7 @@ var public = path.join(__dirname, 'public');
 var app = express()
 
 //Set CORS
-app.use(cors())
+// app.use(cors())
 
 
 //Set JSON parser
