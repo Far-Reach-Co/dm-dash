@@ -9,7 +9,12 @@ export default async function locationSelect(
   async function getLocations() {
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_locations/${state.currentProject.id}/100/0`
+        `${window.location.origin}/api/get_locations/${state.currentProject.id}/100/0`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {

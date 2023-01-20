@@ -33,6 +33,7 @@ export default class Location {
   removeLocation = async () => {
     const res = await fetch(`${window.origin}/api/remove_location/${this.id}`, {
       method: "DELETE",
+      headers: { "x-access-token": `Bearer ${localStorage.getItem("token")}` },
     });
     if (res.status === 204) {
       // window.alert(`Deleted ${this.title}`)
@@ -54,7 +55,10 @@ export default class Location {
     try {
       const res = await fetch(`${window.origin}/api/edit_location/${this.id}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();
@@ -132,16 +136,14 @@ export default class Location {
 
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
-      return createElement("div", {style: "visibility: hidden;"});
+      return createElement("div", { style: "visibility: hidden;" });
     } else {
-      return(
-        createElement("button", {}, "Edit", {
-          type: "click",
-          event: this.toggleEdit,
-        })
-      )
+      return createElement("button", {}, "Edit", {
+        type: "click",
+        event: this.toggleEdit,
+      });
     }
-  }
+  };
 
   render = () => {
     this.domComponent.innerHTML = "";

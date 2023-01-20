@@ -20,7 +20,7 @@ export default class NotesView {
   resetFilters = () => {
     this.searchTerm = "";
     this.offset = 0;
-  }
+  };
 
   toggleCreatingNote = () => {
     this.resetFilters();
@@ -33,7 +33,12 @@ export default class NotesView {
 
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_notes/${state.user.id}/${projectId}/${this.limit}/${this.offset}/${this.searchTerm}`
+        `${window.location.origin}/api/get_notes/${state.user.id}/${projectId}/${this.limit}/${this.offset}/${this.searchTerm}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -57,7 +62,10 @@ export default class NotesView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_note`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify(formProps),
       });
       await res.json();

@@ -25,8 +25,9 @@
     </div>
   </body>
   <script>
+    const token = localStorage.getItem("token");
+
     async function verifyToken() {
-      const token = localStorage.getItem("token");
       if (token) {
         try {
           const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
@@ -53,7 +54,9 @@
 
       try {
         const res = await fetch(
-          `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`
+          `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`, {
+            headers: { "x-access-token": `Bearer ${token}` }
+          }
         );
         const data = await res.json();
         if (res.status === 200) {
@@ -67,7 +70,9 @@
     async function getProject(id) {
       try {
         const res = await fetch(
-          `${window.location.origin}/api/get_project/${id}`
+          `${window.location.origin}/api/get_project/${id}`, {
+            headers: { "x-access-token": `Bearer ${token}` }
+          }
         );
         const data = await res.json();
         if (res.status === 200) {
@@ -84,7 +89,7 @@
           `${window.location.origin}/api/add_project_user`,
           {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json", "x-access-token": `Bearer ${token}` },
             body: JSON.stringify({
               project_id: projectInvite.project_id,
               user_id: user.id,
@@ -104,7 +109,9 @@
     async function getProjectUsers(userId) {
       try {
         const res = await fetch(
-          `${window.location.origin}/api/get_project_users/${userId}`
+          `${window.location.origin}/api/get_project_users/${userId}`, {
+            headers: { "x-access-token": `Bearer ${token}` }
+          }
         );
         const data = await res.json();
         if (res.status === 200) {

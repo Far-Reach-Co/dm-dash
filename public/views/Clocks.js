@@ -13,7 +13,12 @@ export default class ClocksView {
     var projectId = state.currentProject.id;
     try {
       const res = await fetch(
-        `${window.location.origin}/api/get_clocks/${projectId}`
+        `${window.location.origin}/api/get_clocks/${projectId}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
       );
       const data = await res.json();
       if (res.status === 200) {
@@ -67,7 +72,9 @@ export default class ClocksView {
           currentTimeInMilliseconds: clock.current_time_in_milliseconds,
           parentRender: this.render,
         });
-        state.clockComponents[`project-${state.currentProject.id}`].push(newClock);
+        state.clockComponents[`project-${state.currentProject.id}`].push(
+          newClock
+        );
       });
     }
     return clockElements;
@@ -80,7 +87,10 @@ export default class ClocksView {
     try {
       const res = await fetch(`${window.location.origin}/api/add_clock`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           title: "New Clock",
           current_time_in_milliseconds: 0,
@@ -103,7 +113,9 @@ export default class ClocksView {
           currentTimeInMilliseconds: clock.current_time_in_milliseconds,
           parentRender: this.render,
         });
-        state.clockComponents[`project-${state.currentProject.id}`].push(newClock);
+        state.clockComponents[`project-${state.currentProject.id}`].push(
+          newClock
+        );
       } else throw new Error();
     } catch (err) {
       window.alert("Failed to create new clock...");

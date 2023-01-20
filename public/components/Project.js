@@ -40,7 +40,10 @@ export default class Project {
       `${window.location.origin}/api/edit_project/${this.id}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           title: this.title,
         }),
@@ -53,6 +56,9 @@ export default class Project {
       `${window.location.origin}/api/remove_project/${this.id}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -67,6 +73,9 @@ export default class Project {
       `${window.location.origin}/api/remove_project_invite/${this.projectInvite.id}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -81,6 +90,9 @@ export default class Project {
       `${window.location.origin}/api/remove_project_user/${this.projectUserId}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -96,7 +108,10 @@ export default class Project {
         `${window.location.origin}/api/add_project_invite`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify({
             project_id: this.id,
           }),

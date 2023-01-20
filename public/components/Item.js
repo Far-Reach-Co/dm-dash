@@ -14,10 +14,12 @@ export default class Item {
     this.locationId = props.locationId;
     this.characterId = props.characterId;
     this.type = props.type;
-    
+
     this.navigate = props.navigate;
     this.parentRender = props.parentRender;
-    this.handleTypeFilterChange = props.handleTypeFilterChange ? props.handleTypeFilterChange : null;
+    this.handleTypeFilterChange = props.handleTypeFilterChange
+      ? props.handleTypeFilterChange
+      : null;
 
     this.edit = false;
 
@@ -34,6 +36,9 @@ export default class Item {
       `${window.location.origin}/api/remove_item/${this.id}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -47,7 +52,7 @@ export default class Item {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    if(formProps.type === "None") formProps.type = null;
+    if (formProps.type === "None") formProps.type = null;
     // update UI
     this.title = formProps.title;
     this.description = formProps.description;
@@ -57,7 +62,10 @@ export default class Item {
         `${window.location.origin}/api/edit_item/${this.id}`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
           body: JSON.stringify(formProps),
         }
       );
@@ -69,7 +77,7 @@ export default class Item {
       console.log(err);
     }
   };
-  
+
   renderEdit = async () => {
     this.domComponent.append(
       createElement(
@@ -111,11 +119,7 @@ export default class Item {
       createElement("button", { class: "btn-red" }, "Remove Item", {
         type: "click",
         event: () => {
-          if (
-            window.confirm(
-              `Are you sure you want to delete ${this.title}`
-            )
-          ) {
+          if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
             this.removeItem();
             this.toggleEdit();
             this.domComponent.remove();
@@ -127,31 +131,27 @@ export default class Item {
 
   renderItemType = () => {
     if (this.type) {
-      return createElement(
-        "a",
-        { class: "small-clickable" },
-        this.type,
-        { type: "click", event: () => {
-          if(this.handleTypeFilterChange) {
+      return createElement("a", { class: "small-clickable" }, this.type, {
+        type: "click",
+        event: () => {
+          if (this.handleTypeFilterChange) {
             this.handleTypeFilterChange(this.type);
           }
-        } }
-      );
+        },
+      });
     } else return createElement("div", { style: "display: none;" });
   };
 
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
-      return createElement("div", {style: "visibility: hidden;"});
+      return createElement("div", { style: "visibility: hidden;" });
     } else {
-      return(
-        createElement("button", {}, "Edit", {
-          type: "click",
-          event: this.toggleEdit,
-        })
-      )
+      return createElement("button", {}, "Edit", {
+        type: "click",
+        event: this.toggleEdit,
+      });
     }
-  }
+  };
 
   render = () => {
     this.domComponent.innerHTML = "";

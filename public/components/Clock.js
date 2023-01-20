@@ -80,7 +80,10 @@ export default class Clock {
       `${window.location.origin}/api/edit_clock/${this.id}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           title: this.title,
           current_time_in_milliseconds: this.currentTimeInMilliseconds,
@@ -94,6 +97,9 @@ export default class Clock {
       `${window.location.origin}/api/remove_clock/${this.id}`,
       {
         method: "DELETE",
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
