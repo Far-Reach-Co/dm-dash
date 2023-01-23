@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Location from "../components/Location.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
+import { uploadImage } from "../lib/imageUtils.js";
 
 export default class LocationsView {
   constructor(props) {
@@ -15,6 +16,7 @@ export default class LocationsView {
     this.offset = 0;
 
     this.creatingLocation = false;
+    this.savingData = false;
 
     this.render();
   }
@@ -30,6 +32,11 @@ export default class LocationsView {
     this.creatingLocation = !this.creatingLocation;
     this.render();
   };
+
+  toggleSavingData = () => {
+    this.savingData = true;
+    this.render();
+  }
 
   getLocations = async () => {
     let url = `${window.location.origin}/api/get_locations/${state.currentProject.id}/${this.limit}/${this.offset}`;
@@ -67,12 +74,25 @@ export default class LocationsView {
 
   newLocation = async (e) => {
     e.preventDefault();
+    this.toggleSavingData();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     formProps.is_sub = false;
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      const newImageRef = await uploadImage(formProps.image);
+      // if success update formProps and set imageRef for UI
+      if (newImageRef) {
+        formProps.image_ref = newImageRef;
+      }
+      delete formProps.image;
+    }
 
     try {
       const res = await fetch(`${window.location.origin}/api/add_location`, {
@@ -85,15 +105,23 @@ export default class LocationsView {
       });
       await res.json();
       if (res.status === 201) {
-        this.render();
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to create new location...");
+      // window.alert("Failed to create new location...");
       console.log(err);
     }
+
+    this.creatingLocation = false;
+    this.toggleSavingData();
   };
 
   renderCreatingLocation = async () => {
+    if (this.savingData) {
+      return this.domComponent.append(
+        createElement("h2", {}, "Please wait while we process your data...")
+      );
+    }
+
     const titleOfForm = createElement(
       "div",
       { class: "component-title" },
@@ -110,17 +138,30 @@ export default class LocationsView {
         placeholder: "Location Title",
         required: true,
       }),
+      createElement("br"),
       createElement("label", { for: "description" }, "Description"),
       createElement("textarea", {
         id: "description",
         name: "description",
       }),
       createElement("br"),
+      createElement(
+        "label",
+        { for: "image", class: "file-input" },
+        "Upload Image"
+      ),
+      createElement("input", {
+        id: "image",
+        name: "image",
+        type: "file",
+        accept: "image/*",
+      }),
+      createElement("br"),
+      createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
       await this.newLocation(e);
-      this.toggleCreatingLocation();
     });
 
     const cancelButton = createElement("button", {}, "Cancel");
@@ -160,7 +201,7 @@ export default class LocationsView {
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,
-        imageRef: location.image_ref
+        imageRef: location.image_ref,
       });
 
       return elem;

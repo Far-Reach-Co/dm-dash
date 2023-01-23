@@ -25,6 +25,8 @@ export default class Location {
       : null;
 
     this.edit = false;
+    this.uploadingImage = false;
+    this.imageRef = props.imageRef;
 
     this.render();
   }
@@ -33,6 +35,11 @@ export default class Location {
     this.edit = !this.edit;
     this.render();
   };
+
+  toggleUploadingImage = () => {
+    this.uploadingImage = true;
+    this.render();
+  }
 
   removeLocation = async () => {
     const res = await fetch(`${window.origin}/api/remove_location/${this.id}`, {
@@ -52,16 +59,32 @@ export default class Location {
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
     if (formProps.image) {
-      uploadImage(formProps.image);
+      // upload to bucket
+      this.toggleUploadingImage();
+      const newImageRef = await uploadImage(formProps.image);
+      // if success update formProps and set imageRef for UI
+      if(newImageRef) {
+        formProps.image_ref = newImageRef;
+        this.imageRef = newImageRef;
+        this.location.image_ref = newImageRef;
+      }
       delete formProps.image;
+      this.toggleUploadingImage();
     }
 
     // update UI
     this.title = formProps.title;
+    this.location.title = formProps.title;
     this.description = formProps.description;
+    this.location.description = formProps.description;
     this.type = formProps.type;
+    this.location.type = formProps.type;
+    this.toggleEdit();
 
+    // send data to update in db
     try {
       const res = await fetch(`${window.origin}/api/edit_location/${this.id}`, {
         method: "POST",
@@ -81,6 +104,12 @@ export default class Location {
   };
 
   renderEdit = async () => {
+    if (this.uploadingImage) {
+      return this.domComponent.append(
+        createElement("h2", {}, "Please wait while we process your data...")
+      )
+    }
+
     this.domComponent.append(
       createElement(
         "form",
@@ -120,13 +149,13 @@ export default class Location {
             accept: "image/*",
           }),
           createElement("br"),
+          createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
         {
           type: "submit",
           event: (e) => {
             this.saveLocation(e);
-            this.toggleEdit();
           },
         }
       ),
@@ -149,7 +178,7 @@ export default class Location {
       const imageSource = await getPresignedForImageDownload(this.imageRef);
       if (imageSource) {
         return createElement("img", {
-          src: imageSource,
+          src: imageSource.url,
           width: 30,
           height: 30,
         });

@@ -25,7 +25,7 @@ async function getSignedUrlForDownload(req, res, next) {
         err ? reject(err) : resolve(url);
       });
     });
-    res.send(url);
+    res.send({url});
   } catch (err) {
     next(err);
   }

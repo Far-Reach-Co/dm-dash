@@ -36,6 +36,7 @@ async function getPresignedForImageUpload(name) {
       }),
     });
     const data = await res.json();
+    
     if (data) return data;
     else throw new Error();
   } catch (err) {
