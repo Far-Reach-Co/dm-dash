@@ -127,6 +127,48 @@ export default class Project {
     }
   };
 
+  getProjectUsers = async () => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_project_users_by_project/${this.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  renderProjectUsersList = async () => {
+    const projectUsers = await this.getProjectUsers();
+    const map = projectUsers.map((user) => {
+      const elem = createElement("div", {style: "display: flex;"}, [
+        createElement("div", {}, user.username ? user.username : user.email),
+        createElement("div", {style: "margin-left: 10px"}, user.is_editor ? "Editor" : "Viewer")
+      ]);
+      return elem;
+    });
+    if (map.length) return map;
+    else return [createElement("div", { style: "visibility: hidden;" })];
+  };
+
+  renderManageUsersComponent = async () => {
+    if (!this.wasJoined) {
+      return [
+        createElement("h2", {}, "Manage Invited-Users"),
+        createElement("br"),
+        ...(await this.renderProjectUsersList()),
+      ];
+    } else return [createElement("div", { style: "visibility: hidden;" })];
+  };
+
   renderInviteLinkComponent = () => {
     if (this.loadingProjectInvite) {
       return [
@@ -189,7 +231,7 @@ export default class Project {
     }
   };
 
-  renderEditProject = () => {
+  renderEditProject = async () => {
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
@@ -259,6 +301,8 @@ export default class Project {
         doneButton,
         removeButton,
         ...this.renderInviteLinkComponent(),
+        createElement("hr"),
+        ...(await this.renderManageUsersComponent()),
         createElement("hr"),
         createElement("button", {}, "Cancel", {
           type: "click",

@@ -2,11 +2,13 @@ const {
   addProjectUserQuery,
   getProjectUserQuery,
   getProjectUserByUserAndProjectQuery,
+  getProjectUsersByProjectQuery,
   removeProjectUserQuery,
   editProjectUserQuery,
 } = require("../queries/projectUsers.js");
 const { getProjectQuery } = require("../queries/projects.js");
 const { getProjectInviteByProjectQuery } = require("../queries/projectInvites.js");
+const { getUserByIdQuery } = require("../queries/users.js");
 
 async function addProjectUser(req, res, next) {
   try {
@@ -36,6 +38,35 @@ async function getProjectUserByUserAndProject(req, res, next) {
       req.params.project_id
     );
     res.status(200).json(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getProjectUsersByProject(req, res, next) {
+  try {
+    // if no user
+    if (!req.user) throw { status: 401, message: "Missing Credentials" };
+    // If user is not author
+    const projectData = await getProjectQuery(req.params.project_id);
+    const project = projectData.rows[0];
+
+    if (project.user_id !== req.user.id) {
+      throw { status: 403, message: "Forbidden" };
+    }
+
+    const projectUsersData = await getProjectUsersByProjectQuery(
+      req.params.project_id
+    );
+
+    const usersData = [];
+
+    for(const projectUser of projectUsersData.rows) {
+      const user = await getUserByIdQuery(projectUser.user_id);
+      usersData.push(user.rows[0])
+    }
+
+    res.status(200).json(usersData);
   } catch (err) {
     next(err);
   }
@@ -90,6 +121,7 @@ async function editProjectUser(req, res, next) {
 module.exports = {
   addProjectUser,
   getProjectUserByUserAndProject,
+  getProjectUsersByProject,
   removeProjectUser,
   editProjectUser,
 };
