@@ -160,6 +160,7 @@ export default class LocationsView {
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,
+        imageRef: location.image_ref
       });
 
       return elem;

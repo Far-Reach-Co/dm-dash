@@ -90,8 +90,13 @@ const {
   removeProjectUser,
   editProjectUser,
 } = require("./controllers/projectUsers.js");
+const {getSignedUrlForDownload, getSignedUrlForUpload} = require("./controllers/s3.js");
 
 var router = express.Router();
+
+// s3
+router.post('/signed_URL_download', getSignedUrlForDownload)
+router.post('/signed_URL_upload', getSignedUrlForUpload)
 
 // project users
 router.get("/get_project_user_by_user_and_project/:project_id", getProjectUserByUserAndProject);

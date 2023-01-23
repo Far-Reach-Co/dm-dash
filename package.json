@@ -10,6 +10,7 @@
   "author": "Julian Ranieri",
   "license": "ISC",
   "dependencies": {
+    "aws-sdk": "^2.1299.0",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
     "cors": "^2.8.5",

@@ -1,4 +1,8 @@
 import createElement from "../lib/createElement.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import state from "../lib/state.js";
 
@@ -47,6 +51,12 @@ export default class Location {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image.size === 0) delete formProps.image;
+    if (formProps.image) {
+      uploadImage(formProps.image);
+      delete formProps.image;
+    }
+
     // update UI
     this.title = formProps.title;
     this.description = formProps.description;
@@ -76,7 +86,7 @@ export default class Location {
         "form",
         {},
         [
-          createElement("div", {}, "Type Select (Optional)"),
+          createElement("div", {}, "Type Select"),
           locationTypeSelect(null, this.type),
           createElement("br"),
           createElement("label", { for: "title" }, "Title"),
@@ -85,6 +95,7 @@ export default class Location {
             name: "title",
             value: this.title,
           }),
+          createElement("br"),
           createElement("label", { for: "description" }, "Description"),
           createElement(
             "textarea",
@@ -96,6 +107,18 @@ export default class Location {
             },
             this.description
           ),
+          createElement("br"),
+          createElement(
+            "label",
+            { for: "image", class: "file-input" },
+            "Upload Image"
+          ),
+          createElement("input", {
+            id: "image",
+            name: "image",
+            type: "file",
+            accept: "image/*",
+          }),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
@@ -119,6 +142,31 @@ export default class Location {
         },
       })
     );
+  };
+
+  renderImage = async () => {
+    if (this.imageRef) {
+      const imageSource = await getPresignedForImageDownload(this.imageRef);
+      if (imageSource) {
+        return createElement("img", {
+          src: imageSource,
+          width: 30,
+          height: 30,
+        });
+      } else {
+        return createElement("img", {
+          src: "../assets/location.svg",
+          width: 30,
+          height: 30,
+        });
+      }
+    } else {
+      return createElement("img", {
+        src: "../assets/location.svg",
+        width: 30,
+        height: 30,
+      });
+    }
   };
 
   renderLocationType = () => {
@@ -145,7 +193,7 @@ export default class Location {
     }
   };
 
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -156,11 +204,7 @@ export default class Location {
       createElement("div", { class: "component-title" }, [
         this.title,
         this.renderLocationType(),
-        createElement("img", {
-          src: "../assets/location.svg",
-          width: 30,
-          height: 30,
-        }),
+        await this.renderImage(),
       ]),
       createElement("div", { class: "description" }, this.description),
       createElement("br"),

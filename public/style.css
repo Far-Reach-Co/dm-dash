@@ -191,7 +191,7 @@ form {
   width: fit-content;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: space-evenly;
   border: 0.5px solid var(--main-gray);
 }
@@ -212,6 +212,28 @@ input {
 input[type=number] {
   width: 100px
 }
+
+input[type="file"] {
+  all: unset;
+}
+input[type=file]::file-selector-button {
+  width: fit-content;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  color: inherit;
+  border: 0.1px solid var(--main-gray);
+  border-radius: var(--border-radius);
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+input[type=file]::file-selector-button:hover {
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
 
 .form-item input {
   margin-bottom: 10px;
