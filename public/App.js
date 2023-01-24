@@ -12,7 +12,7 @@ import CharactersView from "./views/Characters.js";
 import SingleCharacterView from "./views/SingleCharacter.js";
 import ItemsView from "./views/Items.js";
 import SingleItemView from "./views/SingleItem.js";
-import { Hamburger } from "./components/hamburger.js";
+import { Hamburger } from "./components/Hamburger.js";
 
 class App {
   constructor(props) {
