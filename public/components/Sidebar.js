@@ -3,10 +3,9 @@ import createElement from "../lib/createElement.js";
 export default class SideBar {
   constructor(props) {
     this.domComponent = props.domComponent;
+    this.domComponent.className = "sidebar";
     this.navigate = props.navigate;
     this.isVisible = false;
-
-    this.render();
   }
 
   renderCloseSidebarElem = () => {
@@ -17,12 +16,14 @@ export default class SideBar {
       height: 28,
       width: 28,
     });
-    elem.addEventListener("click", () => {
-      this.isVisible = false;
-      this.container.style.transform = "translate(-200px, 0px)";
-      this.domComponent.style.zIndex = "1";
-    });
+    elem.addEventListener("click", this.close);
     return elem;
+  };
+
+  close = () => {
+    this.isVisible = false;
+    if(this.container && this.container.style) this.container.style.transform = "translate(-200px, 0px)";
+    if(this.domComponent && this.domComponent.style) this.domComponent.style.zIndex = "1";
   };
 
   renderRoutesElems = () => {
@@ -78,16 +79,28 @@ export default class SideBar {
           id: route.id,
         },
         route.displayTitle
-      );
-      // event listener
-      elem.addEventListener("click", () => {
-        this.navigate({ title: route.title, sidebar: true, params: route.params });
+        );
+        // event listener
+        elem.addEventListener("click", () => {
+          this.close();
+          this.navigate({
+            title: route.title,
+            sidebar: true,
+          params: route.params,
+        });
       });
       return elem;
     });
   };
+  
+  hide = () => {
+    this.close();
+    this.domComponent.innerHTML = "";
+  };
 
   render = () => {
+    this.domComponent.innerHTML = "";
+
     const container = createElement(
       "div",
       {
