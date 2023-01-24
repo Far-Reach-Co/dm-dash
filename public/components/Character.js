@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import state from "../lib/state.js";
+import editButtonOrNull from "../lib/editButtonOrNull.js";
 
 export default class Character {
   constructor(props) {
@@ -140,18 +140,7 @@ export default class Character {
     } else return createElement("div", { style: "display: none;" });
   };
 
-  renderEditButtonOrNull = () => {
-    if (state.currentProject.isEditor === false) {
-      return createElement("div", { style: "visibility: hidden;" });
-    } else {
-      return createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      });
-    }
-  };
-
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -160,7 +149,7 @@ export default class Character {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        await editButtonOrNull(this.title, this.toggleEdit),
         this.renderCharacterType(),
         createElement("img", {
           src: "../assets/character.svg",
@@ -178,8 +167,7 @@ export default class Character {
             sidebar: true,
             params: { character: this.character },
           }),
-      }),
-      this.renderEditButtonOrNull()
+      })
     );
   };
 }

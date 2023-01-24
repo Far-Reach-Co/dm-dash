@@ -396,6 +396,21 @@ footer {
   margin-bottom: 5px;
 }
 
+.title-edit {
+  display: flex;
+  color: inherit;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+}
+
+.edit-btn {
+  cursor: pointer;
+  font-size: 0.75em;
+  font-weight: normal;
+  color: inherit;
+}
+
 .current-date {
   display: flex;
   margin-bottom: 5px;
