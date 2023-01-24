@@ -3,6 +3,11 @@ import state from "../lib/state.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
+import modal from "../lib/modal.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -16,6 +21,7 @@ export default class SingleLocationView {
     this.creatingSubLocation = false;
     this.addParentLocation = false;
     this.edit = false;
+    this.uploadingImage = false;
 
     this.render();
   }
@@ -37,6 +43,11 @@ export default class SingleLocationView {
 
   toggleAddParentLocation = () => {
     this.addParentLocation = !this.addParentLocation;
+    this.render();
+  };
+
+  toggleUploadingImage = () => {
+    this.uploadingImage = true;
     this.render();
   };
 
@@ -500,16 +511,45 @@ export default class SingleLocationView {
     } else return createElement("div", { style: "display: none;" });
   };
 
+  renderSubLocationsPlusButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else {
+      return createElement("a", { style: "align-self: flex-end;" }, "+", {
+        type: "click",
+        event: this.toggleCreatingSubLocation,
+      });
+    }
+  };
+
   saveLocation = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      this.toggleUploadingImage();
+      const newImageRef = await uploadImage(formProps.image);
+      // if success update formProps and set imageRef for UI
+      if (newImageRef) {
+        formProps.image_ref = newImageRef;
+        this.location.image_ref = newImageRef;
+      }
+      delete formProps.image;
+      this.toggleUploadingImage();
+    }
+
     // update UI
     this.location.title = formProps.title;
     this.location.description = formProps.description;
     this.location.type = formProps.type;
+    this.toggleEdit();
 
+    // send data to update in db
     try {
       const res = await fetch(
         `${window.origin}/api/edit_location/${this.location.id}`,
@@ -531,18 +571,13 @@ export default class SingleLocationView {
     }
   };
 
-  renderSubLocationsPlusButtonOrNull = () => {
-    if (state.currentProject.isEditor === false) {
-      return createElement("div", { style: "visibility: hidden;" });
-    } else {
-      return createElement("a", { style: "align-self: flex-end;" }, "+", {
-        type: "click",
-        event: this.toggleCreatingSubLocation,
-      });
-    }
-  };
-
   renderEdit = async () => {
+    if (this.uploadingImage) {
+      return this.domComponent.append(
+        createElement("h2", {}, "Please wait while we process your data...")
+      );
+    }
+
     this.domComponent.append(
       createElement(
         "form",
@@ -557,6 +592,7 @@ export default class SingleLocationView {
             name: "title",
             value: this.location.title,
           }),
+          createElement("br"),
           createElement("label", { for: "description" }, "Description"),
           createElement(
             "textarea",
@@ -569,17 +605,57 @@ export default class SingleLocationView {
             this.location.description
           ),
           createElement("br"),
+          createElement(
+            "label",
+            { for: "image", class: "file-input" },
+            "Upload Image"
+          ),
+          createElement("input", {
+            id: "image",
+            name: "image",
+            type: "file",
+            accept: "image/*",
+          }),
+          createElement("br"),
+          createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
         {
           type: "submit",
           event: (e) => {
             this.saveLocation(e);
-            this.toggleEdit();
           },
         }
       )
     );
+  };
+
+  handleImageClick = (imageSource) => {
+    modal.show(createElement("img", {src: imageSource.url, class: "modal-image"}))
+  };
+
+  renderImage = async () => {
+    if (this.location.image_ref) {
+      const imageSource = await getPresignedForImageDownload(
+        this.location.image_ref
+      );
+      if (imageSource) {
+        return createElement(
+          "img",
+          {
+            class: "clickable-image",
+            src: imageSource.url,
+            width: "50%",
+            height: "auto",
+          },
+          null,
+          {
+            type: "click",
+            event: () => this.handleImageClick(imageSource),
+          }
+        );
+      } else return createElement("div", { style: "visibility: hidden;" });
+    } else return createElement("div", { style: "visibility: hidden;" });
   };
 
   renderEditButtonOrNull = () => {
@@ -678,6 +754,8 @@ export default class SingleLocationView {
         ]),
       ]),
       createElement("br"),
+      createElement("br"),
+      await this.renderImage(),
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [
         "Notes",

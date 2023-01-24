@@ -86,15 +86,22 @@ const {
 } = require("./controllers/projectInvites.js");
 const {
   getProjectUserByUserAndProject,
+  getProjectUsersByProject,
   addProjectUser,
   removeProjectUser,
   editProjectUser,
 } = require("./controllers/projectUsers.js");
+const {getSignedUrlForDownload, getSignedUrlForUpload} = require("./controllers/s3.js");
 
 var router = express.Router();
 
+// s3
+router.post('/signed_URL_download', getSignedUrlForDownload)
+router.post('/signed_URL_upload', getSignedUrlForUpload)
+
 // project users
 router.get("/get_project_user_by_user_and_project/:project_id", getProjectUserByUserAndProject);
+router.get("/get_project_users_by_project/:project_id", getProjectUsersByProject);
 router.post("/add_project_user", addProjectUser);
 router.delete("/remove_project_user/:id", removeProjectUser);
 router.post("/edit_project_user/:id", editProjectUser);

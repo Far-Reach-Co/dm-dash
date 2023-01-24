@@ -36,7 +36,7 @@ export default class Character {
       `${window.location.origin}/api/remove_character/${this.id}`,
       {
         method: "DELETE",
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        headers: {"x-access-token": `Bearer ${localStorage.getItem("token")}`},
       }
     );
     if (res.status === 204) {

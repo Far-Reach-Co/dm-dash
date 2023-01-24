@@ -191,7 +191,7 @@ form {
   width: fit-content;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: space-evenly;
   border: 0.5px solid var(--main-gray);
 }
@@ -212,6 +212,28 @@ input {
 input[type=number] {
   width: 100px
 }
+
+input[type="file"] {
+  all: unset;
+}
+input[type=file]::file-selector-button {
+  width: fit-content;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  color: inherit;
+  border: 0.1px solid var(--main-gray);
+  border-radius: var(--border-radius);
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+input[type=file]::file-selector-button:hover {
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
 
 .form-item input {
   margin-bottom: 10px;
@@ -643,4 +665,122 @@ footer {
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.clickable-image {
+  cursor: pointer;
+}
+.clickable-image:hover {
+  opacity: 0.7;
+}
+
+
+/* modal */
+/* The Modal (background) */
+.modal {
+  visibility: hidden; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 3; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100vw; /* Full width */
+  height: 100vh; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal Content/Box */
+.modal-container {
+  /* background-color: var(--main-dark); */
+  width: fit-content; /* Could be more or less, depending on screen size */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The Close Button */
+.close-modal {
+  cursor: pointer;
+  color: var(--main-white);
+  align-self: flex-end;
+  font-size: 30px;
+}
+
+.modal-image {
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--light-gray);
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: var(--blue);
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: var(--green2);
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px var(--green2);
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
