@@ -67,6 +67,7 @@ async function getProjectUsersByProject(req, res, next) {
       const userData = await getUserByIdQuery(projectUser.user_id);
       const user = userData.rows[0];
       user.project_user_id = projectUser.id;
+      user.is_editor = projectUser.is_editor;
       usersList.push(user);
     }
 
