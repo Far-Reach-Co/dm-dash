@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import { editButtonOrNull } from "../lib/editButtonOrNull.js";
+import defaultEditButton from "../lib/defaultEditButton.js";
 
 export default class Character {
   constructor(props) {
@@ -149,7 +149,7 @@ export default class Character {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await editButtonOrNull(this.title, this.toggleEdit),
+        await defaultEditButton(this.title, this.toggleEdit),
         this.renderCharacterType(),
         createElement("img", {
           src: "../assets/character.svg",

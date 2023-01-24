@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
-import { editButtonOrNull } from "../lib/editButtonOrNull.js";
+import defaultEditButton from "../lib/defaultEditButton.js";
 
 export default class Item {
   constructor(props) {
@@ -151,7 +151,7 @@ export default class Item {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await editButtonOrNull(this.title, this.toggleEdit),
+        await defaultEditButton(this.title, this.toggleEdit),
         this.renderItemType(),
         createElement("img", {
           src: "../assets/item.svg",

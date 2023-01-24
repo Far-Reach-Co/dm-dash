@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import { editButtonOrNull } from "../lib/editButtonOrNull.js";
+import defaultEditButton from "../lib/defaultEditButton.js";
 
 export default class Location {
   constructor(props) {
@@ -143,7 +143,7 @@ export default class Location {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await editButtonOrNull(this.title, this.toggleEdit),
+        await defaultEditButton(this.title, this.toggleEdit),
         this.renderLocationType(),
         createElement("img", {
           src: "../assets/location.svg",
