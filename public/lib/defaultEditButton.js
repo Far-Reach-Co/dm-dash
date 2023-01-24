@@ -2,7 +2,7 @@ import state from "./state.js";
 import createElement from "./createElement.js";
 
 export default function defaultEditButton(title, toggleEdit) {
-  const renderEditButtonOrNull = (toggleEdit) => {
+  const renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else {
