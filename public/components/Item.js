@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
-import editButtonOrNull from "../lib/editButtonOrNull.js";
+import { editButtonOrNull } from "../lib/editButtonOrNull.js";
 
 export default class Item {
   constructor(props) {

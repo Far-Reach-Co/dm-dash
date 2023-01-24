@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import editButtonOrNull from "../lib/editButtonOrNull.js";
+import { editButtonOrNull } from "../lib/editButtonOrNull.js";
 
 export default class Location {
   constructor(props) {

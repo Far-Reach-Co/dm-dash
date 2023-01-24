@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import editButtonOrNull from "../lib/editButtonOrNull.js";
+import { editButtonOrNull } from "../lib/editButtonOrNull.js";
 
 export default class Calendar {
   constructor(props) {

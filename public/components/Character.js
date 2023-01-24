@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import editButtonOrNull from "../lib/editButtonOrNull.js";
+import { editButtonOrNull } from "../lib/editButtonOrNull.js";
 
 export default class Character {
   constructor(props) {
