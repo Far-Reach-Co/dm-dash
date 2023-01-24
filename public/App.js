@@ -4,19 +4,23 @@ import ProjectsView from "./views/Projects.js";
 import ClocksView from "./views/Clocks.js";
 import CalendarsView from "./views/Calendars.js";
 import Sidebar from "./components/Sidebar.js";
-import LocationsView from "./views/Locations.js"
+import LocationsView from "./views/Locations.js";
 import SingleLocationView from "./views/SingleLocation.js";
 import NotesView from "./views/Notes.js";
 import CountersView from "./views/Counters.js";
-import CharactersView from "./views/Characters.js"
+import CharactersView from "./views/Characters.js";
 import SingleCharacterView from "./views/SingleCharacter.js";
-import ItemsView from "./views/Items.js"
+import ItemsView from "./views/Items.js";
 import SingleItemView from "./views/SingleItem.js";
+import { Hamburger } from "./components/hamburger.js";
 
 class App {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "app";
+
+    this.sidebar;
+    this.hamburger;
     // begin
     this.init();
   }
@@ -25,7 +29,30 @@ class App {
     this.handleLogout();
     this.handleToProject();
     await this.verifyToken();
+    // setup sidebar
+    this.instantiateSidebar();
+    this.instantiateHamburger();
     this.render();
+  };
+
+  instantiateSidebar = () => {
+    const sidebarElem = createElement("div", {});
+    // SIDEBAR
+    const sidebar = new Sidebar({
+      domComponent: sidebarElem,
+      navigate: this.navigate,
+    });
+    this.sidebar = sidebar;
+  };
+
+  instantiateHamburger = () => {
+    const hamburgerElem = createElement("div", {});
+    // SIDEBAR
+    const hamburger = new Hamburger({
+      domComponent: hamburgerElem,
+      sidebar: this.sidebar,
+    });
+    this.hamburger = hamburger;
   };
 
   handleToProject = () => {
@@ -72,37 +99,37 @@ class App {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new LocationsView({ domComponent: element, navigate });
-  }
+  };
 
   renderSingleLocationView = ({ navigate, params }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new SingleLocationView({ domComponent: element, navigate, params });
-  }
+  };
 
   renderCharactersView = ({ navigate }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new CharactersView({ domComponent: element, navigate });
-  }
+  };
 
   renderSingleCharacterView = ({ navigate, params }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new SingleCharacterView({ domComponent: element, navigate, params });
-  }
+  };
 
   renderItemsView = ({ navigate }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new ItemsView({ domComponent: element, navigate });
-  }
+  };
 
   renderSingleItemView = ({ navigate, params }) => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new SingleItemView({ domComponent: element, navigate, params });
-  }
+  };
 
   renderCalendersView = () => {
     const element = createElement("div");
@@ -142,52 +169,29 @@ class App {
         createElement("h1", {}, "<-- Select a module from the sidebar")
       )
     );
+    this.hamburger.toggle();
   };
 
-  renderSidebarAndHamburger = (props) => {
-    // ELEMENTS
-    const sidebarElem = createElement("div", { class: "sidebar" });
-    // hamburger
-    const hamburgerElem = createElement(
-      "img",
-      {
-        id: "hamburger",
-        style: "z-index: 2; position: absolute; cursor: pointer;",
-        height: "50px",
-        width: "50px",
-        src: "./assets/hamburger.svg",
-      },
-      null,
-      {
-        type: "click",
-        event: () => {
-          if (sidebar.isVisible) {
-            sidebar.isVisible = false;
-            sidebar.container.style.transform = "translate(-200px, 0px)";
-            sidebar.domComponent.style.zIndex = "1";
-          } else {
-            sidebar.isVisible = true;
-            sidebar.container.style.transform = "translate(0px, 0px)";
-            sidebar.domComponent.style.zIndex = "3";
-          }
-        },
-      }
+  renderSidebarAndHamburger = () => {
+    this.domComponent.append(
+      this.sidebar.domComponent,
+      this.hamburger.domComponent
     );
+    this.sidebar.render();
+    this.hamburger.render();
+  };
 
-    this.domComponent.append(sidebarElem, hamburgerElem);
-
-    // SIDEBAR
-    const sidebar = new Sidebar({
-      domComponent: sidebarElem,
-      navigate: props.navigate,
-    });
+  hideSidebarAndHamburger = () => {
+    this.sidebar.hide();
+    this.hamburger.hide();
   };
 
   navigate = ({ title, sidebar, params }) => {
     // clear
     this.domComponent.innerHTML = "";
     // handle sidebar
-    if (sidebar) this.renderSidebarAndHamburger({ navigate: this.navigate });
+    if (sidebar) this.renderSidebarAndHamburger();
+    else this.hideSidebarAndHamburger();
     // routing
     switch (title) {
       case "clocks":
@@ -195,21 +199,27 @@ class App {
       case "counters":
         return this.renderCountersView();
       case "notes":
-        return this.renderNotesView({navigate: this.navigate });
+        return this.renderNotesView({ navigate: this.navigate });
       case "calendars":
         return this.renderCalendersView();
       case "locations":
-        return this.renderLocationsView({navigate: this.navigate});
+        return this.renderLocationsView({ navigate: this.navigate });
       case "single-location":
-        return this.renderSingleLocationView({navigate: this.navigate, params})
+        return this.renderSingleLocationView({
+          navigate: this.navigate,
+          params,
+        });
       case "characters":
-        return this.renderCharactersView({navigate: this.navigate});
+        return this.renderCharactersView({ navigate: this.navigate });
       case "single-character":
-        return this.renderSingleCharacterView({navigate: this.navigate, params})
+        return this.renderSingleCharacterView({
+          navigate: this.navigate,
+          params,
+        });
       case "items":
-        return this.renderItemsView({navigate: this.navigate});
+        return this.renderItemsView({ navigate: this.navigate });
       case "single-item":
-        return this.renderSingleItemView({navigate: this.navigate, params})
+        return this.renderSingleItemView({ navigate: this.navigate, params });
       case "modules":
         return this.renderModulesView();
       default:
