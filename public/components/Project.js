@@ -174,25 +174,25 @@ export default class Project {
   renderProjectUsersList = async () => {
     const projectUsers = await this.getProjectUsers();
     const map = projectUsers.map((user) => {
+      if (user.is_editor === undefined) user.is_editor = false;
+      const checkbox = createElement("input", { type: "checkbox" }, null, {
+        type: "change",
+        event: (e) => {
+          this.updateProjectUserEditorStatus(
+            user.project_user_id,
+            e.currentTarget.checked
+          );
+        },
+      });
+      checkbox.checked = user.is_editor;
+
       const elem = createElement(
         "div",
         { style: "display: flex; align-items: center;" },
         [
-          createElement(
-            "div",
-            { style: "margin-right: 50px;" },
-            user.email
-          ),
+          createElement("div", { style: "margin-right: 50px;" }, user.email),
           createElement("label", { class: "switch" }, [
-            createElement("input", { type: "checkbox", checked: user.is_editor ? true : false }, null, {
-              type: "change",
-              event: (e) => {
-                this.updateProjectUserEditorStatus(
-                  user.project_user_id,
-                  e.currentTarget.checked
-                );
-              },
-            }),
+            checkbox,
             createElement("span", { class: "slider round" }),
           ]),
         ]
