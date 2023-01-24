@@ -66,7 +66,7 @@ app.use((error, req, res, next) => {
 });
 
 //Run
-var PORT = 8000;
+var PORT = 80;
 app.listen({ port: PORT }, async () => {
   console.log(`Server Running at http://localhost:${PORT}`);
 });
