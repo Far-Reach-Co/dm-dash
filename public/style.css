@@ -411,6 +411,10 @@ footer {
   color: inherit;
 }
 
+.edit-btn:hover {
+  color: var(--green);
+}
+
 .current-date {
   display: flex;
   margin-bottom: 5px;
