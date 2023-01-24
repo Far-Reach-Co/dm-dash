@@ -1,5 +1,6 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
+import editButtonOrNull from "../lib/editButtonOrNull.js";
 
 export default class Calendar {
   constructor(props) {
@@ -703,18 +704,7 @@ export default class Calendar {
     );
   };
 
-  renderEditButtonOrNull = () => {
-    if (state.currentProject.isEditor === false) {
-      return createElement("div", { style: "visibility: hidden;" });
-    } else {
-      return createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      });
-    }
-  };
-
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     // edit
@@ -728,7 +718,7 @@ export default class Calendar {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        await editButtonOrNull(this.title, this.toggleEdit),
         createElement("img", {
           src: "../assets/calendar.svg",
           width: 30,
@@ -748,8 +738,7 @@ export default class Calendar {
           this.open = true;
           this.render();
         },
-      }),
-      this.renderEditButtonOrNull()
+      })
     );
   };
 }

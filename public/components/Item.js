@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
-import state from "../lib/state.js";
+import editButtonOrNull from "../lib/editButtonOrNull.js";
 
 export default class Item {
   constructor(props) {
@@ -142,18 +142,7 @@ export default class Item {
     } else return createElement("div", { style: "display: none;" });
   };
 
-  renderEditButtonOrNull = () => {
-    if (state.currentProject.isEditor === false) {
-      return createElement("div", { style: "visibility: hidden;" });
-    } else {
-      return createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      });
-    }
-  };
-
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -162,7 +151,7 @@ export default class Item {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        await editButtonOrNull(this.title, this.toggleEdit),
         this.renderItemType(),
         createElement("img", {
           src: "../assets/item.svg",
@@ -180,8 +169,7 @@ export default class Item {
             sidebar: true,
             params: { item: this.item },
           }),
-      }),
-      this.renderEditButtonOrNull()
+      })
     );
   };
 }

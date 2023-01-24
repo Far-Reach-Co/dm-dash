@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import state from "../lib/state.js";
+import editButtonOrNull from "../lib/editButtonOrNull.js";
 
 export default class Location {
   constructor(props) {
@@ -134,18 +134,7 @@ export default class Location {
     } else return createElement("div", { style: "display: none;" });
   };
 
-  renderEditButtonOrNull = () => {
-    if (state.currentProject.isEditor === false) {
-      return createElement("div", { style: "visibility: hidden;" });
-    } else {
-      return createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      });
-    }
-  };
-
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -154,7 +143,7 @@ export default class Location {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        await editButtonOrNull(this.title, this.toggleEdit),
         this.renderLocationType(),
         createElement("img", {
           src: "../assets/location.svg",
@@ -172,8 +161,7 @@ export default class Location {
             sidebar: true,
             params: { location: this.location },
           }),
-      }),
-      this.renderEditButtonOrNull()
+      })
     );
   };
 }
