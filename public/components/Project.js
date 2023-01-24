@@ -127,6 +127,102 @@ export default class Project {
     }
   };
 
+  updateProjectUserEditorStatus = async (userId, status) => {
+    this.isEditor = status;
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/edit_project_user/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            is_editor: status,
+          }),
+        }
+      );
+      await res.json();
+      if (res.status === 200) {
+      } else throw new Error();
+    } catch (err) {
+      // window.alert("Failed to save counter...");
+      console.log(err);
+    }
+  };
+
+  getProjectUsers = async () => {
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/get_project_users_by_project/${this.id}`,
+        {
+          headers: {
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      const data = await res.json();
+      if (res.status === 200) {
+        return data;
+      } else throw new Error();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  renderProjectUsersList = async () => {
+    const projectUsers = await this.getProjectUsers();
+    const map = projectUsers.map((user) => {
+      const elem = createElement(
+        "div",
+        { style: "display: flex; align-items: center;" },
+        [
+          createElement(
+            "div",
+            { style: "margin-right: 50px;" },
+            user.email
+          ),
+          createElement("label", { class: "switch" }, [
+            createElement("input", { type: "checkbox", checked: user.is_editor ? true : false }, null, {
+              type: "change",
+              event: (e) => {
+                this.updateProjectUserEditorStatus(
+                  user.project_user_id,
+                  e.currentTarget.checked
+                );
+              },
+            }),
+            createElement("span", { class: "slider round" }),
+          ]),
+        ]
+      );
+      return elem;
+    });
+    if (map.length) return map;
+    else return [createElement("div", { style: "visibility: hidden;" })];
+  };
+
+  renderManageUsersComponent = async () => {
+    if (!this.wasJoined) {
+      return [
+        createElement("h2", {}, "Manage Invited-Users"),
+        createElement("br"),
+        createElement(
+          "div",
+          { style: "display: flex; justify-content: space-between;" },
+          [
+            createElement("small", {}, "Email"),
+            createElement("small", {}, "Is Editor"),
+          ]
+        ),
+        createElement("br"),
+        ...(await this.renderProjectUsersList()),
+        createElement("hr"),
+      ];
+    } else return [createElement("div", { style: "visibility: hidden;" })];
+  };
+
   renderInviteLinkComponent = () => {
     if (this.loadingProjectInvite) {
       return [
@@ -189,7 +285,7 @@ export default class Project {
     }
   };
 
-  renderEditProject = () => {
+  renderEditProject = async () => {
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
@@ -260,6 +356,7 @@ export default class Project {
         removeButton,
         ...this.renderInviteLinkComponent(),
         createElement("hr"),
+        ...(await this.renderManageUsersComponent()),
         createElement("button", {}, "Cancel", {
           type: "click",
           event: this.toggleEdit,

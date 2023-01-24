@@ -95,11 +95,11 @@ async function editProject(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editProjectQuery(req.params.id, req.body);

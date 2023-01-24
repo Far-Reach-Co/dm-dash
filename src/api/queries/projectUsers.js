@@ -28,6 +28,14 @@ async function getProjectUserByUserAndProjectQuery(userId, projectId) {
   return await db.query(query)
 }
 
+async function getProjectUsersByProjectQuery(projectId) {
+  const query = {
+    text: /*sql*/ `select * from public."ProjectUser" where project_id = $1`,
+    values: [projectId]
+  }
+  return await db.query(query)
+}
+
 async function getProjectUserQuery(id) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where id = $1`,
@@ -71,6 +79,7 @@ module.exports = {
   addProjectUserQuery,
   getProjectUserQuery,
   getProjectUsersQuery,
+  getProjectUsersByProjectQuery,
   removeProjectUserQuery,
   editProjectUserQuery,
   getProjectUserByUserAndProjectQuery

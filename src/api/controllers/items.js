@@ -27,11 +27,11 @@ async function addItem(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const data = await addItemQuery(req.body);
@@ -125,7 +125,7 @@ async function getItemsByLocation(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -152,7 +152,7 @@ async function getItemsByCharacter(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -179,11 +179,11 @@ async function removeItem(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const data = await removeItemQuery(req.params.id);
@@ -206,11 +206,11 @@ async function editItem(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editItemQuery(req.params.id, req.body);

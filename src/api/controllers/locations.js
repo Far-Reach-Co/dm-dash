@@ -24,11 +24,11 @@ async function addLocation(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const data = await addLocationQuery(req.body);
@@ -51,7 +51,7 @@ async function getLocation(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -149,7 +149,7 @@ async function getSubLocations(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -177,11 +177,11 @@ async function removeLocation(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const subLocations = await getSubLocationsQuery(req.params.id);
@@ -212,11 +212,12 @@ async function editLocation(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editLocationQuery(req.params.id, req.body);
