@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate:up": "node-pg-migrate up",
+    "migrate:down": "node-pg-migrate down",
+    "migrate:redo": "node-pg-migrate redo",
+    "migrate:create": "node-pg-migrate create"
   },
   "author": "Julian Ranieri",
   "license": "ISC",
@@ -17,6 +21,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
+    "node-pg-migrate": "^6.2.2",
     "nodemailer": "^6.9.0",
     "nodemon": "^2.0.20",
     "pg": "^8.8.0",
