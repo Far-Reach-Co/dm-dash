@@ -27,7 +27,7 @@ async function addNote(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -51,7 +51,7 @@ async function getNotes(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -85,7 +85,7 @@ async function getNotesByLocation(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -116,7 +116,7 @@ async function getNotesByCharacter(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -147,7 +147,7 @@ async function getNotesByItem(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -175,7 +175,7 @@ async function removeNote(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
@@ -202,7 +202,7 @@ async function editNote(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );

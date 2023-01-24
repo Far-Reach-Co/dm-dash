@@ -127,6 +127,31 @@ export default class Project {
     }
   };
 
+  updateProjectUserEditorStatus = async (userId, status) => {
+    this.isEditor = status;
+    try {
+      const res = await fetch(
+        `${window.location.origin}/api/edit_project_user/${userId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            is_editor: status,
+          }),
+        }
+      );
+      await res.json();
+      if (res.status === 200) {
+      } else throw new Error();
+    } catch (err) {
+      // window.alert("Failed to save counter...");
+      console.log(err);
+    }
+  };
+
   getProjectUsers = async () => {
     try {
       const res = await fetch(
@@ -149,10 +174,29 @@ export default class Project {
   renderProjectUsersList = async () => {
     const projectUsers = await this.getProjectUsers();
     const map = projectUsers.map((user) => {
-      const elem = createElement("div", {style: "display: flex;"}, [
-        createElement("div", {}, user.username ? user.username : user.email),
-        createElement("div", {style: "margin-left: 10px"}, user.is_editor ? "Editor" : "Viewer")
-      ]);
+      const elem = createElement(
+        "div",
+        { style: "display: flex; align-items: center;" },
+        [
+          createElement(
+            "div",
+            { style: "margin-right: 50px;" },
+            user.email
+          ),
+          createElement("label", { class: "switch" }, [
+            createElement("input", { type: "checkbox", checked: user.is_editor ? true : false }, null, {
+              type: "change",
+              event: (e) => {
+                this.updateProjectUserEditorStatus(
+                  user.project_user_id,
+                  e.currentTarget.checked
+                );
+              },
+            }),
+            createElement("span", { class: "slider round" }),
+          ]),
+        ]
+      );
       return elem;
     });
     if (map.length) return map;
@@ -164,7 +208,17 @@ export default class Project {
       return [
         createElement("h2", {}, "Manage Invited-Users"),
         createElement("br"),
+        createElement(
+          "div",
+          { style: "display: flex; justify-content: space-between;" },
+          [
+            createElement("small", {}, "Email"),
+            createElement("small", {}, "Is Editor"),
+          ]
+        ),
+        createElement("br"),
         ...(await this.renderProjectUsersList()),
+        createElement("hr"),
       ];
     } else return [createElement("div", { style: "visibility: hidden;" })];
   };
@@ -303,7 +357,6 @@ export default class Project {
         ...this.renderInviteLinkComponent(),
         createElement("hr"),
         ...(await this.renderManageUsersComponent()),
-        createElement("hr"),
         createElement("button", {}, "Cancel", {
           type: "click",
           event: this.toggleEdit,

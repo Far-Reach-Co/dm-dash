@@ -23,11 +23,11 @@ async function addProjectInvite(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     const data = await addProjectInviteQuery(req.body);
@@ -62,11 +62,11 @@ async function removeProjectInvite(req, res, next) {
 
     if (project.user_id !== req.user.id) {
       // not editor
-      const projectUser = getProjectUserByUserAndProjectQuery(
+      const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (!projectUser.is_editor) throw { status: 403, message: "Forbidden" };
+      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
     }
 
     await removeProjectInviteQuery(req.params.id);

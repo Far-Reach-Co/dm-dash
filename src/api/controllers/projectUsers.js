@@ -7,7 +7,9 @@ const {
   editProjectUserQuery,
 } = require("../queries/projectUsers.js");
 const { getProjectQuery } = require("../queries/projects.js");
-const { getProjectInviteByProjectQuery } = require("../queries/projectInvites.js");
+const {
+  getProjectInviteByProjectQuery,
+} = require("../queries/projectInvites.js");
 const { getUserByIdQuery } = require("../queries/users.js");
 
 async function addProjectUser(req, res, next) {
@@ -17,9 +19,9 @@ async function addProjectUser(req, res, next) {
 
     const projectData = await getProjectQuery(req.body.project_id);
     const project = projectData.rows[0];
-    const projectInviteData = await getProjectInviteByProjectQuery(project.id)
-    if(!projectInviteData) throw { status: 403, message: "Forbidden" };
-    
+    const projectInviteData = await getProjectInviteByProjectQuery(project.id);
+    if (!projectInviteData) throw { status: 403, message: "Forbidden" };
+
     req.body.is_editor = false;
     req.body.user_id = req.user.id;
     const data = await addProjectUserQuery(req.body);
@@ -59,14 +61,16 @@ async function getProjectUsersByProject(req, res, next) {
       req.params.project_id
     );
 
-    const usersData = [];
+    const usersList = [];
 
-    for(const projectUser of projectUsersData.rows) {
-      const user = await getUserByIdQuery(projectUser.user_id);
-      usersData.push(user.rows[0])
+    for (const projectUser of projectUsersData.rows) {
+      const userData = await getUserByIdQuery(projectUser.user_id);
+      const user = userData.rows[0];
+      user.project_user_id = projectUser.id;
+      usersList.push(user);
     }
 
-    res.status(200).json(usersData);
+    res.status(200).json(usersList);
   } catch (err) {
     next(err);
   }
