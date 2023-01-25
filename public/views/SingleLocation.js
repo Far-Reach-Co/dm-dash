@@ -7,7 +7,7 @@ import {
   getPresignedForImageDownload,
   uploadImage,
 } from "../lib/imageUtils.js";
-import modal from "../lib/modal.js";
+import modal from "../components/modal.js";
 
 export default class SingleLocationView {
   constructor(props) {
