@@ -476,6 +476,7 @@ footer {
   /* align-items: center; */
   /* justify-content: space-evenly; */
   /* padding: 5px 10px; */
+  transform: translate(200px, 0px);
   background-color: var(--blue5);
   transition: 0.3s all ease-out;
   border-left: 0.5px solid var(--main-gray);
