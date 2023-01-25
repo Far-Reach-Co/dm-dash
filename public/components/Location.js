@@ -4,7 +4,7 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import defaultEditButton from "../lib/defaultEditButton.js";
+import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Location {
   constructor(props) {
@@ -231,7 +231,7 @@ export default class Location {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await defaultEditButton(this.title, this.toggleEdit),
+        await listItemTitle(this.title, this.toggleEdit),
         this.renderLocationType(),
         await this.renderImage(),
       ]),

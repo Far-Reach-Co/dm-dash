@@ -1,5 +1,5 @@
 import createElement from "../lib/createElement.js";
-import defaultEditButton from "../lib/defaultEditButton.js";
+import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Counter {
   constructor(props) {
@@ -122,7 +122,7 @@ export default class Counter {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await defaultEditButton(this.title, this.toggleEdit),
+        await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
           src: "../assets/counter.svg",
           width: 30,

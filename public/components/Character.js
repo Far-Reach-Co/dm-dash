@@ -1,6 +1,5 @@
 import createElement from "../lib/createElement.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import defaultEditButton from "../lib/defaultEditButton.js";
 import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Character {

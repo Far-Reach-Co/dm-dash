@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import defaultEditButton from "../lib/defaultEditButton.js";
+import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Calendar {
   constructor(props) {
@@ -718,7 +718,7 @@ export default class Calendar {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await defaultEditButton(this.title, this.toggleEdit),
+        await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
           src: "../assets/calendar.svg",
           width: 30,
