@@ -2,7 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
-import locationTypeSelect from "../components/locationTypeSelect.js";
+import locationTypeSelect from "../lib/locationTypeSelect.js";
 import {
   getPresignedForImageDownload,
   uploadImage,

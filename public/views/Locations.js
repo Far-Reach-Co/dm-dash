@@ -1,7 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Location from "../components/Location.js";
-import locationTypeSelect from "../components/locationTypeSelect.js";
+import locationTypeSelect from "../lib/locationTypeSelect.js";
 import { uploadImage } from "../lib/imageUtils.js";
 
 export default class LocationsView {
