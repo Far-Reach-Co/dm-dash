@@ -192,48 +192,51 @@ class App {
   };
 
   render = async () => {
-        // clear
-        this.domComponent.innerHTML = "";
-        // handle sidebar
-        if (navigate.currentRoute.sidebar) {
-          this.renderSidebarAndHamburger();
-          if (this.sidebar.isVisible) {
-            this.sidebar.open();
-          }
-        }
-        // routing
-        switch (navigate.currentRoute.title) {
-          case "clocks":
-            return this.renderClocksView();
-          case "counters":
-            return this.renderCountersView();
-          case "notes":
-            return this.renderNotesView({ navigate: navigate.navigate });
-          case "calendars":
-            return this.renderCalendersView();
-          case "locations":
-            return this.renderLocationsView({ navigate: navigate.navigate });
-          case "single-location":
-            return this.renderSingleLocationView({
-              navigate: navigate.navigate,
-              params: navigate.currentRoute.params,
-            });
-          case "characters":
-            return this.renderCharactersView({ navigate: navigate.navigate });
-          case "single-character":
-            return this.renderSingleCharacterView({
-              navigate: navigate.navigate,
-              params: navigate.currentRoute.params,
-            });
-          case "items":
-            return this.renderItemsView({ navigate: navigate.navigate });
-          case "single-item":
-            return this.renderSingleItemView({ navigate: navigate.navigate, params: navigate.currentRoute.params });
-          case "modules":
-            return this.renderModulesView();
-          default:
-            return this.renderProjectsView({ navigate: navigate.navigate });
-        }
+    // clear
+    this.domComponent.innerHTML = "";
+    // handle sidebar
+    if (navigate.currentRoute.sidebar) {
+      this.renderSidebarAndHamburger();
+      if (this.sidebar.isVisible) {
+        this.sidebar.open();
+      }
+    }
+    // routing
+    switch (navigate.currentRoute.title) {
+      case "clocks":
+        return this.renderClocksView();
+      case "counters":
+        return this.renderCountersView();
+      case "notes":
+        return this.renderNotesView({ navigate: navigate.navigate });
+      case "calendars":
+        return this.renderCalendersView();
+      case "locations":
+        return this.renderLocationsView({ navigate: navigate.navigate });
+      case "single-location":
+        return this.renderSingleLocationView({
+          navigate: navigate.navigate,
+          params: navigate.currentRoute.params,
+        });
+      case "characters":
+        return this.renderCharactersView({ navigate: navigate.navigate });
+      case "single-character":
+        return this.renderSingleCharacterView({
+          navigate: navigate.navigate,
+          params: navigate.currentRoute.params,
+        });
+      case "items":
+        return this.renderItemsView({ navigate: navigate.navigate });
+      case "single-item":
+        return this.renderSingleItemView({
+          navigate: navigate.navigate,
+          params: navigate.currentRoute.params,
+        });
+      case "modules":
+        return this.renderModulesView();
+      default:
+        return this.renderProjectsView({ navigate: navigate.navigate });
+    }
   };
 }
 
