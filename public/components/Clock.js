@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import msToTime from "../lib/msToTime.js";
 import state from "../lib/state.js";
+import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Clock {
   constructor(props) {
@@ -219,17 +220,13 @@ export default class Clock {
           type: "click",
           event: this.stop,
         }),
-        createElement("button", {}, "Edit", {
-          type: "click",
-          event: this.toggleEdit,
-        }),
         createElement("br"),
         selectSpeed,
       ];
     }
   };
 
-  render = () => {
+  render = async () => {
     // clear
     this.domComponent.innerHTML = "";
     // if edit clock
@@ -247,7 +244,7 @@ export default class Clock {
     // append
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
           src: "../assets/clock.svg",
           width: 30,
