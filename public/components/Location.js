@@ -4,7 +4,7 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import state from "../lib/state.js";
+import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Location {
   constructor(props) {
@@ -39,7 +39,7 @@ export default class Location {
   toggleUploadingImage = () => {
     this.uploadingImage = true;
     this.render();
-  }
+  };
 
   removeLocation = async () => {
     const res = await fetch(`${window.origin}/api/remove_location/${this.id}`, {
@@ -66,7 +66,7 @@ export default class Location {
       this.toggleUploadingImage();
       const newImageRef = await uploadImage(formProps.image);
       // if success update formProps and set imageRef for UI
-      if(newImageRef) {
+      if (newImageRef) {
         formProps.image_ref = newImageRef;
         this.imageRef = newImageRef;
         this.location.image_ref = newImageRef;
@@ -107,7 +107,7 @@ export default class Location {
     if (this.uploadingImage) {
       return this.domComponent.append(
         createElement("h2", {}, "Please wait while we process your data...")
-      )
+      );
     }
 
     this.domComponent.append(
@@ -231,7 +231,7 @@ export default class Location {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        await listItemTitle(this.title, this.toggleEdit),
         this.renderLocationType(),
         await this.renderImage(),
       ]),
@@ -245,8 +245,7 @@ export default class Location {
             sidebar: true,
             params: { location: this.location },
           }),
-      }),
-      this.renderEditButtonOrNull()
+      })
     );
   };
 }

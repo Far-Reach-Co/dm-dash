@@ -128,7 +128,13 @@ export default class Note {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        createElement("div", { class: "title-edit" }, [
+          this.title,
+          createElement("div", { class: "edit-btn" }, "[Edit]", {
+            type: "click",
+            event: this.toggleEdit,
+          }),
+        ]),
         createElement(
           "div",
           { class: "note-date" },
@@ -147,11 +153,7 @@ export default class Note {
         }),
       ]),
       createElement("div", { class: "description" }, this.description),
-      createElement("br"),
-      createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      })
+      createElement("br")
     );
   };
 }

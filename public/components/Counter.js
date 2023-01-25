@@ -1,4 +1,5 @@
 import createElement from "../lib/createElement.js";
+import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Counter {
   constructor(props) {
@@ -112,7 +113,7 @@ export default class Counter {
     );
   };
 
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -121,7 +122,7 @@ export default class Counter {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        this.title,
+        await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
           src: "../assets/counter.svg",
           width: 30,

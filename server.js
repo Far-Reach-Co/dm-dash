@@ -38,7 +38,7 @@ app.use(async (req, res, next) => {
   if (req.headers["x-access-token"]) {
     let token = req.headers["x-access-token"];
     token = token.split(" ")[1];
-    
+
     if (req.path === "/api/verify_jwt") {
       req.token = token;
     } else {
