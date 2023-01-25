@@ -224,14 +224,7 @@ export default class Project {
   };
 
   renderInviteLinkComponent = () => {
-    if (this.loadingProjectInvite) {
-      return [
-        createElement("hr"),
-        createElement("h2", {}, "Share This Project"),
-        createElement("br"),
-        createElement("div", {}, "Loading..."),
-      ];
-    } else if (!this.projectInvite) {
+    if (!this.projectInvite) {
       return [
         createElement("hr"),
         createElement("h2", {}, "Share This Project"),
@@ -286,6 +279,10 @@ export default class Project {
   };
 
   renderEditProject = async () => {
+    if(this.loadingProjectInvite) {
+      return this.domComponent.append(createElement("div", {}, "Loading..."));
+    }
+
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,

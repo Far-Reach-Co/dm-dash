@@ -160,11 +160,11 @@ export default class NotesView {
     this.domComponent.append(
       createElement(
         "div",
-        { style: "display: flex; flex-direction: column;" },
+        {class: "view-options-container"},
         [
           createElement(
             "button",
-            {},
+            {class: "new-btn"},
             "+ Note",
             {
               type: "click",
@@ -189,8 +189,7 @@ export default class NotesView {
           ),
         ]
       ),
-      createElement("h1", { style: "align-self: center;" }, "Notes"),
-      createElement("br"),
+      createElement("hr"),
       ...(await this.renderNoteElems()),
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",

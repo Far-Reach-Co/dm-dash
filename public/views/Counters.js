@@ -84,12 +84,11 @@ export default class CountersView {
 
     // append
     this.domComponent.append(
-      createElement("button", {}, "+ Counter", {
+      createElement("button", {class: "new-btn"}, "+ Counter", {
         type: "click",
         event: this.newCounter,
       }),
-      createElement("h1", { style: "align-self: center;" }, "Counters"),
-      createElement("br"),
+      createElement("hr"),
       ...(await this.renderCounterElems())
     );
   };

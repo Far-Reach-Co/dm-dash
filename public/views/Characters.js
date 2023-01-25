@@ -179,7 +179,7 @@ export default class CharactersView {
     } else
       return createElement(
         "button",
-        {},
+        {class: "new-btn"},
         "+ Character",
         {
           type: "click",
@@ -200,41 +200,37 @@ export default class CharactersView {
       createElement(
         "div",
         {
-          style:
-            "display: flex; justify-content: space-between; align-items: flex-end;",
+          class: "view-options-container"
         },
         [
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              createElement("small", {}, "Filter by type"),
-              characterTypeSelect(this.handleTypeFilterChange, this.filter),
-            ]
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              this.renderAddButtonOrNull(),
-              createElement(
-                "input",
-                { placeholder: "Search Characters", value: this.searchTerm },
-                null,
-                {
-                  type: "change",
-                  event: (e) => {
-                    (this.searchTerm = e.target.value.toLowerCase()),
-                      this.render();
-                  },
-                }
-              ),
-            ]
-          ),
+          this.renderAddButtonOrNull(),
+          createElement("div", {class: "view-filter-options-container"}, [
+            createElement(
+              "div",
+              { style: "display: flex; flex-direction: column;" },
+              [
+                createElement("small", {}, "Filter by type"),
+                characterTypeSelect(this.handleTypeFilterChange, this.filter),
+              ]
+            ),
+            createElement("br"),
+            createElement(
+              "input",
+              { placeholder: "Search Characters", value: this.searchTerm },
+              null,
+              {
+                type: "change",
+                event: (e) => {
+                  this.offset = 0;
+                  (this.searchTerm = e.target.value.toLowerCase()),
+                    this.render();
+                },
+              }
+            ),
+          ]),
         ]
       ),
-      createElement("h1", { style: "align-self: center;" }, "Characters"),
-      createElement("br"),
+      createElement("hr"),
       ...(await this.renderCharactersElems()),
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",

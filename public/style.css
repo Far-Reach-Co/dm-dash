@@ -30,8 +30,8 @@
   --link-blue: rgb(183, 207, 237);
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
-  --green: rgb(156, 215, 89);
-  --green2: rgb(52, 142, 3);
+  --green: rgb(141, 194, 81);
+  --green2: rgb(47, 129, 3);
   --orange: rgb(147, 69, 0);
   --orange2: rgb(230, 149, 83);
   --orange3: rgb(224, 200, 172);
@@ -154,6 +154,7 @@ a:hover {
 
 button {
   width: fit-content;
+  height: fit-content;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
   color: inherit;
   /* border: 0.1px solid var(--main-gray); */
@@ -189,8 +190,8 @@ button:hover {
 
 form {
   background-color: var(--blue3);
-  padding: 18px;
-  width: max-content;
+  padding: 20px;
+  /* flex: 1; */
   display: flex;
   flex-direction: column;
   /* align-items: center; */
@@ -246,6 +247,7 @@ input[type=file]::file-selector-button:hover {
 
 select {
   width: fit-content;
+  height: fit-content;
   margin: 0;
   outline: 0;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
@@ -261,14 +263,15 @@ select {
 }
 
 textarea {
+  height: auto;
   border: none;
-  width: max-content;
   outline: none;
   background-color: rgb(187, 184, 184);
   display: inline-block;
   font-size: inherit;
   font-family: inherit;
   color: black;
+  resize: both;
   /* border: 0.5px solid var(--main-gray); */
 }
 
@@ -341,6 +344,12 @@ footer {
   overflow-y: scroll;
 }
 
+.standard-view form {
+  padding: 5px;
+  flex: 1;
+  background-color: inherit;
+}
+
 .sub-view {
   border: 3px solid var(--main-gray);
   /* background-color: var(--blue4); */
@@ -401,6 +410,31 @@ footer {
 .project-edit-container {
   border: 1px solid var(--main-gray);
   padding: 10px;
+}
+
+.view-options-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.new-btn {
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
+.new-btn:hover {
+  background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
+}
+
+.view-filter-options-container {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.view-filter-options-container input {
+  margin-left: 10px;
 }
 
 .component {

@@ -181,7 +181,7 @@ export default class ItemsView {
     } else
       return createElement(
         "button",
-        {},
+        {class: "new-btn"},
         "+ Item",
         {
           type: "click",
@@ -202,40 +202,35 @@ export default class ItemsView {
       createElement(
         "div",
         {
-          style:
-            "display: flex; justify-content: space-between; align-items: flex-end;",
+          class: "view-options-container"
         },
         [
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              createElement("small", {}, "Filter by type"),
-              itemTypeSelect(this.handleTypeFilterChange, this.filter),
-            ]
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              this.renderAddButtonOrNull(),
-              createElement(
-                "input",
-                { placeholder: "Search Items", value: this.searchTerm },
-                null,
-                {
-                  type: "change",
-                  event: (e) => {
-                    (this.searchTerm = e.target.value.toLowerCase()),
-                      this.render();
-                  },
-                }
-              ),
-            ]
-          ),
+          this.renderAddButtonOrNull(),
+          createElement("div", {class: "view-filter-options-container"}, [
+            createElement(
+              "div",
+              { style: "display: flex; flex-direction: column;" },
+              [
+                createElement("small", {}, "Filter by type"),
+                itemTypeSelect(this.handleTypeFilterChange, this.filter),
+              ]
+            ),
+            createElement(
+              "input",
+              { placeholder: "Search Items", value: this.searchTerm },
+              null,
+              {
+                type: "change",
+                event: (e) => {
+                  (this.searchTerm = e.target.value.toLowerCase()),
+                    this.render();
+                },
+              }
+            ),
+          ])
         ]
       ),
-      createElement("h1", { style: "align-self: center;" }, "Items"),
+      createElement("hr"),
       ...(await this.renderItemsElems()),
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",
