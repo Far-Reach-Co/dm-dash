@@ -18,22 +18,23 @@
 }
 
 :root {
-  --main-white: rgb(227, 227, 227);
+  --main-white: rgb(210, 210, 210);
   --main-dark: rgb(21, 21, 21);
   --main-gray: rgb(103, 101, 101);
   --light-gray: rgb(174, 173, 173);
-  --blue: rgb(59, 82, 113);
-  --blue2: rgb(107, 131, 154);
-  --blue3: rgb(41, 47, 58);
-  --blue4: rgb(42, 58, 82);
-  --link-blue: rgb(164, 216, 249);
+  --blue: rgb(65, 95, 134);
+  --blue2: rgb(107, 129, 154);
+  --blue3: rgb(32, 38, 52);
+  --blue4: rgb(43, 59, 83);
+  --blue5: rgb(39, 50, 67);
+  --link-blue: rgb(183, 207, 237);
   --purple: rgb(36, 35, 59);
   --pink: rgb(220, 175, 201);
-  --green: rgb(173, 215, 89);
-  --green2: rgb(96, 142, 3);
+  --green: rgb(156, 215, 89);
+  --green2: rgb(52, 142, 3);
   --orange: rgb(147, 69, 0);
   --orange2: rgb(230, 149, 83);
-  --orange3: rgb(216, 193, 157);
+  --orange3: rgb(224, 200, 172);
   --red1: rgb(225, 75, 75);
   --red2: rgb(120, 46, 46);
 }
@@ -87,7 +88,7 @@ hr {
 
 h1 {
   font-size: 1.2rem;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   display: inline-block;
 }
 
@@ -155,7 +156,8 @@ button {
   width: fit-content;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
   color: inherit;
-  border: 0.1px solid var(--main-gray);
+  /* border: 0.1px solid var(--main-gray); */
+  border: none;
   border-radius: var(--border-radius);
   padding: 2px 4px;
   font: inherit;
@@ -188,7 +190,7 @@ button:hover {
 form {
   background-color: var(--blue3);
   padding: 18px;
-  width: fit-content;
+  width: max-content;
   display: flex;
   flex-direction: column;
   /* align-items: center; */
@@ -206,7 +208,7 @@ input {
   font-size: inherit;
   font-family: inherit;
   color: black;
-  border: 0.5px solid var(--main-gray);
+  /* border: 0.5px solid var(--main-gray); */
 }
 
 input[type=number] {
@@ -221,7 +223,8 @@ input[type=file]::file-selector-button {
   width: fit-content;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
   color: inherit;
-  border: 0.1px solid var(--main-gray);
+  /* border: 0.1px solid var(--main-gray); */
+  border: none;
   border-radius: var(--border-radius);
   padding: 2px 4px;
   font: inherit;
@@ -232,6 +235,7 @@ input[type=file]::file-selector-button {
 }
 
 input[type=file]::file-selector-button:hover {
+  border: none;
   background: linear-gradient(var(--green) 10%, var(--green2) 90%);
 }
 
@@ -245,7 +249,8 @@ select {
   margin: 0;
   outline: 0;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
-  border: 0.5px solid var(--main-gray);
+  /* border: 0.5px solid var(--main-gray); */
+  border: none;
   border-radius: var(--border-radius);
   padding: 2px 4px;
   font: inherit;
@@ -257,13 +262,14 @@ select {
 
 textarea {
   border: none;
+  width: max-content;
   outline: none;
   background-color: rgb(187, 184, 184);
   display: inline-block;
   font-size: inherit;
   font-family: inherit;
   color: black;
-  border: 0.5px solid var(--main-gray);
+  /* border: 0.5px solid var(--main-gray); */
 }
 
 footer {
@@ -294,6 +300,13 @@ footer {
   justify-content: center;
 }
 
+.dashboard-container {
+  display: flex;
+  flex: 1;
+  background-color: var(--blue3);
+  overflow-y: scroll;
+}
+
 .icon {
   width: 30px;
   height: 30px;
@@ -318,9 +331,7 @@ footer {
   z-index: 1;
   /* margin: 10px; */
   padding: 10px 30px;
-  min-width: 50%;
-  /* border: 0.5px solid var(--main-gray); */
-  background-color: var(--blue3);
+  /* min-width: 50%; */
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -348,7 +359,7 @@ footer {
 
 .projects-view-title {
   align-self: center;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   font-size: 20px;
   font-weight: bold;
 }
@@ -363,7 +374,7 @@ footer {
 
 .project-button {
   margin-right: 20px;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   font-weight: bold;
   width: fit-content;
   display: flex;
@@ -397,9 +408,9 @@ footer {
   padding: 10px;
   /* max-width: 500px; */
   background-color: var(--blue4);
-  border: 0.5px solid var(--main-gray);
+  /* border: 0.5px solid var(--main-gray); */
   /* box-shadow: 1px 5px 10px 1px var(--main-dark); */
-  min-width: 300px;
+  /* min-width: 300px; */
 }
 
 .component button {
@@ -431,7 +442,7 @@ footer {
   cursor: pointer;
   font-size: 0.75em;
   font-weight: normal;
-  color: inherit;
+  color: var(--link-blue);
 }
 
 .edit-btn:hover {
@@ -457,10 +468,10 @@ footer {
   width: 100%;
   height: 100%;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   /* justify-content: space-evenly; */
   /* padding: 5px 10px; */
-  background-color: var(--blue3);
+  background-color: var(--blue5);
   transform: translate(-200px, 0px);
   transition: 0.3s all ease-out;
   border-right: 0.5px solid var(--main-gray);
@@ -472,13 +483,14 @@ footer {
 }
 
 .sidebar-item {
-  background-color: var(--blue4);
-  border-bottom: 0.5px solid var(--main-gray);
+  /* background-color: var(--blue4); */
+  /* border-bottom: 0.5px solid var(--main-gray); */
+  padding-left: 10px;
   width: 100%;
   height: 50px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
 }
 
@@ -487,7 +499,7 @@ footer {
 }
 
 .sidebar-header {
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   align-items: center;
   display: flex;
   justify-content: center;

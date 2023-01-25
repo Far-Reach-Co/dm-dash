@@ -12,7 +12,7 @@ export default class SideBar {
     const elem = createElement("img", {
       id: "close-sidebar",
       class: "close-sidebar",
-      src: "../assets/hide.svg",
+      src: "../assets/hamburger.svg",
       height: 28,
       width: 28,
     });
@@ -22,8 +22,18 @@ export default class SideBar {
 
   close = () => {
     this.isVisible = false;
-    if(this.container && this.container.style) this.container.style.transform = "translate(-200px, 0px)";
-    if(this.domComponent && this.domComponent.style) this.domComponent.style.zIndex = "1";
+    if (this.container && this.container.style)
+      this.container.style.transform = "translate(-200px, 0px)";
+    if (this.domComponent && this.domComponent.style)
+      this.domComponent.style.zIndex = "1";
+  };
+
+  open = () => {
+    this.isVisible = true;
+    if (this.container && this.container.style)
+      this.container.style.transform = "translate(0px, 0px)";
+    if (this.domComponent && this.domComponent.style)
+      this.domComponent.style.zIndex = "3";
   };
 
   renderRoutesElems = () => {
@@ -79,26 +89,26 @@ export default class SideBar {
           id: route.id,
         },
         route.displayTitle
-        );
-        // event listener
-        elem.addEventListener("click", () => {
-          this.close();
-          this.navigate({
-            title: route.title,
-            sidebar: true,
+      );
+      // event listener
+      elem.addEventListener("click", () => {
+        this.navigate({
+          title: route.title,
+          sidebar: true,
           params: route.params,
         });
       });
       return elem;
     });
   };
-  
+
   hide = () => {
     this.close();
     this.domComponent.innerHTML = "";
   };
 
   render = () => {
+    console.log(this.isVisible)
     this.domComponent.innerHTML = "";
 
     const container = createElement(

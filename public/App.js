@@ -166,10 +166,10 @@ class App {
       createElement(
         "div",
         { class: "standard-view" },
-        createElement("h1", {}, "<-- Select a module from the sidebar")
+        createElement("h2", {}, "← Select a module from the sidebar")
       )
     );
-    this.hamburger.toggle();
+    this.sidebar.open();
   };
 
   renderSidebarAndHamburger = () => {
@@ -190,8 +190,12 @@ class App {
     // clear
     this.domComponent.innerHTML = "";
     // handle sidebar
-    if (sidebar) this.renderSidebarAndHamburger();
-    else this.hideSidebarAndHamburger();
+    if (sidebar) {
+      this.renderSidebarAndHamburger();
+      if (this.sidebar.isVisible) {
+        this.sidebar.open();
+      }
+    }
     // routing
     switch (title) {
       case "clocks":

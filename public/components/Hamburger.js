@@ -16,13 +16,9 @@ export class Hamburger {
 
   toggle = () => {
     if (this.sidebar.isVisible) {
-      this.sidebar.isVisible = false;
-      this.sidebar.container.style.transform = "translate(-200px, 0px)";
-      this.sidebar.domComponent.style.zIndex = "1";
+      this.sidebar.close();
     } else {
-      this.sidebar.isVisible = true;
-      this.sidebar.container.style.transform = "translate(0px, 0px)";
-      this.sidebar.domComponent.style.zIndex = "3";
+      this.sidebar.open();
     }
   };
 
