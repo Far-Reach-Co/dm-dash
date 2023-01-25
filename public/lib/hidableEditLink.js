@@ -1,8 +1,7 @@
 import state from "./state.js";
 import createElement from "./createElement.js";
 
-// Rename to hidableEditLink
-export default function defaultEditButton(toggleEdit) {
+export default function hidableEditLink(toggleEdit) {
   if (state.currentProject.isEditor === false) {
     return createElement("div", { style: "visibility: hidden;" });
   } else {
