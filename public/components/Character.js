@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import defaultEditButton from "../lib/defaultEditButton.js";
+import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Character {
   constructor(props) {
@@ -36,7 +37,9 @@ export default class Character {
       `${window.location.origin}/api/remove_character/${this.id}`,
       {
         method: "DELETE",
-        headers: {"x-access-token": `Bearer ${localStorage.getItem("token")}`},
+        headers: {
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
       }
     );
     if (res.status === 204) {
@@ -149,7 +152,7 @@ export default class Character {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await defaultEditButton(this.title, this.toggleEdit),
+        await listItemTitle(this.title, this.toggleEdit),
         this.renderCharacterType(),
         createElement("img", {
           src: "../assets/character.svg",
