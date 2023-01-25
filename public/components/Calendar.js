@@ -720,7 +720,7 @@ export default class Calendar {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
-          src: "../assets/calendar.svg",
+          src: "/assets/calendar.svg",
           width: 30,
           height: 30,
         }),

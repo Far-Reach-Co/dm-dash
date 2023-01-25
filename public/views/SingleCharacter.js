@@ -3,7 +3,6 @@ import state from "../lib/state.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import navigate from "../lib/Navigate.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -316,17 +315,13 @@ export default class SingleCharacterView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, `← ${navigate.previousRoute().displayTitle}`, {
-        type: "click",
-        event: () => navigate.back(),
-      }),
       createElement("div", { class: "single-item-title-container" }, [
         createElement("div", { class: "single-item-title" }, [
           this.character.title,
           this.renderCharacterType(),
         ]),
         createElement("img", {
-          src: "../assets/character.svg",
+          src: "/assets/character.svg",
           width: 45,
           height: 45,
         }),

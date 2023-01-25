@@ -147,7 +147,7 @@ export default class Note {
           })
         ),
         createElement("img", {
-          src: "../assets/note.svg",
+          src: "/assets/note.svg",
           width: 30,
           height: 30,
         }),

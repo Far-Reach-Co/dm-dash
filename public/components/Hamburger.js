@@ -31,7 +31,7 @@ export class Hamburger {
         {
           height: "40px",
           width: "40px",
-          src: "./assets/hamburger.svg",
+          src: "/assets/hamburger.svg",
         },
         null
       )

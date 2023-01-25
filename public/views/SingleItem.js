@@ -4,7 +4,6 @@ import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
-import navigate from "../lib/Navigate.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -274,17 +273,13 @@ export default class SingleItemView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, `← ${navigate.previousRoute().displayTitle}`, {
-        type: "click",
-        event: () => navigate.back(),
-      }),
       createElement("div", { class: "single-item-title-container" }, [
         createElement("div", { class: "single-item-title" }, [
           this.item.title,
           this.renderItemType(),
         ]),
         createElement("img", {
-          src: "../assets/item.svg",
+          src: "/assets/item.svg",
           width: 45,
           height: 45,
         }),

@@ -33,7 +33,8 @@ class App {
     // setup sidebar
     this.instantiateSidebar();
     this.instantiateHamburger();
-    navigate.navigate({ title: null, sidebar: false, params: {} });
+    
+    navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
   instantiateSidebar = () => {
@@ -65,7 +66,7 @@ class App {
         });
       });
       // navigate to project select
-      navigate.navigate({ title: null, sidebar: false, params: {} });
+      navigate.navigate({ title: "app", sidebar: false, params: {} });
     });
   };
 

@@ -154,7 +154,7 @@ export default class Character {
         await listItemTitle(this.title, this.toggleEdit),
         this.renderCharacterType(),
         createElement("img", {
-          src: "../assets/character.svg",
+          src: "/assets/character.svg",
           width: 30,
           height: 30,
         }),

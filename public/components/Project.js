@@ -428,7 +428,7 @@ export default class Project {
         "img",
         {
           class: "icon",
-          src: "../assets/gears.svg",
+          src: "/assets/gears.svg",
         },
         null,
         {

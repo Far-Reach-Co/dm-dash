@@ -330,7 +330,7 @@ footer {
 .standard-view {
   align-self: center;
   z-index: 1;
-  padding: 30px 5px;
+  padding: 10px 5px;
   width: 95vw;
   max-width: 1000px;
   display: flex;

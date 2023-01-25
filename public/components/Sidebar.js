@@ -12,7 +12,7 @@ export default class SideBar {
     const elem = createElement("img", {
       id: "close-sidebar",
       class: "close-sidebar",
-      src: "../assets/hamburger.svg",
+      src: "/assets/hamburger.svg",
       height: 28,
       width: 28,
     });

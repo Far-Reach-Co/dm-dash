@@ -8,7 +8,6 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
-import navigate from "../lib/Navigate.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -697,17 +696,13 @@ export default class SingleLocationView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, `← ${navigate.previousRoute().displayTitle}`, {
-        type: "click",
-        event: () => navigate.back(),
-      }),
       createElement("div", { class: "single-item-title-container" }, [
         createElement("div", { class: "single-item-title" }, [
           this.location.title,
           this.renderLocationType(),
         ]),
         createElement("img", {
-          src: "../assets/location.svg",
+          src: "/assets/location.svg",
           width: 45,
           height: 45,
         }),

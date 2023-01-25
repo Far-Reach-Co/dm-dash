@@ -3,33 +3,32 @@ import capitalizeFirstLetter from "./capitalizeFirstLetter.js";
 
 class Navigate {
   constructor() {
-    this.previousRoutes = [];
+    // this.previousRoutes = [];
     this.currentRoute = null;
+
+    window.addEventListener("popstate", (e) => {
+      const route = e.state
+      this.currentRoute = route;
+      app.render();
+    })
   }
 
-  previousRoute = () => {
-    const previousRoute = this.previousRoutes[this.previousRoutes.length - 1];
-    let displayTitle = capitalizeFirstLetter(previousRoute.title);
-    if (
-      previousRoute.params &&
-      previousRoute.params.content &&
-      previousRoute.params.content.title
-    ) {
-      displayTitle = previousRoute.params.content.title;
+  getDisplayTitle(route) {
+    let displayTitle = capitalizeFirstLetter(route.title);
+    if (route.params && route.params.content && route.params.content.title) {
+      displayTitle = route.params.content.title;
     }
-    previousRoute.displayTitle = displayTitle;
-    return previousRoute;
-  };
+    return displayTitle;
+  }
 
   back = () => {
-    this.currentRoute = this.previousRoutes[this.previousRoutes.length - 1];
-    this.previousRoutes.pop();
-    app.render();
+    history.back();
   };
 
-  navigate = ({ title, sidebar, params }) => {
-    this.previousRoutes.push(this.currentRoute);
-    this.currentRoute = { title, sidebar, params };
+  navigate = (route) => {
+    route.displayTitle = this.getDisplayTitle(route);
+    history.pushState(route, null, `/dashboard.html?view=${route.title}`);
+    this.currentRoute = route;
     app.render();
   };
 }
