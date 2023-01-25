@@ -179,7 +179,7 @@ export default class CharactersView {
     } else
       return createElement(
         "button",
-        { style: "align-self: flex-end; margin-bottom: 10px;" },
+        {},
         "+ Character",
         {
           type: "click",

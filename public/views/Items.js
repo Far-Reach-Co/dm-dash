@@ -181,7 +181,7 @@ export default class ItemsView {
     } else
       return createElement(
         "button",
-        { style: "align-self: flex-end; margin-bottom: 10px;" },
+        {},
         "+ Item",
         {
           type: "click",

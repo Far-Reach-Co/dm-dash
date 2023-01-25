@@ -84,7 +84,7 @@ export default class CountersView {
 
     // append
     this.domComponent.append(
-      createElement("button", { style: "align-self: flex-end;" }, "+ Counter", {
+      createElement("button", {}, "+ Counter", {
         type: "click",
         event: this.newCounter,
       }),

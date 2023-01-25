@@ -362,7 +362,7 @@ export default class SingleCharacterView {
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [
         "Notes:",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
+        createElement("button", {}, "+ Note", {
           type: "click",
           event: () => {
             this.toggleCreatingNote();

@@ -23,7 +23,7 @@ export default class SideBar {
   close = () => {
     this.isVisible = false;
     if (this.container && this.container.style)
-      this.container.style.transform = "translate(-200px, 0px)";
+      this.container.style.transform = "translate(200px, 0px)";
     if (this.domComponent && this.domComponent.style)
       this.domComponent.style.zIndex = "1";
   };
@@ -108,7 +108,6 @@ export default class SideBar {
   };
 
   render = () => {
-    console.log(this.isVisible)
     this.domComponent.innerHTML = "";
 
     const container = createElement(

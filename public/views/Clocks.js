@@ -129,7 +129,7 @@ export default class ClocksView {
     } else
       return createElement(
         "button",
-        { style: "align-self: flex-end;" },
+        {},
         "+ Clock",
         {
           type: "click",

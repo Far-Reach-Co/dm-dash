@@ -1,7 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Location from "../components/Location.js";
-import locationTypeSelect from "../lib/locationTypeSelect.js";
+import locationTypeSelect from "../components/locationTypeSelect.js";
 import { uploadImage } from "../lib/imageUtils.js";
 
 export default class LocationsView {
@@ -224,7 +224,7 @@ export default class LocationsView {
     } else
       return createElement(
         "button",
-        { style: "align-self: flex-end; margin-bottom: 10px;" },
+        {},
         "+ Location",
         {
           type: "click",

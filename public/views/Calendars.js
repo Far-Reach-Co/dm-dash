@@ -601,7 +601,7 @@ export default class CalendarView {
     } else
       return createElement(
         "button",
-        { style: "align-self: flex-end;" },
+        {},
         "+ Calendar",
         {
           type: "click",

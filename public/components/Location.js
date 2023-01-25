@@ -3,7 +3,7 @@ import {
   getPresignedForImageDownload,
   uploadImage,
 } from "../lib/imageUtils.js";
-import locationTypeSelect from "../lib/locationTypeSelect.js";
+import locationTypeSelect from "./locationTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 
 export default class Location {

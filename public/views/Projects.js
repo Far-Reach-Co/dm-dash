@@ -80,7 +80,7 @@ export default class ProjectsView {
 
     // append
     this.domComponent.append(
-      createElement("button", { style: "align-self: flex-end;" }, "+ Project", {
+      createElement("button", {}, "+ Project", {
         type: "click",
         event: this.newProject,
       }),

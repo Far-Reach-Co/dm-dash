@@ -22,7 +22,7 @@
   --main-dark: rgb(21, 21, 21);
   --main-gray: rgb(103, 101, 101);
   --light-gray: rgb(174, 173, 173);
-  --blue: rgb(65, 95, 134);
+  --blue: rgb(59, 85, 120);
   --blue2: rgb(107, 129, 154);
   --blue3: rgb(32, 38, 52);
   --blue4: rgb(43, 59, 83);
@@ -87,7 +87,7 @@ hr {
 }
 
 h1 {
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   letter-spacing: 1.5px;
   display: inline-block;
 }
@@ -180,9 +180,9 @@ button:hover {
 }
 
 .back-button {
-  margin-top: -10px;
-  margin-left: -20px;
-  padding: 5px;
+  /* margin-top: -10px; */
+  /* margin-left: -20px; */
+  /* padding: 5px; */
   /* border-bottom: 0.1px solid var(--light-gray); */
   width: fit-content;
 }
@@ -328,14 +328,16 @@ footer {
 }
 
 .standard-view {
-  z-index: 1;
-  /* margin: 10px; */
-  padding: 10px 30px;
-  /* min-width: 50%; */
-  display: flex;
-  flex: 1;
-  flex-direction: column;
   align-self: center;
+  z-index: 1;
+  padding: 30px 5px;
+  width: 95vw;
+  max-width: 1000px;
+  display: flex;
+  /* flex: 1; */
+  flex-direction: column;
+  /* text-align: center; */
+  /* align-self: center; */
   overflow-y: scroll;
 }
 
@@ -360,7 +362,6 @@ footer {
 .projects-view-title {
   align-self: center;
   letter-spacing: 2px;
-  font-size: 20px;
   font-weight: bold;
 }
 
@@ -381,7 +382,7 @@ footer {
   flex-direction: column;
   /* align-items: center; */
   justify-content: center;
-  padding: 10px 20px;
+  padding: 10px 30px;
   border: 2px solid var(--blue);
   cursor: pointer;
   background-color: var(--purple);
@@ -403,14 +404,17 @@ footer {
 }
 
 .component {
+  align-self: center;
   display: inline-block;
   margin: 5px;
   padding: 10px;
-  /* max-width: 500px; */
+  width: 700px;
+  /* min-width: 300px; */
+  max-width: 100%;
+  height: fit-content;
   background-color: var(--blue4);
   /* border: 0.5px solid var(--main-gray); */
   /* box-shadow: 1px 5px 10px 1px var(--main-dark); */
-  /* min-width: 300px; */
 }
 
 .component button {
@@ -455,6 +459,7 @@ footer {
 }
 
 .sidebar {
+  right: 0px;
   z-index: 1;
   width: 200px;
   height: 100%;
@@ -472,9 +477,8 @@ footer {
   /* justify-content: space-evenly; */
   /* padding: 5px 10px; */
   background-color: var(--blue5);
-  transform: translate(-200px, 0px);
   transition: 0.3s all ease-out;
-  border-right: 0.5px solid var(--main-gray);
+  border-left: 0.5px solid var(--main-gray);
 }
 
 .sidebar-container button {
@@ -511,13 +515,14 @@ footer {
 .close-sidebar {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   margin-right: 3px;
   margin-top: 3px;
   cursor: pointer;
 }
 
 .hamburger {
+  right: 0;
   z-index: 2;
   position: absolute;
   cursor: pointer;
@@ -543,6 +548,11 @@ footer {
   padding: 5px;
   font-size: small;
 
+}
+
+.calendar-container {
+  max-width: 100vw;
+  overflow-x: scroll;
 }
 
 .calendar-box {

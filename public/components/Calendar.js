@@ -640,7 +640,7 @@ export default class Calendar {
       this.render();
     });
 
-    const calendarContainer = createElement("div", {});
+    const calendarContainer = createElement("div", {class: "calendar-container"});
     calendarContainer.style.display = "grid";
     calendarContainer.style.gridTemplateColumns = `repeat(${
       this.daysOfTheWeek.length ? this.daysOfTheWeek.length : 7

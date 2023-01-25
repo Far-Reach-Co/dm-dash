@@ -400,7 +400,7 @@ export default class Project {
           class: "project-button",
         },
         [
-          this.title,
+          createElement("div", {}, this.title),
           createElement(
             "div",
             { class: "project-date" },

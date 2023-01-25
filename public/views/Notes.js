@@ -164,7 +164,7 @@ export default class NotesView {
         [
           createElement(
             "button",
-            { style: "align-self: flex-end; margin-bottom: 10px;" },
+            {},
             "+ Note",
             {
               type: "click",
@@ -176,7 +176,6 @@ export default class NotesView {
             {
               placeholder: "Search Notes",
               value: this.searchTerm,
-              style: "align-self: flex-end;",
             },
             null,
             {

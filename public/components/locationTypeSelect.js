@@ -1,4 +1,4 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/createElement.js";
 
 export default function locationTypeSelect(onChangeCallback, currentType) {
   function renderLocationTypeSelectOptions() {

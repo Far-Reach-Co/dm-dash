@@ -166,7 +166,7 @@ class App {
       createElement(
         "div",
         { class: "standard-view" },
-        createElement("h2", {}, "← Select a module from the sidebar")
+        createElement("h2", {style: "align-self: center;"}, "Select a module from the sidebar ➔")
       )
     );
     this.sidebar.open();
