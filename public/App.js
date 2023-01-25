@@ -195,7 +195,7 @@ class App {
         // clear
         this.domComponent.innerHTML = "";
         // handle sidebar
-        if (this.sidebar) {
+        if (navigate.currentRoute.sidebar) {
           this.renderSidebarAndHamburger();
           if (this.sidebar.isVisible) {
             this.sidebar.open();
