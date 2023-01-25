@@ -13,6 +13,7 @@ import SingleCharacterView from "./views/SingleCharacter.js";
 import ItemsView from "./views/Items.js";
 import SingleItemView from "./views/SingleItem.js";
 import { Hamburger } from "./components/Hamburger.js";
+import navigate from "./lib/Navigate.js";
 
 class App {
   constructor(props) {
@@ -32,7 +33,7 @@ class App {
     // setup sidebar
     this.instantiateSidebar();
     this.instantiateHamburger();
-    this.render();
+    navigate.navigate({ title: null, sidebar: false, params: {} });
   };
 
   instantiateSidebar = () => {
@@ -40,7 +41,7 @@ class App {
     // SIDEBAR
     const sidebar = new Sidebar({
       domComponent: sidebarElem,
-      navigate: this.navigate,
+      navigate: navigate.navigate,
     });
     this.sidebar = sidebar;
   };
@@ -64,7 +65,7 @@ class App {
         });
       });
       // navigate to project select
-      this.navigate({});
+      navigate.navigate({ title: null, sidebar: false, params: {} });
     });
   };
 
@@ -166,7 +167,11 @@ class App {
       createElement(
         "div",
         { class: "standard-view" },
-        createElement("h2", {style: "align-self: center;"}, "Select a module from the sidebar ➔")
+        createElement(
+          "h2",
+          { style: "align-self: center;" },
+          "Select a module from the sidebar ➔"
+        )
       )
     );
     this.sidebar.open();
@@ -186,54 +191,51 @@ class App {
     this.hamburger.hide();
   };
 
-  navigate = ({ title, sidebar, params }) => {
-    // clear
-    this.domComponent.innerHTML = "";
-    // handle sidebar
-    if (sidebar) {
-      this.renderSidebarAndHamburger();
-      if (this.sidebar.isVisible) {
-        this.sidebar.open();
-      }
-    }
-    // routing
-    switch (title) {
-      case "clocks":
-        return this.renderClocksView();
-      case "counters":
-        return this.renderCountersView();
-      case "notes":
-        return this.renderNotesView({ navigate: this.navigate });
-      case "calendars":
-        return this.renderCalendersView();
-      case "locations":
-        return this.renderLocationsView({ navigate: this.navigate });
-      case "single-location":
-        return this.renderSingleLocationView({
-          navigate: this.navigate,
-          params,
-        });
-      case "characters":
-        return this.renderCharactersView({ navigate: this.navigate });
-      case "single-character":
-        return this.renderSingleCharacterView({
-          navigate: this.navigate,
-          params,
-        });
-      case "items":
-        return this.renderItemsView({ navigate: this.navigate });
-      case "single-item":
-        return this.renderSingleItemView({ navigate: this.navigate, params });
-      case "modules":
-        return this.renderModulesView();
-      default:
-        return this.renderProjectsView({ navigate: this.navigate });
-    }
-  };
-
   render = async () => {
-    this.navigate({});
+        // clear
+        this.domComponent.innerHTML = "";
+        // handle sidebar
+        if (this.sidebar) {
+          this.renderSidebarAndHamburger();
+          if (this.sidebar.isVisible) {
+            this.sidebar.open();
+          }
+        }
+        // routing
+        switch (navigate.currentRoute.title) {
+          case "clocks":
+            return this.renderClocksView();
+          case "counters":
+            return this.renderCountersView();
+          case "notes":
+            return this.renderNotesView({ navigate: navigate.navigate });
+          case "calendars":
+            return this.renderCalendersView();
+          case "locations":
+            return this.renderLocationsView({ navigate: navigate.navigate });
+          case "single-location":
+            return this.renderSingleLocationView({
+              navigate: navigate.navigate,
+              params: navigate.currentRoute.params,
+            });
+          case "characters":
+            return this.renderCharactersView({ navigate: navigate.navigate });
+          case "single-character":
+            return this.renderSingleCharacterView({
+              navigate: navigate.navigate,
+              params: navigate.currentRoute.params,
+            });
+          case "items":
+            return this.renderItemsView({ navigate: navigate.navigate });
+          case "single-item":
+            return this.renderSingleItemView({ navigate: navigate.navigate, params: navigate.currentRoute.params });
+          case "modules":
+            return this.renderModulesView();
+          default:
+            return this.renderProjectsView({ navigate: navigate.navigate });
+        }
   };
 }
 
-new App({ domComponent: document.getElementById("app") });
+const app = new App({ domComponent: document.getElementById("app") });
+export default app;

@@ -243,7 +243,7 @@ export default class Location {
           this.navigate({
             title: "single-location",
             sidebar: true,
-            params: { location: this.location },
+            params: { content: this.location },
           }),
       })
     );

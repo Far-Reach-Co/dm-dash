@@ -3,12 +3,12 @@ import state from "../lib/state.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
+import navigate from "../lib/Navigate.js";
 
 export default class SingleCharacterView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.params = props.params;
-    this.character = this.params.character;
+    this.character = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -196,7 +196,7 @@ export default class SingleCharacterView {
             this.navigate({
               title: "single-item",
               sidebar: true,
-              params: { item },
+              params: { content: item },
             }),
         }
       );
@@ -316,9 +316,9 @@ export default class SingleCharacterView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, "← Characters", {
+      createElement("a", { class: "back-button" }, `← ${navigate.previousRoute().displayTitle}`, {
         type: "click",
-        event: () => this.navigate({ title: "characters", sidebar: true }),
+        event: () => navigate.back(),
       }),
       createElement("div", { class: "single-item-title-container" }, [
         createElement("div", { class: "single-item-title" }, [
@@ -481,7 +481,7 @@ class CurrentLocationComponent {
             this.navigate({
               title: "single-location",
               sidebar: true,
-              params: { location },
+              params: { content: location },
             }),
         }
       );

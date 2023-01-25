@@ -167,7 +167,7 @@ export default class Item {
           this.navigate({
             title: "single-item",
             sidebar: true,
-            params: { item: this.item },
+            params: { content: this.item },
           }),
       })
     );

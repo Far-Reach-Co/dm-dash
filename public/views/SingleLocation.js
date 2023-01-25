@@ -8,12 +8,12 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
+import navigate from "../lib/Navigate.js";
 
 export default class SingleLocationView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.params = props.params;
-    this.location = this.params.location;
+    this.location = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -386,7 +386,7 @@ export default class SingleLocationView {
             this.navigate({
               title: "single-location",
               sidebar: true,
-              params: { location },
+              params: { content: location },
             });
           },
         }
@@ -415,7 +415,7 @@ export default class SingleLocationView {
             this.navigate({
               title: "single-character",
               sidebar: true,
-              params: { character },
+              params: { content: character },
             }),
         }
       );
@@ -464,7 +464,7 @@ export default class SingleLocationView {
             this.navigate({
               title: "single-item",
               sidebar: true,
-              params: { item },
+              params: { content: item },
             }),
         }
       );
@@ -489,7 +489,7 @@ export default class SingleLocationView {
             this.navigate({
               title: "single-location",
               sidebar: true,
-              params: { location: parentLocation },
+              params: { content: parentLocation },
             }),
         }
       );
@@ -631,7 +631,9 @@ export default class SingleLocationView {
   };
 
   handleImageClick = (imageSource) => {
-    modal.show(createElement("img", {src: imageSource.url, class: "modal-image"}))
+    modal.show(
+      createElement("img", { src: imageSource.url, class: "modal-image" })
+    );
   };
 
   renderImage = async () => {
@@ -695,9 +697,9 @@ export default class SingleLocationView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, "← Locations", {
+      createElement("a", { class: "back-button" }, `← ${navigate.previousRoute().displayTitle}`, {
         type: "click",
-        event: () => this.navigate({ title: "locations", sidebar: true }),
+        event: () => navigate.back(),
       }),
       createElement("div", { class: "single-item-title-container" }, [
         createElement("div", { class: "single-item-title" }, [

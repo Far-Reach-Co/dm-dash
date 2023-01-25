@@ -167,7 +167,7 @@ export default class Character {
           this.navigate({
             title: "single-character",
             sidebar: true,
-            params: { character: this.character },
+            params: { content: this.character },
           }),
       })
     );
