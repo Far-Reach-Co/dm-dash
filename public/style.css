@@ -533,6 +533,10 @@ footer {
   justify-content: center;
 }
 
+.sidebar-selected-item {
+  color: var(--green);
+}
+
 .sidebar-item:hover {
   background-color: var(--blue);
 }

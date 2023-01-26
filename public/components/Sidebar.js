@@ -1,10 +1,10 @@
 import createElement from "../lib/createElement.js";
+import navigate from "../lib/Navigate.js";
 
 export default class SideBar {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "sidebar";
-    this.navigate = props.navigate;
     this.isVisible = false;
   }
 
@@ -82,17 +82,19 @@ export default class SideBar {
       },
     ];
     return routes.map((route) => {
+      let className = "sidebar-item";
+      if(navigate.currentRoute && navigate.currentRoute.title === route.title) className += " sidebar-selected-item";
       const elem = createElement(
         "a",
         {
-          class: "sidebar-item",
+          class: className,
           id: route.id,
         },
         route.displayTitle
       );
       // event listener
       elem.addEventListener("click", () => {
-        this.navigate({
+        navigate.navigate({
           title: route.title,
           sidebar: true,
           params: route.params,
