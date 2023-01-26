@@ -7,8 +7,7 @@ import characterTypeSelect from "../lib/characterTypeSelect.js";
 export default class SingleCharacterView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.params = props.params;
-    this.character = this.params.character;
+    this.character = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -196,7 +195,7 @@ export default class SingleCharacterView {
             this.navigate({
               title: "single-item",
               sidebar: true,
-              params: { item },
+              params: { content: item },
             }),
         }
       );
@@ -316,17 +315,13 @@ export default class SingleCharacterView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, "← Characters", {
-        type: "click",
-        event: () => this.navigate({ title: "characters", sidebar: true }),
-      }),
       createElement("div", { class: "single-item-title-container" }, [
         createElement("div", { class: "single-item-title" }, [
           this.character.title,
           this.renderCharacterType(),
         ]),
         createElement("img", {
-          src: "../assets/character.svg",
+          src: "/assets/character.svg",
           width: 45,
           height: 45,
         }),
@@ -362,7 +357,7 @@ export default class SingleCharacterView {
       createElement("br"),
       createElement("div", { class: "single-item-subheading" }, [
         "Notes:",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
+        createElement("button", {}, "+ Note", {
           type: "click",
           event: () => {
             this.toggleCreatingNote();
@@ -481,7 +476,7 @@ class CurrentLocationComponent {
             this.navigate({
               title: "single-location",
               sidebar: true,
-              params: { location },
+              params: { content: location },
             }),
         }
       );

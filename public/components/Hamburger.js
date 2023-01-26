@@ -16,13 +16,9 @@ export class Hamburger {
 
   toggle = () => {
     if (this.sidebar.isVisible) {
-      this.sidebar.isVisible = false;
-      this.sidebar.container.style.transform = "translate(-200px, 0px)";
-      this.sidebar.domComponent.style.zIndex = "1";
+      this.sidebar.close();
     } else {
-      this.sidebar.isVisible = true;
-      this.sidebar.container.style.transform = "translate(0px, 0px)";
-      this.sidebar.domComponent.style.zIndex = "3";
+      this.sidebar.open();
     }
   };
 
@@ -33,9 +29,9 @@ export class Hamburger {
       createElement(
         "img",
         {
-          height: "50px",
-          width: "50px",
-          src: "./assets/hamburger.svg",
+          height: "40px",
+          width: "40px",
+          src: "/assets/hamburger.svg",
         },
         null
       )

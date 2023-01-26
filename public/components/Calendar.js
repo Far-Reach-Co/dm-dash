@@ -640,7 +640,7 @@ export default class Calendar {
       this.render();
     });
 
-    const calendarContainer = createElement("div", {});
+    const calendarContainer = createElement("div", {class: "calendar-container"});
     calendarContainer.style.display = "grid";
     calendarContainer.style.gridTemplateColumns = `repeat(${
       this.daysOfTheWeek.length ? this.daysOfTheWeek.length : 7
@@ -720,7 +720,7 @@ export default class Calendar {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
-          src: "../assets/calendar.svg",
+          src: "/assets/calendar.svg",
           width: 30,
           height: 30,
         }),

@@ -246,7 +246,7 @@ export default class Clock {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
-          src: "../assets/clock.svg",
+          src: "/assets/clock.svg",
           width: 30,
           height: 30,
         }),

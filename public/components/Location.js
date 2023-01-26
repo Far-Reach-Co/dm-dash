@@ -184,14 +184,14 @@ export default class Location {
         });
       } else {
         return createElement("img", {
-          src: "../assets/location.svg",
+          src: "/assets/location.svg",
           width: 30,
           height: 30,
         });
       }
     } else {
       return createElement("img", {
-        src: "../assets/location.svg",
+        src: "/assets/location.svg",
         width: 30,
         height: 30,
       });
@@ -243,7 +243,7 @@ export default class Location {
           this.navigate({
             title: "single-location",
             sidebar: true,
-            params: { location: this.location },
+            params: { content: this.location },
           }),
       })
     );

@@ -36,7 +36,7 @@ export default class LocationsView {
   toggleSavingData = () => {
     this.savingData = true;
     this.render();
-  }
+  };
 
   getLocations = async () => {
     let url = `${window.location.origin}/api/get_locations/${state.currentProject.id}/${this.limit}/${this.offset}`;
@@ -222,15 +222,10 @@ export default class LocationsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        { style: "align-self: flex-end; margin-bottom: 10px;" },
-        "+ Location",
-        {
-          type: "click",
-          event: this.toggleCreatingLocation,
-        }
-      );
+      return createElement("button", {class: "new-btn"}, "+ Location", {
+        type: "click",
+        event: this.toggleCreatingLocation,
+      });
   };
 
   render = async () => {
@@ -245,42 +240,37 @@ export default class LocationsView {
       createElement(
         "div",
         {
-          style:
-            "display: flex; justify-content: space-between; align-items: flex-end;",
+          class: "view-options-container",
         },
         [
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              createElement("small", {}, "Filter by type"),
-              locationTypeSelect(this.handleTypeFilterChange, this.filter),
-            ]
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              this.renderAddButtonOrNull(),
-              createElement(
-                "input",
-                { placeholder: "Search Locations", value: this.searchTerm },
-                null,
-                {
-                  type: "change",
-                  event: (e) => {
-                    this.offset = 0;
-                    (this.searchTerm = e.target.value.toLowerCase()),
-                      this.render();
-                  },
-                }
-              ),
-            ]
-          ),
+          this.renderAddButtonOrNull(),
+          createElement("div", {class: "view-filter-options-container"}, [
+            createElement(
+              "div",
+              { style: "display: flex; flex-direction: column;" },
+              [
+                createElement("small", {}, "Filter by type"),
+                locationTypeSelect(this.handleTypeFilterChange, this.filter),
+              ]
+            ),
+            createElement("br"),
+            createElement(
+              "input",
+              { placeholder: "Search Locations", value: this.searchTerm },
+              null,
+              {
+                type: "change",
+                event: (e) => {
+                  this.offset = 0;
+                  (this.searchTerm = e.target.value.toLowerCase()),
+                    this.render();
+                },
+              }
+            ),
+          ]),
         ]
       ),
-      createElement("h1", { style: "align-self: center;" }, "Locations"),
-      createElement("br"),
+      createElement("hr"),
       ...(await this.renderLocationsElems()),
       createElement("a", { style: "align-self: center;" }, "More", {
         type: "click",

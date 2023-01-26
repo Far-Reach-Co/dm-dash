@@ -124,7 +124,7 @@ export default class Counter {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         createElement("img", {
-          src: "../assets/counter.svg",
+          src: "/assets/counter.svg",
           width: 30,
           height: 30,
         }),

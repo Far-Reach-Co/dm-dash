@@ -154,7 +154,7 @@ export default class Character {
         await listItemTitle(this.title, this.toggleEdit),
         this.renderCharacterType(),
         createElement("img", {
-          src: "../assets/character.svg",
+          src: "/assets/character.svg",
           width: 30,
           height: 30,
         }),
@@ -167,7 +167,7 @@ export default class Character {
           this.navigate({
             title: "single-character",
             sidebar: true,
-            params: { character: this.character },
+            params: { content: this.character },
           }),
       })
     );

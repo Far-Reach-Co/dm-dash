@@ -129,7 +129,7 @@ export default class ClocksView {
     } else
       return createElement(
         "button",
-        { style: "align-self: flex-end;" },
+        {class: "new-btn"},
         "+ Clock",
         {
           type: "click",
@@ -144,7 +144,7 @@ export default class ClocksView {
     // append
     this.domComponent.append(
       this.renderAddButtonOrNull(),
-      createElement("h1", { style: "align-self: center;" }, "Clocks"),
+      createElement("hr"),
       createElement(
         "small",
         { style: "align-self: center;" },

@@ -8,8 +8,7 @@ import itemTypeSelect from "../lib/itemTypeSelect.js";
 export default class SingleItemView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.params = props.params;
-    this.item = this.params.item;
+    this.item = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -274,17 +273,13 @@ export default class SingleItemView {
 
     // append
     this.domComponent.append(
-      createElement("a", { class: "back-button" }, "← Items", {
-        type: "click",
-        event: () => this.navigate({ title: "items", sidebar: true }),
-      }),
       createElement("div", { class: "single-item-title-container" }, [
         createElement("div", { class: "single-item-title" }, [
           this.item.title,
           this.renderItemType(),
         ]),
         createElement("img", {
-          src: "../assets/item.svg",
+          src: "/assets/item.svg",
           width: 45,
           height: 45,
         }),
@@ -430,7 +425,7 @@ class CurrentLocationComponent {
             this.navigate({
               title: "single-location",
               sidebar: true,
-              params: { location },
+              params: { content: location },
             }),
         }
       );
@@ -550,7 +545,7 @@ class CurrentCharacterComponent {
             this.navigate({
               title: "single-character",
               sidebar: true,
-              params: { character },
+              params: { content: character },
             }),
         }
       );

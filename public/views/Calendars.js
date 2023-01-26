@@ -601,7 +601,7 @@ export default class CalendarView {
     } else
       return createElement(
         "button",
-        { style: "align-self: flex-end;" },
+        {},
         "+ Calendar",
         {
           type: "click",
@@ -631,8 +631,7 @@ export default class CalendarView {
     // append
     this.domComponent.append(
       this.renderAddButtonOrNull(),
-      createElement("h1", { style: "align-self: center;" }, "Calendars"),
-      createElement("br"),
+      createElement("hr"),
       ...(await this.renderCalendarElems())
     );
   };
