@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import msToTime from "../lib/msToTime.js";
 import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import { deleteThing } from "../lib/apiUtils.js";
 
 export default class Clock {
   constructor(props) {
@@ -93,23 +94,6 @@ export default class Clock {
     );
   };
 
-  removeClock = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_clock/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete clock...");
-    }
-  };
-
   renderEditClock = () => {
     var milliseconds = this.currentTimeInMilliseconds;
     var time = msToTime(milliseconds, false);
@@ -147,7 +131,7 @@ export default class Clock {
     removeButton.addEventListener("click", () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
         try {
-          this.removeClock();
+          deleteThing(`/api/remove_clock/${this.id}`);
           this.domComponent.remove();
           const clocksByProject =
             state.clockComponents[`project-${state.currentProject.id}`];

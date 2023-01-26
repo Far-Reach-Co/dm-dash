@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import { deleteThing } from "../lib/apiUtils.js";
 
 export default class Character {
   constructor(props) {
@@ -29,23 +30,6 @@ export default class Character {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  removeCharacter = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_character/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete character...");
-    }
   };
 
   saveCharacter = async (e) => {
@@ -120,7 +104,7 @@ export default class Character {
         type: "click",
         event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            this.removeCharacter();
+            deleteThing(`/api/remove_character/${this.id}`);
             this.toggleEdit();
             this.domComponent.remove();
           }

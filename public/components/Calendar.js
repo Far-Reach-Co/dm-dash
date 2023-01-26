@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import { deleteThing } from "../lib/apiUtils.js";
 
 export default class Calendar {
   constructor(props) {
@@ -106,23 +107,6 @@ export default class Calendar {
     );
   };
 
-  removeCalendar = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_calendar/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      window.alert("Failed to delete calendar...");
-    }
-  };
-
   newMonth = async () => {
     try {
       const res = await fetch(`${window.location.origin}/api/add_month`, {
@@ -169,40 +153,6 @@ export default class Calendar {
     } catch (err) {
       window.alert("Failed to create new day...");
       console.log(err);
-    }
-  };
-
-  removeMonth = async (monthId) => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_month/${monthId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete month...");
-    }
-  };
-
-  removeDay = async (dayId) => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_day/${dayId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete day...");
     }
   };
 
@@ -337,7 +287,7 @@ export default class Calendar {
           "Remove Day"
         );
         removeDayBtn.addEventListener("click", () => {
-          this.removeDay(day.id);
+          deleteThing(`/api/remove_day/${day.id}`);
           this.daysOfTheWeek.splice(this.daysOfTheWeek.indexOf(day), 1);
           this.render();
         });
@@ -444,7 +394,7 @@ export default class Calendar {
           "Remove Month"
         );
         removeMonthBtn.addEventListener("click", () => {
-          this.removeMonth(month.id);
+          deleteThing(`/api/remove_month/${month.id}`);
           this.months.splice(this.months.indexOf(month), 1);
           this.render();
         });
@@ -595,9 +545,9 @@ export default class Calendar {
       { class: "btn-red" },
       "Remove Calendar"
     );
-    removeButton.addEventListener("click", async () => {
+    removeButton.addEventListener("click", () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        await this.removeCalendar();
+        deleteThing(`/api/remove_calendar/${this.id}`);
         this.toggleEdit();
         this.domComponent.remove();
       }
@@ -640,7 +590,9 @@ export default class Calendar {
       this.render();
     });
 
-    const calendarContainer = createElement("div", {class: "calendar-container"});
+    const calendarContainer = createElement("div", {
+      class: "calendar-container",
+    });
     calendarContainer.style.display = "grid";
     calendarContainer.style.gridTemplateColumns = `repeat(${
       this.daysOfTheWeek.length ? this.daysOfTheWeek.length : 7

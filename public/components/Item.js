@@ -1,3 +1,4 @@
+import { deleteThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
@@ -29,23 +30,6 @@ export default class Item {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  removeItem = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_item/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete item...");
-    }
   };
 
   saveItem = async (e) => {
@@ -120,7 +104,7 @@ export default class Item {
         type: "click",
         event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            this.removeItem();
+            deleteThing(`/api/remove_item/${this.id}`);
             this.toggleEdit();
             this.domComponent.remove();
           }

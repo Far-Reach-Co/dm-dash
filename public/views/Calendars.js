@@ -1,7 +1,7 @@
 import createElement from "../lib/createElement.js";
 import Calendar from "../components/Calendar.js";
 import state from "../lib/state.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, deleteThing } from "../lib/apiUtils.js";
 
 export default class CalendarView {
   constructor(props) {
@@ -52,8 +52,6 @@ export default class CalendarView {
   };
 
   newCalendar = async (e) => {
-    e.preventDefault();
-    if (!state.calendars) return;
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
@@ -72,18 +70,11 @@ export default class CalendarView {
       });
       const data = await res.json();
       if (res.status === 201) {
-        this.loading = false;
-        this.creatingNewCalendar = false;
-        this.creatingNewMonths = true;
-        this.calendarBeingCreated = { title: formProps.title, id: data.id };
-        this.render();
+        return data;
       } else throw new Error();
     } catch (err) {
-      window.alert("Failed to create new calendar...");
       console.log(err);
-      this.creatingNewCalendar = false;
-      this.loading = false;
-      this.render();
+      return null;
     }
   };
 
@@ -108,23 +99,6 @@ export default class CalendarView {
     } catch (err) {
       // window.alert("Failed to create new day...");
       console.log(err);
-    }
-  };
-
-  removeDay = async (dayId) => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_day/${dayId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete day...");
     }
   };
 
@@ -205,7 +179,7 @@ export default class CalendarView {
           "Remove Day"
         );
         removeDayBtn.addEventListener("click", () => {
-          this.removeDay(day.id);
+          deleteThing(`/api/remove_day/${day.id}`);
           this.daysOfTheWeek.splice(this.daysOfTheWeek.indexOf(day), 1);
           this.render();
         });
@@ -275,23 +249,6 @@ export default class CalendarView {
     );
   };
 
-  removeMonth = async (monthId) => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_month/${monthId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete month...");
-    }
-  };
-
   updateMonths = async () => {
     const monthUpdateSuccessList = [];
 
@@ -315,10 +272,10 @@ export default class CalendarView {
           );
           const data = await res.json();
           monthUpdateSuccessList.push(data);
+          if (month.index === 1) this.updateCalendarCurrentMonth(month.id);
         } catch (err) {
           console.log(err);
           // alert("Failed to update month...");
-          if (month.index === 1) this.updateCalendarCurrentMonth(month.id);
         }
       })
     );
@@ -413,7 +370,7 @@ export default class CalendarView {
           "Remove Month"
         );
         removeMonthBtn.addEventListener("click", () => {
-          this.removeMonth(month.id);
+          deleteThing(`/api/remove_month/${month.id}`);
           this.months.splice(this.months.indexOf(month), 1);
           this.render();
         });
@@ -483,7 +440,7 @@ export default class CalendarView {
     );
   };
 
-  renderNewCalendar = () => {
+  renderNewCalendar = async () => {
     if (this.loading) {
       return this.domComponent.append(createElement("div", {}, "Loading..."));
     }
@@ -523,10 +480,18 @@ export default class CalendarView {
         ],
         {
           type: "submit",
-          event: (e) => {
+          event: async (e) => {
+            e.preventDefault();
             this.loading = true;
             this.render();
-            this.newCalendar(e);
+            const newCal = await this.newCalendar(e);
+            this.loading = false;
+            if (newCal) {
+              this.calendarBeingCreated = newCal;
+              this.creatingNewMonths = true;
+            }
+            this.creatingNewCalendar = false;
+            this.render();
           },
         }
       ),
@@ -534,6 +499,7 @@ export default class CalendarView {
       createElement("button", {}, "Cancel", {
         type: "click",
         event: () => {
+          this.loading = false;
           this.creatingNewCalendar = false;
           this.render();
         },
@@ -542,7 +508,9 @@ export default class CalendarView {
   };
 
   renderCalendarElems = async () => {
-    const calendarData = await getThings(`/api/get_calendars/${state.currentProject.id}`);
+    const calendarData = await getThings(
+      `/api/get_calendars/${state.currentProject.id}`
+    );
 
     const calendarElems = [];
     calendarData.forEach((calendar) => {
@@ -576,18 +544,13 @@ export default class CalendarView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        {},
-        "+ Calendar",
-        {
-          type: "click",
-          event: () => {
-            this.creatingNewCalendar = true;
-            this.render();
-          },
-        }
-      );
+      return createElement("button", {}, "+ Calendar", {
+        type: "click",
+        event: () => {
+          this.creatingNewCalendar = true;
+          this.render();
+        },
+      });
   };
 
   render = async () => {

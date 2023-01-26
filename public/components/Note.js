@@ -1,3 +1,4 @@
+import { deleteThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 
 export default class Note {
@@ -23,23 +24,6 @@ export default class Note {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  removeNote = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_note/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete note...");
-    }
   };
 
   saveNote = async (e) => {
@@ -110,7 +94,7 @@ export default class Note {
         type: "click",
         event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            this.removeNote();
+            deleteThing(`/api/remove_note/${this.id}`);
             this.toggleEdit();
             this.domComponent.remove();
           }

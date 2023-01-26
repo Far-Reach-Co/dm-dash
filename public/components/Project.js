@@ -4,7 +4,7 @@ import {
   fallbackCopyTextToClipboard,
   copyTextToClipboard,
 } from "../lib/clipboard.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, deleteThing } from "../lib/apiUtils.js";
 
 export default class Project {
   constructor(props) {
@@ -50,57 +50,6 @@ export default class Project {
         }),
       }
     );
-  };
-
-  removeProject = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_project/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete project...");
-    }
-  };
-
-  removeInvite = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_project_invite/${this.projectInvite.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete project...");
-    }
-  };
-
-  leaveProject = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_project_user/${this.projectUserId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete project...");
-    }
   };
 
   addInviteLink = async () => {
@@ -154,7 +103,9 @@ export default class Project {
   };
 
   renderProjectUsersList = async () => {
-    const projectUsers = await getThings(`/api/get_project_users_by_project/${this.id}`);
+    const projectUsers = await getThings(
+      `/api/get_project_users_by_project/${this.id}`
+    );
     const map = projectUsers.map((user) => {
       if (user.is_editor === undefined) user.is_editor = false;
       const checkbox = createElement("input", { type: "checkbox" }, null, {
@@ -243,7 +194,7 @@ export default class Project {
         if (
           window.confirm(`Are you sure you want to delete the invite link?`)
         ) {
-          this.removeInvite();
+          deleteThing(`/api/remove_project_invite/${this.projectInvite.id}`);
           this.projectInvite = null;
           this.render();
         }
@@ -261,7 +212,7 @@ export default class Project {
   };
 
   renderEditProject = async () => {
-    if(this.loadingProjectInvite) {
+    if (this.loadingProjectInvite) {
       return this.domComponent.append(createElement("div", {}, "Loading..."));
     }
 
@@ -296,11 +247,11 @@ export default class Project {
         )
       ) {
         if (!this.wasJoined) {
-          this.removeProject();
+          deleteThing(`/api/remove_project/${this.id}`);
           this.toggleEdit();
           this.domComponent.remove();
         } else {
-          await this.leaveProject();
+          await deleteThing(`/api/remove_project_user/${this.projectUserId}`);
           this.parentRender();
         }
       }

@@ -1,3 +1,4 @@
+import { deleteThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import listItemTitle from "../lib/listItemTitle.js";
 
@@ -21,23 +22,6 @@ export default class Counter {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  removeCounter = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_counter/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete counter...");
-    }
   };
 
   saveCounter = async (e) => {
@@ -104,7 +88,7 @@ export default class Counter {
         type: "click",
         event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            this.removeCounter();
+            deleteThing(`/api/remove_counter/${this.id}`);
             this.toggleEdit();
             this.domComponent.remove();
           }
