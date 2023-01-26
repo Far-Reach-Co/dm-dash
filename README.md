@@ -1,3 +1,3 @@
-# Wyrld Byldyr
+# Wyrld Byldr
 
 Tools for Byldyng Wyrlds
