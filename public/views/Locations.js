@@ -4,6 +4,7 @@ import Location from "../components/Location.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import { uploadImage } from "../lib/imageUtils.js";
 import { getThings } from "../lib/apiUtils.js";
+import searchElement from "../lib/searchElement.js";
 
 export default class LocationsView {
   constructor(props) {
@@ -243,19 +244,7 @@ export default class LocationsView {
               ]
             ),
             createElement("br"),
-            createElement(
-              "input",
-              { placeholder: "Search Locations", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  this.offset = 0;
-                  (this.searchTerm = e.target.value.toLowerCase()),
-                    this.render();
-                },
-              }
-            ),
+            searchElement("Search Locations", this)
           ]),
         ]
       ),

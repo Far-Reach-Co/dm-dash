@@ -3,6 +3,7 @@ import state from "../lib/state.js";
 import Item from "../components/Item.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings } from "../lib/apiUtils.js";
+import searchElement from "../lib/searchElement.js";
 
 export default class ItemsView {
   constructor(props) {
@@ -199,18 +200,7 @@ export default class ItemsView {
                 itemTypeSelect(this.handleTypeFilterChange, this.filter),
               ]
             ),
-            createElement(
-              "input",
-              { placeholder: "Search Items", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  (this.searchTerm = e.target.value.toLowerCase()),
-                    this.render();
-                },
-              }
-            ),
+            searchElement("Search Items", this)
           ]),
         ]
       ),

@@ -3,6 +3,7 @@ import state from "../lib/state.js";
 import Character from "../components/Character.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import { getThings } from "../lib/apiUtils.js";
+import searchElement from "../lib/searchElement.js";
 
 export default class CharactersView {
   constructor(props) {
@@ -198,19 +199,7 @@ export default class CharactersView {
               ]
             ),
             createElement("br"),
-            createElement(
-              "input",
-              { placeholder: "Search Characters", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  this.offset = 0;
-                  (this.searchTerm = e.target.value.toLowerCase()),
-                    this.render();
-                },
-              }
-            ),
+            searchElement("Search Characters", this)
           ]),
         ]
       ),

@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import Note from "../components/Note.js";
 import state from "../lib/state.js";
 import { getThings } from "../lib/apiUtils.js";
+import searchElement from "../lib/searchElement.js";
 
 export default class NotesView {
   constructor(props) {
@@ -146,22 +147,7 @@ export default class NotesView {
           type: "click",
           event: this.toggleCreatingNote,
         }),
-        createElement(
-          "input",
-          {
-            placeholder: "Search Notes",
-            value: this.searchTerm,
-          },
-          null,
-          {
-            type: "change",
-            event: (e) => {
-              this.offset = 0;
-              this.searchTerm = e.target.value.toLowerCase();
-              this.render();
-            },
-          }
-        ),
+        searchElement("Search Notes", this)
       ]),
       createElement("hr"),
       ...(await this.renderNoteElems()),
