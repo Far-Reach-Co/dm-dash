@@ -42,7 +42,6 @@ class App {
     // SIDEBAR
     const sidebar = new Sidebar({
       domComponent: sidebarElem,
-      navigate: navigate.navigate,
     });
     this.sidebar = sidebar;
   };
