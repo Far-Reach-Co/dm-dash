@@ -1,4 +1,5 @@
 import Clock from "../components/Clock.js";
+import { getThings } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 
@@ -8,27 +9,6 @@ export default class ClocksView {
     this.domComponent.className = "standard-view";
     this.render();
   }
-
-  getClocks = async () => {
-    var projectId = state.currentProject.id;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_clocks/${projectId}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        state.clocks = data;
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   getClockElements = async () => {
     // ******** CLOCKS
@@ -54,7 +34,9 @@ export default class ClocksView {
         clockElements.push(clockComponentDomElement);
       });
     } else {
-      clockData = await this.getClocks();
+      var projectId = state.currentProject.id;
+      const clockData = await getThings(`/api/get_clocks/${projectId}`);
+      if (clockData) state.clocks = clockData;
       // render
       state.clockComponents[`project-${state.currentProject.id}`] = [];
       clockData.forEach((clock) => {
@@ -127,15 +109,10 @@ export default class ClocksView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        {class: "new-btn"},
-        "+ Clock",
-        {
-          type: "click",
-          event: this.newClock,
-        }
-      );
+      return createElement("button", { class: "new-btn" }, "+ Clock", {
+        type: "click",
+        event: this.newClock,
+      });
   };
 
   render = async () => {

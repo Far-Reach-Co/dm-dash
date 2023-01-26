@@ -3,6 +3,7 @@ import state from "../lib/state.js";
 import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -102,28 +103,11 @@ export default class SingleCharacterView {
     );
   };
 
-  getNotesByCharacter = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_character/${this.character.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderCharacterNotes = async () => {
-    let notesByCharacter = await this.getNotesByCharacter();
+    let notesByCharacter = await getThings(
+      `/api/get_notes_by_character/${this.character.id}`
+    );
+    if (!notesByCharacter) notesByCharacter = [];
     return notesByCharacter.map((note) => {
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
@@ -158,28 +142,11 @@ export default class SingleCharacterView {
     } else return createElement("div", { style: "display: none;" });
   };
 
-  getItemsByCharacter = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_items_by_character/${this.character.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderItems = async () => {
-    let itemsByCharacter = await this.getItemsByCharacter();
+    let itemsByCharacter = await getThings(
+      `/api/get_items_by_character/${this.character.id}`
+    );
+    if (!itemsByCharacter) itemsByCharacter = [];
 
     const elemMap = itemsByCharacter.map((item) => {
       const elem = createElement(
@@ -205,7 +172,9 @@ export default class SingleCharacterView {
 
     if (elemMap.length) return elemMap;
     else
-      return [createElement("div", { style: "margin-left: 5px;" }, "None...")];
+      return [
+        createElement("small", { style: "margin-left: 5px;" }, "None..."),
+      ];
   };
 
   saveCharacter = async (e) => {
@@ -423,29 +392,13 @@ class CurrentLocationComponent {
     });
   };
 
-  getLocation = async () => {
-    if (!this.character.location_id) return null;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.character.location_id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  };
-
   renderCurrentLocation = async () => {
-    const location = await this.getLocation();
+    let location = null;
+    if (this.character.location_id) {
+      location = await getThings(
+        `/api/get_location/${this.character.location_id}`
+      );
+    }
 
     if (this.editingCurrentLocation) {
       return createElement(

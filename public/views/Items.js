@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Item from "../components/Item.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class ItemsView {
   constructor(props) {
@@ -32,37 +33,25 @@ export default class ItemsView {
   };
 
   getItems = async () => {
-    let url = `${window.location.origin}/api/get_items/${state.currentProject.id}/${this.limit}/${this.offset}`;
+    let url = `/api/get_items/${state.currentProject.id}/${this.limit}/${this.offset}`;
     if (
       !this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_items_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
+      url = `/api/get_items_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (
       this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_items_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+      url = `/api/get_items_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
-      url = `${window.location.origin}/api/get_items_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
+      url = `/api/get_items_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
-    try {
-      const res = await fetch(url, {
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+    return await getThings(url);
   };
 
   newItem = async (e) => {
@@ -179,15 +168,10 @@ export default class ItemsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        {class: "new-btn"},
-        "+ Item",
-        {
-          type: "click",
-          event: this.toggleCreatingItem,
-        }
-      );
+      return createElement("button", { class: "new-btn" }, "+ Item", {
+        type: "click",
+        event: this.toggleCreatingItem,
+      });
   };
 
   render = async () => {
@@ -202,11 +186,11 @@ export default class ItemsView {
       createElement(
         "div",
         {
-          class: "view-options-container"
+          class: "view-options-container",
         },
         [
           this.renderAddButtonOrNull(),
-          createElement("div", {class: "view-filter-options-container"}, [
+          createElement("div", { class: "view-filter-options-container" }, [
             createElement(
               "div",
               { style: "display: flex; flex-direction: column;" },
@@ -227,7 +211,7 @@ export default class ItemsView {
                 },
               }
             ),
-          ])
+          ]),
         ]
       ),
       createElement("hr"),

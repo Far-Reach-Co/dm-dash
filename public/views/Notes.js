@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import Note from "../components/Note.js";
 import state from "../lib/state.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class NotesView {
   constructor(props) {
@@ -26,28 +27,6 @@ export default class NotesView {
     this.resetFilters();
     this.creatingNewNote = !this.creatingNewNote;
     this.render();
-  };
-
-  getNotes = async () => {
-    const projectId = state.currentProject.id;
-
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_notes/${projectId}/${this.limit}/${this.offset}/${this.searchTerm}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        state.notes = data;
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   newNote = async (e) => {
@@ -119,7 +98,11 @@ export default class NotesView {
   };
 
   renderNoteElems = async () => {
-    let noteData = await this.getNotes();
+    const projectId = state.currentProject.id;
+    const noteData = await getThings(
+      `/api/get_notes/${projectId}/${this.limit}/${this.offset}/${this.searchTerm}`
+    );
+    if (noteData) state.notes = noteData;
 
     const noteMap = noteData.map((note) => {
       // create element
@@ -158,37 +141,28 @@ export default class NotesView {
 
     // append
     this.domComponent.append(
-      createElement(
-        "div",
-        {class: "view-options-container"},
-        [
-          createElement(
-            "button",
-            {class: "new-btn"},
-            "+ Note",
-            {
-              type: "click",
-              event: this.toggleCreatingNote,
-            }
-          ),
-          createElement(
-            "input",
-            {
-              placeholder: "Search Notes",
-              value: this.searchTerm,
+      createElement("div", { class: "view-options-container" }, [
+        createElement("button", { class: "new-btn" }, "+ Note", {
+          type: "click",
+          event: this.toggleCreatingNote,
+        }),
+        createElement(
+          "input",
+          {
+            placeholder: "Search Notes",
+            value: this.searchTerm,
+          },
+          null,
+          {
+            type: "change",
+            event: (e) => {
+              this.offset = 0;
+              this.searchTerm = e.target.value.toLowerCase();
+              this.render();
             },
-            null,
-            {
-              type: "change",
-              event: (e) => {
-                this.offset = 0;
-                this.searchTerm = e.target.value.toLowerCase();
-                this.render();
-              },
-            }
-          ),
-        ]
-      ),
+          }
+        ),
+      ]),
       createElement("hr"),
       ...(await this.renderNoteElems()),
       createElement("a", { style: "align-self: center;" }, "More", {

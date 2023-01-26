@@ -1,4 +1,5 @@
 import createElement from "../lib/createElement.js";
+import { getThings } from "./apiUtils.js";
 import state from "./state.js";
 
 export default async function locationSelect(
@@ -6,27 +7,10 @@ export default async function locationSelect(
   locationToSkip,
   onChangeCallback
 ) {
-  async function getLocations() {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_locations/${state.currentProject.id}/100/0`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
   async function renderLocationSelectOptions() {
-    let locations = await getLocations();
+    let locations = await getThings(
+      `/api/get_locations/${state.currentProject.id}/100/0`
+    );
 
     const locationElemsList = [];
 

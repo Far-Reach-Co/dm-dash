@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import Calendar from "../components/Calendar.js";
 import state from "../lib/state.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class CalendarView {
   constructor(props) {
@@ -28,28 +29,6 @@ export default class CalendarView {
     this.calendarBeingCreated = null;
     this.monthsCreated = [];
     this.daysCreated = [];
-  };
-
-  getCalendars = async () => {
-    const projectId = state.currentProject.id;
-
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_calendars/${projectId}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        state.calendars = data;
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
   };
 
   updateCalendarCurrentMonth = async (monthId) => {
@@ -174,7 +153,6 @@ export default class CalendarView {
         } catch (err) {
           console.log(err);
           // alert("Failed to update day...");
-          this.parentComponentRender();
         }
       })
     );
@@ -341,7 +319,6 @@ export default class CalendarView {
           console.log(err);
           // alert("Failed to update month...");
           if (month.index === 1) this.updateCalendarCurrentMonth(month.id);
-          this.parentComponentRender();
         }
       })
     );
@@ -565,7 +542,7 @@ export default class CalendarView {
   };
 
   renderCalendarElems = async () => {
-    const calendarData = await this.getCalendars();
+    const calendarData = await getThings(`/api/get_calendars/${state.currentProject.id}`);
 
     const calendarElems = [];
     calendarData.forEach((calendar) => {

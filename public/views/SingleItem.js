@@ -4,6 +4,7 @@ import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -103,28 +104,10 @@ export default class SingleItemView {
     );
   };
 
-  getNotesByItem = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_item/${this.item.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderItemNotes = async () => {
-    let notesByItem = await this.getNotesByItem();
+    let notesByItem = await getThings(`/api/get_notes_by_item/${this.item.id}`);
+    if (!notesByItem) notesByItem = [];
+
     return notesByItem.map((note) => {
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
@@ -376,29 +359,11 @@ class CurrentLocationComponent {
     });
   };
 
-  getLocation = async () => {
-    if (!this.item.location_id) return null;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.item.location_id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  };
-
   renderCurrentLocation = async () => {
-    const location = await this.getLocation();
+    let location = null;
+    if (this.item.location_id) {
+      location = await getThings(`/api/get_location/${this.item.location_id}`);
+    }
 
     if (this.editingCurrentLocation) {
       return createElement(
@@ -496,29 +461,13 @@ class CurrentCharacterComponent {
     });
   };
 
-  getCharacter = async () => {
-    if (!this.item.character_id) return null;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_character/${this.item.character_id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  };
-
   renderCurrentCharacter = async () => {
-    const character = await this.getCharacter();
+    let character = null;
+    if (this.item.character_id) {
+      character = await getThings(
+        `/api/get_character/${this.item.character_id}`
+      );
+    }
 
     if (this.editingCurrentCharacter) {
       return createElement(

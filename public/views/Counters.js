@@ -1,4 +1,5 @@
 import Counter from "../components/Counter.js";
+import { getThings } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 
@@ -8,26 +9,6 @@ export default class CountersView {
     this.domComponent.className = "standard-view";
     this.render();
   }
-
-  getCounters = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_counters/${state.currentProject.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        state.counters = data;
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   newCounter = async () => {
     if (!state.counters) return;
@@ -56,7 +37,10 @@ export default class CountersView {
   };
 
   renderCounterElems = async () => {
-    const counterData = await this.getCounters();
+    const counterData = await getThings(
+      `/api/get_counters/${state.currentProject.id}`
+    );
+    if (counterData) state.counters = counterData;
     const map = counterData.map((counter) => {
       // create element
       const elem = createElement("div", {
@@ -84,7 +68,7 @@ export default class CountersView {
 
     // append
     this.domComponent.append(
-      createElement("button", {class: "new-btn"}, "+ Counter", {
+      createElement("button", { class: "new-btn" }, "+ Counter", {
         type: "click",
         event: this.newCounter,
       }),

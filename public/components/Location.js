@@ -5,6 +5,7 @@ import {
 } from "../lib/imageUtils.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import state from "../lib/state.js";
 
 export default class Location {
   constructor(props) {

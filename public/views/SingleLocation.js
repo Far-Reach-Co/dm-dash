@@ -8,6 +8,7 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -48,47 +49,6 @@ export default class SingleLocationView {
   toggleUploadingImage = () => {
     this.uploadingImage = true;
     this.render();
-  };
-
-  getParentLocation = async () => {
-    if (!this.location.parent_location_id) return null;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.location.parent_location_id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  };
-
-  getSubLocations = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_sublocations/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
   };
 
   saveLocationForParent = async (e) => {
@@ -302,28 +262,12 @@ export default class SingleLocationView {
     );
   };
 
-  getNotesByLocation = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_location/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderLocationNotes = async () => {
-    let notesByLocation = await this.getNotesByLocation();
+    let notesByLocation = await getThings(
+      `/api/get_notes_by_location/${this.location.id}`
+    );
+    if (!notesByLocation) notesByLocation = [];
+
     return notesByLocation.map((note) => {
       const elem = createElement("div", {
         id: `note-component-${note.id}`,
@@ -348,28 +292,11 @@ export default class SingleLocationView {
     });
   };
 
-  getCharactersByLocation = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_characters_by_location/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderSubLocations = async () => {
-    const subLocations = await this.getSubLocations();
+    let subLocations = await getThings(
+      `/api/get_sublocations/${this.location.id}`
+    );
+    if (!subLocations) subLocations = [];
 
     const subLocationsMap = subLocations.map((location) => {
       const elem = createElement(
@@ -398,7 +325,10 @@ export default class SingleLocationView {
   };
 
   renderCharacters = async () => {
-    let charactersByLocation = await this.getCharactersByLocation();
+    let charactersByLocation = await getThings(
+      `/api/get_characters_by_location/${this.location.id}`
+    );
+    if (!charactersByLocation) charactersByLocation = [];
 
     const elemMap = charactersByLocation.map((character) => {
       const elem = createElement(
@@ -426,28 +356,11 @@ export default class SingleLocationView {
     else return [createElement("small", {}, "None...")];
   };
 
-  getItemsByLocation = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_items_by_location/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderItems = async () => {
-    let itemsByLocation = await this.getItemsByLocation();
+    let itemsByLocation = await getThings(
+      `/api/get_items_by_location/${this.location.id}`
+    );
+    if (!itemsByLocation) itemsByLocation = [];
 
     const elemMap = itemsByLocation.map((item) => {
       const elem = createElement(
@@ -476,7 +389,13 @@ export default class SingleLocationView {
   };
 
   renderParentLocation = async () => {
-    const parentLocation = await this.getParentLocation();
+    let parentLocation = null;
+    if (this.location.parent_location_id) {
+      parentLocation = await getThings(
+        `/api/get_location/${this.location.parent_location_id}`
+      );
+    }
+    
     if (parentLocation) {
       return createElement(
         "a",

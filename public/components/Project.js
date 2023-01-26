@@ -4,6 +4,7 @@ import {
   fallbackCopyTextToClipboard,
   copyTextToClipboard,
 } from "../lib/clipboard.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class Project {
   constructor(props) {
@@ -152,27 +153,8 @@ export default class Project {
     }
   };
 
-  getProjectUsers = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_project_users_by_project/${this.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   renderProjectUsersList = async () => {
-    const projectUsers = await this.getProjectUsers();
+    const projectUsers = await getThings(`/api/get_project_users_by_project/${this.id}`);
     const map = projectUsers.map((user) => {
       if (user.is_editor === undefined) user.is_editor = false;
       const checkbox = createElement("input", { type: "checkbox" }, null, {

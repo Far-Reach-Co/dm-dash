@@ -3,6 +3,7 @@ import state from "../lib/state.js";
 import Location from "../components/Location.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import { uploadImage } from "../lib/imageUtils.js";
+import { getThings } from "../lib/apiUtils.js";
 
 export default class LocationsView {
   constructor(props) {
@@ -39,37 +40,25 @@ export default class LocationsView {
   };
 
   getLocations = async () => {
-    let url = `${window.location.origin}/api/get_locations/${state.currentProject.id}/${this.limit}/${this.offset}`;
+    let url = `/api/get_locations/${state.currentProject.id}/${this.limit}/${this.offset}`;
     if (
       !this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_locations_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
+      url = `/api/get_locations_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (
       this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_locations_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+      url = `/api/get_locations_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
-      url = `${window.location.origin}/api/get_locations_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
+      url = `/api/get_locations_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
-    try {
-      const res = await fetch(url, {
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+    return await getThings(url);
   };
 
   newLocation = async (e) => {
@@ -222,7 +211,7 @@ export default class LocationsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", {class: "new-btn"}, "+ Location", {
+      return createElement("button", { class: "new-btn" }, "+ Location", {
         type: "click",
         event: this.toggleCreatingLocation,
       });
@@ -244,7 +233,7 @@ export default class LocationsView {
         },
         [
           this.renderAddButtonOrNull(),
-          createElement("div", {class: "view-filter-options-container"}, [
+          createElement("div", { class: "view-filter-options-container" }, [
             createElement(
               "div",
               { style: "display: flex; flex-direction: column;" },

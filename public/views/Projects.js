@@ -1,4 +1,5 @@
 import Project from "../components/Project.js";
+import { getThings } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 
@@ -10,29 +11,15 @@ export default class ProjectsView {
     this.render();
   }
 
-  getProjects = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_projects`, {
-          headers: { "x-access-token": `Bearer ${localStorage.getItem("token")}` }
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        state.projects = data;
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   newProject = async () => {
     if (!state.projects) return;
     try {
       const res = await fetch(`${window.location.origin}/api/add_project`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-access-token": `Bearer ${localStorage.getItem("token")}` },
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           title: `My Project ${state.projects.length + 1}`,
         }),
@@ -48,7 +35,9 @@ export default class ProjectsView {
   };
 
   renderProjectsElems = async () => {
-    const projectData = await this.getProjects();
+    const projectData = await getThings("/api/get_projects");
+    if (projectData) state.projects = projectData;
+
     const map = projectData.map((project) => {
       // create element
       const elem = createElement("div", {
@@ -86,12 +75,12 @@ export default class ProjectsView {
       //   "Choose your project"
       //   ),
       //   createElement("hr", { class: "special-hr" }),
-        createElement("button", {class: "new-btn"}, "+ Project", {
-          type: "click",
-          event: this.newProject,
-        }),
-        createElement("hr"),
-      ...(await this.renderProjectsElems()),
+      createElement("button", { class: "new-btn" }, "+ Project", {
+        type: "click",
+        event: this.newProject,
+      }),
+      createElement("hr"),
+      ...(await this.renderProjectsElems())
     );
   };
 }
