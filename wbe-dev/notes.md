@@ -1,4 +1,4 @@
-# Wyrld Byldyr Engyne
+# Wyrld Byldr Engyne
 
 *** THESE ARE EARLY DRAFT NOTES AND ARE PLANNED TO CHANGE SOON *** A model database is being constructed that will improve clarity ***
 
