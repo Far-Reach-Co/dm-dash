@@ -1,6 +1,5 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import {
@@ -9,7 +8,10 @@ import {
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
 import { getThings } from "../lib/apiUtils.js";
-import { renderNoteComponent } from "../lib/singleThingNoteComponents.js";
+import {
+  renderCreateNewNotes,
+  renderNoteComponent,
+} from "../lib/singleThingNoteComponents.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -215,52 +217,6 @@ export default class SingleLocationView {
       window.alert("Failed to create new note...");
       console.log(err);
     }
-  };
-
-  renderCreateNewNote = async () => {
-    this.domComponent.append(
-      createElement(
-        "div",
-        { class: "component-title" },
-        `Create new note for ${this.location.title}`
-      ),
-      createElement(
-        "form",
-        {},
-        [
-          createElement("label", { for: "title" }, "Title"),
-          createElement("br"),
-          createElement("input", {
-            id: "title",
-            name: "title",
-            placeholder: "Title",
-            required: true,
-          }),
-          createElement("label", { for: "description" }, "Description"),
-          createElement("textarea", {
-            id: "description",
-            name: "description",
-            required: true,
-            cols: "30",
-            rows: "7",
-          }),
-          createElement("br"),
-          createElement("button", { type: "submit" }, "Create"),
-        ],
-        {
-          type: "submit",
-          event: async (e) => {
-            await this.newNote(e);
-            this.toggleCreatingNote();
-          },
-        }
-      ),
-      createElement("br"),
-      createElement("button", {}, "Cancel", {
-        type: "click",
-        event: this.toggleCreatingNote,
-      })
-    );
   };
 
   renderSubLocations = async () => {
@@ -573,7 +529,13 @@ export default class SingleLocationView {
     }
 
     if (this.creatingNote) {
-      return this.renderCreateNewNote();
+      return this.domComponent.append(
+        ...(await renderCreateNewNotes(
+          this.location.title,
+          this.toggleCreatingNote,
+          this.newNote
+        ))
+      );
     }
 
     if (this.creatingSubLocation) {

@@ -2,6 +2,52 @@ import createElement from "./createElement.js";
 import Note from "../components/Note.js";
 import { getThings } from "./apiUtils.js";
 
+async function renderCreateNewNotes(title, toggle, newNote) {
+  return [
+    createElement(
+      "div",
+      { class: "component-title" },
+      `Create new note for ${title}`
+    ),
+    createElement(
+      "form",
+      {},
+      [
+        createElement("label", { for: "title" }, "Title"),
+        createElement("br"),
+        createElement("input", {
+          id: "title",
+          name: "title",
+          placeholder: "Title",
+          required: true,
+        }),
+        createElement("label", { for: "description" }, "Description"),
+        createElement("textarea", {
+          id: "description",
+          name: "description",
+          required: true,
+          cols: "30",
+          rows: "7",
+        }),
+        createElement("br"),
+        createElement("button", { type: "submit" }, "Create"),
+      ],
+      {
+        type: "submit",
+        event: async (e) => {
+          await newNote(e);
+          toggle();
+        },
+      }
+    ),
+    createElement("br"),
+    createElement("button", {}, "Cancel", {
+      type: "click",
+      event: toggle,
+    }),
+  ];
+}
+
 async function renderNotes(endpoint, render, navigate) {
   let notesList = await getThings(endpoint);
   if (!notesList) notesList = [];
@@ -53,4 +99,4 @@ async function renderNoteComponent(
   ];
 }
 
-export { renderNoteComponent };
+export { renderNoteComponent, renderCreateNewNotes };
