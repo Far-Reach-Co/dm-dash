@@ -39,6 +39,7 @@ export default class ProjectsView {
     if (projectData) state.projects = projectData;
 
     const map = projectData.map((project) => {
+      console.log(project)
       // create element
       const elem = createElement("div", {
         id: `project-component-${project.id}`,

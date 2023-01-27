@@ -375,7 +375,6 @@ footer {
 }
 
 .project-btn-container {
-  align-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -408,6 +407,12 @@ footer {
 }
 
 .project-edit-container {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 500px;
+  max-width: 100%;
+  height: fit-content;
   border: 1px solid var(--main-gray);
   padding: 10px;
 }

@@ -121,9 +121,9 @@ export default class Project {
 
       const elem = createElement(
         "div",
-        { style: "display: flex; align-items: center;" },
+        { style: "display: flex; justify-content: space-between;"},
         [
-          createElement("div", { style: "margin-right: 50px;" }, user.email),
+          createElement("div", {}, user.email),
           createElement("label", { class: "switch" }, [
             checkbox,
             createElement("span", { class: "slider round" }),
@@ -157,6 +157,7 @@ export default class Project {
   };
 
   renderInviteLinkComponent = () => {
+    console.log(this.projectInvite)
     if (!this.projectInvite) {
       return [
         createElement("hr"),
@@ -206,6 +207,7 @@ export default class Project {
         createElement("br"),
         createElement("div", {}, inviteLink),
         inviteLinkButton,
+        createElement("br"),
         removeInviteButton,
       ];
     }
@@ -260,14 +262,10 @@ export default class Project {
     if (this.isEditor === false) {
       return this.domComponent.append(
         createElement("div", { class: "project-edit-container" }, [
-          createElement("h2", {}, `Manage ${this.title}`),
+          createElement("h2", {}, `Edit Project: "${this.title}"`),
+          doneButton,
           createElement("br"),
           removeButton,
-          createElement("hr"),
-          createElement("button", {}, "Cancel", {
-            type: "click",
-            event: this.toggleEdit,
-          }),
         ])
       );
     }
@@ -275,22 +273,18 @@ export default class Project {
     // append
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h2", {}, `Manage ${this.title}`),
+        createElement("h2", {}, `Edit Project: "${this.title}"`),
         createElement("br"),
-        createElement("div", {}, [
-          createElement("div", {}, "Title"),
+        createElement("div", { style: "display: flex; align-items: center;" }, [
+          createElement("div", { style: "margin-right: 10px" }, "Title"),
           titleInput,
         ]),
-        createElement("br"),
-        doneButton,
-        removeButton,
         ...this.renderInviteLinkComponent(),
         createElement("hr"),
         ...(await this.renderManageUsersComponent()),
-        createElement("button", {}, "Cancel", {
-          type: "click",
-          event: this.toggleEdit,
-        }),
+        doneButton,
+        createElement("br"),
+        removeButton,
       ])
     );
   };
