@@ -5,6 +5,7 @@ import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings } from "../lib/apiUtils.js";
+import { renderNoteComponent } from "../lib/singleThingNoteComponents.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -102,34 +103,6 @@ export default class SingleItemView {
         event: this.toggleCreatingNote,
       })
     );
-  };
-
-  renderItemNotes = async () => {
-    let notesByItem = await getThings(`/api/get_notes_by_item/${this.item.id}`);
-    if (!notesByItem) notesByItem = [];
-
-    return notesByItem.map((note) => {
-      const elem = createElement("div", {
-        id: `note-component-${note.id}`,
-        class: "sub-view-component",
-      });
-
-      new Note({
-        domComponent: elem,
-        parentRender: this.render,
-        id: note.id,
-        projectId: note.project_id,
-        title: note.title,
-        description: note.description,
-        dateCreated: note.date_created,
-        locationId: note.location_id,
-        characterId: note.character_id,
-        itemId: note.item_id,
-        navigate: this.navigate,
-      });
-
-      return elem;
-    });
   };
 
   renderItemType = () => {
@@ -291,19 +264,12 @@ export default class SingleItemView {
       ]),
       createElement("br"),
       createElement("br"),
-      createElement("div", { class: "single-item-subheading" }, [
-        "Notes:",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
-          type: "click",
-          event: () => {
-            this.toggleCreatingNote();
-          },
-        }),
-      ]),
-      createElement("div", { class: "sub-view" }, [
-        ...(await this.renderItemNotes()),
-      ]),
-      createElement("br")
+      ...(await renderNoteComponent(
+        this.toggleCreatingNote,
+        `/api/get_notes_by_item/${this.item.id}`,
+        this.render,
+        this.navigate
+      ))
     );
   };
 }

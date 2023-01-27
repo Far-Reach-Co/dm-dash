@@ -4,6 +4,7 @@ import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import { getThings } from "../lib/apiUtils.js";
+import { renderNoteComponent } from "../lib/singleThingNoteComponents.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -101,35 +102,6 @@ export default class SingleCharacterView {
         event: this.toggleCreatingNote,
       })
     );
-  };
-
-  renderCharacterNotes = async () => {
-    let notesByCharacter = await getThings(
-      `/api/get_notes_by_character/${this.character.id}`
-    );
-    if (!notesByCharacter) notesByCharacter = [];
-    return notesByCharacter.map((note) => {
-      const elem = createElement("div", {
-        id: `note-component-${note.id}`,
-        class: "sub-view-component",
-      });
-
-      new Note({
-        domComponent: elem,
-        parentRender: this.render,
-        id: note.id,
-        projectId: note.project_id,
-        title: note.title,
-        description: note.description,
-        dateCreated: note.date_created,
-        locationId: note.location_id,
-        characterId: note.character_id,
-        itemId: note.item_id,
-        navigate: this.navigate,
-      });
-
-      return elem;
-    });
   };
 
   renderCharacterType = () => {
@@ -324,19 +296,12 @@ export default class SingleCharacterView {
       ]),
       createElement("br"),
       createElement("br"),
-      createElement("div", { class: "single-item-subheading" }, [
-        "Notes:",
-        createElement("button", {}, "+ Note", {
-          type: "click",
-          event: () => {
-            this.toggleCreatingNote();
-          },
-        }),
-      ]),
-      createElement("div", { class: "sub-view" }, [
-        ...(await this.renderCharacterNotes()),
-      ]),
-      createElement("br")
+      ...(await renderNoteComponent(
+        this.toggleCreatingNote,
+        `/api/get_notes_by_character/${this.character.id}`,
+        this.render,
+        this.navigate
+      ))
     );
   };
 }

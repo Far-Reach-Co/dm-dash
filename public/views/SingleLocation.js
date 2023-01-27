@@ -9,6 +9,7 @@ import {
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
 import { getThings } from "../lib/apiUtils.js";
+import { renderNoteComponent } from "../lib/singleThingNoteComponents.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -262,36 +263,6 @@ export default class SingleLocationView {
     );
   };
 
-  renderLocationNotes = async () => {
-    let notesByLocation = await getThings(
-      `/api/get_notes_by_location/${this.location.id}`
-    );
-    if (!notesByLocation) notesByLocation = [];
-
-    return notesByLocation.map((note) => {
-      const elem = createElement("div", {
-        id: `note-component-${note.id}`,
-        class: "sub-view-component",
-      });
-
-      new Note({
-        domComponent: elem,
-        parentRender: this.render,
-        id: note.id,
-        projectId: note.project_id,
-        title: note.title,
-        description: note.description,
-        dateCreated: note.date_created,
-        locationId: note.location_id,
-        characterId: note.character_id,
-        itemId: note.item_id,
-        navigate: this.navigate,
-      });
-
-      return elem;
-    });
-  };
-
   renderSubLocations = async () => {
     let subLocations = await getThings(
       `/api/get_sublocations/${this.location.id}`
@@ -395,7 +366,7 @@ export default class SingleLocationView {
         `/api/get_location/${this.location.parent_location_id}`
       );
     }
-    
+
     if (parentLocation) {
       return createElement(
         "a",
@@ -670,22 +641,15 @@ export default class SingleLocationView {
         ]),
       ]),
       createElement("br"),
-      createElement("br"),
       await this.renderImage(),
       createElement("br"),
-      createElement("div", { class: "single-item-subheading" }, [
-        "Notes",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
-          type: "click",
-          event: () => {
-            this.toggleCreatingNote();
-          },
-        }),
-      ]),
-      createElement("div", { class: "sub-view" }, [
-        ...(await this.renderLocationNotes()),
-      ]),
-      createElement("br")
+      createElement("br"),
+      ...(await renderNoteComponent(
+        this.toggleCreatingNote,
+        `/api/get_notes_by_location/${this.location.id}`,
+        this.render,
+        this.navigate
+      ))
     );
   };
 }
