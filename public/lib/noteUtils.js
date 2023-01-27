@@ -2,12 +2,12 @@ import createElement from "./createElement.js";
 import Note from "../components/Note.js";
 import { getThings } from "./apiUtils.js";
 
-async function renderCreateNewNotes(title, toggle, newNote) {
+async function renderCreateNewNote(title, toggle, newNote) {
   return [
     createElement(
       "div",
       { class: "component-title" },
-      `Create new note for ${title}`
+      `Create new note${title ? ` for ${title}` : ""}`
     ),
     createElement(
       "form",
@@ -99,4 +99,4 @@ async function renderNoteComponent(
   ];
 }
 
-export { renderNoteComponent, renderCreateNewNotes };
+export { renderNoteComponent, renderCreateNewNote };

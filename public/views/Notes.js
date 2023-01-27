@@ -3,6 +3,7 @@ import Note from "../components/Note.js";
 import state from "../lib/state.js";
 import { getThings } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
+import { renderCreateNewNote } from "../lib/noteUtils.js";
 
 export default class NotesView {
   constructor(props) {
@@ -57,47 +58,6 @@ export default class NotesView {
     }
   };
 
-  renderCreateNewNote = async () => {
-    this.domComponent.append(
-      createElement("div", { class: "component-title" }, "Create new note"),
-      createElement(
-        "form",
-        {},
-        [
-          createElement("label", { for: "title" }, "Title"),
-          createElement("input", {
-            id: "title",
-            name: "title",
-            placeholder: "Title",
-            required: true,
-          }),
-          createElement("label", { for: "description" }, "Description"),
-          createElement("textarea", {
-            id: "description",
-            name: "description",
-            required: true,
-            cols: "30",
-            rows: "7",
-          }),
-          createElement("br"),
-          createElement("button", { type: "submit" }, "Create"),
-        ],
-        {
-          type: "submit",
-          event: async (e) => {
-            await this.newNote(e);
-            this.toggleCreatingNote();
-          },
-        }
-      ),
-      createElement("br"),
-      createElement("button", {}, "Cancel", {
-        type: "click",
-        event: this.toggleCreatingNote,
-      })
-    );
-  };
-
   renderNoteElems = async () => {
     const projectId = state.currentProject.id;
     const noteData = await getThings(
@@ -137,7 +97,13 @@ export default class NotesView {
     this.domComponent.innerHTML = "";
 
     if (this.creatingNewNote) {
-      return this.renderCreateNewNote();
+      return this.domComponent.append(
+        ...(await renderCreateNewNote(
+          null,
+          this.toggleCreatingNote,
+          this.newNote
+        ))
+      );
     }
 
     // append

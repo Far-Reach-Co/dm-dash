@@ -9,9 +9,9 @@ import {
 import modal from "../components/modal.js";
 import { getThings } from "../lib/apiUtils.js";
 import {
-  renderCreateNewNotes,
+  renderCreateNewNote,
   renderNoteComponent,
-} from "../lib/singleThingNoteComponents.js";
+} from "../lib/noteUtils.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -530,7 +530,7 @@ export default class SingleLocationView {
 
     if (this.creatingNote) {
       return this.domComponent.append(
-        ...(await renderCreateNewNotes(
+        ...(await renderCreateNewNote(
           this.location.title,
           this.toggleCreatingNote,
           this.newNote

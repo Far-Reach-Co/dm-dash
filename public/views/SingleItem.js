@@ -4,7 +4,7 @@ import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings } from "../lib/apiUtils.js";
-import { renderCreateNewNotes, renderNoteComponent } from "../lib/singleThingNoteComponents.js";
+import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -164,7 +164,7 @@ export default class SingleItemView {
 
     if (this.creatingNote) {
       return this.domComponent.append(
-        ...(await renderCreateNewNotes(
+        ...(await renderCreateNewNote(
           this.item.title,
           this.toggleCreatingNote,
           this.newNote

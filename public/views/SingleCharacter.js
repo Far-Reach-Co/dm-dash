@@ -3,7 +3,7 @@ import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import { getThings } from "../lib/apiUtils.js";
-import { renderCreateNewNotes, renderNoteComponent } from "../lib/singleThingNoteComponents.js";
+import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -198,7 +198,7 @@ export default class SingleCharacterView {
 
     if (this.creatingNote) {
       return this.domComponent.append(
-        ...(await renderCreateNewNotes(
+        ...(await renderCreateNewNote(
           this.character.title,
           this.toggleCreatingNote,
           this.newNote
