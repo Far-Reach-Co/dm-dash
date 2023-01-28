@@ -1,6 +1,7 @@
 import Project from "../components/Project.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
 
 export default class ProjectsView {
@@ -8,14 +9,23 @@ export default class ProjectsView {
     this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
+
+    this.newProjectLoading = false;
+
     this.render();
   }
 
+  toggleLoadingNewProject = () => {
+    this.newProjectLoading = !this.newProjectLoading;
+    this.render();
+  };
+
   newProject = async () => {
-    if (!state.projects) return;
+    this.toggleLoadingNewProject();
     await postThing("/api/add_project", {
       title: `My Project ${state.projects.length + 1}`,
     });
+    this.toggleLoadingNewProject();
   };
 
   renderProjectsElems = async () => {
@@ -51,6 +61,12 @@ export default class ProjectsView {
   render = async () => {
     this.domComponent.innerHTML = "";
 
+    if (this.newProjectLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we prepare your project...")
+      );
+    }
+
     // append
     this.domComponent.append(
       // createElement(
@@ -61,10 +77,7 @@ export default class ProjectsView {
       //   createElement("hr", { class: "special-hr" }),
       createElement("button", { class: "new-btn" }, "+ Project", {
         type: "click",
-        event: async () => {
-          await this.newProject;
-          this.render();
-        },
+        event: this.newProject,
       }),
       createElement("hr"),
       ...(await this.renderProjectsElems())

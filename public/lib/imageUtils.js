@@ -1,23 +1,48 @@
-import { postThing } from "./apiUtils.js";
-
 export async function getPresignedForImageDownload(imageRef) {
-  const data = await postThing("/api/signed_URL_download", {
-    bucket_name: "wyrld",
-    folder_name: "images",
-    object_name: imageRef,
-  })
-  if(data) return data;
-  else return null;
+  try {
+    const res = await fetch(`${window.origin}/api/signed_URL_download`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        bucket_name: "wyrld",
+        folder_name: "images",
+        object_name: imageRef,
+      }),
+    });
+    const data = await res.json();
+    if (data) return data;
+    else throw new Error();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 }
 
 async function getPresignedForImageUpload(name) {
-  const data = await postThing("/api/signed_URL_upload", {
-    name,
-    bucket_name: "wyrld",
-    folder_name: "images",
-  })
-  if(data) return data;
-  else return null;
+  try {
+    const res = await fetch(`${window.origin}/api/signed_URL_upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        name,
+        bucket_name: "wyrld",
+        folder_name: "images",
+      }),
+    });
+    const data = await res.json();
+    
+    if (data) return data;
+    else throw new Error();
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 }
 
 export async function uploadImage(image) {

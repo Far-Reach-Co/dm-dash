@@ -5,6 +5,7 @@ import {
   copyTextToClipboard,
 } from "../lib/clipboard.js";
 import { getThings, deleteThing, postThing } from "../lib/apiUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class Project {
   constructor(props) {
@@ -189,7 +190,7 @@ export default class Project {
 
   renderEditProject = async () => {
     if (this.loadingProjectInvite) {
-      return this.domComponent.append(createElement("div", {}, "Loading..."));
+      return this.domComponent.append(renderLoadingWithMessage("Creating invite link..."));
     }
 
     const titleInput = createElement("input", {
@@ -298,7 +299,7 @@ export default class Project {
           class: "project-button",
         },
         [
-          createElement("div", {}, this.title),
+          createElement("h1", {}, this.title),
           createElement(
             "div",
             { class: "project-date" },

@@ -1,3 +1,5 @@
+import toast from "../components/toast.js";
+
 async function getThings(endpoint) {
   try {
     const res = await fetch(window.location.origin + endpoint, {
@@ -24,11 +26,12 @@ async function deleteThing(endpoint) {
       },
     });
     if (res.status === 204) {
-      // window.alert()
+      toast.show("Removed")
     } else {
       throw new Error();
     }
   } catch (err) {
+    toast.error("Error")
     console.log(err);
   }
 }
@@ -45,11 +48,13 @@ async function postThing(endpoint, body) {
     });
     const data = await res.json();
     if (res.status === 200 || res.status === 201) {
+      toast.show("Success")
       return data;
     } else throw new Error();
   } catch (err) {
     // window.alert("Failed to save note...");
     console.log(err);
+    toast.error("Error")
     return null;
   }
 }

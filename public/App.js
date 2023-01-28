@@ -61,7 +61,7 @@ class App {
       // stop all clocks
       Object.values(state.clockComponents).forEach((project) => {
         project.forEach((clock) => {
-          clock.stop();
+          if(clock.isRunning) clock.stop();
         });
       });
       // navigate to project select
