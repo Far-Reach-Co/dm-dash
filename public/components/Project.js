@@ -132,7 +132,6 @@ export default class Project {
   };
 
   renderInviteLinkComponent = () => {
-    console.log(this.projectInvite);
     if (!this.projectInvite) {
       return [
         createElement("hr"),

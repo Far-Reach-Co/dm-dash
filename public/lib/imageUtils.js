@@ -1,4 +1,4 @@
-import { postThing } from "./apiUtils";
+import { postThing } from "./apiUtils.js";
 
 export async function getPresignedForImageDownload(imageRef) {
   const data = await postThing("/api/signed_URL_download", {

@@ -1,2 +1,2 @@
 npm run migrate:up
-npm run dev
+npm run start
