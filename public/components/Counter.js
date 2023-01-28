@@ -1,4 +1,4 @@
-import { deleteThing } from "../lib/apiUtils.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import listItemTitle from "../lib/listItemTitle.js";
 
@@ -31,25 +31,10 @@ export default class Counter {
     this.currentCount = formProps.current_count;
     this.title = formProps.title;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_counter/${this.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save counter...");
-      console.log(err);
-    }
+    await postThing(
+      `/api/edit_counter/${this.id}`,
+      formProps
+    );
   };
 
   renderEdit = async () => {
@@ -125,15 +110,8 @@ export default class Counter {
           event: () => {
             this.currentCount--;
             this.render();
-            fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-              },
-              body: JSON.stringify({
-                current_count: this.currentCount,
-              }),
+            postThing(`/api/edit_counter/${this.id}`, {
+              current_count: this.currentCount,
             });
           },
         }),
@@ -142,15 +120,8 @@ export default class Counter {
           event: () => {
             this.currentCount++;
             this.render();
-            fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-              },
-              body: JSON.stringify({
-                current_count: this.currentCount,
-              }),
+            postThing(`/api/edit_counter/${this.id}`, {
+              current_count: this.currentCount,
             });
           },
         }),

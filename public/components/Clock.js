@@ -2,7 +2,7 @@ import createElement from "../lib/createElement.js";
 import msToTime from "../lib/msToTime.js";
 import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
-import { deleteThing } from "../lib/apiUtils.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 
 export default class Clock {
   constructor(props) {
@@ -78,20 +78,10 @@ export default class Clock {
   };
 
   saveClock = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/edit_clock/${this.id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          title: this.title,
-          current_time_in_milliseconds: this.currentTimeInMilliseconds,
-        }),
-      }
-    );
+    await postThing(`/api/edit_clock/${this.id}`, {
+      title: this.title,
+      current_time_in_milliseconds: this.currentTimeInMilliseconds,
+    });
   };
 
   renderEditClock = () => {

@@ -3,7 +3,7 @@ import state from "../lib/state.js";
 import Location from "../components/Location.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import { uploadImage } from "../lib/imageUtils.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 
 export default class LocationsView {
@@ -84,22 +84,7 @@ export default class LocationsView {
       delete formProps.image;
     }
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_location`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to create new location...");
-      console.log(err);
-    }
+    await postThing("/api/add_location", formProps)
 
     this.creatingLocation = false;
     this.toggleSavingData();

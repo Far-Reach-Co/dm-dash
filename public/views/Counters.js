@@ -1,5 +1,5 @@
 import Counter from "../components/Counter.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 
@@ -12,28 +12,13 @@ export default class CountersView {
 
   newCounter = async () => {
     if (!state.counters) return;
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_counter`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          user_id: state.user.id,
-          project_id: state.currentProject.id,
-          title: `My Counter ${state.counters.length + 1}`,
-          current_count: 1,
-        }),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new counter...");
-      console.log(err);
-    }
+
+    await postThing("/api/add_counter", {
+      user_id: state.user.id,
+      project_id: state.currentProject.id,
+      title: `My Counter ${state.counters.length + 1}`,
+      current_count: 1,
+    })
   };
 
   renderCounterElems = async () => {
@@ -70,7 +55,10 @@ export default class CountersView {
     this.domComponent.append(
       createElement("button", { class: "new-btn" }, "+ Counter", {
         type: "click",
-        event: this.newCounter,
+        event: async () => {
+          await this.newCounter();
+          this.render();
+        },
       }),
       createElement("hr"),
       ...(await this.renderCounterElems())

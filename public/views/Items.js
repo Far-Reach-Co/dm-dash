@@ -2,7 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Item from "../components/Item.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 
 export default class ItemsView {
@@ -63,23 +63,7 @@ export default class ItemsView {
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_item`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new item...");
-      console.log(err);
-    }
+    await postThing("/api/add_item", formProps)
   };
 
   renderCreatingItem = async () => {

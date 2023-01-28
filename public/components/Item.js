@@ -1,4 +1,4 @@
-import { deleteThing } from "../lib/apiUtils.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
@@ -41,25 +41,7 @@ export default class Item {
     this.title = formProps.title;
     this.description = formProps.description;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_item/${this.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save item...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_item/${this.id}`, formProps)
   };
 
   renderEdit = async () => {

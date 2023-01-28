@@ -2,7 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
 
 export default class SingleCharacterView {
@@ -39,22 +39,7 @@ export default class SingleCharacterView {
     formProps.location_id = null;
     formProps.item_id = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_note`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new note...");
-      console.log(err);
-    }
+    await postThing("/api/add_note", formProps);
   };
 
   renderCharacterType = () => {
@@ -112,25 +97,7 @@ export default class SingleCharacterView {
     this.character.description = formProps.description;
     this.character.type = formProps.type;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_character/${this.character.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save character...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_character/${this.character.id}`, formProps);
   };
 
   renderEdit = async () => {
@@ -304,15 +271,8 @@ class CurrentLocationComponent {
   };
 
   updateCurrentLocation = (newLocationId) => {
-    fetch(`${window.location.origin}/api/edit_character/${this.character.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        location_id: newLocationId,
-      }),
+    postThing(`/api/edit_character/${this.character.id}`, {
+      location_id: newLocationId,
     });
   };
 

@@ -3,7 +3,7 @@ import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
 
 export default class SingleItemView {
@@ -40,22 +40,7 @@ export default class SingleItemView {
     formProps.location_id = null;
     formProps.character_id = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_note`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new note...");
-      console.log(err);
-    }
+    await postThing("/api/add_note", formProps);
   };
 
   renderItemType = () => {
@@ -78,25 +63,7 @@ export default class SingleItemView {
     this.item.description = formProps.description;
     this.item.type = formProps.type;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_item/${this.item.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save item...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_item/${this.item.id}`, formProps);
   };
 
   renderEdit = async () => {
@@ -272,15 +239,8 @@ class CurrentLocationComponent {
   };
 
   updateCurrentLocation = (newLocationId) => {
-    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        location_id: newLocationId,
-      }),
+    postThing(`/api/edit_item/${this.item.id}`, {
+      location_id: newLocationId,
     });
   };
 
@@ -374,15 +334,8 @@ class CurrentCharacterComponent {
   };
 
   updateCurrentCharacter = (newCharacterId) => {
-    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        character_id: newCharacterId,
-      }),
+    postThing(`/api/edit_item/${this.item.id}`, {
+      character_id: newCharacterId,
     });
   };
 

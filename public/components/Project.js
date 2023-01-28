@@ -4,7 +4,7 @@ import {
   fallbackCopyTextToClipboard,
   copyTextToClipboard,
 } from "../lib/clipboard.js";
-import { getThings, deleteThing } from "../lib/apiUtils.js";
+import { getThings, deleteThing, postThing } from "../lib/apiUtils.js";
 
 export default class Project {
   constructor(props) {
@@ -37,19 +37,9 @@ export default class Project {
   };
 
   saveProject = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/edit_project/${this.id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          title: this.title,
-        }),
-      }
-    );
+    await postThing(`/api/edit_project/${this.id}`, {
+      title: this.title,
+    });
   };
 
   addInviteLink = async () => {
@@ -79,27 +69,12 @@ export default class Project {
 
   updateProjectUserEditorStatus = async (userId, status) => {
     this.isEditor = status;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_project_user/${userId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            is_editor: status,
-          }),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save counter...");
-      console.log(err);
-    }
+    await postThing(
+      `/api/edit_project_user/${userId}`,
+      {
+        is_editor: status,
+      }
+    );
   };
 
   renderProjectUsersList = async () => {
@@ -121,7 +96,7 @@ export default class Project {
 
       const elem = createElement(
         "div",
-        { style: "display: flex; justify-content: space-between;"},
+        { style: "display: flex; justify-content: space-between;" },
         [
           createElement("div", {}, user.email),
           createElement("label", { class: "switch" }, [
@@ -157,7 +132,7 @@ export default class Project {
   };
 
   renderInviteLinkComponent = () => {
-    console.log(this.projectInvite)
+    console.log(this.projectInvite);
     if (!this.projectInvite) {
       return [
         createElement("hr"),

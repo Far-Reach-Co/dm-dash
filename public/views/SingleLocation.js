@@ -7,11 +7,8 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
-import { getThings } from "../lib/apiUtils.js";
-import {
-  renderCreateNewNote,
-  renderNoteComponent,
-} from "../lib/noteUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -61,28 +58,11 @@ export default class SingleLocationView {
     formProps.parent_location_id = formProps.location_id;
     delete formProps.location_id;
     formProps.is_sub = true;
+    // Update UI
+    this.location.parent_location_id = formProps.parent_location_id;
+    this.location.is_sub = true;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_location/${this.location.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        this.location.parent_location_id = formProps.parent_location_id;
-        this.location.is_sub = true;
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to save location...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_location/${this.location.id}`, formProps);
   };
 
   renderAddParentLocation = async () => {
@@ -127,23 +107,7 @@ export default class SingleLocationView {
     formProps.parent_location_id = this.location.id;
     if (formProps.type === "None") formProps.type = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_location`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new location...");
-      console.log(err);
-    }
+    await postThing("/api/add_location", formProps);
   };
 
   renderCreateSubLocation = async () => {
@@ -201,22 +165,7 @@ export default class SingleLocationView {
     formProps.character_id = null;
     formProps.item_id = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_note`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new note...");
-      console.log(err);
-    }
+    await postThing("/api/add_note", formProps);
   };
 
   renderSubLocations = async () => {
@@ -395,25 +344,7 @@ export default class SingleLocationView {
     this.toggleEdit();
 
     // send data to update in db
-    try {
-      const res = await fetch(
-        `${window.origin}/api/edit_location/${this.location.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save location...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_location/${this.location.id}`, formProps);
   };
 
   renderEdit = async () => {

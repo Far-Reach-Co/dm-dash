@@ -2,7 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Character from "../components/Character.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 
 export default class CharactersView {
@@ -62,23 +62,7 @@ export default class CharactersView {
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_character`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new character...");
-      console.log(err);
-    }
+    await postThing("/api/add_character", formProps)
   };
 
   renderCreatingCharacter = async () => {

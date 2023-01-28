@@ -1,5 +1,5 @@
 import Clock from "../components/Clock.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 
@@ -66,42 +66,29 @@ export default class ClocksView {
     if (!state.clocks) return;
 
     var projectId = state.currentProject.id;
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_clock`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          title: "New Clock",
-          current_time_in_milliseconds: 0,
-          project_id: projectId,
-        }),
+    const resData = await postThing("/api/add_clock", {
+      title: "New Clock",
+      current_time_in_milliseconds: 0,
+      project_id: projectId,
+    });
+    if (resData) {
+      const clock = resData;
+      const clockComponentDomElement = createElement("div", {
+        id: `clock-component-${clock.id}`,
       });
-      const data = await res.json();
-      if (res.status === 201) {
-        const clock = data;
-        const clockComponentDomElement = createElement("div", {
-          id: `clock-component-${clock.id}`,
-        });
-        // append
-        this.domComponent.appendChild(clockComponentDomElement);
-        // instantiate
-        const newClock = new Clock({
-          domComponent: clockComponentDomElement,
-          id: clock.id,
-          title: clock.title,
-          currentTimeInMilliseconds: clock.current_time_in_milliseconds,
-          parentRender: this.render,
-        });
-        state.clockComponents[`project-${state.currentProject.id}`].push(
-          newClock
-        );
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new clock...");
-      console.log(err);
+      // append
+      this.domComponent.appendChild(clockComponentDomElement);
+      // instantiate
+      const newClock = new Clock({
+        domComponent: clockComponentDomElement,
+        id: clock.id,
+        title: clock.title,
+        currentTimeInMilliseconds: clock.current_time_in_milliseconds,
+        parentRender: this.render,
+      });
+      state.clockComponents[`project-${state.currentProject.id}`].push(
+        newClock
+      );
     }
   };
 

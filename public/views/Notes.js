@@ -1,7 +1,7 @@
 import createElement from "../lib/createElement.js";
 import Note from "../components/Note.js";
 import state from "../lib/state.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import { renderCreateNewNote } from "../lib/noteUtils.js";
 
@@ -40,22 +40,7 @@ export default class NotesView {
     formProps.location_id = null;
     formProps.character_id = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_note`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new note");
-      console.log(err);
-    }
+    await postThing("/api/add_note", formProps)
   };
 
   renderNoteElems = async () => {

@@ -6,6 +6,7 @@ import {
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import state from "../lib/state.js";
+import { postThing } from "../lib/apiUtils.js";
 
 export default class Location {
   constructor(props) {
@@ -85,23 +86,7 @@ export default class Location {
     this.location.type = formProps.type;
     this.toggleEdit();
 
-    // send data to update in db
-    try {
-      const res = await fetch(`${window.origin}/api/edit_location/${this.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save location...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_location/${this.id}`, formProps)
   };
 
   renderEdit = async () => {

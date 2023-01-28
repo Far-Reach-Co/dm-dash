@@ -1,5 +1,5 @@
 import Project from "../components/Project.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 
@@ -13,25 +13,9 @@ export default class ProjectsView {
 
   newProject = async () => {
     if (!state.projects) return;
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_project`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          title: `My Project ${state.projects.length + 1}`,
-        }),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new project...");
-      console.log(err);
-    }
+    await postThing("/api/add_project", {
+      title: `My Project ${state.projects.length + 1}`,
+    });
   };
 
   renderProjectsElems = async () => {
@@ -39,7 +23,7 @@ export default class ProjectsView {
     if (projectData) state.projects = projectData;
 
     const map = projectData.map((project) => {
-      console.log(project)
+      console.log(project);
       // create element
       const elem = createElement("div", {
         id: `project-component-${project.id}`,
@@ -78,7 +62,10 @@ export default class ProjectsView {
       //   createElement("hr", { class: "special-hr" }),
       createElement("button", { class: "new-btn" }, "+ Project", {
         type: "click",
-        event: this.newProject,
+        event: async () => {
+          await this.newProject;
+          this.render();
+        },
       }),
       createElement("hr"),
       ...(await this.renderProjectsElems())
