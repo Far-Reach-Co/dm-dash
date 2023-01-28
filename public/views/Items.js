@@ -96,7 +96,7 @@ export default class ItemsView {
       this.toggleCreatingItem();
     });
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingItem();
     });

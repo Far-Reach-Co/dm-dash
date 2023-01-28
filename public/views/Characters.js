@@ -95,7 +95,7 @@ export default class CharactersView {
       this.toggleCreatingCharacter();
     });
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingCharacter();
     });

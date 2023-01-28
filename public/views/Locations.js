@@ -139,7 +139,7 @@ export default class LocationsView {
       await this.newLocation(e);
     });
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingLocation();
     });

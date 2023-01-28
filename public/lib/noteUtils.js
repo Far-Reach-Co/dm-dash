@@ -41,7 +41,7 @@ async function renderCreateNewNote(title, toggle, newNote) {
       }
     ),
     createElement("br"),
-    createElement("button", {}, "Cancel", {
+    createElement("button", {class: "btn-red"}, "Cancel", {
       type: "click",
       event: toggle,
     }),

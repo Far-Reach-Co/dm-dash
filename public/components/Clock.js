@@ -186,11 +186,11 @@ export default class Clock {
 
       return [
         createElement("br"),
-        createElement("button", {}, "Start", {
+        createElement("button", {class: "new-btn"}, "Start", {
           type: "click",
           event: this.start,
         }),
-        createElement("button", {}, "Stop", {
+        createElement("button", {class: "btn-red"}, "Stop", {
           type: "click",
           event: this.stop,
         }),

@@ -53,7 +53,6 @@ export default class ProjectsView {
       });
       return elem;
     });
-
     if (map.length) return map;
     else return [createElement("div", {}, "None...")];
   };

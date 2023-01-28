@@ -90,7 +90,7 @@ export default class SingleLocationView {
         }
       ),
       createElement("br"),
-      createElement("button", {}, "Cancel", {
+      createElement("button", {class: "btn-red"}, "Cancel", {
         type: "click",
         event: this.toggleAddParentLocation,
       })
@@ -141,7 +141,7 @@ export default class SingleLocationView {
       this.toggleCreatingSubLocation();
     });
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingSubLocation();
     });

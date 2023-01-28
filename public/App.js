@@ -33,7 +33,9 @@ class App {
     // setup sidebar
     this.instantiateSidebar();
     this.instantiateHamburger();
-    
+    // remove initial spinner
+    document.getElementById("initial-spinner").remove();
+    // navigate to first view
     navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
@@ -61,7 +63,7 @@ class App {
       // stop all clocks
       Object.values(state.clockComponents).forEach((project) => {
         project.forEach((clock) => {
-          if(clock.isRunning) clock.stop();
+          if (clock.isRunning) clock.stop();
         });
       });
       // navigate to project select

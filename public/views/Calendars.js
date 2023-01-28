@@ -403,7 +403,7 @@ export default class CalendarView {
         }
       ),
       createElement("br"),
-      createElement("button", {}, "Cancel", {
+      createElement("button", {class: "btn-red"}, "Cancel", {
         type: "click",
         event: () => {
           this.loading = false;

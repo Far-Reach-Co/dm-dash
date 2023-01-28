@@ -4,6 +4,7 @@ import state from "../lib/state.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import { renderCreateNewNote } from "../lib/noteUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class NotesView {
   constructor(props) {
@@ -16,6 +17,7 @@ export default class NotesView {
     this.offset = 0;
 
     this.creatingNewNote = false;
+    this.newNoteLoading = false;
 
     this.render();
   }
@@ -23,6 +25,11 @@ export default class NotesView {
   resetFilters = () => {
     this.searchTerm = "";
     this.offset = 0;
+  };
+
+  toggleNewNoteLoading = () => {
+    this.newNoteLoading = !this.newNoteLoading;
+    this.render();
   };
 
   toggleCreatingNote = () => {
@@ -33,6 +40,7 @@ export default class NotesView {
 
   newNote = async (e) => {
     e.preventDefault();
+    this.toggleNewNoteLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.user_id = state.user.id;
@@ -40,7 +48,8 @@ export default class NotesView {
     formProps.location_id = null;
     formProps.character_id = null;
 
-    await postThing("/api/add_note", formProps)
+    await postThing("/api/add_note", formProps);
+    this.toggleNewNoteLoading();
   };
 
   renderNoteElems = async () => {
@@ -81,6 +90,12 @@ export default class NotesView {
   render = async () => {
     this.domComponent.innerHTML = "";
 
+    if (this.newNoteLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we create your note...")
+      );
+    }
+
     if (this.creatingNewNote) {
       return this.domComponent.append(
         ...(await renderCreateNewNote(
@@ -98,7 +113,7 @@ export default class NotesView {
           type: "click",
           event: this.toggleCreatingNote,
         }),
-        searchElement("Search Notes", this)
+        searchElement("Search Notes", this),
       ]),
       createElement("hr"),
       ...(await this.renderNoteElems()),
