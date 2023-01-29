@@ -1,5 +1,7 @@
 import Clock from "../components/Clock.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
 
 export default class ClocksView {
@@ -8,26 +10,10 @@ export default class ClocksView {
     this.domComponent.className = "standard-view";
     this.render();
   }
-
-  getClocks = async () => {
-    var projectId = state.currentProject.id;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_clocks/${projectId}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        state.clocks = data;
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+  
+  toggleNewClockLoading = () => {
+    this.newClockLoading = !this.newClockLoading;
+    this.render();
   };
 
   getClockElements = async () => {
@@ -54,7 +40,9 @@ export default class ClocksView {
         clockElements.push(clockComponentDomElement);
       });
     } else {
-      clockData = await this.getClocks();
+      var projectId = state.currentProject.id;
+      const clockData = await getThings(`/api/get_clocks/${projectId}`);
+      if (clockData) state.clocks = clockData;
       // render
       state.clockComponents[`project-${state.currentProject.id}`] = [];
       clockData.forEach((clock) => {
@@ -82,64 +70,56 @@ export default class ClocksView {
 
   newClock = async () => {
     if (!state.clocks) return;
+    this.toggleNewClockLoading()
 
     var projectId = state.currentProject.id;
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_clock`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          title: "New Clock",
-          current_time_in_milliseconds: 0,
-          project_id: projectId,
-        }),
+    const resData = await postThing("/api/add_clock", {
+      title: "New Clock",
+      current_time_in_milliseconds: 0,
+      project_id: projectId,
+    });
+    if (resData) {
+      const clock = resData;
+      const clockComponentDomElement = createElement("div", {
+        id: `clock-component-${clock.id}`,
       });
-      const data = await res.json();
-      if (res.status === 201) {
-        const clock = data;
-        const clockComponentDomElement = createElement("div", {
-          id: `clock-component-${clock.id}`,
-        });
-        // append
-        this.domComponent.appendChild(clockComponentDomElement);
-        // instantiate
-        const newClock = new Clock({
-          domComponent: clockComponentDomElement,
-          id: clock.id,
-          title: clock.title,
-          currentTimeInMilliseconds: clock.current_time_in_milliseconds,
-          parentRender: this.render,
-        });
-        state.clockComponents[`project-${state.currentProject.id}`].push(
-          newClock
-        );
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new clock...");
-      console.log(err);
+      // append
+      // this.domComponent.appendChild(clockComponentDomElement);
+      // instantiate
+      const newClock = new Clock({
+        domComponent: clockComponentDomElement,
+        id: clock.id,
+        title: clock.title,
+        currentTimeInMilliseconds: clock.current_time_in_milliseconds,
+        parentRender: this.render,
+      });
+      state.clockComponents[`project-${state.currentProject.id}`].push(
+        newClock
+      );
     }
+    this.toggleNewClockLoading()
   };
 
   renderAddButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        {class: "new-btn"},
-        "+ Clock",
-        {
-          type: "click",
-          event: this.newClock,
-        }
-      );
+      return createElement("button", { class: "new-btn" }, "+ Clock", {
+        type: "click",
+        event: this.newClock,
+      });
   };
 
   render = async () => {
     this.domComponent.innerHTML = "";
+
+    if (this.newClockLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we create your new clock..."
+        )
+      );
+    }
 
     // append
     this.domComponent.append(

@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import msToTime from "../lib/msToTime.js";
 import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 
 export default class Clock {
   constructor(props) {
@@ -63,7 +64,6 @@ export default class Clock {
   };
 
   toggleEdit = () => {
-    this.stop();
     this.edit = !this.edit;
     this.render();
   };
@@ -77,37 +77,10 @@ export default class Clock {
   };
 
   saveClock = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/edit_clock/${this.id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          title: this.title,
-          current_time_in_milliseconds: this.currentTimeInMilliseconds,
-        }),
-      }
-    );
-  };
-
-  removeClock = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_clock/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete clock...");
-    }
+    await postThing(`/api/edit_clock/${this.id}`, {
+      title: this.title,
+      current_time_in_milliseconds: this.currentTimeInMilliseconds,
+    });
   };
 
   renderEditClock = () => {
@@ -136,8 +109,8 @@ export default class Clock {
     const doneButton = createElement("button", {}, "Done");
     doneButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
-      await this.saveClock();
       this.toggleEdit();
+      this.saveClock();
     });
     const removeButton = createElement(
       "button",
@@ -147,7 +120,7 @@ export default class Clock {
     removeButton.addEventListener("click", () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
         try {
-          this.removeClock();
+          deleteThing(`/api/remove_clock/${this.id}`);
           this.domComponent.remove();
           const clocksByProject =
             state.clockComponents[`project-${state.currentProject.id}`];
@@ -164,8 +137,8 @@ export default class Clock {
     resetButton.addEventListener("click", async () => {
       if (window.confirm(`Are you sure you want to reset ${this.title}`)) {
         this.reset();
-        await this.saveClock();
         this.toggleEdit();
+        this.saveClock();
       }
     });
     // append
@@ -212,11 +185,11 @@ export default class Clock {
 
       return [
         createElement("br"),
-        createElement("button", {}, "Start", {
+        createElement("button", {class: "new-btn"}, "Start", {
           type: "click",
           event: this.start,
         }),
-        createElement("button", {}, "Stop", {
+        createElement("button", {class: "btn-red"}, "Stop", {
           type: "click",
           event: this.stop,
         }),

@@ -4,6 +4,8 @@ import {
   fallbackCopyTextToClipboard,
   copyTextToClipboard,
 } from "../lib/clipboard.js";
+import { getThings, deleteThing, postThing } from "../lib/apiUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class Project {
   constructor(props) {
@@ -36,70 +38,9 @@ export default class Project {
   };
 
   saveProject = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/edit_project/${this.id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          title: this.title,
-        }),
-      }
-    );
-  };
-
-  removeProject = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_project/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete project...");
-    }
-  };
-
-  removeInvite = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_project_invite/${this.projectInvite.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete project...");
-    }
-  };
-
-  leaveProject = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_project_user/${this.projectUserId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete project...");
-    }
+    await postThing(`/api/edit_project/${this.id}`, {
+      title: this.title,
+    });
   };
 
   addInviteLink = async () => {
@@ -129,50 +70,18 @@ export default class Project {
 
   updateProjectUserEditorStatus = async (userId, status) => {
     this.isEditor = status;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_project_user/${userId}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            is_editor: status,
-          }),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save counter...");
-      console.log(err);
-    }
-  };
-
-  getProjectUsers = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_project_users_by_project/${this.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+    await postThing(
+      `/api/edit_project_user/${userId}`,
+      {
+        is_editor: status,
+      }
+    );
   };
 
   renderProjectUsersList = async () => {
-    const projectUsers = await this.getProjectUsers();
+    const projectUsers = await getThings(
+      `/api/get_project_users_by_project/${this.id}`
+    );
     const map = projectUsers.map((user) => {
       if (user.is_editor === undefined) user.is_editor = false;
       const checkbox = createElement("input", { type: "checkbox" }, null, {
@@ -188,9 +97,9 @@ export default class Project {
 
       const elem = createElement(
         "div",
-        { style: "display: flex; align-items: center;" },
+        { style: "display: flex; justify-content: space-between;" },
         [
-          createElement("div", { style: "margin-right: 50px;" }, user.email),
+          createElement("div", {}, user.email),
           createElement("label", { class: "switch" }, [
             checkbox,
             createElement("span", { class: "slider round" }),
@@ -261,7 +170,7 @@ export default class Project {
         if (
           window.confirm(`Are you sure you want to delete the invite link?`)
         ) {
-          this.removeInvite();
+          deleteThing(`/api/remove_project_invite/${this.projectInvite.id}`);
           this.projectInvite = null;
           this.render();
         }
@@ -273,14 +182,15 @@ export default class Project {
         createElement("br"),
         createElement("div", {}, inviteLink),
         inviteLinkButton,
+        createElement("br"),
         removeInviteButton,
       ];
     }
   };
 
   renderEditProject = async () => {
-    if(this.loadingProjectInvite) {
-      return this.domComponent.append(createElement("div", {}, "Loading..."));
+    if (this.loadingProjectInvite) {
+      return this.domComponent.append(renderLoadingWithMessage("Creating invite link..."));
     }
 
     const titleInput = createElement("input", {
@@ -314,11 +224,11 @@ export default class Project {
         )
       ) {
         if (!this.wasJoined) {
-          this.removeProject();
+          deleteThing(`/api/remove_project/${this.id}`);
           this.toggleEdit();
           this.domComponent.remove();
         } else {
-          await this.leaveProject();
+          await deleteThing(`/api/remove_project_user/${this.projectUserId}`);
           this.parentRender();
         }
       }
@@ -327,14 +237,10 @@ export default class Project {
     if (this.isEditor === false) {
       return this.domComponent.append(
         createElement("div", { class: "project-edit-container" }, [
-          createElement("h2", {}, `Manage ${this.title}`),
+          createElement("h2", {}, `Edit Project: "${this.title}"`),
+          doneButton,
           createElement("br"),
           removeButton,
-          createElement("hr"),
-          createElement("button", {}, "Cancel", {
-            type: "click",
-            event: this.toggleEdit,
-          }),
         ])
       );
     }
@@ -342,22 +248,18 @@ export default class Project {
     // append
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h2", {}, `Manage ${this.title}`),
+        createElement("h2", {}, `Edit Project: "${this.title}"`),
         createElement("br"),
-        createElement("div", {}, [
-          createElement("div", {}, "Title"),
+        createElement("div", { style: "display: flex; align-items: center;" }, [
+          createElement("div", { style: "margin-right: 10px" }, "Title"),
           titleInput,
         ]),
-        createElement("br"),
-        doneButton,
-        removeButton,
         ...this.renderInviteLinkComponent(),
         createElement("hr"),
         ...(await this.renderManageUsersComponent()),
-        createElement("button", {}, "Cancel", {
-          type: "click",
-          event: this.toggleEdit,
-        }),
+        doneButton,
+        createElement("br"),
+        removeButton,
       ])
     );
   };
@@ -397,7 +299,7 @@ export default class Project {
           class: "project-button",
         },
         [
-          createElement("div", {}, this.title),
+          createElement("h1", {}, this.title),
           createElement(
             "div",
             { class: "project-date" },

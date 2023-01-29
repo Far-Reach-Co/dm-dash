@@ -72,7 +72,7 @@ br {
 
 hr {
   /* border: 0; */
-  border: 0.5px solid var(--main-gray);
+  border: 0.5px solid var(--blue);
   height: 1px;
   width: 100%;
   margin-top: 10px;
@@ -159,7 +159,6 @@ button {
   color: inherit;
   /* border: 0.1px solid var(--main-gray); */
   border: none;
-  border-radius: var(--border-radius);
   padding: 2px 4px;
   font: inherit;
   color: var(--main-white);
@@ -196,13 +195,14 @@ form {
   flex-direction: column;
   /* align-items: center; */
   justify-content: space-evenly;
-  border: 0.5px solid var(--main-gray);
+  /* border: 0.5px solid var(--main-gray); */
 }
 
 input {
   border: none;
   outline: none;
-  background-color: rgb(187, 184, 184);
+  /* background-color: rgb(208, 208, 208); */
+  width: 250px;
   height: 30px;
   display: inline-block;
   padding-left: 5px;
@@ -226,7 +226,6 @@ input[type=file]::file-selector-button {
   color: inherit;
   /* border: 0.1px solid var(--main-gray); */
   border: none;
-  border-radius: var(--border-radius);
   padding: 2px 4px;
   font: inherit;
   color: var(--main-white);
@@ -253,7 +252,6 @@ select {
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
   /* border: 0.5px solid var(--main-gray); */
   border: none;
-  border-radius: var(--border-radius);
   padding: 2px 4px;
   font: inherit;
   color: var(--main-white);
@@ -266,7 +264,7 @@ textarea {
   height: auto;
   border: none;
   outline: none;
-  background-color: rgb(187, 184, 184);
+  /* background-color: rgb(187, 184, 184); */
   display: inline-block;
   font-size: inherit;
   font-family: inherit;
@@ -355,7 +353,7 @@ footer {
   /* background-color: var(--blue4); */
   padding: 5px 0px;
   margin: 5px 0px;
-  min-height: 400px;
+  height: 400px;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;
@@ -375,7 +373,6 @@ footer {
 }
 
 .project-btn-container {
-  align-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -385,16 +382,18 @@ footer {
 .project-button {
   margin-right: 20px;
   letter-spacing: 1.5px;
-  font-weight: bold;
-  width: fit-content;
+  width: 100%;
   display: flex;
   flex-direction: column;
   /* align-items: center; */
   justify-content: center;
   padding: 10px 30px;
-  border: 2px solid var(--blue);
+  border: 1px solid var(--blue);
   cursor: pointer;
-  background-color: var(--purple);
+  /* background-color: var(--purple); */
+}
+
+.project-button h1 {
   color: var(--link-blue);
 }
 
@@ -403,12 +402,18 @@ footer {
 }
 
 .project-date {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--orange3);
 }
 
 .project-edit-container {
-  border: 1px solid var(--main-gray);
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  /* width: 500px; */
+  width: 100%;
+  height: fit-content;
+  border: 1px solid var(--blue);
   padding: 10px;
 }
 
@@ -743,6 +748,30 @@ footer {
   opacity: 0.7;
 }
 
+.toast {
+  z-index: 1;
+  position: absolute;
+  left: 50%;
+  top: 10%;
+  align-self: center;
+  width: fit-content;
+  height: fit-content;
+  color: inherit;
+  background-color: var(--green2);
+  padding: 3px 6px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  opacity: 0.9;
+  cursor: pointer;
+  /* transition: 1s; */
+}
+
+.toast-error {
+  background-color: var(--red2);
+}
+
 
 /* modal */
 /* The Modal (background) */
@@ -861,4 +890,40 @@ input:checked+.slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+/* spinner */
+.initial-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.lds-dual-ring {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+}
+
+.lds-dual-ring:after {
+  content: " ";
+  display: block;
+  width: 30px;
+  height: 30px;
+  margin: 4px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  border-color: #fff transparent #fff transparent;
+  animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }

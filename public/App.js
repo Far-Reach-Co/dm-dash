@@ -6,7 +6,6 @@ import CalendarsView from "./views/Calendars.js";
 import Sidebar from "./components/Sidebar.js";
 import LocationsView from "./views/Locations.js";
 import SingleLocationView from "./views/SingleLocation.js";
-import NotesView from "./views/Notes.js";
 import CountersView from "./views/Counters.js";
 import CharactersView from "./views/Characters.js";
 import SingleCharacterView from "./views/SingleCharacter.js";
@@ -14,6 +13,7 @@ import ItemsView from "./views/Items.js";
 import SingleItemView from "./views/SingleItem.js";
 import { Hamburger } from "./components/Hamburger.js";
 import navigate from "./lib/Navigate.js";
+import NoteManager from "./views/NoteManager.js";
 
 class App {
   constructor(props) {
@@ -33,7 +33,9 @@ class App {
     // setup sidebar
     this.instantiateSidebar();
     this.instantiateHamburger();
-    
+    // remove initial spinner
+    document.getElementById("initial-spinner").remove();
+    // navigate to first view
     navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
@@ -61,7 +63,7 @@ class App {
       // stop all clocks
       Object.values(state.clockComponents).forEach((project) => {
         project.forEach((clock) => {
-          clock.stop();
+          if (clock.isRunning) clock.stop();
         });
       });
       // navigate to project select
@@ -150,10 +152,13 @@ class App {
     new CountersView({ domComponent: element });
   };
 
-  renderNotesView = ({ navigate }) => {
+  renderNotesView = () => {
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new NotesView({ domComponent: element, navigate });
+    new NoteManager({
+      domComponent: element,
+      standAlone: true
+    });
   };
 
   renderProjectsView = ({ navigate }) => {
@@ -208,7 +213,7 @@ class App {
       case "counters":
         return this.renderCountersView();
       case "notes":
-        return this.renderNotesView({ navigate: navigate.navigate });
+        return this.renderNotesView();
       case "calendars":
         return this.renderCalendersView();
       case "locations":

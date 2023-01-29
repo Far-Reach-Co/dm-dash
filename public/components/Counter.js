@@ -1,3 +1,4 @@
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import listItemTitle from "../lib/listItemTitle.js";
 
@@ -23,49 +24,16 @@ export default class Counter {
     this.render();
   };
 
-  removeCounter = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_counter/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete counter...");
-    }
-  };
-
   saveCounter = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     this.currentCount = formProps.current_count;
     this.title = formProps.title;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_counter/${this.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save counter...");
-      console.log(err);
-    }
+    await postThing(
+      `/api/edit_counter/${this.id}`,
+      formProps
+    );
   };
 
   renderEdit = async () => {
@@ -94,6 +62,7 @@ export default class Counter {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveCounter(e);
             this.toggleEdit();
           },
@@ -104,7 +73,7 @@ export default class Counter {
         type: "click",
         event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            this.removeCounter();
+            deleteThing(`/api/remove_counter/${this.id}`);
             this.toggleEdit();
             this.domComponent.remove();
           }
@@ -141,15 +110,8 @@ export default class Counter {
           event: () => {
             this.currentCount--;
             this.render();
-            fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-              },
-              body: JSON.stringify({
-                current_count: this.currentCount,
-              }),
+            postThing(`/api/edit_counter/${this.id}`, {
+              current_count: this.currentCount,
             });
           },
         }),
@@ -158,24 +120,12 @@ export default class Counter {
           event: () => {
             this.currentCount++;
             this.render();
-            fetch(`${window.location.origin}/api/edit_counter/${this.id}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-              },
-              body: JSON.stringify({
-                current_count: this.currentCount,
-              }),
+            postThing(`/api/edit_counter/${this.id}`, {
+              current_count: this.currentCount,
             });
           },
         }),
       ]),
-      createElement("br"),
-      createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      })
     );
   };
 }

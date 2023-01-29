@@ -1,5 +1,7 @@
 import Project from "../components/Project.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
 
 export default class ProjectsView {
@@ -7,48 +9,29 @@ export default class ProjectsView {
     this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
+
+    this.newProjectLoading = false;
+
     this.render();
   }
 
-  getProjects = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_projects`, {
-          headers: { "x-access-token": `Bearer ${localStorage.getItem("token")}` }
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        state.projects = data;
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+  toggleLoadingNewProject = () => {
+    this.newProjectLoading = !this.newProjectLoading;
+    this.render();
   };
 
   newProject = async () => {
-    if (!state.projects) return;
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_project`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-access-token": `Bearer ${localStorage.getItem("token")}` },
-        body: JSON.stringify({
-          title: `My Project ${state.projects.length + 1}`,
-        }),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new project...");
-      console.log(err);
-    }
+    this.toggleLoadingNewProject();
+    await postThing("/api/add_project", {
+      title: `My Project ${state.projects.length + 1}`,
+    });
+    this.toggleLoadingNewProject();
   };
 
   renderProjectsElems = async () => {
-    const projectData = await this.getProjects();
+    const projectData = await getThings("/api/get_projects");
+    if (projectData) state.projects = projectData;
+
     const map = projectData.map((project) => {
       // create element
       const elem = createElement("div", {
@@ -70,13 +53,18 @@ export default class ProjectsView {
       });
       return elem;
     });
-
     if (map.length) return map;
     else return [createElement("div", {}, "None...")];
   };
 
   render = async () => {
     this.domComponent.innerHTML = "";
+
+    if (this.newProjectLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we prepare your project...")
+      );
+    }
 
     // append
     this.domComponent.append(
@@ -86,12 +74,12 @@ export default class ProjectsView {
       //   "Choose your project"
       //   ),
       //   createElement("hr", { class: "special-hr" }),
-        createElement("button", {class: "new-btn"}, "+ Project", {
-          type: "click",
-          event: this.newProject,
-        }),
-        createElement("hr"),
-      ...(await this.renderProjectsElems()),
+      createElement("button", { class: "new-btn" }, "+ Project", {
+        type: "click",
+        event: this.newProject,
+      }),
+      createElement("hr"),
+      ...(await this.renderProjectsElems())
     );
   };
 }

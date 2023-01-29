@@ -1,3 +1,4 @@
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 
 export default class Note {
@@ -13,7 +14,6 @@ export default class Note {
     this.locationId = props.locationId;
     this.characterId = props.characterId;
     this.itemId = props.itemId;
-    this.navigate = props.navigate;
 
     this.edit = false;
 
@@ -25,50 +25,14 @@ export default class Note {
     this.render();
   };
 
-  removeNote = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_note/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete note...");
-    }
-  };
-
   saveNote = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     // update UI
     this.title = formProps.title;
     this.description = formProps.description;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_note/${this.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save note...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_note/${this.id}`, formProps)
   };
 
   renderEdit = async () => {
@@ -100,6 +64,7 @@ export default class Note {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveNote(e);
             this.toggleEdit();
           },
@@ -110,7 +75,7 @@ export default class Note {
         type: "click",
         event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            this.removeNote();
+            deleteThing(`/api/remove_note/${this.id}`);
             this.toggleEdit();
             this.domComponent.remove();
           }

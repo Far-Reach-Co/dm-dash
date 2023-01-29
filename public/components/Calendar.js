@@ -1,6 +1,8 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class Calendar {
   constructor(props) {
@@ -20,6 +22,7 @@ export default class Calendar {
     // render views
     this.edit = false;
     this.open = false;
+    this.loading = false;
     // open navigation views
     this.monthBeingViewed = this.calculateCurrentMonth();
     this.yearBeingViewed = this.year;
@@ -29,6 +32,11 @@ export default class Calendar {
 
   toggleEdit = () => {
     this.edit = !this.edit;
+    this.render();
+  };
+
+  toggleLoading = () => {
+    this.loading = !this.loading;
     this.render();
   };
 
@@ -89,121 +97,32 @@ export default class Calendar {
   };
 
   updateCalendar = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.title) formProps.title = formProps.title.trim();
-    const res = await fetch(
-      `${window.location.origin}/api/edit_calendar/${this.id}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      }
-    );
-  };
-
-  removeCalendar = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_calendar/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      window.alert("Failed to delete calendar...");
-    }
+    // update UI
+    this.title = formProps.title;
+    this.year = formProps.year;
+    await postThing(`/api/edit_calendar/${this.id}`, formProps);
   };
 
   newMonth = async () => {
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_month`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          calendar_id: this.id,
-          index: this.months.length + 1,
-          title: `Month(${this.months.length + 1})`,
-          number_of_days: 30,
-        }),
-      });
-      const data = await res.json();
-      if (res.status === 201) {
-        this.months.push(data);
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new month...");
-      console.log(err);
-    }
+    const data = await postThing("/api/add_month", {
+      calendar_id: this.id,
+      index: this.months.length + 1,
+      title: `Month(${this.months.length + 1})`,
+      number_of_days: 30,
+    });
+    if (data) this.months.push(data);
   };
 
   newDay = async () => {
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_day`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          calendar_id: this.id,
-          index: this.daysOfTheWeek.length + 1,
-          title: `Day(${this.daysOfTheWeek.length + 1})`,
-        }),
-      });
-      const data = await res.json();
-      if (res.status === 201) {
-        this.daysOfTheWeek.push(data);
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new day...");
-      console.log(err);
-    }
-  };
-
-  removeMonth = async (monthId) => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_month/${monthId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete month...");
-    }
-  };
-
-  removeDay = async (dayId) => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_day/${dayId}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete day...");
-    }
+    const data = await postThing("/api/add_day", {
+      calendar_id: this.id,
+      index: this.daysOfTheWeek.length + 1,
+      title: `Day(${this.daysOfTheWeek.length + 1})`,
+    });
+    if (data) this.daysOfTheWeek.push(data);
   };
 
   updateMonths = async () => {
@@ -211,34 +130,18 @@ export default class Calendar {
 
     await Promise.all(
       this.months.map(async (month) => {
-        try {
-          const res = await fetch(
-            `${window.location.origin}/api/edit_month/${month.id}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-              },
-              body: JSON.stringify({
-                title: month.title,
-                index: month.index,
-                number_of_days: month.number_of_days,
-              }),
-            }
-          );
-          const data = await res.json();
-          monthUpdateSuccessList.push(data);
-        } catch (err) {
-          console.log(err);
-          // alert("Failed to update month...");
-          this.parentComponentRender();
-        }
+        const resData = await postThing(`/api/edit_month/${month.id}`, {
+          title: month.title,
+          index: month.index,
+          number_of_days: month.number_of_days,
+        });
+        if (resData) monthUpdateSuccessList.push(resData);
       })
     );
     const successListSortedByIndex = monthUpdateSuccessList.sort(
       (a, b) => a.index - b.index
     );
+
     this.months = successListSortedByIndex;
   };
 
@@ -247,28 +150,11 @@ export default class Calendar {
 
     await Promise.all(
       this.daysOfTheWeek.map(async (day) => {
-        try {
-          const res = await fetch(
-            `${window.location.origin}/api/edit_day/${day.id}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-              },
-              body: JSON.stringify({
-                title: day.title,
-                index: day.index,
-              }),
-            }
-          );
-          const data = await res.json();
-          dayUpdateSuccessList.push(data);
-        } catch (err) {
-          console.log(err);
-          // alert("Failed to update day...");
-          this.parentComponentRender();
-        }
+        const resData = await postThing(`/api/edit_day/${day.id}`, {
+          title: day.title,
+          index: day.index,
+        });
+        if (resData) dayUpdateSuccessList.push(resData);
       })
     );
     const successListSortedByIndex = dayUpdateSuccessList.sort(
@@ -287,25 +173,10 @@ export default class Calendar {
     this.currentDay = dayNumber;
     this.render();
     // then send data call
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_calendar/${this.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify({
-            current_day: dayNumber,
-            current_month_id: this.monthBeingViewed.id,
-          }),
-        }
-      );
-    } catch (err) {
-      console.log(err);
-      // window.alert("Failed to update current day...");
-    }
+    await postThing(`/api/edit_calendar/${this.id}`, {
+      current_day: dayNumber,
+      current_month_id: this.monthBeingViewed.id,
+    });
   };
 
   renderManageDays = () => {
@@ -337,7 +208,7 @@ export default class Calendar {
           "Remove Day"
         );
         removeDayBtn.addEventListener("click", () => {
-          this.removeDay(day.id);
+          deleteThing(`/api/remove_day/${day.id}`);
           this.daysOfTheWeek.splice(this.daysOfTheWeek.indexOf(day), 1);
           this.render();
         });
@@ -382,16 +253,18 @@ export default class Calendar {
     // add day
     const addBtn = createElement("button", {}, "+ Day");
     addBtn.addEventListener("click", async () => {
+      this.toggleLoading();
       await this.newDay();
-      this.render();
+      this.toggleLoading();
     });
     mainDiv.append(addBtn);
     // done
     const doneBtn = createElement("button", {}, "Done");
     doneBtn.addEventListener("click", async () => {
-      await this.updateDays();
       this.manageDays = false;
-      this.render();
+      this.toggleLoading();
+      await this.updateDays();
+      this.toggleLoading();
     });
     mainDiv.append(doneBtn);
     // append
@@ -444,7 +317,7 @@ export default class Calendar {
           "Remove Month"
         );
         removeMonthBtn.addEventListener("click", () => {
-          this.removeMonth(month.id);
+          deleteThing(`/api/remove_month/${month.id}`);
           this.months.splice(this.months.indexOf(month), 1);
           this.render();
         });
@@ -489,16 +362,18 @@ export default class Calendar {
     // add month
     const addBtn = createElement("button", {}, "+ Month");
     addBtn.addEventListener("click", async () => {
+      this.toggleLoading();
       await this.newMonth();
-      this.render();
+      this.toggleLoading();
     });
     mainDiv.append(addBtn);
     // done
     const doneBtn = createElement("button", {}, "Done");
     doneBtn.addEventListener("click", async () => {
-      await this.updateMonths();
       this.manageMonths = false;
-      this.render();
+      this.toggleLoading();
+      await this.updateMonths();
+      this.toggleLoading();
     });
     mainDiv.append(doneBtn);
     // append
@@ -529,15 +404,21 @@ export default class Calendar {
       ),
     ]);
     form.addEventListener("submit", async (e) => {
-      await this.updateCalendar(e);
+      e.preventDefault();
       this.manageCalendar = false;
-      this.render();
+      this.toggleLoading();
+      await this.updateCalendar(e);
+      this.toggleLoading();
     });
 
     this.domComponent.appendChild(form);
   };
 
   renderEdit = async () => {
+    if (this.loading) {
+      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+    }
+
     if (this.manageCalendar) {
       return this.renderManageCalendar();
     }
@@ -588,16 +469,15 @@ export default class Calendar {
     doneButton.addEventListener("click", async () => {
       // toggle and render
       this.toggleEdit();
-      this.parentComponentRender();
     });
     const removeButton = createElement(
       "button",
       { class: "btn-red" },
       "Remove Calendar"
     );
-    removeButton.addEventListener("click", async () => {
+    removeButton.addEventListener("click", () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        await this.removeCalendar();
+        deleteThing(`/api/remove_calendar/${this.id}`);
         this.toggleEdit();
         this.domComponent.remove();
       }
@@ -640,7 +520,9 @@ export default class Calendar {
       this.render();
     });
 
-    const calendarContainer = createElement("div", {class: "calendar-container"});
+    const calendarContainer = createElement("div", {
+      class: "calendar-container",
+    });
     calendarContainer.style.display = "grid";
     calendarContainer.style.gridTemplateColumns = `repeat(${
       this.daysOfTheWeek.length ? this.daysOfTheWeek.length : 7

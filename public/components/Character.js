@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 
 export default class Character {
   constructor(props) {
@@ -31,51 +32,23 @@ export default class Character {
     this.render();
   };
 
-  removeCharacter = async () => {
-    const res = await fetch(
-      `${window.location.origin}/api/remove_character/${this.id}`,
-      {
-        method: "DELETE",
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      }
-    );
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete character...");
-    }
-  };
-
   saveCharacter = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
     // update UI
     this.title = formProps.title;
+    this.character.title = formProps.title;
     this.description = formProps.description;
+    this.character.description = formProps.description;
+    this.type = formProps.type;
+    this.character.type = formProps.type;
+    this.toggleEdit();
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_character/${this.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save character...");
-      console.log(err);
-    }
+    await postThing(
+      `/api/edit_character/${this.id}`,
+      formProps
+    );
   };
 
   renderEdit = async () => {
@@ -110,8 +83,8 @@ export default class Character {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveCharacter(e);
-            this.toggleEdit();
           },
         }
       ),
@@ -120,7 +93,7 @@ export default class Character {
         type: "click",
         event: () => {
           if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            this.removeCharacter();
+            deleteThing(`/api/remove_character/${this.id}`);
             this.toggleEdit();
             this.domComponent.remove();
           }

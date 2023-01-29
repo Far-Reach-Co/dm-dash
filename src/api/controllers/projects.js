@@ -5,7 +5,7 @@ const {
   removeProjectQuery,
   editProjectQuery,
 } = require("../queries/projects.js");
-const { getProjectInviteQuery } = require("../queries/projectInvites.js");
+const { getProjectInviteByProjectQuery } = require("../queries/projectInvites.js");
 const {
   getProjectUsersQuery,
   getProjectUserByUserAndProjectQuery,
@@ -42,7 +42,7 @@ async function getProjects(req, res, next) {
       projectUserData.rows &&
       projectUserData.rows.length
     ) {
-      for (projectUser of projectUserData.rows) {
+      for (var projectUser of projectUserData.rows) {
         const projectData = await getProjectQuery(projectUser.project_id);
         if (projectData && projectData.rows && projectData.rows.length) {
           const project = projectData.rows[0];
@@ -55,8 +55,8 @@ async function getProjects(req, res, next) {
       }
     }
     // get project invites
-    for (project of projectsData.rows) {
-      const projectInvites = await getProjectInviteQuery(project.id);
+    for (var project of projectsData.rows) {
+      const projectInvites = await getProjectInviteByProjectQuery(project.id);
       if (projectInvites && projectInvites.rows && projectInvites.rows.length)
         project.project_invite = projectInvites.rows[0];
     }

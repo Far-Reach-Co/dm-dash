@@ -2,6 +2,9 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Item from "../components/Item.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import searchElement from "../lib/searchElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class ItemsView {
   constructor(props) {
@@ -16,6 +19,7 @@ export default class ItemsView {
     this.offset = 0;
 
     this.creatingItem = false;
+    this.newItemLoading = false;
 
     this.render();
   }
@@ -31,65 +35,43 @@ export default class ItemsView {
     this.render();
   };
 
+  toggleNewItemLoading = () => {
+    this.newItemLoading = !this.newItemLoading;
+    this.render();
+  };
+
   getItems = async () => {
-    let url = `${window.location.origin}/api/get_items/${state.currentProject.id}/${this.limit}/${this.offset}`;
+    let url = `/api/get_items/${state.currentProject.id}/${this.limit}/${this.offset}`;
     if (
       !this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_items_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
+      url = `/api/get_items_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (
       this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_items_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+      url = `/api/get_items_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
-      url = `${window.location.origin}/api/get_items_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
+      url = `/api/get_items_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
-    try {
-      const res = await fetch(url, {
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+    return await getThings(url);
   };
 
   newItem = async (e) => {
-    e.preventDefault();
+    this.toggleNewItemLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_item`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new item...");
-      console.log(err);
-    }
+    await postThing("/api/add_item", formProps)
+    this.toggleNewItemLoading();
   };
 
   renderCreatingItem = async () => {
@@ -118,11 +100,12 @@ export default class ItemsView {
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      this.creatingItem = false;
       await this.newItem(e);
-      this.toggleCreatingItem();
     });
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingItem();
     });
@@ -179,15 +162,10 @@ export default class ItemsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        {class: "new-btn"},
-        "+ Item",
-        {
-          type: "click",
-          event: this.toggleCreatingItem,
-        }
-      );
+      return createElement("button", { class: "new-btn" }, "+ Item", {
+        type: "click",
+        event: this.toggleCreatingItem,
+      });
   };
 
   render = async () => {
@@ -197,16 +175,22 @@ export default class ItemsView {
       return this.renderCreatingItem();
     }
 
+    if (this.newItemLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we create your item...")
+      );
+    }
+
     // append
     this.domComponent.append(
       createElement(
         "div",
         {
-          class: "view-options-container"
+          class: "view-options-container",
         },
         [
           this.renderAddButtonOrNull(),
-          createElement("div", {class: "view-filter-options-container"}, [
+          createElement("div", { class: "view-filter-options-container" }, [
             createElement(
               "div",
               { style: "display: flex; flex-direction: column;" },
@@ -215,19 +199,8 @@ export default class ItemsView {
                 itemTypeSelect(this.handleTypeFilterChange, this.filter),
               ]
             ),
-            createElement(
-              "input",
-              { placeholder: "Search Items", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  (this.searchTerm = e.target.value.toLowerCase()),
-                    this.render();
-                },
-              }
-            ),
-          ])
+            searchElement("Search Items", this)
+          ]),
         ]
       ),
       createElement("hr"),

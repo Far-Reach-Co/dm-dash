@@ -1,6 +1,5 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import {
@@ -8,6 +7,9 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import NoteManager from "./NoteManager.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -16,11 +18,12 @@ export default class SingleLocationView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
-    this.creatingNote = false;
     this.creatingSubLocation = false;
     this.addParentLocation = false;
     this.edit = false;
     this.uploadingImage = false;
+    this.parentLocationLoading = false;
+    this.subLocationLoading = false;
 
     this.render();
   }
@@ -30,8 +33,13 @@ export default class SingleLocationView {
     this.render();
   };
 
-  toggleCreatingNote = () => {
-    this.creatingNote = !this.creatingNote;
+  toggleParentLocationLoading = () => {
+    this.parentLocationLoading = !this.parentLocationLoading;
+    this.render();
+  };
+
+  toggleSubLocationLoading = () => {
+    this.subLocationLoading = !this.subLocationLoading;
     this.render();
   };
 
@@ -50,76 +58,19 @@ export default class SingleLocationView {
     this.render();
   };
 
-  getParentLocation = async () => {
-    if (!this.location.parent_location_id) return null;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.location.parent_location_id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  };
-
-  getSubLocations = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_sublocations/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   saveLocationForParent = async (e) => {
-    e.preventDefault();
+    this.toggleParentLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.parent_location_id = formProps.location_id;
     delete formProps.location_id;
     formProps.is_sub = true;
+    // Update UI
+    this.location.parent_location_id = formProps.parent_location_id;
+    this.location.is_sub = true;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_location/${this.location.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        this.location.parent_location_id = formProps.parent_location_id;
-        this.location.is_sub = true;
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to save location...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_location/${this.location.id}`, formProps);
+    this.toggleParentLocationLoading();
   };
 
   renderAddParentLocation = async () => {
@@ -141,13 +92,14 @@ export default class SingleLocationView {
         {
           type: "submit",
           event: async (e) => {
+            e.preventDefault();
+            this.addParentLocation = false;
             await this.saveLocationForParent(e);
-            this.toggleAddParentLocation();
           },
         }
       ),
       createElement("br"),
-      createElement("button", {}, "Cancel", {
+      createElement("button", { class: "btn-red" }, "Cancel", {
         type: "click",
         event: this.toggleAddParentLocation,
       })
@@ -155,7 +107,7 @@ export default class SingleLocationView {
   };
 
   newSubLocation = async (e) => {
-    e.preventDefault();
+    this.toggleSubLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
@@ -164,23 +116,8 @@ export default class SingleLocationView {
     formProps.parent_location_id = this.location.id;
     if (formProps.type === "None") formProps.type = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_location`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new location...");
-      console.log(err);
-    }
+    await postThing("/api/add_location", formProps);
+    this.toggleSubLocationLoading();
   };
 
   renderCreateSubLocation = async () => {
@@ -189,32 +126,44 @@ export default class SingleLocationView {
       { class: "component-title" },
       `Create new sub-location for ${this.location.title}`
     );
-    const form = createElement("form", {}, [
-      createElement("div", {}, "Type Select (Optional)"),
-      locationTypeSelect(null, null),
-      createElement("br"),
-      createElement("label", { for: "title" }, "Title"),
-      createElement("br"),
-      createElement("input", {
-        id: "title",
-        name: "title",
-        placeholder: "Location Title",
-        required: true,
-      }),
-      createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
-      createElement("br"),
-      createElement("button", { type: "submit" }, "Create"),
-    ]);
-    form.addEventListener("submit", async (e) => {
-      await this.newSubLocation(e);
-      this.toggleCreatingSubLocation();
-    });
+    const form = createElement(
+      "form",
+      {},
+      [
+        createElement("div", {}, "Type Select (Optional)"),
+        locationTypeSelect(null, null),
+        createElement("br"),
+        createElement("label", { for: "title" }, "Title"),
+        createElement("br"),
+        createElement("input", {
+          id: "title",
+          name: "title",
+          placeholder: "Location Title",
+          required: true,
+        }),
+        createElement("label", { for: "description" }, "Description"),
+        createElement("textarea", {
+          id: "description",
+          name: "description",
+        }),
+        createElement("br"),
+        createElement("button", { type: "submit" }, "Create"),
+      ],
+      {
+        type: "submit",
+        event: async (e) => {
+          e.preventDefault();
+          this.creatingSubLocation = false;
+          await this.newSubLocation(e);
+        },
+      }
+    );
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingSubLocation();
     });
@@ -227,149 +176,11 @@ export default class SingleLocationView {
     );
   };
 
-  newNote = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const formProps = Object.fromEntries(formData);
-    formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject.id;
-
-    formProps.location_id = this.location.id;
-    formProps.character_id = null;
-    formProps.item_id = null;
-
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_note`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new note...");
-      console.log(err);
-    }
-  };
-
-  renderCreateNewNote = async () => {
-    this.domComponent.append(
-      createElement(
-        "div",
-        { class: "component-title" },
-        `Create new note for ${this.location.title}`
-      ),
-      createElement(
-        "form",
-        {},
-        [
-          createElement("label", { for: "title" }, "Title"),
-          createElement("br"),
-          createElement("input", {
-            id: "title",
-            name: "title",
-            placeholder: "Title",
-            required: true,
-          }),
-          createElement("label", { for: "description" }, "Description"),
-          createElement("textarea", {
-            id: "description",
-            name: "description",
-            required: true,
-            cols: "30",
-            rows: "7",
-          }),
-          createElement("br"),
-          createElement("button", { type: "submit" }, "Create"),
-        ],
-        {
-          type: "submit",
-          event: async (e) => {
-            await this.newNote(e);
-            this.toggleCreatingNote();
-          },
-        }
-      ),
-      createElement("br"),
-      createElement("button", {}, "Cancel", {
-        type: "click",
-        event: this.toggleCreatingNote,
-      })
-    );
-  };
-
-  getNotesByLocation = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_location/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
-  renderLocationNotes = async () => {
-    let notesByLocation = await this.getNotesByLocation();
-    return notesByLocation.map((note) => {
-      const elem = createElement("div", {
-        id: `note-component-${note.id}`,
-        class: "sub-view-component",
-      });
-
-      new Note({
-        domComponent: elem,
-        parentRender: this.render,
-        id: note.id,
-        projectId: note.project_id,
-        title: note.title,
-        description: note.description,
-        dateCreated: note.date_created,
-        locationId: note.location_id,
-        characterId: note.character_id,
-        itemId: note.item_id,
-        navigate: this.navigate,
-      });
-
-      return elem;
-    });
-  };
-
-  getCharactersByLocation = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_characters_by_location/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderSubLocations = async () => {
-    const subLocations = await this.getSubLocations();
+    let subLocations = await getThings(
+      `/api/get_sublocations/${this.location.id}`
+    );
+    if (!subLocations) subLocations = [];
 
     const subLocationsMap = subLocations.map((location) => {
       const elem = createElement(
@@ -398,7 +209,10 @@ export default class SingleLocationView {
   };
 
   renderCharacters = async () => {
-    let charactersByLocation = await this.getCharactersByLocation();
+    let charactersByLocation = await getThings(
+      `/api/get_characters_by_location/${this.location.id}`
+    );
+    if (!charactersByLocation) charactersByLocation = [];
 
     const elemMap = charactersByLocation.map((character) => {
       const elem = createElement(
@@ -426,28 +240,11 @@ export default class SingleLocationView {
     else return [createElement("small", {}, "None...")];
   };
 
-  getItemsByLocation = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_items_by_location/${this.location.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
   renderItems = async () => {
-    let itemsByLocation = await this.getItemsByLocation();
+    let itemsByLocation = await getThings(
+      `/api/get_items_by_location/${this.location.id}`
+    );
+    if (!itemsByLocation) itemsByLocation = [];
 
     const elemMap = itemsByLocation.map((item) => {
       const elem = createElement(
@@ -476,7 +273,13 @@ export default class SingleLocationView {
   };
 
   renderParentLocation = async () => {
-    const parentLocation = await this.getParentLocation();
+    let parentLocation = null;
+    if (this.location.parent_location_id) {
+      parentLocation = await getThings(
+        `/api/get_location/${this.location.parent_location_id}`
+      );
+    }
+
     if (parentLocation) {
       return createElement(
         "a",
@@ -522,7 +325,6 @@ export default class SingleLocationView {
   };
 
   saveLocation = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
@@ -549,25 +351,7 @@ export default class SingleLocationView {
     this.toggleEdit();
 
     // send data to update in db
-    try {
-      const res = await fetch(
-        `${window.origin}/api/edit_location/${this.location.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save location...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_location/${this.location.id}`, formProps);
   };
 
   renderEdit = async () => {
@@ -622,6 +406,7 @@ export default class SingleLocationView {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveLocation(e);
           },
         }
@@ -682,17 +467,36 @@ export default class SingleLocationView {
       return this.renderEdit();
     }
 
-    if (this.creatingNote) {
-      return this.renderCreateNewNote();
+    if (this.parentLocationLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we update your location data..."
+        )
+      );
+    }
+
+    if (this.subLocationLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we create your new location..."
+        )
+      );
     }
 
     if (this.creatingSubLocation) {
-      return this.renderCreateSubLocation();
+      return await this.renderCreateSubLocation();
     }
 
     if (this.addParentLocation) {
-      return this.renderAddParentLocation();
+      return await this.renderAddParentLocation();
     }
+
+    const noteManagerElem = createElement("div");
+    new NoteManager({
+      domComponent: noteManagerElem,
+      altEndpoint: `/api/get_notes_by_location/${this.location.id}`,
+      locationId: this.location.id,
+    });
 
     // append
     this.domComponent.append(
@@ -751,22 +555,10 @@ export default class SingleLocationView {
         ]),
       ]),
       createElement("br"),
-      createElement("br"),
       await this.renderImage(),
       createElement("br"),
-      createElement("div", { class: "single-item-subheading" }, [
-        "Notes",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
-          type: "click",
-          event: () => {
-            this.toggleCreatingNote();
-          },
-        }),
-      ]),
-      createElement("div", { class: "sub-view" }, [
-        ...(await this.renderLocationNotes()),
-      ]),
-      createElement("br")
+      createElement("br"),
+      noteManagerElem,
     );
   };
 }

@@ -2,6 +2,9 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Character from "../components/Character.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import searchElement from "../lib/searchElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class CharactersView {
   constructor(props) {
@@ -15,6 +18,7 @@ export default class CharactersView {
     this.offset = 0;
 
     this.creatingCharacter = false;
+    this.newCharacterLoading = false;
 
     this.render();
   }
@@ -30,65 +34,43 @@ export default class CharactersView {
     this.render();
   };
 
+  toggleNewCharacterLoading = () => {
+    this.newCharacterLoading = !this.newCharacterLoading;
+    this.render();
+  };
+
   getCharacters = async () => {
-    let url = `${window.location.origin}/api/get_characters/${state.currentProject.id}/${this.limit}/${this.offset}`;
+    let url = `/api/get_characters/${state.currentProject.id}/${this.limit}/${this.offset}`;
     if (
       !this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_characters_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
+      url = `/api/get_characters_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (
       this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_characters_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+      url = `/api/get_characters_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
-      url = `${window.location.origin}/api/get_characters_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
+      url = `/api/get_characters_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
-    try {
-      const res = await fetch(url, {
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+    return await getThings(url);
   };
 
   newCharacter = async (e) => {
-    e.preventDefault();
+    this.toggleNewCharacterLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_character`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new character...");
-      console.log(err);
-    }
+    await postThing("/api/add_character", formProps);
+    this.toggleNewCharacterLoading();
   };
 
   renderCreatingCharacter = async () => {
@@ -117,11 +99,16 @@ export default class CharactersView {
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      this.creatingCharacter = false;
       await this.newCharacter(e);
-      this.toggleCreatingCharacter();
     });
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingCharacter();
     });
@@ -177,15 +164,10 @@ export default class CharactersView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        {class: "new-btn"},
-        "+ Character",
-        {
-          type: "click",
-          event: this.toggleCreatingCharacter,
-        }
-      );
+      return createElement("button", { class: "new-btn" }, "+ Character", {
+        type: "click",
+        event: this.toggleCreatingCharacter,
+      });
   };
 
   render = async () => {
@@ -195,16 +177,24 @@ export default class CharactersView {
       return this.renderCreatingCharacter();
     }
 
+    if (this.newCharacterLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we create your character..."
+        )
+      );
+    }
+
     // append
     this.domComponent.append(
       createElement(
         "div",
         {
-          class: "view-options-container"
+          class: "view-options-container",
         },
         [
           this.renderAddButtonOrNull(),
-          createElement("div", {class: "view-filter-options-container"}, [
+          createElement("div", { class: "view-filter-options-container" }, [
             createElement(
               "div",
               { style: "display: flex; flex-direction: column;" },
@@ -214,19 +204,7 @@ export default class CharactersView {
               ]
             ),
             createElement("br"),
-            createElement(
-              "input",
-              { placeholder: "Search Characters", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  this.offset = 0;
-                  (this.searchTerm = e.target.value.toLowerCase()),
-                    this.render();
-                },
-              }
-            ),
+            searchElement("Search Characters", this),
           ]),
         ]
       ),

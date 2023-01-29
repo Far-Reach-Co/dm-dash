@@ -3,6 +3,9 @@ import state from "../lib/state.js";
 import Location from "../components/Location.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import { uploadImage } from "../lib/imageUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import searchElement from "../lib/searchElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class LocationsView {
   constructor(props) {
@@ -16,7 +19,7 @@ export default class LocationsView {
     this.offset = 0;
 
     this.creatingLocation = false;
-    this.savingData = false;
+    this.newLocationLoading = false;
 
     this.render();
   }
@@ -33,48 +36,35 @@ export default class LocationsView {
     this.render();
   };
 
-  toggleSavingData = () => {
-    this.savingData = true;
+  toggleNewLocationLoading = () => {
+    this.newLocationLoading = !this.newLocationLoading;
     this.render();
   };
 
   getLocations = async () => {
-    let url = `${window.location.origin}/api/get_locations/${state.currentProject.id}/${this.limit}/${this.offset}`;
+    let url = `/api/get_locations/${state.currentProject.id}/${this.limit}/${this.offset}`;
     if (
       !this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_locations_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
+      url = `/api/get_locations_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (
       this.filter &&
       this.searchTerm &&
       this.searchTerm !== "" &&
       this.searchTerm !== " "
     )
-      url = `${window.location.origin}/api/get_locations_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
+      url = `/api/get_locations_filter_keyword/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}/${this.searchTerm}`;
     if (this.filter && (this.searchTerm === "" || this.searchTerm === " "))
-      url = `${window.location.origin}/api/get_locations_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
+      url = `/api/get_locations_filter/${state.currentProject.id}/${this.limit}/${this.offset}/${this.filter}`;
 
-    try {
-      const res = await fetch(url, {
-        headers: {
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-    }
+    return await getThings(url);
   };
 
   newLocation = async (e) => {
-    e.preventDefault();
-    this.toggleSavingData();
+    this.toggleNewLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
@@ -94,34 +84,11 @@ export default class LocationsView {
       delete formProps.image;
     }
 
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_location`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to create new location...");
-      console.log(err);
-    }
-
-    this.creatingLocation = false;
-    this.toggleSavingData();
+    await postThing("/api/add_location", formProps)
+    this.toggleNewLocationLoading();
   };
 
   renderCreatingLocation = async () => {
-    if (this.savingData) {
-      return this.domComponent.append(
-        createElement("h2", {}, "Please wait while we process your data...")
-      );
-    }
-
     const titleOfForm = createElement(
       "div",
       { class: "component-title" },
@@ -161,10 +128,12 @@ export default class LocationsView {
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      this.creatingLocation = false;
       await this.newLocation(e);
     });
 
-    const cancelButton = createElement("button", {}, "Cancel");
+    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingLocation();
     });
@@ -222,7 +191,7 @@ export default class LocationsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", {class: "new-btn"}, "+ Location", {
+      return createElement("button", { class: "new-btn" }, "+ Location", {
         type: "click",
         event: this.toggleCreatingLocation,
       });
@@ -235,6 +204,12 @@ export default class LocationsView {
       return this.renderCreatingLocation();
     }
 
+    if (this.newLocationLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we create your location...")
+      );
+    }
+
     // append
     this.domComponent.append(
       createElement(
@@ -244,7 +219,7 @@ export default class LocationsView {
         },
         [
           this.renderAddButtonOrNull(),
-          createElement("div", {class: "view-filter-options-container"}, [
+          createElement("div", { class: "view-filter-options-container" }, [
             createElement(
               "div",
               { style: "display: flex; flex-direction: column;" },
@@ -254,19 +229,7 @@ export default class LocationsView {
               ]
             ),
             createElement("br"),
-            createElement(
-              "input",
-              { placeholder: "Search Locations", value: this.searchTerm },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  this.offset = 0;
-                  (this.searchTerm = e.target.value.toLowerCase()),
-                    this.render();
-                },
-              }
-            ),
+            searchElement("Search Locations", this)
           ]),
         ]
       ),

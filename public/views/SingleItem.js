@@ -1,9 +1,10 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import Note from "../components/Note.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import NoteManager from "./NoteManager.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -12,7 +13,6 @@ export default class SingleItemView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
-    this.creatingNote = false;
     this.edit = false;
 
     this.render();
@@ -21,132 +21,6 @@ export default class SingleItemView {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  toggleCreatingNote = () => {
-    this.creatingNote = !this.creatingNote;
-    this.render();
-  };
-
-  newNote = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const formProps = Object.fromEntries(formData);
-    formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject.id;
-
-    formProps.item_id = this.item.id;
-    formProps.location_id = null;
-    formProps.character_id = null;
-
-    try {
-      const res = await fetch(`${window.location.origin}/api/add_note`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify(formProps),
-      });
-      await res.json();
-      if (res.status === 201) {
-      } else throw new Error();
-    } catch (err) {
-      window.alert("Failed to create new note...");
-      console.log(err);
-    }
-  };
-
-  renderCreateNewNote = async () => {
-    this.domComponent.append(
-      createElement(
-        "div",
-        { class: "component-title" },
-        `Create new note for ${this.item.title}`
-      ),
-      createElement(
-        "form",
-        {},
-        [
-          createElement("label", { for: "title" }, "Title"),
-          createElement("br"),
-          createElement("input", {
-            id: "title",
-            name: "title",
-            placeholder: "Title",
-            required: true,
-          }),
-          createElement("label", { for: "description" }, "Description"),
-          createElement("textarea", {
-            id: "description",
-            name: "description",
-            required: true,
-            cols: "30",
-            rows: "7",
-          }),
-          createElement("br"),
-          createElement("button", { type: "submit" }, "Create"),
-        ],
-        {
-          type: "submit",
-          event: async (e) => {
-            await this.newNote(e);
-            this.toggleCreatingNote();
-          },
-        }
-      ),
-      createElement("br"),
-      createElement("button", {}, "Cancel", {
-        type: "click",
-        event: this.toggleCreatingNote,
-      })
-    );
-  };
-
-  getNotesByItem = async () => {
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_notes_by_item/${this.item.id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return [];
-    }
-  };
-
-  renderItemNotes = async () => {
-    let notesByItem = await this.getNotesByItem();
-    return notesByItem.map((note) => {
-      const elem = createElement("div", {
-        id: `note-component-${note.id}`,
-        class: "sub-view-component",
-      });
-
-      new Note({
-        domComponent: elem,
-        parentRender: this.render,
-        id: note.id,
-        projectId: note.project_id,
-        title: note.title,
-        description: note.description,
-        dateCreated: note.date_created,
-        locationId: note.location_id,
-        characterId: note.character_id,
-        itemId: note.item_id,
-        navigate: this.navigate,
-      });
-
-      return elem;
-    });
   };
 
   renderItemType = () => {
@@ -160,7 +34,6 @@ export default class SingleItemView {
   };
 
   saveItem = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
@@ -169,25 +42,7 @@ export default class SingleItemView {
     this.item.description = formProps.description;
     this.item.type = formProps.type;
 
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/edit_item/${this.item.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: JSON.stringify(formProps),
-        }
-      );
-      await res.json();
-      if (res.status === 200) {
-      } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save item...");
-      console.log(err);
-    }
+    await postThing(`/api/edit_item/${this.item.id}`, formProps);
   };
 
   renderEdit = async () => {
@@ -222,6 +77,7 @@ export default class SingleItemView {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveItem(e);
             this.toggleEdit();
           },
@@ -253,10 +109,6 @@ export default class SingleItemView {
       return this.renderEdit();
     }
 
-    if (this.creatingNote) {
-      return this.renderCreateNewNote();
-    }
-
     const currentLocationComponent = createElement("div", {});
     new CurrentLocationComponent({
       domComponent: currentLocationComponent,
@@ -269,6 +121,13 @@ export default class SingleItemView {
       domComponent: currentCharacterComponent,
       item: this.item,
       navigate: this.navigate,
+    });
+
+    const noteManagerElem = createElement("div");
+    new NoteManager({
+      domComponent: noteManagerElem,
+      altEndpoint: `/api/get_notes_by_item/${this.item.id}`,
+      itemId: this.item.id,
     });
 
     // append
@@ -308,19 +167,7 @@ export default class SingleItemView {
       ]),
       createElement("br"),
       createElement("br"),
-      createElement("div", { class: "single-item-subheading" }, [
-        "Notes:",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
-          type: "click",
-          event: () => {
-            this.toggleCreatingNote();
-          },
-        }),
-      ]),
-      createElement("div", { class: "sub-view" }, [
-        ...(await this.renderItemNotes()),
-      ]),
-      createElement("br")
+      noteManagerElem
     );
   };
 }
@@ -364,41 +211,16 @@ class CurrentLocationComponent {
   };
 
   updateCurrentLocation = (newLocationId) => {
-    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        location_id: newLocationId,
-      }),
+    postThing(`/api/edit_item/${this.item.id}`, {
+      location_id: newLocationId,
     });
   };
 
-  getLocation = async () => {
-    if (!this.item.location_id) return null;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_location/${this.item.location_id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  };
-
   renderCurrentLocation = async () => {
-    const location = await this.getLocation();
+    let location = null;
+    if (this.item.location_id) {
+      location = await getThings(`/api/get_location/${this.item.location_id}`);
+    }
 
     if (this.editingCurrentLocation) {
       return createElement(
@@ -484,41 +306,18 @@ class CurrentCharacterComponent {
   };
 
   updateCurrentCharacter = (newCharacterId) => {
-    fetch(`${window.location.origin}/api/edit_item/${this.item.id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-      },
-      body: JSON.stringify({
-        character_id: newCharacterId,
-      }),
+    postThing(`/api/edit_item/${this.item.id}`, {
+      character_id: newCharacterId,
     });
   };
 
-  getCharacter = async () => {
-    if (!this.item.character_id) return null;
-    try {
-      const res = await fetch(
-        `${window.location.origin}/api/get_character/${this.item.character_id}`,
-        {
-          headers: {
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-      const data = await res.json();
-      if (res.status === 200) {
-        return data;
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      return null;
-    }
-  };
-
   renderCurrentCharacter = async () => {
-    const character = await this.getCharacter();
+    let character = null;
+    if (this.item.character_id) {
+      character = await getThings(
+        `/api/get_character/${this.item.character_id}`
+      );
+    }
 
     if (this.editingCurrentCharacter) {
       return createElement(
