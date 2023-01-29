@@ -1,4 +1,4 @@
-import toast from "../components/toast.js";
+import toast from "../components/Toast.js";
 
 async function getThings(endpoint) {
   try {
