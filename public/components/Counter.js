@@ -126,11 +126,6 @@ export default class Counter {
           },
         }),
       ]),
-      createElement("br"),
-      createElement("button", {}, "Edit", {
-        type: "click",
-        event: this.toggleEdit,
-      })
     );
   };
 }

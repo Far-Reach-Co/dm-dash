@@ -64,7 +64,6 @@ export default class Clock {
   };
 
   toggleEdit = () => {
-    this.stop();
     this.edit = !this.edit;
     this.render();
   };
@@ -110,8 +109,8 @@ export default class Clock {
     const doneButton = createElement("button", {}, "Done");
     doneButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
-      await this.saveClock();
       this.toggleEdit();
+      this.saveClock();
     });
     const removeButton = createElement(
       "button",
@@ -138,8 +137,8 @@ export default class Clock {
     resetButton.addEventListener("click", async () => {
       if (window.confirm(`Are you sure you want to reset ${this.title}`)) {
         this.reset();
-        await this.saveClock();
         this.toggleEdit();
+        this.saveClock();
       }
     });
     // append
