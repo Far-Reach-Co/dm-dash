@@ -33,13 +33,17 @@ export default class Character {
   };
 
   saveCharacter = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
     // update UI
     this.title = formProps.title;
+    this.character.title = formProps.title;
     this.description = formProps.description;
+    this.character.description = formProps.description;
+    this.type = formProps.type;
+    this.character.type = formProps.type;
+    this.toggleEdit();
 
     await postThing(
       `/api/edit_character/${this.id}`,
@@ -79,8 +83,8 @@ export default class Character {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveCharacter(e);
-            this.toggleEdit();
           },
         }
       ),

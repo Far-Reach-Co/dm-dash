@@ -3,7 +3,7 @@ import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
-import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
+import NoteManager from "./NoteManager.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -12,7 +12,6 @@ export default class SingleCharacterView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
-    this.creatingNote = false;
     this.edit = false;
 
     this.render();
@@ -21,25 +20,6 @@ export default class SingleCharacterView {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  toggleCreatingNote = () => {
-    this.creatingNote = !this.creatingNote;
-    this.render();
-  };
-
-  newNote = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const formProps = Object.fromEntries(formData);
-    formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject.id;
-
-    formProps.character_id = this.character.id;
-    formProps.location_id = null;
-    formProps.item_id = null;
-
-    await postThing("/api/add_note", formProps);
   };
 
   renderCharacterType = () => {
@@ -88,7 +68,6 @@ export default class SingleCharacterView {
   };
 
   saveCharacter = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
@@ -132,6 +111,7 @@ export default class SingleCharacterView {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveCharacter(e);
             this.toggleEdit();
           },
@@ -163,21 +143,18 @@ export default class SingleCharacterView {
       return this.renderEdit();
     }
 
-    if (this.creatingNote) {
-      return this.domComponent.append(
-        ...(await renderCreateNewNote(
-          this.character.title,
-          this.toggleCreatingNote,
-          this.newNote
-        ))
-      );
-    }
-
     const currentLocationComponent = createElement("div", {});
     new CurrentLocationComponent({
       domComponent: currentLocationComponent,
       character: this.character,
       navigate: this.navigate,
+    });
+
+    const noteManagerElem = createElement("div");
+    new NoteManager({
+      domComponent: noteManagerElem,
+      altEndpoint: `/api/get_notes_by_character/${this.character.id}`,
+      locationId: this.character.id,
     });
 
     // append
@@ -222,12 +199,7 @@ export default class SingleCharacterView {
       ]),
       createElement("br"),
       createElement("br"),
-      ...(await renderNoteComponent(
-        this.toggleCreatingNote,
-        `/api/get_notes_by_character/${this.character.id}`,
-        this.render,
-        this.navigate
-      ))
+      noteManagerElem
     );
   };
 }

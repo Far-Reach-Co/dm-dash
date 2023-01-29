@@ -8,7 +8,8 @@ import {
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
-import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import NoteManager from "./NoteManager.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -17,11 +18,12 @@ export default class SingleLocationView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
-    this.creatingNote = false;
     this.creatingSubLocation = false;
     this.addParentLocation = false;
     this.edit = false;
     this.uploadingImage = false;
+    this.parentLocationLoading = false;
+    this.subLocationLoading = false;
 
     this.render();
   }
@@ -31,8 +33,13 @@ export default class SingleLocationView {
     this.render();
   };
 
-  toggleCreatingNote = () => {
-    this.creatingNote = !this.creatingNote;
+  toggleParentLocationLoading = () => {
+    this.parentLocationLoading = !this.parentLocationLoading;
+    this.render();
+  };
+
+  toggleSubLocationLoading = () => {
+    this.subLocationLoading = !this.subLocationLoading;
     this.render();
   };
 
@@ -52,7 +59,7 @@ export default class SingleLocationView {
   };
 
   saveLocationForParent = async (e) => {
-    e.preventDefault();
+    this.toggleParentLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.parent_location_id = formProps.location_id;
@@ -63,6 +70,7 @@ export default class SingleLocationView {
     this.location.is_sub = true;
 
     await postThing(`/api/edit_location/${this.location.id}`, formProps);
+    this.toggleParentLocationLoading();
   };
 
   renderAddParentLocation = async () => {
@@ -84,13 +92,14 @@ export default class SingleLocationView {
         {
           type: "submit",
           event: async (e) => {
+            e.preventDefault();
+            this.addParentLocation = false;
             await this.saveLocationForParent(e);
-            this.toggleAddParentLocation();
           },
         }
       ),
       createElement("br"),
-      createElement("button", {class: "btn-red"}, "Cancel", {
+      createElement("button", { class: "btn-red" }, "Cancel", {
         type: "click",
         event: this.toggleAddParentLocation,
       })
@@ -98,7 +107,7 @@ export default class SingleLocationView {
   };
 
   newSubLocation = async (e) => {
-    e.preventDefault();
+    this.toggleSubLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
@@ -108,6 +117,7 @@ export default class SingleLocationView {
     if (formProps.type === "None") formProps.type = null;
 
     await postThing("/api/add_location", formProps);
+    this.toggleSubLocationLoading();
   };
 
   renderCreateSubLocation = async () => {
@@ -116,32 +126,44 @@ export default class SingleLocationView {
       { class: "component-title" },
       `Create new sub-location for ${this.location.title}`
     );
-    const form = createElement("form", {}, [
-      createElement("div", {}, "Type Select (Optional)"),
-      locationTypeSelect(null, null),
-      createElement("br"),
-      createElement("label", { for: "title" }, "Title"),
-      createElement("br"),
-      createElement("input", {
-        id: "title",
-        name: "title",
-        placeholder: "Location Title",
-        required: true,
-      }),
-      createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
-      createElement("br"),
-      createElement("button", { type: "submit" }, "Create"),
-    ]);
-    form.addEventListener("submit", async (e) => {
-      await this.newSubLocation(e);
-      this.toggleCreatingSubLocation();
-    });
+    const form = createElement(
+      "form",
+      {},
+      [
+        createElement("div", {}, "Type Select (Optional)"),
+        locationTypeSelect(null, null),
+        createElement("br"),
+        createElement("label", { for: "title" }, "Title"),
+        createElement("br"),
+        createElement("input", {
+          id: "title",
+          name: "title",
+          placeholder: "Location Title",
+          required: true,
+        }),
+        createElement("label", { for: "description" }, "Description"),
+        createElement("textarea", {
+          id: "description",
+          name: "description",
+        }),
+        createElement("br"),
+        createElement("button", { type: "submit" }, "Create"),
+      ],
+      {
+        type: "submit",
+        event: async (e) => {
+          e.preventDefault();
+          this.creatingSubLocation = false;
+          await this.newSubLocation(e);
+        },
+      }
+    );
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingSubLocation();
     });
@@ -152,20 +174,6 @@ export default class SingleLocationView {
       createElement("br"),
       cancelButton
     );
-  };
-
-  newNote = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const formProps = Object.fromEntries(formData);
-    formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject.id;
-
-    formProps.location_id = this.location.id;
-    formProps.character_id = null;
-    formProps.item_id = null;
-
-    await postThing("/api/add_note", formProps);
   };
 
   renderSubLocations = async () => {
@@ -317,7 +325,6 @@ export default class SingleLocationView {
   };
 
   saveLocation = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
@@ -399,6 +406,7 @@ export default class SingleLocationView {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveLocation(e);
           },
         }
@@ -459,23 +467,36 @@ export default class SingleLocationView {
       return this.renderEdit();
     }
 
-    if (this.creatingNote) {
+    if (this.parentLocationLoading) {
       return this.domComponent.append(
-        ...(await renderCreateNewNote(
-          this.location.title,
-          this.toggleCreatingNote,
-          this.newNote
-        ))
+        renderLoadingWithMessage(
+          "Please wait while we update your location data..."
+        )
+      );
+    }
+
+    if (this.subLocationLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we create your new location..."
+        )
       );
     }
 
     if (this.creatingSubLocation) {
-      return this.renderCreateSubLocation();
+      return await this.renderCreateSubLocation();
     }
 
     if (this.addParentLocation) {
-      return this.renderAddParentLocation();
+      return await this.renderAddParentLocation();
     }
+
+    const noteManagerElem = createElement("div");
+    new NoteManager({
+      domComponent: noteManagerElem,
+      altEndpoint: `/api/get_notes_by_location/${this.location.id}`,
+      locationId: this.location.id,
+    });
 
     // append
     this.domComponent.append(
@@ -537,12 +558,7 @@ export default class SingleLocationView {
       await this.renderImage(),
       createElement("br"),
       createElement("br"),
-      ...(await renderNoteComponent(
-        this.toggleCreatingNote,
-        `/api/get_notes_by_location/${this.location.id}`,
-        this.render,
-        this.navigate
-      ))
+      noteManagerElem,
     );
   };
 }

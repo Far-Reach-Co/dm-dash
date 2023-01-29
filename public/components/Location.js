@@ -6,7 +6,7 @@ import {
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import state from "../lib/state.js";
-import { postThing } from "../lib/apiUtils.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 
 export default class Location {
   constructor(props) {
@@ -44,19 +44,10 @@ export default class Location {
   };
 
   removeLocation = async () => {
-    const res = await fetch(`${window.origin}/api/remove_location/${this.id}`, {
-      method: "DELETE",
-      headers: { "x-access-token": `Bearer ${localStorage.getItem("token")}` },
-    });
-    if (res.status === 204) {
-      // window.alert(`Deleted ${this.title}`)
-    } else {
-      // window.alert("Failed to delete location...");
-    }
+    await deleteThing(`/api/remove_location/${this.id}`);
   };
 
   saveLocation = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
@@ -86,7 +77,7 @@ export default class Location {
     this.location.type = formProps.type;
     this.toggleEdit();
 
-    await postThing(`/api/edit_location/${this.id}`, formProps)
+    await postThing(`/api/edit_location/${this.id}`, formProps);
   };
 
   renderEdit = async () => {
@@ -141,6 +132,7 @@ export default class Location {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveLocation(e);
           },
         }

@@ -25,7 +25,6 @@ export default class Counter {
   };
 
   saveCounter = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     this.currentCount = formProps.current_count;
@@ -63,6 +62,7 @@ export default class Counter {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveCounter(e);
             this.toggleEdit();
           },

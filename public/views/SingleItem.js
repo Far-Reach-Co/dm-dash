@@ -4,7 +4,7 @@ import locationSelect from "../lib/locationSelect.js";
 import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
-import { renderCreateNewNote, renderNoteComponent } from "../lib/noteUtils.js";
+import NoteManager from "./NoteManager.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -13,7 +13,6 @@ export default class SingleItemView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
-    this.creatingNote = false;
     this.edit = false;
 
     this.render();
@@ -22,25 +21,6 @@ export default class SingleItemView {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
-  };
-
-  toggleCreatingNote = () => {
-    this.creatingNote = !this.creatingNote;
-    this.render();
-  };
-
-  newNote = async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const formProps = Object.fromEntries(formData);
-    formProps.user_id = state.user.id;
-    formProps.project_id = state.currentProject.id;
-
-    formProps.item_id = this.item.id;
-    formProps.location_id = null;
-    formProps.character_id = null;
-
-    await postThing("/api/add_note", formProps);
   };
 
   renderItemType = () => {
@@ -54,7 +34,6 @@ export default class SingleItemView {
   };
 
   saveItem = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
@@ -98,6 +77,7 @@ export default class SingleItemView {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveItem(e);
             this.toggleEdit();
           },
@@ -129,16 +109,6 @@ export default class SingleItemView {
       return this.renderEdit();
     }
 
-    if (this.creatingNote) {
-      return this.domComponent.append(
-        ...(await renderCreateNewNote(
-          this.item.title,
-          this.toggleCreatingNote,
-          this.newNote
-        ))
-      );
-    }
-
     const currentLocationComponent = createElement("div", {});
     new CurrentLocationComponent({
       domComponent: currentLocationComponent,
@@ -151,6 +121,13 @@ export default class SingleItemView {
       domComponent: currentCharacterComponent,
       item: this.item,
       navigate: this.navigate,
+    });
+
+    const noteManagerElem = createElement("div");
+    new NoteManager({
+      domComponent: noteManagerElem,
+      altEndpoint: `/api/get_notes_by_item/${this.item.id}`,
+      locationId: this.item.id,
     });
 
     // append
@@ -190,12 +167,7 @@ export default class SingleItemView {
       ]),
       createElement("br"),
       createElement("br"),
-      ...(await renderNoteComponent(
-        this.toggleCreatingNote,
-        `/api/get_notes_by_item/${this.item.id}`,
-        this.render,
-        this.navigate
-      ))
+      noteManagerElem
     );
   };
 }

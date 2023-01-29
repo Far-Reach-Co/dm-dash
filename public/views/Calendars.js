@@ -451,7 +451,7 @@ export default class CalendarView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", {}, "+ Calendar", {
+      return createElement("button", {class: "new-btn"}, "+ Calendar", {
         type: "click",
         event: () => {
           this.creatingNewCalendar = true;

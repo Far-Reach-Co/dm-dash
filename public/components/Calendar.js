@@ -90,7 +90,6 @@ export default class Calendar {
   };
 
   updateCalendar = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.title) formProps.title = formProps.title.trim();
@@ -393,6 +392,7 @@ export default class Calendar {
       ),
     ]);
     form.addEventListener("submit", async (e) => {
+      e.preventDefault();
       await this.updateCalendar(e);
       this.manageCalendar = false;
       this.render();

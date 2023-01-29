@@ -4,6 +4,7 @@ import Item from "../components/Item.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class ItemsView {
   constructor(props) {
@@ -18,6 +19,7 @@ export default class ItemsView {
     this.offset = 0;
 
     this.creatingItem = false;
+    this.newItemLoading = false;
 
     this.render();
   }
@@ -30,6 +32,11 @@ export default class ItemsView {
 
   toggleCreatingItem = () => {
     this.creatingItem = !this.creatingItem;
+    this.render();
+  };
+
+  toggleNewItemLoading = () => {
+    this.newItemLoading = !this.newItemLoading;
     this.render();
   };
 
@@ -56,7 +63,7 @@ export default class ItemsView {
   };
 
   newItem = async (e) => {
-    e.preventDefault();
+    this.toggleNewItemLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
@@ -64,6 +71,7 @@ export default class ItemsView {
     if (formProps.type === "None") formProps.type = null;
 
     await postThing("/api/add_item", formProps)
+    this.toggleNewItemLoading();
   };
 
   renderCreatingItem = async () => {
@@ -92,8 +100,9 @@ export default class ItemsView {
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      this.creatingItem = false;
       await this.newItem(e);
-      this.toggleCreatingItem();
     });
 
     const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
@@ -164,6 +173,12 @@ export default class ItemsView {
 
     if (this.creatingItem) {
       return this.renderCreatingItem();
+    }
+
+    if (this.newItemLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we create your item...")
+      );
     }
 
     // append

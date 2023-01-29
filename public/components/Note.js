@@ -14,7 +14,6 @@ export default class Note {
     this.locationId = props.locationId;
     this.characterId = props.characterId;
     this.itemId = props.itemId;
-    this.navigate = props.navigate;
 
     this.edit = false;
 
@@ -27,7 +26,6 @@ export default class Note {
   };
 
   saveNote = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     // update UI
@@ -66,6 +64,7 @@ export default class Note {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveNote(e);
             this.toggleEdit();
           },

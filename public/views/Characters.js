@@ -4,6 +4,7 @@ import Character from "../components/Character.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class CharactersView {
   constructor(props) {
@@ -17,6 +18,7 @@ export default class CharactersView {
     this.offset = 0;
 
     this.creatingCharacter = false;
+    this.newCharacterLoading = false;
 
     this.render();
   }
@@ -29,6 +31,11 @@ export default class CharactersView {
 
   toggleCreatingCharacter = () => {
     this.creatingCharacter = !this.creatingCharacter;
+    this.render();
+  };
+
+  toggleNewCharacterLoading = () => {
+    this.newCharacterLoading = !this.newCharacterLoading;
     this.render();
   };
 
@@ -55,14 +62,15 @@ export default class CharactersView {
   };
 
   newCharacter = async (e) => {
-    e.preventDefault();
+    this.toggleNewCharacterLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
 
-    await postThing("/api/add_character", formProps)
+    await postThing("/api/add_character", formProps);
+    this.toggleNewCharacterLoading();
   };
 
   renderCreatingCharacter = async () => {
@@ -91,11 +99,16 @@ export default class CharactersView {
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      this.creatingCharacter = false;
       await this.newCharacter(e);
-      this.toggleCreatingCharacter();
     });
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingCharacter();
     });
@@ -164,6 +177,14 @@ export default class CharactersView {
       return this.renderCreatingCharacter();
     }
 
+    if (this.newCharacterLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we create your character..."
+        )
+      );
+    }
+
     // append
     this.domComponent.append(
       createElement(
@@ -183,7 +204,7 @@ export default class CharactersView {
               ]
             ),
             createElement("br"),
-            searchElement("Search Characters", this)
+            searchElement("Search Characters", this),
           ]),
         ]
       ),

@@ -202,6 +202,7 @@ input {
   border: none;
   outline: none;
   /* background-color: rgb(208, 208, 208); */
+  width: 250px;
   height: 30px;
   display: inline-block;
   padding-left: 5px;
@@ -352,7 +353,7 @@ footer {
   /* background-color: var(--blue4); */
   padding: 5px 0px;
   margin: 5px 0px;
-  min-height: 400px;
+  height: 400px;
   display: flex;
   flex-direction: column;
   overflow-y: scroll;

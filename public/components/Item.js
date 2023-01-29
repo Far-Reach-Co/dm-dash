@@ -33,13 +33,17 @@ export default class Item {
   };
 
   saveItem = async (e) => {
-    e.preventDefault();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
     // update UI
     this.title = formProps.title;
+    this.item.title = formProps.title;
     this.description = formProps.description;
+    this.item.description = formProps.description;
+    this.type = formProps.type;
+    this.item.type = formProps.type;
+    this.toggleEdit();
 
     await postThing(`/api/edit_item/${this.id}`, formProps)
   };
@@ -76,8 +80,8 @@ export default class Item {
         {
           type: "submit",
           event: (e) => {
+            e.preventDefault();
             this.saveItem(e);
-            this.toggleEdit();
           },
         }
       ),

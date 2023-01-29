@@ -5,6 +5,7 @@ import locationTypeSelect from "../lib/locationTypeSelect.js";
 import { uploadImage } from "../lib/imageUtils.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class LocationsView {
   constructor(props) {
@@ -18,7 +19,7 @@ export default class LocationsView {
     this.offset = 0;
 
     this.creatingLocation = false;
-    this.savingData = false;
+    this.newLocationLoading = false;
 
     this.render();
   }
@@ -35,8 +36,8 @@ export default class LocationsView {
     this.render();
   };
 
-  toggleSavingData = () => {
-    this.savingData = true;
+  toggleNewLocationLoading = () => {
+    this.newLocationLoading = !this.newLocationLoading;
     this.render();
   };
 
@@ -63,8 +64,7 @@ export default class LocationsView {
   };
 
   newLocation = async (e) => {
-    e.preventDefault();
-    this.toggleSavingData();
+    this.toggleNewLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     const projectId = state.currentProject.id;
@@ -85,18 +85,10 @@ export default class LocationsView {
     }
 
     await postThing("/api/add_location", formProps)
-
-    this.creatingLocation = false;
-    this.toggleSavingData();
+    this.toggleNewLocationLoading();
   };
 
   renderCreatingLocation = async () => {
-    if (this.savingData) {
-      return this.domComponent.append(
-        createElement("h2", {}, "Please wait while we process your data...")
-      );
-    }
-
     const titleOfForm = createElement(
       "div",
       { class: "component-title" },
@@ -136,6 +128,8 @@ export default class LocationsView {
       createElement("button", { type: "submit" }, "Create"),
     ]);
     form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      this.creatingLocation = false;
       await this.newLocation(e);
     });
 
@@ -208,6 +202,12 @@ export default class LocationsView {
 
     if (this.creatingLocation) {
       return this.renderCreatingLocation();
+    }
+
+    if (this.newLocationLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we create your location...")
+      );
     }
 
     // append
