@@ -154,7 +154,7 @@ export default class SingleCharacterView {
     new NoteManager({
       domComponent: noteManagerElem,
       altEndpoint: `/api/get_notes_by_character/${this.character.id}`,
-      locationId: this.character.id,
+      characterId: this.character.id,
     });
 
     // append

@@ -127,7 +127,7 @@ export default class SingleItemView {
     new NoteManager({
       domComponent: noteManagerElem,
       altEndpoint: `/api/get_notes_by_item/${this.item.id}`,
-      locationId: this.item.id,
+      itemId: this.item.id,
     });
 
     // append

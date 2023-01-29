@@ -50,9 +50,9 @@ export default class NoteManager {
     const formProps = Object.fromEntries(formData);
     formProps.user_id = state.user.id;
     formProps.project_id = state.currentProject.id;
-    formProps.location_id = this.locationId;
-    formProps.character_id = this.characterId;
-    formProps.item_id = this.itemId;
+    formProps.location_id = this.locationId ? this.locationId : null;
+    formProps.character_id = this.characterId ? this.characterId : null;
+    formProps.item_id = this.itemId ? this.itemId : null;
 
     await postThing("/api/add_note", formProps);
     this.toggleNewNoteLoading();
