@@ -1,4 +1,4 @@
-import toast from "../components/toast.js";
+import toast from "../components/Toast.js";
 
 export function fallbackCopyTextToClipboard(text) {
   var textArea = document.createElement("textarea");
