@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class Calendar {
   constructor(props) {
@@ -21,6 +22,7 @@ export default class Calendar {
     // render views
     this.edit = false;
     this.open = false;
+    this.loading = false;
     // open navigation views
     this.monthBeingViewed = this.calculateCurrentMonth();
     this.yearBeingViewed = this.year;
@@ -30,6 +32,11 @@ export default class Calendar {
 
   toggleEdit = () => {
     this.edit = !this.edit;
+    this.render();
+  };
+
+  toggleLoading = () => {
+    this.loading = !this.loading;
     this.render();
   };
 
@@ -93,19 +100,20 @@ export default class Calendar {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.title) formProps.title = formProps.title.trim();
-    await postThing(
-      `/api/edit_calendar/${this.id}`,
-      formProps
-    );
+    // update UI
+    this.title = formProps.title;
+    this.year = formProps.year;
+    await postThing(`/api/edit_calendar/${this.id}`, formProps);
   };
 
   newMonth = async () => {
-    await postThing("/api/add_month", {
+    const data = await postThing("/api/add_month", {
       calendar_id: this.id,
       index: this.months.length + 1,
       title: `Month(${this.months.length + 1})`,
       number_of_days: 30,
-    })
+    });
+    if (data) this.months.push(data);
   };
 
   newDay = async () => {
@@ -113,8 +121,8 @@ export default class Calendar {
       calendar_id: this.id,
       index: this.daysOfTheWeek.length + 1,
       title: `Day(${this.daysOfTheWeek.length + 1})`,
-    })
-    if(data) this.daysOfTheWeek.push(data);
+    });
+    if (data) this.daysOfTheWeek.push(data);
   };
 
   updateMonths = async () => {
@@ -122,19 +130,18 @@ export default class Calendar {
 
     await Promise.all(
       this.months.map(async (month) => {
-        await postThing(
-          `/api/edit_month/${month.id}`,
-          {
-            title: month.title,
-            index: month.index,
-            number_of_days: month.number_of_days,
-          }
-        );
+        const resData = await postThing(`/api/edit_month/${month.id}`, {
+          title: month.title,
+          index: month.index,
+          number_of_days: month.number_of_days,
+        });
+        if (resData) monthUpdateSuccessList.push(resData);
       })
     );
     const successListSortedByIndex = monthUpdateSuccessList.sort(
       (a, b) => a.index - b.index
     );
+
     this.months = successListSortedByIndex;
   };
 
@@ -143,10 +150,11 @@ export default class Calendar {
 
     await Promise.all(
       this.daysOfTheWeek.map(async (day) => {
-        await postThing(`/api/edit_day/${day.id}`, {
+        const resData = await postThing(`/api/edit_day/${day.id}`, {
           title: day.title,
           index: day.index,
         });
+        if (resData) dayUpdateSuccessList.push(resData);
       })
     );
     const successListSortedByIndex = dayUpdateSuccessList.sort(
@@ -245,16 +253,18 @@ export default class Calendar {
     // add day
     const addBtn = createElement("button", {}, "+ Day");
     addBtn.addEventListener("click", async () => {
+      this.toggleLoading();
       await this.newDay();
-      this.render();
+      this.toggleLoading();
     });
     mainDiv.append(addBtn);
     // done
     const doneBtn = createElement("button", {}, "Done");
     doneBtn.addEventListener("click", async () => {
-      await this.updateDays();
       this.manageDays = false;
-      this.render();
+      this.toggleLoading();
+      await this.updateDays();
+      this.toggleLoading();
     });
     mainDiv.append(doneBtn);
     // append
@@ -352,16 +362,18 @@ export default class Calendar {
     // add month
     const addBtn = createElement("button", {}, "+ Month");
     addBtn.addEventListener("click", async () => {
+      this.toggleLoading();
       await this.newMonth();
-      this.render();
+      this.toggleLoading();
     });
     mainDiv.append(addBtn);
     // done
     const doneBtn = createElement("button", {}, "Done");
     doneBtn.addEventListener("click", async () => {
-      await this.updateMonths();
       this.manageMonths = false;
-      this.render();
+      this.toggleLoading();
+      await this.updateMonths();
+      this.toggleLoading();
     });
     mainDiv.append(doneBtn);
     // append
@@ -393,15 +405,20 @@ export default class Calendar {
     ]);
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      await this.updateCalendar(e);
       this.manageCalendar = false;
-      this.render();
+      this.toggleLoading();
+      await this.updateCalendar(e);
+      this.toggleLoading();
     });
 
     this.domComponent.appendChild(form);
   };
 
   renderEdit = async () => {
+    if (this.loading) {
+      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+    }
+
     if (this.manageCalendar) {
       return this.renderManageCalendar();
     }
@@ -452,7 +469,6 @@ export default class Calendar {
     doneButton.addEventListener("click", async () => {
       // toggle and render
       this.toggleEdit();
-      this.parentComponentRender();
     });
     const removeButton = createElement(
       "button",

@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import Calendar from "../components/Calendar.js";
 import state from "../lib/state.js";
 import { getThings, deleteThing, postThing } from "../lib/apiUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class CalendarView {
   constructor(props) {
@@ -19,6 +20,11 @@ export default class CalendarView {
     this.daysCreated = [];
     this.loading = false;
 
+    this.render();
+  }
+
+  toggleLoading = () => {
+    this.loading = !this.loading;
     this.render();
   }
 
@@ -164,18 +170,19 @@ export default class CalendarView {
     // add day
     const addBtn = createElement("button", {}, "+ Day");
     addBtn.addEventListener("click", async () => {
+      this.toggleLoading();
       await this.newDay();
-      this.render();
+      this.toggleLoading();
     });
     mainDiv.append(addBtn);
 
     const completeButton = createElement("button", {}, "Complete");
-    completeButton.addEventListener("click", () => {
-      if (!this.daysOfTheWeek.length)
-        return alert("Please create at least one day");
-      this.updateDays();
+    completeButton.addEventListener("click", async () => {
+      if (!this.daysOfTheWeek.length) return alert("Please create at least one day");
+      this.toggleLoading();
       this.resetCalendarCreation();
-      this.render();
+      await this.updateDays();
+      this.toggleLoading();
     });
 
     // append
@@ -322,18 +329,20 @@ export default class CalendarView {
     // add month
     const addBtn = createElement("button", {}, "+ Month");
     addBtn.addEventListener("click", async () => {
+      this.toggleLoading();
       await this.newMonth();
-      this.render();
+      this.toggleLoading();
     });
     mainDiv.append(addBtn);
 
     const completeButton = createElement("button", {}, "Next");
-    completeButton.addEventListener("click", () => {
+    completeButton.addEventListener("click", async () => {
       if (!this.months.length) return alert("Please create at least one month");
+      this.toggleLoading();
       this.creatingNewMonths = false;
       this.creatingNewDaysInWeek = true;
-      this.updateMonths();
-      this.render();
+      await this.updateMonths();
+      this.toggleLoading();
     });
 
     // append
@@ -348,10 +357,6 @@ export default class CalendarView {
   };
 
   renderNewCalendar = async () => {
-    if (this.loading) {
-      return this.domComponent.append(createElement("div", {}, "Loading..."));
-    }
-
     this.domComponent.append(
       createElement("div", { class: "component-title" }, "Create new calendar"),
       createElement(
@@ -389,16 +394,14 @@ export default class CalendarView {
           type: "submit",
           event: async (e) => {
             e.preventDefault();
-            this.loading = true;
-            this.render();
+            this.creatingNewCalendar = false;
+            this.toggleLoading();
             const newCal = await this.newCalendar(e);
-            this.loading = false;
             if (newCal) {
               this.calendarBeingCreated = newCal;
               this.creatingNewMonths = true;
             }
-            this.creatingNewCalendar = false;
-            this.render();
+            this.toggleLoading()
           },
         }
       ),
@@ -406,7 +409,6 @@ export default class CalendarView {
       createElement("button", {class: "btn-red"}, "Cancel", {
         type: "click",
         event: () => {
-          this.loading = false;
           this.creatingNewCalendar = false;
           this.render();
         },
@@ -462,6 +464,11 @@ export default class CalendarView {
 
   render = async () => {
     this.domComponent.innerHTML = "";
+
+    // keep this first
+    if (this.loading) {
+      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+    }
 
     if (this.creatingNewCalendar) {
       return this.renderNewCalendar();
