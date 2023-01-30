@@ -139,6 +139,7 @@ export default class ItemsView {
         locationId: item.location_id,
         characterId: item.character_id,
         type: item.type,
+        imageRef: item.image_ref,
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,

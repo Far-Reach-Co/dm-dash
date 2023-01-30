@@ -141,6 +141,7 @@ export default class CharactersView {
         projectId: character.project_id,
         locationId: character.location_id,
         type: character.type,
+        imageRef: character.image_ref,
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,

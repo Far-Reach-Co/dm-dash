@@ -5,6 +5,12 @@ import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
+import modal from "../components/modal.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -14,6 +20,7 @@ export default class SingleItemView {
     this.domComponent.className = "standard-view";
 
     this.edit = false;
+    this.uploadingImage = false;
 
     this.render();
   }
@@ -33,19 +40,47 @@ export default class SingleItemView {
     } else return createElement("div", { style: "display: none;" });
   };
 
+  toggleUploadingImage = () => {
+    this.uploadingImage = true;
+    this.render();
+  };
+
   saveItem = async (e) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      this.toggleUploadingImage();
+      const newImageRef = await uploadImage(formProps.image);
+      // if success update formProps and set imageRef for UI
+      if (newImageRef) {
+        formProps.image_ref = newImageRef;
+        this.item.image_ref = newImageRef;
+      }
+      delete formProps.image;
+      this.toggleUploadingImage();
+    }
+
     // update UI
     this.item.title = formProps.title;
     this.item.description = formProps.description;
     this.item.type = formProps.type;
+    this.toggleEdit();
 
     await postThing(`/api/edit_item/${this.item.id}`, formProps);
   };
 
   renderEdit = async () => {
+    if (this.uploadingImage) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Uploading your image...")
+      );
+    }
+
     this.domComponent.append(
       createElement(
         "form",
@@ -72,6 +107,19 @@ export default class SingleItemView {
             this.item.description
           ),
           createElement("br"),
+          createElement(
+            "label",
+            { for: "image", class: "file-input" },
+            "Upload Image"
+          ),
+          createElement("input", {
+            id: "image",
+            name: "image",
+            type: "file",
+            accept: "image/*",
+          }),
+          createElement("br"),
+          createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
         {
@@ -79,11 +127,40 @@ export default class SingleItemView {
           event: (e) => {
             e.preventDefault();
             this.saveItem(e);
-            this.toggleEdit();
           },
         }
       )
     );
+  };
+
+  handleImageClick = (imageSource) => {
+    modal.show(
+      createElement("img", { src: imageSource.url, class: "modal-image" })
+    );
+  };
+
+  renderImage = async () => {
+    if (this.item.image_ref) {
+      const imageSource = await getPresignedForImageDownload(
+        this.item.image_ref
+      );
+      if (imageSource) {
+        return createElement(
+          "img",
+          {
+            class: "clickable-image",
+            src: imageSource.url,
+            width: "50%",
+            height: "auto",
+          },
+          null,
+          {
+            type: "click",
+            event: () => this.handleImageClick(imageSource),
+          }
+        );
+      } else return createElement("div", { style: "visibility: hidden;" });
+    } else return createElement("div", { style: "visibility: hidden;" });
   };
 
   renderEditButtonOrNull = () => {
@@ -165,6 +242,8 @@ export default class SingleItemView {
           createElement("br"),
         ]),
       ]),
+      createElement("br"),
+      await this.renderImage(),
       createElement("br"),
       createElement("br"),
       noteManagerElem
