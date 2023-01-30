@@ -37,7 +37,7 @@ export default class Item {
   };
 
   toggleUploadingImage = () => {
-    this.uploadingImage = true;
+    this.uploadingImage = !this.uploadingImage;
     this.render();
   };
 
