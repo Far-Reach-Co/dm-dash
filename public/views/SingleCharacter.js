@@ -30,7 +30,7 @@ export default class SingleCharacterView {
   };
 
   toggleUploadingImage = () => {
-    this.uploadingImage = true;
+    this.uploadingImage = !this.uploadingImage;
     this.render();
   };
 

@@ -41,7 +41,7 @@ export default class SingleItemView {
   };
 
   toggleUploadingImage = () => {
-    this.uploadingImage = true;
+    this.uploadingImage = !this.uploadingImage;
     this.render();
   };
 

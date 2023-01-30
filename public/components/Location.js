@@ -40,7 +40,7 @@ export default class Location {
   };
 
   toggleUploadingImage = () => {
-    this.uploadingImage = true;
+    this.uploadingImage = !this.uploadingImage;
     this.render();
   };
 

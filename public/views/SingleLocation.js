@@ -54,7 +54,7 @@ export default class SingleLocationView {
   };
 
   toggleUploadingImage = () => {
-    this.uploadingImage = true;
+    this.uploadingImage = !this.uploadingImage;
     this.render();
   };
 
