@@ -51,6 +51,19 @@ class App {
     navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
+  resetViewsOnProjectChange = () => {
+    this.views = {
+      projects: null,
+      notes: null,
+      counters: null,
+      clocks: null,
+      calendars: null,
+      items: null,
+      characters: null,
+      locations: null,
+    };
+  }
+
   instantiateSidebar = () => {
     const sidebarElem = createElement("div", {});
     // SIDEBAR
@@ -207,7 +220,7 @@ class App {
     }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    const view = new ProjectsView({ domComponent: element, navigate });
+    const view = new ProjectsView({ domComponent: element, navigate, resetViewsOnProjectChange: this.resetViewsOnProjectChange });
     this.views.projects = view;
   };
 

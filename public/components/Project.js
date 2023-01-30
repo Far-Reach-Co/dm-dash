@@ -12,6 +12,8 @@ export default class Project {
     this.navigate = props.navigate;
     this.domComponent = props.domComponent;
     this.domComponent.className = "project-btn-container";
+
+    this.resetViewsOnProjectChange = props.resetViewsOnProjectChange;
     this.id = props.id;
     this.title = props.title;
     this.dateCreated = props.dateCreated;
@@ -70,12 +72,9 @@ export default class Project {
 
   updateProjectUserEditorStatus = async (userId, status) => {
     this.isEditor = status;
-    await postThing(
-      `/api/edit_project_user/${userId}`,
-      {
-        is_editor: status,
-      }
-    );
+    await postThing(`/api/edit_project_user/${userId}`, {
+      is_editor: status,
+    });
   };
 
   renderProjectUsersList = async () => {
@@ -190,7 +189,9 @@ export default class Project {
 
   renderEditProject = async () => {
     if (this.loadingProjectInvite) {
-      return this.domComponent.append(renderLoadingWithMessage("Creating invite link..."));
+      return this.domComponent.append(
+        renderLoadingWithMessage("Creating invite link...")
+      );
     }
 
     const titleInput = createElement("input", {
@@ -319,6 +320,7 @@ export default class Project {
               dateJoined: this.dateJoined,
               projectUserId: this.projectUserId,
             };
+            this.resetViewsOnProjectChange();
             this.navigate({ title: "modules", sidebar: true });
           },
         }
