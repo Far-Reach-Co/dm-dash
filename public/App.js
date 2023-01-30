@@ -20,6 +20,18 @@ class App {
     this.domComponent = props.domComponent;
     this.domComponent.className = "app";
 
+    // save view instantiations
+    this.views = {
+      projects: null,
+      notes: null,
+      counters: null,
+      clocks: null,
+      calendars: null,
+      items: null,
+      characters: null,
+      locations: null,
+    };
+
     this.sidebar;
     this.hamburger;
     // begin
@@ -99,9 +111,13 @@ class App {
   };
 
   renderLocationsView = ({ navigate }) => {
+    if (this.views.locations) {
+      return this.domComponent.appendChild(this.views.locations.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new LocationsView({ domComponent: element, navigate });
+    const view = new LocationsView({ domComponent: element, navigate });
+    this.views.locations = view;
   };
 
   renderSingleLocationView = ({ navigate, params }) => {
@@ -111,9 +127,13 @@ class App {
   };
 
   renderCharactersView = ({ navigate }) => {
+    if (this.views.characters) {
+      return this.domComponent.appendChild(this.views.characters.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new CharactersView({ domComponent: element, navigate });
+    const view = new CharactersView({ domComponent: element, navigate });
+    this.views.characters = view;
   };
 
   renderSingleCharacterView = ({ navigate, params }) => {
@@ -123,9 +143,13 @@ class App {
   };
 
   renderItemsView = ({ navigate }) => {
+    if (this.views.items) {
+      return this.domComponent.appendChild(this.views.items.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new ItemsView({ domComponent: element, navigate });
+    const view = new ItemsView({ domComponent: element, navigate });
+    this.views.items = view;
   };
 
   renderSingleItemView = ({ navigate, params }) => {
@@ -135,36 +159,56 @@ class App {
   };
 
   renderCalendersView = () => {
+    if (this.views.calendars) {
+      return this.domComponent.appendChild(this.views.calendars.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new CalendarsView({ domComponent: element });
+    const view = new CalendarsView({ domComponent: element });
+    this.views.calendars = view;
   };
 
   renderClocksView = () => {
+    if (this.views.clocks) {
+      return this.domComponent.appendChild(this.views.clocks.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new ClocksView({ domComponent: element });
+    const view = new ClocksView({ domComponent: element });
+    this.views.clocks = view;
   };
 
   renderCountersView = () => {
+    if (this.views.counters) {
+      return this.domComponent.appendChild(this.views.counters.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new CountersView({ domComponent: element });
+    const view = new CountersView({ domComponent: element });
+    this.views.counters = view;
   };
 
   renderNotesView = () => {
+    if (this.views.notes) {
+      return this.domComponent.appendChild(this.views.notes.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new NoteManager({
+    const view = new NoteManager({
       domComponent: element,
-      standAlone: true
+      standAlone: true,
     });
+    this.views.notes = view;
   };
 
   renderProjectsView = ({ navigate }) => {
+    if (this.views.projects) {
+      return this.domComponent.appendChild(this.views.projects.domComponent);
+    }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    new ProjectsView({ domComponent: element, navigate });
+    const view = new ProjectsView({ domComponent: element, navigate });
+    this.views.projects = view;
   };
 
   renderModulesView = () => {
