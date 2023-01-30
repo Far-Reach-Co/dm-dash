@@ -1,7 +1,9 @@
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
+import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class Item {
   constructor(props) {
@@ -15,6 +17,7 @@ export default class Item {
     this.locationId = props.locationId;
     this.characterId = props.characterId;
     this.type = props.type;
+    this.imageRef = props.imageRef;
 
     this.navigate = props.navigate;
     this.parentRender = props.parentRender;
@@ -23,6 +26,7 @@ export default class Item {
       : null;
 
     this.edit = false;
+    this.uploadingImage = false;
 
     this.render();
   }
@@ -32,10 +36,32 @@ export default class Item {
     this.render();
   };
 
+  toggleUploadingImage = () => {
+    this.uploadingImage = true;
+    this.render();
+  };
+
   saveItem = async (e) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      this.toggleUploadingImage();
+      const newImageRef = await uploadImage(formProps.image);
+      // if success update formProps and set imageRef for UI
+      if (newImageRef) {
+        formProps.image_ref = newImageRef;
+        this.imageRef = newImageRef;
+        this.item.image_ref = newImageRef;
+      }
+      delete formProps.image;
+      this.toggleUploadingImage();
+    }
+
     // update UI
     this.title = formProps.title;
     this.item.title = formProps.title;
@@ -45,10 +71,16 @@ export default class Item {
     this.item.type = formProps.type;
     this.toggleEdit();
 
-    await postThing(`/api/edit_item/${this.id}`, formProps)
+    await postThing(`/api/edit_item/${this.id}`, formProps);
   };
 
   renderEdit = async () => {
+    if (this.uploadingImage) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Uploading your image...")
+      );
+    }
+
     this.domComponent.append(
       createElement(
         "form",
@@ -74,6 +106,19 @@ export default class Item {
             },
             this.description
           ),
+          createElement("br"),
+          createElement(
+            "label",
+            { for: "image", class: "file-input" },
+            "Upload Image"
+          ),
+          createElement("input", {
+            id: "image",
+            name: "image",
+            type: "file",
+            accept: "image/*",
+          }),
+          createElement("br"),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
@@ -112,6 +157,31 @@ export default class Item {
     } else return createElement("div", { style: "display: none;" });
   };
 
+  renderImage = async () => {
+    if (this.imageRef) {
+      const imageSource = await getPresignedForImageDownload(this.imageRef);
+      if (imageSource) {
+        return createElement("img", {
+          src: imageSource.url,
+          width: 30,
+          height: 30,
+        });
+      } else {
+        return createElement("img", {
+          src: "/assets/item.svg",
+          width: 30,
+          height: 30,
+        });
+      }
+    } else {
+      return createElement("img", {
+        src: "/assets/item.svg",
+        width: 30,
+        height: 30,
+      });
+    }
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -123,11 +193,7 @@ export default class Item {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderItemType(),
-        createElement("img", {
-          src: "/assets/item.svg",
-          width: 30,
-          height: 30,
-        }),
+        await this.renderImage(),
       ]),
       createElement("div", { class: "description" }, this.description),
       createElement("br"),

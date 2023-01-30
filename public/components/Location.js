@@ -7,6 +7,7 @@ import locationTypeSelect from "../lib/locationTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import state from "../lib/state.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class Location {
   constructor(props) {
@@ -83,7 +84,7 @@ export default class Location {
   renderEdit = async () => {
     if (this.uploadingImage) {
       return this.domComponent.append(
-        createElement("h2", {}, "Please wait while we process your data...")
+        renderLoadingWithMessage("Uploading your image...")
       );
     }
 

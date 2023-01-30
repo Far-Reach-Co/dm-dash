@@ -4,6 +4,12 @@ import locationSelect from "../lib/locationSelect.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
+import modal from "../components/modal.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -13,12 +19,18 @@ export default class SingleCharacterView {
     this.domComponent.className = "standard-view";
 
     this.edit = false;
+    this.uploadingImage = false;
 
     this.render();
   }
 
   toggleEdit = () => {
     this.edit = !this.edit;
+    this.render();
+  };
+
+  toggleUploadingImage = () => {
+    this.uploadingImage = true;
     this.render();
   };
 
@@ -71,15 +83,37 @@ export default class SingleCharacterView {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      this.toggleUploadingImage();
+      const newImageRef = await uploadImage(formProps.image);
+      // if success update formProps and set imageRef for UI
+      if (newImageRef) {
+        formProps.image_ref = newImageRef;
+        this.character.image_ref = newImageRef;
+      }
+      delete formProps.image;
+      this.toggleUploadingImage();
+    }
     // update UI
     this.character.title = formProps.title;
     this.character.description = formProps.description;
     this.character.type = formProps.type;
+    this.toggleEdit();
 
     await postThing(`/api/edit_character/${this.character.id}`, formProps);
   };
 
   renderEdit = async () => {
+    if (this.uploadingImage) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Uploading your image...")
+      );
+    }
+
     this.domComponent.append(
       createElement(
         "form",
@@ -106,6 +140,19 @@ export default class SingleCharacterView {
             this.character.description
           ),
           createElement("br"),
+          createElement(
+            "label",
+            { for: "image", class: "file-input" },
+            "Upload Image"
+          ),
+          createElement("input", {
+            id: "image",
+            name: "image",
+            type: "file",
+            accept: "image/*",
+          }),
+          createElement("br"),
+          createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
         {
@@ -113,11 +160,40 @@ export default class SingleCharacterView {
           event: (e) => {
             e.preventDefault();
             this.saveCharacter(e);
-            this.toggleEdit();
           },
         }
       )
     );
+  };
+
+  handleImageClick = (imageSource) => {
+    modal.show(
+      createElement("img", { src: imageSource.url, class: "modal-image" })
+    );
+  };
+
+  renderImage = async () => {
+    if (this.character.image_ref) {
+      const imageSource = await getPresignedForImageDownload(
+        this.character.image_ref
+      );
+      if (imageSource) {
+        return createElement(
+          "img",
+          {
+            class: "clickable-image",
+            src: imageSource.url,
+            width: "50%",
+            height: "auto",
+          },
+          null,
+          {
+            type: "click",
+            event: () => this.handleImageClick(imageSource),
+          }
+        );
+      } else return createElement("div", { style: "visibility: hidden;" });
+    } else return createElement("div", { style: "visibility: hidden;" });
   };
 
   renderEditButtonOrNull = () => {
@@ -197,6 +273,8 @@ export default class SingleCharacterView {
           createElement("br"),
         ]),
       ]),
+      createElement("br"),
+      await this.renderImage(),
       createElement("br"),
       createElement("br"),
       noteManagerElem

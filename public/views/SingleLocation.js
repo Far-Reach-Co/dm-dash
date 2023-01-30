@@ -357,7 +357,7 @@ export default class SingleLocationView {
   renderEdit = async () => {
     if (this.uploadingImage) {
       return this.domComponent.append(
-        createElement("h2", {}, "Please wait while we process your data...")
+        renderLoadingWithMessage("Uploading your image...")
       );
     }
 
