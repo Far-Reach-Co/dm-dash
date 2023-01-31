@@ -116,6 +116,64 @@ nav {
   color: var(--link-blue);
 }
 
+#nav-ham {
+  visibility: hidden;
+  cursor: pointer;
+}
+
+
+#nav-ham:hover {
+  opacity: 0.9;
+}
+
+#nav-links-container-mobile {
+  visibility: hidden;
+  position: absolute;
+  top: 10%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh;
+  width: 100vw;
+  z-index: 1;
+  background-color: var(--main-dark);
+  opacity: 0.95;
+}
+
+#nav-links-container-mobile .top-nav-btn {
+  margin-bottom: 10px;
+  height: 10%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0.5px solid var(--main-gray);
+  border-top: 0.5px solid var(--main-gray);
+  transition: 0s;
+}
+#nav-links-container-mobile .top-nav-btn:hover {
+  background-color: var(--blue);
+}
+
+@media screen and (max-width: 500px) {
+  #nav-ham {
+    visibility: visible;
+  }
+
+  #nav-links-container {
+    visibility: hidden;
+    position: absolute;
+    z-index: 0;
+  }
+}
+
 .top-nav-btn {
   height: 100%;
   display: flex;

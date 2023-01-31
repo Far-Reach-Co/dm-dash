@@ -6,20 +6,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wyrld Dashboard</title>
     <link rel="stylesheet" href="./style.css" />
-    <script src="./lib/AccountManager.js" defer type="module"></script>
+    <script src="/lib/AccountManager.js" defer type="module"></script>
+    <script src="/lib/MobileNavHandler.js" defer></script>
   </head>
   <body>
+
+    <div id="nav-links-container-mobile"></div>
+
     <nav>
       <div style="display: flex; align-items: center">
-        <img height="30px" src="./assets/dmlogo.png" alt="" />
-        <a class="title-anchor" href="./index.html">Wyrld Dashboard</a>
+        <img height="30px" src="/assets/dmlogo.png" alt="" />
+        <a class="title-anchor" href="/index.html">Wyrld Dashboard</a>
       </div>
+      <img src="/assets/hamburger.svg" height="32" width="32" id="nav-ham" alt="">
       <div id="nav-links-container" style="display: flex"></div>
     </nav>
     <div class="container">
       <div>
-        Welcome, please <a href="./login.html">login</a> or
-        <a href="./register.html">register</a>.
+        Welcome, please <a href=".login.html">login</a> or
+        <a href="/register.html">register</a>.
       </div>
     </div>
   </body>

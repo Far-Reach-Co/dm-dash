@@ -1,11 +1,25 @@
+import { postThing } from "./apiUtils.js";
 import createElement from "./createElement.js";
+import renderLoadingWithMessage from "./loadingWithMessage.js";
 
 class AccountManager {
   constructor() {
     this.userInfo = null;
 
+    this.editEmail = false;
+    this.saveEmailLoading = false;
     this.init();
   }
+
+  toggleEditEmail = () => {
+    this.editEmail = !this.editEmail;
+    this.renderAccountApp();
+  };
+
+  toggleSaveEmailLoading = () => {
+    this.saveEmailLoading = !this.saveEmailLoading;
+    this.renderAccountApp();
+  };
 
   init = async () => {
     try {
@@ -48,9 +62,24 @@ class AccountManager {
 
   appendAccountTabOrLogin = async () => {
     const token = await this.verifyToken();
-    const div = document.getElementById("nav-links-container");
+    const navContainer = document.getElementById("nav-links-container");
+    const navContainerMobile = document.getElementById("nav-links-container-mobile");
     if (token) {
-      div.append(
+      navContainer.append(
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/account.html" },
+          "Account"
+        ),
+        createElement("a", { class: "top-nav-btn" }, "Logout", {
+          type: "click",
+          event: () => {
+            localStorage.removeItem("token");
+            window.location.pathname = "/";
+          },
+        })
+      );
+      navContainerMobile.append(
         createElement(
           "a",
           { class: "top-nav-btn", href: "/account.html" },
@@ -65,7 +94,14 @@ class AccountManager {
         })
       );
     } else {
-      div.appendChild(
+      navContainer.appendChild(
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/login.html" },
+          "Login"
+        )
+      );
+      navContainerMobile.appendChild(
         createElement(
           "a",
           { class: "top-nav-btn", href: "/login.html" },
@@ -75,23 +111,101 @@ class AccountManager {
     }
   };
 
+  saveEmail = async (e) => {
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+
+    const resData = await postThing(
+      `/api/edit_user/${this.userInfo.id}`,
+      formProps
+    );
+    if (resData) this.userInfo.email = resData.email;
+  };
+
+  renderEmailOrEditEmail = () => {
+    if (this.editEmail) {
+      return createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement("h2", {}, "Edit Email"),
+          createElement(
+            "form",
+            {},
+            [
+              createElement("label", { for: "email" }, "New Email"),
+              createElement("input", {
+                type: "email",
+                id: "email",
+                name: "email",
+                value: this.userInfo.email,
+                required: true,
+              }),
+              createElement("br"),
+              createElement("button", { type: "submit" }, "Done"),
+            ],
+            {
+              type: "submit",
+              event: async (e) => {
+                e.preventDefault();
+                this.editEmail = false;
+                this.toggleSaveEmailLoading();
+                await this.saveEmail(e);
+                this.toggleSaveEmailLoading();
+              },
+            }
+          ),
+          createElement("br"),
+          createElement("button", { class: "btn-red" }, "Cancel", {
+            type: "click",
+            event: this.toggleEditEmail,
+          }),
+        ]
+      );
+    }
+
+    return createElement(
+      "div",
+      { style: "display: flex; justify-content: space-between;" },
+      [
+        createElement("h2", {}, "Email"),
+        createElement("div", { style: "display: flex; align-items: center;" }, [
+          createElement(
+            "a",
+            { class: "small-clickable", style: "margin-right: 5px" },
+            "Edit",
+            {
+              type: "click",
+              event: this.toggleEditEmail,
+            }
+          ),
+          createElement("div", {}, this.userInfo.email),
+        ]),
+      ]
+    );
+  };
+
   renderAccountApp = () => {
     const domComponent = document.getElementById("account-app");
     domComponent.innerHTML = "";
 
+    if (this.saveEmailLoading) {
+      return domComponent.append(
+        renderLoadingWithMessage("Saving your new email...")
+      );
+    }
+
     domComponent.className = "component";
     domComponent.append(
-      createElement(
-        "div",
-        { style: "display: flex; justify-content: space-between;" },
-        [
-          createElement("h2", {}, "Email"),
-          createElement("div", {}, this.userInfo.email),
-        ]
-      ),
+      this.renderEmailOrEditEmail(),
       createElement("br"),
       createElement("hr"),
-      createElement("button", {}, "Reset Password")
+      createElement("button", {}, "Reset Password", {
+        type: "click",
+        event: () => {
+          window.location.pathname = "/resetpassword.html";
+        },
+      })
     );
   };
 }

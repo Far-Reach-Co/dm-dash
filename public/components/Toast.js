@@ -5,6 +5,7 @@ class Toast {
     this.isVisible = false;
     this.message = "";
     this.domComponent = document.getElementById("toast");
+    if(!this.domComponent) return;
     this.domComponent.style.visibility = "hidden";
 
     this.isError = false;
@@ -13,6 +14,7 @@ class Toast {
   }
 
   show = (message) => {
+    if (!this.domComponent) return;
     this.isVisible = true;
     this.message = message;
     this.render();
@@ -24,20 +26,22 @@ class Toast {
   };
 
   error = (message) => {
+    if (!this.domComponent) return;
     this.isError = true;
     this.show(message);
   };
 
   hide = () => {
+    if (!this.domComponent) return;
     clearTimeout(this.timer);
     this.isVisible = false;
     this.isError = false;
     this.message = "";
-    this.render();
     this.domComponent.style.visibility = "hidden";
   };
 
   render = () => {
+    if (!this.domComponent) return;
     this.domComponent.innerHTML = "";
 
     if (this.isError)
