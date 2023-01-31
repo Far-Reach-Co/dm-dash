@@ -198,7 +198,7 @@ router.post("/edit_project/:id", editProject);
 router.post("/register", registerUser); // needs verification and google login
 router.post("/login", loginUser);
 router.get("/verify_jwt", verifyJwt);
-// router.post("/edit_user", editUser);
+router.post("/edit_user/:id", editUser);
 router.post('/reset_password', resetPassword)
 router.post('/request_reset_email', requestResetEmail)
 
