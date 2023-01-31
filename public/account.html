@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Wyrld Dashboard | Account</title>
     <link rel="stylesheet" href="./style.css" />
-    <script src="./lib/appendAccountTab.js" defer></script>
+    <script src="./lib/AccountManager.js" defer type="module"></script>
   </head>
   <body>
     <nav>
@@ -20,6 +20,10 @@
     </nav>
     <div class="container">
       <h1>Account Management</h1>
+      <br>
+      <!-- Spinner -->
+      <div id="account-spinner" class="lds-dual-ring"></div>
+      <div id="account-app"></div>
     </div>
   </body>
 </html>
