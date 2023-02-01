@@ -59,15 +59,17 @@ function pgBackup() {
     async function doTheThing() {
       console.log("Running backup");
       doBackup();
-      // upload to aws
-      const uploadStatus = await uploadToAws();
-      console.log(uploadStatus);
-      // send email
-      mail.sendMessage({
-        user: { email: "farreachco@gmail.com" },
-        title: "Database Backup",
-        message: `This information will either be a location of the new backup file, or an error message: ${uploadStatus}`,
-      });
+      setTimeout(async () => {
+        // upload to aws
+        const uploadStatus = await uploadToAws();
+        console.log(uploadStatus);
+        // send email
+        mail.sendMessage({
+          user: { email: "farreachco@gmail.com" },
+          title: "Database Backup",
+          message: `This information will either be a location of the new backup file, or an error message: ${uploadStatus}`,
+        });
+      }, 10000);
     }
 
     // do it once on start then do it again every day
