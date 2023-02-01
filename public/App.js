@@ -62,7 +62,7 @@ class App {
       characters: null,
       locations: null,
     };
-  }
+  };
 
   instantiateSidebar = () => {
     const sidebarElem = createElement("div", {});
@@ -84,7 +84,7 @@ class App {
   };
 
   handleToProject = () => {
-    document.getElementById("to-projects-btn").addEventListener("click", () => {
+    function handle() {
       // stop all clocks
       Object.values(state.clockComponents).forEach((project) => {
         project.forEach((clock) => {
@@ -93,14 +93,26 @@ class App {
       });
       // navigate to project select
       navigate.navigate({ title: "app", sidebar: false, params: {} });
-    });
+    }
+    document
+      .getElementById("to-projects-btn")
+      .addEventListener("click", () => handle());
+    document
+      .getElementById("to-projects-btn-mobile")
+      .addEventListener("click", () => handle());
   };
 
   handleLogout = () => {
-    document.getElementById("logout-btn").addEventListener("click", () => {
+    function handle() {
       localStorage.removeItem("token");
       window.location.pathname = "/";
-    });
+    }
+    document
+      .getElementById("logout-btn")
+      .addEventListener("click", () => handle());
+    document
+      .getElementById("logout-btn-mobile")
+      .addEventListener("click", () => handle());
   };
 
   verifyToken = async () => {
@@ -220,7 +232,11 @@ class App {
     }
     const element = createElement("div");
     this.domComponent.appendChild(element);
-    const view = new ProjectsView({ domComponent: element, navigate, resetViewsOnProjectChange: this.resetViewsOnProjectChange });
+    const view = new ProjectsView({
+      domComponent: element,
+      navigate,
+      resetViewsOnProjectChange: this.resetViewsOnProjectChange,
+    });
     this.views.projects = view;
   };
 
