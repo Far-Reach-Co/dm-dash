@@ -15,12 +15,12 @@ class Mail {
   }
   sendMessage = async ({user, title, message}) => {
     await this.transporter.sendMail({
-      from: '"Wyrld Dashboard" <wyrld.dashboard@gmail.com>', // sender address
+      from: '"Far Reach Co." <wyrld.dashboard@gmail.com>', // sender address
       to: user.email, // list of receivers
       subject: title, // Subject line
       html: /*html*/ `
         <div>
-          <h2>Hello from the wyrld team!</h2>
+          <h2>Hello from the Far Reach Co. team!</h2>
           <p>${message}</p>
         </div>
       `
