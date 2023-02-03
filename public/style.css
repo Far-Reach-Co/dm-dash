@@ -459,7 +459,7 @@ footer {
   background-color: var(--blue);
 }
 
-.project-date {
+.project-extra-info {
   font-size: 15px;
   color: var(--orange3);
 }

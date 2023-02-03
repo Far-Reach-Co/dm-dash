@@ -6,6 +6,7 @@ import {
 } from "../lib/clipboard.js";
 import { getThings, deleteThing, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import humanFileSize from "../lib/humanFileSize.js";
 
 export default class Project {
   constructor(props) {
@@ -22,6 +23,7 @@ export default class Project {
     this.wasJoined = props.wasJoined;
     this.dateJoined = props.dateJoined;
     this.projectUserId = props.projectUserId;
+    this.usedDataInBytes = props.usedDataInBytes;
 
     this.edit = false;
     this.parentRender = props.parentRender;
@@ -284,6 +286,10 @@ export default class Project {
     }
   };
 
+  calculateUsedData = () => {
+    return "Data Size:" + " " + humanFileSize(this.usedDataInBytes)
+  }
+
   render = () => {
     this.domComponent.innerHTML = "";
 
@@ -303,8 +309,13 @@ export default class Project {
           createElement("h1", {}, this.title),
           createElement(
             "div",
-            { class: "project-date" },
+            { class: "project-extra-info" },
             this.calculateDateDisplay()
+          ),
+          createElement(
+            "div",
+            { class: "project-extra-info" },
+            this.calculateUsedData()
           ),
         ],
         {
