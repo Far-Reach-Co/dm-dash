@@ -5,6 +5,7 @@ import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import { uploadImage } from "../lib/imageUtils.js";
 
 export default class ItemsView {
   constructor(props) {
@@ -69,6 +70,18 @@ export default class ItemsView {
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image && formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      // if success update formProps and set imageRef for UI
+      if (newImage) {
+        formProps.image_id = newImage.id;
+      }
+      delete formProps.image;
+    }
 
     await postThing("/api/add_item", formProps)
     this.toggleNewItemLoading();
@@ -96,6 +109,19 @@ export default class ItemsView {
         id: "description",
         name: "description",
       }),
+      createElement("br"),
+      createElement(
+        "label",
+        { for: "image", class: "file-input" },
+        "Upload Image"
+      ),
+      createElement("input", {
+        id: "image",
+        name: "image",
+        type: "file",
+        accept: "image/*",
+      }),
+      createElement("br"),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
@@ -139,7 +165,7 @@ export default class ItemsView {
         locationId: item.location_id,
         characterId: item.character_id,
         type: item.type,
-        imageRef: item.image_ref,
+        imageId: item.image_id,
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,

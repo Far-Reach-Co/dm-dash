@@ -5,7 +5,9 @@ const {
   removeProjectQuery,
   editProjectQuery,
 } = require("../queries/projects.js");
-const { getProjectInviteByProjectQuery } = require("../queries/projectInvites.js");
+const {
+  getProjectInviteByProjectQuery,
+} = require("../queries/projectInvites.js");
 const {
   getProjectUsersQuery,
   getProjectUserByUserAndProjectQuery,
@@ -99,7 +101,12 @@ async function editProject(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editProjectQuery(req.params.id, req.body);

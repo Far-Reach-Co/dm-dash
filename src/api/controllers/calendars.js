@@ -26,7 +26,12 @@ async function addCalendar(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await addCalendarQuery(req.body);
@@ -87,10 +92,15 @@ async function removeCalendar(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await removeCalendarQuery(req.params.id);
+    await removeCalendarQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -114,7 +124,12 @@ async function editCalendar(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editCalendarQuery(req.params.id, req.body);

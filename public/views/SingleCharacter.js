@@ -89,11 +89,11 @@ export default class SingleCharacterView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImageRef = await uploadImage(formProps.image);
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.character.image_id);
       // if success update formProps and set imageRef for UI
-      if (newImageRef) {
-        formProps.image_ref = newImageRef;
-        this.character.image_ref = newImageRef;
+      if (newImage) {
+        formProps.image_id = newImage.id;
+        this.character.image_id = newImage.id;
       }
       delete formProps.image;
       this.toggleUploadingImage();
@@ -173,9 +173,9 @@ export default class SingleCharacterView {
   };
 
   renderImage = async () => {
-    if (this.character.image_ref) {
+    if (this.character.image_id) {
       const imageSource = await getPresignedForImageDownload(
-        this.character.image_ref
+        this.character.image_id
       );
       if (imageSource) {
         return createElement(

@@ -2,13 +2,14 @@ const db = require('../dbconfig')
 
 async function addCharacterQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Character" (project_id, title, description, type, location_id) values($1,$2,$3,$4,$5) returning *`,
+    text: /*sql*/ `insert into public."Character" (project_id, title, description, type, location_id, image_id) values($1,$2,$3,$4,$5,$6) returning *`,
     values: [
       data.project_id,
       data.title,
       data.description,
       data.type,
-      data.location_id
+      data.location_id,
+      data.image_id
     ]
   }
   return await db.query(query)

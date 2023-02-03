@@ -71,15 +71,15 @@ export default class LocationsView {
     formProps.project_id = projectId;
     formProps.is_sub = false;
     if (formProps.type === "None") formProps.type = null;
-    if (formProps.image.size === 0) delete formProps.image;
+    if (formProps.image && formProps.image.size === 0) delete formProps.image;
 
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImageRef = await uploadImage(formProps.image);
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
       // if success update formProps and set imageRef for UI
-      if (newImageRef) {
-        formProps.image_ref = newImageRef;
+      if (newImage) {
+        formProps.image_id = newImage.id;
       }
       delete formProps.image;
     }
@@ -167,10 +167,10 @@ export default class LocationsView {
         isSub: location.is_sub,
         parentLocationId: location.parent_location_id,
         projectId: location.project_id,
+        imageId: location.image_id,
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,
-        imageRef: location.image_ref,
       });
 
       return elem;
