@@ -55,11 +55,11 @@ export default class SingleItemView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImageRef = await uploadImage(formProps.image);
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.item.image_id);
       // if success update formProps and set imageRef for UI
-      if (newImageRef) {
-        formProps.image_ref = newImageRef;
-        this.item.image_ref = newImageRef;
+      if (newImage) {
+        formProps.image_id = newImage.id;
+        this.item.image_id = newImage.id;
       }
       delete formProps.image;
       this.toggleUploadingImage();
@@ -140,9 +140,9 @@ export default class SingleItemView {
   };
 
   renderImage = async () => {
-    if (this.item.image_ref) {
+    if (this.item.image_id) {
       const imageSource = await getPresignedForImageDownload(
-        this.item.image_ref
+        this.item.image_id
       );
       if (imageSource) {
         return createElement(

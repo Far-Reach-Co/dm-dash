@@ -2,14 +2,15 @@ const db = require('../dbconfig')
 
 async function addItemQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Item" (project_id, title, description, type, location_id, character_id) values($1,$2,$3,$4,$5,$6) returning *`,
+    text: /*sql*/ `insert into public."Item" (project_id, title, description, type, location_id, character_id, image_id) values($1,$2,$3,$4,$5,$6,$7) returning *`,
     values: [
       data.project_id,
       data.title,
       data.description,
       data.type,
       data.location_id,
-      data.character_id
+      data.character_id,
+      data.image_id
     ]
   }
   return await db.query(query)

@@ -9,11 +9,17 @@ const {
   removeCharacterQuery,
   editCharacterQuery,
 } = require("../queries/characters.js");
+const { getImageQuery, removeImageQuery } = require("../queries/images.js");
 const { getLocationQuery } = require("../queries/locations.js");
-const { getProjectQuery } = require("../queries/projects.js");
+const {
+  getProjectQuery,
+
+  editProjectQuery,
+} = require("../queries/projects.js");
 const {
   getProjectUserByUserAndProjectQuery,
 } = require("../queries/projectUsers.js");
+const { removeFile } = require("./s3.js");
 
 async function addCharacter(req, res, next) {
   try {
@@ -181,11 +187,30 @@ async function removeCharacter(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     await removeCharacterQuery(req.params.id);
     res.status(204).send();
+
+    // remove image
+    if (character.image_id) {
+      const imageData = await getImageQuery(character.image_id);
+      const image = imageData.rows[0];
+      await removeFile("wyrld/images", image);
+      await removeImageQuery(image.id);
+      // update project data usage
+      const newCalculatedData =
+        project.used_data_in_bytes - image.size;
+      await editProjectQuery(project.id, {
+        used_data_in_bytes: newCalculatedData,
+      });
+    }
   } catch (err) {
     next(err);
   }
@@ -208,7 +233,12 @@ async function editCharacter(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editCharacterQuery(req.params.id, req.body);

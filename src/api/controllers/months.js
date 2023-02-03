@@ -28,7 +28,12 @@ async function addMonth(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await addMonthQuery(req.body);
@@ -85,7 +90,12 @@ async function removeMonth(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     await removeMonthQuery(req.params.id);
@@ -115,7 +125,12 @@ async function editMonth(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editMonthQuery(req.params.id, req.body);

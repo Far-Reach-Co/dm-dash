@@ -28,7 +28,12 @@ async function addDay(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await addDayQuery(req.body);
@@ -85,7 +90,12 @@ async function removeDay(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     await removeDayQuery(req.params.id);
@@ -115,7 +125,12 @@ async function editDay(req, res, next) {
         req.user.id,
         project.id
       );
-      if (projectUser.rows && projectUser.rows.length && !projectUser.rows[0].is_editor) throw { status: 403, message: "Forbidden" };
+      if (
+        projectUser.rows &&
+        projectUser.rows.length &&
+        !projectUser.rows[0].is_editor
+      )
+        throw { status: 403, message: "Forbidden" };
     }
 
     const data = await editDayQuery(req.params.id, req.body);

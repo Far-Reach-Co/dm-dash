@@ -7,6 +7,7 @@ import {
   uploadImage,
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import state from "../lib/state.js";
 
 export default class Character {
   constructor(props) {
@@ -29,7 +30,7 @@ export default class Character {
 
     this.edit = false;
     this.uploadingImage = false;
-    this.imageRef = props.imageRef;
+    this.imageId = props.imageId;
 
     this.render();
   }
@@ -54,12 +55,12 @@ export default class Character {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImageRef = await uploadImage(formProps.image);
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
       // if success update formProps and set imageRef for UI
-      if (newImageRef) {
-        formProps.image_ref = newImageRef;
-        this.imageRef = newImageRef;
-        this.character.image_ref = newImageRef;
+      if (newImage) {
+        formProps.image_id = newImage.id;
+        this.imageId = newImage.id;
+        this.character.image_id = newImage.id;
       }
       delete formProps.image;
       this.toggleUploadingImage();
@@ -160,8 +161,8 @@ export default class Character {
   };
 
   renderImage = async () => {
-    if (this.imageRef) {
-      const imageSource = await getPresignedForImageDownload(this.imageRef);
+    if (this.imageId) {
+      const imageSource = await getPresignedForImageDownload(this.imageId);
       if (imageSource) {
         return createElement("img", {
           src: imageSource.url,

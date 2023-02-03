@@ -4,6 +4,7 @@ import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js"
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import state from "../lib/state.js";
 
 export default class Item {
   constructor(props) {
@@ -17,7 +18,7 @@ export default class Item {
     this.locationId = props.locationId;
     this.characterId = props.characterId;
     this.type = props.type;
-    this.imageRef = props.imageRef;
+    this.imageId = props.imageId;
 
     this.navigate = props.navigate;
     this.parentRender = props.parentRender;
@@ -51,12 +52,12 @@ export default class Item {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImageRef = await uploadImage(formProps.image);
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
       // if success update formProps and set imageRef for UI
-      if (newImageRef) {
-        formProps.image_ref = newImageRef;
-        this.imageRef = newImageRef;
-        this.item.image_ref = newImageRef;
+      if (newImage) {
+        formProps.image_id = newImage.id;
+        this.imageId = newImage.id;
+        this.item.image_id = newImage.id;
       }
       delete formProps.image;
       this.toggleUploadingImage();
@@ -158,8 +159,8 @@ export default class Item {
   };
 
   renderImage = async () => {
-    if (this.imageRef) {
-      const imageSource = await getPresignedForImageDownload(this.imageRef);
+    if (this.imageId) {
+      const imageSource = await getPresignedForImageDownload(this.imageId);
       if (imageSource) {
         return createElement("img", {
           src: imageSource.url,

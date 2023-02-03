@@ -334,11 +334,11 @@ export default class SingleLocationView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImageRef = await uploadImage(formProps.image);
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.location.image_id);
       // if success update formProps and set imageRef for UI
-      if (newImageRef) {
-        formProps.image_ref = newImageRef;
-        this.location.image_ref = newImageRef;
+      if (newImage) {
+        formProps.image_id = newImage.id;
+        this.location.image_id = newImage.id;
       }
       delete formProps.image;
       this.toggleUploadingImage();
@@ -421,9 +421,9 @@ export default class SingleLocationView {
   };
 
   renderImage = async () => {
-    if (this.location.image_ref) {
+    if (this.location.image_id) {
       const imageSource = await getPresignedForImageDownload(
-        this.location.image_ref
+        this.location.image_id
       );
       if (imageSource) {
         return createElement(

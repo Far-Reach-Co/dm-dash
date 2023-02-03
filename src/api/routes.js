@@ -91,13 +91,16 @@ const {
   removeProjectUser,
   editProjectUser,
 } = require("./controllers/projectUsers.js");
-const {getSignedUrlForDownload, getSignedUrlForUpload} = require("./controllers/s3.js");
+const {getSignedUrlForDownload, uploadToAws} = require("./controllers/s3.js");
+// for uploading files
+const multer = require('multer');
+const upload = multer({ dest: 'file_uploads/' })
 
 var router = express.Router();
 
 // s3
 router.post('/signed_URL_download', getSignedUrlForDownload)
-router.post('/signed_URL_upload', getSignedUrlForUpload)
+router.post('/file_upload', upload.single('file'), uploadToAws)
 
 // project users
 router.get("/get_project_user_by_user_and_project/:project_id", getProjectUserByUserAndProject);

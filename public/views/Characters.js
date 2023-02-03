@@ -5,6 +5,7 @@ import characterTypeSelect from "../lib/characterTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import { uploadImage } from "../lib/imageUtils.js";
 
 export default class CharactersView {
   constructor(props) {
@@ -68,6 +69,18 @@ export default class CharactersView {
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
+    if (formProps.image && formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      // if success update formProps and set imageRef for UI
+      if (newImage) {
+        formProps.image_id = newImage.id;
+      }
+      delete formProps.image;
+    }
 
     await postThing("/api/add_character", formProps);
     this.toggleNewCharacterLoading();
@@ -95,6 +108,19 @@ export default class CharactersView {
         id: "description",
         name: "description",
       }),
+      createElement("br"),
+      createElement(
+        "label",
+        { for: "image", class: "file-input" },
+        "Upload Image"
+      ),
+      createElement("input", {
+        id: "image",
+        name: "image",
+        type: "file",
+        accept: "image/*",
+      }),
+      createElement("br"),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
@@ -141,7 +167,7 @@ export default class CharactersView {
         projectId: character.project_id,
         locationId: character.location_id,
         type: character.type,
-        imageRef: character.image_ref,
+        imageId: character.image_id,
         navigate: this.navigate,
         parentRender: this.render,
         handleTypeFilterChange: this.handleTypeFilterChange,
