@@ -11,6 +11,9 @@ import {
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import { renderImage } from "../lib/imageRenderUtils.js";
+import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
+import CurrentCharacterComponent from "../lib/CurrentCharacterComponent.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -133,36 +136,6 @@ export default class SingleItemView {
     );
   };
 
-  handleImageClick = (imageSource) => {
-    modal.show(
-      createElement("img", { src: imageSource.url, class: "modal-image" })
-    );
-  };
-
-  renderImage = async () => {
-    if (this.item.image_id) {
-      const imageSource = await getPresignedForImageDownload(
-        this.item.image_id
-      );
-      if (imageSource) {
-        return createElement(
-          "img",
-          {
-            class: "clickable-image",
-            src: imageSource.url,
-            width: "50%",
-            height: "auto",
-          },
-          null,
-          {
-            type: "click",
-            event: () => this.handleImageClick(imageSource),
-          }
-        );
-      } else return createElement("div", { style: "visibility: hidden;" });
-    } else return createElement("div", { style: "visibility: hidden;" });
-  };
-
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
@@ -189,14 +162,16 @@ export default class SingleItemView {
     const currentLocationComponent = createElement("div", {});
     new CurrentLocationComponent({
       domComponent: currentLocationComponent,
-      item: this.item,
+      module: this.item,
+      moduleType: "item",
       navigate: this.navigate,
     });
 
     const currentCharacterComponent = createElement("div", {});
     new CurrentCharacterComponent({
       domComponent: currentCharacterComponent,
-      item: this.item,
+      module: this.item,
+      moduleType: "item",
       navigate: this.navigate,
     });
 
@@ -243,202 +218,10 @@ export default class SingleItemView {
         ]),
       ]),
       createElement("br"),
-      await this.renderImage(),
+      await renderImage(this.item.image_id),
       createElement("br"),
       createElement("br"),
       noteManagerElem
-    );
-  };
-}
-
-class CurrentLocationComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "current-location-component";
-    this.item = props.item;
-    this.navigate = props.navigate;
-
-    this.editingCurrentLocation = false;
-
-    this.render();
-  }
-
-  toggleEditingCurrentLocation = () => {
-    this.editingCurrentLocation = !this.editingCurrentLocation;
-    this.render();
-  };
-
-  renderEditCurrentLocationButtonOrNull = () => {
-    // dont render if user is not an editor
-    if (state.currentProject.isEditor === false)
-      return createElement("div", { style: "invisibility: hidden;" });
-
-    if (!this.editingCurrentLocation) {
-      return createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "align-self: flex-end;",
-        },
-        "Edit",
-        {
-          type: "click",
-          event: this.toggleEditingCurrentLocation,
-        }
-      );
-    } else return createElement("div", { style: "invisibility: hidden;" });
-  };
-
-  updateCurrentLocation = (newLocationId) => {
-    postThing(`/api/edit_item/${this.item.id}`, {
-      location_id: newLocationId,
-    });
-  };
-
-  renderCurrentLocation = async () => {
-    let location = null;
-    if (this.item.location_id) {
-      location = await getThings(`/api/get_location/${this.item.location_id}`);
-    }
-
-    if (this.editingCurrentLocation) {
-      return createElement(
-        "div",
-        { style: "display: flex; flex-direction: column;" },
-        await locationSelect(this.item.location_id, null, (newLocationId) => {
-          this.item.location_id = newLocationId;
-          this.toggleEditingCurrentLocation();
-          this.updateCurrentLocation(newLocationId);
-        })
-      );
-    }
-
-    if (!location) {
-      return createElement("small", {}, "None...");
-    } else {
-      return createElement(
-        "a",
-        { class: "small-clickable", style: "margin: 3px;" },
-        location.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-location",
-              sidebar: true,
-              params: { content: location },
-            }),
-        }
-      );
-    }
-  };
-
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      createElement("div", { class: "single-info-box-subheading" }, [
-        "Current Location",
-        this.renderEditCurrentLocationButtonOrNull(),
-      ]),
-      await this.renderCurrentLocation()
-    );
-  };
-}
-
-class CurrentCharacterComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "current-location-component";
-    this.item = props.item;
-    this.navigate = props.navigate;
-
-    this.editingCurrentCharacter = false;
-
-    this.render();
-  }
-
-  toggleEditingCurrentCharacter = () => {
-    this.editingCurrentCharacter = !this.editingCurrentCharacter;
-    this.render();
-  };
-
-  renderEditCurrentCharacterButtonOrNull = () => {
-    // dont render if user is not an editor
-    if (state.currentProject.isEditor === false)
-      return createElement("div", { style: "invisibility: hidden;" });
-
-    if (!this.editingCurrentCharacter) {
-      return createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "align-self: flex-end;",
-        },
-        "Edit",
-        {
-          type: "click",
-          event: this.toggleEditingCurrentCharacter,
-        }
-      );
-    } else return createElement("div", { style: "invisibility: hidden;" });
-  };
-
-  updateCurrentCharacter = (newCharacterId) => {
-    postThing(`/api/edit_item/${this.item.id}`, {
-      character_id: newCharacterId,
-    });
-  };
-
-  renderCurrentCharacter = async () => {
-    let character = null;
-    if (this.item.character_id) {
-      character = await getThings(
-        `/api/get_character/${this.item.character_id}`
-      );
-    }
-
-    if (this.editingCurrentCharacter) {
-      return createElement(
-        "div",
-        { style: "display: flex; flex-direction: column;" },
-        await characterSelect(this.item.character_id, (newCharacterId) => {
-          this.item.character_id = newCharacterId;
-          this.toggleEditingCurrentCharacter();
-          this.updateCurrentCharacter(newCharacterId);
-        })
-      );
-    }
-
-    if (!character) {
-      return createElement("small", {}, "None...");
-    } else {
-      return createElement(
-        "a",
-        { class: "small-clickable", style: "margin: 3px;" },
-        character.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-character",
-              sidebar: true,
-              params: { content: character },
-            }),
-        }
-      );
-    }
-  };
-
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      createElement("div", { class: "single-info-box-subheading" }, [
-        "With Character",
-        this.renderEditCurrentCharacterButtonOrNull(),
-      ]),
-      await this.renderCurrentCharacter()
     );
   };
 }
