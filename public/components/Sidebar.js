@@ -12,9 +12,9 @@ export default class SideBar {
     const elem = createElement("img", {
       id: "close-sidebar",
       class: "close-sidebar",
-      src: "/assets/hamburger.svg",
-      height: 28,
-      width: 28,
+      src: "/assets/sidebar.svg",
+      height: 32,
+      width: 32,
     });
     elem.addEventListener("click", this.close);
     return elem;
@@ -36,14 +36,8 @@ export default class SideBar {
       this.domComponent.style.zIndex = "3";
   };
 
-  renderRoutesElems = () => {
+  renderMainRoutesElems = () => {
     const routes = [
-      {
-        id: "sidebar-notes",
-        title: "notes",
-        displayTitle: "Notes",
-        params: {},
-      },
       {
         id: "sidebar-locations",
         title: "locations",
@@ -60,12 +54,6 @@ export default class SideBar {
         id: "sidebar-characters",
         title: "characters",
         displayTitle: "Characters",
-        params: {},
-      },
-      {
-        id: "sidebar-counters",
-        title: "counters",
-        displayTitle: "Counters",
         params: {},
       },
       {
@@ -104,6 +92,44 @@ export default class SideBar {
     });
   };
 
+  renderToolRoutesElems = () => {
+    const routes = [
+      {
+        id: "sidebar-notes",
+        title: "notes",
+        displayTitle: "Notes",
+        params: {},
+      },
+      {
+        id: "sidebar-counters",
+        title: "counters",
+        displayTitle: "Counters",
+        params: {},
+      }
+    ];
+    return routes.map((route) => {
+      let className = "sidebar-item";
+      if(navigate.currentRoute && navigate.currentRoute.title === route.title) className += " sidebar-selected-item";
+      const elem = createElement(
+        "a",
+        {
+          class: className,
+          id: route.id,
+        },
+        route.displayTitle
+      );
+      // event listener
+      elem.addEventListener("click", () => {
+        navigate.navigate({
+          title: route.title,
+          sidebar: true,
+          params: route.params,
+        });
+      });
+      return elem;
+    });
+  };
+
   hide = () => {
     this.close();
     this.domComponent.innerHTML = "";
@@ -118,12 +144,14 @@ export default class SideBar {
         class: "sidebar-container",
       },
       [
-        createElement("div", { class: "sidebar-header" }, "Modules"),
+        createElement("div", { class: "sidebar-header" }, "Main Modules"),
+        ...this.renderMainRoutesElems(),
+        createElement("div", { class: "sidebar-header" }, "Personal Tools"),
+        ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),
-        ...this.renderRoutesElems(),
-      ]
-    );
+      ],
+      );
     this.container = container;
-    this.domComponent.appendChild(container);
+    this.domComponent.append(container);
   };
 }

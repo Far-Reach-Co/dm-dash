@@ -616,15 +616,16 @@ footer {
 
 .close-sidebar {
   position: absolute;
-  top: 0;
-  left: 0;
+  bottom: 150px;
+  /* left: 0; */
   margin-right: 3px;
   margin-top: 3px;
   cursor: pointer;
 }
 
 .hamburger {
-  right: 0;
+  bottom: 100px;
+  right: 5px;
   z-index: 2;
   position: absolute;
   cursor: pointer;

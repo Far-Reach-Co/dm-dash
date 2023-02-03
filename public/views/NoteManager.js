@@ -167,7 +167,7 @@ export default class NoteManager {
 
     this.domComponent.append(
       createElement("div", { class: "single-item-subheading" }, [
-        "Notes",
+        "Personal Notes",
         createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
           type: "click",
           event: () => {
