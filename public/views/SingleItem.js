@@ -11,7 +11,7 @@ import {
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
-import { renderImage } from "../lib/imageRenderUtils.js";
+import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
 import CurrentCharacterComponent from "../lib/CurrentCharacterComponent.js";
 
@@ -218,7 +218,7 @@ export default class SingleItemView {
         ]),
       ]),
       createElement("br"),
-      await renderImage(this.item.image_id),
+      await renderImageLarge(this.item.image_id),
       createElement("br"),
       createElement("br"),
       noteManagerElem

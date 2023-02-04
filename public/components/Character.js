@@ -8,6 +8,7 @@ import {
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
+import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
 
 export default class Character {
   constructor(props) {
@@ -160,31 +161,6 @@ export default class Character {
     } else return createElement("div", { style: "display: none;" });
   };
 
-  renderImage = async () => {
-    if (this.imageId) {
-      const imageSource = await getPresignedForImageDownload(this.imageId);
-      if (imageSource) {
-        return createElement("img", {
-          src: imageSource.url,
-          width: 30,
-          height: 30,
-        });
-      } else {
-        return createElement("img", {
-          src: "/assets/character.svg",
-          width: 30,
-          height: 30,
-        });
-      }
-    } else {
-      return createElement("img", {
-        src: "/assets/character.svg",
-        width: 30,
-        height: 30,
-      });
-    }
-  };
-
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -196,7 +172,7 @@ export default class Character {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderCharacterType(),
-        await this.renderImage(),
+        await renderImageSmallOrPlaceholder(this.imageId, "/assets/character.svg"),
       ]),
       createElement("div", { class: "description" }, this.description),
       createElement("br"),

@@ -6,13 +6,11 @@ async function handleImageClick(imageSource) {
   modal.show(
     createElement("img", { src: imageSource.url, class: "modal-image" })
   );
-};
+}
 
-export async function renderImage(imageId) {
+export async function renderImageLarge(imageId) {
   if (imageId) {
-    const imageSource = await getPresignedForImageDownload(
-      imageId
-    );
+    const imageSource = await getPresignedForImageDownload(imageId);
     if (imageSource) {
       return createElement(
         "img",
@@ -30,4 +28,29 @@ export async function renderImage(imageId) {
       );
     } else return createElement("div", { style: "visibility: hidden;" });
   } else return createElement("div", { style: "visibility: hidden;" });
-};
+}
+
+export async function renderImageSmallOrPlaceholder(imageId, placeholderImageLocation) {
+  if (imageId) {
+    const imageSource = await getPresignedForImageDownload(imageId);
+    if (imageSource) {
+      return createElement("img", {
+        src: imageSource.url,
+        width: 30,
+        height: 30,
+      });
+    } else {
+      return createElement("img", {
+        src: placeholderImageLocation,
+        width: 30,
+        height: 30,
+      });
+    }
+  } else {
+    return createElement("img", {
+      src: placeholderImageLocation,
+      width: 30,
+      height: 30,
+    });
+  }
+}
