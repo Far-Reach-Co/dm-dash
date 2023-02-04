@@ -10,6 +10,8 @@ import {
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import { renderImage } from "../lib/imageRenderUtils.js";
+import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -166,36 +168,6 @@ export default class SingleCharacterView {
     );
   };
 
-  handleImageClick = (imageSource) => {
-    modal.show(
-      createElement("img", { src: imageSource.url, class: "modal-image" })
-    );
-  };
-
-  renderImage = async () => {
-    if (this.character.image_id) {
-      const imageSource = await getPresignedForImageDownload(
-        this.character.image_id
-      );
-      if (imageSource) {
-        return createElement(
-          "img",
-          {
-            class: "clickable-image",
-            src: imageSource.url,
-            width: "50%",
-            height: "auto",
-          },
-          null,
-          {
-            type: "click",
-            event: () => this.handleImageClick(imageSource),
-          }
-        );
-      } else return createElement("div", { style: "visibility: hidden;" });
-    } else return createElement("div", { style: "visibility: hidden;" });
-  };
-
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
@@ -222,7 +194,8 @@ export default class SingleCharacterView {
     const currentLocationComponent = createElement("div", {});
     new CurrentLocationComponent({
       domComponent: currentLocationComponent,
-      character: this.character,
+      module: this.character,
+      moduleType: "character",
       navigate: this.navigate,
     });
 
@@ -274,111 +247,10 @@ export default class SingleCharacterView {
         ]),
       ]),
       createElement("br"),
-      await this.renderImage(),
+      await renderImage(this.character.image_id),
       createElement("br"),
       createElement("br"),
       noteManagerElem
-    );
-  };
-}
-
-class CurrentLocationComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "current-location-component";
-    this.character = props.character;
-    this.navigate = props.navigate;
-
-    this.editingCurrentLocation = false;
-
-    this.render();
-  }
-
-  toggleEditingCurrentLocation = () => {
-    this.editingCurrentLocation = !this.editingCurrentLocation;
-    this.render();
-  };
-
-  renderEditCurrentLocationButtonOrNull = () => {
-    // dont render if user is not an editor
-    if (state.currentProject.isEditor === false)
-      return createElement("div", { style: "invisibility: hidden;" });
-
-    if (!this.editingCurrentLocation) {
-      return createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "align-self: flex-end;",
-        },
-        "Edit",
-        {
-          type: "click",
-          event: this.toggleEditingCurrentLocation,
-        }
-      );
-    } else return createElement("div", { style: "invisibility: hidden;" });
-  };
-
-  updateCurrentLocation = (newLocationId) => {
-    postThing(`/api/edit_character/${this.character.id}`, {
-      location_id: newLocationId,
-    });
-  };
-
-  renderCurrentLocation = async () => {
-    let location = null;
-    if (this.character.location_id) {
-      location = await getThings(
-        `/api/get_location/${this.character.location_id}`
-      );
-    }
-
-    if (this.editingCurrentLocation) {
-      return createElement(
-        "div",
-        { style: "display: flex; flex-direction: column;" },
-        await locationSelect(
-          this.character.location_id,
-          null,
-          (newLocationId) => {
-            this.character.location_id = newLocationId;
-            this.toggleEditingCurrentLocation();
-            this.updateCurrentLocation(newLocationId);
-          }
-        )
-      );
-    }
-
-    if (!location) {
-      return createElement("small", {}, "None...");
-    } else {
-      return createElement(
-        "a",
-        { class: "small-clickable", style: "margin: 3px;" },
-        location.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-location",
-              sidebar: true,
-              params: { content: location },
-            }),
-        }
-      );
-    }
-  };
-
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      createElement("div", { class: "single-info-box-subheading" }, [
-        "Current Location",
-        this.renderEditCurrentLocationButtonOrNull(),
-      ]),
-      await this.renderCurrentLocation()
     );
   };
 }

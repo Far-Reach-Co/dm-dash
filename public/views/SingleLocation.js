@@ -10,6 +10,7 @@ import modal from "../components/modal.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
+import { renderImage } from "../lib/imageRenderUtils.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -414,36 +415,6 @@ export default class SingleLocationView {
     );
   };
 
-  handleImageClick = (imageSource) => {
-    modal.show(
-      createElement("img", { src: imageSource.url, class: "modal-image" })
-    );
-  };
-
-  renderImage = async () => {
-    if (this.location.image_id) {
-      const imageSource = await getPresignedForImageDownload(
-        this.location.image_id
-      );
-      if (imageSource) {
-        return createElement(
-          "img",
-          {
-            class: "clickable-image",
-            src: imageSource.url,
-            width: "50%",
-            height: "auto",
-          },
-          null,
-          {
-            type: "click",
-            event: () => this.handleImageClick(imageSource),
-          }
-        );
-      } else return createElement("div", { style: "visibility: hidden;" });
-    } else return createElement("div", { style: "visibility: hidden;" });
-  };
-
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
@@ -555,7 +526,7 @@ export default class SingleLocationView {
         ]),
       ]),
       createElement("br"),
-      await this.renderImage(),
+      await renderImage(this.location.image_id),
       createElement("br"),
       createElement("br"),
       noteManagerElem,
