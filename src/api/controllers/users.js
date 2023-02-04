@@ -71,12 +71,18 @@ async function registerUser(req, res, next) {
     const data = userData.rows[0];
 
     // create first project for user
-    addProjectQuery({ title: "New Project", user_id: data.id });
+    await addProjectQuery({ title: "First Project", user_id: data.id });
 
     // login
     const token = generateAccessToken(data.id, validLoginLength);
 
     res.status(201).send({ token: token });
+    // send welcome email
+    mail.sendMessage({
+      user: data,
+      title: "Welcome",
+      message: `Hi friend, our team would like to welcome you aboard our ship as we sail into our next adventure together with courage and strength!\nIf you find yourself in need of any assistance feel free to reach out to us at farreachco@gmail.com<br>We look forward to seeing your progress along the way, thanks for joining us, have a wonderful day.<br> - Far Reach Co.`,
+    });
   } catch (err) {
     next(err);
   }
