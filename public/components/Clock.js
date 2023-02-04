@@ -160,7 +160,7 @@ export default class Clock {
       return [createElement("div", { style: "visibility: hidden;" })];
     } else {
       const selectSpeed = createElement("select", { name: "speed" }, [
-        createElement("option", { value: 1 }, "--Speed Select--"),
+        createElement("option", { value: 1 }, "Speed"),
         createElement("option", { value: 1 }, "1"),
         createElement("option", { value: 0.5 }, "1/2"),
         createElement("option", { value: 0.25 }, "1/4"),
