@@ -10,7 +10,7 @@ import {
 } from "../lib/imageUtils.js";
 import modal from "../components/modal.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
-import { renderImage } from "../lib/imageRenderUtils.js";
+import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
 
 export default class SingleCharacterView {
@@ -247,7 +247,7 @@ export default class SingleCharacterView {
         ]),
       ]),
       createElement("br"),
-      await renderImage(this.character.image_id),
+      await renderImageLarge(this.character.image_id),
       createElement("br"),
       createElement("br"),
       noteManagerElem

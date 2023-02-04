@@ -8,6 +8,7 @@ import listItemTitle from "../lib/listItemTitle.js";
 import state from "../lib/state.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
 
 export default class Location {
   constructor(props) {
@@ -212,7 +213,7 @@ export default class Location {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderLocationType(),
-        await this.renderImage(),
+        await renderImageSmallOrPlaceholder(this.imageId, "/assets/location.svg"),
       ]),
       createElement("div", { class: "description" }, this.description),
       createElement("br"),

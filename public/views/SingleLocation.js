@@ -10,7 +10,7 @@ import modal from "../components/modal.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
-import { renderImage } from "../lib/imageRenderUtils.js";
+import { renderImageLarge } from "../lib/imageRenderUtils.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -526,7 +526,7 @@ export default class SingleLocationView {
         ]),
       ]),
       createElement("br"),
-      await renderImage(this.location.image_id),
+      await renderImageLarge(this.location.image_id),
       createElement("br"),
       createElement("br"),
       noteManagerElem,

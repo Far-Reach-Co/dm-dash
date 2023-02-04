@@ -1,5 +1,6 @@
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
+import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
 import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
@@ -194,7 +195,7 @@ export default class Item {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderItemType(),
-        await this.renderImage(),
+        await renderImageSmallOrPlaceholder(this.imageId, "/assets/item.svg"),
       ]),
       createElement("div", { class: "description" }, this.description),
       createElement("br"),
