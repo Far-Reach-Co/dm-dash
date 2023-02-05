@@ -1,15 +1,16 @@
 const {
-  addItemQuery,
-  getItemsQuery,
-  getItemQuery,
-  getItemsWithFilterQuery,
-  getItemsWithKeywordQuery,
-  getItemsWithKeywordAndFilterQuery,
-  getItemsByLocationQuery,
-  getItemsByCharacterQuery,
-  removeItemQuery,
-  editItemQuery,
-} = require("../queries/items.js");
+  addLoreQuery,
+  getLoresQuery,
+  getLoreQuery,
+  getLoresWithFilterQuery,
+  getLoresWithKeywordQuery,
+  getLoresWithKeywordAndFilterQuery,
+  getLoresByLocationQuery,
+  getLoresByCharacterQuery,
+  getLoresByItemQuery,
+  removeLoreQuery,
+  editLoreQuery,
+} = require("../queries/Lores.js");
 const { getLocationQuery } = require("../queries/locations.js");
 const { getCharacterQuery } = require("../queries/characters.js");
 const {
@@ -22,8 +23,9 @@ const {
 } = require("../queries/projectUsers.js");
 const { removeFile } = require("./s3.js");
 const { removeImageQuery, getImageQuery } = require("../queries/images.js");
+const { getItemQuery } = require("../queries/items.js");
 
-async function addItem(req, res, next) {
+async function addLore(req, res, next) {
   try {
     // if no user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
@@ -45,41 +47,14 @@ async function addItem(req, res, next) {
         throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await addItemQuery(req.body);
+    const data = await addLoreQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);
   }
 }
 
-async function getItem(req, res, next) {
-  try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get item to get project id
-    const itemData = await getItemQuery(req.params.id);
-    const item = itemData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(item.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (!projectUser) throw { status: 403, message: "Forbidden" };
-    }
-
-    const data = await getItemQuery(req.params.id);
-    res.send(data.rows[0]);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getItems(req, res, next) {
+async function getLores(req, res, next) {
   // if no user
   if (!req.user) throw { status: 401, message: "Missing Credentials" };
   // If user is not author or editor
@@ -97,7 +72,7 @@ async function getItems(req, res, next) {
 
   if (req.params.keyword && req.params.filter) {
     try {
-      const data = await getItemsWithKeywordAndFilterQuery({
+      const data = await getLoresWithKeywordAndFilterQuery({
         projectId: req.params.project_id,
         limit: req.params.limit,
         offset: req.params.offset,
@@ -111,7 +86,7 @@ async function getItems(req, res, next) {
     }
   } else if (req.params.keyword && !req.params.filter) {
     try {
-      const data = await getItemsWithKeywordQuery({
+      const data = await getLoresWithKeywordQuery({
         projectId: req.params.project_id,
         limit: req.params.limit,
         offset: req.params.offset,
@@ -124,7 +99,7 @@ async function getItems(req, res, next) {
     }
   } else if (req.params.filter && !req.params.keyword) {
     try {
-      const data = await getItemsWithFilterQuery({
+      const data = await getLoresWithFilterQuery({
         projectId: req.params.project_id,
         limit: req.params.limit,
         offset: req.params.offset,
@@ -137,7 +112,7 @@ async function getItems(req, res, next) {
     }
   } else {
     try {
-      const data = await getItemsQuery({
+      const data = await getLoresQuery({
         projectId: req.params.project_id,
         limit: req.params.limit,
         offset: req.params.offset,
@@ -150,7 +125,7 @@ async function getItems(req, res, next) {
   }
 }
 
-async function getItemsByLocation(req, res, next) {
+async function getLoresByLocation(req, res, next) {
   try {
     // if no user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
@@ -170,14 +145,14 @@ async function getItemsByLocation(req, res, next) {
       if (!projectUser) throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await getItemsByLocationQuery(req.params.location_id);
+    const data = await getLoresByLocationQuery(req.params.location_id);
     res.send(data.rows);
   } catch (err) {
     next(err);
   }
 }
 
-async function getItemsByCharacter(req, res, next) {
+async function getLoresByCharacter(req, res, next) {
   try {
     // if no user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
@@ -197,22 +172,49 @@ async function getItemsByCharacter(req, res, next) {
       if (!projectUser) throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await getItemsByCharacterQuery(req.params.character_id);
+    const data = await getLoresByCharacterQuery(req.params.character_id);
     res.send(data.rows);
   } catch (err) {
     next(err);
   }
 }
 
-async function removeItem(req, res, next) {
+async function getLoresByItem(req, res, next) {
   try {
     // if no user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
     // get item to get project id
-    const itemData = await getItemQuery(req.params.id);
+    const itemData = await getItemQuery(req.params.item_id);
     const item = itemData.rows[0];
     // If user is not author or editor
     const projectData = await getProjectQuery(item.project_id);
+    const project = projectData.rows[0];
+
+    if (project.user_id !== req.user.id) {
+      // not editor
+      const projectUser = await getProjectUserByUserAndProjectQuery(
+        req.user.id,
+        project.id
+      );
+      if (!projectUser) throw { status: 403, message: "Forbidden" };
+    }
+
+    const data = await getLoresByItemQuery(req.params.item_id);
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function removeLore(req, res, next) {
+  try {
+    // if no user
+    if (!req.user) throw { status: 401, message: "Missing Credentials" };
+    // get Lore to get project id
+    const LoreData = await getLoreQuery(req.params.id);
+    const Lore = LoreData.rows[0];
+    // If user is not author or editor
+    const projectData = await getProjectQuery(Lore.project_id);
     const project = projectData.rows[0];
 
     if (project.user_id !== req.user.id) {
@@ -229,12 +231,12 @@ async function removeItem(req, res, next) {
         throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await removeItemQuery(req.params.id);
+    const data = await removeLoreQuery(req.params.id);
     res.status(204).send();
 
     // remove image
-    if (item.image_id) {
-      const imageData = await getImageQuery(item.image_id);
+    if (Lore.image_id) {
+      const imageData = await getImageQuery(Lore.image_id);
       const image = imageData.rows[0];
       await removeFile("wyrld/images", image);
       await removeImageQuery(image.id);
@@ -249,15 +251,15 @@ async function removeItem(req, res, next) {
   }
 }
 
-async function editItem(req, res, next) {
+async function editLore(req, res, next) {
   try {
     // if no user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get item to get project id
-    const itemData = await getItemQuery(req.params.id);
-    const item = itemData.rows[0];
+    // get Lore to get project id
+    const LoreData = await getLoreQuery(req.params.id);
+    const Lore = LoreData.rows[0];
     // If user is not author or editor
-    const projectData = await getProjectQuery(item.project_id);
+    const projectData = await getProjectQuery(Lore.project_id);
     const project = projectData.rows[0];
 
     if (project.user_id !== req.user.id) {
@@ -274,7 +276,7 @@ async function editItem(req, res, next) {
         throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await editItemQuery(req.params.id, req.body);
+    const data = await editLoreQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -282,11 +284,11 @@ async function editItem(req, res, next) {
 }
 
 module.exports = {
-  getItem,
-  getItems,
-  getItemsByLocation,
-  getItemsByCharacter,
-  addItem,
-  removeItem,
-  editItem,
+  getLores,
+  getLoresByLocation,
+  getLoresByCharacter,
+  getLoresByItem,
+  addLore,
+  removeLore,
+  editLore,
 };
