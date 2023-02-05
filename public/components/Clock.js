@@ -119,17 +119,8 @@ export default class Clock {
     );
     removeButton.addEventListener("click", () => {
       if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        try {
-          deleteThing(`/api/remove_clock/${this.id}`);
-          this.domComponent.remove();
-          const clocksByProject =
-            state.clockComponents[`project-${state.currentProject.id}`];
-          for (var i = 0; i < clocksByProject.length; i++) {
-            if (clocksByProject[i].id === this.id) {
-              clocksByProject.splice(i, 1);
-            }
-          }
-        } catch (err) {}
+        deleteThing(`/api/remove_clock/${this.id}`);
+        this.domComponent.remove();
         this.toggleEdit();
       }
     });
@@ -185,11 +176,11 @@ export default class Clock {
 
       return [
         createElement("br"),
-        createElement("button", {class: "new-btn"}, "Start", {
+        createElement("button", { class: "new-btn" }, "Start", {
           type: "click",
           event: this.start,
         }),
-        createElement("button", {class: "btn-red"}, "Stop", {
+        createElement("button", { class: "btn-red" }, "Stop", {
           type: "click",
           event: this.stop,
         }),

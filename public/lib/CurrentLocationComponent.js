@@ -50,7 +50,6 @@ export default class CurrentLocationComponent {
 
   renderCurrentLocation = async () => {
     let location = null;
-    console.log(this.module.location_id)
     if (this.module.location_id) {
       location = await getThings(
         `/api/get_location/${this.module.location_id}`
