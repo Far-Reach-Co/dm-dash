@@ -2,7 +2,7 @@ const db = require('../dbconfig')
 
 async function addNoteQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, character_id, item_id, user_id) values($1,$2,$3,$4,$5,$6,$7) returning *`,
+    text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, character_id, item_id, user_id, lore_id) values($1,$2,$3,$4,$5,$6,$7,$8) returning *`,
     values: [
       data.title,
       data.description,
@@ -10,7 +10,8 @@ async function addNoteQuery(data) {
       data.location_id,
       data.character_id,
       data.item_id,
-      data.user_id
+      data.user_id,
+      data.lore_id
     ]
   }
   return await db.query(query)
@@ -64,6 +65,14 @@ async function getNotesByItemQuery(userId, item) {
   return await db.query(query)
 }
 
+async function getNotesByLoreQuery(userId, lore) {
+  const query = {
+    text: /*sql*/ `select * from public."Note" where user_id = $2 and lore_id = $1 order by date_created desc`,
+    values: [lore, userId]
+  }
+  return await db.query(query)
+}
+
 async function removeNoteQuery(id) {
   const query = {
     text: /*sql*/ `delete from public."Note" where id = $1`,
@@ -102,6 +111,7 @@ module.exports = {
   getNotesByLocationQuery,
   getNotesByCharacterQuery,
   getNotesByItemQuery,
+  getNotesByLoreQuery,
   removeNoteQuery,
   editNoteQuery
 }

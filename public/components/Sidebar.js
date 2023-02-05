@@ -51,6 +51,12 @@ export default class SideBar {
         params: {},
       },
       {
+        id: "sidebar-lore",
+        title: "lore",
+        displayTitle: "Lore",
+        params: {},
+      },
+      {
         id: "sidebar-characters",
         title: "characters",
         displayTitle: "Characters",

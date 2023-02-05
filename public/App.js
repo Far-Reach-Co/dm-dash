@@ -14,6 +14,8 @@ import SingleItemView from "./views/SingleItem.js";
 import { Hamburger } from "./components/Hamburger.js";
 import navigate from "./lib/Navigate.js";
 import NoteManager from "./views/NoteManager.js";
+import SingleLoreView from "./views/SingleLore.js";
+import LoresView from "./views/lores.js";
 
 class App {
   constructor(props) {
@@ -30,6 +32,7 @@ class App {
       items: null,
       characters: null,
       locations: null,
+      lores: null,
     };
 
     this.sidebar;
@@ -63,6 +66,7 @@ class App {
       items: null,
       characters: null,
       locations: null,
+      lores: null,
     };
   };
 
@@ -177,6 +181,22 @@ class App {
     const element = createElement("div");
     this.domComponent.appendChild(element);
     new SingleItemView({ domComponent: element, navigate, params });
+  };
+
+  renderLoresView = ({ navigate }) => {
+    if (this.views.lores) {
+      return this.domComponent.appendChild(this.views.lores.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new LoresView({ domComponent: element, navigate });
+    this.views.lores = view;
+  };
+
+  renderSingleLoreView = ({ navigate, params }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new SingleLoreView({ domComponent: element, navigate, params });
   };
 
   renderCalendersView = () => {
@@ -303,6 +323,13 @@ class App {
         return this.renderItemsView({ navigate: navigate.navigate });
       case "single-item":
         return this.renderSingleItemView({
+          navigate: navigate.navigate,
+          params: navigate.currentRoute.params,
+        });
+      case "lore":
+        return this.renderLoresView({ navigate: navigate.navigate });
+      case "single-lore":
+        return this.renderSingleLoreView({
           navigate: navigate.navigate,
           params: navigate.currentRoute.params,
         });

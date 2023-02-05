@@ -3,10 +3,8 @@ import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import {
-  getPresignedForImageDownload,
   uploadImage,
 } from "../lib/imageUtils.js";
-import modal from "../components/modal.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
@@ -239,6 +237,41 @@ export default class SingleLocationView {
 
     if (elemMap.length) return elemMap;
     else return [createElement("small", {}, "None...")];
+  };
+
+  renderLore = async () => {
+    let loresByLocation = await getThings(
+      `/api/get_lores_by_location/${this.location.id}`
+    );
+    if (!loresByLocation) loresByLocation = [];
+
+    const elemMap = loresByLocation.map((lore) => {
+      const elem = createElement(
+        "a",
+        {
+          class: "small-clickable",
+          style: "margin: 3px",
+        },
+        lore.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-lore",
+              sidebar: true,
+              params: { content: lore },
+            }),
+        }
+      );
+
+      return elem;
+    });
+
+    if (elemMap.length) return elemMap;
+    else
+      return [
+        createElement("small", { style: "margin-left: 5px;" }, "None..."),
+      ];
   };
 
   renderItems = async () => {
@@ -509,6 +542,13 @@ export default class SingleLocationView {
             "Items"
           ),
           ...(await this.renderItems()),
+          createElement("br"),
+          createElement(
+            "div",
+            { class: "single-info-box-subheading" },
+            "Lore"
+          ),
+          ...(await this.renderLore()),
           createElement("br"),
           createElement(
             "div",

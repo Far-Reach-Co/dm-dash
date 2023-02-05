@@ -20,7 +20,7 @@ const {
   verifyJwt,
   editUser,
   resetPassword,
-  requestResetEmail
+  requestResetEmail,
 } = require("./controllers/users.js");
 const {
   getCalendars,
@@ -56,6 +56,7 @@ const {
   removeNote,
   editNote,
   getNotesByItem,
+  getNotesByLore,
 } = require("./controllers/notes.js");
 const {
   getCounters,
@@ -72,6 +73,7 @@ const {
   editCharacter,
 } = require("./controllers/characters.js");
 const {
+  getItem,
   getItems,
   getItemsByLocation,
   getItemsByCharacter,
@@ -82,7 +84,7 @@ const {
 const {
   getProjectInviteByUUID,
   addProjectInvite,
-  removeProjectInvite
+  removeProjectInvite,
 } = require("./controllers/projectInvites.js");
 const {
   getProjectUserByUserAndProject,
@@ -91,20 +93,35 @@ const {
   removeProjectUser,
   editProjectUser,
 } = require("./controllers/projectUsers.js");
-const {getSignedUrlForDownload, uploadToAws} = require("./controllers/s3.js");
+const { getSignedUrlForDownload, uploadToAws } = require("./controllers/s3.js");
 // for uploading files
-const multer = require('multer');
-const upload = multer({ dest: 'file_uploads/' })
+const multer = require("multer");
+const {
+  getLores,
+  getLoresByLocation,
+  getLoresByCharacter,
+  getLoresByItem,
+  addLore,
+  removeLore,
+  editLore,
+} = require("./controllers/lores.js");
+const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
 
 // s3
-router.post('/signed_URL_download', getSignedUrlForDownload)
-router.post('/file_upload', upload.single('file'), uploadToAws)
+router.post("/signed_URL_download", getSignedUrlForDownload);
+router.post("/file_upload", upload.single("file"), uploadToAws);
 
 // project users
-router.get("/get_project_user_by_user_and_project/:project_id", getProjectUserByUserAndProject);
-router.get("/get_project_users_by_project/:project_id", getProjectUsersByProject);
+router.get(
+  "/get_project_user_by_user_and_project/:project_id",
+  getProjectUserByUserAndProject
+);
+router.get(
+  "/get_project_users_by_project/:project_id",
+  getProjectUsersByProject
+);
 router.post("/add_project_user", addProjectUser);
 router.delete("/remove_project_user/:id", removeProjectUser);
 router.post("/edit_project_user/:id", editProjectUser);
@@ -120,15 +137,35 @@ router.get("/get_notes/:project_id/:limit/:offset/:keyword", getNotes);
 router.get("/get_notes_by_location/:location_id", getNotesByLocation);
 router.get("/get_notes_by_character/:character_id", getNotesByCharacter);
 router.get("/get_notes_by_item/:item_id", getNotesByItem);
+router.get("/get_notes_by_lore/:lore_id", getNotesByLore);
 router.post("/add_note", addNote);
 router.delete("/remove_note/:id", removeNote);
 router.post("/edit_note/:id", editNote);
 
+// lores
+router.get("/get_lores/:project_id/:limit/:offset", getLores);
+router.get("/get_lores_filter/:project_id/:limit/:offset/:filter", getLores);
+router.get("/get_lores_keyword/:project_id/:limit/:offset/:keyword", getLores);
+router.get(
+  "/get_lores_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
+  getLores
+);
+router.get("/get_lores_by_location/:location_id", getLoresByLocation);
+router.get("/get_lores_by_character/:character_id", getLoresByCharacter);
+router.get("/get_lores_by_item/:item_id", getLoresByItem);
+router.post("/add_lore", addLore);
+router.delete("/remove_lore/:id", removeLore);
+router.post("/edit_lore/:id", editLore);
+
 // items
+router.get("/get_item/:id", getItem);
 router.get("/get_items/:project_id/:limit/:offset", getItems);
 router.get("/get_items_filter/:project_id/:limit/:offset/:filter", getItems);
 router.get("/get_items_keyword/:project_id/:limit/:offset/:keyword", getItems);
-router.get("/get_items_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getItems);
+router.get(
+  "/get_items_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
+  getItems
+);
 router.get("/get_items_by_location/:location_id", getItemsByLocation);
 router.get("/get_items_by_character/:character_id", getItemsByCharacter);
 router.post("/add_item", addItem);
@@ -136,11 +173,20 @@ router.delete("/remove_item/:id", removeItem);
 router.post("/edit_item/:id", editItem);
 
 // characters
-router.get("/get_character/:id", getCharacter)
+router.get("/get_character/:id", getCharacter);
 router.get("/get_characters/:project_id/:limit/:offset", getCharacters);
-router.get("/get_characters_filter/:project_id/:limit/:offset/:filter", getCharacters);
-router.get("/get_characters_keyword/:project_id/:limit/:offset/:keyword", getCharacters);
-router.get("/get_characters_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getCharacters);
+router.get(
+  "/get_characters_filter/:project_id/:limit/:offset/:filter",
+  getCharacters
+);
+router.get(
+  "/get_characters_keyword/:project_id/:limit/:offset/:keyword",
+  getCharacters
+);
+router.get(
+  "/get_characters_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
+  getCharacters
+);
 router.get("/get_characters_by_location/:location_id", getCharactersByLocation);
 router.post("/add_character", addCharacter);
 router.delete("/remove_character/:id", removeCharacter);
@@ -149,9 +195,18 @@ router.post("/edit_character/:id", editCharacter);
 // locations
 router.get("/get_location/:id", getLocation);
 router.get("/get_locations/:project_id/:limit/:offset", getLocations);
-router.get("/get_locations_filter/:project_id/:limit/:offset/:filter", getLocations);
-router.get("/get_locations_keyword/:project_id/:limit/:offset/:keyword", getLocations);
-router.get("/get_locations_filter_keyword/:project_id/:limit/:offset/:filter/:keyword", getLocations);
+router.get(
+  "/get_locations_filter/:project_id/:limit/:offset/:filter",
+  getLocations
+);
+router.get(
+  "/get_locations_keyword/:project_id/:limit/:offset/:keyword",
+  getLocations
+);
+router.get(
+  "/get_locations_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
+  getLocations
+);
 router.get("/get_sublocations/:parent_location_id", getSubLocations);
 router.post("/add_location", addLocation);
 router.delete("/remove_location/:id", removeLocation);
@@ -202,7 +257,7 @@ router.post("/register", registerUser); // needs verification and google login
 router.post("/login", loginUser);
 router.get("/verify_jwt", verifyJwt);
 router.post("/edit_user/:id", editUser);
-router.post('/reset_password', resetPassword)
-router.post('/request_reset_email', requestResetEmail)
+router.post("/reset_password", resetPassword);
+router.post("/request_reset_email", requestResetEmail);
 
 module.exports = router;

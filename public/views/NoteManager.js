@@ -16,6 +16,7 @@ export default class NoteManager {
     this.locationId = props.locationId;
     this.itemId = props.itemId;
     this.characterId = props.characterId;
+    this.loreId = props.loreId;
 
     this.searchTerm = "";
     this.limit = state.config.queryLimit;
@@ -53,6 +54,7 @@ export default class NoteManager {
     formProps.location_id = this.locationId ? this.locationId : null;
     formProps.character_id = this.characterId ? this.characterId : null;
     formProps.item_id = this.itemId ? this.itemId : null;
+    formProps.lore_id = this.loreId ? this.loreId : null;
 
     await postThing("/api/add_note", formProps);
     this.toggleNewNoteLoading();

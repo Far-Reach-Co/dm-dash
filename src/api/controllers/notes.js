@@ -7,6 +7,7 @@ const {
   getNotesByItemQuery,
   removeNoteQuery,
   editNoteQuery,
+  getNotesByLoreQuery,
 } = require("../queries/notes.js");
 const { getItemQuery } = require("../queries/items.js");
 const { getCharacterQuery } = require("../queries/characters.js");
@@ -15,6 +16,7 @@ const { getProjectQuery } = require("../queries/projects.js");
 const {
   getProjectUserByUserAndProjectQuery,
 } = require("../queries/projectUsers.js");
+const { getLoreQuery } = require("../queries/Lores.js");
 
 async function addNote(req, res, next) {
   try {
@@ -162,6 +164,34 @@ async function getNotesByItem(req, res, next) {
   }
 }
 
+async function getNotesByLore(req, res, next) {
+  try {
+    // if no user
+    if (!req.user) throw { status: 401, message: "Missing Credentials" };
+    // get lore to get project id
+    const loreData = await getLoreQuery(req.params.lore_id);
+    const lore = loreData.rows[0];
+    // If user is not author or editor
+    const projectData = await getProjectQuery(lore.project_id);
+    const project = projectData.rows[0];
+
+    if (project.user_id !== req.user.id) {
+      // not editor
+      const projectUser = await getProjectUserByUserAndProjectQuery(
+        req.user.id,
+        project.id
+      );
+      if (!projectUser) throw { status: 403, message: "Forbidden" };
+    }
+
+    const data = await getNotesByLoreQuery(req.user.id, req.params.lore_id);
+
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function removeNote(req, res, next) {
   try {
     // if no user
@@ -224,4 +254,5 @@ module.exports = {
   editNote,
   getNotesByCharacter,
   getNotesByItem,
+  getNotesByLore,
 };

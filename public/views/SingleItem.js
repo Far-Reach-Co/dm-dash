@@ -1,15 +1,11 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import locationSelect from "../lib/locationSelect.js";
-import characterSelect from "../lib/characterSelect.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
 import {
-  getPresignedForImageDownload,
   uploadImage,
 } from "../lib/imageUtils.js";
-import modal from "../components/modal.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
@@ -46,6 +42,41 @@ export default class SingleItemView {
   toggleUploadingImage = () => {
     this.uploadingImage = !this.uploadingImage;
     this.render();
+  };
+
+  renderLore = async () => {
+    let loresByItem = await getThings(
+      `/api/get_lores_by_item/${this.item.id}`
+    );
+    if (!loresByItem) loresByItem = [];
+
+    const elemMap = loresByItem.map((lore) => {
+      const elem = createElement(
+        "a",
+        {
+          class: "small-clickable",
+          style: "margin: 3px",
+        },
+        lore.title,
+        {
+          type: "click",
+          event: () =>
+            this.navigate({
+              title: "single-lore",
+              sidebar: true,
+              params: { content: lore },
+            }),
+        }
+      );
+
+      return elem;
+    });
+
+    if (elemMap.length) return elemMap;
+    else
+      return [
+        createElement("small", { style: "margin-left: 5px;" }, "None..."),
+      ];
   };
 
   saveItem = async (e) => {
@@ -214,6 +245,13 @@ export default class SingleItemView {
           currentLocationComponent,
           createElement("br"),
           currentCharacterComponent,
+          createElement("br"),
+          createElement(
+            "div",
+            { class: "single-info-box-subheading" },
+            "Lore"
+          ),
+          ...(await this.renderLore()),
           createElement("br"),
         ]),
       ]),
