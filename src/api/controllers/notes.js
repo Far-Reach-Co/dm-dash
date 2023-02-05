@@ -16,7 +16,7 @@ const { getProjectQuery } = require("../queries/projects.js");
 const {
   getProjectUserByUserAndProjectQuery,
 } = require("../queries/projectUsers.js");
-const { getLoreQuery } = require("../queries/Lores.js");
+const { getLoreQuery } = require("../queries/lores.js");
 
 async function addNote(req, res, next) {
   try {
