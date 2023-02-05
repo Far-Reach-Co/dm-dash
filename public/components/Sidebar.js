@@ -45,6 +45,12 @@ export default class SideBar {
         params: {},
       },
       {
+        id: "sidebar-characters",
+        title: "characters",
+        displayTitle: "Characters",
+        params: {},
+      },
+      {
         id: "sidebar-items",
         title: "items",
         displayTitle: "Items",
@@ -57,9 +63,9 @@ export default class SideBar {
         params: {},
       },
       {
-        id: "sidebar-characters",
-        title: "characters",
-        displayTitle: "Characters",
+        id: "sidebar-events",
+        title: "events",
+        displayTitle: "Events",
         params: {},
       },
       {

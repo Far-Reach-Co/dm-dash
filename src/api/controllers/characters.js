@@ -9,6 +9,7 @@ const {
   removeCharacterQuery,
   editCharacterQuery,
 } = require("../queries/characters.js");
+const { addEventQuery } = require("../queries/events.js");
 const { getImageQuery, removeImageQuery } = require("../queries/images.js");
 const { getLocationQuery } = require("../queries/locations.js");
 const {
@@ -205,8 +206,7 @@ async function removeCharacter(req, res, next) {
       await removeFile("wyrld/images", image);
       await removeImageQuery(image.id);
       // update project data usage
-      const newCalculatedData =
-        project.used_data_in_bytes - image.size;
+      const newCalculatedData = project.used_data_in_bytes - image.size;
       await editProjectQuery(project.id, {
         used_data_in_bytes: newCalculatedData,
       });
@@ -243,6 +243,30 @@ async function editCharacter(req, res, next) {
 
     const data = await editCharacterQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
+
+    // add new event
+    if (req.body.location_id) {
+      const locationData = await getLocationQuery(req.body.location_id);
+      const location = locationData.rows[0];
+
+      let title = `${character.title} moved to ${location.title}`;
+
+      // if previous
+      if (character.location_id) {
+        const previousLocationData = await getLocationQuery(
+          character.location_id
+        );
+        const previousLocation = await previousLocationData.rows[0];
+        title += ` from ${previousLocation.title}`;
+      }
+
+      await addEventQuery({
+        project_id: project.id,
+        title,
+        character_id: character.id,
+        location_id: location.id,
+      });
+    }
   } catch (err) {
     next(err);
   }
