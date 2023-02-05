@@ -29,13 +29,13 @@ async function getNotesQuery(userId, projectId, limit, offset, keyword) {
   let query;
   if(!keyword) {
     query = {
-      text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and location_id is null and character_id is null and item_id is null order by date_created desc limit $3 offset $4`,
+      text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and location_id is null and character_id is null and item_id is null and lore_id is null order by date_created desc limit $3 offset $4`,
       values: [userId, projectId, limit, offset]
     }
     return await db.query(query)
   }
   query = {
-    text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and position($5 in lower(title))>0 and location_id is null and character_id is null and item_id is null order by date_created desc limit $3 offset $4`,
+    text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and position($5 in lower(title))>0 and location_id is null and character_id is null and item_id is null and lore_id is null order by date_created desc limit $3 offset $4`,
     values: [userId, projectId, limit, offset, keyword]
   }
   return await db.query(query)

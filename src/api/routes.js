@@ -59,6 +59,16 @@ const {
   getNotesByLore,
 } = require("./controllers/notes.js");
 const {
+  getEvents,
+  addEvent,
+  getEventsByLocation,
+  getEventsByCharacter,
+  removeEvent,
+  editEvent,
+  getEventsByItem,
+  getEventsByLore,
+} = require("./controllers/events.js");
+const {
   getCounters,
   addCounter,
   removeCounter,
@@ -130,6 +140,16 @@ router.post("/edit_project_user/:id", editProjectUser);
 router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
 router.post("/add_project_invite", addProjectInvite);
 router.delete("/remove_project_invite/:id", removeProjectInvite);
+
+// events
+router.get("/get_events/:project_id/:limit/:offset", getEvents);
+router.get("/get_events_by_location/:location_id", getEventsByLocation);
+router.get("/get_events_by_character/:character_id", getEventsByCharacter);
+router.get("/get_events_by_item/:item_id", getEventsByItem);
+router.get("/get_events_by_lore/:lore_id", getEventsByLore);
+router.post("/add_event", addEvent);
+router.delete("/remove_event/:id", removeEvent);
+router.post("/edit_event/:id", editEvent);
 
 // notes
 router.get("/get_notes/:project_id/:limit/:offset", getNotes);

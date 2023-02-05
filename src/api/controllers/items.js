@@ -22,6 +22,7 @@ const {
 } = require("../queries/projectUsers.js");
 const { removeFile } = require("./s3.js");
 const { removeImageQuery, getImageQuery } = require("../queries/images.js");
+const { addEventQuery } = require("../queries/events.js");
 
 async function addItem(req, res, next) {
   try {
@@ -276,6 +277,54 @@ async function editItem(req, res, next) {
 
     const data = await editItemQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
+
+    // add new events
+    // location
+    if (req.body.location_id) {
+      const locationData = await getLocationQuery(req.body.location_id);
+      const location = locationData.rows[0];
+
+      let title = `${item.title} moved to ${location.title}`;
+
+      // if previous for
+      if (item.location_id) {
+        const previousLocationData = await getLocationQuery(
+          item.location_id
+        );
+        const previousLocation = await previousLocationData.rows[0];
+        title += ` from ${previousLocation.title}`;
+      }
+
+      await addEventQuery({
+        project_id: project.id,
+        title,
+        item_id: item.id,
+        location_id: location.id,
+      });
+    }
+    // character
+    if (req.body.character_id) {
+      const characterData = await getCharacterQuery(req.body.character_id);
+      const character = characterData.rows[0];
+
+      let title = `${item.title} moved to ${character.title}`;
+
+      // if previous
+      if (item.character_id) {
+        const previousCharacterData = await getCharacterQuery(
+          item.character_id
+        );
+        const previousCharacter = await previousCharacterData.rows[0];
+        title += ` from ${previousCharacter.title}`;
+      }
+
+      await addEventQuery({
+        project_id: project.id,
+        title,
+        item_id: item.id,
+        character_id: character.id,
+      });
+    }
   } catch (err) {
     next(err);
   }

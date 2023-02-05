@@ -16,6 +16,7 @@ import navigate from "./lib/Navigate.js";
 import NoteManager from "./views/NoteManager.js";
 import SingleLoreView from "./views/SingleLore.js";
 import LoresView from "./views/lores.js";
+import EventsView from "./views/Events.js";
 
 class App {
   constructor(props) {
@@ -242,6 +243,15 @@ class App {
     this.views.notes = view;
   };
 
+  renderEventsView = () => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new EventsView({
+      domComponent: element,
+      standAlone: true,
+    });
+  };
+
   renderProjectsView = ({ navigate }) => {
     if (this.views.projects) {
       return this.domComponent.appendChild(this.views.projects.domComponent);
@@ -303,6 +313,8 @@ class App {
         return this.renderCountersView();
       case "notes":
         return this.renderNotesView();
+      case "events":
+        return this.renderEventsView();
       case "calendars":
         return this.renderCalendersView();
       case "locations":
