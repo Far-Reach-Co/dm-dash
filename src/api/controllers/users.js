@@ -81,7 +81,7 @@ async function registerUser(req, res, next) {
     mail.sendMessage({
       user: data,
       title: "Welcome",
-      message: `Hi friend, our team would like to welcome you aboard our ship as we sail into our next adventure together with courage and strength!\nIf you find yourself in need of any assistance feel free to reach out to us at farreachco@gmail.com<br>We look forward to seeing your progress along the way, thanks for joining us, have a wonderful day.<br> - Far Reach Co.`,
+      message: `Hi friend, our team would like to welcome you aboard our ship as we sail into our next adventure together with courage and strength!\nIf you find yourself in need of any assistance feel free to reach out to us at farreachco@gmail.com<br>Thanks for joining us, have a wonderful day.<br> - Far Reach Co.`,
     });
   } catch (err) {
     next(err);
