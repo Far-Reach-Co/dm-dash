@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
-import Lore from "../components/Lore.js";
+import Lore from "../components/lore.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
