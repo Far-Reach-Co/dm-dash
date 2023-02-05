@@ -47,8 +47,10 @@ class App {
     this.instantiateHamburger();
     // remove initial spinner
     document.getElementById("initial-spinner").remove();
-    // navigate to first view
-    navigate.navigate({ title: "app", sidebar: false, params: {} });
+    // navigate to first view or refresh to current view
+    if (history.state) {
+      navigate.navigate(history.state);
+    } else navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
   resetViewsOnProjectChange = () => {
@@ -85,12 +87,6 @@ class App {
 
   handleToProject = () => {
     function handle() {
-      // stop all clocks
-      Object.values(state.clockComponents).forEach((project) => {
-        project.forEach((clock) => {
-          if (clock.isRunning) clock.stop();
-        });
-      });
       // navigate to project select
       navigate.navigate({ title: "app", sidebar: false, params: {} });
     }
