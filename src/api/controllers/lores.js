@@ -10,7 +10,7 @@ const {
   getLoresByItemQuery,
   removeLoreQuery,
   editLoreQuery,
-} = require("../queries/Lores.js");
+} = require("../queries/lores.js");
 const { getLocationQuery } = require("../queries/locations.js");
 const { getCharacterQuery } = require("../queries/characters.js");
 const {
