@@ -5,9 +5,6 @@ const {
   getLoresWithFilterQuery,
   getLoresWithKeywordQuery,
   getLoresWithKeywordAndFilterQuery,
-  getLoresByLocationQuery,
-  getLoresByCharacterQuery,
-  getLoresByItemQuery,
   removeLoreQuery,
   editLoreQuery,
 } = require("../queries/lores.js");
@@ -125,87 +122,6 @@ async function getLores(req, res, next) {
   }
 }
 
-async function getLoresByLocation(req, res, next) {
-  try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get location to get project id
-    const locationData = await getLocationQuery(req.params.location_id);
-    const location = locationData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(location.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (!projectUser) throw { status: 403, message: "Forbidden" };
-    }
-
-    const data = await getLoresByLocationQuery(req.params.location_id);
-    res.send(data.rows);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getLoresByCharacter(req, res, next) {
-  try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get character to get project id
-    const characterData = await getCharacterQuery(req.params.character_id);
-    const character = characterData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(character.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (!projectUser) throw { status: 403, message: "Forbidden" };
-    }
-
-    const data = await getLoresByCharacterQuery(req.params.character_id);
-    res.send(data.rows);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function getLoresByItem(req, res, next) {
-  try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get item to get project id
-    const itemData = await getItemQuery(req.params.item_id);
-    const item = itemData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(item.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (!projectUser) throw { status: 403, message: "Forbidden" };
-    }
-
-    const data = await getLoresByItemQuery(req.params.item_id);
-    res.send(data.rows);
-  } catch (err) {
-    next(err);
-  }
-}
-
 async function removeLore(req, res, next) {
   try {
     // if no user
@@ -285,9 +201,6 @@ async function editLore(req, res, next) {
 
 module.exports = {
   getLores,
-  getLoresByLocation,
-  getLoresByCharacter,
-  getLoresByItem,
   addLore,
   removeLore,
   editLore,
