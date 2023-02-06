@@ -1,13 +1,14 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
-import { postThing } from "../lib/apiUtils.js";
+import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
-import {
-  uploadImage,
-} from "../lib/imageUtils.js";
+import { uploadImage } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
+import characterSelect from "../lib/characterSelect.js";
+import locationSelect from "../lib/locationSelect.js";
+import itemSelect from "../lib/itemSelect.js";
 
 export default class SingleLoreView {
   constructor(props) {
@@ -18,6 +19,9 @@ export default class SingleLoreView {
 
     this.edit = false;
     this.uploadingImage = false;
+    this.managing = false;
+    this.manageType = "";
+    this.manageLoading = false;
 
     this.render();
   }
@@ -25,6 +29,156 @@ export default class SingleLoreView {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
+  };
+
+  toggleManaging = (type) => {
+    if (type) this.manageType = type;
+    this.managing = !this.managing;
+    this.render();
+  };
+
+  toggleManageLoading = () => {
+    this.manageLoading = !this.manageLoading;
+    this.render();
+  };
+
+  addLoreRelation = async (e) => {
+    this.toggleManageLoading();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    formProps.lore_id = this.lore.id;
+    if (formProps.type === "None") return;
+
+    await postThing(`/api/add_lore_relation`, formProps);
+
+    this.toggleManageLoading();
+  };
+
+  renderLoreRelationList = async (type) => {
+    const loreRelations = await getThings(
+      `/api/get_lore_relations_by_lore/${type}/${this.lore.id}`
+    );
+
+    if (!loreRelations.length) return [createElement("small", {}, "None...")];
+
+    return await Promise.all(
+      loreRelations.map(async (relation) => {
+        let url = "/api";
+        let navigateComponentTitle = "";
+        switch (type) {
+          case "locations":
+            url += `/get_location/${relation.location_id}`;
+            navigateComponentTitle = "single-location";
+            break;
+          case "characters":
+            url += `/get_character/${relation.character_id}`;
+            navigateComponentTitle = "single-character";
+            break;
+          case "items":
+            url += `/get_item/${relation.item_id}`;
+            navigateComponentTitle = "single-item";
+            break;
+        }
+        const endpoint = url;
+        const item = await getThings(endpoint);
+        if (item) {
+          if (this.managing) {
+            const elem = createElement(
+              "div",
+              { style: "margin-left: 10px; display: flex;" },
+              [
+                item.title,
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  },
+                  "ⓧ",
+                  {
+                    type: "click",
+                    event: () => {
+                      deleteThing(`/api/remove_lore_relation/${relation.id}`);
+                      elem.remove();
+                    },
+                  }
+                ),
+              ]
+            );
+            return elem;
+          } else {
+            const elem = createElement(
+              "a",
+              {
+                class: "small-clickable",
+                style: "margin: 3px",
+              },
+              item.title,
+              {
+                type: "click",
+                event: () => {
+                  this.navigate({
+                    title: navigateComponentTitle,
+                    sidebar: true,
+                    params: { content: item },
+                  });
+                },
+              }
+            );
+            return elem;
+          }
+        }
+      })
+    );
+  };
+
+  renderAddSelect = async () => {
+    switch (this.manageType) {
+      case "locations":
+        return await locationSelect();
+      case "characters":
+        return await characterSelect();
+      case "items":
+        return await itemSelect();
+    }
+  };
+
+  renderManaging = async () => {
+    if (this.manageLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Please wait while we update your lore...")
+      );
+    }
+
+    this.domComponent.append(
+      createElement("h1", {}, `Manage Lore ${this.manageType}`),
+      createElement("hr"),
+      createElement("h2", {}, `Current ${this.manageType}`),
+      ...(await this.renderLoreRelationList(this.manageType)),
+      createElement("hr"),
+      createElement("h2", {}, `Add ${this.manageType}`),
+      createElement(
+        "form",
+        {},
+        [
+          await this.renderAddSelect(),
+          createElement("br"),
+          createElement("button", { class: "new-btn", type: "submit" }, "Add"),
+        ],
+        {
+          type: "submit",
+          event: async (e) => {
+            e.preventDefault();
+            await this.addLoreRelation(e);
+          },
+        }
+      ),
+      createElement("hr"),
+      createElement("button", {}, "Done", {
+        type: "click",
+        event: this.toggleManaging,
+      })
+    );
   };
 
   renderLoreType = () => {
@@ -52,7 +206,11 @@ export default class SingleLoreView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.lore.image_id);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.lore.image_id
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -130,6 +288,22 @@ export default class SingleLoreView {
     );
   };
 
+  renderManageButtonOrNull = (type) => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else {
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "align-self: flex-end;" },
+        "Manage",
+        {
+          type: "click",
+          event: () => this.toggleManaging(type),
+        }
+      );
+    }
+  };
+
   renderEditButtonOrNull = () => {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
@@ -151,6 +325,10 @@ export default class SingleLoreView {
 
     if (this.edit) {
       return this.renderEdit();
+    }
+
+    if (this.managing) {
+      return this.renderManaging();
     }
 
     const noteManagerElem = createElement("div");
@@ -188,8 +366,26 @@ export default class SingleLoreView {
             `"${this.lore.description}"`
           ),
         ]),
-        // createElement("div", { class: "single-info-box" }, [
-        // ]),
+        createElement("div", { class: "single-info-box" }, [
+          createElement("div", { class: "single-info-box-subheading" }, [
+            "Locations",
+            this.renderManageButtonOrNull("locations"),
+          ]),
+          ...(await this.renderLoreRelationList("locations")),
+          createElement("br"),
+          createElement("div", { class: "single-info-box-subheading" }, [
+            "Characters",
+            this.renderManageButtonOrNull("characters"),
+          ]),
+          ...(await this.renderLoreRelationList("characters")),
+          createElement("br"),
+          createElement("div", { class: "single-info-box-subheading" }, [
+            "Items",
+            this.renderManageButtonOrNull("items"),
+          ]),
+          ...(await this.renderLoreRelationList("items")),
+          createElement("br"),
+        ]),
       ]),
       createElement("br"),
       await renderImageLarge(this.lore.image_id),

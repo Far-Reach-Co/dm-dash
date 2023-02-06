@@ -10,6 +10,7 @@ import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
 import CurrentCharacterComponent from "../lib/CurrentCharacterComponent.js";
+import renderLoreList from "../lib/renderLoreList.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -42,41 +43,6 @@ export default class SingleItemView {
   toggleUploadingImage = () => {
     this.uploadingImage = !this.uploadingImage;
     this.render();
-  };
-
-  renderLore = async () => {
-    let loresByItem = await getThings(
-      `/api/get_lores_by_item/${this.item.id}`
-    );
-    if (!loresByItem) loresByItem = [];
-
-    const elemMap = loresByItem.map((lore) => {
-      const elem = createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "margin: 3px",
-        },
-        lore.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-lore",
-              sidebar: true,
-              params: { content: lore },
-            }),
-        }
-      );
-
-      return elem;
-    });
-
-    if (elemMap.length) return elemMap;
-    else
-      return [
-        createElement("small", { style: "margin-left: 5px;" }, "None..."),
-      ];
   };
 
   saveItem = async (e) => {
@@ -251,7 +217,7 @@ export default class SingleItemView {
             { class: "single-info-box-subheading" },
             "Lore"
           ),
-          ...(await this.renderLore()),
+          ...(await renderLoreList("item", this.item.id)),
           createElement("br"),
         ]),
       ]),

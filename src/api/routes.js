@@ -107,11 +107,13 @@ const { getSignedUrlForDownload, uploadToAws } = require("./controllers/s3.js");
 // for uploading files
 const multer = require("multer");
 const {
+  getLore,
   getLores,
   addLore,
   removeLore,
   editLore,
 } = require("./controllers/lores.js");
+const { getLoreRelation, getLoreRelationsByLore, getLoreRelationsByLocation, getLoreRelationsByCharacter, getLoreRelationsByItem, addLoreRelation, removeLoreRelation, editLoreRelation } = require("./controllers/loreRelations.js");
 const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
@@ -159,7 +161,18 @@ router.post("/add_note", addNote);
 router.delete("/remove_note/:id", removeNote);
 router.post("/edit_note/:id", editNote);
 
+// lore relations
+router.get("/get_lore_relation/:id", getLoreRelation);
+router.get("/get_lore_relations_by_lore/:type/:id", getLoreRelationsByLore);
+router.get("/get_lore_relations_by_location/:location_id", getLoreRelationsByLocation);
+router.get("/get_lore_relations_by_character/:character_id", getLoreRelationsByCharacter);
+router.get("/get_lore_relations_by_item/:item_id", getLoreRelationsByItem);
+router.post("/add_lore_relation", addLoreRelation);
+router.delete("/remove_lore_relation/:id", removeLoreRelation);
+router.post("/edit_lore_relation/:id", editLoreRelation);
+
 // lores
+router.get("/get_lore/:id", getLore)
 router.get("/get_lores/:project_id/:limit/:offset", getLores);
 router.get("/get_lores_filter/:project_id/:limit/:offset/:filter", getLores);
 router.get("/get_lores_keyword/:project_id/:limit/:offset/:keyword", getLores);
