@@ -73,8 +73,7 @@ async function getItem(req, res, next) {
       if (!projectUser) throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await getItemQuery(req.params.id);
-    res.send(data.rows[0]);
+    res.send(item);
   } catch (err) {
     next(err);
   }
