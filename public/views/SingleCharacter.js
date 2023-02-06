@@ -9,6 +9,7 @@ import {
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
+import renderLoreList from "../lib/renderLoreList.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -64,41 +65,6 @@ export default class SingleCharacterView {
               title: "single-item",
               sidebar: true,
               params: { content: item },
-            }),
-        }
-      );
-
-      return elem;
-    });
-
-    if (elemMap.length) return elemMap;
-    else
-      return [
-        createElement("small", { style: "margin-left: 5px;" }, "None..."),
-      ];
-  };
-
-  renderLore = async () => {
-    let loresByCharacter = await getThings(
-      `/api/get_lores_by_character/${this.character.id}`
-    );
-    if (!loresByCharacter) loresByCharacter = [];
-
-    const elemMap = loresByCharacter.map((lore) => {
-      const elem = createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "margin: 3px",
-        },
-        lore.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-lore",
-              sidebar: true,
-              params: { content: lore },
             }),
         }
       );
@@ -281,7 +247,7 @@ export default class SingleCharacterView {
             { class: "single-info-box-subheading" },
             "Lore"
           ),
-          ...(await this.renderLore()),
+          ...(await renderLoreList("character", this.character.id)),
           createElement("br"),
         ]),
       ]),

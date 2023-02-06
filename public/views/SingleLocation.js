@@ -9,6 +9,7 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
+import renderLoreList from "../lib/renderLoreList.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -237,41 +238,6 @@ export default class SingleLocationView {
 
     if (elemMap.length) return elemMap;
     else return [createElement("small", {}, "None...")];
-  };
-
-  renderLore = async () => {
-    let loresByLocation = await getThings(
-      `/api/get_lores_by_location/${this.location.id}`
-    );
-    if (!loresByLocation) loresByLocation = [];
-
-    const elemMap = loresByLocation.map((lore) => {
-      const elem = createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "margin: 3px",
-        },
-        lore.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-lore",
-              sidebar: true,
-              params: { content: lore },
-            }),
-        }
-      );
-
-      return elem;
-    });
-
-    if (elemMap.length) return elemMap;
-    else
-      return [
-        createElement("small", { style: "margin-left: 5px;" }, "None..."),
-      ];
   };
 
   renderItems = async () => {
@@ -548,7 +514,7 @@ export default class SingleLocationView {
             { class: "single-info-box-subheading" },
             "Lore"
           ),
-          ...(await this.renderLore()),
+          ...(await renderLoreList("location", this.location.id)),
           createElement("br"),
           createElement(
             "div",
