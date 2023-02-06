@@ -108,9 +108,6 @@ const { getSignedUrlForDownload, uploadToAws } = require("./controllers/s3.js");
 const multer = require("multer");
 const {
   getLores,
-  getLoresByLocation,
-  getLoresByCharacter,
-  getLoresByItem,
   addLore,
   removeLore,
   editLore,
@@ -170,9 +167,6 @@ router.get(
   "/get_lores_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
   getLores
 );
-router.get("/get_lores_by_location/:location_id", getLoresByLocation);
-router.get("/get_lores_by_character/:character_id", getLoresByCharacter);
-router.get("/get_lores_by_item/:item_id", getLoresByItem);
 router.post("/add_lore", addLore);
 router.delete("/remove_lore/:id", removeLore);
 router.post("/edit_lore/:id", editLore);

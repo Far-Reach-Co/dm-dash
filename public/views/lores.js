@@ -162,8 +162,6 @@ export default class LoresView {
         title: lore.title,
         description: lore.description,
         projectId: lore.project_id,
-        locationId: lore.location_id,
-        characterId: lore.character_id,
         type: lore.type,
         imageId: lore.image_id,
         navigate: this.navigate,

@@ -8,9 +8,6 @@ import {
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
-import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
-import CurrentCharacterComponent from "../lib/CurrentCharacterComponent.js";
-import CurrentItemComponent from "../lib/CurrentItemComponent.js";
 
 export default class SingleLoreView {
   constructor(props) {
@@ -156,30 +153,6 @@ export default class SingleLoreView {
       return this.renderEdit();
     }
 
-    const currentLocationComponent = createElement("div", {});
-    new CurrentLocationComponent({
-      domComponent: currentLocationComponent,
-      module: this.lore,
-      moduleType: "lore",
-      navigate: this.navigate,
-    });
-
-    const currentCharacterComponent = createElement("div", {});
-    new CurrentCharacterComponent({
-      domComponent: currentCharacterComponent,
-      module: this.lore,
-      moduleType: "lore",
-      navigate: this.navigate,
-    });
-
-    const currentItemComponent = createElement("div", {});
-    new CurrentItemComponent({
-      domComponent: currentItemComponent,
-      module: this.lore,
-      moduleType: "lore",
-      navigate: this.navigate,
-    });
-
     const noteManagerElem = createElement("div");
     new NoteManager({
       domComponent: noteManagerElem,
@@ -215,14 +188,8 @@ export default class SingleLoreView {
             `"${this.lore.description}"`
           ),
         ]),
-        createElement("div", { class: "single-info-box" }, [
-          currentLocationComponent,
-          createElement("br"),
-          currentCharacterComponent,
-          createElement("br"),
-          currentItemComponent,
-          createElement("br"),
-        ]),
+        // createElement("div", { class: "single-info-box" }, [
+        // ]),
       ]),
       createElement("br"),
       await renderImageLarge(this.lore.image_id),

@@ -16,8 +16,6 @@ export default class Lore {
     this.description = props.description;
     this.title = props.title;
     this.projectId = props.projectId;
-    this.locationId = props.locationId;
-    this.characterId = props.characterId;
     this.type = props.type;
     this.imageId = props.imageId;
 
