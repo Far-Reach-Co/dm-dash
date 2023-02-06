@@ -43,15 +43,15 @@ export default class SingleLoreView {
   };
 
   addLoreRelation = async (e) => {
-    this.toggleManageLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.lore_id = this.lore.id;
-    if (formProps.type === "None") return;
+    if (Object.values(formProps)[0] != 0) {
+      this.toggleManageLoading();
+      await postThing(`/api/add_lore_relation`, formProps);
+      this.toggleManageLoading();
+    }
 
-    await postThing(`/api/add_lore_relation`, formProps);
-
-    this.toggleManageLoading();
   };
 
   renderLoreRelationList = async (type) => {
