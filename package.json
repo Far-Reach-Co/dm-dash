@@ -4,8 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js",
+    "build": "npx tsc",
     "start": "node server.js",
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q server.js\"",
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "migrate:redo": "node-pg-migrate redo",
@@ -27,5 +28,9 @@
     "nodemon": "^2.0.20",
     "pg": "^8.8.0",
     "pm2": "^5.2.2"
+  },
+  "devDependencies": {
+    "concurrently": "^7.6.0",
+    "typescript": "^4.9.5"
   }
 }
