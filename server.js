@@ -4,8 +4,8 @@ const express = require("express");
 const cors = require("cors");
 var path = require("path");
 const bodyParser = require("body-parser");
-const routes = require("./src/api/routes.js");
-const { verifyUserByToken } = require("./src/api/controllers/users.js");
+const routes = require("./dist/api/routes.js");
+const { verifyUserByToken } = require("./dist/api/controllers/users.js");
 
 async function getUserByToken(token) {
   try {
