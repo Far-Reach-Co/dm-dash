@@ -69,8 +69,7 @@ async function getLocation(req, res, next) {
       if (!projectUser) throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await getLocationQuery(req.params.id);
-    res.send(data.rows[0]);
+    res.send(location);
   } catch (err) {
     next(err);
   }
