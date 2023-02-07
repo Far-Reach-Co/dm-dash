@@ -68,6 +68,16 @@ class AccountManager {
       navContainer.append(
         createElement(
           "a",
+          { class: "top-nav-btn", href: "/dashboard.html" },
+          "Dashboard"
+        ),
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/sheets.html" },
+          "Player Characters"
+        ),
+        createElement(
+          "a",
           { class: "top-nav-btn", href: "/account.html" },
           "Account"
         ),
@@ -80,6 +90,16 @@ class AccountManager {
         })
       );
       navContainerMobile.append(
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/dashboard.html" },
+          "Dashboard"
+        ),
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/sheets.html" },
+          "Player Characters"
+        ),
         createElement(
           "a",
           { class: "top-nav-btn", href: "/account.html" },

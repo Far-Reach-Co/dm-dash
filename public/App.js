@@ -43,8 +43,11 @@ class App {
   }
 
   init = async () => {
+    // top bar routes
     this.handleLogout();
     this.handleToProject();
+    this.handleToSheets();
+    // verify user
     await this.verifyToken();
     // setup sidebar
     this.instantiateSidebar();
@@ -100,6 +103,19 @@ class App {
       .addEventListener("click", () => handle());
     document
       .getElementById("to-projects-btn-mobile")
+      .addEventListener("click", () => handle());
+  };
+
+  handleToSheets = () => {
+    function handle() {
+      // navigate to project select
+      window.location.pathname = "/sheets.html";
+    }
+    document
+      .getElementById("to-sheets-btn")
+      .addEventListener("click", () => handle());
+    document
+      .getElementById("to-sheets-btn-mobile")
       .addEventListener("click", () => handle());
   };
 
