@@ -2,7 +2,7 @@ const db = require('../dbconfig')
 
 async function add5eCharProQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."dnd_5e_character_proficiencies" (user_id) values($1) returning *`,
+    text: /*sql*/ `insert into public."dnd_5e_character_proficiencies" (general_id) values($1) returning *`,
     values: [
       data.general_id,
     ]

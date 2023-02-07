@@ -1,0 +1,19 @@
+.cp-input {
+  background-color: inherit;
+  border: 1px solid var(--blue);
+  color: var(--main-white);
+}
+
+.cp-input-large {
+  font-size: 1.5rem;
+}
+
+.cp-input-regular {
+  font-size: 1rem;
+}
+
+.cp-content-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}

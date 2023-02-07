@@ -143,8 +143,8 @@ router.delete("/remove_project_invite/:id", removeProjectInvite);
 
 // 5e characters general, proficiencies, background
 router.get("/get_5e_characters_by_user", get5eCharsByUser);
-router.post("add_5e_character", add5eChar);
-router.delete("remove_5e_character", remove5eChar);
+router.post("/add_5e_character", add5eChar);
+router.delete("/remove_5e_character", remove5eChar);
 router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
 router.post("/edit_5e_character_proficiencies/:id", edit5eCharPro);
 router.post("/edit_5e_character_background/:id", edit5eCharBack);

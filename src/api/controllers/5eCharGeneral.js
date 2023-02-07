@@ -1,4 +1,5 @@
 const {
+  get5eCharsGeneralByUserQuery,
   add5eCharGeneralQuery,
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
@@ -38,20 +39,22 @@ async function add5eChar(req, res, next) {
 async function get5eCharsByUser(req, res, next) {
   try {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
-
-    const generalData = await get5eCharGeneralQuery(req.params.id);
-    const general = generalData.rows[0];
-    if (general.user_id !== req.user.id)
+    const generalsData = await get5eCharsGeneralByUserQuery(req.user.id);
+    const generals = generalsData.rows;
+    if (generals[0].user_id !== req.user.id)
       throw { status: 403, message: "Forbidden" };
-    const proData = await get5eCharProByGeneralQuery(general.id);
-    const pro = proData.rows[0];
-    const backData = await get5eCharBackByGeneralQuery(general.id);
-    const back = backData.rows[0];
 
-    general.proficiencies = pro;
-    general.background = back;
+    for(var general of generals) {
+      const proData = await get5eCharProByGeneralQuery(general.id);
+      const pro = proData.rows[0];
+      const backData = await get5eCharBackByGeneralQuery(general.id);
+      const back = backData.rows[0];
+  
+      general.proficiencies = pro;
+      general.background = back;
+    }
 
-    res.send(general);
+    res.send(generals);
   } catch (err) {
     next(err);
   }

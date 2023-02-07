@@ -2,7 +2,7 @@ const db = require('../dbconfig')
 
 async function add5eCharGeneralQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."dnd_5e_character_general" (user_id, name,) values($1,$2) returning *`,
+    text: /*sql*/ `insert into public."dnd_5e_character_general" (user_id, name) values($1,$2) returning *`,
     values: [
       data.user_id,
       data.name,
@@ -19,7 +19,7 @@ async function get5eCharGeneralQuery(id) {
   return await db.query(query)
 }
 
-async function get5eCharGeneralByUserQuery(userId) {
+async function get5eCharsGeneralByUserQuery(userId) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_general" where user_id = $1`,
     values: [userId]
@@ -60,7 +60,7 @@ async function edit5eCharGeneralQuery(id, data) {
 
 module.exports = {
   add5eCharGeneralQuery,
-  get5eCharGeneralByUserQuery,
+  get5eCharsGeneralByUserQuery,
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
   edit5eCharGeneralQuery
