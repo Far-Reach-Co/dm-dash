@@ -58,28 +58,52 @@ class Sheets {
   renderSheetElems = async () => {
     const sheetData = await getThings("/api/get_5e_characters_by_user");
     const map = sheetData.map((sheet) => {
+      console.log(sheet)
       // create element
-      const elem = createElement("div", { class: "project-button" }, [
-        createElement("h1", {}, sheet.name),
-        createElement(
-          "small",
-          {},
-          `class: ${sheet.class ? sheet.class : "None"}`
-        ),
-        createElement("small", {}, `Race: ${sheet.race ? sheet.race : "None"}`),
-        createElement(
-          "small",
-          {},
-          `Level: ${sheet.Level ? sheet.level : "None"}`
-        ),
-        createElement("small", {}, `EXP: ${sheet.exp ? sheet.exp : "None"}`),
-      ], {
-        type: "click",
-        event: () => {
-          history.pushState(sheet, null, `/5eplayer.html`);
-          window.location.reload();
+      const elem = createElement(
+        "div",
+        {
+          class: "project-button",
+          style:
+            "flex-direction: row; align-items: center; justify-content: space-between;",
+        },
+        [
+          createElement("h1", {}, sheet.name),
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              createElement(
+                "small",
+                {},
+                `Race: ${sheet.race ? sheet.race : "None"}`
+              ),
+              createElement(
+                "small",
+                {},
+                `Class: ${sheet.class ? sheet.class : "None"}`
+              ),
+              createElement(
+                "small",
+                {},
+                `Level: ${sheet.level ? sheet.level : "None"}`
+              ),
+              createElement(
+                "small",
+                {},
+                `EXP: ${sheet.exp ? sheet.exp : "None"}`
+              ),
+            ]
+          ),
+        ],
+        {
+          type: "click",
+          event: () => {
+            history.pushState(sheet, null, `/5eplayer.html`);
+            window.location.reload();
+          },
         }
-      });
+      );
 
       return elem;
     });

@@ -49,7 +49,6 @@ async function edit5eCharGeneralQuery(id, data) {
 
   edits = edits.slice(0, -2)
   values.push(id)
-
   const query = {
     text: /*sql*/ `update public."dnd_5e_character_general" set ${edits} where id = $${iterator} returning *`,
     values: values,
