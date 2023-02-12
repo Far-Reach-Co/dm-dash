@@ -115,6 +115,7 @@ const {
 } = require("./controllers/lores.js");
 const { getLoreRelation, getLoreRelationsByLore, getLoreRelationsByLocation, getLoreRelationsByCharacter, getLoreRelationsByItem, addLoreRelation, removeLoreRelation, editLoreRelation } = require("./controllers/loreRelations.js");
 const { get5eCharsByUser, add5eChar, remove5eChar, edit5eCharGeneral, edit5eCharPro, edit5eCharBack } = require("./controllers/5eCharGeneral.js");
+const { get5eCharOtherProLangsByGeneral, add5eCharOtherProLang, remove5eCharOtherProLang, edit5eCharOtherProLang } = require("./controllers/5eCharOtherProLang.js");
 const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
@@ -148,6 +149,12 @@ router.delete("/remove_5e_character", remove5eChar);
 router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
 router.post("/edit_5e_character_proficiencies/:id", edit5eCharPro);
 router.post("/edit_5e_character_background/:id", edit5eCharBack);
+
+// 5e characters other proficiencies and languages
+router.get("/get_5e_character_other_pro_langs/:general_id", get5eCharOtherProLangsByGeneral);
+router.post("/add_5e_character_other_pro_lang", add5eCharOtherProLang);
+router.delete("/remove_5e_character_other_pro_lang/:id", remove5eCharOtherProLang);
+router.post("/edit_5e_character_other_pro_lang/:id", edit5eCharOtherProLang);
 
 // events
 router.get("/get_events/:project_id/:limit/:offset", getEvents);

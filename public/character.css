@@ -38,6 +38,14 @@ small {
   border-radius: var(--border-radius);
 }
 
+.input-small {
+  font-size: small;
+}
+
+.select-option-small {
+  font-size: small;
+}
+
 .cp-input-no-border {
   background-color: inherit;
   text-align: center;
@@ -256,6 +264,7 @@ small {
   margin-right: 30px;
   border: 2px solid var(--blue);
   border-radius: 30px;
+  cursor: pointer;
 }
 
 .proficiency-item-radio-checked {
@@ -266,4 +275,5 @@ small {
   border-radius: 30px;
   background-color: var();
   background-color: var(--green);
+  cursor: pointer;
 }

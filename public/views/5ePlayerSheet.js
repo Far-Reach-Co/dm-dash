@@ -2,6 +2,7 @@ import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import HPComponent from "../lib/HPComponent.js";
+import OtherProLangComponent from "../lib/OtherProLangComponent.js";
 
 class FiveEPlayerSheet {
   constructor() {
@@ -388,14 +389,24 @@ class FiveEPlayerSheet {
   };
 
   renderGeneralView = async () => {
-    const theHPComponent = createElement("div");
-    new HPComponent({
-      domComponent: theHPComponent,
-      updateGeneralValue: this.updateGeneralValue,
-      max_hp: this.generalData.max_hp,
-      temp_hp: this.generalData.temp_hp,
-      current_hp: this.generalData.current_hp,
-    });
+    if (!this.hpComponent) {
+      const HPComponentElem = createElement("div");
+      this.hpComponent = new HPComponent({
+        domComponent: HPComponentElem,
+        updateGeneralValue: this.updateGeneralValue,
+        max_hp: this.generalData.max_hp,
+        temp_hp: this.generalData.temp_hp,
+        current_hp: this.generalData.current_hp,
+      });
+    }
+
+    if (!this.otherProLangComponent) {
+      const otherProLangComponentElem = createElement("div");
+      this.otherProLangComponent = new OtherProLangComponent({
+        domComponent: otherProLangComponentElem,
+        general_id: this.generalData.id
+      })
+    }
 
     this.domComponent.append(
       createElement(
@@ -682,7 +693,7 @@ class FiveEPlayerSheet {
                   ),
                   createElement("small", {}, "Hit Dice"),
                 ]),
-                theHPComponent,
+                this.hpComponent.domComponent,
               ]
             ),
           ]),
@@ -873,6 +884,7 @@ class FiveEPlayerSheet {
                 ),
               ]),
             ]),
+            this.otherProLangComponent.domComponent
           ]
         ),
         createElement("div", { class: "cp-info-container-column" }, [

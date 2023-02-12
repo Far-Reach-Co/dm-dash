@@ -5,7 +5,7 @@ CREATE TABLE "public"."dnd_5e_character_background" ("id" serial,"general_id" in
 CREATE TABLE "public"."dnd_5e_character_attack" ("id" serial,"title" varchar NOT NULL,"description" varchar NOT NULL,"range" varchar,"damage_type" varchar,"bonus" int2,"general_id" int4 NOT NULL, PRIMARY KEY ("id"));
 CREATE TABLE "public"."dnd_5e_character_equipment" ("id" serial,"general_id" int4 NOT NULL,"title" varchar NOT NULL,"description" varchar,"quantity" int4,"weight" varchar, PRIMARY KEY ("id"));
 CREATE TABLE "public"."dnd_5e_character_feat_trait" ("id" serial,"type" varchar,"title" varchar NOT NULL,"description" varchar NOT NULL,"general_id" int4 NOT NULL, PRIMARY KEY ("id"));
-CREATE TABLE "public"."dnd_5e_character_other_pro_lang" ("id" serial,"general_id" int4 NOT NULL,"type" varchar NOT NULL,"proficiency" varchar NOT NULL, PRIMARY KEY ("id"));
+CREATE TABLE "public"."dnd_5e_character_other_pro_lang" ("id" serial,"general_id" int4 NOT NULL,"type" varchar,"proficiency" varchar NOT NULL, PRIMARY KEY ("id"));
 -- Down Migration
 DROP TABLE "public"."dnd_5e_character_other_pro_lang";
 DROP TABLE "public"."dnd_5e_character_general";
