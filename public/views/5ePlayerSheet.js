@@ -1,15 +1,17 @@
 import createElement from "../lib/createElement.js";
-import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { postThing } from "../lib/apiUtils.js";
 import HPComponent from "../lib/HPComponent.js";
 import OtherProLangComponent from "../lib/OtherProLangComponent.js";
+import AttackComponent from "../lib/AttackComponent.js";
+import EquipmentComponent from "../lib/EquipmentComponent.js";
+import FeatComponent from "../lib/FeatComponent.js";
 
 class FiveEPlayerSheet {
   constructor() {
     this.appComponent = document.getElementById("app");
     this.domComponent = createElement("div", {
       class: "standard-view",
-      style: "align-items: center;",
+      style: "align-items: center; max-width: 100%;",
     });
     this.appComponent.appendChild(this.domComponent);
 
@@ -26,6 +28,13 @@ class FiveEPlayerSheet {
   updateGeneralValue = async (name, value) => {
     this.generalData[name] = value;
     postThing(`/api/edit_5e_character_general/${this.generalData.id}`, {
+      [name]: value,
+    });
+  };
+
+  updateBackgroundValue = async (name, value) => {
+    this.generalData.background[name] = value;
+    postThing(`/api/edit_5e_character_background/${this.generalData.id}`, {
       [name]: value,
     });
   };
@@ -404,8 +413,32 @@ class FiveEPlayerSheet {
       const otherProLangComponentElem = createElement("div");
       this.otherProLangComponent = new OtherProLangComponent({
         domComponent: otherProLangComponentElem,
-        general_id: this.generalData.id
-      })
+        general_id: this.generalData.id,
+      });
+    }
+
+    if (!this.attackComponent) {
+      const attackComponentElem = createElement("div");
+      this.attackComponent = new AttackComponent({
+        domComponent: attackComponentElem,
+        general_id: this.generalData.id,
+      });
+    }
+
+    if (!this.equipmentComponent) {
+      const equipmentComponentElem = createElement("div");
+      this.equipmentComponent = new EquipmentComponent({
+        domComponent: equipmentComponentElem,
+        general_id: this.generalData.id,
+      });
+    }
+
+    if (!this.featComponent) {
+      const featComponentElem = createElement("div");
+      this.featComponent = new FeatComponent({
+        domComponent: featComponentElem,
+        general_id: this.generalData.id,
+      });
     }
 
     this.domComponent.append(
@@ -884,14 +917,604 @@ class FiveEPlayerSheet {
                 ),
               ]),
             ]),
-            this.otherProLangComponent.domComponent
+            this.otherProLangComponent.domComponent,
+            createElement("div", { class: "cp-info-container-row" }, [
+              createElement("div", { class: "cp-content-container-center" }, [
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: flex; align-items: center; justify-content: center;",
+                  },
+                  [
+                    createElement("small", {}, "Total"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-no-border-small",
+                        name: "class_resource_total",
+                        type: "number",
+                        value: this.generalData.class_resource_total
+                          ? this.generalData.class_resource_total
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateGeneralValue(
+                            e.target.name,
+                            e.target.valueAsNumber
+                          );
+                        },
+                      }
+                    ),
+                  ]
+                ),
+                createElement(
+                  "input",
+                  {
+                    class: "cp-input-no-border cp-input-large",
+                    name: "class_resource",
+                    value: this.generalData.class_resource
+                      ? this.generalData.class_resource
+                      : "",
+                  },
+                  null,
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateGeneralValue(e.target.name, e.target.value);
+                    },
+                  }
+                ),
+                createElement(
+                  "input",
+                  {
+                    class: "cp-input-no-border",
+                    style: "font-size: small; color: var(--orange3);",
+                    name: "class_resource_title",
+                    value: this.generalData.class_resource_title
+                      ? this.generalData.class_resource_title
+                      : "",
+                    placeholder: "Class Resource",
+                  },
+                  null,
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateGeneralValue(e.target.name, e.target.value);
+                    },
+                  }
+                ),
+              ]),
+              createElement("div", { class: "cp-content-container-center" }, [
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: flex; align-items: center; justify-content: center;",
+                  },
+                  [
+                    createElement("small", {}, "Total"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-no-border-small",
+                        name: "other_resource_total",
+                        type: "number",
+                        value: this.generalData.other_resource_total
+                          ? this.generalData.other_resource_total
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateGeneralValue(
+                            e.target.name,
+                            e.target.valueAsNumber
+                          );
+                        },
+                      }
+                    ),
+                  ]
+                ),
+                createElement(
+                  "input",
+                  {
+                    class: "cp-input-no-border cp-input-large",
+                    name: "other_resource_total",
+                    value: this.generalData.other_resource_total
+                      ? this.generalData.other_resource_total
+                      : "",
+                  },
+                  null,
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateGeneralValue(e.target.name, e.target.value);
+                    },
+                  }
+                ),
+                createElement(
+                  "input",
+                  {
+                    class: "cp-input-no-border",
+                    style: "font-size: small; color: var(--orange3);",
+                    name: "other_resource_title",
+                    value: this.generalData.other_resource_title
+                      ? this.generalData.other_resource_title
+                      : "",
+                    placeholder: "Other Resource",
+                  },
+                  null,
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateGeneralValue(e.target.name, e.target.value);
+                    },
+                  }
+                ),
+              ]),
+            ]),
           ]
         ),
         createElement("div", { class: "cp-info-container-column" }, [
           createElement("div", { style: "align-self: center;" }, "Skills"),
           ...this.renderSkills(),
         ]),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            this.attackComponent.domComponent,
+            this.equipmentComponent.domComponent,
+            this.featComponent.domComponent,
+          ]
+        ),
       ])
+    );
+  };
+
+  renderBackgroundView = async () => {
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          style: "display: flex; flex: 1; flex-wrap: wrap;",
+        },
+        [
+          createElement("div", {style: "display: flex; flex-direction: column;"}, [
+            createElement("div", { class: "cp-info-container-column" }, [
+              createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+                createElement("div", {}, [
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Background"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "background",
+                        value: this.generalData.background.background
+                          ? this.generalData.background.background
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Alignment"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "alignment",
+                        value: this.generalData.background.alignment
+                          ? this.generalData.background.alignment
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                ]),
+                createElement("div", {}, [
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Age"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "age",
+                        value: this.generalData.background.age
+                          ? this.generalData.background.age
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Eyes"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "eyes",
+                        value: this.generalData.background.eyes
+                          ? this.generalData.background.eyes
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                ]),
+                createElement("div", {}, [
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Skin"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "skin",
+                        value: this.generalData.background.skin
+                          ? this.generalData.background.skin
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Hair"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "hair",
+                        value: this.generalData.background.hair
+                          ? this.generalData.background.hair
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                ]),
+                createElement("div", {}, [
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Height"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "height",
+                        value: this.generalData.background.height
+                          ? this.generalData.background.height
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                  createElement("div", { class: "cp-content-container" }, [
+                    createElement("small", {}, "Weight"),
+                    createElement(
+                      "input",
+                      {
+                        class: "cp-input-gen cp-input-regular",
+                        name: "weight",
+                        value: this.generalData.background.weight
+                          ? this.generalData.background.weight
+                          : "",
+                      },
+                      null,
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          this.updateBackgroundValue(
+                            e.target.name,
+                            e.target.value
+                          );
+                        },
+                      }
+                    ),
+                  ]),
+                ]),
+              ]),
+            ]),
+            createElement("div", {class: "cp-info-container-column"}, [
+              createElement(
+                "div",
+                { style: "color: var(--orange3)" },
+                "Appearance"
+              ),
+              createElement("br"),
+              createElement(
+                "textarea",
+                {
+                  class: "cp-input-gen input-small",
+                  style: "height: 250px;",
+                  name: "appearance",
+                },
+                this.generalData.background.appearance
+                  ? this.generalData.background.appearance
+                  : "",
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    this.updateBackgroundValue(e.target.name, e.target.value);
+                    this.render();
+                  },
+                }
+              ),
+            ]),
+            createElement("div", {class: "cp-info-container-column"}, [
+              createElement(
+                "div",
+                { style: "color: var(--orange3)" },
+                "Backstory"
+              ),
+              createElement("br"),
+              createElement(
+                "textarea",
+                {
+                  class: "cp-input-gen input-small",
+                  style: "height: 250px;",
+                  name: "backstory",
+                },
+                this.generalData.background.backstory
+                  ? this.generalData.background.backstory
+                  : "",
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    this.updateBackgroundValue(e.target.name, e.target.value);
+                    this.render();
+                  },
+                }
+              ),
+            ]),
+            createElement("div", {class: "cp-info-container-column"}, [
+              createElement(
+                "div",
+                { style: "color: var(--orange3)" },
+                "Allies & Organizations"
+              ),
+              createElement("br"),
+              createElement(
+                "textarea",
+                {
+                  class: "cp-input-gen input-small",
+                  style: "height: 250px;",
+                  name: "allies_and_organizations",
+                },
+                this.generalData.background.allies_and_organizations
+                  ? this.generalData.background.allies_and_organizations
+                  : "",
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    this.updateBackgroundValue(e.target.name, e.target.value);
+                    this.render();
+                  },
+                }
+              ),
+            ]),
+            createElement("div", {class: "cp-info-container-column"}, [
+              createElement(
+                "div",
+                { style: "color: var(--orange3)" },
+                "Other Info"
+              ),
+              createElement("br"),
+              createElement(
+                "textarea",
+                {
+                  class: "cp-input-gen input-small",
+                  style: "height: 250px;",
+                  name: "other_info",
+                },
+                this.generalData.background.other_info
+                  ? this.generalData.background.other_info
+                  : "",
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    this.updateBackgroundValue(e.target.name, e.target.value);
+                    this.render();
+                  },
+                }
+              ),
+            ]),
+          ]),
+          createElement("div", { class: "cp-info-container-column " }, [
+            createElement(
+              "div",
+              { style: "display: flex; flex-direction: column;" },
+              [
+                createElement(
+                  "div",
+                  { style: "color: var(--orange3)" },
+                  "Personality Traits"
+                ),
+                createElement("br"),
+                createElement(
+                  "textarea",
+                  {
+                    class: "cp-input-gen input-small",
+                    style: "height: 100px; width: 250px;",
+                    name: "personality_traits",
+                  },
+                  this.generalData.background.personality_traits
+                    ? this.generalData.background.personality_traits
+                    : "",
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateBackgroundValue(e.target.name, e.target.value);
+                      this.render();
+                    },
+                  }
+                ),
+                createElement("hr"),
+              ]
+            ),
+            createElement(
+              "div",
+              { style: "display: flex; flex-direction: column;" },
+              [
+                createElement(
+                  "div",
+                  { style: "color: var(--orange3)" },
+                  "Ideals"
+                ),
+                createElement("br"),
+                createElement(
+                  "textarea",
+                  {
+                    class: "cp-input-gen input-small",
+                    style: "height: 100px; width: 250px;",
+                    name: "ideals",
+                  },
+                  this.generalData.background.ideals
+                    ? this.generalData.background.ideals
+                    : "",
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateBackgroundValue(e.target.name, e.target.value);
+                      this.render();
+                    },
+                  }
+                ),
+                createElement("hr"),
+              ]
+            ),
+            createElement(
+              "div",
+              { style: "display: flex; flex-direction: column;" },
+              [
+                createElement(
+                  "div",
+                  { style: "color: var(--orange3)" },
+                  "Bonds"
+                ),
+                createElement("br"),
+                createElement(
+                  "textarea",
+                  {
+                    class: "cp-input-gen input-small",
+                    style: "height: 100px; width: 250px;",
+                    name: "bonds",
+                  },
+                  this.generalData.background.bonds
+                    ? this.generalData.background.bonds
+                    : "",
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateBackgroundValue(e.target.name, e.target.value);
+                      this.render();
+                    },
+                  }
+                ),
+                createElement("hr"),
+              ]
+            ),
+            createElement(
+              "div",
+              { style: "display: flex; flex-direction: column;" },
+              [
+                createElement(
+                  "div",
+                  { style: "color: var(--orange3)" },
+                  "Flaws"
+                ),
+                createElement("br"),
+                createElement(
+                  "textarea",
+                  {
+                    class: "cp-input-gen input-small",
+                    style: "height: 100px; width: 250px;",
+                    name: "flaws",
+                  },
+                  this.generalData.background.flaws
+                    ? this.generalData.background.flaws
+                    : "",
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      this.updateBackgroundValue(e.target.name, e.target.value);
+                      this.render();
+                    },
+                  }
+                ),
+                createElement("hr"),
+              ]
+            ),
+          ]),
+        ]
+      )
     );
   };
 
@@ -956,6 +1579,10 @@ class FiveEPlayerSheet {
 
     if (this.mainView === "general") {
       return this.renderGeneralView();
+    }
+
+    if (this.mainView === "background") {
+      return this.renderBackgroundView();
     }
   };
 }

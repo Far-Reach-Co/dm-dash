@@ -29,7 +29,7 @@ export default class OtherProLangComponent {
   };
 
   renderTypeSelectOptions = (currentType) => {
-    const types = ["Language", "Weapon", "Armor", "other"];
+    const types = ["Language", "Weapon", "Armor", "Other"];
     const typeList = [];
     types.forEach((type) => {
       const elem = createElement(
@@ -148,6 +148,7 @@ export default class OtherProLangComponent {
         [
           createElement("small", {}, "Type"),
           createElement("small", {}, "Proficiency"),
+          createElement("small", {}, ""),
         ]
       ),
       createElement("br"),

@@ -330,6 +330,7 @@ select {
 }
 
 textarea {
+  padding: 5px;
   height: auto;
   border: none;
   outline: none;
