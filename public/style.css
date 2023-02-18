@@ -27,8 +27,9 @@
   --blue3: rgb(32, 38, 52);
   --blue4: rgb(43, 59, 83);
   --blue5: rgb(39, 50, 67);
+  --blue6: rgb(125, 174, 237);
   --link-blue: rgb(183, 207, 237);
-  --purple: rgb(36, 35, 59);
+  --purple: rgb(52, 51, 80);
   --pink: rgb(220, 175, 201);
   --green: rgb(141, 194, 81);
   --green2: rgb(47, 129, 3);
@@ -37,6 +38,7 @@
   --orange3: rgb(224, 200, 172);
   --red1: rgb(225, 75, 75);
   --red2: rgb(120, 46, 46);
+  --border-radius: 4px;
 }
 
 * {
@@ -260,7 +262,7 @@ input {
   border: none;
   outline: none;
   /* background-color: rgb(208, 208, 208); */
-  width: 250px;
+  /* width: 250px; */
   height: 30px;
   display: inline-block;
   padding-left: 5px;
@@ -297,6 +299,15 @@ input[type=file]::file-selector-button:hover {
   background: linear-gradient(var(--green) 10%, var(--green2) 90%);
 }
 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+  padding-right: 5px;
+}
+
 
 .form-item input {
   margin-bottom: 10px;
@@ -319,6 +330,7 @@ select {
 }
 
 textarea {
+  padding: 5px;
   height: auto;
   border: none;
   outline: none;
@@ -397,6 +409,7 @@ footer {
   flex-direction: column;
   /* text-align: center; */
   /* align-self: center; */
+  overflow-x: hidden;
   overflow-y: scroll;
 }
 
@@ -616,7 +629,7 @@ footer {
 
 .close-sidebar {
   position: absolute;
-  bottom: 150px;
+  bottom: 80px;
   /* left: 0; */
   margin-right: 3px;
   margin-top: 3px;

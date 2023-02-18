@@ -113,7 +113,50 @@ const {
   removeLore,
   editLore,
 } = require("./controllers/lores.js");
-const { getLoreRelation, getLoreRelationsByLore, getLoreRelationsByLocation, getLoreRelationsByCharacter, getLoreRelationsByItem, addLoreRelation, removeLoreRelation, editLoreRelation } = require("./controllers/loreRelations.js");
+const {
+  getLoreRelation,
+  getLoreRelationsByLore,
+  getLoreRelationsByLocation,
+  getLoreRelationsByCharacter,
+  getLoreRelationsByItem,
+  addLoreRelation,
+  removeLoreRelation,
+  editLoreRelation,
+} = require("./controllers/loreRelations.js");
+const {
+  get5eCharsByUser,
+  add5eChar,
+  remove5eChar,
+  edit5eCharGeneral,
+  edit5eCharPro,
+  edit5eCharBack,
+} = require("./controllers/5eCharGeneral.js");
+const {
+  get5eCharOtherProLangsByGeneral,
+  add5eCharOtherProLang,
+  remove5eCharOtherProLang,
+  edit5eCharOtherProLang,
+} = require("./controllers/5eCharOtherProLang.js");
+const {
+  get5eCharAttacksByGeneral,
+  add5eCharAttack,
+  remove5eCharAttack,
+  edit5eCharAttack,
+} = require("./controllers/5eCharAttacks.js");
+const {
+  get5eCharEquipmentsByGeneral,
+  add5eCharEquipment,
+  remove5eCharEquipment,
+  edit5eCharEquipment,
+} = require("./controllers/5eCharEquipment.js");
+const {
+  get5eCharFeatsByGeneral,
+  add5eCharFeat,
+  remove5eCharFeat,
+  edit5eCharFeat,
+} = require("./controllers/5eCharFeats.js");
+const { edit5eCharSpellSlotInfo } = require("./controllers/5eCharSpellSlots.js");
+const { get5eCharSpellsByGeneral, add5eCharSpell, remove5eCharSpell, edit5eCharSpell } = require("./controllers/5eCharSpells.js");
 const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
@@ -140,6 +183,54 @@ router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
 router.post("/add_project_invite", addProjectInvite);
 router.delete("/remove_project_invite/:id", removeProjectInvite);
 
+// 5e characters general, proficiencies, background, spell slots
+router.get("/get_5e_characters_by_user", get5eCharsByUser);
+router.post("/add_5e_character", add5eChar);
+router.delete("/remove_5e_character/:id", remove5eChar);
+router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
+router.post("/edit_5e_character_proficiencies/:id", edit5eCharPro);
+router.post("/edit_5e_character_background/:id", edit5eCharBack);
+router.post("/edit_5e_character_spell_slots/:id", edit5eCharSpellSlotInfo);
+
+// 5e characters attacks
+router.get("/get_5e_character_attacks/:general_id", get5eCharAttacksByGeneral);
+router.post("/add_5e_character_attack", add5eCharAttack);
+router.delete("/remove_5e_character_attack/:id", remove5eCharAttack);
+router.post("/edit_5e_character_attack/:id", edit5eCharAttack);
+
+// 5e characters spells
+router.get("/get_5e_character_spells/:general_id", get5eCharSpellsByGeneral);
+router.post("/add_5e_character_spell", add5eCharSpell);
+router.delete("/remove_5e_character_spell/:id", remove5eCharSpell);
+router.post("/edit_5e_character_spell/:id", edit5eCharSpell);
+
+// 5e characters feats/traits
+router.get("/get_5e_character_feats/:general_id", get5eCharFeatsByGeneral);
+router.post("/add_5e_character_feat", add5eCharFeat);
+router.delete("/remove_5e_character_feat/:id", remove5eCharFeat);
+router.post("/edit_5e_character_feat/:id", edit5eCharFeat);
+
+// 5e characters equipments
+router.get(
+  "/get_5e_character_equipments/:general_id",
+  get5eCharEquipmentsByGeneral
+);
+router.post("/add_5e_character_equipment", add5eCharEquipment);
+router.delete("/remove_5e_character_equipment/:id", remove5eCharEquipment);
+router.post("/edit_5e_character_equipment/:id", edit5eCharEquipment);
+
+// 5e characters other proficiencies and languages
+router.get(
+  "/get_5e_character_other_pro_langs/:general_id",
+  get5eCharOtherProLangsByGeneral
+);
+router.post("/add_5e_character_other_pro_lang", add5eCharOtherProLang);
+router.delete(
+  "/remove_5e_character_other_pro_lang/:id",
+  remove5eCharOtherProLang
+);
+router.post("/edit_5e_character_other_pro_lang/:id", edit5eCharOtherProLang);
+
 // events
 router.get("/get_events/:project_id/:limit/:offset", getEvents);
 router.get("/get_events_by_location/:location_id", getEventsByLocation);
@@ -164,15 +255,21 @@ router.post("/edit_note/:id", editNote);
 // lore relations
 router.get("/get_lore_relation/:id", getLoreRelation);
 router.get("/get_lore_relations_by_lore/:type/:id", getLoreRelationsByLore);
-router.get("/get_lore_relations_by_location/:location_id", getLoreRelationsByLocation);
-router.get("/get_lore_relations_by_character/:character_id", getLoreRelationsByCharacter);
+router.get(
+  "/get_lore_relations_by_location/:location_id",
+  getLoreRelationsByLocation
+);
+router.get(
+  "/get_lore_relations_by_character/:character_id",
+  getLoreRelationsByCharacter
+);
 router.get("/get_lore_relations_by_item/:item_id", getLoreRelationsByItem);
 router.post("/add_lore_relation", addLoreRelation);
 router.delete("/remove_lore_relation/:id", removeLoreRelation);
 router.post("/edit_lore_relation/:id", editLoreRelation);
 
 // lores
-router.get("/get_lore/:id", getLore)
+router.get("/get_lore/:id", getLore);
 router.get("/get_lores/:project_id/:limit/:offset", getLores);
 router.get("/get_lores_filter/:project_id/:limit/:offset/:filter", getLores);
 router.get("/get_lores_keyword/:project_id/:limit/:offset/:keyword", getLores);
