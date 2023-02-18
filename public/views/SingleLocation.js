@@ -2,9 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import {
-  uploadImage,
-} from "../lib/imageUtils.js";
+import { uploadImage } from "../lib/imageUtils.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
@@ -62,14 +60,20 @@ export default class SingleLocationView {
     this.toggleParentLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    //transform to parent location id
     formProps.parent_location_id = formProps.location_id;
+    if (formProps.parent_location_id == 0) delete formProps.parent_location_id;
     delete formProps.location_id;
-    formProps.is_sub = true;
-    // Update UI
-    this.location.parent_location_id = formProps.parent_location_id;
-    this.location.is_sub = true;
 
-    await postThing(`/api/edit_location/${this.location.id}`, formProps);
+    if (formProps.parent_location_id) {
+      formProps.is_sub = true;
+      // Update UI
+      this.location.parent_location_id = formProps.parent_location_id;
+      this.location.is_sub = true;
+
+      await postThing(`/api/edit_location/${this.location.id}`, formProps);
+    }
+
     this.toggleParentLocationLoading();
   };
 
@@ -337,7 +341,11 @@ export default class SingleLocationView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.location.image_id);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.location.image_id
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -512,11 +520,7 @@ export default class SingleLocationView {
           ),
           ...(await this.renderItems()),
           createElement("br"),
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Lore"
-          ),
+          createElement("div", { class: "single-info-box-subheading" }, "Lore"),
           ...(await renderLoreList("location", this.location.id)),
           createElement("br"),
           createElement(
@@ -538,7 +542,7 @@ export default class SingleLocationView {
       await renderImageLarge(this.location.image_id),
       createElement("br"),
       createElement("br"),
-      noteManagerElem,
+      noteManagerElem
     );
   };
 }
