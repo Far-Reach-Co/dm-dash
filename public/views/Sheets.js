@@ -1,6 +1,6 @@
 import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 
 class Sheets {
   constructor() {
@@ -58,7 +58,6 @@ class Sheets {
   renderSheetElems = async () => {
     const sheetData = await getThings("/api/get_5e_characters_by_user");
     const map = sheetData.map((sheet) => {
-      console.log(sheet)
       // create element
       const elem = createElement(
         "div",
@@ -68,7 +67,32 @@ class Sheets {
             "flex-direction: row; align-items: center; justify-content: space-between;",
         },
         [
-          createElement("h1", {}, sheet.name),
+          createElement("div", {style: "display: flex; align-items: center; justify-content: center;"}, [
+            createElement("h1", {}, sheet.name),
+            createElement(
+              "div",
+              {
+                style:
+                  "color: var(--red1); margin-left: 10px; cursor: pointer;",
+              },
+              "ⓧ",
+              {
+                type: "click",
+                event: (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (
+                    window.confirm(
+                      `Are you sure you want to delete ${sheet.name}`
+                    )
+                  ) {
+                    deleteThing(`/api/remove_5e_character/${sheet.id}`);
+                    e.target.parentElement.parentElement.remove();
+                  }
+                },
+              }
+            ),
+          ]),
           createElement(
             "div",
             { style: "display: flex; flex-direction: column;" },

@@ -1,0 +1,4 @@
+-- Up Migration
+CREATE TABLE "public"."dnd_5e_spell_slots" ("id" serial,"first_total" int4 NOT NULL DEFAULT 0,"general_id" int4 NOT NULL,"first_expended" int4 NOT NULL DEFAULT 0,"second_total" int4 NOT NULL DEFAULT 0,"second_expended" int4 NOT NULL DEFAULT 0,"third_total" int4 NOT NULL DEFAULT 0,"third_expended" int4 NOT NULL DEFAULT 0,"fourth_total" int4 NOT NULL DEFAULT 0,"fourth_expended" int4 NOT NULL DEFAULT 0,"fifth_total" int4 NOT NULL DEFAULT 0,"fifth_expended" int4 NOT NULL DEFAULT 0,"sixth_total" int4 NOT NULL DEFAULT 0,"sixth_expended" int4 NOT NULL DEFAULT 0,"seventh_total" int4 NOT NULL DEFAULT 0,"seventh_expended" int4 NOT NULL DEFAULT 0,"eighth_total" int4 NOT NULL DEFAULT 0,"eight_expended" int4 NOT NULL DEFAULT 0,"nineth_total" int4 NOT NULL DEFAULT 0,"nineth_expended" int4 NOT NULL DEFAULT 0,"spell_casting_ability" varchar DEFAULT 'wisdom', PRIMARY KEY ("id"));
+-- Down Migration
+DROP TABLE "public"."dnd_5e_spell_slots";

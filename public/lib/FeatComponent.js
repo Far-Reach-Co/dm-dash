@@ -155,13 +155,14 @@ export default class FeatComponent {
               {
                 type: "click",
                 event: (e) => {
+                  e.preventDefault();
                   if (
                     window.confirm(
                       `Are you sure you want to delete ${item.title}`
                     )
                   ) {
                     deleteThing(`/api/remove_5e_character_feat/${item.id}`);
-                    e.target.parentElement.remove();
+                    e.target.parentElement.parentElement.remove();
                   }
                 },
               }
