@@ -57,6 +57,7 @@ class Sheets {
 
   renderSheetElems = async () => {
     const sheetData = await getThings("/api/get_5e_characters_by_user");
+    if (!sheetData.length) return [createElement("div", {}, "None...")];
     const map = sheetData.map((sheet) => {
       // create element
       const elem = createElement(
@@ -67,32 +68,39 @@ class Sheets {
             "flex-direction: row; align-items: center; justify-content: space-between;",
         },
         [
-          createElement("div", {style: "display: flex; align-items: center; justify-content: center;"}, [
-            createElement("h1", {}, sheet.name),
-            createElement(
-              "div",
-              {
-                style:
-                  "color: var(--red1); margin-left: 10px; cursor: pointer;",
-              },
-              "ⓧ",
-              {
-                type: "click",
-                event: (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (
-                    window.confirm(
-                      `Are you sure you want to delete ${sheet.name}`
-                    )
-                  ) {
-                    deleteThing(`/api/remove_5e_character/${sheet.id}`);
-                    e.target.parentElement.parentElement.remove();
-                  }
+          createElement(
+            "div",
+            {
+              style:
+                "display: flex; align-items: center; justify-content: center;",
+            },
+            [
+              createElement("h1", {}, sheet.name),
+              createElement(
+                "div",
+                {
+                  style:
+                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
                 },
-              }
-            ),
-          ]),
+                "ⓧ",
+                {
+                  type: "click",
+                  event: (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (
+                      window.confirm(
+                        `Are you sure you want to delete ${sheet.name}`
+                      )
+                    ) {
+                      deleteThing(`/api/remove_5e_character/${sheet.id}`);
+                      e.target.parentElement.parentElement.remove();
+                    }
+                  },
+                }
+              ),
+            ]
+          ),
           createElement(
             "div",
             { style: "display: flex; flex-direction: column;" },
