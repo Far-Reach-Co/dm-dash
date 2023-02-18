@@ -10,16 +10,20 @@ const {
   add5eCharProQuery,
   get5eCharProByGeneralQuery,
   remove5eCharProQuery,
-  edit5eCharProQuery
+  edit5eCharProQuery,
 } = require("../queries/5eCharPro");
 const {
   add5eCharBackQuery,
   get5eCharBackByGeneralQuery,
   remove5eCharBackQuery,
   get5eCharBackQuery,
-  edit5eCharBackQuery
+  edit5eCharBackQuery,
 } = require("../queries/5eCharBack");
-const { get5eCharSpellSlotInfosByGeneralQuery, add5eCharSpellSlotInfoQuery, remove5eCharSpellSlotInfoQuery } = require("../queries/5eCharSpellSlots");
+const {
+  get5eCharSpellSlotInfosByGeneralQuery,
+  add5eCharSpellSlotInfoQuery,
+  remove5eCharSpellSlotInfoQuery,
+} = require("../queries/5eCharSpellSlots");
 
 async function add5eChar(req, res, next) {
   try {
@@ -43,20 +47,24 @@ async function get5eCharsByUser(req, res, next) {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
     const generalsData = await get5eCharsGeneralByUserQuery(req.user.id);
     const generals = generalsData.rows;
-    if (generals[0].user_id !== req.user.id)
-      throw { status: 403, message: "Forbidden" };
+    if (generals.length) {
+      if (generals[0].user_id !== req.user.id)
+        throw { status: 403, message: "Forbidden" };
 
-    for(var general of generals) {
-      const proData = await get5eCharProByGeneralQuery(general.id);
-      const pro = proData.rows[0];
-      const backData = await get5eCharBackByGeneralQuery(general.id);
-      const back = backData.rows[0];
-      const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(general.id);
-      const spellSlots = spellSlotsData.rows[0];
-  
-      general.proficiencies = pro;
-      general.background = back;
-      general.spell_slots = spellSlots;
+      for (var general of generals) {
+        const proData = await get5eCharProByGeneralQuery(general.id);
+        const pro = proData.rows[0];
+        const backData = await get5eCharBackByGeneralQuery(general.id);
+        const back = backData.rows[0];
+        const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(
+          general.id
+        );
+        const spellSlots = spellSlotsData.rows[0];
+
+        general.proficiencies = pro;
+        general.background = back;
+        general.spell_slots = spellSlots;
+      }
     }
 
     res.send(generals);
@@ -77,13 +85,15 @@ async function remove5eChar(req, res, next) {
     const pro = proData.rows[0];
     const backData = await get5eCharBackByGeneralQuery(general.id);
     const back = backData.rows[0];
-    const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(general.id);
+    const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(
+      general.id
+    );
     const spellSlots = spellSlotsData.rows[0];
 
     await remove5eCharGeneralQuery(general.id);
     await remove5eCharProQuery(pro.id);
     await remove5eCharBackQuery(back.id);
-    await remove5eCharSpellSlotInfoQuery(spellSlots.id)
+    await remove5eCharSpellSlotInfoQuery(spellSlots.id);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -148,5 +158,5 @@ module.exports = {
   remove5eChar,
   edit5eCharGeneral,
   edit5eCharPro,
-  edit5eCharBack
+  edit5eCharBack,
 };
