@@ -209,6 +209,7 @@ export default class EquipmentComponent {
     const equipmentsData = await getThings(
       `/api/get_5e_character_equipments/${this.general_id}`
     );
+
     this.equipmentData = equipmentsData;
 
     if (this.newLoading) {
