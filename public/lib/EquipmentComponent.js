@@ -206,12 +206,6 @@ export default class EquipmentComponent {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    const equipmentsData = await getThings(
-      `/api/get_5e_character_equipments/${this.general_id}`
-    );
-
-    this.equipmentData = equipmentsData;
-
     if (this.newLoading) {
       return this.domComponent.append(renderLoadingWithMessage("Loading..."));
     }
@@ -219,6 +213,12 @@ export default class EquipmentComponent {
     if (this.creating) {
       return this.renderCreatingEquipment();
     }
+
+    const equipmentsData = await getThings(
+      `/api/get_5e_character_equipments/${this.general_id}`
+    );
+
+    this.equipmentData = equipmentsData;
 
     this.domComponent.append(
       createElement("div", { style: "align-self: center;" }, "Equipment"),
