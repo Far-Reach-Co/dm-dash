@@ -24,7 +24,7 @@ async function getEventQuery(id) {
   return await db.query(query)
 }
 
-async function getEventsQuery(projectId, limit, offset) {
+async function getEventsQuery({projectId, limit, offset}) {
   const query = {
     text: /*sql*/ `select * from public."Event" where project_id = $1 order by date_created desc limit $2 offset $3`,
     values: [projectId, limit, offset]

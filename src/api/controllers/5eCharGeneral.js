@@ -24,6 +24,14 @@ const {
   add5eCharSpellSlotInfoQuery,
   remove5eCharSpellSlotInfoQuery,
 } = require("../queries/5eCharSpellSlots");
+const {
+  get5eCharAttacksByGeneralQuery,
+  remove5eCharAttackQuery,
+} = require("../queries/5eCharAttacks");
+const { remove5eCharEquipmentQuery, get5eCharEquipmentsByGeneralQuery } = require("../queries/5eCharEquipment");
+const { get5eCharFeatsByGeneralQuery, remove5eCharFeatQuery } = require("../queries/5eCharFeats");
+const { get5eCharSpellsByGeneralQuery, remove5eCharSpellQuery } = require("../queries/5eCharSpells");
+const { get5eCharOtherProLangsByGeneralQuery, remove5eCharOtherProLangQuery } = require("../queries/5eCharOtherProLang");
 
 async function add5eChar(req, res, next) {
   try {
@@ -94,6 +102,28 @@ async function remove5eChar(req, res, next) {
     await remove5eCharProQuery(pro.id);
     await remove5eCharBackQuery(back.id);
     await remove5eCharSpellSlotInfoQuery(spellSlots.id);
+
+    const attacksData = await get5eCharAttacksByGeneralQuery(general.id);
+    attacksData.rows.forEach(async (attack) => {
+      await remove5eCharAttackQuery(attack.id);
+    });
+    const equipmentData = await get5eCharEquipmentsByGeneralQuery(general.id);
+    equipmentData.rows.forEach(async (equipment) => {
+      await remove5eCharEquipmentQuery(equipment.id);
+    });
+    const featsData = await get5eCharFeatsByGeneralQuery(general.id);
+    featsData.rows.forEach(async (feat) => {
+      await remove5eCharFeatQuery(feat.id);
+    });
+    const spellsData = await get5eCharSpellsByGeneralQuery(general.id);
+    spellsData.rows.forEach(async (spell) => {
+      await remove5eCharSpellQuery(spell.id);
+    });
+    const otherProLangsData = await get5eCharOtherProLangsByGeneralQuery(general.id);
+    otherProLangsData.rows.forEach(async (other) => {
+      await remove5eCharOtherProLangQuery(other.id);
+    });
+
     res.status(204).send();
   } catch (err) {
     next(err);
