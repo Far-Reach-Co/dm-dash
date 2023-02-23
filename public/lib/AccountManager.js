@@ -30,7 +30,7 @@ class AccountManager {
           return (window.location.pathname = "/login.html");
         }
         // stop initial spinner
-        document.getElementById("account-spinner").remove();
+        document.getElementById("initial-spinner").remove();
         this.renderAccountApp();
       }
     } catch (err) {
@@ -63,7 +63,9 @@ class AccountManager {
   appendAccountTabOrLogin = async () => {
     const token = await this.verifyToken();
     const navContainer = document.getElementById("nav-links-container");
-    const navContainerMobile = document.getElementById("nav-links-container-mobile");
+    const navContainerMobile = document.getElementById(
+      "nav-links-container-mobile"
+    );
     if (token) {
       navContainer.append(
         createElement(
@@ -206,7 +208,7 @@ class AccountManager {
   };
 
   renderAccountApp = () => {
-    const domComponent = document.getElementById("account-app");
+    const domComponent = document.getElementById("app");
     domComponent.innerHTML = "";
 
     if (this.saveEmailLoading) {
@@ -215,17 +217,23 @@ class AccountManager {
       );
     }
 
-    domComponent.className = "component";
+    // domComponent.className = "component";
     domComponent.append(
-      this.renderEmailOrEditEmail(),
-      createElement("br"),
-      createElement("hr"),
-      createElement("button", {}, "Reset Password", {
-        type: "click",
-        event: () => {
-          window.location.pathname = "/resetpassword.html";
-        },
-      })
+      createElement("div", { class: "standard-view" }, [
+        createElement("h1", {style: "margin: auto;"}, "Account"),
+        createElement("br"),
+        createElement("div", {class: "component"}, [
+          this.renderEmailOrEditEmail(),
+          createElement("br"),
+          createElement("hr"),
+          createElement("button", {}, "Reset Password", {
+            type: "click",
+            event: () => {
+              window.location.pathname = "/resetpassword.html";
+            },
+          }),
+        ])
+      ])
     );
   };
 }

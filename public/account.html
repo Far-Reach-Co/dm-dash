@@ -23,14 +23,21 @@
       <div id="nav-links-container" style="display: flex">
       </div>
     </nav>
-    <div class="container">
-      <h1>Account Management</h1>
-      <br />
-      <!-- Spinner -->
-      <div id="account-spinner" class="lds-dual-ring"></div>
+    <div class="dashboard-container">
+      <div id="app">
+        <!-- Initial spinner -->
+        <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>
+      </div>
       <!-- Toast -->
       <div id="toast"></div>
-      <div id="account-app"></div>
+      <!-- The Modal -->
+      <div id="modal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-container">
+          <div id="close-modal" class="close-modal">&times;</div>
+          <div id="modal-content" class="modal-content"></div>
+        </div>
+      </div>
     </div>
   </body>
 </html>
