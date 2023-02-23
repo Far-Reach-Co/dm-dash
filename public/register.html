@@ -45,6 +45,8 @@
         <div>
           <button type="submit">Register</button>
         </div>
+        <br>
+        <small>Already have an account?</small>
         <a href="/login.html"><small>Login</small></a>
       </form>
     </div>
@@ -67,7 +69,7 @@
         if (res.status === 201) {
           const token = resData.token;
           localStorage.setItem("token", token);
-          window.location.pathname = "/dashboard.html";
+          window.location.pathname = "/account.html";
         } else if (res.status === 400) {
           alert("Email has already been registered");
         } else {
