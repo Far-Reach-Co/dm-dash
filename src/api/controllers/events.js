@@ -60,11 +60,11 @@ async function getEvents(req, res, next) {
       if (!projectUser) throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await getEventsQuery(
-      req.params.project_id,
-      req.params.limit,
-      req.params.offset
-    );
+    const data = await getEventsQuery({
+      projectId: req.params.project_id,
+      limit: req.params.limit,
+      offset: req.params.offset
+    });
 
     res.send(data.rows);
   } catch (err) {
