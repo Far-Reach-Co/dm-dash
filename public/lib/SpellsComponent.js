@@ -12,7 +12,6 @@ export default class SpellsComponent {
     this.calculateProBonus = props.calculateProBonus;
 
     this.newLoading = false;
-    this.spells = [];
 
     this.render();
   }
@@ -20,7 +19,8 @@ export default class SpellsComponent {
   calculateSpellSaveDC = () => {
     let spellSaveDC = 8;
     if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore = this.generalData[this.generalData.spell_slots.spell_casting_ability]
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
       let mod = this.calculateAbilityScoreModifier(abilityScore);
       if (mod === "0") mod = 0;
       spellSaveDC += mod;
@@ -29,13 +29,14 @@ export default class SpellsComponent {
     spellSaveDC += this.calculateProBonus();
 
     if (spellSaveDC === 0) spellSaveDC = 0;
-    return spellSaveDC
-  }
+    return spellSaveDC;
+  };
 
   calculateSpellAttackBonus = () => {
     let bonus = 0;
     if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore = this.generalData[this.generalData.spell_slots.spell_casting_ability]
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
       let mod = this.calculateAbilityScoreModifier(abilityScore);
       if (mod === "0") mod = 0;
       bonus += mod;
@@ -44,7 +45,226 @@ export default class SpellsComponent {
     bonus += this.calculateProBonus();
 
     if (bonus === 0) bonus = 0;
-    return bonus
+    return bonus;
+  };
+
+  renderSpellSlotsElems = () => {
+    const list = [
+      {
+        title: "First level",
+        totalKey: "first_total",
+        expendedKey: "first_expended",
+      },
+      {
+        title: "Second level",
+        totalKey: "second_total",
+        expendedKey: "second_expended",
+      },
+      {
+        title: "Third level",
+        totalKey: "third_total",
+        expendedKey: "third_expended",
+      },
+      {
+        title: "Fourth level",
+        totalKey: "fourth_total",
+        expendedKey: "fourth_expended",
+      },
+      {
+        title: "Fifth level",
+        totalKey: "fifth_total",
+        expendedKey: "fifth_expended",
+      },
+      {
+        title: "Sixth level",
+        totalKey: "sixth_total",
+        expendedKey: "sixth_expended",
+      },
+      {
+        title: "Seventh level",
+        totalKey: "seventh_total",
+        expendedKey: "seventh_expended",
+      },
+      {
+        title: "Eighth level",
+        totalKey: "eighth_total",
+        expendedKey: "eighth_expended",
+      },
+      {
+        title: "Nineth level",
+        totalKey: "nineth_total",
+        expendedKey: "nineth_expended",
+      },
+    ];
+
+    return list.map((spellSlot) => {
+      const elem = createElement("div");
+      new SingleSpell({
+        domComponent: elem,
+        general_id: this.general_id,
+        generalData: this.generalData,
+        spellSlot: spellSlot,
+        updateSpellSlotValue: this.updateSpellSlotValue,
+        isCantrip: false,
+      });
+      return elem;
+    });
+  };
+
+  renderCantrip = () => {
+    const elem = createElement("div");
+    new SingleSpell({
+      domComponent: elem,
+      general_id: this.general_id,
+      generalData: this.generalData,
+      updateSpellSlotValue: this.updateSpellSlotValue,
+      isCantrip: true,
+    });
+    return elem;
+  };
+
+  renderTypeSelectOptions = (currentType) => {
+    const types = [
+      "strength",
+      "dexterity",
+      "constitution",
+      "intelligence",
+      "wisdom",
+      "charisma",
+    ];
+    const typeList = [];
+    types.forEach((type) => {
+      const elem = createElement(
+        "option",
+        { class: "select-option-small", value: type },
+        type
+      );
+      if (currentType && currentType === type) elem.selected = true;
+      typeList.push(elem);
+    });
+    return typeList;
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.newLoading) {
+      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+    }
+
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          style: "display: flex; flex-direction: column; align-items: center;",
+        },
+        [
+          createElement("div", {}, [
+            createElement(
+              "div",
+              {
+                class: "cp-info-container-row",
+                style: "width: fit-content; align-items: flex-start;",
+              },
+              [
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+                  },
+                  [
+                    createElement(
+                      "small",
+                      { style: "margin-bottom: 8px;" },
+                      "Spell Casting Ability"
+                    ),
+                    createElement(
+                      "select",
+                      {
+                        id: "spell_casting_ability",
+                        name: "spell_casting_ability",
+                        style: "margin-right: 10px; width: fit-content",
+                      },
+                      [
+                        createElement("option", { value: "None" }, "None"),
+                        ...this.renderTypeSelectOptions(
+                          this.generalData.spell_slots.spell_casting_ability
+                        ),
+                      ],
+                      {
+                        type: "change",
+                        event: (e) => {
+                          e.preventDefault();
+                          this.updateSpellSlotValue(
+                            "spell_casting_ability",
+                            e.target.value
+                          );
+                          this.render();
+                        },
+                      }
+                    ),
+                  ]
+                ),
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: flex; flex-direction: column; align-items: center; margin-right: 10px; margin-left: 10px;",
+                  },
+                  [
+                    createElement("small", {}, "Spell Save DC"),
+                    createElement(
+                      "div",
+                      {
+                        class: "cp-content-long-number",
+                      },
+                      this.calculateSpellSaveDC()
+                    ),
+                  ]
+                ),
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+                  },
+                  [
+                    createElement("small", {}, "Spell Attack Bonus"),
+                    createElement(
+                      "div",
+                      {
+                        class: "cp-content-long-number",
+                      },
+                      `+${this.calculateSpellAttackBonus()}`
+                    ),
+                  ]
+                ),
+              ]
+            ),
+          ]),
+          createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+            this.renderCantrip(),
+            ...this.renderSpellSlotsElems(),
+          ]),
+        ]
+      )
+    );
+  };
+}
+
+class SingleSpell {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.general_id = props.general_id;
+    this.spellSlot = props.spellSlot;
+    this.generalData = props.generalData;
+    this.updateSpellSlotValue = props.updateSpellSlotValue;
+    this.isCantrip = props.isCantrip;
+
+    this.spells = [];
+
+    this.render();
   }
 
   newSpell = async (type) => {
@@ -57,7 +277,7 @@ export default class SpellsComponent {
     if (res) this.render();
   };
 
-  renderSpells = (type) => {
+  renderSpells = async (type) => {
     if (!this.spells.filter((spell) => spell.type === type).length)
       return [createElement("small", {}, "None...")];
     return this.spells
@@ -142,58 +362,31 @@ export default class SpellsComponent {
       });
   };
 
-  renderSpellSlotsElems = () => {
-    const list = [
-      {
-        title: "First level",
-        totalKey: "first_total",
-        expendedKey: "first_expended",
-      },
-      {
-        title: "Second level",
-        totalKey: "second_total",
-        expendedKey: "second_expended",
-      },
-      {
-        title: "Third level",
-        totalKey: "third_total",
-        expendedKey: "third_expended",
-      },
-      {
-        title: "Fourth level",
-        totalKey: "fourth_total",
-        expendedKey: "fourth_expended",
-      },
-      {
-        title: "Fifth level",
-        totalKey: "fifth_total",
-        expendedKey: "fifth_expended",
-      },
-      {
-        title: "Sixth level",
-        totalKey: "sixth_total",
-        expendedKey: "sixth_expended",
-      },
-      {
-        title: "Seventh level",
-        totalKey: "seventh_total",
-        expendedKey: "seventh_expended",
-      },
-      {
-        title: "Eighth level",
-        totalKey: "eighth_total",
-        expendedKey: "eighth_expended",
-      },
-      {
-        title: "Nineth level",
-        totalKey: "nineth_total",
-        expendedKey: "nineth_expended",
-      },
-    ];
+  render = async () => {
+    this.domComponent.innerHTML = "";
 
-    return list.map((spellSlot) => {
-      return createElement("div", { class: "cp-info-container-column" }, [
-        createElement("h2", {}, spellSlot.title),
+    const spells = await getThings(
+      `/api/get_5e_character_spells/${this.general_id}`
+    );
+    if (spells.length) this.spells = spells;
+
+    if (this.isCantrip) {
+      return this.domComponent.append(
+        createElement("div", { class: "cp-info-container-column" }, [
+          createElement("h2", {}, "Cantrips"),
+          createElement("br"),
+          ...(await this.renderSpells("cantrip")),
+          createElement("a", { style: "align-self: flex-start;" }, "+", {
+            type: "click",
+            event: () => this.newSpell("cantrip"),
+          }),
+        ])
+      );
+    }
+
+    this.domComponent.append(
+      createElement("div", { class: "cp-info-container-column" }, [
+        createElement("h2", {}, this.spellSlot.title),
         createElement("div", { class: "cp-content-container-center" }, [
           createElement(
             "div",
@@ -207,10 +400,10 @@ export default class SpellsComponent {
                 "input",
                 {
                   class: "cp-input-no-border-small",
-                  name: spellSlot.totalKey,
+                  name: this.spellSlot.totalKey,
                   type: "number",
-                  value: this.generalData.spell_slots[spellSlot.totalKey]
-                    ? this.generalData.spell_slots[spellSlot.totalKey]
+                  value: this.generalData.spell_slots[this.spellSlot.totalKey]
+                    ? this.generalData.spell_slots[this.spellSlot.totalKey]
                     : "0",
                 },
                 null,
@@ -230,9 +423,9 @@ export default class SpellsComponent {
             "input",
             {
               class: "cp-input-no-border cp-input-small",
-              name: spellSlot.expendedKey,
-              value: this.generalData.spell_slots[spellSlot.expendedKey]
-                ? this.generalData.spell_slots[spellSlot.expendedKey]
+              name: this.spellSlot.expendedKey,
+              value: this.generalData.spell_slots[this.spellSlot.expendedKey]
+                ? this.generalData.spell_slots[this.spellSlot.expendedKey]
                 : "0",
             },
             null,
@@ -246,117 +439,12 @@ export default class SpellsComponent {
           createElement("small", {}, "Expended"),
         ]),
         createElement("hr"),
-        ...this.renderSpells(spellSlot.title),
+        ...(await this.renderSpells(this.spellSlot.title)),
         createElement("a", { style: "align-self: flex-start;" }, "+", {
           type: "click",
-          event: () => this.newSpell(spellSlot.title),
+          event: () => this.newSpell(this.spellSlot.title),
         }),
-      ]);
-    });
-  };
-
-  renderTypeSelectOptions = (currentType) => {
-    const types = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"];
-    const typeList = [];
-    types.forEach((type) => {
-      const elem = createElement(
-        "option",
-        { class: "select-option-small", value: type },
-        type
-      );
-      if (currentType && currentType === type) elem.selected = true;
-      typeList.push(elem);
-    });
-    return typeList;
-  };
-
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    const spells = await getThings(
-      `/api/get_5e_character_spells/${this.general_id}`
-    );
-    if (spells.length) this.spells = spells;
-
-    if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
-    }
-
-    this.domComponent.append(
-      createElement(
-        "div",
-        {
-          style: "display: flex; flex-direction: column; align-items: center;",
-        },
-        [
-          createElement("div", {}, [
-            createElement(
-              "div",
-              {
-                class: "cp-info-container-row",
-                style: "width: fit-content; align-items: flex-start;",
-              },
-              [
-                createElement("div", { style: "display: flex; flex-direction: column; align-items: center; justify-content: center;" }, [
-                  createElement("small", {style: "margin-bottom: 8px;"}, "Spell Casting Ability"),
-                  createElement(
-                    "select",
-                    {
-                      id: "spell_casting_ability",
-                      name: "spell_casting_ability",
-                      style: "margin-right: 10px; width: fit-content",
-                    },
-                    [
-                      createElement("option", { value: "None" }, "None"),
-                      ...this.renderTypeSelectOptions(this.generalData.spell_slots.spell_casting_ability),
-                    ],
-                    {
-                      type: "change",
-                      event: (e) => {
-                        e.preventDefault();
-                        this.updateSpellSlotValue("spell_casting_ability", e.target.value)
-                        this.render();
-                      },
-                    }
-                  ),
-                ]),
-                createElement("div", { style: "display: flex; flex-direction: column; align-items: center; margin-right: 10px; margin-left: 10px;" }, [
-                  createElement("small", {}, "Spell Save DC"),
-                  createElement(
-                    "div",
-                    {
-                      class: "cp-content-long-number"
-                    },
-                    this.calculateSpellSaveDC(),
-                  ),
-                ]),
-                createElement("div", { style: "display: flex; flex-direction: column; align-items: center; justify-content: center;" }, [
-                  createElement("small", {}, "Spell Attack Bonus"),
-                  createElement(
-                    "div",
-                    {
-                      class: "cp-content-long-number"
-                    },
-                    `+${this.calculateSpellAttackBonus()}`,
-                  ),
-                ]),
-              ]
-            ),
-          ]),
-          createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
-            createElement("div", { class: "cp-info-container-column" }, [
-              createElement("h2", {}, "Cantrips"),
-              createElement("br"),
-              ...(await this.renderSpells("cantrip")),
-              createElement("a", { style: "align-self: flex-start;" }, "+", {
-                type: "click",
-                event: () => this.newSpell("cantrip"),
-              }),
-            ]),
-            ...this.renderSpellSlotsElems(),
-          ]),
-        ]
-      )
+      ])
     );
   };
 }
