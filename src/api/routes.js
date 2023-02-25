@@ -130,6 +130,7 @@ const {
   edit5eCharGeneral,
   edit5eCharPro,
   edit5eCharBack,
+  get5eCharGeneral,
 } = require("./controllers/5eCharGeneral.js");
 const {
   get5eCharOtherProLangsByGeneral,
@@ -156,7 +157,7 @@ const {
   edit5eCharFeat,
 } = require("./controllers/5eCharFeats.js");
 const { edit5eCharSpellSlotInfo } = require("./controllers/5eCharSpellSlots.js");
-const { get5eCharSpellsByGeneral, add5eCharSpell, remove5eCharSpell, edit5eCharSpell } = require("./controllers/5eCharSpells.js");
+const { get5eCharSpellsByType, add5eCharSpell, remove5eCharSpell, edit5eCharSpell } = require("./controllers/5eCharSpells.js");
 const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
@@ -185,6 +186,7 @@ router.delete("/remove_project_invite/:id", removeProjectInvite);
 
 // 5e characters general, proficiencies, background, spell slots
 router.get("/get_5e_characters_by_user", get5eCharsByUser);
+router.get("/get_5e_character_general/:id", get5eCharGeneral);
 router.post("/add_5e_character", add5eChar);
 router.delete("/remove_5e_character/:id", remove5eChar);
 router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
@@ -199,7 +201,7 @@ router.delete("/remove_5e_character_attack/:id", remove5eCharAttack);
 router.post("/edit_5e_character_attack/:id", edit5eCharAttack);
 
 // 5e characters spells
-router.get("/get_5e_character_spells/:general_id", get5eCharSpellsByGeneral);
+router.get("/get_5e_character_spells/:general_id/:type", get5eCharSpellsByType);
 router.post("/add_5e_character_spell", add5eCharSpell);
 router.delete("/remove_5e_character_spell/:id", remove5eCharSpell);
 router.post("/edit_5e_character_spell/:id", edit5eCharSpell);

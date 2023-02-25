@@ -28,10 +28,22 @@ const {
   get5eCharAttacksByGeneralQuery,
   remove5eCharAttackQuery,
 } = require("../queries/5eCharAttacks");
-const { remove5eCharEquipmentQuery, get5eCharEquipmentsByGeneralQuery } = require("../queries/5eCharEquipment");
-const { get5eCharFeatsByGeneralQuery, remove5eCharFeatQuery } = require("../queries/5eCharFeats");
-const { get5eCharSpellsByGeneralQuery, remove5eCharSpellQuery } = require("../queries/5eCharSpells");
-const { get5eCharOtherProLangsByGeneralQuery, remove5eCharOtherProLangQuery } = require("../queries/5eCharOtherProLang");
+const {
+  remove5eCharEquipmentQuery,
+  get5eCharEquipmentsByGeneralQuery,
+} = require("../queries/5eCharEquipment");
+const {
+  get5eCharFeatsByGeneralQuery,
+  remove5eCharFeatQuery,
+} = require("../queries/5eCharFeats");
+const {
+  get5eCharSpellsByGeneralQuery,
+  remove5eCharSpellQuery,
+} = require("../queries/5eCharSpells");
+const {
+  get5eCharOtherProLangsByGeneralQuery,
+  remove5eCharOtherProLangQuery,
+} = require("../queries/5eCharOtherProLang");
 
 async function add5eChar(req, res, next) {
   try {
@@ -81,6 +93,33 @@ async function get5eCharsByUser(req, res, next) {
   }
 }
 
+async function get5eCharGeneral(req, res, next) {
+  try {
+    if (!req.user) throw { status: 401, message: "Missing Credentials" };
+    const generalsData = await get5eCharGeneralQuery(req.params.id);
+    const general = generalsData.rows[0];
+    if (general.user_id !== req.user.id)
+      throw { status: 403, message: "Forbidden" };
+
+    const proData = await get5eCharProByGeneralQuery(general.id);
+    const pro = proData.rows[0];
+    const backData = await get5eCharBackByGeneralQuery(general.id);
+    const back = backData.rows[0];
+    const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(
+      general.id
+    );
+    const spellSlots = spellSlotsData.rows[0];
+
+    general.proficiencies = pro;
+    general.background = back;
+    general.spell_slots = spellSlots;
+
+    res.send(general);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function remove5eChar(req, res, next) {
   try {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
@@ -119,7 +158,9 @@ async function remove5eChar(req, res, next) {
     spellsData.rows.forEach(async (spell) => {
       await remove5eCharSpellQuery(spell.id);
     });
-    const otherProLangsData = await get5eCharOtherProLangsByGeneralQuery(general.id);
+    const otherProLangsData = await get5eCharOtherProLangsByGeneralQuery(
+      general.id
+    );
     otherProLangsData.rows.forEach(async (other) => {
       await remove5eCharOtherProLangQuery(other.id);
     });
@@ -185,6 +226,7 @@ async function edit5eCharBack(req, res, next) {
 module.exports = {
   add5eChar,
   get5eCharsByUser,
+  get5eCharGeneral,
   remove5eChar,
   edit5eCharGeneral,
   edit5eCharPro,

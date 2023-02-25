@@ -1,5 +1,5 @@
 import createElement from "../lib/createElement.js";
-import { postThing } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import HPComponent from "../lib/HPComponent.js";
 import OtherProLangComponent from "../lib/OtherProLangComponent.js";
 import AttackComponent from "../lib/AttackComponent.js";
@@ -22,9 +22,18 @@ class FiveEPlayerSheet {
 
     // stop initial spinner
     document.getElementById("initial-spinner").remove();
-    this.generalData = history.state;
-    this.render();
+
+    this.init();
   }
+
+  init = async () => {
+    this.generalId = history.state;
+    const generalData = await getThings(
+      `/api/get_5e_character_general/${this.generalId}`
+    );
+    this.generalData = generalData;
+    this.render();
+  };
 
   updateGeneralValue = async (name, value) => {
     this.generalData[name] = value;
@@ -114,13 +123,13 @@ class FiveEPlayerSheet {
   };
 
   calculateProBonus = () => {
-    if (this.generalData.exp < 6500) {
+    if (this.generalData.level < 5) {
       return 2;
-    } else if (this.generalData.exp < 48000) {
+    } else if (this.generalData.level < 9) {
       return 3;
-    } else if (this.generalData.exp < 120000) {
+    } else if (this.generalData.level < 13) {
       return 4;
-    } else if (this.generalData.exp < 225000) {
+    } else if (this.generalData.level < 17) {
       return 5;
     } else return 6;
   };
@@ -540,6 +549,7 @@ class FiveEPlayerSheet {
                           e.target.name,
                           e.target.valueAsNumber
                         );
+                        this.render();
                       },
                     }
                   ),
@@ -562,7 +572,6 @@ class FiveEPlayerSheet {
                           e.target.name,
                           e.target.valueAsNumber
                         );
-                        this.render();
                       },
                     }
                   ),
@@ -897,15 +906,16 @@ class FiveEPlayerSheet {
                   {
                     class: "cp-input-no-border cp-input-large",
                     name: "other_resource_total",
+                    type: "number",
                     value: this.generalData.other_resource_total
                       ? this.generalData.other_resource_total
-                      : "",
+                      : "0",
                   },
                   null,
                   {
                     type: "focusout",
                     event: (e) => {
-                      this.updateGeneralValue(e.target.name, e.target.value);
+                      this.updateGeneralValue(e.target.name, e.target.valueAsNumber);
                     },
                   }
                 ),

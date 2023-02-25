@@ -2,7 +2,7 @@ const { get5eCharGeneralQuery } = require("../queries/5eCharGeneral.js");
 const {
   add5eCharSpellQuery,
   get5eCharSpellQuery,
-  get5eCharSpellsByGeneralQuery,
+  get5eCharSpellsByTypeQuery,
   remove5eCharSpellQuery,
   edit5eCharSpellQuery,
 } = require("../queries/5eCharSpells.js");
@@ -22,7 +22,7 @@ async function add5eCharSpell(req, res, next) {
   }
 }
 
-async function get5eCharSpellsByGeneral(req, res, next) {
+async function get5eCharSpellsByType(req, res, next) {
   try {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
     const generalsData = await get5eCharGeneralQuery(req.params.general_id);
@@ -30,8 +30,9 @@ async function get5eCharSpellsByGeneral(req, res, next) {
     if (general.user_id !== req.user.id)
       throw { status: 403, message: "Forbidden" };
 
-    const data = await get5eCharSpellsByGeneralQuery(
-      req.params.general_id
+    const data = await get5eCharSpellsByTypeQuery(
+      req.params.general_id,
+      req.params.type
     );
 
     res.send(data.rows);
@@ -76,7 +77,7 @@ async function edit5eCharSpell(req, res, next) {
 }
 
 module.exports = {
-  get5eCharSpellsByGeneral,
+  get5eCharSpellsByType,
   add5eCharSpell,
   remove5eCharSpell,
   edit5eCharSpell
