@@ -116,6 +116,7 @@ export default class SpellsComponent {
     new SingleSpell({
       domComponent: elem,
       general_id: this.general_id,
+      spellSlot: { title: "cantrip" },
       generalData: this.generalData,
       updateSpellSlotValue: this.updateSpellSlotValue,
       isCantrip: true,
@@ -277,96 +278,91 @@ class SingleSpell {
     if (res) this.render();
   };
 
-  renderSpells = async (type) => {
-    if (!this.spells.filter((spell) => spell.type === type).length)
-      return [createElement("small", {}, "None...")];
-    return this.spells
-      .filter((spell) => spell.type === type)
-      .map((spell) => {
-        return createElement(
-          "div",
-          {
-            style: "display: flex; flex-direction: column;",
-          },
-          [
-            createElement(
-              "div",
-              { style: "display: flex; margin-bottom: 5px;" },
-              [
-                createElement(
-                  "input",
-                  {
-                    class: "cp-input-gen",
-                    style: "color: var(--orange2)",
-                    name: "title",
-                    value: spell.title ? spell.title : "",
-                  },
-                  null,
-                  {
-                    type: "focusout",
-                    event: (e) => {
-                      e.preventDefault();
-                      postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                        title: e.target.value,
-                      });
-                    },
-                  }
-                ),
-                createElement(
-                  "div",
-                  {
-                    style:
-                      "color: var(--red1); margin-left: 10px; cursor: pointer;",
-                  },
-                  "ⓧ",
-                  {
-                    type: "click",
-                    event: (e) => {
-                      e.preventDefault();
-                      if (
-                        window.confirm(
-                          `Are you sure you want to delete ${spell.title}`
-                        )
-                      ) {
-                        deleteThing(
-                          `/api/remove_5e_character_spell/${spell.id}`
-                        );
-                        e.target.parentElement.parentElement.remove();
-                      }
-                    },
-                  }
-                ),
-              ]
-            ),
-            createElement(
-              "textarea",
-              {
-                class: "cp-input-gen input-small",
-                style: "height: 100px;",
-                name: "description",
-              },
-              spell.description ? spell.description : "",
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                    description: e.target.value,
-                  });
+  renderSpells = async () => {
+    if (!this.spells.length) return [createElement("div", {}, "None...")];
+    return this.spells.map((spell) => {
+      return createElement(
+        "div",
+        {
+          style: "display: flex; flex-direction: column;",
+        },
+        [
+          createElement(
+            "div",
+            { style: "display: flex; margin-bottom: 5px;" },
+            [
+              createElement(
+                "input",
+                {
+                  class: "cp-input-gen",
+                  style: "color: var(--orange2)",
+                  name: "title",
+                  value: spell.title ? spell.title : "",
                 },
-              }
-            ),
-            createElement("hr"),
-          ]
-        );
-      });
+                null,
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    e.preventDefault();
+                    postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                      title: e.target.value,
+                    });
+                  },
+                }
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                },
+                "ⓧ",
+                {
+                  type: "click",
+                  event: (e) => {
+                    e.preventDefault();
+                    if (
+                      window.confirm(
+                        `Are you sure you want to delete ${spell.title}`
+                      )
+                    ) {
+                      deleteThing(`/api/remove_5e_character_spell/${spell.id}`);
+                      e.target.parentElement.parentElement.remove();
+                    }
+                  },
+                }
+              ),
+            ]
+          ),
+          createElement(
+            "textarea",
+            {
+              class: "cp-input-gen input-small",
+              style: "height: 100px;",
+              name: "description",
+            },
+            spell.description ? spell.description : "",
+            {
+              type: "focusout",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                  description: e.target.value,
+                });
+              },
+            }
+          ),
+          createElement("hr"),
+        ]
+      );
+    });
   };
 
   render = async () => {
     this.domComponent.innerHTML = "";
 
     const spells = await getThings(
-      `/api/get_5e_character_spells/${this.general_id}`
+      `/api/get_5e_character_spells/${this.general_id}/${this.spellSlot.title}`
     );
     if (spells.length) this.spells = spells;
 
@@ -375,7 +371,7 @@ class SingleSpell {
         createElement("div", { class: "cp-info-container-column" }, [
           createElement("h2", {}, "Cantrips"),
           createElement("br"),
-          ...(await this.renderSpells("cantrip")),
+          ...(await this.renderSpells()),
           createElement("a", { style: "align-self: flex-start;" }, "+", {
             type: "click",
             event: () => this.newSpell("cantrip"),
@@ -424,6 +420,7 @@ class SingleSpell {
             {
               class: "cp-input-no-border cp-input-small",
               name: this.spellSlot.expendedKey,
+              type: "number",
               value: this.generalData.spell_slots[this.spellSlot.expendedKey]
                 ? this.generalData.spell_slots[this.spellSlot.expendedKey]
                 : "0",
@@ -432,14 +429,14 @@ class SingleSpell {
             {
               type: "focusout",
               event: (e) => {
-                this.updateSpellSlotValue(e.target.name, e.target.value);
+                this.updateSpellSlotValue(e.target.name, e.target.valueAsNumber);
               },
             }
           ),
           createElement("small", {}, "Expended"),
         ]),
         createElement("hr"),
-        ...(await this.renderSpells(this.spellSlot.title)),
+        ...(await this.renderSpells()),
         createElement("a", { style: "align-self: flex-start;" }, "+", {
           type: "click",
           event: () => this.newSpell(this.spellSlot.title),

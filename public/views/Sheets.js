@@ -131,7 +131,7 @@ class Sheets {
         {
           type: "click",
           event: () => {
-            history.pushState(sheet, null, `/5eplayer.html`);
+            history.pushState(sheet.id, null, `/5eplayer.html`);
             window.location.reload();
           },
         }
