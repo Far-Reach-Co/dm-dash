@@ -3,7 +3,7 @@ import state from "../lib/state.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
-import { uploadImage } from "../lib/imageUtils.js";
+import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import characterSelect from "../lib/characterSelect.js";
@@ -217,7 +217,7 @@ export default class SingleLoreView {
         this.lore.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
 
     // update UI
@@ -227,6 +227,49 @@ export default class SingleLoreView {
     this.toggleEdit();
 
     await postThing(`/api/edit_lore/${this.lore.id}`, formProps);
+  };
+
+  renderRemoveImage = async () => {
+    if (this.lore.image_id) {
+      const imageSource = await getPresignedForImageDownload(this.lore.image_id);
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_lore/${this.lore.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.lore.image_id}`
+                  );
+                  e.target.parentElement.remove();
+                  this.lore.image_id = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
   };
 
   renderEdit = async () => {
@@ -265,8 +308,9 @@ export default class SingleLoreView {
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",

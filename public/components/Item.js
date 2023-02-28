@@ -1,7 +1,10 @@
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
-import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
@@ -53,7 +56,11 @@ export default class Item {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -61,7 +68,7 @@ export default class Item {
         this.item.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
 
     // update UI
@@ -74,6 +81,49 @@ export default class Item {
     this.toggleEdit();
 
     await postThing(`/api/edit_item/${this.id}`, formProps);
+  };
+
+  renderRemoveImage = async () => {
+    if (this.imageId) {
+      const imageSource = await getPresignedForImageDownload(this.imageId);
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_item/${this.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.imageId}`
+                  );
+                  e.target.parentElement.remove();
+                  this.imageId = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
   };
 
   renderEdit = async () => {
@@ -112,8 +162,9 @@ export default class Item {
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",

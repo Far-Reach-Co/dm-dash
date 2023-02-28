@@ -64,7 +64,7 @@ export default class Character {
         this.character.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
     // update UI
     this.title = formProps.title;
@@ -76,6 +76,49 @@ export default class Character {
     this.toggleEdit();
 
     await postThing(`/api/edit_character/${this.id}`, formProps);
+  };
+
+  renderRemoveImage = async () => {
+    if (this.imageId) {
+      const imageSource = await getPresignedForImageDownload(this.imageId);
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_character/${this.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.imageId}`
+                  );
+                  e.target.parentElement.remove();
+                  this.imageId = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
   };
 
   renderEdit = async () => {
@@ -114,8 +157,9 @@ export default class Character {
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",

@@ -103,7 +103,7 @@ const {
   removeProjectUser,
   editProjectUser,
 } = require("./controllers/projectUsers.js");
-const { getSignedUrlForDownload, uploadToAws } = require("./controllers/s3.js");
+const { getSignedUrlForDownload, uploadToAws, removeImage } = require("./controllers/s3.js");
 // for uploading files
 const multer = require("multer");
 const {
@@ -165,6 +165,7 @@ var router = express.Router();
 // s3
 router.post("/signed_URL_download", getSignedUrlForDownload);
 router.post("/file_upload", upload.single("file"), uploadToAws);
+router.delete("/remove_image/:project_id/:image_id", removeImage);
 
 // project users
 router.get(
