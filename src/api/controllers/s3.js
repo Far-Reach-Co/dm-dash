@@ -119,9 +119,7 @@ async function uploadToAws(req, res, next) {
 
       // prepare to update project data usage
       let dataUsageCount = 0;
-      console.log("************** TESTING TODAY *******************")
       dataUsageCount += image.size;
-      console.log(dataUsageCount)
       // remove current file in bucket if there is one
       if (req.body.current_file_id) {
         const oldImageData = await getImageQuery(req.body.current_file_id);
@@ -131,19 +129,40 @@ async function uploadToAws(req, res, next) {
         await removeImageQuery(req.body.current_file_id);
 
         dataUsageCount -= oldImage.size;
-        console.log(dataUsageCount)
       }
       // update project data usage
       const projectData = await getProjectQuery(req.body.project_id);
       const project = projectData.rows[0];
       const newCalculatedData = project.used_data_in_bytes + dataUsageCount;
-      console.log(newCalculatedData)
       await editProjectQuery(project.id, {
         used_data_in_bytes: newCalculatedData,
       });
     } catch (err) {
       console.log(err);
     }
+  }
+}
+
+async function removeImage(req, res, next) {
+  try {
+    // remove current file
+    const imageData = await getImageQuery(req.params.image_id);
+    const image = imageData.rows[0];
+
+    await removeFile("wyrld/images", image);
+    await removeImageQuery(req.body.image_id);
+
+    // update project data usage
+    const projectData = await getProjectQuery(req.params.project_id);
+    const project = projectData.rows[0];
+    const newCalculatedData = project.used_data_in_bytes - image.size;
+    await editProjectQuery(project.id, {
+      used_data_in_bytes: newCalculatedData,
+    });
+    res.status(204).send();
+  } catch (err) {
+    console.log(err);
+    next(err);
   }
 }
 
@@ -174,4 +193,5 @@ module.exports = {
   // getSignedUrlForUpload,
   uploadToAws,
   removeFile,
+  removeImage,
 };
