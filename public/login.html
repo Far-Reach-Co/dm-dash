@@ -11,12 +11,7 @@
     <nav>
       <div style="display: flex; align-items: center">
         <img height="30px" src="/assets/dmlogo.png" alt="" />
-        <a
-          class="title-anchor"
-          href="/index.html"
-
-          >Wyrld Dashboard</a
-        >
+        <a class="title-anchor" href="/index.html">Wyrld Dashboard</a>
       </div>
     </nav>
     <div class="container">
@@ -45,9 +40,11 @@
         <div>
           <button type="submit">Login</button>
         </div>
-        <br>
+        <br />
         <small>Don't have an account or forgot your password?</small>
-        <a href="/register.html"><small>Register</small></a>
+        <a onclick=" window.location.pathname = '/register.html' "
+          ><small>Register</small></a
+        >
         <a href="/forgotpassword.html"><small>Forgot Password</small></a>
       </form>
     </div>
@@ -66,8 +63,16 @@
         });
         const resData = await res.json();
         if (res.status === 200) {
+          // set token
           const token = resData.token;
           localStorage.setItem("token", token);
+          // if invite UUID in params push to invite page
+          var searchParams = new URLSearchParams(window.location.search);
+          var inviteUUID = searchParams.get("invite");
+          if (inviteUUID) {
+            return (window.location.pathname = "/invite.html");
+          }
+          // else push to account page
           window.location.pathname = "/account.html";
         } else if (res.status === 400) {
           alert(resData.message);

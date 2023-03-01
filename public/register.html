@@ -47,7 +47,9 @@
         </div>
         <br>
         <small>Already have an account?</small>
-        <a href="/login.html"><small>Login</small></a>
+        <a onclick=" window.location.pathname = '/login.html' "
+          ><small>Login</small></a
+        >
       </form>
     </div>
   </body>
@@ -67,8 +69,16 @@
         });
         const resData = await res.json();
         if (res.status === 201) {
+          // set token
           const token = resData.token;
           localStorage.setItem("token", token);
+          // if invite UUID in params push to invite page
+          var searchParams = new URLSearchParams(window.location.search);
+          var inviteUUID = searchParams.get("invite");
+          if (inviteUUID) {
+            return (window.location.pathname = "/invite.html");
+          }
+          // else push to account page
           window.location.pathname = "/account.html";
         } else if (res.status === 400) {
           alert("Email has already been registered");
