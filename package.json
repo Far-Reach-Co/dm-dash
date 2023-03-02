@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon server.js",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
     "start": "node server.js",
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
@@ -14,6 +17,7 @@
   "author": "Julian Ranieri",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^18.14.2",
     "aws-sdk": "^2.1299.0",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
@@ -26,6 +30,10 @@
     "nodemailer": "^6.9.0",
     "nodemon": "^2.0.20",
     "pg": "^8.8.0",
-    "pm2": "^5.2.2"
-  }
-}
+    "pm2": "^5.2.2",
+    "vite": "^4.1.4"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.3",
+    "vite": "^4.1.0"
+  }}
