@@ -1,7 +1,3 @@
-small {
-  color: var(--orange3)
-}
-
 .cp-nav {
   display: flex;
   flex-direction: row;

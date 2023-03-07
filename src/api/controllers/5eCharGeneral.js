@@ -44,6 +44,7 @@ const {
   get5eCharOtherProLangsByGeneralQuery,
   remove5eCharOtherProLangQuery,
 } = require("../queries/5eCharOtherProLang");
+const { getProjectPlayersByPlayerQuery, removeProjectPlayerQuery } = require("../queries/projectPlayers");
 
 async function add5eChar(req, res, next) {
   try {
@@ -163,6 +164,12 @@ async function remove5eChar(req, res, next) {
     );
     otherProLangsData.rows.forEach(async (other) => {
       await remove5eCharOtherProLangQuery(other.id);
+    });
+    const projectPlayerData = await getProjectPlayersByPlayerQuery(
+      general.id
+    );
+    projectPlayerData.rows.forEach(async (projectPlayer) => {
+      await removeProjectPlayerQuery(projectPlayer.id);
     });
 
     res.status(204).send();
