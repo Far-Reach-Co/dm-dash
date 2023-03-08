@@ -6,6 +6,8 @@ const {
   // remove5eCharSpellSlotInfoQuery,
   edit5eCharSpellSlotInfoQuery,
 } = require("../queries/5eCharSpellSlots.js");
+const { getProjectPlayersByPlayerQuery } = require("../queries/projectPlayers.js");
+const { getProjectQuery } = require("../queries/projects.js");
 
 // async function add5eCharSpellSlotInfo(req, res, next) {
 //   try {
@@ -64,8 +66,20 @@ async function edit5eCharSpellSlotInfo(req, res, next) {
     const otherProLang = otherProLangData.rows[0];
     const generalsData = await get5eCharGeneralQuery(otherProLang.general_id);
     const general = generalsData.rows[0];
-    if (general.user_id !== req.user.id)
-      throw { status: 403, message: "Forbidden" };
+    // not creator of character
+    if (general.user_id !== req.user.id) {
+      const projectPlayersData = await getProjectPlayersByPlayerQuery(
+        general.id
+      );
+      if (projectPlayersData.rows.length) {
+        const projectPlayer = projectPlayersData.rows[0];
+        const projectData = await getProjectQuery(projectPlayer.project_id);
+        const project = projectData.rows[0];
+        // not creator of a linked project
+        if (project.user_id !== req.user.id)
+          throw { status: 403, message: "Forbidden" };
+      } else throw { status: 403, message: "Forbidden" };
+    }
 
 
     const data = await edit5eCharSpellSlotInfoQuery(req.params.id, req.body);

@@ -12,31 +12,42 @@ export default class PlayersView {
   }
 
   renderCharacterList = async () => {
-    const projectPlayers = await getThings(
-      `/api/get_project_players_by_project/${state.currentProject.id}`
-    );
-    if (!projectPlayers.length)
-      return [
-        createElement(
-          "div",
-          {},
-          "*No players have been invited yet. You can create an invite link in your project settings from the projects page."
-        ),
-      ];
-    return await Promise.all(
-      projectPlayers.map(async (projectPlayer) => {
-        const characterSheet = await getThings(
-          `/api/get_5e_character_general/${projectPlayer.player_id}`
-        );
+    if (state.currentProject.wasJoined) {
+      const sheetData = await getThings("/api/get_5e_characters_by_user");
+      if (!sheetData.length) {
+        return [createElement("div", {}, "*You have not linked a player yet.")];
+      }
+      return sheetData.map(characterSheet => {
         const elem = createElement("div");
         new PlayerComponent({
           domComponent: elem,
           sheet: characterSheet,
-          navigate: this.navigate
+          navigate: this.navigate,
         });
         return elem;
       })
-    );
+    } else {
+      const projectPlayers = await getThings(
+        `/api/get_project_players_by_project/${state.currentProject.id}`
+      );
+      if (!projectPlayers.length) {
+        return [createElement("div", {}, "*No players have been linked yet.")];
+      }
+      return await Promise.all(
+        projectPlayers.map(async (projectPlayer) => {
+          const characterSheet = await getThings(
+            `/api/get_5e_character_general/${projectPlayer.player_id}`
+          );
+          const elem = createElement("div");
+          new PlayerComponent({
+            domComponent: elem,
+            sheet: characterSheet,
+            navigate: this.navigate,
+          });
+          return elem;
+        })
+      );
+    }
   };
 
   render = async () => {
@@ -49,7 +60,7 @@ class PlayerComponent {
     this.domComponent = props.domComponent;
     this.domComponent.className = "project-btn-container";
     this.sheet = props.sheet;
-    this.navigate = props.navigate
+    this.navigate = props.navigate;
 
     this.edit = false;
 
@@ -123,22 +134,22 @@ class PlayerComponent {
               title: "single-player",
               sidebar: true,
               params: { content: this.sheet },
-            })
+            });
           },
         }
-      ),
-      createElement(
-        "img",
-        {
-          class: "icon",
-          src: "/assets/gears.svg",
-        },
-        null,
-        {
-          type: "click",
-          event: this.toggleEdit,
-        }
       )
+      // createElement(
+      //   "img",
+      //   {
+      //     class: "icon",
+      //     src: "/assets/gears.svg",
+      //   },
+      //   null,
+      //   {
+      //     type: "click",
+      //     event: this.toggleEdit,
+      //   }
+      // )
     );
   };
 }
