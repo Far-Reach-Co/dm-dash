@@ -51,6 +51,12 @@ export default class SideBar {
         params: {},
       },
       {
+        id: "sidebar-players",
+        title: "players",
+        displayTitle: "Players",
+        params: {},
+      },
+      {
         id: "sidebar-items",
         title: "items",
         displayTitle: "Items",

@@ -44,6 +44,14 @@ const {
   get5eCharOtherProLangsByGeneralQuery,
   remove5eCharOtherProLangQuery,
 } = require("../queries/5eCharOtherProLang");
+const {
+  getProjectPlayersByPlayerQuery,
+  removeProjectPlayerQuery,
+} = require("../queries/projectPlayers");
+const { getProjectQuery } = require("../queries/projects");
+const {
+  getProjectUserByUserAndProjectQuery,
+} = require("../queries/projectUsers");
 
 async function add5eChar(req, res, next) {
   try {
@@ -95,11 +103,24 @@ async function get5eCharsByUser(req, res, next) {
 
 async function get5eCharGeneral(req, res, next) {
   try {
+    // not user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
     const generalsData = await get5eCharGeneralQuery(req.params.id);
     const general = generalsData.rows[0];
-    if (general.user_id !== req.user.id)
-      throw { status: 403, message: "Forbidden" };
+    // not creator of character
+    if (general.user_id !== req.user.id) {
+      const projectPlayersData = await getProjectPlayersByPlayerQuery(
+        general.id
+      );
+      if (projectPlayersData.rows.length) {
+        const projectPlayer = projectPlayersData.rows[0];
+        const projectData = await getProjectQuery(projectPlayer.project_id);
+        const project = projectData.rows[0];
+        // not creator of a linked project
+        if (project.user_id !== req.user.id)
+          throw { status: 403, message: "Forbidden" };
+      } else throw { status: 403, message: "Forbidden" };
+    }
 
     const proData = await get5eCharProByGeneralQuery(general.id);
     const pro = proData.rows[0];
@@ -164,6 +185,10 @@ async function remove5eChar(req, res, next) {
     otherProLangsData.rows.forEach(async (other) => {
       await remove5eCharOtherProLangQuery(other.id);
     });
+    const projectPlayerData = await getProjectPlayersByPlayerQuery(general.id);
+    projectPlayerData.rows.forEach(async (projectPlayer) => {
+      await removeProjectPlayerQuery(projectPlayer.id);
+    });
 
     res.status(204).send();
   } catch (err) {
@@ -173,12 +198,24 @@ async function remove5eChar(req, res, next) {
 
 async function edit5eCharGeneral(req, res, next) {
   try {
+    // not user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
-
-    const generalData = await get5eCharGeneralQuery(req.params.id);
-    const general = generalData.rows[0];
-    if (general.user_id !== req.user.id)
-      throw { status: 403, message: "Forbidden" };
+    const generalsData = await get5eCharGeneralQuery(req.params.id);
+    const general = generalsData.rows[0];
+    // not creator of character
+    if (general.user_id !== req.user.id) {
+      const projectPlayersData = await getProjectPlayersByPlayerQuery(
+        general.id
+      );
+      if (projectPlayersData.rows.length) {
+        const projectPlayer = projectPlayersData.rows[0];
+        const projectData = await getProjectQuery(projectPlayer.project_id);
+        const project = projectData.rows[0];
+        // not creator of a linked project
+        if (project.user_id !== req.user.id)
+          throw { status: 403, message: "Forbidden" };
+      } else throw { status: 403, message: "Forbidden" };
+    }
 
     const data = await edit5eCharGeneralQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -195,8 +232,20 @@ async function edit5eCharPro(req, res, next) {
     const pro = proData.rows[0];
     const generalData = await get5eCharGeneralQuery(pro.general_id);
     const general = generalData.rows[0];
-    if (general.user_id !== req.user.id)
-      throw { status: 403, message: "Forbidden" };
+    // not creator of character
+    if (general.user_id !== req.user.id) {
+      const projectPlayersData = await getProjectPlayersByPlayerQuery(
+        general.id
+      );
+      if (projectPlayersData.rows.length) {
+        const projectPlayer = projectPlayersData.rows[0];
+        const projectData = await getProjectQuery(projectPlayer.project_id);
+        const project = projectData.rows[0];
+        // not creator of a linked project
+        if (project.user_id !== req.user.id)
+          throw { status: 403, message: "Forbidden" };
+      } else throw { status: 403, message: "Forbidden" };
+    }
 
     const data = await edit5eCharProQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -213,8 +262,20 @@ async function edit5eCharBack(req, res, next) {
     const back = backData.rows[0];
     const generalData = await get5eCharGeneralQuery(back.general_id);
     const general = generalData.rows[0];
-    if (general.user_id !== req.user.id)
-      throw { status: 403, message: "Forbidden" };
+    // not creator of character
+    if (general.user_id !== req.user.id) {
+      const projectPlayersData = await getProjectPlayersByPlayerQuery(
+        general.id
+      );
+      if (projectPlayersData.rows.length) {
+        const projectPlayer = projectPlayersData.rows[0];
+        const projectData = await getProjectQuery(projectPlayer.project_id);
+        const project = projectData.rows[0];
+        // not creator of a linked project
+        if (project.user_id !== req.user.id)
+          throw { status: 403, message: "Forbidden" };
+      } else throw { status: 403, message: "Forbidden" };
+    }
 
     const data = await edit5eCharBackQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);

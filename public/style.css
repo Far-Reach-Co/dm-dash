@@ -33,9 +33,10 @@
   --pink: rgb(220, 175, 201);
   --green: rgb(141, 194, 81);
   --green2: rgb(47, 129, 3);
-  --orange: rgb(147, 69, 0);
-  --orange2: rgb(230, 149, 83);
-  --orange3: rgb(224, 200, 172);
+  --orange: rgb(165, 79, 4);
+  --orange2: rgb(241, 170, 113);
+  --orange3: rgb(241, 219, 194);
+  --orange4: rgb(213, 189, 161);
   --red1: rgb(225, 75, 75);
   --red2: rgb(120, 46, 46);
   --border-radius: 4px;
@@ -63,7 +64,7 @@ body {
 
 small {
   font-size: 12px;
-  color: var(--light-gray);
+  color: var(--orange4);
 }
 
 br {

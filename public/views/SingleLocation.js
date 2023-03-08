@@ -303,7 +303,7 @@ export default class SingleLocationView {
       if (state.currentProject.isEditor === false) {
         return createElement("small", {}, "None...");
       }
-      return createElement("button", {}, "+ Parent-Location", {
+      return createElement("button", {}, "🔗 Parent-Location", {
         type: "click",
         event: this.toggleAddParentLocation,
       });

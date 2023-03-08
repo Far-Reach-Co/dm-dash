@@ -1,5 +1,5 @@
 import createElement from "../lib/createElement.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { postThing } from "../lib/apiUtils.js";
 import HPComponent from "../lib/HPComponent.js";
 import OtherProLangComponent from "../lib/OtherProLangComponent.js";
 import AttackComponent from "../lib/AttackComponent.js";
@@ -7,33 +7,18 @@ import EquipmentComponent from "../lib/EquipmentComponent.js";
 import FeatComponent from "../lib/FeatComponent.js";
 import SpellsComponent from "../lib/SpellsComponent.js";
 
-class FiveEPlayerSheet {
-  constructor() {
-    this.appComponent = document.getElementById("app");
-    this.domComponent = createElement("div", {
-      class: "standard-view",
-      style: "align-items: center; max-width: 100%;",
-    });
-    this.appComponent.appendChild(this.domComponent);
-
-    this.user = null;
+export default class FiveEPlayerSheet {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.navigate = props.navigate;
+    (this.domComponent.className = "standard-view"),
+      (this.domComponent.style = "align-items: center; max-width: 100%;"),
+      (this.generalData = props.params.content);
     // general, background, etc
     this.mainView = "general";
-
-    // stop initial spinner
-    document.getElementById("initial-spinner").remove();
-
-    this.init();
-  }
-
-  init = async () => {
-    this.generalId = history.state;
-    const generalData = await getThings(
-      `/api/get_5e_character_general/${this.generalId}`
-    );
-    this.generalData = generalData;
+    
     this.render();
-  };
+  }
 
   updateGeneralValue = async (name, value) => {
     this.generalData[name] = value;
@@ -915,7 +900,10 @@ class FiveEPlayerSheet {
                   {
                     type: "focusout",
                     event: (e) => {
-                      this.updateGeneralValue(e.target.name, e.target.valueAsNumber);
+                      this.updateGeneralValue(
+                        e.target.name,
+                        e.target.valueAsNumber
+                      );
                     },
                   }
                 ),
@@ -1622,5 +1610,3 @@ class FiveEPlayerSheet {
     }
   };
 }
-
-new FiveEPlayerSheet();

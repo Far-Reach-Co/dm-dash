@@ -17,6 +17,8 @@ import NoteManager from "./views/NoteManager.js";
 import SingleLoreView from "./views/SingleLore.js";
 import LoresView from "./views/lores.js";
 import EventsView from "./views/Events.js";
+import PlayersView from "./views/Players.js";
+import FiveEPlayerSheet from "./components/5ePlayerSheet.js";
 
 class App {
   constructor(props) {
@@ -34,6 +36,7 @@ class App {
       characters: null,
       locations: null,
       lores: null,
+      players: null,
     };
 
     this.sidebar;
@@ -71,6 +74,7 @@ class App {
       characters: null,
       locations: null,
       lores: null,
+      players: null,
     };
   };
 
@@ -150,6 +154,22 @@ class App {
         window.location.pathname = "/login.html";
       }
     } else window.location.pathname = "/login.html";
+  };
+
+  renderPlayersView = ({ navigate }) => {
+    if (this.views.players) {
+      return this.domComponent.appendChild(this.views.players.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new PlayersView({ domComponent: element, navigate });
+    this.views.players = view;
+  };
+
+  renderSinglePlayerView = ({ navigate, params }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new FiveEPlayerSheet({ domComponent: element, navigate, params });
   };
 
   renderLocationsView = ({ navigate }) => {
@@ -323,6 +343,13 @@ class App {
     }
     // routing
     switch (navigate.currentRoute.title) {
+      case "players":
+        return this.renderPlayersView({ navigate: navigate.navigate });
+        case "single-player":
+          return this.renderSinglePlayerView({
+            navigate: navigate.navigate,
+            params: navigate.currentRoute.params,
+          });
       case "clocks":
         return this.renderClocksView();
       case "counters":
