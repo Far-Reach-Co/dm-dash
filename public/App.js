@@ -12,7 +12,7 @@ import SingleCharacterView from "./views/SingleCharacter.js";
 import ItemsView from "./views/Items.js";
 import SingleItemView from "./views/SingleItem.js";
 import { Hamburger } from "./components/Hamburger.js";
-import navigate from "./lib/Navigate.js";
+import Navigate from "./lib/Navigate.js";
 import NoteManager from "./views/NoteManager.js";
 import SingleLoreView from "./views/SingleLore.js";
 import LoresView from "./views/lores.js";
@@ -41,6 +41,7 @@ class App {
 
     this.sidebar;
     this.hamburger;
+    this.navigate = new Navigate({ appRender: this.render });
     // begin
     this.init();
   }
@@ -59,8 +60,8 @@ class App {
     document.getElementById("initial-spinner").remove();
     // navigate to first view or refresh to current view
     if (history.state) {
-      navigate.navigate(history.state);
-    } else navigate.navigate({ title: "app", sidebar: false, params: {} });
+      this.navigate.navigate(history.state);
+    } else this.navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
   resetViewsOnProjectChange = () => {
@@ -83,6 +84,71 @@ class App {
     // SIDEBAR
     const sidebar = new Sidebar({
       domComponent: sidebarElem,
+      navigate: this.navigate,
+      mainRoutes: [
+        {
+          id: "sidebar-locations",
+          title: "locations",
+          displayTitle: "Locations",
+          params: {},
+        },
+        {
+          id: "sidebar-characters",
+          title: "characters",
+          displayTitle: "Characters",
+          params: {},
+        },
+        {
+          id: "sidebar-players",
+          title: "players",
+          displayTitle: "Players",
+          params: {},
+        },
+        {
+          id: "sidebar-items",
+          title: "items",
+          displayTitle: "Items",
+          params: {},
+        },
+        {
+          id: "sidebar-lore",
+          title: "lore",
+          displayTitle: "Lore",
+          params: {},
+        },
+        {
+          id: "sidebar-events",
+          title: "events",
+          displayTitle: "Events",
+          params: {},
+        },
+        {
+          id: "sidebar-clocks",
+          title: "clocks",
+          displayTitle: "Clocks",
+          params: {},
+        },
+        {
+          id: "sidebar-calendars",
+          title: "calendars",
+          displayTitle: "Calendars",
+          params: {},
+        },
+      ],
+      secondRoutes: [
+        {
+          id: "sidebar-notes",
+          title: "notes",
+          displayTitle: "Notes",
+          params: {},
+        },
+        {
+          id: "sidebar-counters",
+          title: "counters",
+          displayTitle: "Counters",
+          params: {},
+        },
+      ],
     });
     this.sidebar = sidebar;
   };
@@ -98,16 +164,13 @@ class App {
   };
 
   handleToProject = () => {
-    function handle() {
-      // navigate to project select
-      navigate.navigate({ title: "app", sidebar: false, params: {} });
-    }
+
     document
       .getElementById("to-projects-btn")
-      .addEventListener("click", () => handle());
+      .addEventListener("click", () => this.navigate.navigate({ title: "app", sidebar: false, params: {} }));
     document
       .getElementById("to-projects-btn-mobile")
-      .addEventListener("click", () => handle());
+      .addEventListener("click", () => this.navigate.navigate({ title: "app", sidebar: false, params: {} }));
   };
 
   handleToSheets = () => {
@@ -335,21 +398,21 @@ class App {
     // clear
     this.domComponent.innerHTML = "";
     // handle sidebar
-    if (navigate.currentRoute.sidebar) {
+    if (this.navigate.currentRoute.sidebar) {
       this.renderSidebarAndHamburger();
       if (this.sidebar.isVisible) {
         this.sidebar.open();
       }
     }
     // routing
-    switch (navigate.currentRoute.title) {
+    switch (this.navigate.currentRoute.title) {
       case "players":
-        return this.renderPlayersView({ navigate: navigate.navigate });
-        case "single-player":
-          return this.renderSinglePlayerView({
-            navigate: navigate.navigate,
-            params: navigate.currentRoute.params,
-          });
+        return this.renderPlayersView({ navigate: this.navigate.navigate });
+      case "single-player":
+        return this.renderSinglePlayerView({
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
+        });
       case "clocks":
         return this.renderClocksView();
       case "counters":
@@ -361,37 +424,37 @@ class App {
       case "calendars":
         return this.renderCalendersView();
       case "locations":
-        return this.renderLocationsView({ navigate: navigate.navigate });
+        return this.renderLocationsView({ navigate: this.navigate.navigate });
       case "single-location":
         return this.renderSingleLocationView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
       case "characters":
-        return this.renderCharactersView({ navigate: navigate.navigate });
+        return this.renderCharactersView({ navigate: this.navigate.navigate });
       case "single-character":
         return this.renderSingleCharacterView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
       case "items":
-        return this.renderItemsView({ navigate: navigate.navigate });
+        return this.renderItemsView({ navigate: this.navigate.navigate });
       case "single-item":
         return this.renderSingleItemView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
       case "lore":
-        return this.renderLoresView({ navigate: navigate.navigate });
+        return this.renderLoresView({ navigate: this.navigate.navigate });
       case "single-lore":
         return this.renderSingleLoreView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
       case "modules":
         return this.renderModulesView();
       default:
-        return this.renderProjectsView({ navigate: navigate.navigate });
+        return this.renderProjectsView({ navigate: this.navigate.navigate });
     }
   };
 }
