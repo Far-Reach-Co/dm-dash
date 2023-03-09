@@ -88,4 +88,6 @@ export default function canvasLayer() {
       console.log("selected an image");
     });
   });
+
+  return canvas;
 }

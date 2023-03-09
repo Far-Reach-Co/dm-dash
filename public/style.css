@@ -639,6 +639,15 @@ footer {
   background-color: var(--blue);
 }
 
+.sidebar-image-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px;
+  border-bottom: 1px solid var(--main-white);
+}
+
 .sidebar-header {
   letter-spacing: 1.5px;
   align-items: center;

@@ -143,6 +143,16 @@ async function uploadToAws(req, res, next) {
   }
 }
 
+async function getImage(req, res, next) {
+  try {
+    const imageData = await getImageQuery(req.params.id);
+    res.send(imageData.rows[0]);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+}
+
 async function removeImage(req, res, next) {
   try {
     // remove current file
@@ -190,6 +200,7 @@ async function removeFile(bucket, image) {
 
 module.exports = {
   getSignedUrlForDownload,
+  getImage,
   // getSignedUrlForUpload,
   uploadToAws,
   removeFile,

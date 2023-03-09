@@ -9,6 +9,8 @@ export default class Table {
     this.navigate = props.navigate;
     this.params = props.params;
 
+    this.canvas;
+
     this.render();
   }
 
@@ -21,6 +23,7 @@ export default class Table {
       canvasElem,
     )
     // instantiate
-    canvasLayer()
+    const canvas = canvasLayer();
+    this.canvas = canvas;
   }
 }

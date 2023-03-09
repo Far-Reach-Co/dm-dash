@@ -107,6 +107,7 @@ const {
   getSignedUrlForDownload,
   uploadToAws,
   removeImage,
+  getImage,
 } = require("./controllers/s3.js");
 // for uploading files
 const multer = require("multer");
@@ -176,14 +177,22 @@ const {
   editProjectPlayer,
   getProjectPlayersByPlayer,
 } = require("./controllers/projectPlayers.js");
+const { getTableImages, addTableImage, removeTableImage } = require("./controllers/tableImages.js");
 const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
 
 // s3
+router.get("/get_image/:id", getImage);
 router.post("/signed_URL_download", getSignedUrlForDownload);
 router.post("/file_upload", upload.single("file"), uploadToAws);
 router.delete("/remove_image/:project_id/:image_id", removeImage);
+
+// table images
+router.get("/get_table_images/:project_id", getTableImages);
+router.post("/add_table_image", addTableImage);
+router.delete("/remove_table_image/:id", removeTableImage);
+router.post("/edit_table_image/:id", removeTableImage);
 
 // project players
 router.get(

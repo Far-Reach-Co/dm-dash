@@ -1,4 +1,5 @@
 import createElement from "../lib/createElement.js";
+import TableSidebarComponent from "../lib/renderTableSidebar.js";
 import renderTableSidebar from "../lib/renderTableSidebar.js";
 
 export default class SideBar {
@@ -105,12 +106,20 @@ export default class SideBar {
     this.domComponent.innerHTML = "";
 
     if (this.tableView) {
+      const tableSidebarComponentElem = createElement("div", {
+        style: "display: flex; flex-direction: column;",
+      });
+      new TableSidebarComponent({ domComponent: tableSidebarComponentElem });
       const container = createElement(
         "div",
         {
           class: "sidebar-container",
         },
-        [...(await renderTableSidebar()), this.renderCloseSidebarElem()]
+        [
+          createElement("div", { class: "sidebar-header" }, "Images"),
+          tableSidebarComponentElem,
+          this.renderCloseSidebarElem(),
+        ]
       );
       this.container = container;
       this.open();
