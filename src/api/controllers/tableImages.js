@@ -19,16 +19,11 @@ async function addTableImage(req, res, next) {
     const project = projectData.rows[0];
 
     if (project.user_id !== req.user.id) {
-      // not editor
       const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
+      if (!projectUser && projectUser.rows.length)
         throw { status: 403, message: "Forbidden" };
     }
 
@@ -43,12 +38,11 @@ async function getTableImages(req, res, next) {
   try {
     // if no user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // If user is not author or editor
+    // If user is not author or project user
     const projectData = await getProjectQuery(req.params.project_id);
     const project = projectData.rows[0];
 
     if (project.user_id !== req.user.id) {
-      // not editor
       const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
@@ -71,21 +65,16 @@ async function removeTableImage(req, res, next) {
     // get tableImage to get project id
     const tableImageData = await getTableImageQuery(req.params.id);
     const tableImage = tableImageData.rows[0];
-    // If user is not author or editor
+    // If user is not author or project user
     const projectData = await getProjectQuery(tableImage.project_id);
     const project = projectData.rows[0];
 
     if (project.user_id !== req.user.id) {
-      // not editor
       const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
+      if (!projectUser && projectUser.rows.length)
         throw { status: 403, message: "Forbidden" };
     }
 
@@ -103,21 +92,16 @@ async function editTableImage(req, res, next) {
     // get tableImage to get project id
     const tableImageData = await getTableImageQuery(req.params.id);
     const tableImage = tableImageData.rows[0];
-    // If user is not author or editor
+    // If user is not author or project user
     const projectData = await getProjectQuery(tableImage.project_id);
     const project = projectData.rows[0];
 
     if (project.user_id !== req.user.id) {
-      // not editor
       const projectUser = await getProjectUserByUserAndProjectQuery(
         req.user.id,
         project.id
       );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
+      if (!projectUser && projectUser.rows.length)
         throw { status: 403, message: "Forbidden" };
     }
 

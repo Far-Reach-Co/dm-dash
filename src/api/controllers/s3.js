@@ -23,7 +23,7 @@ async function getSignedUrlForDownload(req, res, next) {
     const params = {
       Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
       Key: objectName,
-      Expires: 60 * 5,
+      Expires: ((60 * 60) * 24) * 3,
     };
     // if(req.body.download_name) params.ResponseContentDisposition = `filename="${req.body.download_name}"`
     const url = await new Promise((resolve, reject) => {

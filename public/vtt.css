@@ -1,0 +1,14 @@
+.canvas-ui-elem {
+  width: max-content;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  padding: 5px;
+  border-radius: var(--border-radius);
+  top: 10px;
+  left: 10px;
+  z-index: 3;
+  background-color: var(--blue4);
+}
