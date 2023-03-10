@@ -81,7 +81,6 @@ export default class TableSidebarComponent {
                     canvasLayer.canvas.renderAll();
 
                     // EMIT ***************************
-                    console.log(newImg);
                     socketIntegration.imageAdded({ newImg, id, zIndex });
                   });
                 }

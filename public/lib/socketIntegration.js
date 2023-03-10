@@ -14,7 +14,7 @@ class SocketIntegration {
   setupListeners = (canvasLayer) => {
     // OBJECTS LISTENERS
     this.socket.on("image-add", ({ newImg, id, zIndex }) => {
-      console.log("New socket image", { newImg, id, zIndex });
+      // console.log("New socket image", { newImg, id, zIndex });
 
       fabric.Image.fromURL(newImg.src, function (img) {
         // reconstruct new image
@@ -23,7 +23,6 @@ class SocketIntegration {
         }
         img.set({ id });
         img.zIndex = zIndex;
-        console.log(img, "reconstructed");
 
         // HANDLE ************************
         // add to canvas
@@ -40,12 +39,27 @@ class SocketIntegration {
       });
     });
 
-    this.socket.on("image-remove", ({ newImg, id, zIndex }) => {
-      console.log("Remocve socket image", { newImg, id, zIndex });
+    this.socket.on("image-remove", (id) => {
+      // console.log("Remove socket image", id);
+
+      canvasLayer.canvas._objects.forEach((object) => {
+        if (object.id === id) {
+          canvasLayer.canvas.remove(object);
+        }
+      });
     });
 
-    this.socket.on("image-edit", ({ newImg, id, zIndex }) => {
-      console.log("Edit socket image", { newImg, id, zIndex });
+    this.socket.on("image-move", ({ id, image }) => {
+      // console.log("Move socket image", { id, image });
+      canvasLayer.canvas._objects.forEach(object => {
+        if (object.id === id) {
+          for (var [key, value] of Object.entries(image)) {
+            object[key] = value;
+          }
+          canvasLayer.canvas.renderAll();
+        }
+      })
+      //
     });
   };
 
@@ -63,15 +77,15 @@ class SocketIntegration {
     });
   };
 
-  imageRemoved = (image) => {
+  imageRemoved = (id) => {
     this.socket.emit("image-removed", {
       project: `project-${state.currentProject.id}`,
-      image,
+      id,
     });
   };
 
-  imageModified = (image) => {
-    this.socket.emit("image-modified", {
+  imageMoved = (image) => {
+    this.socket.emit("image-moved", {
       project: `project-${state.currentProject.id}`,
       image,
     });

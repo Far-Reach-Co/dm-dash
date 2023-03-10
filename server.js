@@ -88,18 +88,15 @@ io.on("connection", (socket) => {
   // VTT
   // update images
   socket.on("image-added", ({project, image}) => {
-    console.log("************** SOCKETTTTTT ***********************\n");
-    console.log(image, project, "\n");
-    console.log("************** SOCKETTTTTT ***********************\n");
     socket.broadcast.to(project).emit("image-add", image);
   });
   
-  socket.on("image-removed", ({project, image}) => {
-    socket.broadcast.to(project).emit("image-remove", image);
+  socket.on("image-removed", ({project, id}) => {
+    socket.broadcast.to(project).emit("image-remove", id);
   });
 
-  socket.on("image-modified", ({project, image}) => {
-    socket.broadcast.to(project).emit("image-edit", image);
+  socket.on("image-moved", ({project, image}) => {
+    socket.broadcast.to(project).emit("image-move", image);
   });
 
 });
