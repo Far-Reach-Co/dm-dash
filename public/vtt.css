@@ -12,3 +12,9 @@
   z-index: 3;
   background-color: var(--blue4);
 }
+
+.table-sidebar {
+  border-bottom: 1px solid var(--main-gray);
+  overflow-y: auto;
+  height: 500px;
+}

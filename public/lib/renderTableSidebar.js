@@ -10,6 +10,7 @@ import socketIntegration from "./socketIntegration.js";
 export default class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
+    this.domComponent.className = "table-sidebar";
 
     this.imageLoading = false;
     this.render();
@@ -82,10 +83,20 @@ export default class TableSidebarComponent {
                     canvasLayer.canvas.renderAll();
 
                     // EMIT ***************************
-                    socketIntegration.imageAdded({ newImg, id, zIndex, imageId: image.id });
+                    socketIntegration.imageAdded({
+                      newImg,
+                      id,
+                      zIndex,
+                      imageId: image.id,
+                    });
 
                     // SAVE ***************************
-                    canvasLayer.saveObjectState({ object: newImg, id, zIndex, imageId: image.id });
+                    canvasLayer.saveObjectState({
+                      object: newImg,
+                      id,
+                      zIndex,
+                      imageId: image.id,
+                    });
                   });
                 }
               },
