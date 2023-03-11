@@ -64,6 +64,7 @@ export default class TableSidebarComponent {
                         ? canvasLayer.BOTTOM_LAYER
                         : canvasLayer.OBJECT_LAYER;
                     newImg.zIndex = zIndex;
+                    newImg.imageId = image.id;
 
                     // HANDLE ************************
                     // add to canvas
@@ -81,7 +82,10 @@ export default class TableSidebarComponent {
                     canvasLayer.canvas.renderAll();
 
                     // EMIT ***************************
-                    socketIntegration.imageAdded({ newImg, id, zIndex });
+                    socketIntegration.imageAdded({ newImg, id, zIndex, imageId: image.id });
+
+                    // SAVE ***************************
+                    canvasLayer.saveObjectState({ object: newImg, id, zIndex, imageId: image.id });
                   });
                 }
               },

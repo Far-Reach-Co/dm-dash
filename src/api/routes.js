@@ -177,7 +177,8 @@ const {
   editProjectPlayer,
   getProjectPlayersByPlayer,
 } = require("./controllers/projectPlayers.js");
-const { getTableImages, addTableImage, removeTableImage } = require("./controllers/tableImages.js");
+const { getTableImages, addTableImage, removeTableImage, editTableImage } = require("./controllers/tableImages.js");
+const { getTableViews, removeTableView, editTableView, addTableView } = require("./controllers/tableViews.js");
 const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
@@ -188,11 +189,17 @@ router.post("/signed_URL_download", getSignedUrlForDownload);
 router.post("/file_upload", upload.single("file"), uploadToAws);
 router.delete("/remove_image/:project_id/:image_id", removeImage);
 
+// table views
+router.get("/get_table_views/:project_id", getTableViews);
+router.post("/add_table_view", addTableView);
+router.delete("/remove_table_view/:id", removeTableView);
+router.post("/edit_table_view/:id", editTableView);
+
 // table images
 router.get("/get_table_images/:project_id", getTableImages);
 router.post("/add_table_image", addTableImage);
 router.delete("/remove_table_image/:id", removeTableImage);
-router.post("/edit_table_image/:id", removeTableImage);
+router.post("/edit_table_image/:id", editTableImage);
 
 // project players
 router.get(

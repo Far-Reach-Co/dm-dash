@@ -1,7 +1,8 @@
 import CanvasLayer from "../components/CanvasLayer.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
-
 import socketIntegration from "../lib/socketIntegration.js";
+import state from "../lib/state.js";
 
 export default class Table {
   constructor(props) {
@@ -16,13 +17,17 @@ export default class Table {
     socketIntegration.socketTest();
   }
 
-  render = () => {
+  render = async () => {
     // refresh
     this.domComponent.innerHTML = "";
+    // get table views
+    const tableViews = await getThings(
+      `/api/get_table_views/${state.currentProject.id}`
+    );
     // create canvas elem and append
     const canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.domComponent.append(canvasElem);
-    this.canvasLayer = new CanvasLayer();
+    this.canvasLayer = new CanvasLayer({tableViews});
     // setup socket listeners after canvas instantiation
     socketIntegration.setupListeners(this.canvasLayer);
 

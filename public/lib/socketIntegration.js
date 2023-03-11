@@ -13,7 +13,7 @@ class SocketIntegration {
   // Listeners
   setupListeners = (canvasLayer) => {
     // OBJECTS LISTENERS
-    this.socket.on("image-add", ({ newImg, id, zIndex }) => {
+    this.socket.on("image-add", ({ newImg, id, zIndex, imageId }) => {
       // console.log("New socket image", { newImg, id, zIndex });
 
       fabric.Image.fromURL(newImg.src, function (img) {
@@ -23,6 +23,7 @@ class SocketIntegration {
         }
         img.set({ id });
         img.zIndex = zIndex;
+        img.imageId = imageId;
 
         // HANDLE ************************
         // add to canvas

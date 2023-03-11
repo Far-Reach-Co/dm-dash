@@ -1,13 +1,21 @@
+import { getPresignedForImageDownload } from "../lib/imageUtils.js";
 import socketIntegration from "../lib/socketIntegration.js";
 
 export default class CanvasLayer {
-  constructor() {
-    // SETUP
+  constructor(props) {
+    // setup table views and saved state
+    this.tableViews = props.tableViews;
+    this.currentTableView = this.tableViews[0];
+    // array to save state
+    this.savedState = this.currentTableView.data;
+
+    // SETUP layers
     this.BOTTOM_LAYER = 1;
     this.GRID_LAYER = 2;
     this.OBJECT_LAYER = 3;
     this.currentLayer = "Map";
 
+    // init canvas
     this.canvas = new fabric.Canvas("canvas-layer", {
       containerClass: "canvas-layer",
       height: window.innerHeight,
@@ -17,6 +25,7 @@ export default class CanvasLayer {
       backgroundColor: "black",
     });
 
+    // grid variables
     var grid = 50;
     var unitScale = 10;
     var canvasWidth = 250 * unitScale;
@@ -52,12 +61,14 @@ export default class CanvasLayer {
       const top = Math.round(options.target.top / grid) * grid;
       options.target.set({
         left,
-        top
+        top,
       });
       socketIntegration.imageMoved({
         id: options.target.id,
-        image: options.target
+        image: options.target,
       });
+      // save state
+      this.saveObjectState(options.target);
     });
 
     // Zoom
@@ -110,6 +121,7 @@ export default class CanvasLayer {
           this.canvas.getActiveObjects().forEach((object) => {
             this.canvas.remove(object);
             socketIntegration.imageRemoved(object.id);
+            this.removeObjectState(object);
           });
         }
       }
@@ -120,15 +132,120 @@ export default class CanvasLayer {
     this.canvas.on("object:rotating", (options) => {
       socketIntegration.imageMoved({
         id: options.target.id,
-        image: options.target
+        image: options.target,
       });
-    })
+      // save state
+      this.saveObjectState(options.target);
+    });
 
     this.canvas.on("object:scaling", (options) => {
       socketIntegration.imageMoved({
         id: options.target.id,
-        image: options.target
+        image: options.target,
       });
-    })
+      // save state
+      this.saveObjectState(options.target);
+    });
+
+    // save data in db after mouse up
+    document.addEventListener(
+      "mouseup",
+      throttle(async (evt) => {
+        if (Object.entries(this.savedState).length) {
+          try {
+            const res = await fetch(window.location.origin + `/api/edit_table_view/${this.currentTableView.id}`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+              },
+              body: JSON.stringify({data: this.savedState}),
+            });
+            // const data = await res.json();
+            // if (res.status === 200 || res.status === 201) {
+            //   return data;
+            // } else throw new Error();
+          } catch (err) {
+            // window.alert("Failed to save note...");
+            console.log(err);
+            return null;
+          }
+        }
+      }, 3000)
+    );
+
+    // re-create objects from db state
+    if (Object.entries(this.savedState).length) {
+      const arrayOfObjects = Object.values(this.savedState);
+      arrayOfObjects.forEach(async object => {
+
+        // just for images right now
+        const imageSource = await getPresignedForImageDownload(object.imageId)
+        if (imageSource) {
+          fabric.Image.fromURL(imageSource.url, (img) => {
+            // reconstruct new image
+            for (const [key, value] of Object.entries(object.object)) {
+              img[key] = value;
+            }
+            img.set({ id: object.id });
+            img.zIndex = object.zIndex;
+            img.imageId = object.imageId;
+            // HANDLE ************************
+            // add to canvas
+            this.canvas.add(img);
+            // event listener
+            // img.on("selected", function () {
+            //   console.log("selected an image", img);
+            // });
+            // sort by layers and re-render
+            this.canvas._objects.sort((a, b) =>
+              a.zIndex > b.zIndex ? 1 : -1
+            );
+            this.canvas.renderAll();
+          });
+        }
+      })
+    }
   }
+
+  saveObjectState = (object) => {
+    if (object.id) {
+      this.savedState[object.id] = {
+        object,
+        id: object.id,
+        zIndex: object.zIndex,
+      };
+      if (object.imageId) {
+        this.savedState[object.id].imageId = object.imageId;
+      }
+    } else console.log("ERROR: Missing object ID");
+  };
+
+  removeObjectState = (object) => {
+    if (object.id) {
+      delete this.savedState[object.id];
+    } else console.log("ERROR: Missing object ID");
+  };
 }
+
+///////// UTILS
+const throttle = (fn, wait) => {
+  let inThrottle, lastFn, lastTime;
+  return function () {
+    const context = this,
+      args = arguments;
+    if (!inThrottle) {
+      fn.apply(context, args);
+      lastTime = Date.now();
+      inThrottle = true;
+    } else {
+      clearTimeout(lastFn);
+      lastFn = setTimeout(function () {
+        if (Date.now() - lastTime >= wait) {
+          fn.apply(context, args);
+          lastTime = Date.now();
+        }
+      }, Math.max(wait - (Date.now() - lastTime), 0));
+    }
+  };
+};
