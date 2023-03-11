@@ -47,12 +47,15 @@ const {
 } = require("../queries/notes.js");
 const { getImageQuery, removeImageQuery } = require("../queries/images.js");
 const { removeFile } = require("./s3.js");
+const { addTableViewQuery } = require("../queries/tableViews.js");
 
 async function addProject(req, res, next) {
   try {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
     req.body.user_id = req.user.id;
     const data = await addProjectQuery(req.body);
+    // add first project table view
+    await addTableViewQuery({project_id: data.rows[0].id});
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);

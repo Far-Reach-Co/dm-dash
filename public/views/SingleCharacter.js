@@ -294,7 +294,7 @@ export default class SingleCharacterView {
           ...(await this.renderItems()),
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, "Lore"),
-          ...(await renderLoreList("character", this.character.id)),
+          ...(await renderLoreList("character", this.character.id, this.navigate)),
           createElement("br"),
         ]),
       ]),

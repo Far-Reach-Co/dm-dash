@@ -1,16 +1,16 @@
-import app from "../App.js";
 import capitalizeFirstLetter from "./capitalizeFirstLetter.js";
 import state from "./state.js";
 
-class Navigate {
-  constructor() {
+export default class Navigate {
+  constructor(props) {
+    this.appRender = props.appRender;
     // this.previousRoutes = [];
     this.currentRoute = null;
 
     window.addEventListener("popstate", (e) => {
       const route = e.state;
       this.currentRoute = route;
-      app.render();
+      this.appRender();
     });
   }
 
@@ -29,11 +29,8 @@ class Navigate {
   navigate = (route) => {
     if (history.state) route.applicationState = state;
     route.displayTitle = this.getDisplayTitle(route);
-    history.pushState(route, null, `/dashboard.html?view=${route.title}`);
+    history.pushState(route, null, `${window.location.pathname}?view=${route.title}`);
     this.currentRoute = route;
-    app.render();
+    this.appRender();
   };
 }
-
-const navigate = new Navigate();
-export default navigate;

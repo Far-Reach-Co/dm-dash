@@ -232,6 +232,27 @@ button:hover {
   background: linear-gradient(var(--green) 10%, var(--green2) 90%);
 }
 
+.label-btn {
+  /* width: fit-content; */
+  padding: 5px;
+  text-align: center;
+  height: fit-content;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  color: inherit;
+  /* border: 0.1px solid var(--main-gray); */
+  border: none;
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+.label-btn:hover {
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
 .btn-red {
   background: linear-gradient(var(--red1) 10%, var(--red2) 90%);
 }
@@ -401,7 +422,7 @@ footer {
 
 .standard-view {
   align-self: center;
-  z-index: 1;
+  z-index: 2;
   padding: 10px 5px;
   width: 95vw;
   max-width: 1000px;
@@ -571,7 +592,7 @@ footer {
 
 .sidebar {
   right: 0px;
-  z-index: 1;
+  z-index: 2;
   width: 200px;
   height: 100%;
   position: absolute;
@@ -618,6 +639,15 @@ footer {
   background-color: var(--blue);
 }
 
+.sidebar-image-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px;
+  border-bottom: 1px solid var(--main-white);
+}
+
 .sidebar-header {
   letter-spacing: 1.5px;
   align-items: center;
@@ -640,7 +670,7 @@ footer {
 .hamburger {
   bottom: 100px;
   right: 5px;
-  z-index: 2;
+  z-index: 3;
   position: absolute;
   cursor: pointer;
 }

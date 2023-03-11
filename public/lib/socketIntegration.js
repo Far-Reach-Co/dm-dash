@@ -1,0 +1,96 @@
+import state from "./state.js";
+
+class SocketIntegration {
+  constructor() {
+    this.socket = io(window.location.origin);
+
+    // message from server TESTING
+    this.socket.on("message", (message) => {
+      console.log("New socket message", message);
+    });
+  }
+
+  // Listeners
+  setupListeners = (canvasLayer) => {
+    // OBJECTS LISTENERS
+    this.socket.on("image-add", ({ newImg, id, zIndex, imageId }) => {
+      // console.log("New socket image", { newImg, id, zIndex });
+
+      fabric.Image.fromURL(newImg.src, function (img) {
+        // reconstruct new image
+        for (const [key, value] of Object.entries(newImg)) {
+          img[key] = value;
+        }
+        img.set({ id });
+        img.zIndex = zIndex;
+        img.imageId = imageId;
+
+        // HANDLE ************************
+        // add to canvas
+        canvasLayer.canvas.add(img);
+        // event listener
+        // img.on("selected", function () {
+        //   console.log("selected an image", img);
+        // });
+        // sort by layers and re-render
+        canvasLayer.canvas._objects.sort((a, b) =>
+          a.zIndex > b.zIndex ? 1 : -1
+        );
+        canvasLayer.canvas.renderAll();
+      });
+    });
+
+    this.socket.on("image-remove", (id) => {
+      // console.log("Remove socket image", id);
+
+      canvasLayer.canvas._objects.forEach((object) => {
+        if (object.id === id) {
+          canvasLayer.canvas.remove(object);
+        }
+      });
+    });
+
+    this.socket.on("image-move", ({ id, image }) => {
+      // console.log("Move socket image", { id, image });
+      canvasLayer.canvas._objects.forEach(object => {
+        if (object.id === id) {
+          for (var [key, value] of Object.entries(image)) {
+            object[key] = value;
+          }
+          canvasLayer.canvas.renderAll();
+        }
+      })
+      //
+    });
+  };
+
+  socketTest = () => {
+    this.socket.emit("joinProject", {
+      user: state.user.email,
+      project: `project-${state.currentProject.id}`,
+    });
+  };
+  // OBJECTS
+  imageAdded = (image) => {
+    this.socket.emit("image-added", {
+      project: `project-${state.currentProject.id}`,
+      image,
+    });
+  };
+
+  imageRemoved = (id) => {
+    this.socket.emit("image-removed", {
+      project: `project-${state.currentProject.id}`,
+      id,
+    });
+  };
+
+  imageMoved = (image) => {
+    this.socket.emit("image-moved", {
+      project: `project-${state.currentProject.id}`,
+      image,
+    });
+  };
+}
+const socketIntegration = new SocketIntegration();
+export default socketIntegration;

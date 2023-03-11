@@ -23,7 +23,7 @@ async function getSignedUrlForDownload(req, res, next) {
     const params = {
       Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
       Key: objectName,
-      Expires: 60 * 5,
+      Expires: ((60 * 60) * 24) * 3,
     };
     // if(req.body.download_name) params.ResponseContentDisposition = `filename="${req.body.download_name}"`
     const url = await new Promise((resolve, reject) => {
@@ -143,6 +143,16 @@ async function uploadToAws(req, res, next) {
   }
 }
 
+async function getImage(req, res, next) {
+  try {
+    const imageData = await getImageQuery(req.params.id);
+    res.send(imageData.rows[0]);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+}
+
 async function removeImage(req, res, next) {
   try {
     // remove current file
@@ -190,6 +200,7 @@ async function removeFile(bucket, image) {
 
 module.exports = {
   getSignedUrlForDownload,
+  getImage,
   // getSignedUrlForUpload,
   uploadToAws,
   removeFile,
