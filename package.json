@@ -5,7 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "nodemon server.js",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "start": "vite",
