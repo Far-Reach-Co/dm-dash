@@ -78,7 +78,7 @@ class App {
       players: null,
     };
   };
-
+  
   instantiateSidebar = () => {
     const sidebarElem = createElement("div", {});
     // SIDEBAR
