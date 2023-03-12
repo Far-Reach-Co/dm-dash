@@ -9,8 +9,8 @@ const { getProjectQuery, editProjectQuery } = require("../queries/projects");
 
 AWS.config.update({
   signatureVersion: "v4",
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
+  secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY,
   region: "us-east-1",
 });
 

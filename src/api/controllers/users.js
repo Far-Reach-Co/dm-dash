@@ -15,7 +15,7 @@ const { addTableViewQuery } = require("../queries/tableViews.js");
 const validLoginLength = "30d";
 
 function generateAccessToken(id, expires) {
-  return jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: expires });
+  return jwt.sign({ id }, import.meta.env.VITE_SECRET_KEY, { expiresIn: expires });
 }
 
 function sendResetEmail(user, token) {
@@ -27,7 +27,7 @@ function sendResetEmail(user, token) {
 }
 
 async function verifyUserByToken(token) {
-  return jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
+  return jwt.verify(token, import.meta.env.VITE_SECRET_KEY, async (err, user) => {
     if (err) return null;
 
     const userData = await getUserByIdQuery(user.id);

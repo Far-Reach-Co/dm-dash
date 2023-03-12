@@ -2,10 +2,10 @@ var { Pool } = require("pg")
 
 // LOCAL
 var credentials = {
-  user: process.env.PG_USER,
-  host: process.env.PG_HOST,
-  database: process.env.PG_DB,
-  password: process.env.PG_PW,
+  user: import.meta.env.VITE_PG_USER,
+  host: import.meta.env.VITE_PG_HOST,
+  database: import.meta.env.VITE_PG_DB,
+  password: import.meta.env.VITE_PG_PW,
   port: 5432
 }
 

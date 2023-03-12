@@ -7,8 +7,8 @@ const mail = require("../../api/smtp");
 
 AWS.config.update({
   signatureVersion: "v4",
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  accessKeyId: import.meta.env.VITE_AWS_ACCESS_KEY_ID,
+  secretAccessKey: import.meta.env.VITE_AWS_SECRET_ACCESS_KEY,
   region: "us-east-1",
 });
 
@@ -16,7 +16,7 @@ const s3 = new AWS.S3();
 
 function pgBackup() {
   function doBackup() {
-    const command = `pg_dump --data-only --no-acl ${process.env.DATABASE_URL} > backup.sql`;
+    const command = `pg_dump --data-only --no-acl ${import.meta.env.VITE_DATABASE_URL} > backup.sql`;
 
     exec(command, (err, stdout, stderr) => {
       if (err) {
