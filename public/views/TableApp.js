@@ -1,5 +1,5 @@
 import createElement from "../lib/createElement.js";
-import state from "../lib/state.js";
+import accountManager from "../lib/AccountManager.js"; // dont remove
 import ProjectsView from "../views/Projects.js";
 import TableSidebar from "../components/TableSidebar.js";
 import { Hamburger } from "../components/Hamburger.js";
@@ -23,28 +23,14 @@ class TableApp {
   }
 
   init = async () => {
-    // top bar routes
-    this.handleLogout();
-    this.handleToProject();
-    this.handleToSheets();
-    // verify user
-    await this.verifyToken();
     // setup sidebar
     this.instantiateSidebar();
     this.instantiateHamburger();
-    // remove initial spinner
-    document.getElementById("initial-spinner").remove();
     // navigate to first view or refresh to current view
     if (history.state) {
       this.navigate.navigate(history.state);
     } else
       this.navigate.navigate({ title: "tableapp", sidebar: false, params: {} });
-  };
-
-  resetViewsOnProjectChange = () => {
-    this.views = {
-      table: null,
-    };
   };
 
   instantiateSidebar = () => {
@@ -67,71 +53,6 @@ class TableApp {
     this.hamburger = hamburger;
   };
 
-  handleToProject = () => {
-    document.getElementById("to-projects-btn").addEventListener("click", () =>
-      this.navigate.navigate({
-        title: "tableapp",
-        sidebar: false,
-        params: {},
-      })
-    );
-    document
-      .getElementById("to-projects-btn-mobile")
-      .addEventListener("click", () =>
-        this.navigate.navigate({
-          title: "tableapp",
-          sidebar: false,
-          params: {},
-        })
-      );
-  };
-
-  handleToSheets = () => {
-    function handle() {
-      // navigate to project select
-      window.location.pathname = "/sheets.html";
-    }
-    document
-      .getElementById("to-sheets-btn")
-      .addEventListener("click", () => handle());
-    document
-      .getElementById("to-sheets-btn-mobile")
-      .addEventListener("click", () => handle());
-  };
-
-  handleLogout = () => {
-    function handle() {
-      localStorage.removeItem("token");
-      window.location.pathname = "/";
-    }
-    document
-      .getElementById("logout-btn")
-      .addEventListener("click", () => handle());
-    document
-      .getElementById("logout-btn-mobile")
-      .addEventListener("click", () => handle());
-  };
-
-  verifyToken = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
-          headers: { "x-access-token": `Bearer ${token}` },
-        });
-        const resData = await res.json();
-        if (res.status === 200) {
-          state.user = resData;
-        } else if (res.status === 400) {
-          window.location.pathname = "/login.html";
-        } else throw resData.error;
-      } catch (err) {
-        console.log(err);
-        window.location.pathname = "/login.html";
-      }
-    } else window.location.pathname = "/login.html";
-  };
-
   renderProjectsView = ({ navigate }) => {
     if (this.views.projects) {
       return this.domComponent.appendChild(this.views.projects.domComponent);
@@ -141,7 +62,6 @@ class TableApp {
     const view = new ProjectsView({
       domComponent: element,
       navigate,
-      resetViewsOnProjectChange: this.resetViewsOnProjectChange,
     });
     this.views.projects = view;
   };
@@ -186,7 +106,7 @@ class TableApp {
     }
     // routing
     switch (this.navigate.currentRoute.title) {
-      case "modules":
+      case "main":
         return this.renderTable({
           navigate: this.navigate.navigate,
           params: this.navigate.currentRoute.params,

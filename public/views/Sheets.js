@@ -1,4 +1,5 @@
 import createElement from "../lib/createElement.js";
+import accountManager from "../lib/AccountManager.js"; // dont remove
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import projectSelect from "../lib/projectSelect.js";
@@ -14,37 +15,8 @@ class Sheets {
     this.newLoading = false;
     this.creating = false;
 
-    this.init();
-  }
-
-  init = async () => {
-    // verify user
-    await this.verifyToken();
-    // stop initial spinner
-    document.getElementById("initial-spinner").remove();
-
     this.render();
-  };
-
-  verifyToken = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
-          headers: { "x-access-token": `Bearer ${token}` },
-        });
-        const resData = await res.json();
-        if (res.status === 200) {
-          this.user = resData;
-        } else if (res.status === 400) {
-          window.location.pathname = "/login.html";
-        } else throw resData.error;
-      } catch (err) {
-        console.log(err);
-        window.location.pathname = "/login.html";
-      }
-    } else window.location.pathname = "/login.html";
-  };
+  }
 
   toggleLoadingNew = () => {
     this.newLoading = !this.newLoading;
