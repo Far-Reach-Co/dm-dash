@@ -1,10 +1,11 @@
 import createElement from "../lib/createElement.js";
-import TableSidebarComponent from "../lib/renderTableSidebar.js";
+import TableSidebarComponent from "../lib/TableSidebarComponent.js";
 
-export default class TableSideBar {
+export default class TableSidebar {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "sidebar";
+    this.canvasLayer = props.canvasLayer;
     this.isVisible = false;
     this.navigate = props.navigate;
   }
@@ -48,7 +49,10 @@ export default class TableSideBar {
     const tableSidebarComponentElem = createElement("div", {
       style: "display: flex; flex-direction: column;",
     });
-    new TableSidebarComponent({ domComponent: tableSidebarComponentElem });
+    new TableSidebarComponent({
+      domComponent: tableSidebarComponentElem,
+      canvasLayer: this.canvasLayer,
+    });
     const container = createElement(
       "div",
       {

@@ -1,4 +1,5 @@
 import createElement from "../lib/createElement.js";
+import state from "../lib/state.js";
 
 export default class SideBar {
   constructor(props) {
@@ -110,6 +111,13 @@ export default class SideBar {
       [
         createElement("div", { class: "sidebar-header" }, "Main Modules"),
         ...this.renderMainRoutesElems(),
+        createElement("a", {class: "sidebar-item"}, "Table", {
+          type: "click",
+          event: () => {
+            history.pushState(state.currentProject.id, null, `/vtt.html`);
+            window.location.reload();
+          }
+        }),
         createElement("div", { class: "sidebar-header" }, "Personal Tools"),
         ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),

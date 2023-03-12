@@ -76,11 +76,6 @@ class AccountManager {
       navContainer.append(
         createElement(
           "a",
-          { class: "top-nav-btn", href: "/vtt.html" },
-          "Table"
-        ),
-        createElement(
-          "a",
           { class: "top-nav-btn", href: "/dashboard.html" },
           "Dashboard"
         ),
@@ -103,11 +98,6 @@ class AccountManager {
         })
       );
       navContainerMobile.append(
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/vtt.html" },
-          "Table"
-        ),
         createElement(
           "a",
           { class: "top-nav-btn", href: "/dashboard.html" },

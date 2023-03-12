@@ -72,9 +72,17 @@ async function addProject(req, res, next) {
 
 async function getProject(req, res, next) {
   try {
-    const data = await getProjectQuery(req.params.id);
-
-    res.send(data.rows[0]);
+    const projectData = await getProjectQuery(req.params.id);
+    const project = projectData.rows[0];
+    const projectUsersData = await getProjectUserByUserAndProjectQuery(req.user.id, project.id)
+    if (projectUsersData.rows.length) {
+      const projectUser = projectUsersData.rows[0]
+      project.was_joined = true;
+      project.project_user_id = projectUser.id;
+      project.date_joined = projectUser.date_joined;
+      project.is_editor = projectUser.is_editor;
+    }
+    res.send(project);
   } catch (err) {
     next(err);
   }
