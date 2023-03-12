@@ -102,7 +102,7 @@ export default class TableSidebarComponent {
             }),
             createElement(
               "div",
-              { style: "width: 100px" },
+              { style: "width: 100px; overflow-x: auto" },
               image.original_name
             ),
             await this.renderImage(image.id),
