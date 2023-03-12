@@ -103,7 +103,12 @@ const {
   removeProjectUser,
   editProjectUser,
 } = require("./controllers/projectUsers.js");
-const { getSignedUrlForDownload, uploadToAws, removeImage } = require("./controllers/s3.js");
+const {
+  getSignedUrlForDownload,
+  uploadToAws,
+  removeImage,
+  getImage,
+} = require("./controllers/s3.js");
 // for uploading files
 const multer = require("multer");
 const {
@@ -156,16 +161,58 @@ const {
   remove5eCharFeat,
   edit5eCharFeat,
 } = require("./controllers/5eCharFeats.js");
-const { edit5eCharSpellSlotInfo } = require("./controllers/5eCharSpellSlots.js");
-const { get5eCharSpellsByType, add5eCharSpell, remove5eCharSpell, edit5eCharSpell } = require("./controllers/5eCharSpells.js");
+const {
+  edit5eCharSpellSlotInfo,
+} = require("./controllers/5eCharSpellSlots.js");
+const {
+  get5eCharSpellsByType,
+  add5eCharSpell,
+  remove5eCharSpell,
+  edit5eCharSpell,
+} = require("./controllers/5eCharSpells.js");
+const {
+  getProjectPlayersByProject,
+  addProjectPlayer,
+  removeProjectPlayer,
+  editProjectPlayer,
+  getProjectPlayersByPlayer,
+} = require("./controllers/projectPlayers.js");
+const { getTableImages, addTableImage, removeTableImage, editTableImage } = require("./controllers/tableImages.js");
+const { getTableViews, removeTableView, editTableView, addTableView } = require("./controllers/tableViews.js");
 const upload = multer({ dest: "file_uploads/" });
 
 var router = express.Router();
 
 // s3
+router.get("/get_image/:id", getImage);
 router.post("/signed_URL_download", getSignedUrlForDownload);
 router.post("/file_upload", upload.single("file"), uploadToAws);
 router.delete("/remove_image/:project_id/:image_id", removeImage);
+
+// table views
+router.get("/get_table_views/:project_id", getTableViews);
+router.post("/add_table_view", addTableView);
+router.delete("/remove_table_view/:id", removeTableView);
+router.post("/edit_table_view/:id", editTableView);
+
+// table images
+router.get("/get_table_images/:project_id", getTableImages);
+router.post("/add_table_image", addTableImage);
+router.delete("/remove_table_image/:id", removeTableImage);
+router.post("/edit_table_image/:id", editTableImage);
+
+// project players
+router.get(
+  "/get_project_players_by_project/:project_id",
+  getProjectPlayersByProject
+);
+router.get(
+  "/get_project_players_by_player/:player_id",
+  getProjectPlayersByPlayer
+);
+router.post("/add_project_player", addProjectPlayer);
+router.delete("/remove_project_player/:id", removeProjectPlayer);
+router.post("/edit_project_player/:id", editProjectPlayer);
 
 // project users
 router.get(

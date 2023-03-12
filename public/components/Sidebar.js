@@ -1,11 +1,16 @@
 import createElement from "../lib/createElement.js";
-import navigate from "../lib/Navigate.js";
+import TableSidebarComponent from "../lib/renderTableSidebar.js";
+import renderTableSidebar from "../lib/renderTableSidebar.js";
 
 export default class SideBar {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "sidebar";
     this.isVisible = false;
+    this.navigate = props.navigate;
+    this.mainRoutes = props.mainRoutes;
+    this.secondRoutes = props.secondRoutes;
+    this.tableView = props.tableView;
   }
 
   renderCloseSidebarElem = () => {
@@ -25,7 +30,7 @@ export default class SideBar {
     if (this.container && this.container.style)
       this.container.style.transform = "translate(200px, 0px)";
     if (this.domComponent && this.domComponent.style)
-      this.domComponent.style.zIndex = "1";
+      this.domComponent.style.zIndex = "2";
   };
 
   open = () => {
@@ -33,57 +38,17 @@ export default class SideBar {
     if (this.container && this.container.style)
       this.container.style.transform = "translate(0px, 0px)";
     if (this.domComponent && this.domComponent.style)
-      this.domComponent.style.zIndex = "3";
+      this.domComponent.style.zIndex = "4";
   };
 
   renderMainRoutesElems = () => {
-    const routes = [
-      {
-        id: "sidebar-locations",
-        title: "locations",
-        displayTitle: "Locations",
-        params: {},
-      },
-      {
-        id: "sidebar-characters",
-        title: "characters",
-        displayTitle: "Characters",
-        params: {},
-      },
-      {
-        id: "sidebar-items",
-        title: "items",
-        displayTitle: "Items",
-        params: {},
-      },
-      {
-        id: "sidebar-lore",
-        title: "lore",
-        displayTitle: "Lore",
-        params: {},
-      },
-      {
-        id: "sidebar-events",
-        title: "events",
-        displayTitle: "Events",
-        params: {},
-      },
-      {
-        id: "sidebar-clocks",
-        title: "clocks",
-        displayTitle: "Clocks",
-        params: {},
-      },
-      {
-        id: "sidebar-calendars",
-        title: "calendars",
-        displayTitle: "Calendars",
-        params: {},
-      },
-    ];
-    return routes.map((route) => {
+    return this.mainRoutes.map((route) => {
       let className = "sidebar-item";
-      if(navigate.currentRoute && navigate.currentRoute.title === route.title) className += " sidebar-selected-item";
+      if (
+        this.navigate.currentRoute &&
+        this.navigate.currentRoute.title === route.title
+      )
+        className += " sidebar-selected-item";
       const elem = createElement(
         "a",
         {
@@ -94,7 +59,7 @@ export default class SideBar {
       );
       // event listener
       elem.addEventListener("click", () => {
-        navigate.navigate({
+        this.navigate.navigate({
           title: route.title,
           sidebar: true,
           params: route.params,
@@ -105,23 +70,13 @@ export default class SideBar {
   };
 
   renderToolRoutesElems = () => {
-    const routes = [
-      {
-        id: "sidebar-notes",
-        title: "notes",
-        displayTitle: "Notes",
-        params: {},
-      },
-      {
-        id: "sidebar-counters",
-        title: "counters",
-        displayTitle: "Counters",
-        params: {},
-      }
-    ];
-    return routes.map((route) => {
+    return this.secondRoutes.map((route) => {
       let className = "sidebar-item";
-      if(navigate.currentRoute && navigate.currentRoute.title === route.title) className += " sidebar-selected-item";
+      if (
+        this.navigate.currentRoute &&
+        this.navigate.currentRoute.title === route.title
+      )
+        className += " sidebar-selected-item";
       const elem = createElement(
         "a",
         {
@@ -132,7 +87,7 @@ export default class SideBar {
       );
       // event listener
       elem.addEventListener("click", () => {
-        navigate.navigate({
+        this.navigate.navigate({
           title: route.title,
           sidebar: true,
           params: route.params,
@@ -147,8 +102,29 @@ export default class SideBar {
     this.domComponent.innerHTML = "";
   };
 
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
+
+    if (this.tableView) {
+      const tableSidebarComponentElem = createElement("div", {
+        style: "display: flex; flex-direction: column;",
+      });
+      new TableSidebarComponent({ domComponent: tableSidebarComponentElem });
+      const container = createElement(
+        "div",
+        {
+          class: "sidebar-container",
+        },
+        [
+          createElement("div", { class: "sidebar-header" }, "Images"),
+          tableSidebarComponentElem,
+          this.renderCloseSidebarElem(),
+        ]
+      );
+      this.container = container;
+      this.open();
+      return this.domComponent.append(container);
+    }
 
     const container = createElement(
       "div",
@@ -161,8 +137,8 @@ export default class SideBar {
         createElement("div", { class: "sidebar-header" }, "Personal Tools"),
         ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),
-      ],
-      );
+      ]
+    );
     this.container = container;
     this.domComponent.append(container);
   };

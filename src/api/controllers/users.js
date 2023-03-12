@@ -10,6 +10,7 @@ const {
   editUserPasswordQuery,
 } = require("../queries/users");
 const { addProjectQuery } = require("../queries/projects");
+const { addTableViewQuery } = require("../queries/tableViews.js");
 
 const validLoginLength = "30d";
 
@@ -71,7 +72,8 @@ async function registerUser(req, res, next) {
     const data = userData.rows[0];
 
     // create first project for user
-    await addProjectQuery({ title: "First Project", user_id: data.id });
+    const projectData = await addProjectQuery({ title: "First Project", user_id: data.id });
+    await addTableViewQuery({project_id: projectData.rows[0].id});
 
     // login
     const token = generateAccessToken(data.id, validLoginLength);

@@ -7,7 +7,7 @@ export class Hamburger {
     this.domComponent.className = "hamburger";
     this.sidebar = props.sidebar;
 
-    this.domComponent.addEventListener("click", this.toggle)
+    this.domComponent.addEventListener("click", this.toggle);
   }
 
   hide = () => {
@@ -32,6 +32,7 @@ export class Hamburger {
           height: "40px",
           width: "40px",
           src: "/assets/sidebar.svg",
+          class: "flipXAxis",
         },
         null
       )

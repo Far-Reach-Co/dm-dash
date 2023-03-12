@@ -303,7 +303,7 @@ export default class SingleLocationView {
       if (state.currentProject.isEditor === false) {
         return createElement("small", {}, "None...");
       }
-      return createElement("button", {}, "+ Parent-Location", {
+      return createElement("button", {}, "🔗 Parent-Location", {
         type: "click",
         event: this.toggleAddParentLocation,
       });
@@ -565,7 +565,7 @@ export default class SingleLocationView {
           ...(await this.renderItems()),
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, "Lore"),
-          ...(await renderLoreList("location", this.location.id)),
+          ...(await renderLoreList("location", this.location.id, this.navigate)),
           createElement("br"),
           createElement(
             "div",

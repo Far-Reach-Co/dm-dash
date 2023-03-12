@@ -1,6 +1,7 @@
 import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
+import projectSelect from "../lib/projectSelect.js";
 
 class Sheets {
   constructor() {
@@ -57,85 +58,13 @@ class Sheets {
 
   renderSheetElems = async () => {
     const sheetData = await getThings("/api/get_5e_characters_by_user");
-    if (!sheetData.length) return [createElement("div", {}, "None...")];
     const map = sheetData.map((sheet) => {
       // create element
-      const elem = createElement(
-        "div",
-        {
-          class: "project-button",
-          style:
-            "flex-direction: row; align-items: center; justify-content: space-between;",
-        },
-        [
-          createElement(
-            "div",
-            {
-              style:
-                "display: flex; align-items: center; justify-content: center;",
-            },
-            [
-              createElement("h1", {}, sheet.name),
-              createElement(
-                "div",
-                {
-                  style:
-                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
-                },
-                "ⓧ",
-                {
-                  type: "click",
-                  event: (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (
-                      window.confirm(
-                        `Are you sure you want to delete ${sheet.name}`
-                      )
-                    ) {
-                      deleteThing(`/api/remove_5e_character/${sheet.id}`);
-                      e.target.parentElement.parentElement.remove();
-                    }
-                  },
-                }
-              ),
-            ]
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              createElement(
-                "small",
-                {},
-                `Race: ${sheet.race ? sheet.race : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `Class: ${sheet.class ? sheet.class : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `Level: ${sheet.level ? sheet.level : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `EXP: ${sheet.exp ? sheet.exp : "None"}`
-              ),
-            ]
-          ),
-        ],
-        {
-          type: "click",
-          event: () => {
-            history.pushState(sheet.id, null, `/5eplayer.html`);
-            window.location.reload();
-          },
-        }
-      );
+      const elem = createElement("div");
+      new PlayerComponent({
+        domComponent: elem,
+        sheet,
+      });
 
       return elem;
     });
@@ -143,7 +72,7 @@ class Sheets {
     else
       return [
         createElement(
-          "small",
+          "div",
           {},
           "No player characters have been created yet..."
         ),
@@ -234,3 +163,248 @@ class Sheets {
 }
 
 new Sheets();
+
+class PlayerComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "project-btn-container";
+    this.sheet = props.sheet;
+
+    this.edit = false;
+
+    this.render();
+  }
+
+  toggleEdit = () => {
+    this.edit = !this.edit;
+    this.render();
+  };
+
+  toggleConnect = () => {
+    this.connect = !this.connect;
+    this.render();
+  };
+
+  toggleConnectLoading = () => {
+    this.connectLoading = !this.connectLoading;
+    this.render();
+  };
+
+  renderCurrentConnections = async () => {
+    const projectPlayerIds = await getThings(
+      `/api/get_project_players_by_player/${this.sheet.id}`
+    );
+    if (!projectPlayerIds.length)
+      return [createElement("small", {}, "None...")];
+
+    return await Promise.all(
+      projectPlayerIds.map(async (projectPlayer) => {
+        const project = await getThings(
+          `/api/get_project/${projectPlayer.project_id}`
+        );
+        if (project) {
+          const elem = createElement(
+            "div",
+            { style: "margin-left: 10px; display: flex;" },
+            [
+              project.title,
+              createElement(
+                "div",
+                {
+                  style:
+                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                },
+                "ⓧ",
+                {
+                  type: "click",
+                  event: () => {
+                    deleteThing(
+                      `/api/remove_project_player/${projectPlayer.id}`
+                    );
+                    elem.remove();
+                  },
+                }
+              ),
+            ]
+          );
+          return elem;
+        }
+      })
+    );
+  };
+
+  addConnection = async (e) => {
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    formProps.player_id = this.sheet.id;
+    if (Object.values(formProps)[0] != 0) {
+      this.toggleConnectLoading();
+      await postThing(`/api/add_project_player`, formProps);
+      this.toggleConnectLoading();
+    }
+  };
+
+  renderConnect = async () => {
+    if (this.connectLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we setup your connection..."
+        )
+      );
+    }
+
+    this.domComponent.append(
+      createElement("div", { class: "project-edit-container" }, [
+        createElement("h1", {}, `Connect Character: "${this.sheet.name}"`),
+        createElement("hr"),
+        createElement("h2", {}, "Current connections"),
+        ...(await this.renderCurrentConnections()),
+        createElement("hr"),
+        createElement("h2", {}, "Add connections"),
+        createElement(
+          "form",
+          {},
+          [
+            await projectSelect(),
+            createElement("br"),
+            createElement(
+              "button",
+              { class: "new-btn", type: "submit" },
+              "Add"
+            ),
+          ],
+          {
+            type: "submit",
+            event: async (e) => {
+              e.preventDefault();
+              await this.addConnection(e);
+            },
+          }
+        ),
+        createElement("hr"),
+        createElement("button", {}, "Done", {
+          type: "click",
+          event: () => {
+            this.toggleConnect();
+          },
+        }),
+      ])
+    );
+  };
+
+  renderEdit = async () => {
+    this.domComponent.append(
+      createElement("div", { class: "project-edit-container" }, [
+        createElement("h1", {}, `Manage Character: "${this.sheet.name}"`),
+        createElement("br"),
+        createElement("button", {}, "Done", {
+          type: "click",
+          event: () => {
+            this.toggleEdit();
+          },
+        }),
+        createElement("br"),
+        createElement("button", {}, "Connect to projects", {
+          type: "click",
+          event: () => {
+            this.toggleConnect();
+          },
+        }),
+        createElement("br"),
+        createElement("button", { class: "btn-red" }, "Delete Character", {
+          type: "click",
+          event: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (
+              window.confirm(
+                `Are you sure you want to delete ${this.sheet.name}`
+              )
+            ) {
+              deleteThing(`/api/remove_5e_character/${this.sheet.id}`);
+              e.target.parentElement.parentElement.remove();
+            }
+          },
+        }),
+      ])
+    );
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.connect) {
+      return this.renderConnect();
+    }
+
+    if (this.edit) {
+      return this.renderEdit();
+    }
+
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          class: "project-button",
+          style:
+            "flex-direction: row; align-items: center; justify-content: space-between;",
+        },
+        [
+          createElement(
+            "div",
+            {
+              style:
+                "display: flex; align-items: center; justify-content: center;",
+            },
+            createElement("h1", {}, this.sheet.name)
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              createElement(
+                "small",
+                {},
+                `Race: ${this.sheet.race ? this.sheet.race : "None"}`
+              ),
+              createElement(
+                "small",
+                {},
+                `Class: ${this.sheet.class ? this.sheet.class : "None"}`
+              ),
+              createElement(
+                "small",
+                {},
+                `Level: ${this.sheet.level ? this.sheet.level : "None"}`
+              ),
+              createElement(
+                "small",
+                {},
+                `EXP: ${this.sheet.exp ? this.sheet.exp : "None"}`
+              ),
+            ]
+          ),
+        ],
+        {
+          type: "click",
+          event: () => {
+            history.pushState(this.sheet.id, null, `/5eplayer.html`);
+            window.location.reload();
+          },
+        }
+      ),
+      createElement(
+        "img",
+        {
+          class: "icon",
+          src: "/assets/gears.svg",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
+    );
+  };
+}

@@ -262,7 +262,7 @@ export default class SingleItemView {
             { class: "single-info-box-subheading" },
             "Lore"
           ),
-          ...(await renderLoreList("item", this.item.id)),
+          ...(await renderLoreList("item", this.item.id, this.navigate)),
           createElement("br"),
         ]),
       ]),
