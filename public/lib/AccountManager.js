@@ -1,6 +1,7 @@
 import { postThing } from "./apiUtils.js";
 import createElement from "./createElement.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
+import state from "./state.js";
 
 class AccountManager {
   constructor() {
@@ -25,12 +26,16 @@ class AccountManager {
     try {
       // try to append tabs
       await this.appendAccountTabOrLogin();
-      if (window.location.pathname === "/account.html") {
-        if (!this.userInfo) {
-          return (window.location.pathname = "/login.html");
-        }
-        // stop initial spinner
+      if (!this.userInfo) {
+        return (window.location.pathname = "/login.html");
+      }
+      // stop initial spinner
+      if (document.getElementById("initial-spinner")) {
         document.getElementById("initial-spinner").remove();
+      }
+
+      // do account app if account page
+      if (window.location.pathname === "/account.html") {
         this.renderAccountApp();
       }
     } catch (err) {
@@ -48,6 +53,7 @@ class AccountManager {
         const resData = await res.json();
         if (res.status === 200) {
           this.userInfo = resData;
+          state.user = resData;
           return resData;
         } else if (res.status === 400) {
           console.log("expired token");
@@ -70,13 +76,18 @@ class AccountManager {
       navContainer.append(
         createElement(
           "a",
+          { class: "top-nav-btn", href: "/vtt.html" },
+          "Table"
+        ),
+        createElement(
+          "a",
           { class: "top-nav-btn", href: "/dashboard.html" },
           "Dashboard"
         ),
         createElement(
           "a",
           { class: "top-nav-btn", href: "/sheets.html" },
-          "Player Characters"
+          "Players"
         ),
         createElement(
           "a",
@@ -94,13 +105,18 @@ class AccountManager {
       navContainerMobile.append(
         createElement(
           "a",
+          { class: "top-nav-btn", href: "/vtt.html" },
+          "Table"
+        ),
+        createElement(
+          "a",
           { class: "top-nav-btn", href: "/dashboard.html" },
           "Dashboard"
         ),
         createElement(
           "a",
           { class: "top-nav-btn", href: "/sheets.html" },
-          "Player Characters"
+          "Players"
         ),
         createElement(
           "a",
@@ -220,9 +236,9 @@ class AccountManager {
     // domComponent.className = "component";
     domComponent.append(
       createElement("div", { class: "standard-view" }, [
-        createElement("h1", {style: "margin: auto;"}, "Account"),
+        createElement("h1", { style: "margin: auto;" }, "Account"),
         createElement("br"),
-        createElement("div", {class: "component"}, [
+        createElement("div", { class: "component" }, [
           this.renderEmailOrEditEmail(),
           createElement("br"),
           createElement("hr"),
@@ -232,10 +248,11 @@ class AccountManager {
               window.location.pathname = "/resetpassword.html";
             },
           }),
-        ])
+        ]),
       ])
     );
   };
 }
 
-new AccountManager();
+const accountManager = new AccountManager();
+export default accountManager;

@@ -10,8 +10,6 @@ export default class ProjectsView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
-    this.resetViewsOnProjectChange = props.resetViewsOnProjectChange;
-
     this.newProjectLoading = false;
 
     this.render();
@@ -53,7 +51,6 @@ export default class ProjectsView {
         projectInvite: project.project_invite,
         parentRender: this.render,
         navigate: this.navigate,
-        resetViewsOnProjectChange: this.resetViewsOnProjectChange
       });
       return elem;
     });
