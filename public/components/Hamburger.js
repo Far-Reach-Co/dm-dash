@@ -7,7 +7,7 @@ export class Hamburger {
     this.domComponent.className = "hamburger";
     this.sidebar = props.sidebar;
 
-    this.domComponent.addEventListener("click", this.toggle);
+    this.domComponent.addEventListener("click", this.toggle)
   }
 
   hide = () => {
