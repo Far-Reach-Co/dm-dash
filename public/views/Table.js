@@ -16,7 +16,6 @@ class Table {
     this.canvasLayer;
 
     this.init();
-    // socketIntegration.socketTest();
   }
 
   init = async () => {
@@ -30,7 +29,9 @@ class Table {
     // create canvas elem and append
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.canvasLayer = new CanvasLayer({ tableViews });
+    socketIntegration.projectId = this.projectId;
     // setup socket listeners after canvas instantiation
+    socketIntegration.socketTest();
     socketIntegration.setupListeners(this.canvasLayer);
 
     this.instantiateSidebar();
@@ -69,9 +70,7 @@ class Table {
     this.hamburger.render();
   };
 
-  render = async () => {
-    this.renderSidebarAndHamburger();
-
+  renderTopLayerOrNot = () => {
     // create UI layer above canvas and append
     const topLayerElem = createElement("div");
     new TopLayer({
@@ -79,9 +78,19 @@ class Table {
       canvasLayer: this.canvasLayer,
     });
 
+    if (state.currentProject.is_editor === false) {
+      return createElement("div", {style: "display: none;"});
+    } else {
+      return topLayerElem;
+    }
+  };
+
+  render = async () => {
+    this.renderSidebarAndHamburger();
+
     this.domComponent.append(
       createElement("div", { style: "position: relative;" }, [
-        topLayerElem,
+        this.renderTopLayerOrNot(),
         this.canvasElem,
       ])
     );
@@ -104,6 +113,7 @@ class TopLayer {
         }
         if (object.zIndex === this.canvasLayer.OBJECT_LAYER) {
           object.selectable = true;
+          object.opacity = "1";
         }
         this.canvasLayer.canvas.renderAll();
       });
@@ -114,7 +124,7 @@ class TopLayer {
           object.selectable = true;
         if (object.zIndex === this.canvasLayer.OBJECT_LAYER) {
           object.selectable = false;
-          object.opacity = "0.8";
+          object.opacity = "0.5";
         }
         this.canvasLayer.canvas.renderAll();
       });

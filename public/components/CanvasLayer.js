@@ -13,7 +13,7 @@ export default class CanvasLayer {
     this.BOTTOM_LAYER = 1;
     this.GRID_LAYER = 2;
     this.OBJECT_LAYER = 3;
-    this.currentLayer = "Map";
+    this.currentLayer = "Object";
   }
 
   init = () => {
@@ -124,6 +124,7 @@ export default class CanvasLayer {
             this.canvas.remove(object);
             socketIntegration.imageRemoved(object.id);
             this.removeObjectState(object);
+            this.saveToDatabase();
           });
         }
       }
@@ -153,30 +154,7 @@ export default class CanvasLayer {
     document.addEventListener(
       "mouseup",
       throttle(async (evt) => {
-        if (Object.entries(this.savedState).length) {
-          try {
-            const res = await fetch(
-              window.location.origin +
-                `/api/edit_table_view/${this.currentTableView.id}`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-                },
-                body: JSON.stringify({ data: this.savedState }),
-              }
-            );
-            // const data = await res.json();
-            // if (res.status === 200 || res.status === 201) {
-            //   return data;
-            // } else throw new Error();
-          } catch (err) {
-            // window.alert("Failed to save note...");
-            console.log(err);
-            return null;
-          }
-        }
+        await this.saveToDatabase();
       }, 3000)
     );
 
@@ -195,6 +173,19 @@ export default class CanvasLayer {
             img.set({ id: object.id });
             img.zIndex = object.zIndex;
             img.imageId = object.imageId;
+            if (this.currentLayer === "Object") {
+              if (img.zIndex === this.BOTTOM_LAYER) {
+                img.selectable = false;
+              } else {
+                img.selectable = true;
+                img.opacity = 1;
+              }
+            } else {
+              if (img.zIndex === this.OBJECT_LAYER) {
+                img.selectable = false;
+                img.opacity = 0.5;
+              }
+            }
             // HANDLE ************************
             // add to canvas
             this.canvas.add(img);
@@ -208,6 +199,33 @@ export default class CanvasLayer {
           });
         }
       });
+    }
+  };
+
+  saveToDatabase = async () => {
+    if (Object.entries(this.savedState).length) {
+      try {
+        const res = await fetch(
+          window.location.origin +
+            `/api/edit_table_view/${this.currentTableView.id}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+            },
+            body: JSON.stringify({ data: this.savedState }),
+          }
+        );
+        // const data = await res.json();
+        // if (res.status === 200 || res.status === 201) {
+        //   return data;
+        // } else throw new Error();
+      } catch (err) {
+        // window.alert("Failed to save note...");
+        console.log(err);
+        return null;
+      }
     }
   };
 

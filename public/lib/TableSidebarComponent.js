@@ -10,7 +10,7 @@ export default class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar";
-    this.canvasLayer = props.canvasLayer
+    this.canvasLayer = props.canvasLayer;
 
     this.imageLoading = false;
     this.render();
@@ -53,7 +53,7 @@ export default class TableSidebarComponent {
                 const imageSource = this.downloadedImageSourceList[image.id];
                 if (imageSource) {
                   // create new object
-                  fabric.Image.fromURL(imageSource, function (newImg) {
+                  fabric.Image.fromURL(imageSource, (newImg) => {
                     // CREATE ************************
                     // assing uuid
                     const id = uuidv4();
@@ -102,7 +102,7 @@ export default class TableSidebarComponent {
             }),
             createElement(
               "div",
-              { style: "width: 100px; overflow-x: auto" },
+              { style: "width: 100px" },
               image.original_name
             ),
             await this.renderImage(image.id),
