@@ -24,7 +24,16 @@ class SocketIntegration {
         img.set({ id });
         img.zIndex = zIndex;
         img.imageId = imageId;
-
+        if (canvasLayer.currentLayer === "Object") {
+          if (img.zIndex === canvasLayer.BOTTOM_LAYER) {
+            img.selectable === false;
+          }
+        } else {
+          if (img.zindex === canvasLayer.OBJECT_LAYER) {
+            img.selectable === false;
+            img.opacity === 0.8;
+          }
+        }
         // HANDLE ************************
         // add to canvas
         canvasLayer.canvas.add(img);
@@ -37,29 +46,32 @@ class SocketIntegration {
           a.zIndex > b.zIndex ? 1 : -1
         );
         canvasLayer.canvas.renderAll();
+        canvasLayer.saveObjectState(img)
       });
     });
 
     this.socket.on("image-remove", (id) => {
       // console.log("Remove socket image", id);
 
-      canvasLayer.canvas._objects.forEach((object) => {
+      canvasLayer.canvas.getObjects().forEach((object) => {
         if (object.id === id) {
           canvasLayer.canvas.remove(object);
+          canvasLayer.removeObjectState(object)
         }
       });
     });
 
     this.socket.on("image-move", ({ id, image }) => {
       // console.log("Move socket image", { id, image });
-      canvasLayer.canvas._objects.forEach(object => {
+      canvasLayer.canvas.getObjects().forEach((object) => {
         if (object.id === id) {
           for (var [key, value] of Object.entries(image)) {
             object[key] = value;
           }
           canvasLayer.canvas.renderAll();
+          canvasLayer.saveObjectState(object);
         }
-      })
+      });
       //
     });
   };

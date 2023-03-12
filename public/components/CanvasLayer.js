@@ -14,7 +14,9 @@ export default class CanvasLayer {
     this.GRID_LAYER = 2;
     this.OBJECT_LAYER = 3;
     this.currentLayer = "Map";
+  }
 
+  init = () => {
     // init canvas
     this.canvas = new fabric.Canvas("canvas-layer", {
       containerClass: "canvas-layer",
@@ -153,14 +155,18 @@ export default class CanvasLayer {
       throttle(async (evt) => {
         if (Object.entries(this.savedState).length) {
           try {
-            const res = await fetch(window.location.origin + `/api/edit_table_view/${this.currentTableView.id}`, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-              },
-              body: JSON.stringify({data: this.savedState}),
-            });
+            const res = await fetch(
+              window.location.origin +
+                `/api/edit_table_view/${this.currentTableView.id}`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({ data: this.savedState }),
+              }
+            );
             // const data = await res.json();
             // if (res.status === 200 || res.status === 201) {
             //   return data;
@@ -177,10 +183,9 @@ export default class CanvasLayer {
     // re-create objects from db state
     if (Object.entries(this.savedState).length) {
       const arrayOfObjects = Object.values(this.savedState);
-      arrayOfObjects.forEach(async object => {
-
+      arrayOfObjects.forEach(async (object) => {
         // just for images right now
-        const imageSource = await getPresignedForImageDownload(object.imageId)
+        const imageSource = await getPresignedForImageDownload(object.imageId);
         if (imageSource) {
           fabric.Image.fromURL(imageSource.url, (img) => {
             // reconstruct new image
@@ -198,15 +203,13 @@ export default class CanvasLayer {
             //   console.log("selected an image", img);
             // });
             // sort by layers and re-render
-            this.canvas._objects.sort((a, b) =>
-              a.zIndex > b.zIndex ? 1 : -1
-            );
+            this.canvas._objects.sort((a, b) => (a.zIndex > b.zIndex ? 1 : -1));
             this.canvas.renderAll();
           });
         }
-      })
+      });
     }
-  }
+  };
 
   saveObjectState = (object) => {
     if (object.id) {
