@@ -3,7 +3,7 @@ import createElement from "./createElement.js";
 import state from "./state.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
-import TableApp from "../views/TableApp.js";
+import tableApp from "../views/TableApp.js";
 import { v4 as uuidv4 } from "https://jspm.dev/uuid"; // Hopefully we can download this instead
 import socketIntegration from "./socketIntegration.js";
 
@@ -50,7 +50,7 @@ export default class TableSidebarComponent {
             createElement("a", {}, "+", {
               type: "click",
               event: async () => {
-                const canvasLayer = TableApp.views.table.canvasLayer;
+                const canvasLayer = tableApp.views.table.canvasLayer;
                 const imageSource = this.downloadedImageSourceList[image.id];
                 if (imageSource) {
                   // create new object

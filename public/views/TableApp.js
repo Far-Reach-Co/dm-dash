@@ -1,7 +1,7 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import ProjectsView from "../views/Projects.js";
-import Sidebar from "../components/Sidebar.js";
+import TableSidebar from "../components/TableSidebar.js";
 import { Hamburger } from "../components/Hamburger.js";
 import Navigate from "../lib/Navigate.js";
 import Table from "./Table.js";
@@ -50,12 +50,9 @@ class TableApp {
   instantiateSidebar = () => {
     const sidebarElem = createElement("div", {});
     // SIDEBAR
-    const sidebar = new Sidebar({
+    const sidebar = new TableSidebar({
       domComponent: sidebarElem,
       navigate: this.navigate,
-      mainRoutes: [],
-      secondRoutes: [],
-      tableView: true,
     });
     this.sidebar = sidebar;
   };
@@ -71,15 +68,13 @@ class TableApp {
   };
 
   handleToProject = () => {
-    document
-      .getElementById("to-projects-btn")
-      .addEventListener("click", () =>
-        this.navigate.navigate({
-          title: "tableapp",
-          sidebar: false,
-          params: {},
-        })
-      );
+    document.getElementById("to-projects-btn").addEventListener("click", () =>
+      this.navigate.navigate({
+        title: "tableapp",
+        sidebar: false,
+        params: {},
+      })
+    );
     document
       .getElementById("to-projects-btn-mobile")
       .addEventListener("click", () =>
@@ -163,7 +158,6 @@ class TableApp {
       params,
     });
     this.views.table = view;
-    
   };
 
   renderSidebarAndHamburger = () => {
@@ -203,5 +197,5 @@ class TableApp {
   };
 }
 
-const app = new TableApp({ domComponent: document.getElementById("app") });
-export default app;
+const tableApp = new TableApp({ domComponent: document.getElementById("app") });
+export default tableApp;
