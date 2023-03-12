@@ -69,7 +69,6 @@ async function getSignedUrlForDownload(req, res, next) {
 // }
 
 async function uploadToAws(req, res, next) {
-  console.log(req.file, "***************************************");
   // helper function to split at index
   function splitAtIndex(value, index) {
     return [value.substring(0, index), value.substring(index)];
@@ -183,7 +182,7 @@ async function removeFile(bucket, image) {
       Key: image.file_name,
     };
 
-    const awsRes = await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       s3.deleteObject(params, (err, data) => {
         if (err) {
           reject(err);
@@ -191,10 +190,8 @@ async function removeFile(bucket, image) {
         resolve(data.DeleteMarker);
       });
     });
-    console.log(awsRes);
-    if (!awsRes) throw awsRes;
   } catch (err) {
-    console.log(err);
+    console.log(err)
   }
 }
 
