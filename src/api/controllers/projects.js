@@ -47,7 +47,15 @@ const {
 } = require("../queries/notes.js");
 const { getImageQuery, removeImageQuery } = require("../queries/images.js");
 const { removeFile } = require("./s3.js");
-const { addTableViewQuery } = require("../queries/tableViews.js");
+const {
+  addTableViewQuery,
+  getTableViewsQuery,
+  removeTableViewQuery,
+} = require("../queries/tableViews.js");
+const {
+  getTableImagesQuery,
+  removeTableImageQuery,
+} = require("../queries/tableImages.js");
 
 async function addProject(req, res, next) {
   try {
@@ -55,7 +63,7 @@ async function addProject(req, res, next) {
     req.body.user_id = req.user.id;
     const data = await addProjectQuery(req.body);
     // add first project table view
-    await addTableViewQuery({project_id: data.rows[0].id});
+    await addTableViewQuery({ project_id: data.rows[0].id });
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);
@@ -136,7 +144,11 @@ async function removeProject(req, res, next) {
       });
     });
     // locations
-    const locationsData = await getLocationsQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const locationsData = await getLocationsQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     locationsData.rows.forEach(async (location) => {
       await removeLocationQuery(location.id);
       if (location.image_id) {
@@ -147,7 +159,11 @@ async function removeProject(req, res, next) {
       }
     });
     // characters
-    const charactersData = await getCharactersQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const charactersData = await getCharactersQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     charactersData.rows.forEach(async (character) => {
       await removeCharacterQuery(character.id);
       if (character.image_id) {
@@ -168,12 +184,20 @@ async function removeProject(req, res, next) {
       await removeCounterQuery(counter.id);
     });
     // events
-    const eventsData = await getEventsQuery({projectId: req.params.id, limit: 1000000, offset: 0});
+    const eventsData = await getEventsQuery({
+      projectId: req.params.id,
+      limit: 1000000,
+      offset: 0,
+    });
     eventsData.rows.forEach(async (event) => {
       await removeEventQuery(event.id);
     });
     // items
-    const itemsData = await getItemsQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const itemsData = await getItemsQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     itemsData.rows.forEach(async (item) => {
       await removeItemQuery(item.id);
       if (item.image_id) {
@@ -184,7 +208,11 @@ async function removeProject(req, res, next) {
       }
     });
     // lore
-    const loreData = await getLoresQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const loreData = await getLoresQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     loreData.rows.forEach(async (lore) => {
       await removeLoreQuery(lore.id);
       if (lore.image_id) {
@@ -214,6 +242,19 @@ async function removeProject(req, res, next) {
     const projectUsersData = await getProjectUsersByProjectQuery(req.params.id);
     projectUsersData.rows.forEach(async (user) => {
       await removeProjectUserQuery(user.id);
+    });
+    // table images
+    const tableImages = await getTableImagesQuery(req.params.id);
+    tableImages.rows.forEach(async (tableImage) => {
+      const imageData = await getImageQuery(tableImage.image_id);
+      const image = imageData.rows[0];
+      await removeFile("wyrld/images", image);
+      await removeTableImageQuery(tableImage.id);
+    });
+    // table views
+    const tableViews = await getTableViewsQuery(req.params.id);
+    tableViews.rows.forEach(async (tableView) => {
+      await removeTableViewQuery(tableView.id);
     });
 
     res.status(204).send();
