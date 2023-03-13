@@ -1,4 +1,4 @@
-import db from '../dbconfig';
+import db from '../dbconfig.js';
 
 async function getUserByIdQuery(id) {
   const query = {
