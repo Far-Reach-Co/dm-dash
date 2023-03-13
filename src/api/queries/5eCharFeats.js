@@ -60,7 +60,7 @@ async function edit5eCharFeatQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   add5eCharFeatQuery,
   get5eCharFeatsByGeneralQuery,
   get5eCharFeatQuery,

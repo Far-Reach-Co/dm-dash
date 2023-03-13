@@ -268,7 +268,7 @@ async function edit5eCharBack(req, res, next) {
   }
 }
 
-export default {
+export {
   add5eChar,
   get5eCharsByUser,
   get5eCharGeneral,

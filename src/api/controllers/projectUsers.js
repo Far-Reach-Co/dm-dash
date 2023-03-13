@@ -122,7 +122,7 @@ async function editProjectUser(req, res, next) {
   }
 }
 
-export default {
+export {
   addProjectUser,
   getProjectUserByUserAndProject,
   getProjectUsersByProject,

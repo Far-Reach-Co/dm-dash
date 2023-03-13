@@ -93,7 +93,7 @@ async function editLocationQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   getLocationQuery,
   addLocationQuery,
   getLocationsQuery,

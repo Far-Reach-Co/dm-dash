@@ -83,7 +83,7 @@ async function edit5eCharSpellSlotInfo(req, res, next) {
   }
 }
 
-export default {
+export {
   // get5eCharSpellSlotInfosByGeneral,
   // add5eCharSpellSlotInfo,
   // remove5eCharSpellSlotInfo,

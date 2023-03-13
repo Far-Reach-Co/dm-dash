@@ -59,7 +59,7 @@ async function editCalendarQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addCalendarQuery,
   getCalendarsQuery,
   getCalendarQuery,

@@ -66,7 +66,7 @@ async function editProjectPlayerQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addProjectPlayerQuery,
   getProjectPlayerQuery,
   getProjectPlayersByProjectQuery,

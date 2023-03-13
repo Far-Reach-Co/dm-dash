@@ -101,7 +101,7 @@ async function editItemQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addItemQuery,
   getItemsQuery,
   getItemQuery,

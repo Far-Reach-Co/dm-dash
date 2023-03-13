@@ -112,7 +112,7 @@ async function editNoteQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addNoteQuery,
   getNotesQuery,
   getNoteQuery,

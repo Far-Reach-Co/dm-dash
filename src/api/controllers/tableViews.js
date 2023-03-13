@@ -121,7 +121,7 @@ async function editTableView(req, res, next) {
   }
 }
 
-export default {
+export {
   addTableView,
   getTableViews,
   removeTableView,

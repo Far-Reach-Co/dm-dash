@@ -92,7 +92,7 @@ async function editCharacterQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addCharacterQuery,
   getCharacterQuery,
   getCharactersQuery,

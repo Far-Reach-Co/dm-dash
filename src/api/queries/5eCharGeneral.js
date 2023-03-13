@@ -57,7 +57,7 @@ async function edit5eCharGeneralQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   add5eCharGeneralQuery,
   get5eCharsGeneralByUserQuery,
   get5eCharGeneralQuery,

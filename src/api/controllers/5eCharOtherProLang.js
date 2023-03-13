@@ -127,7 +127,7 @@ async function edit5eCharOtherProLang(req, res, next) {
   }
 }
 
-export default {
+export {
   get5eCharOtherProLangsByGeneral,
   add5eCharOtherProLang,
   remove5eCharOtherProLang,

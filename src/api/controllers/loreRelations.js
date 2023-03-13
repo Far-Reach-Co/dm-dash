@@ -83,7 +83,7 @@ async function editLoreRelation(req, res, next) {
   }
 }
 
-export default {
+export {
   addLoreRelation,
   removeLoreRelation,
   editLoreRelation,

@@ -233,7 +233,7 @@ async function editProject(req, res, next) {
   }
 }
 
-export default {
+export {
   getProjects,
   getProject,
   addProject,

@@ -266,7 +266,7 @@ async function editCharacter(req, res, next) {
   }
 }
 
-export default {
+export {
   getCharacter,
   getCharacters,
   getCharactersWithFilterQuery,

@@ -127,7 +127,7 @@ async function edit5eCharAttack(req, res, next) {
   }
 }
 
-export default {
+export {
   get5eCharAttacksByGeneral,
   add5eCharAttack,
   remove5eCharAttack,

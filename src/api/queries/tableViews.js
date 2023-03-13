@@ -57,7 +57,7 @@ async function editTableViewQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addTableViewQuery,
   getTableViewsQuery,
   getTableViewQuery,

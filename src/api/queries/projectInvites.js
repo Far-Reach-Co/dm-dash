@@ -44,7 +44,7 @@ async function removeProjectInviteQuery(id) {
   return await db.query(query)
 }
 
-export default {
+export {
   addProjectInviteQuery,
   getProjectInviteQuery,
   getProjectInviteByUUIDQuery,

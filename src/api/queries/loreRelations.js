@@ -111,7 +111,7 @@ async function editLoreRelationQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addLoreRelationQuery,
   getLoreRelationQuery,
   removeLoreRelationQuery,

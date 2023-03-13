@@ -127,7 +127,7 @@ async function edit5eCharFeat(req, res, next) {
   }
 }
 
-export default {
+export {
   get5eCharFeatsByGeneral,
   add5eCharFeat,
   remove5eCharFeat,

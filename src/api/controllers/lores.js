@@ -220,7 +220,7 @@ async function editLore(req, res, next) {
   }
 }
 
-export default {
+export {
   getLore,
   getLores,
   addLore,

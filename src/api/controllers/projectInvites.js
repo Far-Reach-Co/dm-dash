@@ -85,7 +85,7 @@ async function removeProjectInvite(req, res, next) {
   }
 }
 
-export default {
+export {
   getProjectInviteByUUID,
   addProjectInvite,
   removeProjectInvite,

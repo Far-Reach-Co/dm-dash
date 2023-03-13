@@ -128,7 +128,7 @@ async function edit5eCharSpell(req, res, next) {
   }
 }
 
-export default {
+export {
   get5eCharSpellsByType,
   add5eCharSpell,
   remove5eCharSpell,

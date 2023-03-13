@@ -324,7 +324,7 @@ async function editItem(req, res, next) {
   }
 }
 
-export default {
+export {
   getItem,
   getItems,
   getItemsByLocation,

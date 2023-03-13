@@ -111,7 +111,7 @@ async function editCounter(req, res, next) {
   }
 }
 
-export default {
+export {
   getCounters,
   addCounter,
   removeCounter,

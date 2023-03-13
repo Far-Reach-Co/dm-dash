@@ -190,7 +190,7 @@ async function requestResetEmail(req, res, next) {
   }
 }
 
-export default {
+export {
   verifyUserByToken,
   getAllUsers,
   getUserById,

@@ -51,7 +51,7 @@ async function editImageQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addImageQuery,
   getImageQuery,
   removeImageQuery,

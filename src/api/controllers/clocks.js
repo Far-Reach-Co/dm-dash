@@ -127,7 +127,7 @@ async function editClock(req, res, next) {
   }
 }
 
-export default {
+export {
   getClocks,
   addClock,
   removeClock,

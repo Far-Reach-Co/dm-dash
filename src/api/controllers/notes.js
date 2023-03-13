@@ -245,7 +245,7 @@ async function editNote(req, res, next) {
   }
 }
 
-export default {
+export {
   getNotes,
   getNotesByLocation,
   addNote,

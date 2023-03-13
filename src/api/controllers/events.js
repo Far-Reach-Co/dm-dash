@@ -241,7 +241,7 @@ async function editEvent(req, res, next) {
   }
 }
 
-export default {
+export {
   getEvents,
   getEventsByLocation,
   addEvent,

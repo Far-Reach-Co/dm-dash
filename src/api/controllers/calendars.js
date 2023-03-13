@@ -148,7 +148,7 @@ async function editCalendar(req, res, next) {
   }
 }
 
-export default {
+export {
   getCalendars,
   addCalendar,
   removeCalendar,

@@ -127,7 +127,7 @@ async function edit5eCharEquipment(req, res, next) {
   }
 }
 
-export default {
+export {
   get5eCharEquipmentsByGeneral,
   add5eCharEquipment,
   remove5eCharEquipment,

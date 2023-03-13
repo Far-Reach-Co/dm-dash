@@ -132,7 +132,7 @@ async function editDay(req, res, next) {
   }
 }
 
-export default {
+export {
   getDays,
   addDay,
   removeDay,

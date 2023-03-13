@@ -109,7 +109,7 @@ async function editProjectPlayer(req, res, next) {
   }
 }
 
-export default {
+export {
   addProjectPlayer,
   getProjectPlayersByProject,
   getProjectPlayersByPlayer,

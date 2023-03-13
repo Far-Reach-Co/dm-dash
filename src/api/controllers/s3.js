@@ -194,7 +194,7 @@ async function removeFile(bucket, image) {
   }
 }
 
-export default {
+export {
   getSignedUrlForDownload,
   getImage,
   // getSignedUrlForUpload,

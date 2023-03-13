@@ -60,7 +60,7 @@ async function editMonthQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addMonthQuery,
   getMonthsQuery,
   getMonthQuery,

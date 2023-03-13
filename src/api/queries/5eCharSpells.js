@@ -68,7 +68,7 @@ async function edit5eCharSpellQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   add5eCharSpellQuery,
   get5eCharSpellsByTypeQuery,
   get5eCharSpellsByGeneralQuery,

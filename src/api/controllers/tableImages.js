@@ -111,7 +111,7 @@ async function editTableImage(req, res, next) {
   }
 }
 
-export default {
+export {
   getTableImages,
   addTableImage,
   removeTableImage,

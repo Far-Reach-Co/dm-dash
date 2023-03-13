@@ -83,7 +83,7 @@ async function editLoreQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   addLoreQuery,
   getLoresQuery,
   getLoreQuery,

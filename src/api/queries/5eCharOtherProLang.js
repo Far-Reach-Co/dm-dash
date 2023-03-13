@@ -59,7 +59,7 @@ async function edit5eCharOtherProLangQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   add5eCharOtherProLangQuery,
   get5eCharOtherProLangsByGeneralQuery,
   get5eCharOtherProLangQuery,

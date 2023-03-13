@@ -61,7 +61,7 @@ async function edit5eCharEquipmentQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   add5eCharEquipmentQuery,
   get5eCharEquipmentsByGeneralQuery,
   get5eCharEquipmentQuery,

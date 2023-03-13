@@ -62,7 +62,7 @@ async function edit5eCharAttackQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   add5eCharAttackQuery,
   get5eCharAttacksByGeneralQuery,
   get5eCharAttackQuery,

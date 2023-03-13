@@ -66,7 +66,7 @@ async function editUserPasswordQuery(id, password) {
   return await db.query(query)
 }
 
-export default {
+export {
   getAllUsersQuery,
   getUserByIdQuery,
   getUserByEmailQuery,

@@ -57,7 +57,7 @@ async function edit5eCharSpellSlotInfoQuery(id, data) {
   return await db.query(query)
 }
 
-export default {
+export {
   add5eCharSpellSlotInfoQuery,
   get5eCharSpellSlotInfosByGeneralQuery,
   get5eCharSpellSlotInfoQuery,

@@ -139,7 +139,7 @@ async function editMonth(req, res, next) {
   }
 }
 
-export default {
+export {
   getMonths,
   addMonth,
   removeMonth,

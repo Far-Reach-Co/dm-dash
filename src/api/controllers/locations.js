@@ -256,7 +256,7 @@ async function editLocation(req, res, next) {
   }
 }
 
-export default {
+export {
   getLocation,
   getLocations,
   getSubLocations,
