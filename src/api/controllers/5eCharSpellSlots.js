@@ -1,13 +1,7 @@
-const { get5eCharGeneralQuery } = require("../queries/5eCharGeneral.js");
-const {
-  // add5eCharSpellSlotInfoQuery,
-  get5eCharSpellSlotInfoQuery,
-  // get5eCharSpellSlotInfosByGeneralQuery,
-  // remove5eCharSpellSlotInfoQuery,
-  edit5eCharSpellSlotInfoQuery,
-} = require("../queries/5eCharSpellSlots.js");
-const { getProjectPlayersByPlayerQuery } = require("../queries/projectPlayers.js");
-const { getProjectQuery } = require("../queries/projects.js");
+import { get5eCharGeneralQuery } from "../queries/5eCharGeneral.js";
+import { get5eCharSpellSlotInfoQuery, edit5eCharSpellSlotInfoQuery } from "../queries/5eCharSpellSlots.js";
+import { getProjectPlayersByPlayerQuery } from "../queries/projectPlayers.js";
+import { getProjectQuery } from "../queries/projects.js";
 
 // async function add5eCharSpellSlotInfo(req, res, next) {
 //   try {
@@ -89,7 +83,7 @@ async function edit5eCharSpellSlotInfo(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   // get5eCharSpellSlotInfosByGeneral,
   // add5eCharSpellSlotInfo,
   // remove5eCharSpellSlotInfo,

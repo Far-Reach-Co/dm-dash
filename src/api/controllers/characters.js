@@ -1,4 +1,4 @@
-const {
+import {
   addCharacterQuery,
   getCharacterQuery,
   getCharactersQuery,
@@ -8,19 +8,14 @@ const {
   getCharactersByLocationQuery,
   removeCharacterQuery,
   editCharacterQuery,
-} = require("../queries/characters.js");
-const { addEventQuery } = require("../queries/events.js");
-const { getImageQuery, removeImageQuery } = require("../queries/images.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const {
-  getProjectQuery,
+} from "../queries/characters.js";
 
-  editProjectQuery,
-} = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
-const { removeFile } = require("./s3.js");
+import { addEventQuery } from "../queries/events.js";
+import { getImageQuery, removeImageQuery } from "../queries/images.js";
+import { getLocationQuery } from "../queries/locations.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import { removeFile } from "./s3.js";
 
 async function addCharacter(req, res, next) {
   try {
@@ -271,7 +266,7 @@ async function editCharacter(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getCharacter,
   getCharacters,
   getCharactersWithFilterQuery,

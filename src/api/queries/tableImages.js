@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addTableImageQuery(data) {
   const query = {
@@ -58,10 +58,10 @@ async function editTableImageQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addTableImageQuery,
   getTableImagesQuery,
   getTableImageQuery,
   removeTableImageQuery,
   editTableImageQuery
-}
+};

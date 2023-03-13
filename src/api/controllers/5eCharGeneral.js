@@ -1,57 +1,41 @@
-const {
+import {
   get5eCharsGeneralByUserQuery,
   add5eCharGeneralQuery,
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
   edit5eCharGeneralQuery,
-} = require("../queries/5eCharGeneral");
-const {
+} from "../queries/5eCharGeneral.js";
+
+import {
   get5eCharProQuery,
   add5eCharProQuery,
   get5eCharProByGeneralQuery,
   remove5eCharProQuery,
   edit5eCharProQuery,
-} = require("../queries/5eCharPro");
-const {
+} from "../queries/5eCharPro.js";
+
+import {
   add5eCharBackQuery,
   get5eCharBackByGeneralQuery,
   remove5eCharBackQuery,
   get5eCharBackQuery,
   edit5eCharBackQuery,
-} = require("../queries/5eCharBack");
-const {
+} from "../queries/5eCharBack.js";
+
+import {
   get5eCharSpellSlotInfosByGeneralQuery,
   add5eCharSpellSlotInfoQuery,
   remove5eCharSpellSlotInfoQuery,
-} = require("../queries/5eCharSpellSlots");
-const {
-  get5eCharAttacksByGeneralQuery,
-  remove5eCharAttackQuery,
-} = require("../queries/5eCharAttacks");
-const {
-  remove5eCharEquipmentQuery,
-  get5eCharEquipmentsByGeneralQuery,
-} = require("../queries/5eCharEquipment");
-const {
-  get5eCharFeatsByGeneralQuery,
-  remove5eCharFeatQuery,
-} = require("../queries/5eCharFeats");
-const {
-  get5eCharSpellsByGeneralQuery,
-  remove5eCharSpellQuery,
-} = require("../queries/5eCharSpells");
-const {
-  get5eCharOtherProLangsByGeneralQuery,
-  remove5eCharOtherProLangQuery,
-} = require("../queries/5eCharOtherProLang");
-const {
-  getProjectPlayersByPlayerQuery,
-  removeProjectPlayerQuery,
-} = require("../queries/projectPlayers");
-const { getProjectQuery } = require("../queries/projects");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers");
+} from "../queries/5eCharSpellSlots.js";
+
+import { get5eCharAttacksByGeneralQuery, remove5eCharAttackQuery } from "../queries/5eCharAttacks.js";
+import { remove5eCharEquipmentQuery, get5eCharEquipmentsByGeneralQuery } from "../queries/5eCharEquipment.js";
+import { get5eCharFeatsByGeneralQuery, remove5eCharFeatQuery } from "../queries/5eCharFeats.js";
+import { get5eCharSpellsByGeneralQuery, remove5eCharSpellQuery } from "../queries/5eCharSpells.js";
+import { get5eCharOtherProLangsByGeneralQuery, remove5eCharOtherProLangQuery } from "../queries/5eCharOtherProLang.js";
+import { getProjectPlayersByPlayerQuery, removeProjectPlayerQuery } from "../queries/projectPlayers.js";
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function add5eChar(req, res, next) {
   try {
@@ -284,7 +268,7 @@ async function edit5eCharBack(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   add5eChar,
   get5eCharsByUser,
   get5eCharGeneral,

@@ -1,9 +1,9 @@
-const { exec } = require("child_process");
-const fs = require("fs");
-const AWS = require("aws-sdk");
-const dotenv = require("dotenv");
+import { exec } from "child_process";
+import fs from "fs";
+import AWS from "aws-sdk";
+import dotenv from "dotenv";
 dotenv.config({ path: "../../../.env" });
-const mail = require("../../api/smtp");
+import mail from "../../api/smtp";
 
 AWS.config.update({
   signatureVersion: "v4",
@@ -84,4 +84,4 @@ function pgBackup() {
 
 pgBackup();
 
-module.exports = pgBackup;
+export default pgBackup;

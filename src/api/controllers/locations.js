@@ -1,5 +1,6 @@
-const { getImageQuery, removeImageQuery } = require("../queries/images.js");
-const {
+import { getImageQuery, removeImageQuery } from "../queries/images.js";
+
+import {
   addLocationQuery,
   getLocationsQuery,
   getLocationsWithKeywordAndFilterQuery,
@@ -9,16 +10,11 @@ const {
   getSubLocationsQuery,
   removeLocationQuery,
   editLocationQuery,
-} = require("../queries/locations.js");
-const {
-  getProjectQuery,
+} from "../queries/locations.js";
 
-  editProjectQuery,
-} = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
-const { removeFile } = require("./s3.js");
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import { removeFile } from "./s3.js";
 
 async function addLocation(req, res, next) {
   try {
@@ -260,7 +256,7 @@ async function editLocation(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getLocation,
   getLocations,
   getSubLocations,

@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function add5eCharBackQuery(data) {
   const query = {
@@ -57,10 +57,10 @@ async function edit5eCharBackQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   add5eCharBackQuery,
   get5eCharBackByGeneralQuery,
   get5eCharBackQuery,
   remove5eCharBackQuery,
   edit5eCharBackQuery
-}
+};

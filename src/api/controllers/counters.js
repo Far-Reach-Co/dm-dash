@@ -1,14 +1,13 @@
-const {
+import {
   addCounterQuery,
   getCountersQuery,
   getCounterQuery,
   removeCounterQuery,
   editCounterQuery,
-} = require("../queries/counters.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+} from "../queries/counters.js";
+
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addCounter(req, res, next) {
   try {
@@ -112,7 +111,7 @@ async function editCounter(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getCounters,
   addCounter,
   removeCounter,

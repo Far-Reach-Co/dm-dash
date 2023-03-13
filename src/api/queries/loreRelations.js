@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addLoreRelationQuery(data) {
   const query = {
@@ -111,7 +111,7 @@ async function editLoreRelationQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addLoreRelationQuery,
   getLoreRelationQuery,
   removeLoreRelationQuery,
@@ -121,4 +121,4 @@ module.exports = {
   getLoreRelationsByCharacterQuery,
   getLoreRelationsByItemQuery,
   getLoreRelationsQuery
-}
+};

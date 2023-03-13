@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addProjectPlayerQuery(data) {
   const query = {
@@ -66,11 +66,11 @@ async function editProjectPlayerQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addProjectPlayerQuery,
   getProjectPlayerQuery,
   getProjectPlayersByProjectQuery,
   getProjectPlayersByPlayerQuery,
   removeProjectPlayerQuery,
   editProjectPlayerQuery,
-}
+};

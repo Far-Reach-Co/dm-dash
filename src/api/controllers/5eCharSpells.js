@@ -1,13 +1,15 @@
-const { get5eCharGeneralQuery } = require("../queries/5eCharGeneral.js");
-const {
+import { get5eCharGeneralQuery } from "../queries/5eCharGeneral.js";
+
+import {
   add5eCharSpellQuery,
   get5eCharSpellQuery,
   get5eCharSpellsByTypeQuery,
   remove5eCharSpellQuery,
   edit5eCharSpellQuery,
-} = require("../queries/5eCharSpells.js");
-const { getProjectPlayersByPlayerQuery } = require("../queries/projectPlayers.js");
-const { getProjectQuery } = require("../queries/projects.js");
+} from "../queries/5eCharSpells.js";
+
+import { getProjectPlayersByPlayerQuery } from "../queries/projectPlayers.js";
+import { getProjectQuery } from "../queries/projects.js";
 
 async function add5eCharSpell(req, res, next) {
   try {
@@ -126,7 +128,7 @@ async function edit5eCharSpell(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   get5eCharSpellsByType,
   add5eCharSpell,
   remove5eCharSpell,

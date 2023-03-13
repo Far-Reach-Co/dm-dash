@@ -1,4 +1,4 @@
-const {
+import {
   addNoteQuery,
   getNotesQuery,
   getNoteQuery,
@@ -8,15 +8,14 @@ const {
   removeNoteQuery,
   editNoteQuery,
   getNotesByLoreQuery,
-} = require("../queries/notes.js");
-const { getItemQuery } = require("../queries/items.js");
-const { getCharacterQuery } = require("../queries/characters.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
-const { getLoreQuery } = require("../queries/lores.js");
+} from "../queries/notes.js";
+
+import { getItemQuery } from "../queries/items.js";
+import { getCharacterQuery } from "../queries/characters.js";
+import { getLocationQuery } from "../queries/locations.js";
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import { getLoreQuery } from "../queries/lores.js";
 
 async function addNote(req, res, next) {
   try {
@@ -246,7 +245,7 @@ async function editNote(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getNotes,
   getNotesByLocation,
   addNote,

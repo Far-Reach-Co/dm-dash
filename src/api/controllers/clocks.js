@@ -1,14 +1,13 @@
-const {
+import {
   addClockQuery,
   getClocksQuery,
   getClockQuery,
   removeClockQuery,
   editClockQuery,
-} = require("../queries/clocks.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+} from "../queries/clocks.js";
+
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addClock(req, res, next) {
   try {
@@ -128,7 +127,7 @@ async function editClock(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getClocks,
   addClock,
   removeClock,

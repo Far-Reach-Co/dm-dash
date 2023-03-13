@@ -1,4 +1,4 @@
-const {
+import {
   addItemQuery,
   getItemsQuery,
   getItemQuery,
@@ -9,20 +9,15 @@ const {
   getItemsByCharacterQuery,
   removeItemQuery,
   editItemQuery,
-} = require("../queries/items.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const { getCharacterQuery } = require("../queries/characters.js");
-const {
-  getProjectQuery,
+} from "../queries/items.js";
 
-  editProjectQuery,
-} = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
-const { removeFile } = require("./s3.js");
-const { removeImageQuery, getImageQuery } = require("../queries/images.js");
-const { addEventQuery } = require("../queries/events.js");
+import { getLocationQuery } from "../queries/locations.js";
+import { getCharacterQuery } from "../queries/characters.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import { removeFile } from "./s3.js";
+import { removeImageQuery, getImageQuery } from "../queries/images.js";
+import { addEventQuery } from "../queries/events.js";
 
 async function addItem(req, res, next) {
   try {
@@ -329,7 +324,7 @@ async function editItem(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getItem,
   getItems,
   getItemsByLocation,

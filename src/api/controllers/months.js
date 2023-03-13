@@ -1,15 +1,14 @@
-const {
+import {
   addMonthQuery,
   getMonthsQuery,
   getMonthQuery,
   removeMonthQuery,
   editMonthQuery,
-} = require("../queries/months.js");
-const { getCalendarQuery } = require("../queries/calendars.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+} from "../queries/months.js";
+
+import { getCalendarQuery } from "../queries/calendars.js";
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addMonth(req, res, next) {
   try {
@@ -140,7 +139,7 @@ async function editMonth(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getMonths,
   addMonth,
   removeMonth,

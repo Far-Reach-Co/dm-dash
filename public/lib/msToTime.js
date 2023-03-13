@@ -30,6 +30,6 @@ export default function msToTime(duration, twelveHours) {
     // 'Days: ' +
     // days +
     // '........' +
-    hours + ":" + minutes + ":" + seconds + "." + milliseconds
+    (hours + ":" + minutes + ":" + seconds + "." + milliseconds)
   );
 }

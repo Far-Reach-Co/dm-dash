@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addCharacterQuery(data) {
   const query = {
@@ -92,7 +92,7 @@ async function editCharacterQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addCharacterQuery,
   getCharacterQuery,
   getCharactersQuery,
@@ -102,4 +102,4 @@ module.exports = {
   getCharactersByLocationQuery,
   removeCharacterQuery,
   editCharacterQuery
-}
+};

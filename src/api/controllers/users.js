@@ -1,16 +1,18 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const mail = require("../smtp/index.js");
-const {
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import mail from "../smtp/index.js";
+
+import {
   getUserByIdQuery,
   getAllUsersQuery,
   getUserByEmailQuery,
   registerUserQuery,
   editUserQuery,
   editUserPasswordQuery,
-} = require("../queries/users");
-const { addProjectQuery } = require("../queries/projects");
-const { addTableViewQuery } = require("../queries/tableViews.js");
+} from "../queries/users.js";
+
+import { addProjectQuery } from "../queries/projects.js";
+import { addTableViewQuery } from "../queries/tableViews.js";
 
 const validLoginLength = "30d";
 
@@ -188,7 +190,7 @@ async function requestResetEmail(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   verifyUserByToken,
   getAllUsers,
   getUserById,

@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addEventQuery(data) {
   const query = {
@@ -95,7 +95,7 @@ async function editEventQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addEventQuery,
   getEventsQuery,
   getEventQuery,
@@ -105,4 +105,4 @@ module.exports = {
   getEventsByLoreQuery,
   removeEventQuery,
   editEventQuery
-}
+};

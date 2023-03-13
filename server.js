@@ -1,16 +1,16 @@
-const dotenv = require("dotenv");
+import dotenv from "dotenv";
 dotenv.config();
-const express = require("express");
+import express from "express";
 const app = express();
-const http = require("http");
+import http from "http";
 const server = http.createServer(app);
-const { Server } = require("socket.io");
+import { Server } from "socket.io";
 const io = new Server(server);
-const cors = require("cors");
-var path = require("path");
-const bodyParser = require("body-parser");
-const routes = require("./src/api/routes.js");
-const { verifyUserByToken } = require("./src/api/controllers/users.js");
+import cors from "cors";
+import path from "path";
+import bodyParser from "body-parser";
+import routes from "./src/api/routes.js";
+import { verifyUserByToken } from "./src/api/controllers/users.js";
 
 async function getUserByToken(token) {
   try {

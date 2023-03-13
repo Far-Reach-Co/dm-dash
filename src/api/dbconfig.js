@@ -1,4 +1,4 @@
-var { Pool } = require("pg")
+import { Pool } from "pg";
 
 // LOCAL
 var credentials = {
@@ -19,6 +19,6 @@ async function query(text, params) {
   return res
 }
 
-module.exports = {
+export default {
   query
-}
+};

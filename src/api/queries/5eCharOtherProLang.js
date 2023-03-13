@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function add5eCharOtherProLangQuery(data) {
   const query = {
@@ -59,10 +59,10 @@ async function edit5eCharOtherProLangQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   add5eCharOtherProLangQuery,
   get5eCharOtherProLangsByGeneralQuery,
   get5eCharOtherProLangQuery,
   remove5eCharOtherProLangQuery,
   edit5eCharOtherProLangQuery
-}
+};

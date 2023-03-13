@@ -1,11 +1,7 @@
-const AWS = require("aws-sdk");
-const fs = require("fs");
-const {
-  addImageQuery,
-  getImageQuery,
-  removeImageQuery,
-} = require("../queries/images");
-const { getProjectQuery, editProjectQuery } = require("../queries/projects");
+import AWS from "aws-sdk";
+import fs from "fs";
+import { addImageQuery, getImageQuery, removeImageQuery } from "../queries/images.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
 
 AWS.config.update({
   signatureVersion: "v4",
@@ -198,7 +194,7 @@ async function removeFile(bucket, image) {
   }
 }
 
-module.exports = {
+export default {
   getSignedUrlForDownload,
   getImage,
   // getSignedUrlForUpload,

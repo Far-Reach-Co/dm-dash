@@ -1,13 +1,15 @@
-const { get5eCharGeneralQuery } = require("../queries/5eCharGeneral.js");
-const {
+import { get5eCharGeneralQuery } from "../queries/5eCharGeneral.js";
+
+import {
   add5eCharAttackQuery,
   get5eCharAttackQuery,
   get5eCharAttacksByGeneralQuery,
   remove5eCharAttackQuery,
   edit5eCharAttackQuery,
-} = require("../queries/5eCharAttacks.js");
-const { getProjectPlayersByPlayerQuery } = require("../queries/projectPlayers.js");
-const { getProjectQuery } = require("../queries/projects.js");
+} from "../queries/5eCharAttacks.js";
+
+import { getProjectPlayersByPlayerQuery } from "../queries/projectPlayers.js";
+import { getProjectQuery } from "../queries/projects.js";
 
 async function add5eCharAttack(req, res, next) {
   try {
@@ -125,7 +127,7 @@ async function edit5eCharAttack(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   get5eCharAttacksByGeneral,
   add5eCharAttack,
   remove5eCharAttack,

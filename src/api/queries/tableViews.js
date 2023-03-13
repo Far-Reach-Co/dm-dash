@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addTableViewQuery(data) {
   const query = {
@@ -57,10 +57,10 @@ async function editTableViewQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addTableViewQuery,
   getTableViewsQuery,
   getTableViewQuery,
   removeTableViewQuery,
   editTableViewQuery
-}
+};

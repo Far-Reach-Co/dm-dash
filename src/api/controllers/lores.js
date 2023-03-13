@@ -1,4 +1,4 @@
-const {
+import {
   addLoreQuery,
   getLoresQuery,
   getLoreQuery,
@@ -7,20 +7,15 @@ const {
   getLoresWithKeywordAndFilterQuery,
   removeLoreQuery,
   editLoreQuery,
-} = require("../queries/lores.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const { getCharacterQuery } = require("../queries/characters.js");
-const {
-  getProjectQuery,
+} from "../queries/lores.js";
 
-  editProjectQuery,
-} = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
-const { removeFile } = require("./s3.js");
-const { removeImageQuery, getImageQuery } = require("../queries/images.js");
-const { getItemQuery } = require("../queries/items.js");
+import { getLocationQuery } from "../queries/locations.js";
+import { getCharacterQuery } from "../queries/characters.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import { removeFile } from "./s3.js";
+import { removeImageQuery, getImageQuery } from "../queries/images.js";
+import { getItemQuery } from "../queries/items.js";
 
 async function addLore(req, res, next) {
   try {
@@ -225,7 +220,7 @@ async function editLore(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getLore,
   getLores,
   addLore,

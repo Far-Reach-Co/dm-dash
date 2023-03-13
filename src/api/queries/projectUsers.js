@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addProjectUserQuery(data) {
   const query = {
@@ -75,7 +75,7 @@ async function editProjectUserQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addProjectUserQuery,
   getProjectUserQuery,
   getProjectUsersQuery,
@@ -83,4 +83,4 @@ module.exports = {
   removeProjectUserQuery,
   editProjectUserQuery,
   getProjectUserByUserAndProjectQuery
-}
+};

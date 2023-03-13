@@ -1,53 +1,35 @@
-const {
+import {
   addProjectQuery,
   getProjectQuery,
   getProjectsQuery,
   removeProjectQuery,
   editProjectQuery,
-} = require("../queries/projects.js");
-const {
-  getProjectInviteByProjectQuery,
-  removeProjectInviteQuery,
-} = require("../queries/projectInvites.js");
-const {
+} from "../queries/projects.js";
+
+import { getProjectInviteByProjectQuery, removeProjectInviteQuery } from "../queries/projectInvites.js";
+
+import {
   getProjectUsersQuery,
   getProjectUserByUserAndProjectQuery,
   getProjectUsersByProjectQuery,
   removeProjectUserQuery,
-} = require("../queries/projectUsers.js");
-const {
-  getCalendarQuery,
-  removeCalendarQuery,
-} = require("../queries/calendars.js");
-const { getMonthsQuery, removeMonthQuery } = require("../queries/months.js");
-const { getDaysQuery, removeDayQuery } = require("../queries/days.js");
-const {
-  getLocationsQuery,
-  removeLocationQuery,
-} = require("../queries/locations.js");
-const {
-  getCharactersQuery,
-  removeCharacterQuery,
-} = require("../queries/characters.js");
-const { getClocksQuery, removeClockQuery } = require("../queries/clocks.js");
-const {
-  removeCounterQuery,
-  getAllCountersByProjectQuery,
-} = require("../queries/counters.js");
-const { getEventsQuery, removeEventQuery } = require("../queries/events.js");
-const { getItemsQuery, removeItemQuery } = require("../queries/items.js");
-const { getLoresQuery, removeLoreQuery } = require("../queries/lores.js");
-const {
-  removeLoreRelationQuery,
-  getLoreRelationsQuery,
-} = require("../queries/loreRelations.js");
-const {
-  getAllNotesByProjectQuery,
-  removeNoteQuery,
-} = require("../queries/notes.js");
-const { getImageQuery, removeImageQuery } = require("../queries/images.js");
-const { removeFile } = require("./s3.js");
-const { addTableViewQuery } = require("../queries/tableViews.js");
+} from "../queries/projectUsers.js";
+
+import { getCalendarQuery, removeCalendarQuery } from "../queries/calendars.js";
+import { getMonthsQuery, removeMonthQuery } from "../queries/months.js";
+import { getDaysQuery, removeDayQuery } from "../queries/days.js";
+import { getLocationsQuery, removeLocationQuery } from "../queries/locations.js";
+import { getCharactersQuery, removeCharacterQuery } from "../queries/characters.js";
+import { getClocksQuery, removeClockQuery } from "../queries/clocks.js";
+import { removeCounterQuery, getAllCountersByProjectQuery } from "../queries/counters.js";
+import { getEventsQuery, removeEventQuery } from "../queries/events.js";
+import { getItemsQuery, removeItemQuery } from "../queries/items.js";
+import { getLoresQuery, removeLoreQuery } from "../queries/lores.js";
+import { removeLoreRelationQuery, getLoreRelationsQuery } from "../queries/loreRelations.js";
+import { getAllNotesByProjectQuery, removeNoteQuery } from "../queries/notes.js";
+import { getImageQuery, removeImageQuery } from "../queries/images.js";
+import { removeFile } from "./s3.js";
+import { addTableViewQuery } from "../queries/tableViews.js";
 
 async function addProject(req, res, next) {
   try {
@@ -251,7 +233,7 @@ async function editProject(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getProjects,
   getProject,
   addProject,

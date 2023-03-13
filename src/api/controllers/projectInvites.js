@@ -1,14 +1,13 @@
-const {
+import {
   addProjectInviteQuery,
   getProjectInviteQuery,
   getProjectInviteByUUIDQuery,
   removeProjectInviteQuery,
-} = require("../queries/projectInvites.js");
-const uuidv4 = require("uuid/v4");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+} from "../queries/projectInvites.js";
+
+import uuidv4 from "uuid/v4.js";
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addProjectInvite(req, res, next) {
   const uuid = uuidv4();
@@ -86,7 +85,7 @@ async function removeProjectInvite(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getProjectInviteByUUID,
   addProjectInvite,
   removeProjectInvite,

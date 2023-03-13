@@ -1,14 +1,13 @@
-const {
+import {
   getTableViewsQuery,
   getTableViewQuery,
   removeTableViewQuery,
   editTableViewQuery,
   addTableViewQuery,
-} = require("../queries/tableViews.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+} from "../queries/tableViews.js";
+
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addTableView(req, res, next) {
   try {
@@ -122,7 +121,7 @@ async function editTableView(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   addTableView,
   getTableViews,
   removeTableView,

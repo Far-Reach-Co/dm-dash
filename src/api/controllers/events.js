@@ -1,4 +1,4 @@
-const {
+import {
   addEventQuery,
   getEventsQuery,
   getEventQuery,
@@ -8,15 +8,14 @@ const {
   removeEventQuery,
   editEventQuery,
   getEventsByLoreQuery,
-} = require("../queries/events.js");
-const { getItemQuery } = require("../queries/items.js");
-const { getCharacterQuery } = require("../queries/characters.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
-const { getLoreQuery } = require("../queries/lores.js");
+} from "../queries/events.js";
+
+import { getItemQuery } from "../queries/items.js";
+import { getCharacterQuery } from "../queries/characters.js";
+import { getLocationQuery } from "../queries/locations.js";
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import { getLoreQuery } from "../queries/lores.js";
 
 async function addEvent(req, res, next) {
   try {
@@ -242,7 +241,7 @@ async function editEvent(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getEvents,
   getEventsByLocation,
   addEvent,

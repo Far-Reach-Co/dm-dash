@@ -1,16 +1,15 @@
-const {
+import {
   addProjectUserQuery,
   getProjectUserQuery,
   getProjectUserByUserAndProjectQuery,
   getProjectUsersByProjectQuery,
   removeProjectUserQuery,
   editProjectUserQuery,
-} = require("../queries/projectUsers.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectInviteByProjectQuery,
-} = require("../queries/projectInvites.js");
-const { getUserByIdQuery } = require("../queries/users.js");
+} from "../queries/projectUsers.js";
+
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectInviteByProjectQuery } from "../queries/projectInvites.js";
+import { getUserByIdQuery } from "../queries/users.js";
 
 async function addProjectUser(req, res, next) {
   try {
@@ -123,7 +122,7 @@ async function editProjectUser(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   addProjectUser,
   getProjectUserByUserAndProject,
   getProjectUsersByProject,

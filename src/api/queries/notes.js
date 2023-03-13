@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addNoteQuery(data) {
   const query = {
@@ -112,7 +112,7 @@ async function editNoteQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addNoteQuery,
   getNotesQuery,
   getNoteQuery,
@@ -123,4 +123,4 @@ module.exports = {
   removeNoteQuery,
   editNoteQuery,
   getAllNotesByProjectQuery
-}
+};

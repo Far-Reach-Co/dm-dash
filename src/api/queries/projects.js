@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addProjectQuery(data) {
   const query = {
@@ -36,15 +36,6 @@ async function getProjectsQuery(userId) {
   return await db.query(query)
 }
 
-async function removeProjectQuery(id) {
-  const query = {
-    text: /*sql*/ `delete from public."Project" where id = $1`,
-    values: [id]
-  }
-
-  return await db.query(query)
-}
-
 async function editProjectQuery(id, data) {
   let edits = ``
   let values = []
@@ -67,10 +58,10 @@ async function editProjectQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addProjectQuery,
   getProjectQuery,
   getProjectsQuery,
   removeProjectQuery,
   editProjectQuery
-}
+};

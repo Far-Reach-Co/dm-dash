@@ -1,13 +1,15 @@
-const { get5eCharGeneralQuery } = require("../queries/5eCharGeneral.js");
-const {
+import { get5eCharGeneralQuery } from "../queries/5eCharGeneral.js";
+
+import {
   addProjectPlayerQuery,
   getProjectPlayersByProjectQuery,
   removeProjectPlayerQuery,
   editProjectPlayerQuery,
   getProjectPlayersByPlayerQuery,
-} = require("../queries/projectPlayers.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const { getProjectUserByUserAndProjectQuery } = require("../queries/projectUsers.js");
+} from "../queries/projectPlayers.js";
+
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addProjectPlayer(req, res, next) {
   try {
@@ -107,7 +109,7 @@ async function editProjectPlayer(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   addProjectPlayer,
   getProjectPlayersByProject,
   getProjectPlayersByPlayer,

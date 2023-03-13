@@ -1,15 +1,7 @@
-const {
-  addDayQuery,
-  getDaysQuery,
-  getDayQuery,
-  removeDayQuery,
-  editDayQuery,
-} = require("../queries/days.js");
-const { getCalendarQuery } = require("../queries/calendars.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+import { addDayQuery, getDaysQuery, getDayQuery, removeDayQuery, editDayQuery } from "../queries/days.js";
+import { getCalendarQuery } from "../queries/calendars.js";
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addDay(req, res, next) {
   try {
@@ -140,7 +132,7 @@ async function editDay(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getDays,
   addDay,
   removeDay,

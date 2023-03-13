@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addItemQuery(data) {
   const query = {
@@ -101,7 +101,7 @@ async function editItemQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addItemQuery,
   getItemsQuery,
   getItemQuery,
@@ -112,4 +112,4 @@ module.exports = {
   getItemsByCharacterQuery,
   removeItemQuery,
   editItemQuery
-}
+};

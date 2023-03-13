@@ -1,4 +1,4 @@
-const {
+import {
   addLoreRelationQuery,
   getLoreRelationQuery,
   removeLoreRelationQuery,
@@ -6,8 +6,8 @@ const {
   getLoreRelationsByLoreQuery,
   getLoreRelationsByLocationQuery,
   getLoreRelationsByCharacterQuery,
-  getLoreRelationsByItemQuery
-} = require("../queries/loreRelations.js");
+  getLoreRelationsByItemQuery,
+} from "../queries/loreRelations.js";
 
 async function addLoreRelation(req, res, next) {
   try {
@@ -83,7 +83,7 @@ async function editLoreRelation(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   addLoreRelation,
   removeLoreRelation,
   editLoreRelation,

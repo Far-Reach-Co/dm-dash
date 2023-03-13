@@ -1,13 +1,15 @@
-const { get5eCharGeneralQuery } = require("../queries/5eCharGeneral.js");
-const {
+import { get5eCharGeneralQuery } from "../queries/5eCharGeneral.js";
+
+import {
   add5eCharOtherProLangQuery,
   get5eCharOtherProLangQuery,
   get5eCharOtherProLangsByGeneralQuery,
   remove5eCharOtherProLangQuery,
   edit5eCharOtherProLangQuery,
-} = require("../queries/5eCharOtherProLang.js");
-const { getProjectPlayersByPlayerQuery } = require("../queries/projectPlayers.js");
-const { getProjectQuery } = require("../queries/projects.js");
+} from "../queries/5eCharOtherProLang.js";
+
+import { getProjectPlayersByPlayerQuery } from "../queries/projectPlayers.js";
+import { getProjectQuery } from "../queries/projects.js";
 
 async function add5eCharOtherProLang(req, res, next) {
   try {
@@ -125,7 +127,7 @@ async function edit5eCharOtherProLang(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   get5eCharOtherProLangsByGeneral,
   add5eCharOtherProLang,
   remove5eCharOtherProLang,

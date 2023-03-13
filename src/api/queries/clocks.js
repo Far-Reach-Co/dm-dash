@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addClockQuery(data) {
   const query = {
@@ -59,10 +59,10 @@ async function editClockQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addClockQuery,
   getClocksQuery,
   getClockQuery,
   removeClockQuery,
   editClockQuery
-}
+};

@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addLocationQuery(data) {
   const query = {
@@ -93,7 +93,7 @@ async function editLocationQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   getLocationQuery,
   addLocationQuery,
   getLocationsQuery,
@@ -103,4 +103,4 @@ module.exports = {
   getSubLocationsQuery,
   removeLocationQuery,
   editLocationQuery
-}
+};

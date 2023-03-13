@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function addCounterQuery(data) {
   const query = {
@@ -68,11 +68,11 @@ async function editCounterQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   addCounterQuery,
   getCountersQuery,
   getCounterQuery,
   getAllCountersByProjectQuery,
   removeCounterQuery,
   editCounterQuery
-}
+};

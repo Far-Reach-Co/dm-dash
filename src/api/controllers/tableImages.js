@@ -1,14 +1,13 @@
-const {
+import {
   addTableImageQuery,
   getTableImagesQuery,
   getTableImageQuery,
   removeTableImageQuery,
   editTableImageQuery,
-} = require("../queries/tableImages.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+} from "../queries/tableImages.js";
+
+import { getProjectQuery } from "../queries/projects.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 async function addTableImage(req, res, next) {
   try {
@@ -112,7 +111,7 @@ async function editTableImage(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   getTableImages,
   addTableImage,
   removeTableImage,

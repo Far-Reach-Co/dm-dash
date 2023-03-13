@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+import db from '../dbconfig';
 
 async function getUserByIdQuery(id) {
   const query = {
@@ -66,11 +66,11 @@ async function editUserPasswordQuery(id, password) {
   return await db.query(query)
 }
 
-module.exports = {
+export default {
   getAllUsersQuery,
   getUserByIdQuery,
   getUserByEmailQuery,
   registerUserQuery,
   editUserQuery,
   editUserPasswordQuery
-}
+};
