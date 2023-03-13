@@ -113,7 +113,6 @@ async function editTableView(req, res, next) {
       );
       if (!projectUser) throw { status: 403, message: "Forbidden" };
     }
-    console.log(req.body)
     const data = await editTableViewQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

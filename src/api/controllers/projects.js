@@ -14,22 +14,47 @@ import {
   getProjectUsersByProjectQuery,
   removeProjectUserQuery,
 } from "../queries/projectUsers.js";
-
-import { getCalendarQuery, removeCalendarQuery } from "../queries/calendars.js";
+import {
+  getCalendarQuery,
+  removeCalendarQuery,
+} from "../queries/calendars.js";
 import { getMonthsQuery, removeMonthQuery } from "../queries/months.js";
 import { getDaysQuery, removeDayQuery } from "../queries/days.js";
-import { getLocationsQuery, removeLocationQuery } from "../queries/locations.js";
-import { getCharactersQuery, removeCharacterQuery } from "../queries/characters.js";
+import {
+  getLocationsQuery,
+  removeLocationQuery,
+} from "../queries/locations.js";
+import {
+  getCharactersQuery,
+  removeCharacterQuery,
+} from "../queries/characters.js";
 import { getClocksQuery, removeClockQuery } from "../queries/clocks.js";
-import { removeCounterQuery, getAllCountersByProjectQuery } from "../queries/counters.js";
+import {
+  removeCounterQuery,
+  getAllCountersByProjectQuery,
+} from "../queries/counters.js";
 import { getEventsQuery, removeEventQuery } from "../queries/events.js";
 import { getItemsQuery, removeItemQuery } from "../queries/items.js";
 import { getLoresQuery, removeLoreQuery } from "../queries/lores.js";
-import { removeLoreRelationQuery, getLoreRelationsQuery } from "../queries/loreRelations.js";
-import { getAllNotesByProjectQuery, removeNoteQuery } from "../queries/notes.js";
+import {
+  removeLoreRelationQuery,
+  getLoreRelationsQuery,
+} from "../queries/loreRelations.js";
+import {
+  getAllNotesByProjectQuery,
+  removeNoteQuery,
+} from "../queries/notes.js";
 import { getImageQuery, removeImageQuery } from "../queries/images.js";
 import { removeFile } from "./s3.js";
-import { addTableViewQuery } from "../queries/tableViews.js";
+import {
+  addTableViewQuery,
+  getTableViewsQuery,
+  removeTableViewQuery,
+} from "../queries/tableViews.js";
+import {
+  getTableImagesQuery,
+  removeTableImageQuery,
+} from "../queries/tableImages.js";
 
 async function addProject(req, res, next) {
   try {
@@ -37,7 +62,7 @@ async function addProject(req, res, next) {
     req.body.user_id = req.user.id;
     const data = await addProjectQuery(req.body);
     // add first project table view
-    await addTableViewQuery({project_id: data.rows[0].id});
+    await addTableViewQuery({ project_id: data.rows[0].id });
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);
@@ -46,9 +71,17 @@ async function addProject(req, res, next) {
 
 async function getProject(req, res, next) {
   try {
-    const data = await getProjectQuery(req.params.id);
-
-    res.send(data.rows[0]);
+    const projectData = await getProjectQuery(req.params.id);
+    const project = projectData.rows[0];
+    const projectUsersData = await getProjectUserByUserAndProjectQuery(req.user.id, project.id)
+    if (projectUsersData.rows.length) {
+      const projectUser = projectUsersData.rows[0]
+      project.was_joined = true;
+      project.project_user_id = projectUser.id;
+      project.date_joined = projectUser.date_joined;
+      project.is_editor = projectUser.is_editor;
+    }
+    res.send(project);
   } catch (err) {
     next(err);
   }
@@ -118,7 +151,11 @@ async function removeProject(req, res, next) {
       });
     });
     // locations
-    const locationsData = await getLocationsQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const locationsData = await getLocationsQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     locationsData.rows.forEach(async (location) => {
       await removeLocationQuery(location.id);
       if (location.image_id) {
@@ -129,7 +166,11 @@ async function removeProject(req, res, next) {
       }
     });
     // characters
-    const charactersData = await getCharactersQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const charactersData = await getCharactersQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     charactersData.rows.forEach(async (character) => {
       await removeCharacterQuery(character.id);
       if (character.image_id) {
@@ -150,12 +191,20 @@ async function removeProject(req, res, next) {
       await removeCounterQuery(counter.id);
     });
     // events
-    const eventsData = await getEventsQuery({projectId: req.params.id, limit: 1000000, offset: 0});
+    const eventsData = await getEventsQuery({
+      projectId: req.params.id,
+      limit: 1000000,
+      offset: 0,
+    });
     eventsData.rows.forEach(async (event) => {
       await removeEventQuery(event.id);
     });
     // items
-    const itemsData = await getItemsQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const itemsData = await getItemsQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     itemsData.rows.forEach(async (item) => {
       await removeItemQuery(item.id);
       if (item.image_id) {
@@ -166,7 +215,11 @@ async function removeProject(req, res, next) {
       }
     });
     // lore
-    const loreData = await getLoresQuery({projectId: req.params.id, limit: 10000, offset: 0});
+    const loreData = await getLoresQuery({
+      projectId: req.params.id,
+      limit: 10000,
+      offset: 0,
+    });
     loreData.rows.forEach(async (lore) => {
       await removeLoreQuery(lore.id);
       if (lore.image_id) {
@@ -196,6 +249,19 @@ async function removeProject(req, res, next) {
     const projectUsersData = await getProjectUsersByProjectQuery(req.params.id);
     projectUsersData.rows.forEach(async (user) => {
       await removeProjectUserQuery(user.id);
+    });
+    // table images
+    const tableImages = await getTableImagesQuery(req.params.id);
+    tableImages.rows.forEach(async (tableImage) => {
+      const imageData = await getImageQuery(tableImage.image_id);
+      const image = imageData.rows[0];
+      await removeFile("wyrld/images", image);
+      await removeTableImageQuery(tableImage.id);
+    });
+    // table views
+    const tableViews = await getTableViewsQuery(req.params.id);
+    tableViews.rows.forEach(async (tableView) => {
+      await removeTableViewQuery(tableView.id);
     });
 
     res.status(204).send();

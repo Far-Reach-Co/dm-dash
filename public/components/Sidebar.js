@@ -1,6 +1,5 @@
 import createElement from "../lib/createElement.js";
-import TableSidebarComponent from "../lib/renderTableSidebar.js";
-import renderTableSidebar from "../lib/renderTableSidebar.js";
+import state from "../lib/state.js";
 
 export default class SideBar {
   constructor(props) {
@@ -10,7 +9,6 @@ export default class SideBar {
     this.navigate = props.navigate;
     this.mainRoutes = props.mainRoutes;
     this.secondRoutes = props.secondRoutes;
-    this.tableView = props.tableView;
   }
 
   renderCloseSidebarElem = () => {
@@ -105,27 +103,6 @@ export default class SideBar {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    if (this.tableView) {
-      const tableSidebarComponentElem = createElement("div", {
-        style: "display: flex; flex-direction: column;",
-      });
-      new TableSidebarComponent({ domComponent: tableSidebarComponentElem });
-      const container = createElement(
-        "div",
-        {
-          class: "sidebar-container",
-        },
-        [
-          createElement("div", { class: "sidebar-header" }, "Images"),
-          tableSidebarComponentElem,
-          this.renderCloseSidebarElem(),
-        ]
-      );
-      this.container = container;
-      this.open();
-      return this.domComponent.append(container);
-    }
-
     const container = createElement(
       "div",
       {
@@ -134,6 +111,13 @@ export default class SideBar {
       [
         createElement("div", { class: "sidebar-header" }, "Main Modules"),
         ...this.renderMainRoutesElems(),
+        createElement("a", {class: "sidebar-item"}, "Table", {
+          type: "click",
+          event: () => {
+            history.pushState(state.currentProject.id, null, `/vtt.html`);
+            window.location.reload();
+          }
+        }),
         createElement("div", { class: "sidebar-header" }, "Personal Tools"),
         ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),

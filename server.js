@@ -71,10 +71,10 @@ app.use((error, req, res, next) => {
 // Socket
 io.on("connection", (socket) => {
   // testing
-  socket.on("joinProject", ({ user, project }) => {
+  socket.on("joinProject", ({ project }) => {
     try {
       console.log("************** SOCKETTTTTT ***********************\n");
-      console.log(user, project, "\n");
+      console.log(project, "\n");
       console.log("************** SOCKETTTTTT ***********************\n");
       socket.join(project);
 

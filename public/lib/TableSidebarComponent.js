@@ -3,7 +3,6 @@ import createElement from "./createElement.js";
 import state from "./state.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
-import TableApp from "../views/TableApp.js";
 import { v4 as uuidv4 } from "https://jspm.dev/uuid"; // Hopefully we can download this instead
 import socketIntegration from "./socketIntegration.js";
 
@@ -11,6 +10,7 @@ export default class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar";
+    this.canvasLayer = props.canvasLayer;
 
     this.imageLoading = false;
     this.render();
@@ -50,37 +50,36 @@ export default class TableSidebarComponent {
             createElement("a", {}, "+", {
               type: "click",
               event: async () => {
-                const canvasLayer = TableApp.views.table.canvasLayer;
                 const imageSource = this.downloadedImageSourceList[image.id];
                 if (imageSource) {
                   // create new object
-                  fabric.Image.fromURL(imageSource, function (newImg) {
+                  fabric.Image.fromURL(imageSource, (newImg) => {
                     // CREATE ************************
                     // assing uuid
                     const id = uuidv4();
                     newImg.set({ id });
                     // assign layer zindex
                     const zIndex =
-                      canvasLayer.currentLayer === "Map"
-                        ? canvasLayer.BOTTOM_LAYER
-                        : canvasLayer.OBJECT_LAYER;
+                      this.canvasLayer.currentLayer === "Map"
+                        ? this.canvasLayer.BOTTOM_LAYER
+                        : this.canvasLayer.OBJECT_LAYER;
                     newImg.zIndex = zIndex;
                     newImg.imageId = image.id;
 
                     // HANDLE ************************
                     // add to canvas
-                    canvasLayer.canvas.add(newImg);
+                    this.canvasLayer.canvas.add(newImg);
                     // in center of viewport
-                    canvasLayer.canvas.viewportCenterObject(newImg);
+                    this.canvasLayer.canvas.viewportCenterObject(newImg);
                     // event listener
                     // newImg.on("selected", function () {
                     //   console.log("selected an image", newImg);
                     // });
                     // sort by layers and re-render
-                    canvasLayer.canvas._objects.sort((a, b) =>
+                    this.canvasLayer.canvas._objects.sort((a, b) =>
                       a.zIndex > b.zIndex ? 1 : -1
                     );
-                    canvasLayer.canvas.renderAll();
+                    this.canvasLayer.canvas.renderAll();
 
                     // EMIT ***************************
                     socketIntegration.imageAdded({
@@ -91,7 +90,7 @@ export default class TableSidebarComponent {
                     });
 
                     // SAVE ***************************
-                    canvasLayer.saveObjectState({
+                    this.canvasLayer.saveObjectState({
                       object: newImg,
                       id,
                       zIndex,
@@ -103,7 +102,7 @@ export default class TableSidebarComponent {
             }),
             createElement(
               "div",
-              { style: "width: 100px; overflow-x: auto" },
+              { style: "width: 100px; word-wrap: break-word;" },
               image.original_name
             ),
             await this.renderImage(image.id),
@@ -116,17 +115,28 @@ export default class TableSidebarComponent {
               "ⓧ",
               {
                 type: "click",
-                event: async () => {
+                event: () => {
                   if (
                     window.confirm(
                       `Are you sure you want to delete ${image.original_name}`
                     )
                   ) {
+                    // remove image in db
                     deleteThing(
                       `/api/remove_image/${state.currentProject.id}/${image.id}`
                     );
+                    // remove table image in db
                     deleteThing(`/api/remove_table_image/${tableImage.id}`);
+                    // remove elem in sidebar
                     elem.remove();
+                    // remove all from screens and sockets and state
+                    this.canvasLayer.canvas.getObjects().forEach((object) => {
+                      if (object.imageId === image.id) {
+                        this.canvasLayer.canvas.remove(object);
+                        socketIntegration.imageRemoved(object.id);
+                        this.canvasLayer.removeObjectState(object);
+                      }
+                    });
                   }
                 },
               }
