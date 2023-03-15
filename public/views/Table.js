@@ -105,25 +105,32 @@ class TopLayer {
   }
 
   handleChangeCanvasLayer = () => {
+    const gridObjectIndex = this.canvasLayer.canvas.getObjects().indexOf(this.canvasLayer.oGridGroup)
+
     if (this.canvasLayer.currentLayer === "Map") {
       this.canvasLayer.currentLayer = "Object";
-      this.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.zIndex === this.canvasLayer.BOTTOM_LAYER) {
+      this.canvasLayer.canvas.getObjects().forEach((object, index) => {
+        if (object.layer === "Map") {
           object.selectable = false;
+          object.evented = false;
         }
-        if (object.zIndex === this.canvasLayer.OBJECT_LAYER) {
+        if (object.layer === "Object") {
           object.selectable = true;
+          object.evented = true;
           object.opacity = "1";
         }
         this.canvasLayer.canvas.renderAll();
       });
     } else {
       this.canvasLayer.currentLayer = "Map";
-      this.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.zIndex === this.canvasLayer.BOTTOM_LAYER)
+      this.canvasLayer.canvas.getObjects().forEach((object, index) => {
+        if (object.layer === "Map") {
           object.selectable = true;
-        if (object.zIndex === this.canvasLayer.OBJECT_LAYER) {
+          object.evented = true;
+        }
+        if (object.layer === "Object") {
           object.selectable = false;
+          object.evented = false;
           object.opacity = "0.5";
         }
         this.canvasLayer.canvas.renderAll();
