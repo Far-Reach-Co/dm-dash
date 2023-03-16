@@ -106,7 +106,7 @@ io.on("connection", (socket) => {
 });
 
 //Run
-var PORT = 8000;
+var PORT = 80;
 server.listen({ port: PORT }, async () => {
   console.log(`Server Running at http://localhost:${PORT}`);
 });
