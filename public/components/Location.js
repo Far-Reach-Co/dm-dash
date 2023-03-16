@@ -59,7 +59,11 @@ export default class Location {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -67,7 +71,7 @@ export default class Location {
         this.location.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
 
     // update UI
@@ -80,6 +84,49 @@ export default class Location {
     this.toggleEdit();
 
     await postThing(`/api/edit_location/${this.id}`, formProps);
+  };
+
+  renderRemoveImage = async () => {
+    if (this.imageId) {
+      const imageSource = await getPresignedForImageDownload(this.imageId);
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_location/${this.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.imageId}`
+                  );
+                  e.target.parentElement.remove();
+                  this.imageId = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
   };
 
   renderEdit = async () => {
@@ -119,8 +166,9 @@ export default class Location {
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",
@@ -213,7 +261,10 @@ export default class Location {
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderLocationType(),
-        await renderImageSmallOrPlaceholder(this.imageId, "/assets/location.svg"),
+        await renderImageSmallOrPlaceholder(
+          this.imageId,
+          "/assets/location.svg"
+        ),
       ]),
       createElement("div", { class: "description" }, this.description),
       createElement("br"),

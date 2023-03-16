@@ -23,7 +23,7 @@ async function getSignedUrlForDownload(req, res, next) {
     const params = {
       Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
       Key: objectName,
-      Expires: 60 * 5,
+      Expires: ((60 * 60) * 24) * 3,
     };
     // if(req.body.download_name) params.ResponseContentDisposition = `filename="${req.body.download_name}"`
     const url = await new Promise((resolve, reject) => {
@@ -69,7 +69,6 @@ async function getSignedUrlForDownload(req, res, next) {
 // }
 
 async function uploadToAws(req, res, next) {
-  console.log(req.file, "***************************************");
   // helper function to split at index
   function splitAtIndex(value, index) {
     return [value.substring(0, index), value.substring(index)];
@@ -119,9 +118,7 @@ async function uploadToAws(req, res, next) {
 
       // prepare to update project data usage
       let dataUsageCount = 0;
-      console.log("************** TESTING TODAY *******************")
       dataUsageCount += image.size;
-      console.log(dataUsageCount)
       // remove current file in bucket if there is one
       if (req.body.current_file_id) {
         const oldImageData = await getImageQuery(req.body.current_file_id);
@@ -131,19 +128,50 @@ async function uploadToAws(req, res, next) {
         await removeImageQuery(req.body.current_file_id);
 
         dataUsageCount -= oldImage.size;
-        console.log(dataUsageCount)
       }
       // update project data usage
       const projectData = await getProjectQuery(req.body.project_id);
       const project = projectData.rows[0];
       const newCalculatedData = project.used_data_in_bytes + dataUsageCount;
-      console.log(newCalculatedData)
       await editProjectQuery(project.id, {
         used_data_in_bytes: newCalculatedData,
       });
     } catch (err) {
       console.log(err);
     }
+  }
+}
+
+async function getImage(req, res, next) {
+  try {
+    const imageData = await getImageQuery(req.params.id);
+    res.send(imageData.rows[0]);
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+}
+
+async function removeImage(req, res, next) {
+  try {
+    // remove current file
+    const imageData = await getImageQuery(req.params.image_id);
+    const image = imageData.rows[0];
+
+    await removeFile("wyrld/images", image);
+    await removeImageQuery(req.body.image_id);
+
+    // update project data usage
+    const projectData = await getProjectQuery(req.params.project_id);
+    const project = projectData.rows[0];
+    const newCalculatedData = project.used_data_in_bytes - image.size;
+    await editProjectQuery(project.id, {
+      used_data_in_bytes: newCalculatedData,
+    });
+    res.status(204).send();
+  } catch (err) {
+    console.log(err);
+    next(err);
   }
 }
 
@@ -154,7 +182,7 @@ async function removeFile(bucket, image) {
       Key: image.file_name,
     };
 
-    const awsRes = await new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       s3.deleteObject(params, (err, data) => {
         if (err) {
           reject(err);
@@ -162,16 +190,16 @@ async function removeFile(bucket, image) {
         resolve(data.DeleteMarker);
       });
     });
-    console.log(awsRes);
-    if (!awsRes) throw awsRes;
   } catch (err) {
-    console.log(err);
+    console.log(err)
   }
 }
 
 module.exports = {
   getSignedUrlForDownload,
+  getImage,
   // getSignedUrlForUpload,
   uploadToAws,
   removeFile,
+  removeImage,
 };

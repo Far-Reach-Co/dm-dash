@@ -1,8 +1,7 @@
 import { getThings } from "./apiUtils.js";
 import createElement from "./createElement.js";
-import navigate from "./Navigate.js";
 
-export default async function renderLoreList(type, id) {
+export default async function renderLoreList(type, id, navigate) {
   const loreRelations = await getThings(
     `/api/get_lore_relations_by_${type}/${id}`
   );
@@ -24,7 +23,7 @@ export default async function renderLoreList(type, id) {
           {
             type: "click",
             event: () =>
-              navigate.navigate({
+              navigate({
                 title: "single-lore",
                 sidebar: true,
                 params: { content: lore },

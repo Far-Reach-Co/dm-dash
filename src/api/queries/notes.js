@@ -25,6 +25,14 @@ async function getNoteQuery(id) {
   return await db.query(query)
 }
 
+async function getAllNotesByProjectQuery(projectId) {
+  const query = {
+    text: /*sql*/ `select * from public."Note" where project_id = $1`,
+    values: [projectId]
+  }
+  return await db.query(query)
+}
+
 async function getNotesQuery(userId, projectId, limit, offset, keyword) {
   let query;
   if(!keyword) {
@@ -113,5 +121,6 @@ module.exports = {
   getNotesByItemQuery,
   getNotesByLoreQuery,
   removeNoteQuery,
-  editNoteQuery
+  editNoteQuery,
+  getAllNotesByProjectQuery
 }

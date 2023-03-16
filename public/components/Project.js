@@ -14,7 +14,6 @@ export default class Project {
     this.domComponent = props.domComponent;
     this.domComponent.className = "project-btn-container";
 
-    this.resetViewsOnProjectChange = props.resetViewsOnProjectChange;
     this.id = props.id;
     this.title = props.title;
     this.dateCreated = props.dateCreated;
@@ -287,8 +286,8 @@ export default class Project {
   };
 
   calculateUsedData = () => {
-    return "Data Size:" + " " + humanFileSize(this.usedDataInBytes)
-  }
+    return "Data Size:" + " " + humanFileSize(this.usedDataInBytes);
+  };
 
   render = () => {
     this.domComponent.innerHTML = "";
@@ -331,8 +330,7 @@ export default class Project {
               dateJoined: this.dateJoined,
               projectUserId: this.projectUserId,
             };
-            this.resetViewsOnProjectChange();
-            this.navigate({ title: "modules", sidebar: true });
+            this.navigate({ title: "main", sidebar: true });
           },
         }
       ),

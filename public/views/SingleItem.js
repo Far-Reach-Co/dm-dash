@@ -1,9 +1,10 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
 import {
+  getPresignedForImageDownload,
   uploadImage,
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
@@ -62,7 +63,7 @@ export default class SingleItemView {
         this.item.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
 
     // update UI
@@ -72,6 +73,49 @@ export default class SingleItemView {
     this.toggleEdit();
 
     await postThing(`/api/edit_item/${this.item.id}`, formProps);
+  };
+
+  renderRemoveImage = async () => {
+    if (this.item.image_id) {
+      const imageSource = await getPresignedForImageDownload(this.item.image_id);
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_item/${this.item.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.item.image_id}`
+                  );
+                  e.target.parentElement.remove();
+                  this.item.image_id = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
   };
 
   renderEdit = async () => {
@@ -110,8 +154,9 @@ export default class SingleItemView {
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",
@@ -217,7 +262,7 @@ export default class SingleItemView {
             { class: "single-info-box-subheading" },
             "Lore"
           ),
-          ...(await renderLoreList("item", this.item.id)),
+          ...(await renderLoreList("item", this.item.id, this.navigate)),
           createElement("br"),
         ]),
       ]),

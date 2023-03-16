@@ -1,6 +1,11 @@
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
+const app = express();
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 const cors = require("cors");
 var path = require("path");
 const bodyParser = require("body-parser");
@@ -21,8 +26,6 @@ async function getUserByToken(token) {
     return null;
   }
 }
-
-var app = express();
 
 //Set CORS
 // app.use(cors())
@@ -65,8 +68,45 @@ app.use((error, req, res, next) => {
   });
 });
 
+// Socket
+io.on("connection", (socket) => {
+  // testing
+  socket.on("joinProject", ({ project }) => {
+    try {
+      console.log("************** SOCKETTTTTT ***********************\n");
+      console.log(project, "\n");
+      console.log("************** SOCKETTTTTT ***********************\n");
+      socket.join(project);
+
+      // broadcast when a user connects
+      io.to(project).emit("message", "Hello test");
+    } catch (err) {
+      console.log("SOCKET ERROR", err);
+    }
+  });
+
+  // VTT
+  // update images
+  socket.on("image-added", ({ project, image }) => {
+    socket.broadcast.to(project).emit("image-add", image);
+  });
+
+  socket.on("image-removed", ({ project, id }) => {
+    socket.broadcast.to(project).emit("image-remove", id);
+  });
+
+  socket.on("image-moved", ({ project, image }) => {
+    socket.broadcast.to(project).emit("image-move", image);
+  });
+
+  socket.on("object-moved-up", ({project, object}) => {
+    socket.broadcast.to(project).emit("object-move-up", object);
+  });
+
+});
+
 //Run
 var PORT = 80;
-app.listen({ port: PORT }, async () => {
+server.listen({ port: PORT }, async () => {
   console.log(`Server Running at http://localhost:${PORT}`);
 });

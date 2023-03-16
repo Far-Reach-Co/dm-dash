@@ -72,6 +72,14 @@ async function getLoreRelationQuery(id) {
   return await db.query(query)
 }
 
+async function getLoreRelationsQuery(loreId) {
+  const query = {
+    text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1`,
+    values: [loreId]
+  }
+  return await db.query(query)
+}
+
 async function removeLoreRelationQuery(id) {
   const query = {
     text: /*sql*/ `delete from public."LoreRelation" where id = $1`,
@@ -111,5 +119,6 @@ module.exports = {
   getLoreRelationsByLoreQuery,
   getLoreRelationsByLocationQuery,
   getLoreRelationsByCharacterQuery,
-  getLoreRelationsByItemQuery
+  getLoreRelationsByItemQuery,
+  getLoreRelationsQuery
 }

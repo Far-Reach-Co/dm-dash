@@ -1,5 +1,5 @@
 import createElement from "./lib/createElement.js";
-import state from "./lib/state.js";
+import accountManager from "./lib/AccountManager.js"; // dont remove
 import ProjectsView from "./views/Projects.js";
 import ClocksView from "./views/Clocks.js";
 import CalendarsView from "./views/Calendars.js";
@@ -12,11 +12,13 @@ import SingleCharacterView from "./views/SingleCharacter.js";
 import ItemsView from "./views/Items.js";
 import SingleItemView from "./views/SingleItem.js";
 import { Hamburger } from "./components/Hamburger.js";
-import navigate from "./lib/Navigate.js";
+import Navigate from "./lib/Navigate.js";
 import NoteManager from "./views/NoteManager.js";
 import SingleLoreView from "./views/SingleLore.js";
 import LoresView from "./views/lores.js";
 import EventsView from "./views/Events.js";
+import PlayersView from "./views/Players.js";
+import FiveEPlayerSheet from "./components/5ePlayerSheet.js";
 
 class App {
   constructor(props) {
@@ -34,44 +36,24 @@ class App {
       characters: null,
       locations: null,
       lores: null,
+      players: null,
     };
 
     this.sidebar;
     this.hamburger;
+    this.navigate = new Navigate({ appRender: this.render });
     // begin
     this.init();
   }
 
   init = async () => {
-    // top bar routes
-    this.handleLogout();
-    this.handleToProject();
-    this.handleToSheets();
-    // verify user
-    await this.verifyToken();
     // setup sidebar
     this.instantiateSidebar();
     this.instantiateHamburger();
-    // remove initial spinner
-    document.getElementById("initial-spinner").remove();
     // navigate to first view or refresh to current view
     if (history.state) {
-      navigate.navigate(history.state);
-    } else navigate.navigate({ title: "app", sidebar: false, params: {} });
-  };
-
-  resetViewsOnProjectChange = () => {
-    this.views = {
-      projects: null,
-      notes: null,
-      counters: null,
-      clocks: null,
-      calendars: null,
-      items: null,
-      characters: null,
-      locations: null,
-      lores: null,
-    };
+      this.navigate.navigate(history.state);
+    } else this.navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
   instantiateSidebar = () => {
@@ -79,6 +61,71 @@ class App {
     // SIDEBAR
     const sidebar = new Sidebar({
       domComponent: sidebarElem,
+      navigate: this.navigate,
+      mainRoutes: [
+        {
+          id: "sidebar-locations",
+          title: "locations",
+          displayTitle: "Locations",
+          params: {},
+        },
+        {
+          id: "sidebar-characters",
+          title: "characters",
+          displayTitle: "Characters",
+          params: {},
+        },
+        {
+          id: "sidebar-players",
+          title: "players",
+          displayTitle: "Players",
+          params: {},
+        },
+        {
+          id: "sidebar-items",
+          title: "items",
+          displayTitle: "Items",
+          params: {},
+        },
+        {
+          id: "sidebar-lore",
+          title: "lore",
+          displayTitle: "Lore",
+          params: {},
+        },
+        {
+          id: "sidebar-events",
+          title: "events",
+          displayTitle: "Events",
+          params: {},
+        },
+        {
+          id: "sidebar-clocks",
+          title: "clocks",
+          displayTitle: "Clocks",
+          params: {},
+        },
+        {
+          id: "sidebar-calendars",
+          title: "calendars",
+          displayTitle: "Calendars",
+          params: {},
+        },
+      ],
+      secondRoutes: [
+        {
+          id: "sidebar-notes",
+          title: "notes",
+          displayTitle: "Notes",
+          params: {},
+        },
+        {
+          id: "sidebar-counters",
+          title: "counters",
+          displayTitle: "Counters",
+          params: {},
+        },
+      ],
     });
     this.sidebar = sidebar;
   };
@@ -93,63 +140,20 @@ class App {
     this.hamburger = hamburger;
   };
 
-  handleToProject = () => {
-    function handle() {
-      // navigate to project select
-      navigate.navigate({ title: "app", sidebar: false, params: {} });
+  renderPlayersView = ({ navigate }) => {
+    if (this.views.players) {
+      return this.domComponent.appendChild(this.views.players.domComponent);
     }
-    document
-      .getElementById("to-projects-btn")
-      .addEventListener("click", () => handle());
-    document
-      .getElementById("to-projects-btn-mobile")
-      .addEventListener("click", () => handle());
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new PlayersView({ domComponent: element, navigate });
+    this.views.players = view;
   };
 
-  handleToSheets = () => {
-    function handle() {
-      // navigate to project select
-      window.location.pathname = "/sheets.html";
-    }
-    document
-      .getElementById("to-sheets-btn")
-      .addEventListener("click", () => handle());
-    document
-      .getElementById("to-sheets-btn-mobile")
-      .addEventListener("click", () => handle());
-  };
-
-  handleLogout = () => {
-    function handle() {
-      localStorage.removeItem("token");
-      window.location.pathname = "/";
-    }
-    document
-      .getElementById("logout-btn")
-      .addEventListener("click", () => handle());
-    document
-      .getElementById("logout-btn-mobile")
-      .addEventListener("click", () => handle());
-  };
-
-  verifyToken = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
-          headers: { "x-access-token": `Bearer ${token}` },
-        });
-        const resData = await res.json();
-        if (res.status === 200) {
-          state.user = resData;
-        } else if (res.status === 400) {
-          window.location.pathname = "/login.html";
-        } else throw resData.error;
-      } catch (err) {
-        console.log(err);
-        window.location.pathname = "/login.html";
-      }
-    } else window.location.pathname = "/login.html";
+  renderSinglePlayerView = ({ navigate, params }) => {
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    new FiveEPlayerSheet({ domComponent: element, navigate, params });
   };
 
   renderLocationsView = ({ navigate }) => {
@@ -277,7 +281,6 @@ class App {
     const view = new ProjectsView({
       domComponent: element,
       navigate,
-      resetViewsOnProjectChange: this.resetViewsOnProjectChange,
     });
     this.views.projects = view;
   };
@@ -315,14 +318,21 @@ class App {
     // clear
     this.domComponent.innerHTML = "";
     // handle sidebar
-    if (navigate.currentRoute.sidebar) {
+    if (this.navigate.currentRoute.sidebar) {
       this.renderSidebarAndHamburger();
       if (this.sidebar.isVisible) {
         this.sidebar.open();
       }
     }
     // routing
-    switch (navigate.currentRoute.title) {
+    switch (this.navigate.currentRoute.title) {
+      case "players":
+        return this.renderPlayersView({ navigate: this.navigate.navigate });
+      case "single-player":
+        return this.renderSinglePlayerView({
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
+        });
       case "clocks":
         return this.renderClocksView();
       case "counters":
@@ -334,37 +344,37 @@ class App {
       case "calendars":
         return this.renderCalendersView();
       case "locations":
-        return this.renderLocationsView({ navigate: navigate.navigate });
+        return this.renderLocationsView({ navigate: this.navigate.navigate });
       case "single-location":
         return this.renderSingleLocationView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
       case "characters":
-        return this.renderCharactersView({ navigate: navigate.navigate });
+        return this.renderCharactersView({ navigate: this.navigate.navigate });
       case "single-character":
         return this.renderSingleCharacterView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
       case "items":
-        return this.renderItemsView({ navigate: navigate.navigate });
+        return this.renderItemsView({ navigate: this.navigate.navigate });
       case "single-item":
         return this.renderSingleItemView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
       case "lore":
-        return this.renderLoresView({ navigate: navigate.navigate });
+        return this.renderLoresView({ navigate: this.navigate.navigate });
       case "single-lore":
         return this.renderSingleLoreView({
-          navigate: navigate.navigate,
-          params: navigate.currentRoute.params,
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
         });
-      case "modules":
+      case "main":
         return this.renderModulesView();
       default:
-        return this.renderProjectsView({ navigate: navigate.navigate });
+        return this.renderProjectsView({ navigate: this.navigate.navigate });
     }
   };
 }

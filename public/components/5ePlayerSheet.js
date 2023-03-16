@@ -7,22 +7,16 @@ import EquipmentComponent from "../lib/EquipmentComponent.js";
 import FeatComponent from "../lib/FeatComponent.js";
 import SpellsComponent from "../lib/SpellsComponent.js";
 
-class FiveEPlayerSheet {
-  constructor() {
-    this.appComponent = document.getElementById("app");
-    this.domComponent = createElement("div", {
-      class: "standard-view",
-      style: "align-items: center; max-width: 100%;",
-    });
-    this.appComponent.appendChild(this.domComponent);
-
-    this.user = null;
+export default class FiveEPlayerSheet {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.navigate = props.navigate;
+    (this.domComponent.className = "standard-view"),
+      (this.domComponent.style = "align-items: center; max-width: 100%;"),
+      (this.generalData = props.params.content);
     // general, background, etc
     this.mainView = "general";
-
-    // stop initial spinner
-    document.getElementById("initial-spinner").remove();
-    this.generalData = history.state;
+    
     this.render();
   }
 
@@ -114,13 +108,13 @@ class FiveEPlayerSheet {
   };
 
   calculateProBonus = () => {
-    if (this.generalData.exp < 6500) {
+    if (this.generalData.level < 5) {
       return 2;
-    } else if (this.generalData.exp < 48000) {
+    } else if (this.generalData.level < 9) {
       return 3;
-    } else if (this.generalData.exp < 120000) {
+    } else if (this.generalData.level < 13) {
       return 4;
-    } else if (this.generalData.exp < 225000) {
+    } else if (this.generalData.level < 17) {
       return 5;
     } else return 6;
   };
@@ -540,6 +534,7 @@ class FiveEPlayerSheet {
                           e.target.name,
                           e.target.valueAsNumber
                         );
+                        this.render();
                       },
                     }
                   ),
@@ -562,7 +557,6 @@ class FiveEPlayerSheet {
                           e.target.name,
                           e.target.valueAsNumber
                         );
-                        this.render();
                       },
                     }
                   ),
@@ -897,15 +891,19 @@ class FiveEPlayerSheet {
                   {
                     class: "cp-input-no-border cp-input-large",
                     name: "other_resource_total",
+                    type: "number",
                     value: this.generalData.other_resource_total
                       ? this.generalData.other_resource_total
-                      : "",
+                      : "0",
                   },
                   null,
                   {
                     type: "focusout",
                     event: (e) => {
-                      this.updateGeneralValue(e.target.name, e.target.value);
+                      this.updateGeneralValue(
+                        e.target.name,
+                        e.target.valueAsNumber
+                      );
                     },
                   }
                 ),
@@ -1612,5 +1610,3 @@ class FiveEPlayerSheet {
     }
   };
 }
-
-new FiveEPlayerSheet();

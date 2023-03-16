@@ -38,12 +38,11 @@
             throw new Error();
           } else return resData;
         } catch (err) {
-          console.log(err);
-          alert("You aren't logged in. Please login before visiting this page");
+          // console.log(err);
           window.location.pathname = "/login.html";
         }
       } else {
-        alert("You aren't logged in. Please login before visiting this page");
+        alert("You aren't logged in. Please login or register first.");
         window.location.pathname = "/login.html";
       }
     }
@@ -139,10 +138,10 @@
           if (project) {
             // check if user already has this project
             const hasJoinedProject = await getProjectUser(project.id);
-              if (hasJoinedProject) {
-                alert("You already have this project...");
-                return (window.location.pathname = "/dashboard.html");
-              }
+            if (hasJoinedProject) {
+              alert("You already have this project...");
+              return (window.location.pathname = "/dashboard.html");
+            }
             // check if user has this project
             if (project.user_id === user.id) {
               alert("You already have this project...");
@@ -169,7 +168,7 @@
                   "click",
                   () => (window.location.pathname = "/dashboard.html")
                 );
-                inviteDiv.append(message, button);
+                inviteDiv.append(message, document.createElement("br"), button);
               }
             });
 

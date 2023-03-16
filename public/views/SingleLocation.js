@@ -2,8 +2,8 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import { uploadImage } from "../lib/imageUtils.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
+import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
@@ -303,7 +303,7 @@ export default class SingleLocationView {
       if (state.currentProject.isEditor === false) {
         return createElement("small", {}, "None...");
       }
-      return createElement("button", {}, "+ Parent-Location", {
+      return createElement("button", {}, "🔗 Parent-Location", {
         type: "click",
         event: this.toggleAddParentLocation,
       });
@@ -352,7 +352,7 @@ export default class SingleLocationView {
         this.location.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
 
     // update UI
@@ -363,6 +363,49 @@ export default class SingleLocationView {
 
     // send data to update in db
     await postThing(`/api/edit_location/${this.location.id}`, formProps);
+  };
+
+  renderRemoveImage = async () => {
+    if (this.location.image_id) {
+      const imageSource = await getPresignedForImageDownload(this.location.image_id);
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_location/${this.location.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.location.image_id}`
+                  );
+                  e.target.parentElement.remove();
+                  this.location.image_id = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
   };
 
   renderEdit = async () => {
@@ -402,8 +445,9 @@ export default class SingleLocationView {
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",
@@ -521,7 +565,7 @@ export default class SingleLocationView {
           ...(await this.renderItems()),
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, "Lore"),
-          ...(await renderLoreList("location", this.location.id)),
+          ...(await renderLoreList("location", this.location.id, this.navigate)),
           createElement("br"),
           createElement(
             "div",

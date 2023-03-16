@@ -45,8 +45,12 @@
         <div>
           <button type="submit">Login</button>
         </div>
+        <br />
+        <small>Don't have an account or forgot your password?</small>
+        <a onclick=" window.location.pathname = '/register.html' "
+          ><small>Register</small></a
+        >
         <a href="/forgotpassword.html"><small>Forgot Password</small></a>
-        <a href="/register.html"><small>Register</small></a>
       </form>
     </div>
   </body>
@@ -64,9 +68,17 @@
         });
         const resData = await res.json();
         if (res.status === 200) {
+          // set token
           const token = resData.token;
           localStorage.setItem("token", token);
-          window.location.pathname = "/dashboard.html";
+          // if invite UUID in params push to invite page
+          var searchParams = new URLSearchParams(window.location.search);
+          var inviteUUID = searchParams.get("invite");
+          if (inviteUUID) {
+            return (window.location.pathname = "/invite.html");
+          }
+          // else push to account page
+          window.location.pathname = "/account.html";
         } else if (res.status === 400) {
           alert(resData.message);
         } else {
