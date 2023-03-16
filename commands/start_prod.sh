@@ -1,3 +1,3 @@
 npm run migrate:up
-rollup --config rollup.config.mjs
+npx rollup --config rollup.config.mjs
 npm run start

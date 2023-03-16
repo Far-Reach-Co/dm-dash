@@ -1,5 +1,3 @@
-import { v4 } from 'https://jspm.dev/uuid';
-
 let state = {
   config: {
     // serverURL: 'http://localhost:4000'
@@ -574,7 +572,7 @@ async function uploadImage(image, currentProjectId, currentImageId) {
 
 class SocketIntegration {
   constructor() {
-    this.socket = io(window.location.origin);   
+    this.socket = io(window.location.origin);
 
     this.projectId = null;
 
@@ -583,83 +581,106 @@ class SocketIntegration {
       console.log("New socket message", message);
     });
   }
-  
+
   // Listeners
   setupListeners = (canvasLayer) => {
     // OBJECTS LISTENERS
-    this.socket.on("image-add", ({ newImg, id, zIndex, imageId }) => {
-      // console.log("New socket image", { newImg, id, zIndex });
-      
+    this.socket.on("image-add", (newImg) => {
+      // console.log("New socket image", newImg);
+
       fabric.Image.fromURL(newImg.src, function (img) {
         // reconstruct new image
         for (const [key, value] of Object.entries(newImg)) {
           img[key] = value;
         }
-        img.set({ id });
-        img.zIndex = zIndex;
-        img.imageId = imageId;
-        if (canvasLayer.currentLayer === "Object") {
-          if (img.zIndex === canvasLayer.BOTTOM_LAYER) {
-            img.selectable = false;
-          }
-        } else {
-          if (img.zIndex === canvasLayer.OBJECT_LAYER) {
-            img.selectable = false;
-            img.opacity = 0.5;
-          }
-        }
-        // HANDLE ************************
         // add to canvas
-        canvasLayer.canvas.add(img);
+        if (img.layer === "Map") {
+          if (canvasLayer.currentLayer === "Object") {
+            img.selectable = false;
+            img.evented = false;
+          }
+          const gridObjectIndex = canvasLayer.canvas
+            .getObjects()
+            .indexOf(canvasLayer.oGridGroup);
+          canvasLayer.canvas.add(img);
+          img.moveTo(gridObjectIndex);
+        } else {
+          if (canvasLayer.currentLayer === "Map") {
+            img.opacity = "0.5";
+            img.selectable = false;
+            img.evented = false;
+          }
+          canvasLayer.canvas.add(img);
+        }
         // event listener
-        // img.on("selected", function () {
-          //   console.log("selected an image", img);
-          // });
-          // sort by layers and re-render
-          canvasLayer.canvas._objects.sort((a, b) =>
-          a.zIndex > b.zIndex ? 1 : -1
-          );
-          canvasLayer.canvas.renderAll();
-          canvasLayer.saveObjectState(img);
+        img.on("selected", (options) => {
+          canvasLayer.moveObjectUp(options.target);
         });
       });
-      
-      this.socket.on("image-remove", (id) => {
-        // console.log("Remove socket image", id);
-        
-        canvasLayer.canvas.getObjects().forEach((object) => {
-          if (object.id === id) {
-            canvasLayer.canvas.remove(object);
-          canvasLayer.removeObjectState(object);
+    });
+
+    this.socket.on("image-remove", (id) => {
+      // console.log("Remove socket image", id);
+
+      canvasLayer.canvas.getObjects().forEach((object) => {
+        if (object.id === id) {
+          canvasLayer.canvas.remove(object);
         }
       });
     });
-    
-    this.socket.on("image-move", ({ id, image }) => {
-      // console.log("Move socket image", { id, image });
+
+    this.socket.on("image-move", (image) => {
+      // console.log("Move socket image", image);
       canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === id) {
+        if (object.id === image.id) {
           for (var [key, value] of Object.entries(image)) {
             object[key] = value;
           }
-          if (canvasLayer.currentLayer === "Object") {
-            if (object.zIndex === canvasLayer.BOTTOM_LAYER) {
+          if (canvasLayer.currentLayer === "Map") {
+            if (object.layer === "Object") {
+              object.opacity = "0.5";
               object.selectable = false;
+              object.evented = false;
+            } else {
+              object.opacity = "1";
+              object.selectable = true;
+              object.evented = true;
             }
           } else {
-            if (object.zIndex === canvasLayer.OBJECT_LAYER) {
+            if (object.layer === "Map") {
+              object.opacity = "1";
               object.selectable = false;
-              object.opacity = 0.5;
+              object.evented = false;
+            } else {
+              object.opacity = "1";
+              object.selectable = true;
+              object.evented = true;
             }
           }
           canvasLayer.canvas.renderAll();
-          canvasLayer.saveObjectState(object);
+        }
+      });
+      //
+    });
+
+    this.socket.on("object-move-up", (object) => {
+      // console.log("Move socket object up", object);
+      canvasLayer.canvas.getObjects().forEach((item) => {
+        if (item.id === object.id) {
+          if (item.layer === "Map") {
+            const gridObjectIndex = canvasLayer.canvas
+              .getObjects()
+              .indexOf(canvasLayer.oGridGroup);
+            item.moveTo(gridObjectIndex - 1);
+          } else {
+            item.bringToFront();
+          }
         }
       });
       //
     });
   };
-  
+
   socketTest = () => {
     this.socket.emit("joinProject", {
       // user: state.user.email,
@@ -673,18 +694,25 @@ class SocketIntegration {
       image,
     });
   };
-  
+
   imageRemoved = (id) => {
     this.socket.emit("image-removed", {
       project: `project-${this.projectId}`,
       id,
     });
   };
-  
+
   imageMoved = (image) => {
     this.socket.emit("image-moved", {
       project: `project-${this.projectId}`,
       image,
+    });
+  };
+
+  objectMoveUp = (object) => {
+    this.socket.emit("object-moved-up", {
+      project: `project-${this.projectId}`,
+      object,
     });
   };
 }
@@ -719,6 +747,66 @@ class TableSidebarComponent {
     }
   };
 
+  addImageToTable = async (image) => {
+    let imageSource = this.downloadedImageSourceList[image.id];
+    if (!imageSource)
+      imageSource = await getPresignedForImageDownload(image.id);
+    if (imageSource) {
+      // create new object
+      fabric.Image.fromURL(imageSource, (newImg) => {
+        // CREATE ************************
+        const id = uuidv4();
+        newImg.set("id", id);
+        newImg.set("imageId", image.id);
+        newImg.set("layer", this.canvasLayer.currentLayer);
+
+        // HANDLE ************************
+        // add to canvas
+        if (this.canvasLayer.currentLayer === "Map") {
+          const gridObjectIndex = this.canvasLayer.canvas
+            .getObjects()
+            .indexOf(this.canvasLayer.oGridGroup);
+          this.canvasLayer.canvas.add(newImg);
+          // in center of viewport
+          this.canvasLayer.canvas.viewportCenterObject(newImg);
+          newImg.moveTo(gridObjectIndex);
+        } else {
+          this.canvasLayer.canvas.add(newImg);
+          // in center of viewport
+          this.canvasLayer.canvas.viewportCenterObject(newImg);
+        }
+
+        // event listener
+        newImg.on("selected", (options) => {
+          this.canvasLayer.moveObjectUp(options.target);
+        });
+
+        // EMIT ***************************
+        socketIntegration.imageAdded(newImg);
+      });
+    }
+  };
+
+  removeImageFromTableAndSidebar = (image, tableImage, elem) => {
+    if (
+      window.confirm(`Are you sure you want to delete ${image.original_name}`)
+    ) {
+      // remove image in db
+      deleteThing(`/api/remove_image/${state$1.currentProject.id}/${image.id}`);
+      // remove table image in db
+      deleteThing(`/api/remove_table_image/${tableImage.id}`);
+      // remove elem in sidebar
+      elem.remove();
+      // remove all from screens and sockets and state
+      this.canvasLayer.canvas.getObjects().forEach((object) => {
+        if (object.imageId === image.id) {
+          this.canvasLayer.canvas.remove(object);
+          socketIntegration.imageRemoved(object.id);
+        }
+      });
+    }
+  };
+
   renderCurrentImages = async () => {
     const tableImages = await getThings(
       `/api/get_table_images/${state$1.currentProject.id}`
@@ -734,54 +822,7 @@ class TableSidebarComponent {
             createElement("a", {}, "+", {
               type: "click",
               event: async () => {
-                const imageSource = this.downloadedImageSourceList[image.id];
-                if (imageSource) {
-                  // create new object
-                  fabric.Image.fromURL(imageSource, (newImg) => {
-                    // CREATE ************************
-                    // assing uuid
-                    const id = v4();
-                    newImg.set({ id });
-                    // assign layer zindex
-                    const zIndex =
-                      this.canvasLayer.currentLayer === "Map"
-                        ? this.canvasLayer.BOTTOM_LAYER
-                        : this.canvasLayer.OBJECT_LAYER;
-                    newImg.zIndex = zIndex;
-                    newImg.imageId = image.id;
-
-                    // HANDLE ************************
-                    // add to canvas
-                    this.canvasLayer.canvas.add(newImg);
-                    // in center of viewport
-                    this.canvasLayer.canvas.viewportCenterObject(newImg);
-                    // event listener
-                    // newImg.on("selected", function () {
-                    //   console.log("selected an image", newImg);
-                    // });
-                    // sort by layers and re-render
-                    this.canvasLayer.canvas._objects.sort((a, b) =>
-                      a.zIndex > b.zIndex ? 1 : -1
-                    );
-                    this.canvasLayer.canvas.renderAll();
-
-                    // EMIT ***************************
-                    socketIntegration.imageAdded({
-                      newImg,
-                      id,
-                      zIndex,
-                      imageId: image.id,
-                    });
-
-                    // SAVE ***************************
-                    this.canvasLayer.saveObjectState({
-                      object: newImg,
-                      id,
-                      zIndex,
-                      imageId: image.id,
-                    });
-                  });
-                }
+                await this.addImageToTable(image);
               },
             }),
             createElement(
@@ -800,28 +841,7 @@ class TableSidebarComponent {
               {
                 type: "click",
                 event: () => {
-                  if (
-                    window.confirm(
-                      `Are you sure you want to delete ${image.original_name}`
-                    )
-                  ) {
-                    // remove image in db
-                    deleteThing(
-                      `/api/remove_image/${state$1.currentProject.id}/${image.id}`
-                    );
-                    // remove table image in db
-                    deleteThing(`/api/remove_table_image/${tableImage.id}`);
-                    // remove elem in sidebar
-                    elem.remove();
-                    // remove all from screens and sockets and state
-                    this.canvasLayer.canvas.getObjects().forEach((object) => {
-                      if (object.imageId === image.id) {
-                        this.canvasLayer.canvas.remove(object);
-                        socketIntegration.imageRemoved(object.id);
-                        this.canvasLayer.removeObjectState(object);
-                      }
-                    });
-                  }
+                  this.removeImageFromTableAndSidebar(image, tableImage, elem);
                 },
               }
             ),
@@ -839,6 +859,23 @@ class TableSidebarComponent {
     });
     if (imageElems.length) return imageElems;
     else return [createElement("small", {}, "None...")];
+  };
+
+  addImageToSidebar = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      this.toggleImageLoading();
+      const newImage = await uploadImage(file, state$1.currentProject.id);
+      if (newImage) {
+        // add new table image
+        await postThing(`/api/add_table_image`, {
+          project_id: state$1.currentProject.id,
+          image_id: newImage.id,
+        });
+        // re render
+      }
+      this.toggleImageLoading();
+    }
   };
 
   render = async () => {
@@ -862,20 +899,7 @@ class TableSidebarComponent {
         {
           type: "change",
           event: async (e) => {
-            const file = e.target.files[0];
-            if (file) {
-              this.toggleImageLoading();
-              const newImage = await uploadImage(file, state$1.currentProject.id);
-              if (newImage) {
-                // add new table image
-                await postThing(`/api/add_table_image`, {
-                  project_id: state$1.currentProject.id,
-                  image_id: newImage.id,
-                });
-                // re render
-              }
-              this.toggleImageLoading();
-            }
+            await this.addImageToSidebar(e);
           },
         }
       ),
@@ -967,17 +991,30 @@ class CanvasLayer {
     // setup table views and saved state
     this.tableViews = props.tableViews;
     this.currentTableView = this.tableViews[0];
-    // array to save state
-    this.savedState = this.currentTableView.data;
-
-    // SETUP layers
-    this.BOTTOM_LAYER = 1;
-    this.GRID_LAYER = 2;
-    this.OBJECT_LAYER = 3;
+    console.log(this.currentTableView);
     this.currentLayer = "Object";
+
+    // grid
+    this.grid = 50;
+    this.unitScale = 10;
+    this.canvasWidth = 250 * this.unitScale;
+    this.canvasHeight = 250 * this.unitScale;
   }
 
-  init = () => {
+  init = async () => {
+    //EXTEND THE PROPS FABRIC WILL EXPORT TO JSON
+    fabric.Object.prototype.toObject = (function (toObject) {
+      return function () {
+        return fabric.util.object.extend(toObject.call(this), {
+          id: this.id,
+          imageId: this.imageId,
+          layer: this.layer,
+          selectable: this.selectable,
+          evented: this.evented,
+        });
+      };
+    })(fabric.Object.prototype.toObject);
+
     // init canvas
     this.canvas = new fabric.Canvas("canvas-layer", {
       containerClass: "canvas-layer",
@@ -987,55 +1024,90 @@ class CanvasLayer {
       // isDrawingMode: true,
       backgroundColor: "black",
     });
+    // write new grid if there isn't objects in previous data
+    if (!this.currentTableView.data.objects) {
+      this.renderGridObjects();
+    } else {
+      if (!this.currentTableView.data.objects.length) {
+        this.renderGridObjects();
+      } else {
+        // update image links
+        const imageSrcList = {};
 
-    // grid variables
-    var grid = 50;
-    var unitScale = 10;
-    var canvasWidth = 250 * unitScale;
-    var canvasHeight = 250 * unitScale;
-
-    // create grid
-    const gridLineList = [];
-
-    for (var i = 0; i < canvasWidth / grid; i++) {
-      const lineh = new fabric.Line([i * grid, 0, i * grid, canvasHeight], {
-        type: "line",
-        stroke: "#ccc",
-        zIndex: this.GRID_LAYER,
-        selectable: false,
-      });
-      gridLineList.push(lineh);
-      this.canvas.add(lineh);
-      const linew = new fabric.Line([0, i * grid, canvasWidth, i * grid], {
-        type: "line",
-        stroke: "#ccc",
-        zIndex: this.GRID_LAYER,
-        selectable: false,
-      });
-      gridLineList.push(linew);
-      this.canvas.add(linew);
+        await Promise.all(
+          this.currentTableView.data.objects.map(async (object) => {
+            // if (object.type === "group") return object;
+            if (object.imageId) {
+              console.log(object.imageId);
+              if (imageSrcList[object.imageId]) {
+                object.src = imageSrcList[object.imageId];
+              } else {
+                const presigned = await getPresignedForImageDownload(
+                  object.imageId
+                );
+                object.src = presigned.url;
+                imageSrcList[object.imageId] = object.src;
+              }
+            }
+          })
+        );
+        // render old data
+        this.canvas.loadFromJSON(this.currentTableView.data, () => {
+          this.canvas.getObjects().forEach((object) => {
+            // group layer events
+            if (object.type === "group") {
+              this.oGridGroup = object;
+              object.selectable = false;
+              object.evented = false;
+              return;
+            }
+            // set event listeners
+            object.on("selected", (options) => {
+              this.moveObjectUp(options.target);
+            });
+            // handle layer events
+            if (this.currentLayer === "Map") {
+              if (object.layer === "Object") {
+                object.opacity = "0.5";
+                object.selectable = false;
+                object.evented = false;
+              } else {
+                object.opacity = "1";
+                object.selectable = true;
+                object.evented = true;
+              }
+            } else {
+              if (object.layer === "Map") {
+                object.opacity = "1";
+                object.selectable = false;
+                object.evented = false;
+              } else {
+                object.opacity = "1";
+                object.selectable = true;
+                object.evented = true;
+              }
+            }
+          });
+          this.canvas.renderAll();
+        });
+      }
     }
-    new fabric.Group(gridLineList, { left: 0, top: 0 });
+    this.setupEventListeners();
+  };
 
+  setupEventListeners = () => {
     // snap to grid
-
     this.canvas.on("object:moving", (options) => {
-      const left = Math.round(options.target.left / grid) * grid;
-      const top = Math.round(options.target.top / grid) * grid;
+      const left = Math.round(options.target.left / this.grid) * this.grid;
+      const top = Math.round(options.target.top / this.grid) * this.grid;
       options.target.set({
         left,
         top,
       });
-      socketIntegration.imageMoved({
-        id: options.target.id,
-        image: options.target,
-      });
-      // save state
-      this.saveObjectState(options.target);
+      socketIntegration.imageMoved(options.target);
     });
 
     // Zoom
-
     this.canvas.on("mouse:wheel", (opt) => {
       var delta = opt.e.deltaY;
       var zoom = this.canvas.getZoom();
@@ -1084,7 +1156,6 @@ class CanvasLayer {
           this.canvas.getActiveObjects().forEach((object) => {
             this.canvas.remove(object);
             socketIntegration.imageRemoved(object.id);
-            this.removeObjectState(object);
             this.saveToDatabase();
           });
         }
@@ -1092,23 +1163,12 @@ class CanvasLayer {
     });
 
     // more object event handlers
-
     this.canvas.on("object:rotating", (options) => {
-      socketIntegration.imageMoved({
-        id: options.target.id,
-        image: options.target,
-      });
-      // save state
-      this.saveObjectState(options.target);
+      socketIntegration.imageMoved(options.target);
     });
 
     this.canvas.on("object:scaling", (options) => {
-      socketIntegration.imageMoved({
-        id: options.target.id,
-        image: options.target,
-      });
-      // save state
-      this.saveObjectState(options.target);
+      socketIntegration.imageMoved(options.target);
     });
 
     // save data in db after mouse up
@@ -1118,95 +1178,75 @@ class CanvasLayer {
         await this.saveToDatabase();
       }, 3000)
     );
+  };
 
-    // re-create objects from db state
-    if (Object.entries(this.savedState).length) {
-      const arrayOfObjects = Object.values(this.savedState);
-      arrayOfObjects.forEach(async (object) => {
-        // just for images right now
-        const imageSource = await getPresignedForImageDownload(object.imageId);
-        if (imageSource) {
-          fabric.Image.fromURL(imageSource.url, (img) => {
-            // reconstruct new image
-            for (const [key, value] of Object.entries(object.object)) {
-              img[key] = value;
-            }
-            img.set({ id: object.id });
-            img.zIndex = object.zIndex;
-            img.imageId = object.imageId;
-            if (this.currentLayer === "Object") {
-              if (img.zIndex === this.BOTTOM_LAYER) {
-                img.selectable = false;
-              } else {
-                img.selectable = true;
-                img.opacity = 1;
-              }
-            } else {
-              if (img.zIndex === this.OBJECT_LAYER) {
-                img.selectable = false;
-                img.opacity = 0.5;
-              }
-            }
-            // HANDLE ************************
-            // add to canvas
-            this.canvas.add(img);
-            // event listener
-            // img.on("selected", function () {
-            //   console.log("selected an image", img);
-            // });
-            // sort by layers and re-render
-            this.canvas._objects.sort((a, b) => (a.zIndex > b.zIndex ? 1 : -1));
-            this.canvas.renderAll();
-          });
-        }
-      });
+  moveObjectUp = (object) => {
+    if (object.layer === "Map") {
+      const gridObjectIndex = this.canvas.getObjects().indexOf(this.oGridGroup);
+      object.moveTo(gridObjectIndex - 1);
+    } else {
+      object.bringToFront();
     }
+    socketIntegration.objectMoveUp(object);
   };
 
   saveToDatabase = async () => {
-    if (Object.entries(this.savedState).length) {
-      try {
-        const res = await fetch(
-          window.location.origin +
-            `/api/edit_table_view/${this.currentTableView.id}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-            },
-            body: JSON.stringify({ data: this.savedState }),
-          }
-        );
-        // const data = await res.json();
-        // if (res.status === 200 || res.status === 201) {
-        //   return data;
-        // } else throw new Error();
-      } catch (err) {
-        // window.alert("Failed to save note...");
-        console.log(err);
-        return null;
-      }
+    const jsonCanvas = this.canvas.toJSON();
+    try {
+      const res = await fetch(
+        window.location.origin +
+          `/api/edit_table_view/${this.currentTableView.id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ data: jsonCanvas }),
+        }
+      );
+      // const data = await res.json();
+      // if (res.status === 200 || res.status === 201) {
+      //   return data;
+      // } else throw new Error();
+    } catch (err) {
+      // window.alert("Failed to save note...");
+      console.log(err);
+      return null;
     }
   };
 
-  saveObjectState = (object) => {
-    if (object.id) {
-      this.savedState[object.id] = {
-        object,
-        id: object.id,
-        zIndex: object.zIndex,
-      };
-      if (object.imageId) {
-        this.savedState[object.id].imageId = object.imageId;
-      }
-    } else console.log("ERROR: Missing object ID");
-  };
+  renderGridObjects = () => {
+    // create grid
+    const gridLineList = [];
 
-  removeObjectState = (object) => {
-    if (object.id) {
-      delete this.savedState[object.id];
-    } else console.log("ERROR: Missing object ID");
+    for (var i = 0; i < this.canvasWidth / this.grid; i++) {
+      const lineh = new fabric.Line(
+        [i * this.grid, 0, i * this.grid, this.canvasHeight],
+        {
+          type: "line",
+          stroke: "#ccc",
+          selectable: false,
+        }
+      );
+      gridLineList.push(lineh);
+      const linew = new fabric.Line(
+        [0, i * this.grid, this.canvasWidth, i * this.grid],
+        {
+          type: "line",
+          stroke: "#ccc",
+          selectable: false,
+        }
+      );
+      gridLineList.push(linew);
+    }
+    this.oGridGroup = new fabric.Group(gridLineList, {
+      left: 0,
+      top: 0,
+      selectable: false,
+      evented: false,
+    });
+    this.canvas.add(this.oGridGroup);
   };
 }
 
@@ -1330,25 +1370,32 @@ class TopLayer {
   }
 
   handleChangeCanvasLayer = () => {
+    this.canvasLayer.canvas.getObjects().indexOf(this.canvasLayer.oGridGroup);
+
     if (this.canvasLayer.currentLayer === "Map") {
       this.canvasLayer.currentLayer = "Object";
-      this.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.zIndex === this.canvasLayer.BOTTOM_LAYER) {
+      this.canvasLayer.canvas.getObjects().forEach((object, index) => {
+        if (object.layer === "Map") {
           object.selectable = false;
+          object.evented = false;
         }
-        if (object.zIndex === this.canvasLayer.OBJECT_LAYER) {
+        if (object.layer === "Object") {
           object.selectable = true;
+          object.evented = true;
           object.opacity = "1";
         }
         this.canvasLayer.canvas.renderAll();
       });
     } else {
       this.canvasLayer.currentLayer = "Map";
-      this.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.zIndex === this.canvasLayer.BOTTOM_LAYER)
+      this.canvasLayer.canvas.getObjects().forEach((object, index) => {
+        if (object.layer === "Map") {
           object.selectable = true;
-        if (object.zIndex === this.canvasLayer.OBJECT_LAYER) {
+          object.evented = true;
+        }
+        if (object.layer === "Object") {
           object.selectable = false;
+          object.evented = false;
           object.opacity = "0.5";
         }
         this.canvasLayer.canvas.renderAll();
