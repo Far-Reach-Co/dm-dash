@@ -401,7 +401,7 @@ footer {
   display: flex;
   flex: 1;
   background-color: var(--blue3);
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .icon {
@@ -436,7 +436,7 @@ footer {
   /* text-align: center; */
   /* align-self: center; */
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .standard-view form {
@@ -453,7 +453,7 @@ footer {
   height: 400px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .sub-view-component {
@@ -897,7 +897,7 @@ footer {
   /* Full width */
   height: 100vh;
   /* Full height */
-  overflow: auto;
+  overflow: hidden;
   /* Enable scroll if needed */
   background-color: rgb(0, 0, 0);
   /* Fallback color */
