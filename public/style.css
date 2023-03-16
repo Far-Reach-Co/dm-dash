@@ -18,6 +18,15 @@
   src: url("./assets/fonts/blanka/Blanka-Regular.otf") format("woff2");
 }
 
+@font-face {
+  font-family: "YoungSerif";
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 2rem;
+  font-display: swap;
+  src: url("./assets/fonts/YoungSerif/YoungSerif-Regular.woff2");
+}
+
 :root {
   --main-white: rgb(210, 210, 210);
   --main-dark: rgb(21, 21, 21);
@@ -59,7 +68,7 @@ body {
   flex: 1;
   overflow: hidden;
   flex-direction: column;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "YoungSerif", "IBM Plex Sans", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   text-shadow: 0.5px 0.5px black;
 }
 
