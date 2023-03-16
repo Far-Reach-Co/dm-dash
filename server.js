@@ -98,6 +98,11 @@ io.on("connection", (socket) => {
   socket.on("image-moved", ({ project, image }) => {
     socket.broadcast.to(project).emit("image-move", image);
   });
+
+  socket.on("object-moved-up", ({project, object}) => {
+    socket.broadcast.to(project).emit("object-move-up", object);
+  });
+
 });
 
 //Run

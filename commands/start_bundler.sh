@@ -1,1 +1,1 @@
-rollup --config rollup.config.mjs --watch
+npx rollup --config rollup.config.mjs --watch
