@@ -57,7 +57,9 @@ export default class CanvasLayer {
               if (imageSrcList[object.imageId]) {
                 object.src = imageSrcList[object.imageId];
               } else {
-                const presigned = await getPresignedForImageDownload(object.imageId);
+                const presigned = await getPresignedForImageDownload(
+                  object.imageId
+                );
                 object.src = presigned.url;
                 imageSrcList[object.imageId] = object.src;
               }
@@ -67,11 +69,18 @@ export default class CanvasLayer {
         // render old data
         this.canvas.loadFromJSON(this.currentTableView.data, () => {
           this.canvas.getObjects().forEach((object) => {
+            // group layer events
             if (object.type === "group") {
+              this.oGridGroup = object;
               object.selectable = false;
               object.evented = false;
               return;
-            };
+            }
+            // set event listeners
+            object.on("selected", (options) => {
+              this.moveObjectUp(options.target);
+            });
+            // handle layer events
             if (this.currentLayer === "Map") {
               if (object.layer === "Object") {
                 object.opacity = "0.5";
