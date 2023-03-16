@@ -746,6 +746,7 @@ footer {
   max-width: 700px;
   white-space: pre-line;
   margin-bottom: 10px;
+  text-shadow: none;
 }
 
 .single-item-title-container {
