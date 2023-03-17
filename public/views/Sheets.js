@@ -3,6 +3,7 @@ import accountManager from "../lib/AccountManager.js"; // dont remove
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import projectSelect from "../lib/projectSelect.js";
+import state from "../lib/state.js";
 
 class Sheets {
   constructor() {
@@ -55,7 +56,7 @@ class Sheets {
     this.toggleLoadingNew();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    formProps.user_id = this.user.id;
+    formProps.user_id = state.user.id;
 
     await postThing("/api/add_5e_character", formProps);
 
