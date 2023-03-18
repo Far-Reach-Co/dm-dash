@@ -149,7 +149,7 @@ export default class PlayersView {
       const sheetMap = sheetData
         .filter((characterSheet) => {
           for (var projectPlayer of projectPlayers) {
-            return projectPlayer.player_id === characterSheet.id;
+            if (projectPlayer.player_id === characterSheet.id) return characterSheet;
           }
         })
         .map((characterSheet) => {
