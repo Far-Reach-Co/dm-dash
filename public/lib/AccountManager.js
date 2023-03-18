@@ -27,7 +27,16 @@ class AccountManager {
       // try to append tabs
       await this.appendAccountTabOrLogin();
       if (!this.userInfo) {
-        return (window.location.pathname = "/login.html");
+        console.log("uhh")
+        if (
+          window.location.pathname === "/dashboard.html" ||
+          window.location.pathname === "/account.html" ||
+          window.location.pathname === "/vtt.html" ||
+          window.location.pathname === "/sheets.html" ||
+          window.location.pathname === "/5eplayer.html"
+        ) {
+          return (window.location.pathname = "/login.html");
+        }
       }
       // stop initial spinner
       if (document.getElementById("initial-spinner")) {
