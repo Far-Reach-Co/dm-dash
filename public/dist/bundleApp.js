@@ -8492,7 +8492,7 @@ class EquipmentComponent {
     if (!this.equipmentData.length)
       return [createElement("small", {}, "None...")];
 
-    return this.equipmentData.map((item) => {
+    return this.equipmentData.map((item, index) => {
       return createElement(
         "div",
         {
@@ -8515,6 +8515,7 @@ class EquipmentComponent {
                 postThing(`/api/edit_5e_character_equipment/${item.id}`, {
                   title: e.target.value,
                 });
+                this.equipmentData[index].title = e.target.value;
               },
             }
           ),
@@ -8522,7 +8523,7 @@ class EquipmentComponent {
           createElement(
             "input",
             {
-              class: "cp-input-gen input-small",
+              class: "cp-input-gen-short input-small",
               style: "margin-right: 5px;",
               type: "number",
               name: "quantity",
@@ -8536,14 +8537,16 @@ class EquipmentComponent {
                 await postThing(`/api/edit_5e_character_equipment/${item.id}`, {
                   quantity: e.target.valueAsNumber,
                 });
-                this.render();
+                this.equipmentData[index].quantity = e.target.valueAsNumber;
+                // re-calc weight
+                this.updateWeight();
               },
             }
           ),
           createElement(
             "input",
             {
-              class: "cp-input-gen input-small",
+              class: "cp-input-gen-short input-small",
               style: "margin-right: 5px;",
               type: "number",
               name: "weight",
@@ -8557,7 +8560,9 @@ class EquipmentComponent {
                 await postThing(`/api/edit_5e_character_equipment/${item.id}`, {
                   weight: e.target.valueAsNumber,
                 });
-                this.render();
+                this.equipmentData[index].weight = e.target.valueAsNumber;
+                // re-calc weight
+                this.updateWeight();
               },
             }
           ),
@@ -8584,6 +8589,11 @@ class EquipmentComponent {
         ]
       );
     });
+  };
+
+  updateWeight = () => {
+    document.getElementById("total-equipment-weight").innerHTML =
+      this.calculateTotalWeight().toString();
   };
 
   calculateTotalWeight = () => {
@@ -8624,7 +8634,7 @@ class EquipmentComponent {
         },
         [
           createElement("small", { style: "margin-right: 115px;" }, "Name"),
-          createElement("small", { style: "margin-right: 60px;" }, "Quantity"),
+          createElement("small", { style: "margin-right: 20px;" }, "Quantity"),
           createElement("small", {}, "Weight"),
         ]
       ),
@@ -8647,7 +8657,11 @@ class EquipmentComponent {
               { style: "margin-right: 5px;" },
               "Total Weight:"
             ),
-            createElement("div", {}, this.calculateTotalWeight()),
+            createElement(
+              "div",
+              { id: "total-equipment-weight" },
+              this.calculateTotalWeight()
+            ),
           ]),
         ]
       )
@@ -10386,6 +10400,7 @@ class FiveEPlayerSheet {
                 ),
               ]),
             ]),
+            this.equipmentComponent.domComponent,
           ]
         ),
         createElement("div", { class: "cp-info-container-column" }, [
@@ -10397,7 +10412,6 @@ class FiveEPlayerSheet {
           { style: "display: flex; flex-direction: column;" },
           [
             this.attackComponent.domComponent,
-            this.equipmentComponent.domComponent,
             this.featComponent.domComponent,
           ]
         ),

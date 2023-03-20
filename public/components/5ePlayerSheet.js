@@ -1055,6 +1055,7 @@ export default class FiveEPlayerSheet {
                 ),
               ]),
             ]),
+            this.equipmentComponent.domComponent,
           ]
         ),
         createElement("div", { class: "cp-info-container-column" }, [
@@ -1066,7 +1067,6 @@ export default class FiveEPlayerSheet {
           { style: "display: flex; flex-direction: column;" },
           [
             this.attackComponent.domComponent,
-            this.equipmentComponent.domComponent,
             this.featComponent.domComponent,
           ]
         ),
