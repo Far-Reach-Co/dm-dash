@@ -334,6 +334,112 @@ class SingleSpell {
               ),
             ]
           ),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Casting Time"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "casting_time",
+                value: spell.casting_time ? spell.casting_time : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    casting_time: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Duration"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "duration",
+                value: spell.duration ? spell.duration : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    duration: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Range"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "range",
+                value: spell.range ? spell.range : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    range: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Damage Type"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "damage_type",
+                value: spell.damage_type ? spell.damage_type : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    damage_type: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Components"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "components",
+                value: spell.components ? spell.components : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    components: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("br"),
           createElement(
             "textarea",
             {
@@ -370,7 +476,7 @@ class SingleSpell {
       return this.domComponent.append(
         createElement("div", { class: "cp-info-container-column" }, [
           createElement("h2", {}, "Cantrips"),
-          createElement("br"),
+          createElement("hr"),
           ...(await this.renderSpells()),
           createElement("a", { style: "align-self: flex-start;" }, "+", {
             type: "click",

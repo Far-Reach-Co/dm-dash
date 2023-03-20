@@ -23,7 +23,7 @@ async function get5eCharSpellQuery(id) {
 
 async function get5eCharSpellsByTypeQuery(generalId, type) {
   const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_spell" where general_id = $1 and type = $2`,
+    text: /*sql*/ `select * from public."dnd_5e_character_spell" where general_id = $1 and type = $2 order by LOWER(title)`,
     values: [generalId, type]
   }
   return await db.query(query)

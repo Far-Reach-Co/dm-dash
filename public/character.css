@@ -96,6 +96,14 @@
   margin: 5px;
 }
 
+.cp-content-container-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
 .cp-content-container-center {
   width: 140px;
   /* border: 1px solid var(--blue); */

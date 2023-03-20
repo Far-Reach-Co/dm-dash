@@ -23,7 +23,7 @@ async function get5eCharFeatQuery(id) {
 
 async function get5eCharFeatsByGeneralQuery(generalId) {
   const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where general_id = $1`,
+    text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where general_id = $1 order by Lower(title)`,
     values: [generalId]
   }
   return await db.query(query)
