@@ -2,12 +2,13 @@ const db = require('../dbconfig')
 
 async function add5eCharAttackQuery(data) {
   const query = {
-    text: /*sql*/ `insert into public."dnd_5e_character_attack" (general_id, title, description, range, damage_type, bonus) values($1,$2,$3,$4,$5,$6) returning *`,
+    text: /*sql*/ `insert into public."dnd_5e_character_attack" (general_id, title, description, range, duration, damage_type, bonus) values($1,$2,$3,$4,$5,$6,$7) returning *`,
     values: [
       data.general_id,
       data.title,
       data.description,
       data.range,
+      data.duration,
       data.damage_type,
       data.bonus,
     ]
@@ -25,7 +26,7 @@ async function get5eCharAttackQuery(id) {
 
 async function get5eCharAttacksByGeneralQuery(generalId) {
   const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_attack" where general_id = $1`,
+    text: /*sql*/ `select * from public."dnd_5e_character_attack" where general_id = $1 order by LOWER(title)`,
     values: [generalId]
   }
   return await db.query(query)

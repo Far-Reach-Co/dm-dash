@@ -34,6 +34,15 @@
   border-radius: var(--border-radius);
 }
 
+.cp-input-gen-short {
+  background-color: inherit;
+  /* border: 1px solid var(--blue); */
+  color: var(--main-white);
+  width: 60px;
+  background-color: var(--blue3);
+  border-radius: var(--border-radius);
+}
+
 .input-small {
   font-size: small;
 }
