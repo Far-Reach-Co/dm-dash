@@ -1344,7 +1344,7 @@ class Table {
 
   init = async () => {
     // get table views
-    this.projectId = history.state;
+    this.projectId = localStorage.getItem("current-table-project-id");
     const project = await getThings(`/api/get_project/${this.projectId}`);
     state$1.currentProject = project;
     const tableViews = await getThings(
