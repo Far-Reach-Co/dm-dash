@@ -1,13 +1,12 @@
 import createElement from "../lib/createElement.js";
-import TableSidebarComponent from "../lib/TableSidebarComponent.js";
 
 export default class TableSidebar {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "sidebar";
-    this.canvasLayer = props.canvasLayer;
     this.isVisible = false;
     this.navigate = props.navigate;
+    this.tableSidebarComponent = props.tableSidebarComponent
   }
 
   renderCloseSidebarElem = () => {
@@ -46,13 +45,6 @@ export default class TableSidebar {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    const tableSidebarComponentElem = createElement("div", {
-      style: "display: flex; flex-direction: column;",
-    });
-    new TableSidebarComponent({
-      domComponent: tableSidebarComponentElem,
-      canvasLayer: this.canvasLayer,
-    });
     const container = createElement(
       "div",
       {
@@ -60,7 +52,7 @@ export default class TableSidebar {
       },
       [
         createElement("div", { class: "sidebar-header" }, "Images"),
-        tableSidebarComponentElem,
+        this.tableSidebarComponent.domComponent,
         this.renderCloseSidebarElem(),
       ]
     );

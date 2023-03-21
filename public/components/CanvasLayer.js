@@ -1,3 +1,4 @@
+import imageFollowingCursor from "../lib/imageFollowingCursor.js";
 import { getPresignedForImageDownload } from "../lib/imageUtils.js";
 import socketIntegration from "../lib/socketIntegration.js";
 
@@ -8,6 +9,9 @@ export default class CanvasLayer {
     this.currentTableView = this.tableViews[0];
     console.log(this.currentTableView);
     this.currentLayer = "Object";
+
+    // table sidebar component
+    this.tableSidebarComponent = props.tableSidebarComponent;
 
     // grid
     this.grid = 50;
@@ -186,13 +190,57 @@ export default class CanvasLayer {
       socketIntegration.imageMoved(options.target);
     });
 
-    // save data in db after mouse up
-    document.addEventListener(
-      "mouseup",
-      throttle(async (evt) => {
+    // DOCUMENT MOUSE UP HACKS
+    document.addEventListener("mouseup", (e) => {
+      // save data in db after mouse up
+      throttle(async () => {
         await this.saveToDatabase();
-      }, 3000)
-    );
+      }, 3000);
+
+      // handle adding new image
+      if (imageFollowingCursor.isOnPage) {
+        if (e.target.nodeName === "CANVAS") this.addImageToTable(this.tableSidebarComponent.currentMouseDownImage);
+      }
+      imageFollowingCursor.remove();
+    });
+  };
+
+  addImageToTable = async (image) => {
+    const imageSource = await getPresignedForImageDownload(image.id);
+    if (imageSource) {
+      // create new object
+      fabric.Image.fromURL(imageSource.url, (newImg) => {
+        // CREATE ************************
+        const id = uuidv4();
+        newImg.set("id", id);
+        newImg.set("imageId", image.id);
+        newImg.set("layer", this.currentLayer);
+
+        // HANDLE ************************
+        // add to canvas
+        if (this.currentLayer === "Map") {
+          const gridObjectIndex = this.canvas
+            .getObjects()
+            .indexOf(this.oGridGroup);
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+          newImg.moveTo(gridObjectIndex);
+        } else {
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+        }
+
+        // event listener
+        newImg.on("selected", (options) => {
+          this.moveObjectUp(options.target);
+        });
+
+        // EMIT ***************************
+        socketIntegration.imageAdded(newImg);
+      });
+    }
   };
 
   moveObjectUp = (object) => {

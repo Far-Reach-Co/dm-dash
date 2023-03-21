@@ -3,18 +3,20 @@ import createElement from "./createElement.js";
 import state from "./state.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
-import socketIntegration from "./socketIntegration.js";
+import imageFollowingCursor from "./imageFollowingCursor.js";
 
 export default class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar";
-    this.canvasLayer = props.canvasLayer;
+
+    this.currentMouseDownImage = null;
 
     this.imageLoading = false;
+    this.downloadedImageSourceList = {};
+
     this.render();
 
-    this.downloadedImageSourceList = {};
   }
 
   toggleImageLoading = () => {
@@ -30,46 +32,7 @@ export default class TableSidebarComponent {
         src: imageSource.url,
         width: 30,
         height: 30,
-      });
-    }
-  };
-
-  addImageToTable = async (image) => {
-    let imageSource = this.downloadedImageSourceList[image.id];
-    if (!imageSource)
-      imageSource = await getPresignedForImageDownload(image.id);
-    if (imageSource) {
-      // create new object
-      fabric.Image.fromURL(imageSource, (newImg) => {
-        // CREATE ************************
-        const id = uuidv4();
-        newImg.set("id", id)
-        newImg.set("imageId", image.id)
-        newImg.set("layer", this.canvasLayer.currentLayer);
-
-        // HANDLE ************************
-        // add to canvas
-        if (this.canvasLayer.currentLayer === "Map") {
-          const gridObjectIndex = this.canvasLayer.canvas
-            .getObjects()
-            .indexOf(this.canvasLayer.oGridGroup);
-          this.canvasLayer.canvas.add(newImg);
-          // in center of viewport
-          this.canvasLayer.canvas.viewportCenterObject(newImg);
-          newImg.moveTo(gridObjectIndex);
-        } else {
-          this.canvasLayer.canvas.add(newImg);
-          // in center of viewport
-          this.canvasLayer.canvas.viewportCenterObject(newImg);
-        }
-
-        // event listener
-        newImg.on("selected", (options) => {
-          this.canvasLayer.moveObjectUp(options.target)
-        });
-
-        // EMIT ***************************
-        socketIntegration.imageAdded(newImg);
+        style: "pointer-events: none;",
       });
     }
   };
@@ -85,12 +48,12 @@ export default class TableSidebarComponent {
       // remove elem in sidebar
       elem.remove();
       // remove all from screens and sockets and state
-      this.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.imageId === image.id) {
-          this.canvasLayer.canvas.remove(object);
-          socketIntegration.imageRemoved(object.id);
-        }
-      });
+      // this.canvasLayer.canvas.getObjects().forEach((object) => {
+      //   if (object.imageId === image.id) {
+      //     this.canvasLayer.canvas.remove(object);
+      //     socketIntegration.imageRemoved(object.id);
+      //   }
+      // });
     }
   };
 
@@ -106,18 +69,31 @@ export default class TableSidebarComponent {
         const image = await getThings(`/api/get_image/${tableImage.image_id}`);
         if (image) {
           const elem = createElement("div", { class: "sidebar-image-item" }, [
-            createElement("a", {}, "+", {
-              type: "click",
-              event: async () => {
-                await this.addImageToTable(image);
-              },
-            }),
             createElement(
-              "div",
-              { style: "width: 100px; word-wrap: break-word;" },
-              image.original_name
+              "a",
+              { style: "display: flex; align-items: center; flex: 1;" },
+              [
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "width: 125px; word-wrap: break-word; margin-right: 3px;",
+                  },
+                  image.original_name
+                ),
+                await this.renderImage(image.id),
+              ],
+              {
+                type: "mousedown",
+                event: () => {
+                  imageFollowingCursor.setImageSrc(
+                    this.downloadedImageSourceList[image.id]
+                  );
+                  imageFollowingCursor.render();
+                  this.currentMouseDownImage = image;
+                },
+              }
             ),
-            await this.renderImage(image.id),
             createElement(
               "div",
               {

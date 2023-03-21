@@ -6,6 +6,7 @@ import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/TableSidebar.js";
 import CanvasLayer from "../components/CanvasLayer.js";
 import socketIntegration from "../lib/socketIntegration.js";
+import TableSidebarComponent from "../lib/TableSidebarComponent.js";
 
 class Table {
   constructor(props) {
@@ -26,29 +27,37 @@ class Table {
     const tableViews = await getThings(
       `/api/get_table_views/${state.currentProject.id}`
     );
+    // sidebar and hamburger inst
+    this.instantiateSidebar();
+    this.instantiateHamburger();
     // create canvas elem and append
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
-    this.canvasLayer = new CanvasLayer({ tableViews });
+    this.canvasLayer = new CanvasLayer({
+      tableViews,
+      tableSidebarComponent: this.tableSidebarComponent,
+    });
     socketIntegration.projectId = this.projectId;
     // setup socket listeners after canvas instantiation
     socketIntegration.socketTest();
     socketIntegration.setupListeners(this.canvasLayer);
-
-    this.instantiateSidebar();
-    this.instantiateHamburger();
 
     this.render();
     this.canvasLayer.init();
   };
 
   instantiateSidebar = () => {
-    const sidebarElem = createElement("div", {});
+    const tableSidebarComponent = new TableSidebarComponent({
+      domComponent: createElement("div", {
+        style: "display: flex; flex-direction: column;",
+      }),
+    });
     // SIDEBAR
     const sidebar = new TableSidebar({
-      domComponent: sidebarElem,
-      canvasLayer: this.canvasLayer,
+      domComponent: createElement("div", {}),
+      tableSidebarComponent,
     });
     this.sidebar = sidebar;
+    this.tableSidebarComponent = tableSidebarComponent;
   };
 
   instantiateHamburger = () => {
@@ -79,7 +88,7 @@ class Table {
     });
 
     if (state.currentProject.is_editor === false) {
-      return createElement("div", {style: "display: none;"});
+      return createElement("div", { style: "display: none;" });
     } else {
       return topLayerElem;
     }
@@ -105,7 +114,9 @@ class TopLayer {
   }
 
   handleChangeCanvasLayer = () => {
-    const gridObjectIndex = this.canvasLayer.canvas.getObjects().indexOf(this.canvasLayer.oGridGroup)
+    const gridObjectIndex = this.canvasLayer.canvas
+      .getObjects()
+      .indexOf(this.canvasLayer.oGridGroup);
 
     if (this.canvasLayer.currentLayer === "Map") {
       this.canvasLayer.currentLayer = "Object";

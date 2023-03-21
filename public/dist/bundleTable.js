@@ -478,6 +478,99 @@ class Hamburger {
   };
 }
 
+class TableSidebar {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "sidebar";
+    this.isVisible = false;
+    this.navigate = props.navigate;
+    this.tableSidebarComponent = props.tableSidebarComponent;
+  }
+
+  renderCloseSidebarElem = () => {
+    const elem = createElement("img", {
+      id: "close-sidebar",
+      class: "close-sidebar",
+      src: "/assets/sidebar.svg",
+      height: 32,
+      width: 32,
+    });
+    elem.addEventListener("click", this.close);
+    return elem;
+  };
+
+  close = () => {
+    this.isVisible = false;
+    if (this.container && this.container.style)
+      this.container.style.transform = "translate(200px, 0px)";
+    if (this.domComponent && this.domComponent.style)
+      this.domComponent.style.zIndex = "2";
+  };
+
+  open = () => {
+    this.isVisible = true;
+    if (this.container && this.container.style)
+      this.container.style.transform = "translate(0px, 0px)";
+    if (this.domComponent && this.domComponent.style)
+      this.domComponent.style.zIndex = "4";
+  };
+
+  hide = () => {
+    this.close();
+    this.domComponent.innerHTML = "";
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    const container = createElement(
+      "div",
+      {
+        class: "sidebar-container",
+      },
+      [
+        createElement("div", { class: "sidebar-header" }, "Images"),
+        this.tableSidebarComponent.domComponent,
+        this.renderCloseSidebarElem(),
+      ]
+    );
+    this.container = container;
+    this.open();
+    return this.domComponent.append(container);
+  };
+}
+
+class ImageFollowingCursor {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+
+    this.isOnPage = false;
+
+    document.addEventListener("mousemove", (e) => {
+      this.domComponent.style.left = `${e.pageX}px`;
+      this.domComponent.style.top = `${e.pageY}px`;
+    });
+  }
+
+  setImageSrc = (src) => {
+    this.domComponent.src = src;
+  };
+
+  remove = () => {
+    this.domComponent.remove();
+    this.isOnPage = false;
+  };
+
+  render = () => {
+    document.body.appendChild(this.domComponent);
+    this.isOnPage = true;
+  };
+}
+
+const imageFollowingCursor = new ImageFollowingCursor({
+  domComponent: createElement("img", { id: "image-following-cursor" }),
+});
+
 async function getPresignedForImageDownload(imageId) {
   try {
     const res = await fetch(`${window.origin}/api/signed_URL_download`, {
@@ -727,274 +820,6 @@ class SocketIntegration {
 }
 const socketIntegration = new SocketIntegration();
 
-class TableSidebarComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "table-sidebar";
-    this.canvasLayer = props.canvasLayer;
-
-    this.imageLoading = false;
-    this.render();
-
-    this.downloadedImageSourceList = {};
-  }
-
-  toggleImageLoading = () => {
-    this.imageLoading = !this.imageLoading;
-    this.render();
-  };
-
-  renderImage = async (imageId) => {
-    const imageSource = await getPresignedForImageDownload(imageId);
-    if (imageSource) {
-      this.downloadedImageSourceList[imageId] = imageSource.url;
-      return createElement("img", {
-        src: imageSource.url,
-        width: 30,
-        height: 30,
-      });
-    }
-  };
-
-  addImageToTable = async (image) => {
-    let imageSource = this.downloadedImageSourceList[image.id];
-    if (!imageSource)
-      imageSource = await getPresignedForImageDownload(image.id);
-    if (imageSource) {
-      // create new object
-      fabric.Image.fromURL(imageSource, (newImg) => {
-        // CREATE ************************
-        const id = uuidv4();
-        newImg.set("id", id);
-        newImg.set("imageId", image.id);
-        newImg.set("layer", this.canvasLayer.currentLayer);
-
-        // HANDLE ************************
-        // add to canvas
-        if (this.canvasLayer.currentLayer === "Map") {
-          const gridObjectIndex = this.canvasLayer.canvas
-            .getObjects()
-            .indexOf(this.canvasLayer.oGridGroup);
-          this.canvasLayer.canvas.add(newImg);
-          // in center of viewport
-          this.canvasLayer.canvas.viewportCenterObject(newImg);
-          newImg.moveTo(gridObjectIndex);
-        } else {
-          this.canvasLayer.canvas.add(newImg);
-          // in center of viewport
-          this.canvasLayer.canvas.viewportCenterObject(newImg);
-        }
-
-        // event listener
-        newImg.on("selected", (options) => {
-          this.canvasLayer.moveObjectUp(options.target);
-        });
-
-        // EMIT ***************************
-        socketIntegration.imageAdded(newImg);
-      });
-    }
-  };
-
-  removeImageFromTableAndSidebar = (image, tableImage, elem) => {
-    if (
-      window.confirm(`Are you sure you want to delete ${image.original_name}`)
-    ) {
-      // remove image in db
-      deleteThing(`/api/remove_image/${state$1.currentProject.id}/${image.id}`);
-      // remove table image in db
-      deleteThing(`/api/remove_table_image/${tableImage.id}`);
-      // remove elem in sidebar
-      elem.remove();
-      // remove all from screens and sockets and state
-      this.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.imageId === image.id) {
-          this.canvasLayer.canvas.remove(object);
-          socketIntegration.imageRemoved(object.id);
-        }
-      });
-    }
-  };
-
-  renderCurrentImages = async () => {
-    const tableImages = await getThings(
-      `/api/get_table_images/${state$1.currentProject.id}`
-    );
-    if (!tableImages.length) return [createElement("small", {}, "None...")];
-
-    let imageElems = [];
-    await Promise.all(
-      tableImages.map(async (tableImage) => {
-        const image = await getThings(`/api/get_image/${tableImage.image_id}`);
-        if (image) {
-          const elem = createElement("div", { class: "sidebar-image-item" }, [
-            createElement("a", {}, "+", {
-              type: "click",
-              event: async () => {
-                await this.addImageToTable(image);
-              },
-            }),
-            createElement(
-              "div",
-              { style: "width: 100px; word-wrap: break-word;" },
-              image.original_name
-            ),
-            await this.renderImage(image.id),
-            createElement(
-              "div",
-              {
-                style:
-                  "color: var(--red1); margin-left: 10px; cursor: pointer;",
-              },
-              "ⓧ",
-              {
-                type: "click",
-                event: () => {
-                  this.removeImageFromTableAndSidebar(image, tableImage, elem);
-                },
-              }
-            ),
-          ]);
-          imageElems.push(elem);
-        }
-      })
-    );
-    imageElems = imageElems.sort((a, b) => {
-      if (
-        a.children[1].innerText.toUpperCase() <
-        b.children[1].innerText.toUpperCase()
-      )
-        return -1;
-    });
-    if (imageElems.length) return imageElems;
-    else return [createElement("small", {}, "None...")];
-  };
-
-  addImageToSidebar = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      this.toggleImageLoading();
-      const newImage = await uploadImage(file, state$1.currentProject.id);
-      if (newImage) {
-        // add new table image
-        await postThing(`/api/add_table_image`, {
-          project_id: state$1.currentProject.id,
-          image_id: newImage.id,
-        });
-        // re render
-      }
-      this.toggleImageLoading();
-    }
-  };
-
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    if (this.imageLoading) {
-      return this.domComponent.append(renderLoadingWithMessage(""));
-    }
-
-    this.domComponent.append(
-      createElement(
-        "input",
-        {
-          id: "image",
-          name: "image",
-          type: "file",
-          accept: "image/*",
-          style: "display: none",
-        },
-        null,
-        {
-          type: "change",
-          event: async (e) => {
-            await this.addImageToSidebar(e);
-          },
-        }
-      ),
-      createElement(
-        "label",
-        {
-          for: "image",
-          class: "label-btn",
-        },
-        "+ Image"
-      ),
-      createElement("br"),
-      ...(await this.renderCurrentImages())
-    );
-  };
-}
-
-class TableSidebar {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "sidebar";
-    this.canvasLayer = props.canvasLayer;
-    this.isVisible = false;
-    this.navigate = props.navigate;
-  }
-
-  renderCloseSidebarElem = () => {
-    const elem = createElement("img", {
-      id: "close-sidebar",
-      class: "close-sidebar",
-      src: "/assets/sidebar.svg",
-      height: 32,
-      width: 32,
-    });
-    elem.addEventListener("click", this.close);
-    return elem;
-  };
-
-  close = () => {
-    this.isVisible = false;
-    if (this.container && this.container.style)
-      this.container.style.transform = "translate(200px, 0px)";
-    if (this.domComponent && this.domComponent.style)
-      this.domComponent.style.zIndex = "2";
-  };
-
-  open = () => {
-    this.isVisible = true;
-    if (this.container && this.container.style)
-      this.container.style.transform = "translate(0px, 0px)";
-    if (this.domComponent && this.domComponent.style)
-      this.domComponent.style.zIndex = "4";
-  };
-
-  hide = () => {
-    this.close();
-    this.domComponent.innerHTML = "";
-  };
-
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    const tableSidebarComponentElem = createElement("div", {
-      style: "display: flex; flex-direction: column;",
-    });
-    new TableSidebarComponent({
-      domComponent: tableSidebarComponentElem,
-      canvasLayer: this.canvasLayer,
-    });
-    const container = createElement(
-      "div",
-      {
-        class: "sidebar-container",
-      },
-      [
-        createElement("div", { class: "sidebar-header" }, "Images"),
-        tableSidebarComponentElem,
-        this.renderCloseSidebarElem(),
-      ]
-    );
-    this.container = container;
-    this.open();
-    return this.domComponent.append(container);
-  };
-}
-
 class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
@@ -1002,6 +827,9 @@ class CanvasLayer {
     this.currentTableView = this.tableViews[0];
     console.log(this.currentTableView);
     this.currentLayer = "Object";
+
+    // table sidebar component
+    this.tableSidebarComponent = props.tableSidebarComponent;
 
     // grid
     this.grid = 50;
@@ -1180,13 +1008,53 @@ class CanvasLayer {
       socketIntegration.imageMoved(options.target);
     });
 
-    // save data in db after mouse up
-    document.addEventListener(
-      "mouseup",
-      throttle(async (evt) => {
-        await this.saveToDatabase();
-      }, 3000)
-    );
+    // DOCUMENT MOUSE UP HACKS
+    document.addEventListener("mouseup", (e) => {
+
+      // handle adding new image
+      if (imageFollowingCursor.isOnPage) {
+        if (e.target.nodeName === "CANVAS") this.addImageToTable(this.tableSidebarComponent.currentMouseDownImage);
+      }
+      imageFollowingCursor.remove();
+    });
+  };
+
+  addImageToTable = async (image) => {
+    const imageSource = await getPresignedForImageDownload(image.id);
+    if (imageSource) {
+      // create new object
+      fabric.Image.fromURL(imageSource.url, (newImg) => {
+        // CREATE ************************
+        const id = uuidv4();
+        newImg.set("id", id);
+        newImg.set("imageId", image.id);
+        newImg.set("layer", this.currentLayer);
+
+        // HANDLE ************************
+        // add to canvas
+        if (this.currentLayer === "Map") {
+          const gridObjectIndex = this.canvas
+            .getObjects()
+            .indexOf(this.oGridGroup);
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+          newImg.moveTo(gridObjectIndex);
+        } else {
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+        }
+
+        // event listener
+        newImg.on("selected", (options) => {
+          this.moveObjectUp(options.target);
+        });
+
+        // EMIT ***************************
+        socketIntegration.imageAdded(newImg);
+      });
+    }
   };
 
   moveObjectUp = (object) => {
@@ -1259,27 +1127,180 @@ class CanvasLayer {
   };
 }
 
-///////// UTILS
-const throttle = (fn, wait) => {
-  let inThrottle, lastFn, lastTime;
-  return function () {
-    const context = this,
-      args = arguments;
-    if (!inThrottle) {
-      fn.apply(context, args);
-      lastTime = Date.now();
-      inThrottle = true;
-    } else {
-      clearTimeout(lastFn);
-      lastFn = setTimeout(function () {
-        if (Date.now() - lastTime >= wait) {
-          fn.apply(context, args);
-          lastTime = Date.now();
-        }
-      }, Math.max(wait - (Date.now() - lastTime), 0));
+class TableSidebarComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "table-sidebar";
+
+    this.currentMouseDownImage = null;
+
+    this.imageLoading = false;
+    this.downloadedImageSourceList = {};
+
+    this.render();
+
+  }
+
+  toggleImageLoading = () => {
+    this.imageLoading = !this.imageLoading;
+    this.render();
+  };
+
+  renderImage = async (imageId) => {
+    const imageSource = await getPresignedForImageDownload(imageId);
+    if (imageSource) {
+      this.downloadedImageSourceList[imageId] = imageSource.url;
+      return createElement("img", {
+        src: imageSource.url,
+        width: 30,
+        height: 30,
+        style: "pointer-events: none;",
+      });
     }
   };
-};
+
+  removeImageFromTableAndSidebar = (image, tableImage, elem) => {
+    if (
+      window.confirm(`Are you sure you want to delete ${image.original_name}`)
+    ) {
+      // remove image in db
+      deleteThing(`/api/remove_image/${state$1.currentProject.id}/${image.id}`);
+      // remove table image in db
+      deleteThing(`/api/remove_table_image/${tableImage.id}`);
+      // remove elem in sidebar
+      elem.remove();
+      // remove all from screens and sockets and state
+      // this.canvasLayer.canvas.getObjects().forEach((object) => {
+      //   if (object.imageId === image.id) {
+      //     this.canvasLayer.canvas.remove(object);
+      //     socketIntegration.imageRemoved(object.id);
+      //   }
+      // });
+    }
+  };
+
+  renderCurrentImages = async () => {
+    const tableImages = await getThings(
+      `/api/get_table_images/${state$1.currentProject.id}`
+    );
+    if (!tableImages.length) return [createElement("small", {}, "None...")];
+
+    let imageElems = [];
+    await Promise.all(
+      tableImages.map(async (tableImage) => {
+        const image = await getThings(`/api/get_image/${tableImage.image_id}`);
+        if (image) {
+          const elem = createElement("div", { class: "sidebar-image-item" }, [
+            createElement(
+              "a",
+              { style: "display: flex; align-items: center; flex: 1;" },
+              [
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "width: 125px; word-wrap: break-word; margin-right: 3px;",
+                  },
+                  image.original_name
+                ),
+                await this.renderImage(image.id),
+              ],
+              {
+                type: "mousedown",
+                event: () => {
+                  imageFollowingCursor.setImageSrc(
+                    this.downloadedImageSourceList[image.id]
+                  );
+                  imageFollowingCursor.render();
+                  this.currentMouseDownImage = image;
+                },
+              }
+            ),
+            createElement(
+              "div",
+              {
+                style:
+                  "color: var(--red1); margin-left: 10px; cursor: pointer;",
+              },
+              "ⓧ",
+              {
+                type: "click",
+                event: () => {
+                  this.removeImageFromTableAndSidebar(image, tableImage, elem);
+                },
+              }
+            ),
+          ]);
+          imageElems.push(elem);
+        }
+      })
+    );
+    imageElems = imageElems.sort((a, b) => {
+      if (
+        a.children[1].innerText.toUpperCase() <
+        b.children[1].innerText.toUpperCase()
+      )
+        return -1;
+    });
+    if (imageElems.length) return imageElems;
+    else return [createElement("small", {}, "None...")];
+  };
+
+  addImageToSidebar = async (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      this.toggleImageLoading();
+      const newImage = await uploadImage(file, state$1.currentProject.id);
+      if (newImage) {
+        // add new table image
+        await postThing(`/api/add_table_image`, {
+          project_id: state$1.currentProject.id,
+          image_id: newImage.id,
+        });
+        // re render
+      }
+      this.toggleImageLoading();
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.imageLoading) {
+      return this.domComponent.append(renderLoadingWithMessage(""));
+    }
+
+    this.domComponent.append(
+      createElement(
+        "input",
+        {
+          id: "image",
+          name: "image",
+          type: "file",
+          accept: "image/*",
+          style: "display: none",
+        },
+        null,
+        {
+          type: "change",
+          event: async (e) => {
+            await this.addImageToSidebar(e);
+          },
+        }
+      ),
+      createElement(
+        "label",
+        {
+          for: "image",
+          class: "label-btn",
+        },
+        "+ Image"
+      ),
+      createElement("br"),
+      ...(await this.renderCurrentImages())
+    );
+  };
+}
 
 class Table {
   constructor(props) {
@@ -1300,29 +1321,37 @@ class Table {
     const tableViews = await getThings(
       `/api/get_table_views/${state$1.currentProject.id}`
     );
+    // sidebar and hamburger inst
+    this.instantiateSidebar();
+    this.instantiateHamburger();
     // create canvas elem and append
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
-    this.canvasLayer = new CanvasLayer({ tableViews });
+    this.canvasLayer = new CanvasLayer({
+      tableViews,
+      tableSidebarComponent: this.tableSidebarComponent,
+    });
     socketIntegration.projectId = this.projectId;
     // setup socket listeners after canvas instantiation
     socketIntegration.socketTest();
     socketIntegration.setupListeners(this.canvasLayer);
-
-    this.instantiateSidebar();
-    this.instantiateHamburger();
 
     this.render();
     this.canvasLayer.init();
   };
 
   instantiateSidebar = () => {
-    const sidebarElem = createElement("div", {});
+    const tableSidebarComponent = new TableSidebarComponent({
+      domComponent: createElement("div", {
+        style: "display: flex; flex-direction: column;",
+      }),
+    });
     // SIDEBAR
     const sidebar = new TableSidebar({
-      domComponent: sidebarElem,
-      canvasLayer: this.canvasLayer,
+      domComponent: createElement("div", {}),
+      tableSidebarComponent,
     });
     this.sidebar = sidebar;
+    this.tableSidebarComponent = tableSidebarComponent;
   };
 
   instantiateHamburger = () => {
@@ -1353,7 +1382,7 @@ class Table {
     });
 
     if (state$1.currentProject.is_editor === false) {
-      return createElement("div", {style: "display: none;"});
+      return createElement("div", { style: "display: none;" });
     } else {
       return topLayerElem;
     }
@@ -1379,7 +1408,9 @@ class TopLayer {
   }
 
   handleChangeCanvasLayer = () => {
-    this.canvasLayer.canvas.getObjects().indexOf(this.canvasLayer.oGridGroup);
+    this.canvasLayer.canvas
+      .getObjects()
+      .indexOf(this.canvasLayer.oGridGroup);
 
     if (this.canvasLayer.currentLayer === "Map") {
       this.canvasLayer.currentLayer = "Object";

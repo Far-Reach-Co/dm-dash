@@ -1,3 +1,8 @@
+* {
+  user-select: none;
+  -moz-user-select: none;
+}
+
 .canvas-ui-elem {
   width: max-content;
   position: absolute;
@@ -17,4 +22,10 @@
   border-bottom: 1px solid var(--main-gray);
   overflow-y: auto;
   height: 500px;
+}
+
+#image-following-cursor {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.6;
 }
