@@ -825,7 +825,6 @@ class CanvasLayer {
     // setup table views and saved state
     this.tableViews = props.tableViews;
     this.currentTableView = this.tableViews[0];
-    console.log(this.currentTableView);
     this.currentLayer = "Object";
 
     // table sidebar component
@@ -871,23 +870,22 @@ class CanvasLayer {
         // update image links
         const imageSrcList = {};
 
-        await Promise.all(
-          this.currentTableView.data.objects.map(async (object) => {
-            // if (object.type === "group") return object;
-            if (object.imageId) {
-              console.log(object.imageId);
-              if (imageSrcList[object.imageId]) {
-                object.src = imageSrcList[object.imageId];
-              } else {
-                const presigned = await getPresignedForImageDownload(
-                  object.imageId
-                );
+        for (var object of this.currentTableView.data.objects) {
+          // if (object.type === "group") return object;
+          if (object.imageId) {
+            if (imageSrcList[object.imageId]) {
+              object.src = imageSrcList[object.imageId];
+            } else {
+              const presigned = await getPresignedForImageDownload(
+                object.imageId
+              );
+              if (presigned) {
                 object.src = presigned.url;
                 imageSrcList[object.imageId] = object.src;
-              }
+              } else delete this.currentTableView.data.objects[object];
             }
-          })
-        );
+          }
+        }
         // render old data
         this.canvas.loadFromJSON(this.currentTableView.data, () => {
           this.canvas.getObjects().forEach((object) => {
@@ -1009,11 +1007,20 @@ class CanvasLayer {
     });
 
     // DOCUMENT MOUSE UP HACKS
+    document.addEventListener(
+      "mouseup",
+      // save data in db after mouse up
+      throttle(async () => {
+        await this.saveToDatabase();
+      }, 3000)
+    );
     document.addEventListener("mouseup", (e) => {
-
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
-        if (e.target.nodeName === "CANVAS") this.addImageToTable(this.tableSidebarComponent.currentMouseDownImage);
+        if (e.target.nodeName === "CANVAS")
+          this.addImageToTable(
+            this.tableSidebarComponent.currentMouseDownImage
+          );
       }
       imageFollowingCursor.remove();
     });
@@ -1126,6 +1133,28 @@ class CanvasLayer {
     this.canvas.add(this.oGridGroup);
   };
 }
+
+///////// UTILS
+const throttle = (fn, wait) => {
+  let inThrottle, lastFn, lastTime;
+  return function () {
+    const context = this,
+      args = arguments;
+    if (!inThrottle) {
+      fn.apply(context, args);
+      lastTime = Date.now();
+      inThrottle = true;
+    } else {
+      clearTimeout(lastFn);
+      lastFn = setTimeout(function () {
+        if (Date.now() - lastTime >= wait) {
+          fn.apply(context, args);
+          lastTime = Date.now();
+        }
+      }, Math.max(wait - (Date.now() - lastTime), 0));
+    }
+  };
+};
 
 class TableSidebarComponent {
   constructor(props) {

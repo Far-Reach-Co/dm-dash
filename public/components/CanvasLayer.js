@@ -7,7 +7,6 @@ export default class CanvasLayer {
     // setup table views and saved state
     this.tableViews = props.tableViews;
     this.currentTableView = this.tableViews[0];
-    console.log(this.currentTableView);
     this.currentLayer = "Object";
 
     // table sidebar component
@@ -53,23 +52,22 @@ export default class CanvasLayer {
         // update image links
         const imageSrcList = {};
 
-        await Promise.all(
-          this.currentTableView.data.objects.map(async (object) => {
-            // if (object.type === "group") return object;
-            if (object.imageId) {
-              console.log(object.imageId);
-              if (imageSrcList[object.imageId]) {
-                object.src = imageSrcList[object.imageId];
-              } else {
-                const presigned = await getPresignedForImageDownload(
-                  object.imageId
-                );
+        for (var object of this.currentTableView.data.objects) {
+          // if (object.type === "group") return object;
+          if (object.imageId) {
+            if (imageSrcList[object.imageId]) {
+              object.src = imageSrcList[object.imageId];
+            } else {
+              const presigned = await getPresignedForImageDownload(
+                object.imageId
+              );
+              if (presigned) {
                 object.src = presigned.url;
                 imageSrcList[object.imageId] = object.src;
-              }
+              } else delete this.currentTableView.data.objects[object];
             }
-          })
-        );
+          }
+        }
         // render old data
         this.canvas.loadFromJSON(this.currentTableView.data, () => {
           this.canvas.getObjects().forEach((object) => {
@@ -191,15 +189,20 @@ export default class CanvasLayer {
     });
 
     // DOCUMENT MOUSE UP HACKS
-    document.addEventListener("mouseup", (e) => {
+    document.addEventListener(
+      "mouseup",
       // save data in db after mouse up
       throttle(async () => {
         await this.saveToDatabase();
-      }, 3000);
-
+      }, 3000)
+    );
+    document.addEventListener("mouseup", (e) => {
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
-        if (e.target.nodeName === "CANVAS") this.addImageToTable(this.tableSidebarComponent.currentMouseDownImage);
+        if (e.target.nodeName === "CANVAS")
+          this.addImageToTable(
+            this.tableSidebarComponent.currentMouseDownImage
+          );
       }
       imageFollowingCursor.remove();
     });
