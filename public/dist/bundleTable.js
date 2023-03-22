@@ -835,6 +835,9 @@ class CanvasLayer {
     this.unitScale = 10;
     this.canvasWidth = 250 * this.unitScale;
     this.canvasHeight = 250 * this.unitScale;
+
+    // event setup
+    this.rightClick = false;
   }
 
   init = async () => {
@@ -859,6 +862,11 @@ class CanvasLayer {
       preserveObjectStacking: true,
       // isDrawingMode: true,
       backgroundColor: "black",
+      fireRightClick: true, // <-- enable firing of right click events
+      fireMiddleClick: true, // <-- enable firing of middle click events
+      stopContextMenu: true, // <--  prevent context menu from showing
+      defaultCursor: "grab",
+      hoverCursor: "pointer"
     });
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
@@ -956,7 +964,10 @@ class CanvasLayer {
 
     this.canvas.on("mouse:down", (opt) => {
       var evt = opt.e;
-      if (evt.altKey === true || !opt.target || !opt.target.selectable) {
+      // select multiple with altkey
+      if (evt.altKey === true) return;
+      // else pan
+      if (!opt.target || !opt.target.selectable) {
         this.canvas.isDragging = true;
         this.canvas.selection = false;
         this.canvas.lastPosX = evt.clientX;
@@ -983,9 +994,17 @@ class CanvasLayer {
       this.canvas.selection = true;
     });
 
-    // remove selected objects
+    // KEYS
+    // alt key change cursor
+    document.addEventListener("keydown", (e) => {
+      if (e.altKey) {
+        this.canvas.defaultCursor = "crosshair";
+        this.canvas.setCursor("crosshair");
+      }
+    });
     document.addEventListener("keyup", (e) => {
       var key = e.key;
+      // remove selected objects
       if (key === "Backspace" || key === "Delete") {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
@@ -995,6 +1014,10 @@ class CanvasLayer {
           });
         }
       }
+
+      // reset cursor to default
+      this.canvas.defaultCursor = "grab";
+      this.canvas.setCursor("grab");
     });
 
     // more object event handlers
@@ -1007,13 +1030,14 @@ class CanvasLayer {
     });
 
     // DOCUMENT MOUSE UP HACKS
+    // save data in db after mouse up
     document.addEventListener(
       "mouseup",
-      // save data in db after mouse up
       throttle(async () => {
         await this.saveToDatabase();
       }, 3000)
     );
+
     document.addEventListener("mouseup", (e) => {
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
@@ -1023,6 +1047,9 @@ class CanvasLayer {
           );
       }
       imageFollowingCursor.remove();
+
+      // remove status of holding multi-select on right click down
+      this.rightClick = false;
     });
   };
 
@@ -1331,6 +1358,33 @@ class TableSidebarComponent {
   };
 }
 
+class Modal {
+  constructor() {
+    this.domComponent = document.getElementById("modal");
+    this.domContent = document.getElementById("modal-content");
+    this.closeButton = document.getElementById("close-modal");
+
+    this.closeButton.addEventListener("click", this.hide);
+    document.addEventListener('click', (e) => {
+      if(e.target.id === "modal") {
+        this.hide();
+      }
+    });
+  }
+
+  show = (content) => {
+    this.domComponent.style.visibility = "visible";
+    this.domContent.innerHTML = "";
+    this.domContent.append(content);
+  };
+
+  hide = () => {
+    this.domComponent.style.visibility = "hidden";
+  };
+}
+
+const modal = new Modal();
+
 class Table {
   constructor(props) {
     this.domComponent = props.domComponent;
@@ -1477,7 +1531,7 @@ class TopLayer {
     this.domComponent.innerHTML = "";
 
     this.domComponent.append(
-      createElement("div", { class: "canvas-ui-elem" }, [
+      createElement("div", { class: "table-config layers-elem" }, [
         createElement(
           "small",
           {},
@@ -1494,7 +1548,43 @@ class TopLayer {
             event: () => this.handleChangeCanvasLayer(),
           }
         ),
-      ])
+      ]),
+      createElement(
+        "div",
+        { class: "table-config info-elem" },
+        [createElement("div", {}, "?")],
+        {
+          type: "click",
+          event: () => {
+            modal.show(
+              createElement("div", { class: "help-content" }, [
+                createElement("h1", {}, "Key Commands"),
+                createElement("hr"),
+                createElement("b", {}, "Option/Alt (⌥)"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Shift"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key and click multiple objects to select multiple objects."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Delete/Backspace"),
+                createElement(
+                  "small",
+                  {},
+                  "While object is selected, press key to remove object from table."
+                ),
+              ])
+            );
+          },
+        }
+      )
     );
   };
 }

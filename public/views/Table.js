@@ -7,6 +7,7 @@ import TableSidebar from "../components/TableSidebar.js";
 import CanvasLayer from "../components/CanvasLayer.js";
 import socketIntegration from "../lib/socketIntegration.js";
 import TableSidebarComponent from "../lib/TableSidebarComponent.js";
+import modal from "../components/modal.js";
 
 class Table {
   constructor(props) {
@@ -154,7 +155,7 @@ class TopLayer {
     this.domComponent.innerHTML = "";
 
     this.domComponent.append(
-      createElement("div", { class: "canvas-ui-elem" }, [
+      createElement("div", { class: "table-config layers-elem" }, [
         createElement(
           "small",
           {},
@@ -171,7 +172,43 @@ class TopLayer {
             event: () => this.handleChangeCanvasLayer(),
           }
         ),
-      ])
+      ]),
+      createElement(
+        "div",
+        { class: "table-config info-elem" },
+        [createElement("div", {}, "?")],
+        {
+          type: "click",
+          event: () => {
+            modal.show(
+              createElement("div", { class: "help-content" }, [
+                createElement("h1", {}, "Key Commands"),
+                createElement("hr"),
+                createElement("b", {}, "Option/Alt (⌥)"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Shift"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key and click multiple objects to select multiple objects."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Delete/Backspace"),
+                createElement(
+                  "small",
+                  {},
+                  "While object is selected, press key to remove object from table."
+                ),
+              ])
+            );
+          },
+        }
+      )
     );
   };
 }

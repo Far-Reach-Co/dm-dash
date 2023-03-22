@@ -17,6 +17,9 @@ export default class CanvasLayer {
     this.unitScale = 10;
     this.canvasWidth = 250 * this.unitScale;
     this.canvasHeight = 250 * this.unitScale;
+
+    // event setup
+    this.rightClick = false;
   }
 
   init = async () => {
@@ -41,6 +44,11 @@ export default class CanvasLayer {
       preserveObjectStacking: true,
       // isDrawingMode: true,
       backgroundColor: "black",
+      fireRightClick: true, // <-- enable firing of right click events
+      fireMiddleClick: true, // <-- enable firing of middle click events
+      stopContextMenu: true, // <--  prevent context menu from showing
+      defaultCursor: "grab",
+      hoverCursor: "pointer"
     });
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
@@ -138,7 +146,10 @@ export default class CanvasLayer {
 
     this.canvas.on("mouse:down", (opt) => {
       var evt = opt.e;
-      if (evt.altKey === true || !opt.target || !opt.target.selectable) {
+      // select multiple with altkey
+      if (evt.altKey === true) return;
+      // else pan
+      if (!opt.target || !opt.target.selectable) {
         this.canvas.isDragging = true;
         this.canvas.selection = false;
         this.canvas.lastPosX = evt.clientX;
@@ -165,9 +176,17 @@ export default class CanvasLayer {
       this.canvas.selection = true;
     });
 
-    // remove selected objects
+    // KEYS
+    // alt key change cursor
+    document.addEventListener("keydown", (e) => {
+      if (e.altKey) {
+        this.canvas.defaultCursor = "crosshair"
+        this.canvas.setCursor("crosshair");
+      }
+    });
     document.addEventListener("keyup", (e) => {
       var key = e.key;
+      // remove selected objects
       if (key === "Backspace" || key === "Delete") {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
@@ -177,6 +196,10 @@ export default class CanvasLayer {
           });
         }
       }
+
+      // reset cursor to default
+      this.canvas.defaultCursor = "grab"
+      this.canvas.setCursor("grab");
     });
 
     // more object event handlers
@@ -189,13 +212,14 @@ export default class CanvasLayer {
     });
 
     // DOCUMENT MOUSE UP HACKS
+    // save data in db after mouse up
     document.addEventListener(
       "mouseup",
-      // save data in db after mouse up
       throttle(async () => {
         await this.saveToDatabase();
       }, 3000)
     );
+
     document.addEventListener("mouseup", (e) => {
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
@@ -205,6 +229,9 @@ export default class CanvasLayer {
           );
       }
       imageFollowingCursor.remove();
+
+      // remove status of holding multi-select on right click down
+      this.rightClick = false;
     });
   };
 
