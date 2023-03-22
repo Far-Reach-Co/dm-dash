@@ -999,11 +999,10 @@ class CanvasLayer {
             object.left + options.target.left + options.target.width / 2;
           let absoluteTop =
             object.top + options.target.top + options.target.height / 2;
-
-          const newObj = Object.create(object); // important not to disturb original object
+          const newObj = JSON.parse(JSON.stringify(object)); // important not to disturb original object
           newObj.left = absoluteLeft;
           newObj.top = absoluteTop;
-
+          console.log(newObj);
           socketIntegration.imageMoved(newObj);
         }
       } else socketIntegration.imageMoved(options.target);
