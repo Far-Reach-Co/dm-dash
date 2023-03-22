@@ -732,9 +732,9 @@ class SocketIntegration {
     });
 
     this.socket.on("image-move", (image) => {
-      // console.log("Move socket image", image);
+      console.log("Move socket image", image);
       canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === image.id) {
+        if (object.id && object.id === image.id) {
           for (var [key, value] of Object.entries(image)) {
             object[key] = value;
           }
@@ -781,6 +781,43 @@ class SocketIntegration {
       });
       //
     });
+
+    this.socket.on("object-change-layer", (object) => {
+      console.log("Move socket object to different layer", object);
+      canvasLayer.canvas.getObjects().forEach((item) => {
+        if (item.id === object.id) {
+          item.layer = object.layer;
+
+          if (item.layer === "Map") {
+            const gridObjectIndex = canvasLayer.canvas
+              .getObjects()
+              .indexOf(canvasLayer.oGridGroup);
+            item.moveTo(gridObjectIndex);
+            if (canvasLayer.currentLayer === "Map") {
+              item.opacity = "1";
+              item.selectable = true;
+              item.evented = true;
+            } else {
+              item.opacity = "1";
+              item.selectable = false;
+              item.evented = false;
+            }
+          } else if (item.layer === "Object") {
+            item.bringToFront();
+            if (canvasLayer.currentLayer === "Map") {
+              item.opacity = "0.5";
+              item.selectable = false;
+              item.evented = false;
+            } else {
+              item.opacity = "1";
+              item.selectable = true;
+              item.evented = true;
+            }
+          }
+        }
+      });
+      //
+    });
   };
 
   socketTest = () => {
@@ -813,6 +850,13 @@ class SocketIntegration {
 
   objectMoveUp = (object) => {
     this.socket.emit("object-moved-up", {
+      project: `project-${this.projectId}`,
+      object,
+    });
+  };
+
+  objectChangeLayer = (object) => {
+    this.socket.emit("object-changed-layer", {
       project: `project-${this.projectId}`,
       object,
     });
@@ -866,7 +910,7 @@ class CanvasLayer {
       fireMiddleClick: true, // <-- enable firing of middle click events
       stopContextMenu: true, // <--  prevent context menu from showing
       defaultCursor: "grab",
-      hoverCursor: "pointer"
+      hoverCursor: "pointer",
     });
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
@@ -939,15 +983,30 @@ class CanvasLayer {
   };
 
   setupEventListeners = () => {
-    // snap to grid
     this.canvas.on("object:moving", (options) => {
+      // align to grid
       const left = Math.round(options.target.left / this.grid) * this.grid;
       const top = Math.round(options.target.top / this.grid) * this.grid;
       options.target.set({
         left,
         top,
       });
-      socketIntegration.imageMoved(options.target);
+
+      // if multiple objects calculate special distance
+      if (options.target.hasOwnProperty("_objects")) {
+        for (var object of options.target._objects) {
+          let absoluteLeft =
+            object.left + options.target.left + options.target.width / 2;
+          let absoluteTop =
+            object.top + options.target.top + options.target.height / 2;
+
+          const newObj = Object.create(object); // important not to disturb original object
+          newObj.left = absoluteLeft;
+          newObj.top = absoluteTop;
+
+          socketIntegration.imageMoved(newObj);
+        }
+      } else socketIntegration.imageMoved(options.target);
     });
 
     // Zoom
@@ -995,11 +1054,19 @@ class CanvasLayer {
     });
 
     // KEYS
-    // alt key change cursor
     document.addEventListener("keydown", (e) => {
+      // alt key change cursor
       if (e.altKey) {
         this.canvas.defaultCursor = "crosshair";
         this.canvas.setCursor("crosshair");
+      }
+      // move active objects to other layer
+      if (e.ctrlKey) {
+        console.log("ok ctr");
+        const activeObjects = this.canvas.getActiveObjects();
+        for (var object of activeObjects) {
+          this.moveObjectToOtherLayer(object);
+        }
       }
     });
     document.addEventListener("keyup", (e) => {
@@ -1099,6 +1166,37 @@ class CanvasLayer {
       object.bringToFront();
     }
     socketIntegration.objectMoveUp(object);
+  };
+
+  moveObjectToOtherLayer = (object) => {
+    if (object.layer === "Map") {
+      object.layer = "Object";
+      object.bringToFront();
+      if (this.currentLayer === "Map") {
+        object.opacity = "0.5";
+        object.selectable = false;
+        object.evented = false;
+      } else {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      }
+    } else if (object.layer === "Object") {
+      object.layer = "Map";
+      const gridObjectIndex = this.canvas.getObjects().indexOf(this.oGridGroup);
+      object.moveTo(gridObjectIndex);
+      if (this.currentLayer === "Map") {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      } else {
+        object.opacity = "1";
+        object.selectable = false;
+        object.evented = false;
+      }
+    }
+
+    socketIntegration.objectChangeLayer(object);
   };
 
   saveToDatabase = async () => {
@@ -1456,27 +1554,18 @@ class Table {
     this.hamburger.render();
   };
 
-  renderTopLayerOrNot = () => {
-    // create UI layer above canvas and append
+  render = async () => {
+    this.renderSidebarAndHamburger();
+
     const topLayerElem = createElement("div");
     new TopLayer({
       domComponent: topLayerElem,
       canvasLayer: this.canvasLayer,
     });
 
-    if (state$1.currentProject.is_editor === false) {
-      return createElement("div", { style: "display: none;" });
-    } else {
-      return topLayerElem;
-    }
-  };
-
-  render = async () => {
-    this.renderSidebarAndHamburger();
-
     this.domComponent.append(
       createElement("div", { style: "position: relative;" }, [
-        this.renderTopLayerOrNot(),
+        topLayerElem,
         this.canvasElem,
       ])
     );
@@ -1527,11 +1616,11 @@ class TopLayer {
     this.render();
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      createElement("div", { class: "table-config layers-elem" }, [
+  renderLayersElem = () => {
+    if (state$1.currentProject.is_editor === false) {
+      return createElement("div", { style: "display: none;" });
+    } else {
+      return createElement("div", { class: "table-config layers-elem" }, [
         createElement(
           "small",
           {},
@@ -1548,7 +1637,15 @@ class TopLayer {
             event: () => this.handleChangeCanvasLayer(),
           }
         ),
-      ]),
+      ]);
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      this.renderLayersElem(),
       createElement(
         "div",
         { class: "table-config info-elem" },

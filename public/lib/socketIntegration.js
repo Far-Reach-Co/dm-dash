@@ -42,7 +42,7 @@ class SocketIntegration {
         }
         // event listener
         img.on("selected", (options) => {
-          canvasLayer.moveObjectUp(options.target)
+          canvasLayer.moveObjectUp(options.target);
         });
       });
     });
@@ -58,9 +58,9 @@ class SocketIntegration {
     });
 
     this.socket.on("image-move", (image) => {
-      // console.log("Move socket image", image);
+      console.log("Move socket image", image);
       canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === image.id) {
+        if (object.id && object.id === image.id) {
           for (var [key, value] of Object.entries(image)) {
             object[key] = value;
           }
@@ -101,7 +101,44 @@ class SocketIntegration {
               .indexOf(canvasLayer.oGridGroup);
             item.moveTo(gridObjectIndex - 1);
           } else {
-            item.bringToFront()
+            item.bringToFront();
+          }
+        }
+      });
+      //
+    });
+
+    this.socket.on("object-change-layer", (object) => {
+      console.log("Move socket object to different layer", object);
+      canvasLayer.canvas.getObjects().forEach((item) => {
+        if (item.id === object.id) {
+          item.layer = object.layer;
+
+          if (item.layer === "Map") {
+            const gridObjectIndex = canvasLayer.canvas
+              .getObjects()
+              .indexOf(canvasLayer.oGridGroup);
+            item.moveTo(gridObjectIndex);
+            if (canvasLayer.currentLayer === "Map") {
+              item.opacity = "1";
+              item.selectable = true;
+              item.evented = true;
+            } else {
+              item.opacity = "1";
+              item.selectable = false;
+              item.evented = false;
+            }
+          } else if (item.layer === "Object") {
+            item.bringToFront();
+            if (canvasLayer.currentLayer === "Map") {
+              item.opacity = "0.5";
+              item.selectable = false;
+              item.evented = false;
+            } else {
+              item.opacity = "1";
+              item.selectable = true;
+              item.evented = true;
+            }
           }
         }
       });
@@ -139,6 +176,13 @@ class SocketIntegration {
 
   objectMoveUp = (object) => {
     this.socket.emit("object-moved-up", {
+      project: `project-${this.projectId}`,
+      object,
+    });
+  };
+
+  objectChangeLayer = (object) => {
+    this.socket.emit("object-changed-layer", {
       project: `project-${this.projectId}`,
       object,
     });

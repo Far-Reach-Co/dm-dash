@@ -80,27 +80,18 @@ class Table {
     this.hamburger.render();
   };
 
-  renderTopLayerOrNot = () => {
-    // create UI layer above canvas and append
+  render = async () => {
+    this.renderSidebarAndHamburger();
+
     const topLayerElem = createElement("div");
     new TopLayer({
       domComponent: topLayerElem,
       canvasLayer: this.canvasLayer,
     });
 
-    if (state.currentProject.is_editor === false) {
-      return createElement("div", { style: "display: none;" });
-    } else {
-      return topLayerElem;
-    }
-  };
-
-  render = async () => {
-    this.renderSidebarAndHamburger();
-
     this.domComponent.append(
       createElement("div", { style: "position: relative;" }, [
-        this.renderTopLayerOrNot(),
+        topLayerElem,
         this.canvasElem,
       ])
     );
@@ -151,11 +142,11 @@ class TopLayer {
     this.render();
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      createElement("div", { class: "table-config layers-elem" }, [
+  renderLayersElem = () => {
+    if (state.currentProject.is_editor === false) {
+      return createElement("div", { style: "display: none;" });
+    } else {
+      return createElement("div", { class: "table-config layers-elem" }, [
         createElement(
           "small",
           {},
@@ -172,7 +163,15 @@ class TopLayer {
             event: () => this.handleChangeCanvasLayer(),
           }
         ),
-      ]),
+      ]);
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      this.renderLayersElem(),
       createElement(
         "div",
         { class: "table-config info-elem" },

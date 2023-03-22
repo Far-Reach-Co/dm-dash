@@ -103,6 +103,10 @@ io.on("connection", (socket) => {
     socket.broadcast.to(project).emit("object-move-up", object);
   });
 
+  socket.on("object-changed-layer", ({project, object}) => {
+    socket.broadcast.to(project).emit("object-change-layer", object);
+  });
+
 });
 
 //Run

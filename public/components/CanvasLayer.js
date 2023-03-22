@@ -48,7 +48,7 @@ export default class CanvasLayer {
       fireMiddleClick: true, // <-- enable firing of middle click events
       stopContextMenu: true, // <--  prevent context menu from showing
       defaultCursor: "grab",
-      hoverCursor: "pointer"
+      hoverCursor: "pointer",
     });
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
@@ -121,15 +121,30 @@ export default class CanvasLayer {
   };
 
   setupEventListeners = () => {
-    // snap to grid
     this.canvas.on("object:moving", (options) => {
+      // align to grid
       const left = Math.round(options.target.left / this.grid) * this.grid;
       const top = Math.round(options.target.top / this.grid) * this.grid;
       options.target.set({
         left,
         top,
       });
-      socketIntegration.imageMoved(options.target);
+
+      // if multiple objects calculate special distance
+      if (options.target.hasOwnProperty("_objects")) {
+        for (var object of options.target._objects) {
+          let absoluteLeft =
+            object.left + options.target.left + options.target.width / 2;
+          let absoluteTop =
+            object.top + options.target.top + options.target.height / 2;
+
+          const newObj = Object.create(object); // important not to disturb original object
+          newObj.left = absoluteLeft;
+          newObj.top = absoluteTop;
+
+          socketIntegration.imageMoved(newObj);
+        }
+      } else socketIntegration.imageMoved(options.target);
     });
 
     // Zoom
@@ -177,11 +192,19 @@ export default class CanvasLayer {
     });
 
     // KEYS
-    // alt key change cursor
     document.addEventListener("keydown", (e) => {
+      // alt key change cursor
       if (e.altKey) {
-        this.canvas.defaultCursor = "crosshair"
+        this.canvas.defaultCursor = "crosshair";
         this.canvas.setCursor("crosshair");
+      }
+      // move active objects to other layer
+      if (e.ctrlKey) {
+        console.log("ok ctr");
+        const activeObjects = this.canvas.getActiveObjects();
+        for (var object of activeObjects) {
+          this.moveObjectToOtherLayer(object);
+        }
       }
     });
     document.addEventListener("keyup", (e) => {
@@ -198,7 +221,7 @@ export default class CanvasLayer {
       }
 
       // reset cursor to default
-      this.canvas.defaultCursor = "grab"
+      this.canvas.defaultCursor = "grab";
       this.canvas.setCursor("grab");
     });
 
@@ -281,6 +304,37 @@ export default class CanvasLayer {
       object.bringToFront();
     }
     socketIntegration.objectMoveUp(object);
+  };
+
+  moveObjectToOtherLayer = (object) => {
+    if (object.layer === "Map") {
+      object.layer = "Object";
+      object.bringToFront();
+      if (this.currentLayer === "Map") {
+        object.opacity = "0.5";
+        object.selectable = false;
+        object.evented = false;
+      } else {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      }
+    } else if (object.layer === "Object") {
+      object.layer = "Map";
+      const gridObjectIndex = this.canvas.getObjects().indexOf(this.oGridGroup);
+      object.moveTo(gridObjectIndex);
+      if (this.currentLayer === "Map") {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      } else {
+        object.opacity = "1";
+        object.selectable = false;
+        object.evented = false;
+      }
+    }
+
+    socketIntegration.objectChangeLayer(object);
   };
 
   saveToDatabase = async () => {
