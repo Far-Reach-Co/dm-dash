@@ -1,6 +1,11 @@
 # This is to prevent formatting SQL queries
 # It is a coarse option - we may change to a more elegant solution later
 src/api/queries/*
+src/lib/db_backups/*
+
+# This is redundant, but just in case
+.sql
+
 
 # Here onward is copied from gitignore
 
