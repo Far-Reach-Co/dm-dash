@@ -898,6 +898,12 @@ class CanvasLayer {
       };
     })(fabric.Object.prototype.toObject);
 
+    // OVERWRITE GROUP TO DISABLE PROPERTIES
+    fabric.Group.prototype.hasControls = false;
+    fabric.Group.prototype.lockScalingX = true;
+    fabric.Group.prototype.lockScalingY = true;
+    fabric.Group.prototype.lockRotation = true;
+
     // init canvas
     this.canvas = new fabric.Canvas("canvas-layer", {
       containerClass: "canvas-layer",
@@ -1002,7 +1008,6 @@ class CanvasLayer {
           const newObj = JSON.parse(JSON.stringify(object)); // important not to disturb original object
           newObj.left = absoluteLeft;
           newObj.top = absoluteTop;
-          console.log(newObj);
           socketIntegration.imageMoved(newObj);
         }
       } else socketIntegration.imageMoved(options.target);
