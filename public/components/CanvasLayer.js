@@ -217,6 +217,12 @@ export default class CanvasLayer {
       if (key === "Backspace" || key === "Delete") {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
+            if (object.hasOwnProperty("_objects")) {
+              for(var subObj of object._objects) {
+                this.canvas.remove(subObj);
+                socketIntegration.imageRemoved(subObj.id);
+              }
+            }
             this.canvas.remove(object);
             socketIntegration.imageRemoved(object.id);
             this.saveToDatabase();

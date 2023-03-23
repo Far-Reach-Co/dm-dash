@@ -1079,6 +1079,12 @@ class CanvasLayer {
       if (key === "Backspace" || key === "Delete") {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
+            if (object.hasOwnProperty("_objects")) {
+              for(var subObj of object._objects) {
+                this.canvas.remove(subObj);
+                socketIntegration.imageRemoved(subObj.id);
+              }
+            }
             this.canvas.remove(object);
             socketIntegration.imageRemoved(object.id);
             this.saveToDatabase();
@@ -1666,6 +1672,13 @@ class TopLayer {
                   "small",
                   {},
                   "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Control (⌃)"),
+                createElement(
+                  "small",
+                  {},
+                  "While an object is selected, pressing control will change the layer that the object is currently on."
                 ),
                 createElement("br"),
                 createElement("b", {}, "Shift"),

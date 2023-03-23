@@ -190,6 +190,13 @@ class TopLayer {
                   "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
                 ),
                 createElement("br"),
+                createElement("b", {}, "Control (⌃)"),
+                createElement(
+                  "small",
+                  {},
+                  "While an object is selected, pressing control will change the layer that the object is currently on."
+                ),
+                createElement("br"),
                 createElement("b", {}, "Shift"),
                 createElement(
                   "small",
