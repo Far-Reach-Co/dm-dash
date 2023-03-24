@@ -6,7 +6,6 @@ import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/TableSidebar.js";
 import CanvasLayer from "../components/CanvasLayer.js";
 import socketIntegration from "../lib/socketIntegration.js";
-import TableSidebarComponent from "../lib/TableSidebarComponent.js";
 import modal from "../components/modal.js";
 
 class Table {
@@ -15,7 +14,9 @@ class Table {
     this.domComponent.className = "app";
     this.params = props.params;
 
-    this.canvasLayer;
+    this.canvasLayer = null;
+    this.sidebar = null;
+    this.hamburger = null;
 
     this.init();
   }
@@ -35,35 +36,30 @@ class Table {
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.canvasLayer = new CanvasLayer({
       tableViews,
-      tableSidebarComponent: this.tableSidebarComponent,
+      tableSidebarComponent: this.sidebar.tableSidebarComponent,
     });
+    // provide socket necessary variables
     socketIntegration.projectId = this.projectId;
+    socketIntegration.user = state.user;
+    socketIntegration.sidebar = this.sidebar;
     // setup socket listeners after canvas instantiation
-    socketIntegration.socketTest();
     socketIntegration.setupListeners(this.canvasLayer);
+    socketIntegration.socketJoined();
 
     this.render();
     this.canvasLayer.init();
   };
 
   instantiateSidebar = () => {
-    const tableSidebarComponent = new TableSidebarComponent({
-      domComponent: createElement("div", {
-        style: "display: flex; flex-direction: column;",
-      }),
-    });
-    // SIDEBAR
     const sidebar = new TableSidebar({
       domComponent: createElement("div", {}),
-      tableSidebarComponent,
     });
     this.sidebar = sidebar;
-    this.tableSidebarComponent = tableSidebarComponent;
   };
 
   instantiateHamburger = () => {
     const hamburgerElem = createElement("div", {});
-    // SIDEBAR
+
     const hamburger = new Hamburger({
       domComponent: hamburgerElem,
       sidebar: this.sidebar,

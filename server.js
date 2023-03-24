@@ -11,7 +11,13 @@ var path = require("path");
 const bodyParser = require("body-parser");
 const routes = require("./src/api/routes.js");
 const { verifyUserByToken } = require("./src/api/controllers/users.js");
+const {
+  userJoin,
+  getProjectUsers,
+  userLeave,
+} = require("./src/lib/socketUsers.js");
 
+/***************************** SETUP AND UTILS ***************************/
 async function getUserByToken(token) {
   try {
     const userData = await verifyUserByToken(token);
@@ -68,18 +74,23 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Socket
+/***************************** SOCKETS ***************************/
 io.on("connection", (socket) => {
   // testing
-  socket.on("joinProject", ({ project }) => {
+  socket.on("project-joined", ({ project, userEmail }) => {
     try {
       console.log("************** SOCKETTTTTT ***********************\n");
-      console.log(project, "\n");
+      console.log(project, userEmail, "\n");
       console.log("************** SOCKETTTTTT ***********************\n");
+
+      const user = userJoin(socket.id, userEmail, project);
       socket.join(project);
 
       // broadcast when a user connects
-      io.to(project).emit("message", "Hello test");
+      io.to(project).emit("project-join", `Hello ${userEmail}`);
+
+      // send users list
+      io.to(user.project).emit("current-users", getProjectUsers(project));
     } catch (err) {
       console.log("SOCKET ERROR", err);
     }
@@ -99,17 +110,26 @@ io.on("connection", (socket) => {
     socket.broadcast.to(project).emit("image-move", image);
   });
 
-  socket.on("object-moved-up", ({project, object}) => {
+  socket.on("object-moved-up", ({ project, object }) => {
     socket.broadcast.to(project).emit("object-move-up", object);
   });
 
-  socket.on("object-changed-layer", ({project, object}) => {
+  socket.on("object-changed-layer", ({ project, object }) => {
     socket.broadcast.to(project).emit("object-change-layer", object);
   });
 
+  // when a user disconnects
+  socket.on("disconnect", () => {
+    const user = userLeave(socket.id);
+
+    if (user) {
+      // send users list
+      io.to(user.project).emit("current-users", getProjectUsers(user.project));
+    }
+  });
 });
 
-//Run
+/***************************** Run ***************************/
 var PORT = 80;
 server.listen({ port: PORT }, async () => {
   console.log(`Server Running at http://localhost:${PORT}`);

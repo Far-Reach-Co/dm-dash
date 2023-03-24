@@ -3,15 +3,27 @@ class SocketIntegration {
     this.socket = io(window.location.origin);
 
     this.projectId = null;
+    this.user = null;
+    this.sidebar = null;
 
-    // message from server TESTING
-    this.socket.on("message", (message) => {
-      console.log("New socket message", message);
-    });
   }
-
+  
   // Listeners
   setupListeners = (canvasLayer) => {
+
+    // USER JOIN
+    this.socket.on("project-join", (message) => {
+      console.log("User Joined:\n", message);
+    });
+
+    // UPDATE CURRENT USERS
+    this.socket.on("current-users", (list) => {
+      if (this.sidebar) {
+        this.sidebar.onlineUsersComponent.usersList = list;
+        this.sidebar.onlineUsersComponent.render();
+      }
+    });
+
     // OBJECTS LISTENERS
     this.socket.on("image-add", (newImg) => {
       // console.log("New socket image", newImg);
@@ -146,12 +158,13 @@ class SocketIntegration {
     });
   };
 
-  socketTest = () => {
-    this.socket.emit("joinProject", {
-      // user: state.user.email,
+  socketJoined = () => {
+    this.socket.emit("project-joined", {
+      userEmail: this.user.email,
       project: `project-${this.projectId}`,
     });
   };
+
   // OBJECTS
   imageAdded = (image) => {
     this.socket.emit("image-added", {
