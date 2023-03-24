@@ -2508,11 +2508,11 @@ class SideBar {
       [
         createElement("div", { class: "sidebar-header" }, "Main Modules"),
         ...this.renderMainRoutesElems(),
-        createElement("a", {class: "sidebar-item"}, "Table", {
+        createElement("a", {class: "sidebar-item"}, "Table ↗", {
           type: "click",
           event: () => {
-            history.pushState(state$1.currentProject.id, null, `/vtt.html`);
-            window.location.reload();
+            localStorage.setItem("current-table-project-id", state$1.currentProject.id);
+            window.open("/vtt.html", '_blank').focus();
           }
         }),
         createElement("div", { class: "sidebar-header" }, "Personal Tools"),

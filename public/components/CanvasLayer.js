@@ -1,3 +1,4 @@
+import imageFollowingCursor from "../lib/imageFollowingCursor.js";
 import { getPresignedForImageDownload } from "../lib/imageUtils.js";
 import socketIntegration from "../lib/socketIntegration.js";
 
@@ -6,14 +7,19 @@ export default class CanvasLayer {
     // setup table views and saved state
     this.tableViews = props.tableViews;
     this.currentTableView = this.tableViews[0];
-    console.log(this.currentTableView);
     this.currentLayer = "Object";
+
+    // table sidebar component
+    this.tableSidebarComponent = props.tableSidebarComponent;
 
     // grid
     this.grid = 50;
     this.unitScale = 10;
     this.canvasWidth = 250 * this.unitScale;
     this.canvasHeight = 250 * this.unitScale;
+
+    // event setup
+    this.rightClick = false;
   }
 
   init = async () => {
@@ -30,6 +36,12 @@ export default class CanvasLayer {
       };
     })(fabric.Object.prototype.toObject);
 
+    // OVERWRITE GROUP TO DISABLE PROPERTIES
+    fabric.Group.prototype.hasControls = false;
+    fabric.Group.prototype.lockScalingX = true;
+    fabric.Group.prototype.lockScalingY = true;
+    fabric.Group.prototype.lockRotation = true;
+
     // init canvas
     this.canvas = new fabric.Canvas("canvas-layer", {
       containerClass: "canvas-layer",
@@ -38,6 +50,11 @@ export default class CanvasLayer {
       preserveObjectStacking: true,
       // isDrawingMode: true,
       backgroundColor: "black",
+      fireRightClick: true, // <-- enable firing of right click events
+      fireMiddleClick: true, // <-- enable firing of middle click events
+      stopContextMenu: true, // <--  prevent context menu from showing
+      defaultCursor: "grab",
+      hoverCursor: "pointer",
     });
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
@@ -49,23 +66,22 @@ export default class CanvasLayer {
         // update image links
         const imageSrcList = {};
 
-        await Promise.all(
-          this.currentTableView.data.objects.map(async (object) => {
-            // if (object.type === "group") return object;
-            if (object.imageId) {
-              console.log(object.imageId);
-              if (imageSrcList[object.imageId]) {
-                object.src = imageSrcList[object.imageId];
-              } else {
-                const presigned = await getPresignedForImageDownload(
-                  object.imageId
-                );
+        for (var object of this.currentTableView.data.objects) {
+          // if (object.type === "group") return object;
+          if (object.imageId) {
+            if (imageSrcList[object.imageId]) {
+              object.src = imageSrcList[object.imageId];
+            } else {
+              const presigned = await getPresignedForImageDownload(
+                object.imageId
+              );
+              if (presigned) {
                 object.src = presigned.url;
                 imageSrcList[object.imageId] = object.src;
-              }
+              } else delete this.currentTableView.data.objects[object];
             }
-          })
-        );
+          }
+        }
         // render old data
         this.canvas.loadFromJSON(this.currentTableView.data, () => {
           this.canvas.getObjects().forEach((object) => {
@@ -111,15 +127,28 @@ export default class CanvasLayer {
   };
 
   setupEventListeners = () => {
-    // snap to grid
     this.canvas.on("object:moving", (options) => {
+      // align to grid
       const left = Math.round(options.target.left / this.grid) * this.grid;
       const top = Math.round(options.target.top / this.grid) * this.grid;
       options.target.set({
         left,
         top,
       });
-      socketIntegration.imageMoved(options.target);
+
+      // if multiple objects calculate special distance
+      if (options.target.hasOwnProperty("_objects")) {
+        for (var object of options.target._objects) {
+          let absoluteLeft =
+            object.left + options.target.left + options.target.width / 2;
+          let absoluteTop =
+            object.top + options.target.top + options.target.height / 2;
+          const newObj = JSON.parse(JSON.stringify(object)); // important not to disturb original object
+          newObj.left = absoluteLeft;
+          newObj.top = absoluteTop;
+          socketIntegration.imageMoved(newObj);
+        }
+      } else socketIntegration.imageMoved(options.target);
     });
 
     // Zoom
@@ -136,7 +165,10 @@ export default class CanvasLayer {
 
     this.canvas.on("mouse:down", (opt) => {
       var evt = opt.e;
-      if (evt.altKey === true || !opt.target || !opt.target.selectable) {
+      // select multiple with altkey
+      if (evt.altKey === true) return;
+      // else pan
+      if (!opt.target || !opt.target.selectable) {
         this.canvas.isDragging = true;
         this.canvas.selection = false;
         this.canvas.lastPosX = evt.clientX;
@@ -163,18 +195,44 @@ export default class CanvasLayer {
       this.canvas.selection = true;
     });
 
-    // remove selected objects
+    // KEYS
+    document.addEventListener("keydown", (e) => {
+      // alt key change cursor
+      if (e.altKey) {
+        this.canvas.defaultCursor = "crosshair";
+        this.canvas.setCursor("crosshair");
+      }
+      // move active objects to other layer
+      if (e.ctrlKey) {
+        console.log("ok ctr");
+        const activeObjects = this.canvas.getActiveObjects();
+        for (var object of activeObjects) {
+          this.moveObjectToOtherLayer(object);
+        }
+      }
+    });
     document.addEventListener("keyup", (e) => {
       var key = e.key;
+      // remove selected objects
       if (key === "Backspace" || key === "Delete") {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
+            if (object.hasOwnProperty("_objects")) {
+              for(var subObj of object._objects) {
+                this.canvas.remove(subObj);
+                socketIntegration.imageRemoved(subObj.id);
+              }
+            }
             this.canvas.remove(object);
             socketIntegration.imageRemoved(object.id);
             this.saveToDatabase();
           });
         }
       }
+
+      // reset cursor to default
+      this.canvas.defaultCursor = "grab";
+      this.canvas.setCursor("grab");
     });
 
     // more object event handlers
@@ -186,13 +244,66 @@ export default class CanvasLayer {
       socketIntegration.imageMoved(options.target);
     });
 
+    // DOCUMENT MOUSE UP HACKS
     // save data in db after mouse up
     document.addEventListener(
       "mouseup",
-      throttle(async (evt) => {
+      throttle(async () => {
         await this.saveToDatabase();
       }, 3000)
     );
+
+    document.addEventListener("mouseup", (e) => {
+      // handle adding new image
+      if (imageFollowingCursor.isOnPage) {
+        if (e.target.nodeName === "CANVAS")
+          this.addImageToTable(
+            this.tableSidebarComponent.currentMouseDownImage
+          );
+      }
+      imageFollowingCursor.remove();
+
+      // remove status of holding multi-select on right click down
+      this.rightClick = false;
+    });
+  };
+
+  addImageToTable = async (image) => {
+    const imageSource = await getPresignedForImageDownload(image.id);
+    if (imageSource) {
+      // create new object
+      fabric.Image.fromURL(imageSource.url, (newImg) => {
+        // CREATE ************************
+        const id = uuidv4();
+        newImg.set("id", id);
+        newImg.set("imageId", image.id);
+        newImg.set("layer", this.currentLayer);
+
+        // HANDLE ************************
+        // add to canvas
+        if (this.currentLayer === "Map") {
+          const gridObjectIndex = this.canvas
+            .getObjects()
+            .indexOf(this.oGridGroup);
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+          newImg.moveTo(gridObjectIndex);
+        } else {
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+        }
+
+        // event listener
+        newImg.on("selected", (options) => {
+          this.moveObjectUp(options.target);
+        });
+
+        // EMIT ***************************
+        socketIntegration.imageAdded(newImg);
+      });
+    }
   };
 
   moveObjectUp = (object) => {
@@ -203,6 +314,37 @@ export default class CanvasLayer {
       object.bringToFront();
     }
     socketIntegration.objectMoveUp(object);
+  };
+
+  moveObjectToOtherLayer = (object) => {
+    if (object.layer === "Map") {
+      object.layer = "Object";
+      object.bringToFront();
+      if (this.currentLayer === "Map") {
+        object.opacity = "0.5";
+        object.selectable = false;
+        object.evented = false;
+      } else {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      }
+    } else if (object.layer === "Object") {
+      object.layer = "Map";
+      const gridObjectIndex = this.canvas.getObjects().indexOf(this.oGridGroup);
+      object.moveTo(gridObjectIndex);
+      if (this.currentLayer === "Map") {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      } else {
+        object.opacity = "1";
+        object.selectable = false;
+        object.evented = false;
+      }
+    }
+
+    socketIntegration.objectChangeLayer(object);
   };
 
   saveToDatabase = async () => {

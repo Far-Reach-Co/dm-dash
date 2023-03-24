@@ -579,164 +579,49 @@ async function uploadImage(image, currentProjectId, currentImageId) {
   }
 }
 
-class SocketIntegration {
-  constructor() {
-    this.socket = io(window.location.origin);
+class ImageFollowingCursor {
+  constructor(props) {
+    this.domComponent = props.domComponent;
 
-    this.projectId = null;
+    this.isOnPage = false;
 
-    // message from server TESTING
-    this.socket.on("message", (message) => {
-      console.log("New socket message", message);
+    document.addEventListener("mousemove", (e) => {
+      this.domComponent.style.left = `${e.pageX}px`;
+      this.domComponent.style.top = `${e.pageY}px`;
     });
   }
 
-  // Listeners
-  setupListeners = (canvasLayer) => {
-    // OBJECTS LISTENERS
-    this.socket.on("image-add", (newImg) => {
-      // console.log("New socket image", newImg);
-
-      fabric.Image.fromURL(newImg.src, function (img) {
-        // reconstruct new image
-        for (const [key, value] of Object.entries(newImg)) {
-          img[key] = value;
-        }
-        // add to canvas
-        if (img.layer === "Map") {
-          if (canvasLayer.currentLayer === "Object") {
-            img.selectable = false;
-            img.evented = false;
-          }
-          const gridObjectIndex = canvasLayer.canvas
-            .getObjects()
-            .indexOf(canvasLayer.oGridGroup);
-          canvasLayer.canvas.add(img);
-          img.moveTo(gridObjectIndex);
-        } else {
-          if (canvasLayer.currentLayer === "Map") {
-            img.opacity = "0.5";
-            img.selectable = false;
-            img.evented = false;
-          }
-          canvasLayer.canvas.add(img);
-        }
-        // event listener
-        img.on("selected", (options) => {
-          canvasLayer.moveObjectUp(options.target);
-        });
-      });
-    });
-
-    this.socket.on("image-remove", (id) => {
-      // console.log("Remove socket image", id);
-
-      canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === id) {
-          canvasLayer.canvas.remove(object);
-        }
-      });
-    });
-
-    this.socket.on("image-move", (image) => {
-      // console.log("Move socket image", image);
-      canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === image.id) {
-          for (var [key, value] of Object.entries(image)) {
-            object[key] = value;
-          }
-          if (canvasLayer.currentLayer === "Map") {
-            if (object.layer === "Object") {
-              object.opacity = "0.5";
-              object.selectable = false;
-              object.evented = false;
-            } else {
-              object.opacity = "1";
-              object.selectable = true;
-              object.evented = true;
-            }
-          } else {
-            if (object.layer === "Map") {
-              object.opacity = "1";
-              object.selectable = false;
-              object.evented = false;
-            } else {
-              object.opacity = "1";
-              object.selectable = true;
-              object.evented = true;
-            }
-          }
-          canvasLayer.canvas.renderAll();
-        }
-      });
-      //
-    });
-
-    this.socket.on("object-move-up", (object) => {
-      // console.log("Move socket object up", object);
-      canvasLayer.canvas.getObjects().forEach((item) => {
-        if (item.id === object.id) {
-          if (item.layer === "Map") {
-            const gridObjectIndex = canvasLayer.canvas
-              .getObjects()
-              .indexOf(canvasLayer.oGridGroup);
-            item.moveTo(gridObjectIndex - 1);
-          } else {
-            item.bringToFront();
-          }
-        }
-      });
-      //
-    });
+  setImageSrc = (src) => {
+    this.domComponent.src = src;
   };
 
-  socketTest = () => {
-    this.socket.emit("joinProject", {
-      // user: state.user.email,
-      project: `project-${this.projectId}`,
-    });
-  };
-  // OBJECTS
-  imageAdded = (image) => {
-    this.socket.emit("image-added", {
-      project: `project-${this.projectId}`,
-      image,
-    });
+  remove = () => {
+    this.domComponent.remove();
+    this.isOnPage = false;
   };
 
-  imageRemoved = (id) => {
-    this.socket.emit("image-removed", {
-      project: `project-${this.projectId}`,
-      id,
-    });
-  };
-
-  imageMoved = (image) => {
-    this.socket.emit("image-moved", {
-      project: `project-${this.projectId}`,
-      image,
-    });
-  };
-
-  objectMoveUp = (object) => {
-    this.socket.emit("object-moved-up", {
-      project: `project-${this.projectId}`,
-      object,
-    });
+  render = () => {
+    document.body.appendChild(this.domComponent);
+    this.isOnPage = true;
   };
 }
-const socketIntegration = new SocketIntegration();
+
+const imageFollowingCursor = new ImageFollowingCursor({
+  domComponent: createElement("img", { id: "image-following-cursor" }),
+});
 
 class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar";
-    this.canvasLayer = props.canvasLayer;
+
+    this.currentMouseDownImage = null;
 
     this.imageLoading = false;
+    this.downloadedImageSourceList = {};
+
     this.render();
 
-    this.downloadedImageSourceList = {};
   }
 
   toggleImageLoading = () => {
@@ -752,46 +637,7 @@ class TableSidebarComponent {
         src: imageSource.url,
         width: 30,
         height: 30,
-      });
-    }
-  };
-
-  addImageToTable = async (image) => {
-    let imageSource = this.downloadedImageSourceList[image.id];
-    if (!imageSource)
-      imageSource = await getPresignedForImageDownload(image.id);
-    if (imageSource) {
-      // create new object
-      fabric.Image.fromURL(imageSource, (newImg) => {
-        // CREATE ************************
-        const id = uuidv4();
-        newImg.set("id", id);
-        newImg.set("imageId", image.id);
-        newImg.set("layer", this.canvasLayer.currentLayer);
-
-        // HANDLE ************************
-        // add to canvas
-        if (this.canvasLayer.currentLayer === "Map") {
-          const gridObjectIndex = this.canvasLayer.canvas
-            .getObjects()
-            .indexOf(this.canvasLayer.oGridGroup);
-          this.canvasLayer.canvas.add(newImg);
-          // in center of viewport
-          this.canvasLayer.canvas.viewportCenterObject(newImg);
-          newImg.moveTo(gridObjectIndex);
-        } else {
-          this.canvasLayer.canvas.add(newImg);
-          // in center of viewport
-          this.canvasLayer.canvas.viewportCenterObject(newImg);
-        }
-
-        // event listener
-        newImg.on("selected", (options) => {
-          this.canvasLayer.moveObjectUp(options.target);
-        });
-
-        // EMIT ***************************
-        socketIntegration.imageAdded(newImg);
+        style: "pointer-events: none;",
       });
     }
   };
@@ -807,12 +653,12 @@ class TableSidebarComponent {
       // remove elem in sidebar
       elem.remove();
       // remove all from screens and sockets and state
-      this.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.imageId === image.id) {
-          this.canvasLayer.canvas.remove(object);
-          socketIntegration.imageRemoved(object.id);
-        }
-      });
+      // this.canvasLayer.canvas.getObjects().forEach((object) => {
+      //   if (object.imageId === image.id) {
+      //     this.canvasLayer.canvas.remove(object);
+      //     socketIntegration.imageRemoved(object.id);
+      //   }
+      // });
     }
   };
 
@@ -828,18 +674,31 @@ class TableSidebarComponent {
         const image = await getThings(`/api/get_image/${tableImage.image_id}`);
         if (image) {
           const elem = createElement("div", { class: "sidebar-image-item" }, [
-            createElement("a", {}, "+", {
-              type: "click",
-              event: async () => {
-                await this.addImageToTable(image);
-              },
-            }),
             createElement(
-              "div",
-              { style: "width: 100px; word-wrap: break-word;" },
-              image.original_name
+              "a",
+              { style: "display: flex; align-items: center; flex: 1;" },
+              [
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "width: 125px; word-wrap: break-word; margin-right: 3px;",
+                  },
+                  image.original_name
+                ),
+                await this.renderImage(image.id),
+              ],
+              {
+                type: "mousedown",
+                event: () => {
+                  imageFollowingCursor.setImageSrc(
+                    this.downloadedImageSourceList[image.id]
+                  );
+                  imageFollowingCursor.render();
+                  this.currentMouseDownImage = image;
+                },
+              }
             ),
-            await this.renderImage(image.id),
             createElement(
               "div",
               {
@@ -930,9 +789,20 @@ class TableSidebar {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "sidebar";
-    this.canvasLayer = props.canvasLayer;
     this.isVisible = false;
     this.navigate = props.navigate;
+
+    // table sidebar component
+    this.tableSidebarComponent = new TableSidebarComponent({
+      domComponent: createElement("div", {
+        style: "display: flex; flex-direction: column;",
+      }),
+    });
+    
+    // setup online users component
+    this.onlineUsersComponent = new OnlineUsersComponent({
+      domComponent: createElement("div"),
+    });
   }
 
   renderCloseSidebarElem = () => {
@@ -971,13 +841,6 @@ class TableSidebar {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    const tableSidebarComponentElem = createElement("div", {
-      style: "display: flex; flex-direction: column;",
-    });
-    new TableSidebarComponent({
-      domComponent: tableSidebarComponentElem,
-      canvasLayer: this.canvasLayer,
-    });
     const container = createElement(
       "div",
       {
@@ -985,7 +848,9 @@ class TableSidebar {
       },
       [
         createElement("div", { class: "sidebar-header" }, "Images"),
-        tableSidebarComponentElem,
+        this.tableSidebarComponent.domComponent,
+        createElement("div", { class: "sidebar-header" }, "Online Users"),
+        this.onlineUsersComponent.domComponent,
         this.renderCloseSidebarElem(),
       ]
     );
@@ -995,19 +860,261 @@ class TableSidebar {
   };
 }
 
+class OnlineUsersComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "online-users-container";
+
+    this.usersList = [];
+
+    this.render();
+  }
+
+  renderUsersList = () => {
+    if (!this.usersList.length) return [createElement("small", {}, "None...")];
+
+    return this.usersList.map((user) => {
+      return createElement(
+        "div",
+        {
+          style:
+            "display: flex; align-items: center; justify-content: space-between",
+        },
+        [createElement("div", {class: "online-indicator"}), createElement("div", {}, user.username)]
+      );
+    });
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(...this.renderUsersList());
+  };
+}
+
+class SocketIntegration {
+  constructor() {
+    this.socket = io(window.location.origin);
+
+    this.projectId = null;
+    this.user = null;
+    this.sidebar = null;
+
+  }
+  
+  // Listeners
+  setupListeners = (canvasLayer) => {
+
+    // USER JOIN
+    this.socket.on("project-join", (message) => {
+      console.log("User Joined:\n", message);
+    });
+
+    // UPDATE CURRENT USERS
+    this.socket.on("current-users", (list) => {
+      if (this.sidebar) {
+        this.sidebar.onlineUsersComponent.usersList = list;
+        this.sidebar.onlineUsersComponent.render();
+      }
+    });
+
+    // OBJECTS LISTENERS
+    this.socket.on("image-add", (newImg) => {
+      // console.log("New socket image", newImg);
+
+      fabric.Image.fromURL(newImg.src, function (img) {
+        // reconstruct new image
+        for (const [key, value] of Object.entries(newImg)) {
+          img[key] = value;
+        }
+        // add to canvas
+        if (img.layer === "Map") {
+          if (canvasLayer.currentLayer === "Object") {
+            img.selectable = false;
+            img.evented = false;
+          }
+          const gridObjectIndex = canvasLayer.canvas
+            .getObjects()
+            .indexOf(canvasLayer.oGridGroup);
+          canvasLayer.canvas.add(img);
+          img.moveTo(gridObjectIndex);
+        } else {
+          if (canvasLayer.currentLayer === "Map") {
+            img.opacity = "0.5";
+            img.selectable = false;
+            img.evented = false;
+          }
+          canvasLayer.canvas.add(img);
+        }
+        // event listener
+        img.on("selected", (options) => {
+          canvasLayer.moveObjectUp(options.target);
+        });
+      });
+    });
+
+    this.socket.on("image-remove", (id) => {
+      // console.log("Remove socket image", id);
+
+      canvasLayer.canvas.getObjects().forEach((object) => {
+        if (object.id === id) {
+          canvasLayer.canvas.remove(object);
+        }
+      });
+    });
+
+    this.socket.on("image-move", (image) => {
+      console.log("Move socket image", image);
+      canvasLayer.canvas.getObjects().forEach((object) => {
+        if (object.id && object.id === image.id) {
+          for (var [key, value] of Object.entries(image)) {
+            object[key] = value;
+          }
+          if (canvasLayer.currentLayer === "Map") {
+            if (object.layer === "Object") {
+              object.opacity = "0.5";
+              object.selectable = false;
+              object.evented = false;
+            } else {
+              object.opacity = "1";
+              object.selectable = true;
+              object.evented = true;
+            }
+          } else {
+            if (object.layer === "Map") {
+              object.opacity = "1";
+              object.selectable = false;
+              object.evented = false;
+            } else {
+              object.opacity = "1";
+              object.selectable = true;
+              object.evented = true;
+            }
+          }
+          canvasLayer.canvas.renderAll();
+        }
+      });
+      //
+    });
+
+    this.socket.on("object-move-up", (object) => {
+      // console.log("Move socket object up", object);
+      canvasLayer.canvas.getObjects().forEach((item) => {
+        if (item.id === object.id) {
+          if (item.layer === "Map") {
+            const gridObjectIndex = canvasLayer.canvas
+              .getObjects()
+              .indexOf(canvasLayer.oGridGroup);
+            item.moveTo(gridObjectIndex - 1);
+          } else {
+            item.bringToFront();
+          }
+        }
+      });
+      //
+    });
+
+    this.socket.on("object-change-layer", (object) => {
+      console.log("Move socket object to different layer", object);
+      canvasLayer.canvas.getObjects().forEach((item) => {
+        if (item.id === object.id) {
+          item.layer = object.layer;
+
+          if (item.layer === "Map") {
+            const gridObjectIndex = canvasLayer.canvas
+              .getObjects()
+              .indexOf(canvasLayer.oGridGroup);
+            item.moveTo(gridObjectIndex);
+            if (canvasLayer.currentLayer === "Map") {
+              item.opacity = "1";
+              item.selectable = true;
+              item.evented = true;
+            } else {
+              item.opacity = "1";
+              item.selectable = false;
+              item.evented = false;
+            }
+          } else if (item.layer === "Object") {
+            item.bringToFront();
+            if (canvasLayer.currentLayer === "Map") {
+              item.opacity = "0.5";
+              item.selectable = false;
+              item.evented = false;
+            } else {
+              item.opacity = "1";
+              item.selectable = true;
+              item.evented = true;
+            }
+          }
+        }
+      });
+      //
+    });
+  };
+
+  socketJoined = () => {
+    this.socket.emit("project-joined", {
+      userEmail: this.user.email,
+      project: `project-${this.projectId}`,
+    });
+  };
+
+  // OBJECTS
+  imageAdded = (image) => {
+    this.socket.emit("image-added", {
+      project: `project-${this.projectId}`,
+      image,
+    });
+  };
+
+  imageRemoved = (id) => {
+    this.socket.emit("image-removed", {
+      project: `project-${this.projectId}`,
+      id,
+    });
+  };
+
+  imageMoved = (image) => {
+    this.socket.emit("image-moved", {
+      project: `project-${this.projectId}`,
+      image,
+    });
+  };
+
+  objectMoveUp = (object) => {
+    this.socket.emit("object-moved-up", {
+      project: `project-${this.projectId}`,
+      object,
+    });
+  };
+
+  objectChangeLayer = (object) => {
+    this.socket.emit("object-changed-layer", {
+      project: `project-${this.projectId}`,
+      object,
+    });
+  };
+}
+const socketIntegration = new SocketIntegration();
+
 class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
     this.tableViews = props.tableViews;
     this.currentTableView = this.tableViews[0];
-    console.log(this.currentTableView);
     this.currentLayer = "Object";
+
+    // table sidebar component
+    this.tableSidebarComponent = props.tableSidebarComponent;
 
     // grid
     this.grid = 50;
     this.unitScale = 10;
     this.canvasWidth = 250 * this.unitScale;
     this.canvasHeight = 250 * this.unitScale;
+
+    // event setup
+    this.rightClick = false;
   }
 
   init = async () => {
@@ -1024,6 +1131,12 @@ class CanvasLayer {
       };
     })(fabric.Object.prototype.toObject);
 
+    // OVERWRITE GROUP TO DISABLE PROPERTIES
+    fabric.Group.prototype.hasControls = false;
+    fabric.Group.prototype.lockScalingX = true;
+    fabric.Group.prototype.lockScalingY = true;
+    fabric.Group.prototype.lockRotation = true;
+
     // init canvas
     this.canvas = new fabric.Canvas("canvas-layer", {
       containerClass: "canvas-layer",
@@ -1032,6 +1145,11 @@ class CanvasLayer {
       preserveObjectStacking: true,
       // isDrawingMode: true,
       backgroundColor: "black",
+      fireRightClick: true, // <-- enable firing of right click events
+      fireMiddleClick: true, // <-- enable firing of middle click events
+      stopContextMenu: true, // <--  prevent context menu from showing
+      defaultCursor: "grab",
+      hoverCursor: "pointer",
     });
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
@@ -1043,23 +1161,22 @@ class CanvasLayer {
         // update image links
         const imageSrcList = {};
 
-        await Promise.all(
-          this.currentTableView.data.objects.map(async (object) => {
-            // if (object.type === "group") return object;
-            if (object.imageId) {
-              console.log(object.imageId);
-              if (imageSrcList[object.imageId]) {
-                object.src = imageSrcList[object.imageId];
-              } else {
-                const presigned = await getPresignedForImageDownload(
-                  object.imageId
-                );
+        for (var object of this.currentTableView.data.objects) {
+          // if (object.type === "group") return object;
+          if (object.imageId) {
+            if (imageSrcList[object.imageId]) {
+              object.src = imageSrcList[object.imageId];
+            } else {
+              const presigned = await getPresignedForImageDownload(
+                object.imageId
+              );
+              if (presigned) {
                 object.src = presigned.url;
                 imageSrcList[object.imageId] = object.src;
-              }
+              } else delete this.currentTableView.data.objects[object];
             }
-          })
-        );
+          }
+        }
         // render old data
         this.canvas.loadFromJSON(this.currentTableView.data, () => {
           this.canvas.getObjects().forEach((object) => {
@@ -1105,15 +1222,28 @@ class CanvasLayer {
   };
 
   setupEventListeners = () => {
-    // snap to grid
     this.canvas.on("object:moving", (options) => {
+      // align to grid
       const left = Math.round(options.target.left / this.grid) * this.grid;
       const top = Math.round(options.target.top / this.grid) * this.grid;
       options.target.set({
         left,
         top,
       });
-      socketIntegration.imageMoved(options.target);
+
+      // if multiple objects calculate special distance
+      if (options.target.hasOwnProperty("_objects")) {
+        for (var object of options.target._objects) {
+          let absoluteLeft =
+            object.left + options.target.left + options.target.width / 2;
+          let absoluteTop =
+            object.top + options.target.top + options.target.height / 2;
+          const newObj = JSON.parse(JSON.stringify(object)); // important not to disturb original object
+          newObj.left = absoluteLeft;
+          newObj.top = absoluteTop;
+          socketIntegration.imageMoved(newObj);
+        }
+      } else socketIntegration.imageMoved(options.target);
     });
 
     // Zoom
@@ -1130,7 +1260,10 @@ class CanvasLayer {
 
     this.canvas.on("mouse:down", (opt) => {
       var evt = opt.e;
-      if (evt.altKey === true || !opt.target || !opt.target.selectable) {
+      // select multiple with altkey
+      if (evt.altKey === true) return;
+      // else pan
+      if (!opt.target || !opt.target.selectable) {
         this.canvas.isDragging = true;
         this.canvas.selection = false;
         this.canvas.lastPosX = evt.clientX;
@@ -1157,18 +1290,44 @@ class CanvasLayer {
       this.canvas.selection = true;
     });
 
-    // remove selected objects
+    // KEYS
+    document.addEventListener("keydown", (e) => {
+      // alt key change cursor
+      if (e.altKey) {
+        this.canvas.defaultCursor = "crosshair";
+        this.canvas.setCursor("crosshair");
+      }
+      // move active objects to other layer
+      if (e.ctrlKey) {
+        console.log("ok ctr");
+        const activeObjects = this.canvas.getActiveObjects();
+        for (var object of activeObjects) {
+          this.moveObjectToOtherLayer(object);
+        }
+      }
+    });
     document.addEventListener("keyup", (e) => {
       var key = e.key;
+      // remove selected objects
       if (key === "Backspace" || key === "Delete") {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
+            if (object.hasOwnProperty("_objects")) {
+              for(var subObj of object._objects) {
+                this.canvas.remove(subObj);
+                socketIntegration.imageRemoved(subObj.id);
+              }
+            }
             this.canvas.remove(object);
             socketIntegration.imageRemoved(object.id);
             this.saveToDatabase();
           });
         }
       }
+
+      // reset cursor to default
+      this.canvas.defaultCursor = "grab";
+      this.canvas.setCursor("grab");
     });
 
     // more object event handlers
@@ -1180,13 +1339,66 @@ class CanvasLayer {
       socketIntegration.imageMoved(options.target);
     });
 
+    // DOCUMENT MOUSE UP HACKS
     // save data in db after mouse up
     document.addEventListener(
       "mouseup",
-      throttle(async (evt) => {
+      throttle(async () => {
         await this.saveToDatabase();
       }, 3000)
     );
+
+    document.addEventListener("mouseup", (e) => {
+      // handle adding new image
+      if (imageFollowingCursor.isOnPage) {
+        if (e.target.nodeName === "CANVAS")
+          this.addImageToTable(
+            this.tableSidebarComponent.currentMouseDownImage
+          );
+      }
+      imageFollowingCursor.remove();
+
+      // remove status of holding multi-select on right click down
+      this.rightClick = false;
+    });
+  };
+
+  addImageToTable = async (image) => {
+    const imageSource = await getPresignedForImageDownload(image.id);
+    if (imageSource) {
+      // create new object
+      fabric.Image.fromURL(imageSource.url, (newImg) => {
+        // CREATE ************************
+        const id = uuidv4();
+        newImg.set("id", id);
+        newImg.set("imageId", image.id);
+        newImg.set("layer", this.currentLayer);
+
+        // HANDLE ************************
+        // add to canvas
+        if (this.currentLayer === "Map") {
+          const gridObjectIndex = this.canvas
+            .getObjects()
+            .indexOf(this.oGridGroup);
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+          newImg.moveTo(gridObjectIndex);
+        } else {
+          this.canvas.add(newImg);
+          // in center of viewport
+          this.canvas.viewportCenterObject(newImg);
+        }
+
+        // event listener
+        newImg.on("selected", (options) => {
+          this.moveObjectUp(options.target);
+        });
+
+        // EMIT ***************************
+        socketIntegration.imageAdded(newImg);
+      });
+    }
   };
 
   moveObjectUp = (object) => {
@@ -1197,6 +1409,37 @@ class CanvasLayer {
       object.bringToFront();
     }
     socketIntegration.objectMoveUp(object);
+  };
+
+  moveObjectToOtherLayer = (object) => {
+    if (object.layer === "Map") {
+      object.layer = "Object";
+      object.bringToFront();
+      if (this.currentLayer === "Map") {
+        object.opacity = "0.5";
+        object.selectable = false;
+        object.evented = false;
+      } else {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      }
+    } else if (object.layer === "Object") {
+      object.layer = "Map";
+      const gridObjectIndex = this.canvas.getObjects().indexOf(this.oGridGroup);
+      object.moveTo(gridObjectIndex);
+      if (this.currentLayer === "Map") {
+        object.opacity = "1";
+        object.selectable = true;
+        object.evented = true;
+      } else {
+        object.opacity = "1";
+        object.selectable = false;
+        object.evented = false;
+      }
+    }
+
+    socketIntegration.objectChangeLayer(object);
   };
 
   saveToDatabase = async () => {
@@ -1281,53 +1524,85 @@ const throttle = (fn, wait) => {
   };
 };
 
+class Modal {
+  constructor() {
+    this.domComponent = document.getElementById("modal");
+    this.domContent = document.getElementById("modal-content");
+    this.closeButton = document.getElementById("close-modal");
+
+    this.closeButton.addEventListener("click", this.hide);
+    document.addEventListener('click', (e) => {
+      if(e.target.id === "modal") {
+        this.hide();
+      }
+    });
+  }
+
+  show = (content) => {
+    this.domComponent.style.visibility = "visible";
+    this.domContent.innerHTML = "";
+    this.domContent.append(content);
+  };
+
+  hide = () => {
+    this.domComponent.style.visibility = "hidden";
+  };
+}
+
+const modal = new Modal();
+
 class Table {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "app";
     this.params = props.params;
 
-    this.canvasLayer;
+    this.canvasLayer = null;
+    this.sidebar = null;
+    this.hamburger = null;
 
     this.init();
   }
 
   init = async () => {
     // get table views
-    this.projectId = history.state;
+    this.projectId = localStorage.getItem("current-table-project-id");
     const project = await getThings(`/api/get_project/${this.projectId}`);
     state$1.currentProject = project;
     const tableViews = await getThings(
       `/api/get_table_views/${state$1.currentProject.id}`
     );
-    // create canvas elem and append
-    this.canvasElem = createElement("canvas", { id: "canvas-layer" });
-    this.canvasLayer = new CanvasLayer({ tableViews });
-    socketIntegration.projectId = this.projectId;
-    // setup socket listeners after canvas instantiation
-    socketIntegration.socketTest();
-    socketIntegration.setupListeners(this.canvasLayer);
-
+    // sidebar and hamburger inst
     this.instantiateSidebar();
     this.instantiateHamburger();
+    // create canvas elem and append
+    this.canvasElem = createElement("canvas", { id: "canvas-layer" });
+    this.canvasLayer = new CanvasLayer({
+      tableViews,
+      tableSidebarComponent: this.sidebar.tableSidebarComponent,
+    });
+    // provide socket necessary variables
+    socketIntegration.projectId = this.projectId;
+    socketIntegration.user = state$1.user;
+    socketIntegration.sidebar = this.sidebar;
+    // setup socket listeners after canvas instantiation
+    socketIntegration.setupListeners(this.canvasLayer);
+    socketIntegration.socketJoined();
 
     this.render();
     this.canvasLayer.init();
   };
 
   instantiateSidebar = () => {
-    const sidebarElem = createElement("div", {});
-    // SIDEBAR
     const sidebar = new TableSidebar({
-      domComponent: sidebarElem,
-      canvasLayer: this.canvasLayer,
+      domComponent: createElement("div", {}),
     });
     this.sidebar = sidebar;
   };
 
   instantiateHamburger = () => {
     const hamburgerElem = createElement("div", {});
-    // SIDEBAR
+
     const hamburger = new Hamburger({
       domComponent: hamburgerElem,
       sidebar: this.sidebar,
@@ -1344,27 +1619,18 @@ class Table {
     this.hamburger.render();
   };
 
-  renderTopLayerOrNot = () => {
-    // create UI layer above canvas and append
+  render = async () => {
+    this.renderSidebarAndHamburger();
+
     const topLayerElem = createElement("div");
     new TopLayer({
       domComponent: topLayerElem,
       canvasLayer: this.canvasLayer,
     });
 
-    if (state$1.currentProject.is_editor === false) {
-      return createElement("div", {style: "display: none;"});
-    } else {
-      return topLayerElem;
-    }
-  };
-
-  render = async () => {
-    this.renderSidebarAndHamburger();
-
     this.domComponent.append(
       createElement("div", { style: "position: relative;" }, [
-        this.renderTopLayerOrNot(),
+        topLayerElem,
         this.canvasElem,
       ])
     );
@@ -1379,7 +1645,9 @@ class TopLayer {
   }
 
   handleChangeCanvasLayer = () => {
-    this.canvasLayer.canvas.getObjects().indexOf(this.canvasLayer.oGridGroup);
+    this.canvasLayer.canvas
+      .getObjects()
+      .indexOf(this.canvasLayer.oGridGroup);
 
     if (this.canvasLayer.currentLayer === "Map") {
       this.canvasLayer.currentLayer = "Object";
@@ -1413,11 +1681,11 @@ class TopLayer {
     this.render();
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      createElement("div", { class: "canvas-ui-elem" }, [
+  renderLayersElem = () => {
+    if (state$1.currentProject.is_editor === false) {
+      return createElement("div", { style: "display: none;" });
+    } else {
+      return createElement("div", { class: "table-config layers-elem" }, [
         createElement(
           "small",
           {},
@@ -1434,7 +1702,58 @@ class TopLayer {
             event: () => this.handleChangeCanvasLayer(),
           }
         ),
-      ])
+      ]);
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      this.renderLayersElem(),
+      createElement(
+        "div",
+        { class: "table-config info-elem" },
+        [createElement("div", {}, "?")],
+        {
+          type: "click",
+          event: () => {
+            modal.show(
+              createElement("div", { class: "help-content" }, [
+                createElement("h1", {}, "Key Commands"),
+                createElement("hr"),
+                createElement("b", {}, "Option/Alt (⌥)"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Control (⌃)"),
+                createElement(
+                  "small",
+                  {},
+                  "While an object is selected, pressing control will change the layer that the object is currently on."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Shift"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key and click multiple objects to select multiple objects."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Delete/Backspace"),
+                createElement(
+                  "small",
+                  {},
+                  "While object is selected, press key to remove object from table."
+                ),
+              ])
+            );
+          },
+        }
+      )
     );
   };
 }
