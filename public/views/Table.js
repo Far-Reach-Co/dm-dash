@@ -138,22 +138,42 @@ class TopLayer {
     this.render();
   };
 
+  renderStyledLayerInfoComponent = () => {
+    if (this.canvasLayer.currentLayer === "Map") {
+      return createElement("div", { style: "display: flex;" }, [
+        createElement(
+          "small",
+          { style: "margin-right: 3px;" },
+          "Current Layer:"
+        ),
+        createElement("small", { style: "color: var(--orange2)" }, "Map"),
+      ]);
+    } else {
+      return createElement("div", { style: "display: flex;" }, [
+        createElement(
+          "small",
+          { style: "margin-right: 3px;" },
+          "Current Layer:"
+        ),
+        createElement("small", { style: "color: var(--green)" }, "Object"),
+      ]);
+    }
+  };
+
   renderLayersElem = () => {
     if (state.currentProject.is_editor === false) {
       return createElement("div", { style: "display: none;" });
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
-        createElement(
-          "small",
-          {},
-          `Current Layer: ${this.canvasLayer.currentLayer}`
-        ),
+        this.renderStyledLayerInfoComponent(),
+        createElement("br"),
         createElement(
           "button",
-          {},
-          `View ${
-            this.canvasLayer.currentLayer === "Map" ? "Object" : "Map"
-          } Layer`,
+          {
+            class:
+              this.canvasLayer.currentLayer === "Object" ? "btn-h-orange" : "",
+          },
+          "Switch Layer",
           {
             type: "click",
             event: () => this.handleChangeCanvasLayer(),

@@ -6,8 +6,7 @@
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url("./assets/fonts/IBM_Plex_Sans/IBMPlexSans-Regular.ttf")
-    format("woff2");
+  src: url("./assets/fonts/IBM_Plex_Sans/IBMPlexSans-Regular.ttf") format("woff2");
 }
 
 @font-face {
@@ -85,12 +84,10 @@ hr {
 
 .special-hr {
   border: 0;
-  background-image: linear-gradient(
-    to right,
-    rgba(255, 255, 255, 0),
-    var(--main-gray),
-    rgba(255, 255, 255, 0)
-  );
+  background-image: linear-gradient(to right,
+      rgba(255, 255, 255, 0),
+      var(--main-gray),
+      rgba(255, 255, 255, 0));
   margin-top: 5px;
   margin-bottom: 30px;
 }
@@ -166,6 +163,7 @@ nav {
   border-top: 0.5px solid var(--main-gray);
   transition: 0s;
 }
+
 #nav-links-container-mobile .top-nav-btn:hover {
   background-color: var(--blue);
 }
@@ -235,6 +233,10 @@ button {
 
 button:hover {
   background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
+.btn-h-orange:hover {
+  background: linear-gradient(var(--orange2) 10%, var(--orange) 90%);
 }
 
 .label-btn {
@@ -978,15 +980,15 @@ footer {
   transition: 0.4s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
   background-color: var(--green2);
 }
 
-input:focus + .slider {
+input:focus+.slider {
   box-shadow: 0 0 1px var(--green2);
 }
 
-input:checked + .slider:before {
+input:checked+.slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);
