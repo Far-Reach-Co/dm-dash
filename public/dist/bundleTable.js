@@ -798,7 +798,7 @@ class TableSidebar {
         style: "display: flex; flex-direction: column;",
       }),
     });
-    
+
     // setup online users component
     this.onlineUsersComponent = new OnlineUsersComponent({
       domComponent: createElement("div"),
@@ -877,10 +877,12 @@ class OnlineUsersComponent {
       return createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: space-between",
+          class: "online-user-item",
         },
-        [createElement("div", {class: "online-indicator"}), createElement("div", {}, user.username)]
+        [
+          createElement("div", { class: "online-indicator" }),
+          createElement("div", {}, user.username),
+        ]
       );
     });
   };
@@ -1681,22 +1683,42 @@ class TopLayer {
     this.render();
   };
 
+  renderStyledLayerInfoComponent = () => {
+    if (this.canvasLayer.currentLayer === "Map") {
+      return createElement("div", { style: "display: flex;" }, [
+        createElement(
+          "small",
+          { style: "margin-right: 3px;" },
+          "Current Layer:"
+        ),
+        createElement("small", { style: "color: var(--orange2)" }, "Map"),
+      ]);
+    } else {
+      return createElement("div", { style: "display: flex;" }, [
+        createElement(
+          "small",
+          { style: "margin-right: 3px;" },
+          "Current Layer:"
+        ),
+        createElement("small", { style: "color: var(--green)" }, "Object"),
+      ]);
+    }
+  };
+
   renderLayersElem = () => {
     if (state$1.currentProject.is_editor === false) {
       return createElement("div", { style: "display: none;" });
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
-        createElement(
-          "small",
-          {},
-          `Current Layer: ${this.canvasLayer.currentLayer}`
-        ),
+        this.renderStyledLayerInfoComponent(),
+        createElement("br"),
         createElement(
           "button",
-          {},
-          `View ${
-            this.canvasLayer.currentLayer === "Map" ? "Object" : "Map"
-          } Layer`,
+          {
+            class:
+              this.canvasLayer.currentLayer === "Object" ? "btn-h-orange" : "",
+          },
+          "Switch Layer",
           {
             type: "click",
             event: () => this.handleChangeCanvasLayer(),

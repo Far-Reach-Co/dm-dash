@@ -27,6 +27,7 @@
   padding: 3px 10px;
   border-radius: 30px;
 }
+
 .info-elem:hover {
   cursor: help;
   background-color: var(--green);
@@ -68,4 +69,12 @@
   height: 10px;
   border-radius: 30px;
   background-color: var(--green);
+  margin-right: 5px;
+}
+
+.online-user-item {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  justify-content: space-between;
 }

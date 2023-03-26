@@ -14,7 +14,7 @@ export default class TableSidebar {
         style: "display: flex; flex-direction: column;",
       }),
     });
-    
+
     // setup online users component
     this.onlineUsersComponent = new OnlineUsersComponent({
       domComponent: createElement("div"),
@@ -93,10 +93,12 @@ class OnlineUsersComponent {
       return createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: space-between",
+          class: "online-user-item",
         },
-        [createElement("div", {class: "online-indicator"}), createElement("div", {}, user.username)]
+        [
+          createElement("div", { class: "online-indicator" }),
+          createElement("div", {}, user.username),
+        ]
       );
     });
   };
