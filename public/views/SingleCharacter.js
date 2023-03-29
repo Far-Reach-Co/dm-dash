@@ -11,6 +11,7 @@ import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
 import renderLoreList from "../lib/renderLoreList.js";
+import RichText from "../lib/RichText.js";
 
 export default class SingleCharacterView {
   constructor(props) {
@@ -80,9 +81,10 @@ export default class SingleCharacterView {
       ];
   };
 
-  saveCharacter = async (e) => {
+  saveCharacter = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -164,6 +166,10 @@ export default class SingleCharacterView {
       );
     }
 
+    const richText = new RichText({
+      value: this.character.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -179,16 +185,7 @@ export default class SingleCharacterView {
             value: this.character.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.character.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -210,7 +207,7 @@ export default class SingleCharacterView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveCharacter(e);
+            this.saveCharacter(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -255,6 +252,9 @@ export default class SingleCharacterView {
       characterId: this.character.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.character.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -277,11 +277,7 @@ export default class SingleCharacterView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.character.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           currentLocationComponent,
@@ -294,7 +290,11 @@ export default class SingleCharacterView {
           ...(await this.renderItems()),
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, "Lore"),
-          ...(await renderLoreList("character", this.character.id, this.navigate)),
+          ...(await renderLoreList(
+            "character",
+            this.character.id,
+            this.navigate
+          )),
           createElement("br"),
         ]),
       ]),

@@ -12,6 +12,7 @@ import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
 import CurrentCharacterComponent from "../lib/CurrentCharacterComponent.js";
 import renderLoreList from "../lib/renderLoreList.js";
+import RichText from "../lib/RichText.js";
 
 export default class SingleItemView {
   constructor(props) {
@@ -46,9 +47,10 @@ export default class SingleItemView {
     this.render();
   };
 
-  saveItem = async (e) => {
+  saveItem = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -56,7 +58,11 @@ export default class SingleItemView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.item.image_id);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.item.image_id
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -77,7 +83,9 @@ export default class SingleItemView {
 
   renderRemoveImage = async () => {
     if (this.item.image_id) {
-      const imageSource = await getPresignedForImageDownload(this.item.image_id);
+      const imageSource = await getPresignedForImageDownload(
+        this.item.image_id
+      );
 
       return createElement(
         "div",
@@ -125,6 +133,10 @@ export default class SingleItemView {
       );
     }
 
+    const richText = new RichText({
+      value: this.item.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -140,16 +152,7 @@ export default class SingleItemView {
             value: this.item.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.item.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -171,7 +174,7 @@ export default class SingleItemView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveItem(e);
+            this.saveItem(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -224,6 +227,9 @@ export default class SingleItemView {
       itemId: this.item.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.item.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -246,22 +252,14 @@ export default class SingleItemView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.item.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           currentLocationComponent,
           createElement("br"),
           currentCharacterComponent,
           createElement("br"),
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Lore"
-          ),
+          createElement("div", { class: "single-info-box-subheading" }, "Lore"),
           ...(await renderLoreList("item", this.item.id, this.navigate)),
           createElement("br"),
         ]),

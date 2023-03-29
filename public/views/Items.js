@@ -6,6 +6,7 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { uploadImage } from "../lib/imageUtils.js";
+import RichText from "../lib/RichText.js";
 
 export default class ItemsView {
   constructor(props) {
@@ -63,10 +64,11 @@ export default class ItemsView {
     return await getThings(url);
   };
 
-  newItem = async (e) => {
+  newItem = async (e, description) => {
     this.toggleNewItemLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
@@ -75,7 +77,11 @@ export default class ItemsView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -83,7 +89,7 @@ export default class ItemsView {
       delete formProps.image;
     }
 
-    await postThing("/api/add_item", formProps)
+    await postThing("/api/add_item", formProps);
     this.toggleNewItemLoading();
   };
 
@@ -93,6 +99,9 @@ export default class ItemsView {
       { class: "component-title" },
       "Create new item"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       itemTypeSelect(null, null),
@@ -105,10 +114,7 @@ export default class ItemsView {
         required: true,
       }),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -128,10 +134,14 @@ export default class ItemsView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingItem = false;
-      await this.newItem(e);
+      await this.newItem(e, richText.children[1].innerHTML);
     });
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingItem();
     });
@@ -226,7 +236,7 @@ export default class ItemsView {
                 itemTypeSelect(this.handleTypeFilterChange, this.filter),
               ]
             ),
-            searchElement("Search Items", this)
+            searchElement("Search Items", this),
           ]),
         ]
       ),

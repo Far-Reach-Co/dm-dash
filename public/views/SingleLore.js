@@ -3,12 +3,16 @@ import state from "../lib/state.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
-import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import characterSelect from "../lib/characterSelect.js";
 import locationSelect from "../lib/locationSelect.js";
 import itemSelect from "../lib/itemSelect.js";
+import RichText from "../lib/RichText.js";
 
 export default class SingleLoreView {
   constructor(props) {
@@ -51,7 +55,6 @@ export default class SingleLoreView {
       await postThing(`/api/add_lore_relation`, formProps);
       this.toggleManageLoading();
     }
-
   };
 
   renderLoreRelationList = async (type) => {
@@ -196,9 +199,10 @@ export default class SingleLoreView {
     this.render();
   };
 
-  saveLore = async (e) => {
+  saveLore = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -231,7 +235,9 @@ export default class SingleLoreView {
 
   renderRemoveImage = async () => {
     if (this.lore.image_id) {
-      const imageSource = await getPresignedForImageDownload(this.lore.image_id);
+      const imageSource = await getPresignedForImageDownload(
+        this.lore.image_id
+      );
 
       return createElement(
         "div",
@@ -279,6 +285,10 @@ export default class SingleLoreView {
       );
     }
 
+    const richText = new RichText({
+      value: this.lore.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -294,16 +304,7 @@ export default class SingleLoreView {
             value: this.lore.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.lore.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -325,7 +326,7 @@ export default class SingleLoreView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLore(e);
+            this.saveLore(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -382,6 +383,9 @@ export default class SingleLoreView {
       loreId: this.lore.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.lore.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -404,11 +408,7 @@ export default class SingleLoreView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.lore.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           createElement("div", { class: "single-info-box-subheading" }, [

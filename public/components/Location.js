@@ -9,6 +9,7 @@ import state from "../lib/state.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
+import RichText from "../lib/RichText.js";
 
 export default class Location {
   constructor(props) {
@@ -49,9 +50,10 @@ export default class Location {
     await deleteThing(`/api/remove_location/${this.id}`);
   };
 
-  saveLocation = async (e) => {
+  saveLocation = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -136,6 +138,10 @@ export default class Location {
       );
     }
 
+    const richText = new RichText({
+      value: this.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -152,16 +158,7 @@ export default class Location {
           }),
           createElement("br"),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -183,7 +180,7 @@ export default class Location {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLocation(e);
+            this.saveLocation(e, richText.children[1].innerHTML);
           },
         }
       ),
@@ -257,6 +254,9 @@ export default class Location {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
@@ -266,7 +266,7 @@ export default class Location {
           "/assets/location.svg"
         ),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",

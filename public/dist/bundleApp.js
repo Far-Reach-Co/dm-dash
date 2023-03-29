@@ -2748,6 +2748,90 @@ async function renderImageSmallOrPlaceholder(
   }
 }
 
+class RichText {
+  constructor(props) {
+    const textAreaComponent = createElement(
+      "div",
+      {
+        contentEditable: "true",
+        wrap: "soft",
+        spellcheck: true,
+        class: "text-area-rich",
+        id: "description",
+        name: "description",
+        "data-ph": "...Write your text here.",
+      },
+      null,
+      {
+        type: "keydown",
+        event: (event) => {
+          if (event.key === "Enter") {
+            document.execCommand("insertLineBreak");
+            event.preventDefault();
+          }
+        },
+      }
+    );
+
+    textAreaComponent.innerHTML = props.value ? props.value : null;
+
+    this.domComponent = createElement("div", { class: "rich-text-container" }, [
+      createElement("div", { class: "rich-text-option-container noselect" }, [
+        createElement(
+          "b",
+          {
+            title: "Make selected text bold",
+            class: "rich-text-option noselect",
+          },
+          "B",
+          {
+            type: "click",
+            event: () => {
+              var sel = window.getSelection(); // Gets selection
+              if (sel.rangeCount) {
+                var elem = document.createElement("span");
+                elem.style.fontWeight = "bold";
+                elem.innerHTML = sel.toString();
+
+                var range = sel.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(elem);
+              }
+
+              // document.execCommand("bold");
+            },
+          }
+        ),
+        createElement(
+          "i",
+          { class: "rich-text-option", title: "Make selected text italic" },
+          "i",
+          {
+            type: "click",
+            event: () => {
+              var sel = window.getSelection(); // Gets selection
+              if (sel.rangeCount) {
+                var elem = document.createElement("span");
+                elem.style.fontStyle = "italic";
+                elem.innerHTML = sel.toString();
+
+                var range = sel.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(elem);
+              }
+
+              // document.execCommand("italic");
+            },
+          }
+        ),
+      ]),
+      textAreaComponent,
+    ]);
+
+    return this.domComponent;
+  }
+}
+
 class Location {
   constructor(props) {
     this.domComponent = props.domComponent;
@@ -2787,9 +2871,10 @@ class Location {
     await deleteThing(`/api/remove_location/${this.id}`);
   };
 
-  saveLocation = async (e) => {
+  saveLocation = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -2874,6 +2959,10 @@ class Location {
       );
     }
 
+    const richText = new RichText({
+      value: this.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -2890,16 +2979,7 @@ class Location {
           }),
           createElement("br"),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -2921,7 +3001,7 @@ class Location {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLocation(e);
+            this.saveLocation(e, richText.children[1].innerHTML);
           },
         }
       ),
@@ -2995,6 +3075,9 @@ class Location {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
@@ -3004,7 +3087,7 @@ class Location {
           "/assets/location.svg"
         ),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",
@@ -3021,21 +3104,22 @@ class Location {
 
 function searchElement(placeholder, component) {
   return createElement(
-      "input",
-      {
-        placeholder: placeholder,
-        value: component.searchTerm,
+    "input",
+    {
+      class: "search",
+      placeholder: placeholder,
+      value: component.searchTerm,
+    },
+    null,
+    {
+      type: "change",
+      event: (e) => {
+        component.offset = 0;
+        component.searchTerm = e.target.value.toLowerCase();
+        component.render();
       },
-      null,
-      {
-        type: "change",
-        event: (e) => {
-          component.offset = 0;
-          component.searchTerm = e.target.value.toLowerCase();
-          component.render();
-        },
-      }
-    )
+    }
+  );
 }
 
 class LocationsView {
@@ -3094,10 +3178,12 @@ class LocationsView {
     return await getThings(url);
   };
 
-  newLocation = async (e) => {
+  newLocation = async (e, description) => {
     this.toggleNewLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
+
     const projectId = state$1.currentProject.id;
     formProps.project_id = projectId;
     formProps.is_sub = false;
@@ -3107,7 +3193,11 @@ class LocationsView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state$1.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state$1.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -3125,6 +3215,9 @@ class LocationsView {
       { class: "component-title" },
       "Create new location"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       locationTypeSelect(null, null),
@@ -3138,10 +3231,7 @@ class LocationsView {
       }),
       createElement("br"),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -3161,10 +3251,14 @@ class LocationsView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingLocation = false;
-      await this.newLocation(e);
+      await this.newLocation(e, richText.children[1].innerHTML);
     });
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingLocation();
     });
@@ -3260,7 +3354,7 @@ class LocationsView {
               ]
             ),
             createElement("br"),
-            searchElement("Search Locations", this)
+            searchElement("Search Locations", this),
           ]),
         ]
       ),
@@ -4005,9 +4099,10 @@ class SingleLocationView {
     }
   };
 
-  saveLocation = async (e) => {
+  saveLocation = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -4041,7 +4136,9 @@ class SingleLocationView {
 
   renderRemoveImage = async () => {
     if (this.location.image_id) {
-      const imageSource = await getPresignedForImageDownload(this.location.image_id);
+      const imageSource = await getPresignedForImageDownload(
+        this.location.image_id
+      );
 
       return createElement(
         "div",
@@ -4089,6 +4186,10 @@ class SingleLocationView {
       );
     }
 
+    const richText = new RichText({
+      value: this.location.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -4105,16 +4206,7 @@ class SingleLocationView {
           }),
           createElement("br"),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.location.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -4136,7 +4228,7 @@ class SingleLocationView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLocation(e);
+            this.saveLocation(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -4197,6 +4289,9 @@ class SingleLocationView {
       locationId: this.location.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.location.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -4219,9 +4314,7 @@ class SingleLocationView {
             { class: "single-item-subheading" },
             "Description"
           ),
-          createElement("div", { class: "description" }, [
-            `"${this.location.description}"`,
-          ]),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           createElement(
@@ -4239,7 +4332,11 @@ class SingleLocationView {
           ...(await this.renderItems()),
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, "Lore"),
-          ...(await renderLoreList("location", this.location.id, this.navigate)),
+          ...(await renderLoreList(
+            "location",
+            this.location.id,
+            this.navigate
+          )),
           createElement("br"),
           createElement(
             "div",
@@ -4549,9 +4646,10 @@ class Character {
     this.render();
   };
 
-  saveCharacter = async (e) => {
+  saveCharacter = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -4559,7 +4657,11 @@ class Character {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state$1.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state$1.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -4631,6 +4733,10 @@ class Character {
       );
     }
 
+    const richText = new RichText({
+      value: this.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -4646,16 +4752,7 @@ class Character {
             value: this.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -4677,7 +4774,7 @@ class Character {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveCharacter(e);
+            this.saveCharacter(e, richText.children[1].innerHTML);
           },
         }
       ),
@@ -4715,13 +4812,19 @@ class Character {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderCharacterType(),
-        await renderImageSmallOrPlaceholder(this.imageId, "/assets/character.svg"),
+        await renderImageSmallOrPlaceholder(
+          this.imageId,
+          "/assets/character.svg"
+        ),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",
@@ -4791,10 +4894,11 @@ class CharactersView {
     return await getThings(url);
   };
 
-  newCharacter = async (e) => {
+  newCharacter = async (e, description) => {
     this.toggleNewCharacterLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     const projectId = state$1.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
@@ -4803,7 +4907,11 @@ class CharactersView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state$1.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state$1.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -4821,6 +4929,9 @@ class CharactersView {
       { class: "component-title" },
       "Create new character"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       characterTypeSelect(null, null),
@@ -4833,10 +4944,7 @@ class CharactersView {
         required: true,
       }),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -4856,7 +4964,7 @@ class CharactersView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingCharacter = false;
-      await this.newCharacter(e);
+      await this.newCharacter(e, richText.children[1].innerHTML);
     });
 
     const cancelButton = createElement(
@@ -5146,9 +5254,10 @@ class SingleCharacterView {
       ];
   };
 
-  saveCharacter = async (e) => {
+  saveCharacter = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -5230,6 +5339,10 @@ class SingleCharacterView {
       );
     }
 
+    const richText = new RichText({
+      value: this.character.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -5245,16 +5358,7 @@ class SingleCharacterView {
             value: this.character.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.character.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -5276,7 +5380,7 @@ class SingleCharacterView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveCharacter(e);
+            this.saveCharacter(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -5321,6 +5425,9 @@ class SingleCharacterView {
       characterId: this.character.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.character.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -5343,11 +5450,7 @@ class SingleCharacterView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.character.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           currentLocationComponent,
@@ -5360,7 +5463,11 @@ class SingleCharacterView {
           ...(await this.renderItems()),
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, "Lore"),
-          ...(await renderLoreList("character", this.character.id, this.navigate)),
+          ...(await renderLoreList(
+            "character",
+            this.character.id,
+            this.navigate
+          )),
           createElement("br"),
         ]),
       ]),
@@ -5449,9 +5556,10 @@ class Item {
     this.render();
   };
 
-  saveItem = async (e) => {
+  saveItem = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -5536,6 +5644,10 @@ class Item {
       );
     }
 
+    const richText = new RichText({
+      value: this.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -5551,16 +5663,7 @@ class Item {
             value: this.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -5582,7 +5685,7 @@ class Item {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveItem(e);
+            this.saveItem(e, richText.children[1].innerHTML);
           },
         }
       ),
@@ -5645,13 +5748,16 @@ class Item {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderItemType(),
         await renderImageSmallOrPlaceholder(this.imageId, "/assets/item.svg"),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",
@@ -5722,10 +5828,11 @@ class ItemsView {
     return await getThings(url);
   };
 
-  newItem = async (e) => {
+  newItem = async (e, description) => {
     this.toggleNewItemLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     const projectId = state$1.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
@@ -5734,7 +5841,11 @@ class ItemsView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state$1.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state$1.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -5752,6 +5863,9 @@ class ItemsView {
       { class: "component-title" },
       "Create new item"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       itemTypeSelect(null, null),
@@ -5764,10 +5878,7 @@ class ItemsView {
         required: true,
       }),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -5787,10 +5898,14 @@ class ItemsView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingItem = false;
-      await this.newItem(e);
+      await this.newItem(e, richText.children[1].innerHTML);
     });
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingItem();
     });
@@ -5885,7 +6000,7 @@ class ItemsView {
                 itemTypeSelect(this.handleTypeFilterChange, this.filter),
               ]
             ),
-            searchElement("Search Items", this)
+            searchElement("Search Items", this),
           ]),
         ]
       ),
@@ -6073,9 +6188,10 @@ class SingleItemView {
     this.render();
   };
 
-  saveItem = async (e) => {
+  saveItem = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -6083,7 +6199,11 @@ class SingleItemView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state$1.currentProject.id, this.item.image_id);
+      const newImage = await uploadImage(
+        formProps.image,
+        state$1.currentProject.id,
+        this.item.image_id
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -6104,7 +6224,9 @@ class SingleItemView {
 
   renderRemoveImage = async () => {
     if (this.item.image_id) {
-      const imageSource = await getPresignedForImageDownload(this.item.image_id);
+      const imageSource = await getPresignedForImageDownload(
+        this.item.image_id
+      );
 
       return createElement(
         "div",
@@ -6152,6 +6274,10 @@ class SingleItemView {
       );
     }
 
+    const richText = new RichText({
+      value: this.item.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -6167,16 +6293,7 @@ class SingleItemView {
             value: this.item.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.item.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -6198,7 +6315,7 @@ class SingleItemView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveItem(e);
+            this.saveItem(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -6251,6 +6368,9 @@ class SingleItemView {
       itemId: this.item.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.item.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -6273,22 +6393,14 @@ class SingleItemView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.item.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           currentLocationComponent,
           createElement("br"),
           currentCharacterComponent,
           createElement("br"),
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Lore"
-          ),
+          createElement("div", { class: "single-info-box-subheading" }, "Lore"),
           ...(await renderLoreList("item", this.item.id, this.navigate)),
           createElement("br"),
         ]),
@@ -6505,7 +6617,6 @@ class SingleLoreView {
       await postThing(`/api/add_lore_relation`, formProps);
       this.toggleManageLoading();
     }
-
   };
 
   renderLoreRelationList = async (type) => {
@@ -6650,9 +6761,10 @@ class SingleLoreView {
     this.render();
   };
 
-  saveLore = async (e) => {
+  saveLore = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -6685,7 +6797,9 @@ class SingleLoreView {
 
   renderRemoveImage = async () => {
     if (this.lore.image_id) {
-      const imageSource = await getPresignedForImageDownload(this.lore.image_id);
+      const imageSource = await getPresignedForImageDownload(
+        this.lore.image_id
+      );
 
       return createElement(
         "div",
@@ -6733,6 +6847,10 @@ class SingleLoreView {
       );
     }
 
+    const richText = new RichText({
+      value: this.lore.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -6748,16 +6866,7 @@ class SingleLoreView {
             value: this.lore.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.lore.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -6779,7 +6888,7 @@ class SingleLoreView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLore(e);
+            this.saveLore(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -6836,6 +6945,9 @@ class SingleLoreView {
       loreId: this.lore.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.lore.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -6858,11 +6970,7 @@ class SingleLoreView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.lore.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           createElement("div", { class: "single-info-box-subheading" }, [
@@ -6928,9 +7036,10 @@ class Lore {
     this.render();
   };
 
-  saveLore = async (e) => {
+  saveLore = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -6938,7 +7047,11 @@ class Lore {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state$1.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state$1.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -7011,6 +7124,10 @@ class Lore {
       );
     }
 
+    const richText = new RichText({
+      value: this.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -7026,16 +7143,7 @@ class Lore {
             value: this.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -7057,7 +7165,7 @@ class Lore {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLore(e);
+            this.saveLore(e, richText.children[1].innerHTML);
           },
         }
       ),
@@ -7120,13 +7228,16 @@ class Lore {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderLoreType(),
         await renderImageSmallOrPlaceholder(this.imageId, "/assets/lore.svg"),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",
@@ -7197,10 +7308,11 @@ class LoresView {
     return await getThings(url);
   };
 
-  newLore = async (e) => {
+  newLore = async (e, description) => {
     this.toggleNewLoreLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     const projectId = state$1.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
@@ -7209,7 +7321,11 @@ class LoresView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state$1.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state$1.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -7227,6 +7343,9 @@ class LoresView {
       { class: "component-title" },
       "Create new lore"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       loreTypeSelect(null, null),
@@ -7239,10 +7358,7 @@ class LoresView {
         required: true,
       }),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -7262,10 +7378,14 @@ class LoresView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingLore = false;
-      await this.newLore(e);
+      await this.newLore(e, richText.children[1].innerHTML);
     });
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingLore();
     });
@@ -7358,7 +7478,7 @@ class LoresView {
                 loreTypeSelect(this.handleTypeFilterChange, this.filter),
               ]
             ),
-            searchElement("Search Lore", this)
+            searchElement("Search Lore", this),
           ]),
         ]
       ),

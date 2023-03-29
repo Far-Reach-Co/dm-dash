@@ -26,21 +26,21 @@
 }
 
 .cp-input-gen {
-  background-color: inherit;
   /* border: 1px solid var(--blue); */
   color: var(--main-white);
   width: auto;
   background-color: var(--blue3);
   border-radius: var(--border-radius);
+  border-width: 0;
 }
 
 .cp-input-gen-short {
-  background-color: inherit;
   /* border: 1px solid var(--blue); */
   color: var(--main-white);
   max-width: 60px;
   background-color: var(--blue3);
   border-radius: var(--border-radius);
+  border-width: 0;
 }
 
 .input-small {
@@ -57,6 +57,7 @@
   color: var(--main-white);
   width: 100px;
   border-radius: var(--border-radius);
+  border-width: 0;
 }
 
 .cp-input-no-border-small {
@@ -65,6 +66,7 @@
   color: var(--main-white);
   width: 50px;
   border-radius: var(--border-radius);
+  border-width: 0;
 }
 
 .cp-input-no-border:hover {
@@ -87,6 +89,7 @@
   font-size: 1rem;
   width: fit-content;
   max-width: 130px;
+  border-width: 0;
 }
 
 .cp-content-container {
@@ -209,7 +212,7 @@
   height: 20px;
   width: 20px;
   position: absolute;
-  top: 0; 
+  top: 0;
   right: 0;
 }
 

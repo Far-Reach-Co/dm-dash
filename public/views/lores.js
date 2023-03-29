@@ -6,6 +6,7 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { uploadImage } from "../lib/imageUtils.js";
+import RichText from "../lib/RichText.js";
 
 export default class LoresView {
   constructor(props) {
@@ -63,10 +64,11 @@ export default class LoresView {
     return await getThings(url);
   };
 
-  newLore = async (e) => {
+  newLore = async (e, description) => {
     this.toggleNewLoreLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
@@ -75,7 +77,11 @@ export default class LoresView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -83,7 +89,7 @@ export default class LoresView {
       delete formProps.image;
     }
 
-    await postThing("/api/add_lore", formProps)
+    await postThing("/api/add_lore", formProps);
     this.toggleNewLoreLoading();
   };
 
@@ -93,6 +99,9 @@ export default class LoresView {
       { class: "component-title" },
       "Create new lore"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       loreTypeSelect(null, null),
@@ -105,10 +114,7 @@ export default class LoresView {
         required: true,
       }),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -128,10 +134,14 @@ export default class LoresView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingLore = false;
-      await this.newLore(e);
+      await this.newLore(e, richText.children[1].innerHTML);
     });
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingLore();
     });
@@ -224,7 +234,7 @@ export default class LoresView {
                 loreTypeSelect(this.handleTypeFilterChange, this.filter),
               ]
             ),
-            searchElement("Search Lore", this)
+            searchElement("Search Lore", this),
           ]),
         ]
       ),

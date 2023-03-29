@@ -2,12 +2,16 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import renderLoreList from "../lib/renderLoreList.js";
+import RichText from "../lib/RichText.js";
 
 export default class SingleLocationView {
   constructor(props) {
@@ -331,9 +335,10 @@ export default class SingleLocationView {
     }
   };
 
-  saveLocation = async (e) => {
+  saveLocation = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -367,7 +372,9 @@ export default class SingleLocationView {
 
   renderRemoveImage = async () => {
     if (this.location.image_id) {
-      const imageSource = await getPresignedForImageDownload(this.location.image_id);
+      const imageSource = await getPresignedForImageDownload(
+        this.location.image_id
+      );
 
       return createElement(
         "div",
@@ -415,6 +422,10 @@ export default class SingleLocationView {
       );
     }
 
+    const richText = new RichText({
+      value: this.location.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -431,16 +442,7 @@ export default class SingleLocationView {
           }),
           createElement("br"),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.location.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -462,7 +464,7 @@ export default class SingleLocationView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLocation(e);
+            this.saveLocation(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -523,6 +525,9 @@ export default class SingleLocationView {
       locationId: this.location.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.location.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -545,9 +550,7 @@ export default class SingleLocationView {
             { class: "single-item-subheading" },
             "Description"
           ),
-          createElement("div", { class: "description" }, [
-            `"${this.location.description}"`,
-          ]),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           createElement(
@@ -565,7 +568,11 @@ export default class SingleLocationView {
           ...(await this.renderItems()),
           createElement("br"),
           createElement("div", { class: "single-info-box-subheading" }, "Lore"),
-          ...(await renderLoreList("location", this.location.id, this.navigate)),
+          ...(await renderLoreList(
+            "location",
+            this.location.id,
+            this.navigate
+          )),
           createElement("br"),
           createElement(
             "div",
