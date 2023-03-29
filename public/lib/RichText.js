@@ -76,7 +76,7 @@ export default class RichText {
         ),
         createElement(
           "u",
-          { class: "rich-text-option", title: "Make selected text italic" },
+          { class: "rich-text-option", title: "Make selected text underlined" },
           "U",
           {
             type: "click",
@@ -96,7 +96,7 @@ export default class RichText {
         ),
         createElement(
           "div",
-          { class: "rich-text-option", title: "Make selected text italic" },
+          { class: "rich-text-option", title: "Make selected text hyperlink" },
           "@",
           {
             type: "click",

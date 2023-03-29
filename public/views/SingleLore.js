@@ -303,6 +303,7 @@ export default class SingleLoreView {
             name: "title",
             value: this.lore.title,
           }),
+          createElement("br"),
           createElement("label", { for: "description" }, "Description"),
           richText,
           createElement("br"),

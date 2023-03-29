@@ -2824,7 +2824,7 @@ class RichText {
         ),
         createElement(
           "u",
-          { class: "rich-text-option", title: "Make selected text italic" },
+          { class: "rich-text-option", title: "Make selected text underlined" },
           "U",
           {
             type: "click",
@@ -2844,7 +2844,7 @@ class RichText {
         ),
         createElement(
           "div",
-          { class: "rich-text-option", title: "Make selected text italic" },
+          { class: "rich-text-option", title: "Make selected text hyperlink" },
           "@",
           {
             type: "click",
@@ -6904,6 +6904,7 @@ class SingleLoreView {
             name: "title",
             value: this.lore.title,
           }),
+          createElement("br"),
           createElement("label", { for: "description" }, "Description"),
           richText,
           createElement("br"),
