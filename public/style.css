@@ -191,6 +191,7 @@ a {
   color: var(--link-blue);
   cursor: pointer;
   text-decoration: none;
+  font-size: inherit;
 }
 
 a small {

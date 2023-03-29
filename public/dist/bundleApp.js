@@ -2819,8 +2819,47 @@ class RichText {
                 range.deleteContents();
                 range.insertNode(elem);
               }
+            },
+          }
+        ),
+        createElement(
+          "u",
+          { class: "rich-text-option", title: "Make selected text italic" },
+          "U",
+          {
+            type: "click",
+            event: () => {
+              var sel = window.getSelection(); // Gets selection
+              if (sel.rangeCount) {
+                var elem = document.createElement("span");
+                elem.style.textDecoration = "underline";
+                elem.innerHTML = sel.toString();
 
-              // document.execCommand("italic");
+                var range = sel.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(elem);
+              }
+            },
+          }
+        ),
+        createElement(
+          "div",
+          { class: "rich-text-option", title: "Make selected text italic" },
+          "@",
+          {
+            type: "click",
+            event: () => {
+              var sel = window.getSelection(); // Gets selection
+              if (sel.rangeCount) {
+                var elem = document.createElement("a");
+                var href = window.prompt("Please enter the link address");
+                if (href) elem.href = href;
+                elem.innerHTML = sel.toString();
+
+                var range = sel.getRangeAt(0);
+                range.deleteContents();
+                range.insertNode(elem);
+              }
             },
           }
         ),
