@@ -6,6 +6,7 @@ import { uploadImage } from "../lib/imageUtils.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import RichText from "../lib/RichText.js";
 
 export default class LocationsView {
   constructor(props) {
@@ -63,10 +64,12 @@ export default class LocationsView {
     return await getThings(url);
   };
 
-  newLocation = async (e) => {
+  newLocation = async (e, description) => {
     this.toggleNewLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
+
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     formProps.is_sub = false;
@@ -76,7 +79,11 @@ export default class LocationsView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -84,7 +91,7 @@ export default class LocationsView {
       delete formProps.image;
     }
 
-    await postThing("/api/add_location", formProps)
+    await postThing("/api/add_location", formProps);
     this.toggleNewLocationLoading();
   };
 
@@ -94,6 +101,9 @@ export default class LocationsView {
       { class: "component-title" },
       "Create new location"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       locationTypeSelect(null, null),
@@ -107,10 +117,7 @@ export default class LocationsView {
       }),
       createElement("br"),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -130,10 +137,14 @@ export default class LocationsView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingLocation = false;
-      await this.newLocation(e);
+      await this.newLocation(e, richText.children[1].innerHTML);
     });
 
-    const cancelButton = createElement("button", {class: "btn-red"}, "Cancel");
+    const cancelButton = createElement(
+      "button",
+      { class: "btn-red" },
+      "Cancel"
+    );
     cancelButton.addEventListener("click", () => {
       this.toggleCreatingLocation();
     });
@@ -229,7 +240,7 @@ export default class LocationsView {
               ]
             ),
             createElement("br"),
-            searchElement("Search Locations", this)
+            searchElement("Search Locations", this),
           ]),
         ]
       ),

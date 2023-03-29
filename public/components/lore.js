@@ -1,11 +1,15 @@
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
-import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
+import RichText from "../lib/RichText.js";
 
 export default class Lore {
   constructor(props) {
@@ -41,9 +45,10 @@ export default class Lore {
     this.render();
   };
 
-  saveLore = async (e) => {
+  saveLore = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -51,7 +56,11 @@ export default class Lore {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -124,6 +133,10 @@ export default class Lore {
       );
     }
 
+    const richText = new RichText({
+      value: this.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -139,16 +152,7 @@ export default class Lore {
             value: this.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -170,7 +174,7 @@ export default class Lore {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLore(e);
+            this.saveLore(e, richText.children[1].innerHTML);
           },
         }
       ),
@@ -233,13 +237,16 @@ export default class Lore {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderLoreType(),
         await renderImageSmallOrPlaceholder(this.imageId, "/assets/lore.svg"),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",
