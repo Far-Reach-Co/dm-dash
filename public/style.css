@@ -761,6 +761,10 @@ footer {
   margin-bottom: 10px;
 }
 
+.description * {
+  font-size: inherit;
+}
+
 .single-item-title-container {
   display: flex;
   flex-direction: row;
@@ -1070,21 +1074,6 @@ input:checked+.slider:before {
   border: 0.5px solid var(--main-gray);
   width: 120px;
   display: flex;
-}
-
-.rich-text-option {
-  background-color: var(--blue4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  border-right: 0.5px solid var(--main-gray);
-}
-
-.rich-text-option:hover {
-  background-color: var(--green);
 }
 
 .text-area-rich {
