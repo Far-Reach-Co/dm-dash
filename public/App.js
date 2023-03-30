@@ -51,9 +51,23 @@ class App {
     this.instantiateSidebar();
     this.instantiateHamburger();
     // navigate to first view or refresh to current view
+    const searchParams = new URLSearchParams(window.location.search);
+    const currentView = searchParams.get("view");
+    const viewId = searchParams.get("id");
     if (history.state) {
-      this.navigate.navigate(history.state);
-    } else this.navigate.navigate({ title: "app", sidebar: false, params: {} });
+      return this.navigate.navigate(history.state);
+    }
+    if (currentView && currentView != "app" && currentView != "main") {
+      if (viewId) {
+        return this.navigate.navigate({
+          title: currentView,
+          sidebar: true,
+          id: viewId,
+        });
+      }
+      return this.navigate.navigate({ title: currentView, sidebar: true });
+    }
+    this.navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
   instantiateSidebar = () => {

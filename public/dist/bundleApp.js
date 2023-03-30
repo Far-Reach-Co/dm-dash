@@ -3156,6 +3156,7 @@ class Location {
         event: () =>
           this.navigate({
             title: "single-location",
+            id: this.id,
             sidebar: true,
             params: { content: this.location },
           }),
@@ -3827,6 +3828,7 @@ async function renderLoreList(type, id, navigate) {
             event: () =>
               navigate({
                 title: "single-lore",
+                id: lore.id,
                 sidebar: true,
                 params: { content: lore },
               }),
@@ -3842,7 +3844,7 @@ async function renderLoreList(type, id, navigate) {
 class SingleLocationView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.location = props.params.content;
+
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -3853,8 +3855,19 @@ class SingleLocationView {
     this.parentLocationLoading = false;
     this.subLocationLoading = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.location = props.params.content;
+    } else this.location = await getThings(`/api/get_location/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -4029,6 +4042,7 @@ class SingleLocationView {
           event: () => {
             this.navigate({
               title: "single-location",
+              id: location.id,
               sidebar: true,
               params: { content: location },
             });
@@ -4061,6 +4075,7 @@ class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-character",
+              id: character.id,
               sidebar: true,
               params: { content: character },
             }),
@@ -4093,6 +4108,7 @@ class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-item",
+              id: item.id,
               sidebar: true,
               params: { content: item },
             }),
@@ -4124,6 +4140,7 @@ class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-location",
+              id: parentLocation.id,
               sidebar: true,
               params: { content: parentLocation },
             }),
@@ -4893,6 +4910,7 @@ class Character {
         event: () =>
           this.navigate({
             title: "single-character",
+            id: this.id,
             sidebar: true,
             params: { content: this.character },
           }),
@@ -5203,15 +5221,11 @@ class CurrentLocationComponent {
       return createElement(
         "div",
         { style: "display: flex; flex-direction: column;" },
-        await locationSelect(
-          this.module.location_id,
-          null,
-          (newLocationId) => {
-            this.module.location_id = newLocationId;
-            this.toggleEditingCurrentLocation();
-            this.updateCurrentLocation(newLocationId);
-          }
-        )
+        await locationSelect(this.module.location_id, null, (newLocationId) => {
+          this.module.location_id = newLocationId;
+          this.toggleEditingCurrentLocation();
+          this.updateCurrentLocation(newLocationId);
+        })
       );
     }
 
@@ -5227,6 +5241,7 @@ class CurrentLocationComponent {
           event: () =>
             this.navigate({
               title: "single-location",
+              id: location.id,
               sidebar: true,
               params: { content: location },
             }),
@@ -5251,15 +5266,25 @@ class CurrentLocationComponent {
 class SingleCharacterView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.character = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
     this.edit = false;
     this.uploadingImage = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.character = props.params.content;
+    } else this.character = await getThings(`/api/get_character/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -5300,6 +5325,7 @@ class SingleCharacterView {
           event: () =>
             this.navigate({
               title: "single-item",
+              id: item.id,
               sidebar: true,
               params: { content: item },
             }),
@@ -5826,6 +5852,7 @@ class Item {
         event: () =>
           this.navigate({
             title: "single-item",
+            id: this.id,
             sidebar: true,
             params: { content: this.item },
           }),
@@ -6196,6 +6223,7 @@ class CurrentCharacterComponent {
           event: () =>
             this.navigate({
               title: "single-character",
+              id: character.id,
               sidebar: true,
               params: { content: character },
             }),
@@ -6220,15 +6248,25 @@ class CurrentCharacterComponent {
 class SingleItemView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.item = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
     this.edit = false;
     this.uploadingImage = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.item = props.params.content;
+    } else this.item = await getThings(`/api/get_item/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -6545,10 +6583,30 @@ class Navigate {
     history.back();
   };
 
-  navigate = (route) => {
+  navigate = async (route) => {
     if (history.state) route.applicationState = state$1;
     route.displayTitle = this.getDisplayTitle(route);
-    history.pushState(route, null, `${window.location.pathname}?view=${route.title}`);
+    if (!state$1.currentProject) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const projectId = searchParams.get("project");
+      if (projectId) {
+        const projectData = await getThings(`/api/get_project/${projectId}`);
+        state$1.currentProject = {
+          id: projectData.id,
+          title: projectData.title,
+          dateCreated: projectData.date_created,
+          isEditor: projectData.is_editor,
+          wasJoined: projectData.was_joined,
+          dateJoined: projectData.date_joined,
+          projectUserId: projectData.project_user_id,
+        };
+      }
+    }
+    let locationString = `${window.location.pathname}?view=${route.title}`;
+    if (state$1.currentProject)
+      locationString += `&project=${state$1.currentProject.id}`;
+    if (route.id) locationString += `&id=${route.id}`;
+    history.pushState(route, null, locationString);
     this.currentRoute = route;
     this.appRender();
   };
@@ -6641,7 +6699,6 @@ async function itemSelect(
 class SingleLoreView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.lore = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -6651,8 +6708,19 @@ class SingleLoreView {
     this.manageType = "";
     this.manageLoading = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.lore = props.params.content;
+    } else this.lore = await getThings(`/api/get_lore/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -6746,6 +6814,7 @@ class SingleLoreView {
                 event: () => {
                   this.navigate({
                     title: navigateComponentTitle,
+                    id: item.id,
                     sidebar: true,
                     params: { content: item },
                   });
@@ -7307,6 +7376,7 @@ class Lore {
         event: () =>
           this.navigate({
             title: "single-lore",
+            id: this.id,
             sidebar: true,
             params: { content: this.lore },
           }),
@@ -11276,9 +11346,23 @@ class App {
     this.instantiateSidebar();
     this.instantiateHamburger();
     // navigate to first view or refresh to current view
+    const searchParams = new URLSearchParams(window.location.search);
+    const currentView = searchParams.get("view");
+    const viewId = searchParams.get("id");
     if (history.state) {
-      this.navigate.navigate(history.state);
-    } else this.navigate.navigate({ title: "app", sidebar: false, params: {} });
+      return this.navigate.navigate(history.state);
+    }
+    if (currentView && currentView != "app" && currentView != "main") {
+      if (viewId) {
+        return this.navigate.navigate({
+          title: currentView,
+          sidebar: true,
+          id: viewId,
+        });
+      }
+      return this.navigate.navigate({ title: currentView, sidebar: true });
+    }
+    this.navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
   instantiateSidebar = () => {

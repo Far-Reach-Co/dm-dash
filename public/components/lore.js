@@ -253,6 +253,7 @@ export default class Lore {
         event: () =>
           this.navigate({
             title: "single-lore",
+            id: this.id,
             sidebar: true,
             params: { content: this.lore },
           }),

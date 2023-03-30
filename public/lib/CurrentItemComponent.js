@@ -52,9 +52,7 @@ export default class CurrentItemComponent {
   renderCurrentItem = async () => {
     let item = null;
     if (this.module.item_id) {
-      item = await getThings(
-        `/api/get_item/${this.module.item_id}`
-      );
+      item = await getThings(`/api/get_item/${this.module.item_id}`);
     }
 
     if (this.editingCurrentItem) {
@@ -81,6 +79,7 @@ export default class CurrentItemComponent {
           event: () =>
             this.navigate({
               title: "single-item",
+              id: item.id,
               sidebar: true,
               params: { content: item },
             }),

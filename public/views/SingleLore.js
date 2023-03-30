@@ -17,7 +17,6 @@ import RichText from "../lib/RichText.js";
 export default class SingleLoreView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.lore = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -27,8 +26,19 @@ export default class SingleLoreView {
     this.manageType = "";
     this.manageLoading = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.lore = props.params.content;
+    } else this.lore = await getThings(`/api/get_lore/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -122,6 +132,7 @@ export default class SingleLoreView {
                 event: () => {
                   this.navigate({
                     title: navigateComponentTitle,
+                    id: item.id,
                     sidebar: true,
                     params: { content: item },
                   });

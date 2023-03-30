@@ -255,6 +255,7 @@ export default class Item {
         event: () =>
           this.navigate({
             title: "single-item",
+            id: this.id,
             sidebar: true,
             params: { content: this.item },
           }),
