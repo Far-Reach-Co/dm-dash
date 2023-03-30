@@ -25,6 +25,7 @@ export default async function renderLoreList(type, id, navigate) {
             event: () =>
               navigate({
                 title: "single-lore",
+                id: lore.id,
                 sidebar: true,
                 params: { content: lore },
               }),

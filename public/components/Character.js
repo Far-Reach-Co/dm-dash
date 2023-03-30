@@ -232,6 +232,7 @@ export default class Character {
         event: () =>
           this.navigate({
             title: "single-character",
+            id: this.id,
             sidebar: true,
             params: { content: this.character },
           }),

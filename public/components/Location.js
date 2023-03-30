@@ -273,6 +273,7 @@ export default class Location {
         event: () =>
           this.navigate({
             title: "single-location",
+            id: this.id,
             sidebar: true,
             params: { content: this.location },
           }),

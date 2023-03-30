@@ -16,15 +16,25 @@ import RichText from "../lib/RichText.js";
 export default class SingleCharacterView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.character = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
     this.edit = false;
     this.uploadingImage = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.character = props.params.content;
+    } else this.character = await getThings(`/api/get_character/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -65,6 +75,7 @@ export default class SingleCharacterView {
           event: () =>
             this.navigate({
               title: "single-item",
+              id: item.id,
               sidebar: true,
               params: { content: item },
             }),

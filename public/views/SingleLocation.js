@@ -16,7 +16,7 @@ import RichText from "../lib/RichText.js";
 export default class SingleLocationView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.location = props.params.content;
+
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -27,8 +27,19 @@ export default class SingleLocationView {
     this.parentLocationLoading = false;
     this.subLocationLoading = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.location = props.params.content;
+    } else this.location = await getThings(`/api/get_location/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -203,6 +214,7 @@ export default class SingleLocationView {
           event: () => {
             this.navigate({
               title: "single-location",
+              id: location.id,
               sidebar: true,
               params: { content: location },
             });
@@ -235,6 +247,7 @@ export default class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-character",
+              id: character.id,
               sidebar: true,
               params: { content: character },
             }),
@@ -267,6 +280,7 @@ export default class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-item",
+              id: item.id,
               sidebar: true,
               params: { content: item },
             }),
@@ -298,6 +312,7 @@ export default class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-location",
+              id: parentLocation.id,
               sidebar: true,
               params: { content: parentLocation },
             }),
