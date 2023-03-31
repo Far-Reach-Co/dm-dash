@@ -56,10 +56,19 @@ const {
   getTableImagesQuery,
   removeTableImageQuery,
 } = require("../queries/tableImages.js");
+const { USER_IS_NOT_PRO } = require("../../lib/enums.js");
 
 async function addProject(req, res, next) {
   try {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
+
+    // check if user is pro
+    const projectsData = await getProjectsQuery(req.user.id);
+    // limit to three projects
+    if (projectsData.rows.length >= 3) {
+      if (!req.user.is_pro) throw { status: 402, message: USER_IS_NOT_PRO };
+    }
+
     req.body.user_id = req.user.id;
     const data = await addProjectQuery(req.body);
     // add first project table view
@@ -74,9 +83,12 @@ async function getProject(req, res, next) {
   try {
     const projectData = await getProjectQuery(req.params.id);
     const project = projectData.rows[0];
-    const projectUsersData = await getProjectUserByUserAndProjectQuery(req.user.id, project.id)
+    const projectUsersData = await getProjectUserByUserAndProjectQuery(
+      req.user.id,
+      project.id
+    );
     if (projectUsersData.rows.length) {
-      const projectUser = projectUsersData.rows[0]
+      const projectUser = projectUsersData.rows[0];
       project.was_joined = true;
       project.project_user_id = projectUser.id;
       project.date_joined = projectUser.date_joined;

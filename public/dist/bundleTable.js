@@ -60,7 +60,7 @@ class Toast {
     this.isVisible = false;
     this.message = "";
     this.domComponent = document.getElementById("toast");
-    if(!this.domComponent) return;
+    if (!this.domComponent) return;
     this.domComponent.style.visibility = "hidden";
 
     this.isError = false;
@@ -76,7 +76,7 @@ class Toast {
     this.domComponent.style.visibility = "visible";
     const timer = setTimeout(() => {
       this.hide();
-    }, 2000);
+    }, 4000);
     this.timer = timer;
   };
 
@@ -111,6 +111,47 @@ class Toast {
 }
 
 const toast = new Toast();
+
+class Modal {
+  constructor() {
+    this.domComponent = document.getElementById("modal");
+    this.domContent = document.getElementById("modal-content");
+    this.closeButton = document.getElementById("close-modal");
+
+    this.closeButton.addEventListener("click", this.hide);
+    document.addEventListener('click', (e) => {
+      if(e.target.id === "modal") {
+        this.hide();
+      }
+    });
+  }
+
+  show = (content) => {
+    this.domComponent.style.visibility = "visible";
+    this.domContent.innerHTML = "";
+    this.domContent.append(content);
+  };
+
+  hide = () => {
+    this.domComponent.style.visibility = "hidden";
+  };
+}
+
+const modal = new Modal();
+
+function renderTierLimitWarning(message) {
+  modal.show(
+    createElement("div", { class: "modal-pro-warning-container" }, [
+      createElement("h2", {}, "Limited Feature"),
+      createElement("hr", { style: "margin-top: 0px;" }),
+      createElement("div", {}, message),
+      createElement("br"),
+      createElement("div", {}, "Thank you."),
+      createElement("br"),
+      createElement("small", {}, "-- the Far Reach Co. staff"),
+    ])
+  );
+}
 
 async function getThings(endpoint) {
   try {
@@ -159,14 +200,23 @@ async function postThing(endpoint, body) {
       body: JSON.stringify(body),
     });
     const data = await res.json();
+    console.log(res, data);
     if (res.status === 200 || res.status === 201) {
-      toast.show("Success");
+      // toast.show("Success");
       return data;
-    } else throw new Error();
+    } else if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
+      renderTierLimitWarning(
+        'Please subscribe to our "Pro" package to gain access. In order to continue providing our services we need your support <3. Please read about our available tiers <insert link here> and choose the best option for your future.'
+      );
+    } else {
+      let error = new Error();
+      if (data && data.error) error = data.error;
+      throw error;
+    }
   } catch (err) {
-    // window.alert("Failed to save note...");
     console.log(err);
     toast.error("Error");
+
     return null;
   }
 }
@@ -516,7 +566,7 @@ async function getPresignedForImageDownload(imageId) {
 //       }),
 //     });
 //     const data = await res.json();
-    
+
 //     if (data) return data;
 //     else throw new Error();
 //   } catch (err) {
@@ -560,7 +610,7 @@ async function uploadImage(image, currentProjectId, currentImageId) {
     formData.append("folder_name", "images");
     formData.append("project_id", currentProjectId);
     if (currentImageId) formData.append("current_file_id", currentImageId);
-    
+
     const res = await fetch(`${window.origin}/api/file_upload`, {
       method: "POST",
       headers: {
@@ -570,7 +620,14 @@ async function uploadImage(image, currentProjectId, currentImageId) {
       body: formData,
     });
     const data = await res.json();
-    
+
+    // warn about data usage and pro subscription
+    if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
+      return renderTierLimitWarning(
+        'You have reached your limit for uploading data such as images. Please subscribe to our "Pro" package to increase your limit. In order to continue providing our services we need your support <3. Please read about our available tiers <insert link here> and choose the best option for your future.'
+      );
+    }
+
     if (data) return data;
     else throw new Error();
   } catch (err) {
@@ -1525,33 +1582,6 @@ const throttle = (fn, wait) => {
     }
   };
 };
-
-class Modal {
-  constructor() {
-    this.domComponent = document.getElementById("modal");
-    this.domContent = document.getElementById("modal-content");
-    this.closeButton = document.getElementById("close-modal");
-
-    this.closeButton.addEventListener("click", this.hide);
-    document.addEventListener('click', (e) => {
-      if(e.target.id === "modal") {
-        this.hide();
-      }
-    });
-  }
-
-  show = (content) => {
-    this.domComponent.style.visibility = "visible";
-    this.domContent.innerHTML = "";
-    this.domContent.append(content);
-  };
-
-  hide = () => {
-    this.domComponent.style.visibility = "hidden";
-  };
-}
-
-const modal = new Modal();
 
 class Table {
   constructor(props) {

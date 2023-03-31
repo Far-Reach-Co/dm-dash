@@ -1,3 +1,5 @@
+import renderTierLimitWarning from "./renderTierLimitWarning.js";
+
 export async function getPresignedForImageDownload(imageId) {
   try {
     const res = await fetch(`${window.origin}/api/signed_URL_download`, {
@@ -36,7 +38,7 @@ export async function getPresignedForImageDownload(imageId) {
 //       }),
 //     });
 //     const data = await res.json();
-    
+
 //     if (data) return data;
 //     else throw new Error();
 //   } catch (err) {
@@ -77,10 +79,10 @@ export async function uploadImage(image, currentProjectId, currentImageId) {
     const formData = new FormData();
     formData.append("file", image);
     formData.append("bucket_name", "wyrld");
-    formData.append("folder_name", "images")
-    formData.append("project_id", currentProjectId)
-    if (currentImageId) formData.append("current_file_id", currentImageId)
-    
+    formData.append("folder_name", "images");
+    formData.append("project_id", currentProjectId);
+    if (currentImageId) formData.append("current_file_id", currentImageId);
+
     const res = await fetch(`${window.origin}/api/file_upload`, {
       method: "POST",
       headers: {
@@ -90,7 +92,14 @@ export async function uploadImage(image, currentProjectId, currentImageId) {
       body: formData,
     });
     const data = await res.json();
-    
+
+    // warn about data usage and pro subscription
+    if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
+      return renderTierLimitWarning(
+        'You have reached your limit for uploading data such as images. Please subscribe to our "Pro" package to increase your limit. In order to continue providing our services we need your support <3. Please read about our available tiers <insert link here> and choose the best option for your future.'
+      );
+    }
+
     if (data) return data;
     else throw new Error();
   } catch (err) {
