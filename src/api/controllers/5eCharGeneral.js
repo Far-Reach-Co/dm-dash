@@ -52,10 +52,18 @@ const { getProjectQuery } = require("../queries/projects");
 const {
   getProjectUserByUserAndProjectQuery,
 } = require("../queries/projectUsers");
+const { USER_IS_NOT_PRO } = require("../../lib/enums");
 
 async function add5eChar(req, res, next) {
   try {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
+
+    // check if user is pro
+    const generalsData = await get5eCharsGeneralByUserQuery(req.user.id);
+    // limit to three projects
+    if (generalsData.rows.length >= 5) {
+      if (!req.user.is_pro) throw { status: 402, message: USER_IS_NOT_PRO };
+    }
 
     req.body.user_id = req.user.id;
     const generalData = await add5eCharGeneralQuery(req.body);
@@ -107,7 +115,7 @@ async function get5eCharGeneral(req, res, next) {
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
     const generalsData = await get5eCharGeneralQuery(req.params.id);
     const general = generalsData.rows[0];
-    
+
     // // not creator of character
     // CODE IS BROKEN NEEDS TO BE FIXED
 

@@ -1106,3 +1106,16 @@ input:checked+.slider:before {
   /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
 }
+
+.modal-pro-warning-container {
+  padding: 10px;
+  width: 50vw;
+  height: fit-content;
+  position: inherit;
+  border-radius: var(--border-radius);
+  border: 0.5px solid var(--main-gray);
+  z-index: 3;
+  background-color: var(--blue4);
+  display: flex;
+  flex-direction: column;
+}

@@ -1,5 +1,6 @@
 const AWS = require("aws-sdk");
 const fs = require("fs");
+const { USER_IS_NOT_PRO } = require("../../lib/enums");
 const {
   addImageQuery,
   getImageQuery,
@@ -23,7 +24,7 @@ async function getSignedUrlForDownload(req, res, next) {
     const params = {
       Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
       Key: objectName,
-      Expires: ((60 * 60) * 24) * 3,
+      Expires: 60 * 60 * 24 * 3,
     };
     // if(req.body.download_name) params.ResponseContentDisposition = `filename="${req.body.download_name}"`
     const url = await new Promise((resolve, reject) => {
@@ -79,6 +80,8 @@ async function uploadToAws(req, res, next) {
   const type = splitAtIndex(name, ind2);
   const imageRef = req.file.filename + type[1];
 
+  const fileName = req.file.filename;
+
   const params = {
     Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
     Key: imageRef,
@@ -88,6 +91,18 @@ async function uploadToAws(req, res, next) {
   let image = null;
 
   try {
+    // check if pro // yes this is in a code block
+    {
+      const projectData = await getProjectQuery(req.body.project_id);
+      const project = projectData.rows[0];
+      const projectDataCount = project.used_data_in_bytes;
+
+      if (projectDataCount >= 104857600) {
+        // 100 MB
+        if (!req.user.is_pro) throw { status: 402, message: USER_IS_NOT_PRO };
+      }
+    }
+
     await new Promise((resolve, reject) => {
       s3.upload(params, (err, data) => {
         if (err) {
@@ -107,13 +122,16 @@ async function uploadToAws(req, res, next) {
     res.send(image);
   } catch (err) {
     console.log(err);
+    // delete file in storage
+    const filePath = `file_uploads/${fileName}`;
+    fs.unlinkSync(filePath);
     next(err);
   }
 
   if (image) {
     try {
       // delete file in storage
-      const filePath = `file_uploads/${req.file.filename}`;
+      const filePath = `file_uploads/${fileName}`;
       fs.unlinkSync(filePath);
 
       // prepare to update project data usage
@@ -138,6 +156,7 @@ async function uploadToAws(req, res, next) {
       });
     } catch (err) {
       console.log(err);
+      next(err);
     }
   }
 }
@@ -191,7 +210,7 @@ async function removeFile(bucket, image) {
       });
     });
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
 }
 

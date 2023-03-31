@@ -5,7 +5,7 @@ class Toast {
     this.isVisible = false;
     this.message = "";
     this.domComponent = document.getElementById("toast");
-    if(!this.domComponent) return;
+    if (!this.domComponent) return;
     this.domComponent.style.visibility = "hidden";
 
     this.isError = false;
@@ -21,7 +21,7 @@ class Toast {
     this.domComponent.style.visibility = "visible";
     const timer = setTimeout(() => {
       this.hide();
-    }, 2000);
+    }, 4000);
     this.timer = timer;
   };
 
