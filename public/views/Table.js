@@ -210,7 +210,7 @@ class TopLayer {
                 createElement(
                   "small",
                   {},
-                  "While an object is selected, pressing control will change the layer that the object is currently on."
+                  "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
                 ),
                 createElement("br"),
                 createElement("b", {}, "Shift"),
