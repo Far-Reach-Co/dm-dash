@@ -1358,7 +1358,9 @@ class CanvasLayer {
       }
       // move active objects to other layer
       if (e.ctrlKey) {
-        console.log("ok ctr");
+        // only allow gm to do this
+        if (state$1.currentProject.is_editor === false) return;
+
         const activeObjects = this.canvas.getActiveObjects();
         for (var object of activeObjects) {
           this.moveObjectToOtherLayer(object);
@@ -1372,7 +1374,7 @@ class CanvasLayer {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
             if (object.hasOwnProperty("_objects")) {
-              for(var subObj of object._objects) {
+              for (var subObj of object._objects) {
                 this.canvas.remove(subObj);
                 socketIntegration.imageRemoved(subObj.id);
               }
@@ -1785,7 +1787,7 @@ class TopLayer {
                 createElement(
                   "small",
                   {},
-                  "While an object is selected, pressing control will change the layer that the object is currently on."
+                  "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
                 ),
                 createElement("br"),
                 createElement("b", {}, "Shift"),

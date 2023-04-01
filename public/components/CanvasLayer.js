@@ -1,6 +1,7 @@
 import imageFollowingCursor from "../lib/imageFollowingCursor.js";
 import { getPresignedForImageDownload } from "../lib/imageUtils.js";
 import socketIntegration from "../lib/socketIntegration.js";
+import state from "../lib/state.js";
 
 export default class CanvasLayer {
   constructor(props) {
@@ -204,7 +205,9 @@ export default class CanvasLayer {
       }
       // move active objects to other layer
       if (e.ctrlKey) {
-        console.log("ok ctr");
+        // only allow gm to do this
+        if (state.currentProject.is_editor === false) return;
+
         const activeObjects = this.canvas.getActiveObjects();
         for (var object of activeObjects) {
           this.moveObjectToOtherLayer(object);
@@ -218,7 +221,7 @@ export default class CanvasLayer {
         if (this.canvas.getActiveObjects().length) {
           this.canvas.getActiveObjects().forEach((object) => {
             if (object.hasOwnProperty("_objects")) {
-              for(var subObj of object._objects) {
+              for (var subObj of object._objects) {
                 this.canvas.remove(subObj);
                 socketIntegration.imageRemoved(subObj.id);
               }
