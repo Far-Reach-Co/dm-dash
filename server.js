@@ -3,7 +3,20 @@ dotenv.config();
 const express = require("express");
 const app = express();
 const http = require("http");
-const server = http.createServer(app);
+const https = require("https");
+const fs = require("fs");
+let server = http.createServer(app);
+if (process.env.SERVER_ENV === "prod") {
+  server = https.createServer(
+    {
+      key: fs.readFileSync("/etc/letsencrypt/live/farreachco.com/privkey.pem"),
+      cert: fs.readFileSync(
+        "/etc/letsencrypt/live/farreachco.com/fullchain.pem"
+      ),
+    },
+    app
+  );
+}
 const { Server } = require("socket.io");
 const io = new Server(server);
 const cors = require("cors");
@@ -130,7 +143,14 @@ io.on("connection", (socket) => {
 });
 
 /***************************** Run ***************************/
-var PORT = 80;
-server.listen({ port: PORT }, async () => {
-  console.log(`Server Running at http://localhost:${PORT}`);
-});
+let PORT = 80;
+if (process.env.SERVER_ENV === "dev") {
+  server.listen({ port: PORT }, async () => {
+    console.log(`Server Running at http://localhost:${PORT}`);
+  });
+} else {
+  PORT = 443;
+  server.listen({ port: PORT }, async () => {
+    console.log(`Server Running at https://localhost:${PORT}`);
+  });
+}
