@@ -90,17 +90,17 @@ app.use((error, req, res, next) => {
 /***************************** SOCKETS ***************************/
 io.on("connection", (socket) => {
   // testing
-  socket.on("project-joined", ({ project, userEmail }) => {
+  socket.on("project-joined", ({ project, username }) => {
     try {
       console.log("************** SOCKETTTTTT ***********************\n");
-      console.log(project, userEmail, "\n");
+      console.log(project, username, "\n");
       console.log("************** SOCKETTTTTT ***********************\n");
 
-      const user = userJoin(socket.id, userEmail, project);
+      const user = userJoin(socket.id, username, project);
       socket.join(project);
 
       // broadcast when a user connects
-      io.to(project).emit("project-join", `Hello ${userEmail}`);
+      io.to(project).emit("project-join", `Hello ${username}`);
 
       // send users list
       io.to(user.project).emit("current-users", getProjectUsers(project));

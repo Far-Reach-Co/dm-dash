@@ -97,9 +97,12 @@ export default class Project {
 
       const elem = createElement(
         "div",
-        { style: "display: flex; justify-content: space-between;" },
+        {
+          style:
+            "display: flex; justify-content: space-between; margin-bottom: 5px;",
+        },
         [
-          createElement("div", {}, user.email),
+          createElement("div", {}, user.username),
           createElement("label", { class: "switch" }, [
             checkbox,
             createElement("span", { class: "slider round" }),

@@ -60,13 +60,14 @@ async function getUserById(req, res, next) {
 
 async function registerUser(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const { email, username, password } = req.body;
     // hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const userData = await registerUserQuery({
       email: email.toLowerCase(),
+      username: username,
       password: hashedPassword,
     });
     const data = userData.rows[0];
