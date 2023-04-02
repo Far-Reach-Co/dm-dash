@@ -5,12 +5,10 @@ class SocketIntegration {
     this.projectId = null;
     this.user = null;
     this.sidebar = null;
-
   }
-  
+
   // Listeners
   setupListeners = (canvasLayer) => {
-
     // USER JOIN
     this.socket.on("project-join", (message) => {
       console.log("User Joined:\n", message);
@@ -160,7 +158,7 @@ class SocketIntegration {
 
   socketJoined = () => {
     this.socket.emit("project-joined", {
-      userEmail: this.user.email,
+      username: this.user.username,
       project: `project-${this.projectId}`,
     });
   };
