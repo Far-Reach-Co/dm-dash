@@ -22,7 +22,7 @@ function sendResetEmail(user, token) {
   mail.sendMessage({
     user: user,
     title: "Reset Password",
-    message: `Visit the following link to reset your password: <a href="http://165.227.88.65/resetpassword.html?token=${token}">Reset Password</a>`,
+    message: `Visit the following link to reset your password: <a href="https://farreachco.com/resetpassword.html?token=${token}">Reset Password</a>`,
   });
 }
 
@@ -72,8 +72,11 @@ async function registerUser(req, res, next) {
     const data = userData.rows[0];
 
     // create first project for user
-    const projectData = await addProjectQuery({ title: "First Project", user_id: data.id });
-    await addTableViewQuery({project_id: projectData.rows[0].id});
+    const projectData = await addProjectQuery({
+      title: "First Project",
+      user_id: data.id,
+    });
+    await addTableViewQuery({ project_id: projectData.rows[0].id });
 
     // login
     const token = generateAccessToken(data.id, validLoginLength);
@@ -135,9 +138,10 @@ async function verifyJwt(req, res, next) {
 
 async function editUser(req, res, next) {
   try {
-    console.log(req.user, req.params)
+    console.log(req.user, req.params);
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    if (req.user.id != req.params.id) throw { status: 403, message: "Forbidden" };
+    if (req.user.id != req.params.id)
+      throw { status: 403, message: "Forbidden" };
 
     const userEditData = await editUserQuery(req.params.id, req.body);
     res.send(userEditData.rows[0]);
