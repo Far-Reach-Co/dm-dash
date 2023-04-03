@@ -643,6 +643,7 @@ class Project {
 
     this.id = props.id;
     this.title = props.title;
+    this.description = props.description;
     this.dateCreated = props.dateCreated;
     this.projectInvite = props.projectInvite;
     this.isEditor = props.isEditor;
@@ -953,6 +954,7 @@ class Project {
             state$1.currentProject = {
               id: this.id,
               title: this.title,
+              description: this.description,
               dateCreated: this.dateCreated,
               projectInvite: this.projectInvite,
               isEditor: this.isEditor,
@@ -960,7 +962,7 @@ class Project {
               dateJoined: this.dateJoined,
               projectUserId: this.projectUserId,
             };
-            this.navigate({ title: "main", sidebar: true });
+            this.navigate({ title: "landing", sidebar: true });
           },
         }
       ),
@@ -1018,6 +1020,7 @@ class ProjectsView {
         domComponent: elem,
         id: project.id,
         title: project.title,
+        description: project.description,
         dateCreated: project.date_created,
         usedDataInBytes: project.used_data_in_bytes,
         isEditor: project.is_editor,
@@ -6711,6 +6714,7 @@ class Navigate {
         state$1.currentProject = {
           id: projectData.id,
           title: projectData.title,
+          description: projectData.description,
           dateCreated: projectData.date_created,
           isEditor: projectData.is_editor,
           wasJoined: projectData.was_joined,
@@ -11432,6 +11436,120 @@ class FiveEPlayerSheet {
   };
 }
 
+class LandingView {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.navigate = props.navigate;
+    this.domComponent.className = "standard-view";
+    this.edit = false;
+    this.render();
+  }
+
+  toggleEdit = () => {
+    this.edit = !this.edit;
+    this.render();
+  };
+
+  saveProject = async (e, description) => {
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    formProps.description = description;
+
+    // update UI
+    state$1.currentProject.title = formProps.title;
+    state$1.currentProject.description = formProps.description;
+    // update routing history for refresh
+    if (history.state) {
+      history.state.applicationState.currentProject.title = formProps.title;
+      history.state.applicationState.currentProject.description =
+        formProps.description;
+      history.pushState(history.state, null);
+    }
+    this.toggleEdit();
+
+    await postThing(`/api/edit_project/${state$1.currentProject.id}`, formProps);
+  };
+
+  renderEdit = () => {
+    const richText = new RichText({
+      value: state$1.currentProject.description,
+    });
+
+    this.domComponent.append(
+      createElement(
+        "form",
+        {},
+        [
+          createElement("label", { for: "title" }, "Title"),
+          createElement("input", {
+            id: "title",
+            name: "title",
+            value: state$1.currentProject.title,
+          }),
+          createElement("br"),
+          createElement("label", { for: "description" }, "Description (About)"),
+          richText,
+          createElement("br"),
+          createElement("br"),
+          createElement("button", { type: "submit" }, "Done"),
+        ],
+        {
+          type: "submit",
+          event: (e) => {
+            e.preventDefault();
+            this.saveProject(e, richText.children[1].innerHTML);
+          },
+        }
+      )
+    );
+  };
+
+  renderEditButtonOrNull = () => {
+    if (state$1.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else {
+      return createElement(
+        "a",
+        { class: "small-clickable", style: "margin-left: 3px;" },
+        "Edit",
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      );
+    }
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.edit) {
+      return this.renderEdit();
+    }
+
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = state$1.currentProject.description;
+
+    this.domComponent.append(
+      createElement("div", { class: "single-item-title-container" }, [
+        createElement("div", { class: "single-item-title" }, [
+          state$1.currentProject.title,
+        ]),
+      ]),
+      this.renderEditButtonOrNull(),
+      createElement("br"),
+      createElement("div", {}, [
+        createElement(
+          "div",
+          { class: "single-item-subheading" },
+          "About this project"
+        ),
+        descriptionComponent,
+      ])
+    );
+  };
+}
+
 class App {
   constructor(props) {
     this.domComponent = props.domComponent;
@@ -11439,6 +11557,7 @@ class App {
 
     // save view instantiations
     this.views = {
+      landing: null,
       projects: null,
       notes: null,
       counters: null,
@@ -11469,7 +11588,7 @@ class App {
     if (history.state) {
       return this.navigate.navigate(history.state);
     }
-    if (currentView && currentView != "app" && currentView != "main") {
+    if (currentView && currentView != "app" && currentView != "landing") {
       if (viewId) {
         return this.navigate.navigate({
           title: currentView,
@@ -11490,6 +11609,12 @@ class App {
       navigate: this.navigate,
       mainRoutes: [
         {
+          id: "sidebar-landing",
+          title: "landing",
+          displayTitle: "About",
+          params: {},
+        },
+        {
           id: "sidebar-locations",
           title: "locations",
           displayTitle: "Locations",
@@ -11499,12 +11624,6 @@ class App {
           id: "sidebar-characters",
           title: "characters",
           displayTitle: "Characters",
-          params: {},
-        },
-        {
-          id: "sidebar-players",
-          title: "players",
-          displayTitle: "Players",
           params: {},
         },
         {
@@ -11539,6 +11658,12 @@ class App {
         },
       ],
       secondRoutes: [
+        {
+          id: "sidebar-players",
+          title: "player",
+          displayTitle: "Players",
+          params: {},
+        },
         {
           id: "sidebar-notes",
           title: "notes",
@@ -11711,18 +11836,19 @@ class App {
     this.views.projects = view;
   };
 
-  renderModulesView = () => {
-    this.domComponent.appendChild(
-      createElement(
-        "div",
-        { class: "standard-view" },
-        createElement(
-          "h2",
-          { style: "align-self: center;" },
-          "Select a module from the sidebar ➔"
-        )
-      )
-    );
+  renderLandingView = ({ navigate }) => {
+    if (this.views.landing) {
+      return this.domComponent.appendChild(this.views.landing.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new LandingView({
+      domComponent: element,
+      navigate,
+    });
+    this.views.landing = view;
+
+    // open sidebar for first time
     this.sidebar.open();
   };
 
@@ -11797,8 +11923,8 @@ class App {
           navigate: this.navigate.navigate,
           params: this.navigate.currentRoute.params,
         });
-      case "main":
-        return this.renderModulesView();
+      case "landing":
+        return this.renderLandingView({ navigate: this.navigate.navigate });
       default:
         return this.renderProjectsView({ navigate: this.navigate.navigate });
     }

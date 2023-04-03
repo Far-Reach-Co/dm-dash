@@ -38,6 +38,7 @@ export default class Navigate {
         state.currentProject = {
           id: projectData.id,
           title: projectData.title,
+          description: projectData.description,
           dateCreated: projectData.date_created,
           isEditor: projectData.is_editor,
           wasJoined: projectData.was_joined,

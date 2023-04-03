@@ -42,6 +42,7 @@ export default class ProjectsView {
         domComponent: elem,
         id: project.id,
         title: project.title,
+        description: project.description,
         dateCreated: project.date_created,
         usedDataInBytes: project.used_data_in_bytes,
         isEditor: project.is_editor,
