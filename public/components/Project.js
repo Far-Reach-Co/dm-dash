@@ -16,6 +16,7 @@ export default class Project {
 
     this.id = props.id;
     this.title = props.title;
+    this.description = props.description;
     this.dateCreated = props.dateCreated;
     this.projectInvite = props.projectInvite;
     this.isEditor = props.isEditor;
@@ -326,6 +327,7 @@ export default class Project {
             state.currentProject = {
               id: this.id,
               title: this.title,
+              description: this.description,
               dateCreated: this.dateCreated,
               projectInvite: this.projectInvite,
               isEditor: this.isEditor,
@@ -333,7 +335,7 @@ export default class Project {
               dateJoined: this.dateJoined,
               projectUserId: this.projectUserId,
             };
-            this.navigate({ title: "main", sidebar: true });
+            this.navigate({ title: "landing", sidebar: true });
           },
         }
       ),

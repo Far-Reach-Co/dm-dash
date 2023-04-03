@@ -19,6 +19,7 @@ import LoresView from "./views/lores.js";
 import EventsView from "./views/Events.js";
 import PlayersView from "./views/Players.js";
 import FiveEPlayerSheet from "./components/5ePlayerSheet.js";
+import LandingView from "./views/Landing.js";
 
 class App {
   constructor(props) {
@@ -27,6 +28,7 @@ class App {
 
     // save view instantiations
     this.views = {
+      landing: null,
       projects: null,
       notes: null,
       counters: null,
@@ -57,7 +59,7 @@ class App {
     if (history.state) {
       return this.navigate.navigate(history.state);
     }
-    if (currentView && currentView != "app" && currentView != "main") {
+    if (currentView && currentView != "app" && currentView != "landing") {
       if (viewId) {
         return this.navigate.navigate({
           title: currentView,
@@ -78,6 +80,12 @@ class App {
       navigate: this.navigate,
       mainRoutes: [
         {
+          id: "sidebar-landing",
+          title: "landing",
+          displayTitle: "About",
+          params: {},
+        },
+        {
           id: "sidebar-locations",
           title: "locations",
           displayTitle: "Locations",
@@ -87,12 +95,6 @@ class App {
           id: "sidebar-characters",
           title: "characters",
           displayTitle: "Characters",
-          params: {},
-        },
-        {
-          id: "sidebar-players",
-          title: "players",
-          displayTitle: "Players",
           params: {},
         },
         {
@@ -127,6 +129,12 @@ class App {
         },
       ],
       secondRoutes: [
+        {
+          id: "sidebar-players",
+          title: "player",
+          displayTitle: "Players",
+          params: {},
+        },
         {
           id: "sidebar-notes",
           title: "notes",
@@ -299,18 +307,19 @@ class App {
     this.views.projects = view;
   };
 
-  renderModulesView = () => {
-    this.domComponent.appendChild(
-      createElement(
-        "div",
-        { class: "standard-view" },
-        createElement(
-          "h2",
-          { style: "align-self: center;" },
-          "Select a module from the sidebar ➔"
-        )
-      )
-    );
+  renderLandingView = ({ navigate }) => {
+    if (this.views.landing) {
+      return this.domComponent.appendChild(this.views.landing.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new LandingView({
+      domComponent: element,
+      navigate,
+    });
+    this.views.landing = view;
+
+    // open sidebar for first time
     this.sidebar.open();
   };
 
@@ -385,8 +394,8 @@ class App {
           navigate: this.navigate.navigate,
           params: this.navigate.currentRoute.params,
         });
-      case "main":
-        return this.renderModulesView();
+      case "landing":
+        return this.renderLandingView({ navigate: this.navigate.navigate });
       default:
         return this.renderProjectsView({ navigate: this.navigate.navigate });
     }
