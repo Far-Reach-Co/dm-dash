@@ -20,6 +20,7 @@ import EventsView from "./views/Events.js";
 import PlayersView from "./views/Players.js";
 import FiveEPlayerSheet from "./components/5ePlayerSheet.js";
 import LandingView from "./views/Landing.js";
+import CampaignsView from "./views/Campaigns.js";
 
 class App {
   constructor(props) {
@@ -29,6 +30,7 @@ class App {
     // save view instantiations
     this.views = {
       landing: null,
+      campaigns: null,
       projects: null,
       notes: null,
       counters: null,
@@ -83,6 +85,12 @@ class App {
           id: "sidebar-landing",
           title: "landing",
           displayTitle: "About",
+          params: {},
+        },
+        {
+          id: "sidebar-campaigns",
+          title: "campaigns",
+          displayTitle: "Campaigns",
           params: {},
         },
         {
@@ -294,6 +302,19 @@ class App {
     });
   };
 
+  renderCampaignsView = ({ navigate }) => {
+    if (this.views.campaigns) {
+      return this.domComponent.appendChild(this.views.campaigns.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new CampaignsView({
+      domComponent: element,
+      navigate,
+    });
+    this.views.campaigns = view;
+  };
+
   renderProjectsView = ({ navigate }) => {
     if (this.views.projects) {
       return this.domComponent.appendChild(this.views.projects.domComponent);
@@ -394,6 +415,8 @@ class App {
           navigate: this.navigate.navigate,
           params: this.navigate.currentRoute.params,
         });
+      case "campaigns":
+        return this.renderCampaignsView({ navigate: this.navigate.navigate });
       case "landing":
         return this.renderLandingView({ navigate: this.navigate.navigate });
       default:

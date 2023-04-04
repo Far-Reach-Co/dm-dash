@@ -24,18 +24,19 @@ class Table {
   init = async () => {
     // get table views
     this.projectId = localStorage.getItem("current-table-project-id");
+    this.campaignId = localStorage.getItem("current-campaign-id");
+
     const project = await getThings(`/api/get_project/${this.projectId}`);
     state.currentProject = project;
-    const tableViews = await getThings(
-      `/api/get_table_views/${state.currentProject.id}`
-    );
+
+    const tableView = await getThings(`/api/get_table_view/${this.campaignId}`);
     // sidebar and hamburger inst
     this.instantiateSidebar();
     this.instantiateHamburger();
     // create canvas elem and append
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.canvasLayer = new CanvasLayer({
-      tableViews,
+      tableView,
       tableSidebarComponent: this.sidebar.tableSidebarComponent,
     });
     // provide socket necessary variables

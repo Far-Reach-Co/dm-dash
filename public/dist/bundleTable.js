@@ -1241,8 +1241,8 @@ const socketIntegration = new SocketIntegration();
 class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
-    this.tableViews = props.tableViews;
-    this.currentTableView = this.tableViews[0];
+    this.currentTableView = props.tableView;
+    console.log(this.currentTableView);
     this.currentLayer = "Object";
 
     // table sidebar component
@@ -1683,18 +1683,19 @@ class Table {
   init = async () => {
     // get table views
     this.projectId = localStorage.getItem("current-table-project-id");
+    this.campaignId = localStorage.getItem("current-campaign-id");
+
     const project = await getThings(`/api/get_project/${this.projectId}`);
     state$1.currentProject = project;
-    const tableViews = await getThings(
-      `/api/get_table_views/${state$1.currentProject.id}`
-    );
+
+    const tableView = await getThings(`/api/get_table_view/${this.campaignId}`);
     // sidebar and hamburger inst
     this.instantiateSidebar();
     this.instantiateHamburger();
     // create canvas elem and append
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.canvasLayer = new CanvasLayer({
-      tableViews,
+      tableView,
       tableSidebarComponent: this.sidebar.tableSidebarComponent,
     });
     // provide socket necessary variables

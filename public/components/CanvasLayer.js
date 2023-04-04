@@ -6,8 +6,8 @@ import state from "../lib/state.js";
 export default class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
-    this.tableViews = props.tableViews;
-    this.currentTableView = this.tableViews[0];
+    this.currentTableView = props.tableView;
+    console.log(this.currentTableView);
     this.currentLayer = "Object";
 
     // table sidebar component

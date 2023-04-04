@@ -9,6 +9,7 @@ const { getProjectQuery } = require("../queries/projects.js");
 const {
   getProjectUserByUserAndProjectQuery,
 } = require("../queries/projectUsers.js");
+const { USER_IS_NOT_PRO } = require("../../lib/enums.js");
 
 async function addTableView(req, res, next) {
   try {
@@ -30,6 +31,13 @@ async function addTableView(req, res, next) {
         !projectUser.rows[0].is_editor
       )
         throw { status: 403, message: "Forbidden" };
+    }
+
+    // check if user is pro
+    const tableViewsData = await getTableViewsQuery(req.body.project_id);
+    // limit to two campaigns
+    if (tableViewsData.rows.length >= 2) {
+      if (!req.user.is_pro) throw { status: 402, message: USER_IS_NOT_PRO };
     }
 
     const data = await addTableViewQuery(req.body);
@@ -58,6 +66,31 @@ async function getTableViews(req, res, next) {
     const data = await getTableViewsQuery(req.params.project_id);
 
     res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getTableView(req, res, next) {
+  try {
+    // if no user
+    if (!req.user) throw { status: 401, message: "Missing Credentials" };
+
+    const tableViewData = await getTableViewQuery(req.params.id);
+    const tableView = tableViewData.rows[0];
+    // If user is not author or editor
+    const projectData = await getProjectQuery(tableView.project_id);
+    const project = projectData.rows[0];
+
+    if (project.user_id !== req.user.id) {
+      const projectUser = await getProjectUserByUserAndProjectQuery(
+        req.user.id,
+        project.id
+      );
+      if (!projectUser) throw { status: 403, message: "Forbidden" };
+    }
+
+    res.send(tableView);
   } catch (err) {
     next(err);
   }
@@ -124,6 +157,7 @@ async function editTableView(req, res, next) {
 module.exports = {
   addTableView,
   getTableViews,
+  getTableView,
   removeTableView,
   editTableView,
 };
