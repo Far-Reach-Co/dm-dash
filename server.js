@@ -153,4 +153,14 @@ if (process.env.SERVER_ENV === "dev") {
   server.listen({ port: PORT }, async () => {
     console.log(`Server Running at https://localhost:${PORT}`);
   });
+
+  // redirect
+  http
+    .createServer(function (req, res) {
+      res.writeHead(301, {
+        Location: "https://" + req.headers["host"] + req.url,
+      });
+      res.end();
+    })
+    .listen(80);
 }
