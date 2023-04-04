@@ -551,7 +551,7 @@ class AccountManager {
     this.domComponent.append(
       createElement("div", { class: "standard-view" }, [
         createElement("h1", { style: "margin: auto;" }, "Account"),
-        createElement("br"),
+        createElement("hr", { class: "special-hr" }),
         createElement("div", { class: "component" }, [
           this.renderEmailOrEditEmail(),
           createElement("br"),
@@ -846,7 +846,7 @@ class Project {
     const removeButton = createElement(
       "button",
       { class: "btn-red" },
-      `${this.wasJoined ? "Leave" : "Delete"} Project`
+      `${this.wasJoined ? "Leave" : "Delete"} Wyrld`
     );
     removeButton.addEventListener("click", async () => {
       if (
@@ -870,7 +870,7 @@ class Project {
     if (this.isEditor === false) {
       return this.domComponent.append(
         createElement("div", { class: "project-edit-container" }, [
-          createElement("h2", {}, `Edit Project: "${this.title}"`),
+          createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
           doneButton,
           createElement("br"),
           removeButton,
@@ -881,7 +881,7 @@ class Project {
     // append
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h2", {}, `Edit Project: "${this.title}"`),
+        createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
         createElement("br"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement("div", { style: "margin-right: 10px" }, "Title"),
@@ -1001,7 +1001,7 @@ class ProjectsView {
   newProject = async () => {
     this.toggleLoadingNewProject();
     await postThing("/api/add_project", {
-      title: `My Project ${state$1.projects.length + 1}`,
+      title: `My Wyrld ${state$1.projects.length + 1}`,
     });
     this.toggleLoadingNewProject();
   };
@@ -1048,13 +1048,9 @@ class ProjectsView {
 
     // append
     this.domComponent.append(
-      // createElement(
-      //   "h1",
-      //   { class: "projects-view-title" },
-      //   "Choose your project"
-      //   ),
-      //   createElement("hr", { class: "special-hr" }),
-      createElement("button", { class: "new-btn" }, "+ Project", {
+      createElement("h1", { class: "projects-view-title" }, "Wyrlds"),
+      createElement("hr", { class: "special-hr" }),
+      createElement("button", { class: "new-btn" }, "+ Wyrld", {
         type: "click",
         event: this.newProject,
       }),
@@ -2646,16 +2642,19 @@ class SideBar {
         class: "sidebar-container",
       },
       [
-        createElement("div", { class: "sidebar-header" }, "Main Modules"),
+        createElement("div", { class: "sidebar-header" }, "Shared"),
         ...this.renderMainRoutesElems(),
-        createElement("a", {class: "sidebar-item"}, "Table ↗", {
+        createElement("a", { class: "sidebar-item" }, "Table ↗", {
           type: "click",
           event: () => {
-            localStorage.setItem("current-table-project-id", state$1.currentProject.id);
-            window.open("/vtt.html", '_blank').focus();
-          }
+            localStorage.setItem(
+              "current-table-project-id",
+              state$1.currentProject.id
+            );
+            window.open("/vtt.html", "_blank").focus();
+          },
         }),
-        createElement("div", { class: "sidebar-header" }, "Personal Tools"),
+        createElement("div", { class: "sidebar-header" }, "Personal"),
         ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),
       ]
@@ -11660,8 +11659,8 @@ class App {
       secondRoutes: [
         {
           id: "sidebar-players",
-          title: "player",
-          displayTitle: "Players",
+          title: "players",
+          displayTitle: "Connected Players",
           params: {},
         },
         {
@@ -11670,12 +11669,12 @@ class App {
           displayTitle: "Notes",
           params: {},
         },
-        {
-          id: "sidebar-counters",
-          title: "counters",
-          displayTitle: "Counters",
-          params: {},
-        },
+        // {
+        //   id: "sidebar-counters",
+        //   title: "counters",
+        //   displayTitle: "Counters",
+        //   params: {},
+        // },
       ],
     });
     this.sidebar = sidebar;

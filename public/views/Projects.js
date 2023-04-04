@@ -23,7 +23,7 @@ export default class ProjectsView {
   newProject = async () => {
     this.toggleLoadingNewProject();
     await postThing("/api/add_project", {
-      title: `My Project ${state.projects.length + 1}`,
+      title: `My Wyrld ${state.projects.length + 1}`,
     });
     this.toggleLoadingNewProject();
   };
@@ -70,13 +70,9 @@ export default class ProjectsView {
 
     // append
     this.domComponent.append(
-      // createElement(
-      //   "h1",
-      //   { class: "projects-view-title" },
-      //   "Choose your project"
-      //   ),
-      //   createElement("hr", { class: "special-hr" }),
-      createElement("button", { class: "new-btn" }, "+ Project", {
+      createElement("h1", { class: "projects-view-title" }, "Wyrlds"),
+      createElement("hr", { class: "special-hr" }),
+      createElement("button", { class: "new-btn" }, "+ Wyrld", {
         type: "click",
         event: this.newProject,
       }),

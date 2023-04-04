@@ -120,6 +120,12 @@ class Sheets {
 
     this.domComponent.append(
       createElement(
+        "h1",
+        { class: "projects-view-title" },
+        "Player Character Sheets"
+      ),
+      createElement("hr", { class: "special-hr" }),
+      createElement(
         "div",
         { style: "text-align: center; align-self: center; width: 80%;" },
         "*We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games."

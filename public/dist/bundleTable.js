@@ -551,7 +551,7 @@ class AccountManager {
     this.domComponent.append(
       createElement("div", { class: "standard-view" }, [
         createElement("h1", { style: "margin: auto;" }, "Account"),
-        createElement("br"),
+        createElement("hr", { class: "special-hr" }),
         createElement("div", { class: "component" }, [
           this.renderEmailOrEditEmail(),
           createElement("br"),
