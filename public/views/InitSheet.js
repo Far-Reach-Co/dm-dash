@@ -1,5 +1,6 @@
 import { getThings } from "../lib/apiUtils.js";
-import FiveEPlayerSheet from "../components/5ePlayerSheet.js"; 
+import accountManager from "../lib/AccountManager.js"; // dont remove
+import FiveEPlayerSheet from "../components/5ePlayerSheet.js";
 
 class InitSheet {
   constructor() {
@@ -19,9 +20,9 @@ class InitSheet {
     );
     new FiveEPlayerSheet({
       domComponent: this.elem,
-      params: {content: generalData}
+      params: { content: generalData },
     });
   };
 }
 
-new InitSheet()
+new InitSheet();

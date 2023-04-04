@@ -2644,16 +2644,16 @@ class SideBar {
       [
         createElement("div", { class: "sidebar-header" }, "Shared"),
         ...this.renderMainRoutesElems(),
-        createElement("a", { class: "sidebar-item" }, "Table ↗", {
-          type: "click",
-          event: () => {
-            localStorage.setItem(
-              "current-table-project-id",
-              state$1.currentProject.id
-            );
-            window.open("/vtt.html", "_blank").focus();
-          },
-        }),
+        // createElement("a", { class: "sidebar-item" }, "Table ↗", {
+        //   type: "click",
+        //   event: () => {
+        //     localStorage.setItem(
+        //       "current-table-project-id",
+        //       state.currentProject.id
+        //     );
+        //     window.open("/vtt.html", "_blank").focus();
+        //   },
+        // }),
         createElement("div", { class: "sidebar-header" }, "Personal"),
         ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),
@@ -11549,6 +11549,220 @@ class LandingView {
   };
 }
 
+class Campaign {
+  constructor(props) {
+    this.navigate = props.navigate;
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "project-btn-container";
+
+    this.id = props.id;
+    this.title = props.title;
+    this.description = props.description;
+    this.dateCreated = props.dateCreated;
+
+    this.edit = false;
+
+    this.render();
+  }
+
+  toggleEdit = () => {
+    this.edit = !this.edit;
+    this.render();
+  };
+
+  renderDeleteOrNull = () => {
+    if (state$1.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else {
+      return createElement("button", { class: "btn-red" }, "Delete Campaign", {
+        type: "click",
+        event: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
+            deleteThing(`/api/remove_table_view/${this.id}`);
+            e.target.parentElement.parentElement.remove();
+          }
+        },
+      });
+    }
+  };
+
+  editTitle = (title) => {
+    this.title = title.trim();
+  };
+
+  saveCampaign = () => {
+    postThing(`/api/edit_table_view/${this.id}`, {
+      title: this.title,
+    });
+  };
+
+  renderEditCampaign = async () => {
+    const titleInput = createElement("input", {
+      id: `edit-project-title-${this.id}`,
+      value: this.title,
+      style: "margin-right: 10px;",
+    });
+
+    this.domComponent.append(
+      createElement("div", { class: "project-edit-container" }, [
+        createElement("h1", {}, `Manage Campaign: "${this.title}"`),
+        createElement("br"),
+        createElement("div", { style: "display: flex; align-items: center;" }, [
+          createElement("div", { style: "margin-right: 10px" }, "Title"),
+          titleInput,
+        ]),
+        createElement("br"),
+        createElement("button", {}, "Done", {
+          type: "click",
+          event: () => {
+            this.editTitle(titleInput.value);
+            this.saveCampaign();
+            this.toggleEdit();
+          },
+        }),
+        createElement("br"),
+        this.renderDeleteOrNull(),
+      ])
+    );
+  };
+
+  calculateDateDisplay = () => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return `Created: ${new Date(this.dateCreated).toLocaleDateString(
+      "en-US",
+      options
+    )}`;
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.edit) {
+      return this.renderEditCampaign();
+    }
+
+    // append
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          class: "project-button",
+          title: "Open Campaign in new tab",
+        },
+        [
+          createElement("h1", {}, this.title + "↗"),
+          createElement(
+            "div",
+            { class: "project-extra-info" },
+            this.calculateDateDisplay()
+          ),
+        ],
+        {
+          type: "click",
+          event: () => {
+            localStorage.setItem(
+              "current-table-project-id",
+              state$1.currentProject.id
+            );
+            localStorage.setItem("current-campaign-id", this.id);
+            window.open("/vtt.html", "_blank").focus();
+          },
+        }
+      ),
+      createElement(
+        "img",
+        {
+          class: "icon",
+          src: "/assets/gears.svg",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
+    );
+  };
+}
+
+class CampaignsView {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "standard-view";
+
+    this.newCampaignLoading = false;
+
+    this.render();
+  }
+
+  toggleLoadingNewCampaign = () => {
+    this.newCampaignLoading = !this.newCampaignLoading;
+    this.render();
+  };
+
+  newCampaign = async () => {
+    this.toggleLoadingNewCampaign();
+    await postThing("/api/add_table_view", {
+      project_id: state$1.currentProject.id,
+    });
+    this.toggleLoadingNewCampaign();
+  };
+
+  getCampaignElements = async () => {
+    const campaignData = await getThings(
+      `/api/get_table_views/${state$1.currentProject.id}`
+    );
+
+    return campaignData.map((campaign) => {
+      const campaignComponentDomElement = createElement("div");
+      new Campaign({
+        domComponent: campaignComponentDomElement,
+        id: campaign.id,
+        title: campaign.title,
+        dateCreated: campaign.date_created,
+      });
+
+      return campaignComponentDomElement;
+    });
+  };
+
+  renderAddButtonOrNull = () => {
+    if (state$1.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else
+      return createElement("button", { class: "new-btn" }, "+ Campaign", {
+        type: "click",
+        event: this.newCampaign,
+      });
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.newCampaignLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage(
+          "Please wait while we prepare your campaign..."
+        )
+      );
+    }
+
+    // append
+    this.domComponent.append(
+      this.renderAddButtonOrNull(),
+      createElement("hr"),
+      createElement("br"),
+      ...(await this.getCampaignElements())
+    );
+  };
+}
+
 class App {
   constructor(props) {
     this.domComponent = props.domComponent;
@@ -11557,6 +11771,7 @@ class App {
     // save view instantiations
     this.views = {
       landing: null,
+      campaigns: null,
       projects: null,
       notes: null,
       counters: null,
@@ -11611,6 +11826,12 @@ class App {
           id: "sidebar-landing",
           title: "landing",
           displayTitle: "About",
+          params: {},
+        },
+        {
+          id: "sidebar-campaigns",
+          title: "campaigns",
+          displayTitle: "Campaigns",
           params: {},
         },
         {
@@ -11822,6 +12043,19 @@ class App {
     });
   };
 
+  renderCampaignsView = ({ navigate }) => {
+    if (this.views.campaigns) {
+      return this.domComponent.appendChild(this.views.campaigns.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new CampaignsView({
+      domComponent: element,
+      navigate,
+    });
+    this.views.campaigns = view;
+  };
+
   renderProjectsView = ({ navigate }) => {
     if (this.views.projects) {
       return this.domComponent.appendChild(this.views.projects.domComponent);
@@ -11922,6 +12156,8 @@ class App {
           navigate: this.navigate.navigate,
           params: this.navigate.currentRoute.params,
         });
+      case "campaigns":
+        return this.renderCampaignsView({ navigate: this.navigate.navigate });
       case "landing":
         return this.renderLandingView({ navigate: this.navigate.navigate });
       default:
