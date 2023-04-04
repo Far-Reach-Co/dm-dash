@@ -109,16 +109,19 @@ export default class SideBar {
         class: "sidebar-container",
       },
       [
-        createElement("div", { class: "sidebar-header" }, "Main Modules"),
+        createElement("div", { class: "sidebar-header" }, "Shared"),
         ...this.renderMainRoutesElems(),
-        createElement("a", {class: "sidebar-item"}, "Table ↗", {
+        createElement("a", { class: "sidebar-item" }, "Table ↗", {
           type: "click",
           event: () => {
-            localStorage.setItem("current-table-project-id", state.currentProject.id)
-            window.open("/vtt.html", '_blank').focus();
-          }
+            localStorage.setItem(
+              "current-table-project-id",
+              state.currentProject.id
+            );
+            window.open("/vtt.html", "_blank").focus();
+          },
         }),
-        createElement("div", { class: "sidebar-header" }, "Personal Tools"),
+        createElement("div", { class: "sidebar-header" }, "Personal"),
         ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),
       ]

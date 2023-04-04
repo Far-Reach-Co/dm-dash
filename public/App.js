@@ -131,8 +131,8 @@ class App {
       secondRoutes: [
         {
           id: "sidebar-players",
-          title: "player",
-          displayTitle: "Players",
+          title: "players",
+          displayTitle: "Connected Players",
           params: {},
         },
         {
@@ -141,12 +141,12 @@ class App {
           displayTitle: "Notes",
           params: {},
         },
-        {
-          id: "sidebar-counters",
-          title: "counters",
-          displayTitle: "Counters",
-          params: {},
-        },
+        // {
+        //   id: "sidebar-counters",
+        //   title: "counters",
+        //   displayTitle: "Counters",
+        //   params: {},
+        // },
       ],
     });
     this.sidebar = sidebar;

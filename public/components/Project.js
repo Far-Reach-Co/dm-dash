@@ -219,7 +219,7 @@ export default class Project {
     const removeButton = createElement(
       "button",
       { class: "btn-red" },
-      `${this.wasJoined ? "Leave" : "Delete"} Project`
+      `${this.wasJoined ? "Leave" : "Delete"} Wyrld`
     );
     removeButton.addEventListener("click", async () => {
       if (
@@ -243,7 +243,7 @@ export default class Project {
     if (this.isEditor === false) {
       return this.domComponent.append(
         createElement("div", { class: "project-edit-container" }, [
-          createElement("h2", {}, `Edit Project: "${this.title}"`),
+          createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
           doneButton,
           createElement("br"),
           removeButton,
@@ -254,7 +254,7 @@ export default class Project {
     // append
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h2", {}, `Edit Project: "${this.title}"`),
+        createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
         createElement("br"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement("div", { style: "margin-right: 10px" }, "Title"),
