@@ -644,6 +644,7 @@ class Project {
     this.id = props.id;
     this.title = props.title;
     this.description = props.description;
+    this.userId = props.userId;
     this.dateCreated = props.dateCreated;
     this.projectInvite = props.projectInvite;
     this.isEditor = props.isEditor;
@@ -970,6 +971,7 @@ class Project {
               id: this.id,
               title: this.title,
               description: this.description,
+              userId: this.userId,
               dateCreated: this.dateCreated,
               projectInvite: this.projectInvite,
               isEditor: this.isEditor,
@@ -1036,6 +1038,7 @@ class ProjectsView {
         id: project.id,
         title: project.title,
         description: project.description,
+        userId: project.user_id,
         dateCreated: project.date_created,
         usedDataInBytes: project.used_data_in_bytes,
         isEditor: project.is_editor,
@@ -6729,6 +6732,7 @@ class Navigate {
           id: projectData.id,
           title: projectData.title,
           description: projectData.description,
+          userId: projectData.user_id,
           dateCreated: projectData.date_created,
           isEditor: projectData.is_editor,
           wasJoined: projectData.was_joined,
@@ -11480,6 +11484,20 @@ class LandingView {
     });
   };
 
+  renderOwner = async () => {
+    const projectOwner = await getThings(
+      `/api/get_user_by_id/${state$1.currentProject.userId}`
+    );
+    if (!projectOwner)
+      return [createElement("div", { style: "display: none;" })];
+
+    return createElement(
+      "div",
+      { style: "margin-left: 5px; color: var(--blue6)" },
+      projectOwner.username
+    );
+  };
+
   saveProject = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
@@ -11572,17 +11590,13 @@ class LandingView {
         createElement(
           "div",
           { class: "single-item-subheading" },
-          "About this project"
+          "About this wyrld"
         ),
         descriptionComponent,
       ]),
       createElement("hr"),
       createElement("h1", {}, "Owner"),
-      createElement(
-        "div",
-        { style: "margin-left: 5px; color: var(--blue6)" },
-        state$1.user.username
-      ),
+      await this.renderOwner(),
       createElement("br"),
       createElement("h1", {}, "Members"),
       ...(await this.renderMembers())

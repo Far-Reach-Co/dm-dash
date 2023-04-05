@@ -17,6 +17,7 @@ export default class Project {
     this.id = props.id;
     this.title = props.title;
     this.description = props.description;
+    this.userId = props.userId;
     this.dateCreated = props.dateCreated;
     this.projectInvite = props.projectInvite;
     this.isEditor = props.isEditor;
@@ -343,6 +344,7 @@ export default class Project {
               id: this.id,
               title: this.title,
               description: this.description,
+              userId: this.userId,
               dateCreated: this.dateCreated,
               projectInvite: this.projectInvite,
               isEditor: this.isEditor,
