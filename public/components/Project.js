@@ -29,8 +29,17 @@ export default class Project {
     this.parentRender = props.parentRender;
     this.loadingProjectInvite = false;
 
-    this.render();
+    this.projectUsers = [];
+
+    this.init();
   }
+
+  init = async () => {
+    this.projectUsers = await getThings(
+      `/api/get_project_users_by_project/${this.id}`
+    );
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -307,6 +316,7 @@ export default class Project {
         {
           id: `project-${this.id}`,
           class: "project-button",
+          title: "Enter wyrld",
         },
         [
           createElement("h1", {}, this.title),
@@ -319,6 +329,11 @@ export default class Project {
             "div",
             { class: "project-extra-info" },
             this.calculateUsedData()
+          ),
+          createElement(
+            "div",
+            { class: "project-extra-info" },
+            `${this.projectUsers.length + 1} Members`
           ),
         ],
         {

@@ -1,5 +1,5 @@
 import RichText from "../lib/RichText.js";
-import { postThing } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 
@@ -15,6 +15,22 @@ export default class LandingView {
   toggleEdit = () => {
     this.edit = !this.edit;
     this.render();
+  };
+
+  renderMembers = async () => {
+    const projectUsers = await getThings(
+      `/api/get_project_users_by_project/${state.currentProject.id}`
+    );
+    if (!projectUsers.length)
+      return [createElement("div", { style: "display: none;" })];
+
+    return projectUsers.map((user) => {
+      return createElement(
+        "div",
+        { style: "margin-left: 5px; color: var(--blue6)" },
+        user.username
+      );
+    });
   };
 
   saveProject = async (e, description) => {
@@ -87,7 +103,7 @@ export default class LandingView {
     }
   };
 
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -112,7 +128,17 @@ export default class LandingView {
           "About this wyrld"
         ),
         descriptionComponent,
-      ])
+      ]),
+      createElement("hr"),
+      createElement("h1", {}, "Owner"),
+      createElement(
+        "div",
+        { style: "margin-left: 5px; color: var(--blue6)" },
+        state.user.username
+      ),
+      createElement("br"),
+      createElement("h1", {}, "Members"),
+      ...(await this.renderMembers())
     );
   };
 }
