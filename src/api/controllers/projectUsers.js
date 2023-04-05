@@ -49,13 +49,6 @@ async function getProjectUsersByProject(req, res, next) {
   try {
     // if no user
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // If user is not author
-    const projectData = await getProjectQuery(req.params.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      throw { status: 403, message: "Forbidden" };
-    }
 
     const projectUsersData = await getProjectUsersByProjectQuery(
       req.params.project_id

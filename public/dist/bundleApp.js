@@ -11572,7 +11572,7 @@ class LandingView {
         createElement(
           "div",
           { class: "single-item-subheading" },
-          "About this project"
+          "About this wyrld"
         ),
         descriptionComponent,
       ]),
