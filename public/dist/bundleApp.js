@@ -656,8 +656,17 @@ class Project {
     this.parentRender = props.parentRender;
     this.loadingProjectInvite = false;
 
-    this.render();
+    this.projectUsers = [];
+
+    this.init();
   }
+
+  init = async () => {
+    this.projectUsers = await getThings(
+      `/api/get_project_users_by_project/${this.id}`
+    );
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -934,6 +943,7 @@ class Project {
         {
           id: `project-${this.id}`,
           class: "project-button",
+          title: "Enter wyrld",
         },
         [
           createElement("h1", {}, this.title),
@@ -946,6 +956,11 @@ class Project {
             "div",
             { class: "project-extra-info" },
             this.calculateUsedData()
+          ),
+          createElement(
+            "div",
+            { class: "project-extra-info" },
+            `${this.projectUsers.length + 1} Members`
           ),
         ],
         {
@@ -11449,6 +11464,22 @@ class LandingView {
     this.render();
   };
 
+  renderMembers = async () => {
+    const projectUsers = await getThings(
+      `/api/get_project_users_by_project/${state$1.currentProject.id}`
+    );
+    if (!projectUsers.length)
+      return [createElement("div", { style: "display: none;" })];
+
+    return projectUsers.map((user) => {
+      return createElement(
+        "div",
+        { style: "margin-left: 5px; color: var(--blue6)" },
+        user.username
+      );
+    });
+  };
+
   saveProject = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
@@ -11519,7 +11550,7 @@ class LandingView {
     }
   };
 
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
     if (this.edit) {
@@ -11544,7 +11575,17 @@ class LandingView {
           "About this project"
         ),
         descriptionComponent,
-      ])
+      ]),
+      createElement("hr"),
+      createElement("h1", {}, "Owner"),
+      createElement(
+        "div",
+        { style: "margin-left: 5px; color: var(--blue6)" },
+        state$1.user.username
+      ),
+      createElement("br"),
+      createElement("h1", {}, "Members"),
+      ...(await this.renderMembers())
     );
   };
 }
