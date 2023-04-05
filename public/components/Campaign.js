@@ -23,24 +23,6 @@ export default class Campaign {
     this.render();
   };
 
-  renderDeleteOrNull = () => {
-    if (state.currentProject.isEditor === false) {
-      return createElement("div", { style: "visibility: hidden;" });
-    } else {
-      return createElement("button", { class: "btn-red" }, "Delete Campaign", {
-        type: "click",
-        event: (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-            deleteThing(`/api/remove_table_view/${this.id}`);
-            e.target.parentElement.parentElement.remove();
-          }
-        },
-      });
-    }
-  };
-
   editTitle = (title) => {
     this.title = title.trim();
   };
@@ -76,7 +58,19 @@ export default class Campaign {
           },
         }),
         createElement("br"),
-        this.renderDeleteOrNull(),
+        createElement("button", { class: "btn-red" }, "Delete Campaign", {
+          type: "click",
+          event: (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (
+              window.confirm(`Are you sure you want to delete ${this.title}`)
+            ) {
+              deleteThing(`/api/remove_table_view/${this.id}`);
+              e.target.parentElement.parentElement.remove();
+            }
+          },
+        }),
       ])
     );
   };
@@ -91,6 +85,25 @@ export default class Campaign {
       "en-US",
       options
     )}`;
+  };
+
+  renderEditButtonOrNull = () => {
+    if (state.currentProject.isEditor === false) {
+      return createElement("div", { style: "visibility: hidden;" });
+    } else {
+      return createElement(
+        "img",
+        {
+          class: "icon",
+          src: "/assets/gears.svg",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      );
+    }
   };
 
   render = () => {
@@ -128,18 +141,7 @@ export default class Campaign {
           },
         }
       ),
-      createElement(
-        "img",
-        {
-          class: "icon",
-          src: "/assets/gears.svg",
-        },
-        null,
-        {
-          type: "click",
-          event: this.toggleEdit,
-        }
-      )
+      this.renderEditButtonOrNull()
     );
   };
 }
