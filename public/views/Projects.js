@@ -43,6 +43,7 @@ export default class ProjectsView {
         id: project.id,
         title: project.title,
         description: project.description,
+        userId: project.user_id,
         dateCreated: project.date_created,
         usedDataInBytes: project.used_data_in_bytes,
         isEditor: project.is_editor,

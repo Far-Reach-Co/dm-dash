@@ -33,6 +33,20 @@ export default class LandingView {
     });
   };
 
+  renderOwner = async () => {
+    const projectOwner = await getThings(
+      `/api/get_user_by_id/${state.currentProject.userId}`
+    );
+    if (!projectOwner)
+      return [createElement("div", { style: "display: none;" })];
+
+    return createElement(
+      "div",
+      { style: "margin-left: 5px; color: var(--blue6)" },
+      projectOwner.username
+    );
+  };
+
   saveProject = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
@@ -131,11 +145,7 @@ export default class LandingView {
       ]),
       createElement("hr"),
       createElement("h1", {}, "Owner"),
-      createElement(
-        "div",
-        { style: "margin-left: 5px; color: var(--blue6)" },
-        state.user.username
-      ),
+      await this.renderOwner(),
       createElement("br"),
       createElement("h1", {}, "Members"),
       ...(await this.renderMembers())

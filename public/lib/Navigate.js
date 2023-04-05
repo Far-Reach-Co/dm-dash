@@ -39,6 +39,7 @@ export default class Navigate {
           id: projectData.id,
           title: projectData.title,
           description: projectData.description,
+          userId: projectData.user_id,
           dateCreated: projectData.date_created,
           isEditor: projectData.is_editor,
           wasJoined: projectData.was_joined,

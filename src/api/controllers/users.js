@@ -52,7 +52,7 @@ async function getUserById(req, res, next) {
   try {
     const userData = await getUserByIdQuery(req.params.id);
 
-    res.send(userData);
+    res.send(userData.rows[0]);
   } catch (err) {
     next(err);
   }
