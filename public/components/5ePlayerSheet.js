@@ -16,12 +16,16 @@ export default class FiveEPlayerSheet {
       (this.generalData = props.params.content);
     // general, background, etc
     this.mainView = "general";
-    
+
     this.render();
   }
 
   updateGeneralValue = async (name, value) => {
     this.generalData[name] = value;
+    if (history.state && history.state.params && history.state.params.content) {
+      history.state.params.content[name] = value;
+      history.pushState(history.state, null);
+    }
     postThing(`/api/edit_5e_character_general/${this.generalData.id}`, {
       [name]: value,
     });
@@ -29,6 +33,10 @@ export default class FiveEPlayerSheet {
 
   updateBackgroundValue = async (name, value) => {
     this.generalData.background[name] = value;
+    if (history.state && history.state.params && history.state.params.content) {
+      history.state.params.content.background[name] = value;
+      history.pushState(history.state, null);
+    }
     postThing(`/api/edit_5e_character_background/${this.generalData.id}`, {
       [name]: value,
     });
@@ -36,6 +44,10 @@ export default class FiveEPlayerSheet {
 
   updateSpellSlotValue = async (name, value) => {
     this.generalData.spell_slots[name] = value;
+    if (history.state && history.state.params && history.state.params.content) {
+      history.state.params.content.spell_slots[name] = value;
+      history.pushState(history.state, null);
+    }
     postThing(
       `/api/edit_5e_character_spell_slots/${this.generalData.spell_slots.id}`,
       {
@@ -46,6 +58,10 @@ export default class FiveEPlayerSheet {
 
   updateProficiencyInfo = async (name, value) => {
     this.generalData.proficiencies[name] = value;
+    if (history.state && history.state.params && history.state.params.content) {
+      history.state.params.content.proficiencies[name] = value;
+      history.pushState(history.state, null);
+    }
     postThing(
       `/api/edit_5e_character_proficiencies/${this.generalData.proficiencies.id}`,
       {
@@ -524,7 +540,7 @@ export default class FiveEPlayerSheet {
                       name: "level",
                       value: this.generalData.level
                         ? this.generalData.level
-                        : "",
+                        : 0,
                     },
                     null,
                     {
@@ -547,7 +563,7 @@ export default class FiveEPlayerSheet {
                       class: "cp-input-gen cp-input-regular",
                       type: "number",
                       name: "exp",
-                      value: this.generalData.exp ? this.generalData.exp : "",
+                      value: this.generalData.exp ? this.generalData.exp : 0,
                     },
                     null,
                     {
@@ -581,7 +597,7 @@ export default class FiveEPlayerSheet {
                       name: "armor_class",
                       value: this.generalData.armor_class
                         ? this.generalData.armor_class
-                        : "",
+                        : 0,
                     },
                     null,
                     {
@@ -605,7 +621,7 @@ export default class FiveEPlayerSheet {
                       name: "initiative",
                       value: this.generalData.initiative
                         ? this.generalData.initiative
-                        : "",
+                        : 0,
                     },
                     null,
                     {
@@ -629,7 +645,7 @@ export default class FiveEPlayerSheet {
                       name: "speed",
                       value: this.generalData.speed
                         ? this.generalData.speed
-                        : "",
+                        : 0,
                     },
                     null,
                     {
@@ -694,7 +710,6 @@ export default class FiveEPlayerSheet {
                         {
                           class: "cp-input-no-border-small",
                           name: "hit_dice_total",
-                          type: "number",
                           value: this.generalData.hit_dice_total
                             ? this.generalData.hit_dice_total
                             : "",
@@ -705,7 +720,7 @@ export default class FiveEPlayerSheet {
                           event: (e) => {
                             this.updateGeneralValue(
                               e.target.name,
-                              e.target.valueAsNumber
+                              e.target.value
                             );
                           },
                         }
@@ -717,15 +732,19 @@ export default class FiveEPlayerSheet {
                     {
                       class: "cp-input-no-border cp-input-large",
                       name: "hit_dice",
+                      type: "number",
                       value: this.generalData.hit_dice
                         ? this.generalData.hit_dice
-                        : "",
+                        : 0,
                     },
                     null,
                     {
                       type: "focusout",
                       event: (e) => {
-                        this.updateGeneralValue(e.target.name, e.target.value);
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
                       },
                     }
                   ),
@@ -802,7 +821,7 @@ export default class FiveEPlayerSheet {
                         type: "number",
                         value: this.generalData.class_resource_total
                           ? this.generalData.class_resource_total
-                          : "",
+                          : 0,
                       },
                       null,
                       {
@@ -822,15 +841,19 @@ export default class FiveEPlayerSheet {
                   {
                     class: "cp-input-no-border cp-input-large",
                     name: "class_resource",
+                    type: "number",
                     value: this.generalData.class_resource
                       ? this.generalData.class_resource
-                      : "",
+                      : 0,
                   },
                   null,
                   {
                     type: "focusout",
                     event: (e) => {
-                      this.updateGeneralValue(e.target.name, e.target.value);
+                      this.updateGeneralValue(
+                        e.target.name,
+                        e.target.valueAsNumber
+                      );
                     },
                   }
                 ),
@@ -871,7 +894,7 @@ export default class FiveEPlayerSheet {
                         type: "number",
                         value: this.generalData.other_resource_total
                           ? this.generalData.other_resource_total
-                          : "",
+                          : 0,
                       },
                       null,
                       {
@@ -894,7 +917,7 @@ export default class FiveEPlayerSheet {
                     type: "number",
                     value: this.generalData.other_resource_total
                       ? this.generalData.other_resource_total
-                      : "0",
+                      : 0,
                   },
                   null,
                   {
@@ -1065,10 +1088,7 @@ export default class FiveEPlayerSheet {
         createElement(
           "div",
           { style: "display: flex; flex-direction: column;" },
-          [
-            this.attackComponent.domComponent,
-            this.featComponent.domComponent,
-          ]
+          [this.attackComponent.domComponent, this.featComponent.domComponent]
         ),
       ])
     );

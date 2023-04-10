@@ -141,7 +141,7 @@ export default class HPComponent {
             style: `color: ${this.calculateHPColor()}`,
             type: "number",
             name: "current_hp",
-            value: this.calculateCurrentHP(),
+            value: this.calculateCurrentHP() ? this.calculateCurrentHP() : 0,
           },
           null,
           {
