@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "allowJs": true,
+    "checkJs": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    // "outFile": "",
+    // "rootDir": "src",
+    "outDir": "dist"
+    // "outFile": "server.js"
+    // "sourceMap": true
+  },
+  "include": [
+    "src/"
+    // "server.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "public"
+    // "**/*.spec.ts"
+  ]
+}
