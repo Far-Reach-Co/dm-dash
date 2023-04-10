@@ -754,7 +754,7 @@ const imageFollowingCursor = new ImageFollowingCursor({
 class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "table-sidebar";
+    this.domComponent.className = "table-sidebar-images";
 
     this.currentMouseDownImage = null;
 
@@ -762,7 +762,6 @@ class TableSidebarComponent {
     this.downloadedImageSourceList = {};
 
     this.render();
-
   }
 
   toggleImageLoading = () => {

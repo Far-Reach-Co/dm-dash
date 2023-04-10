@@ -45,7 +45,7 @@
   flex-direction: column;
 }
 
-.table-sidebar {
+.table-sidebar-images {
   border-bottom: 1px solid var(--main-gray);
   overflow-y: auto;
   height: 500px;

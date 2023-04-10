@@ -92,7 +92,7 @@ h2 {
 nav {
   padding-left: 10px;
   padding-right: 10px;
-  /* height: 35px; */
+  height: 35px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -620,10 +620,11 @@ footer {
   right: 0px;
   z-index: 2;
   width: 200px;
-  height: 100%;
+  height: calc(100% - 35px);
+  /* based on nav height */
   position: absolute;
   background: transparent;
-  overflow: hidden;
+
 }
 
 .sidebar-container {
@@ -686,15 +687,15 @@ footer {
 
 .close-sidebar {
   position: absolute;
-  bottom: 50px;
-  /* left: 0; */
+  top: 0px;
   margin-right: 3px;
   margin-top: 3px;
   cursor: pointer;
 }
 
 .hamburger {
-  bottom: 100px;
+  top: 35px;
+  /* from nav height */
   right: 5px;
   z-index: 3;
   position: absolute;
