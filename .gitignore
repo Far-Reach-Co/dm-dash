@@ -5,7 +5,7 @@ dist-ssr
 *.local
 
 # Bundles
-public/dist/
+public/dist/*
 
 # Editor directories and files
 .vscode/*
