@@ -1,7 +1,7 @@
 DS_Store
 node_modules
-dist
-dist-ssr
+
+
 *.local
 
 # Bundles
@@ -102,7 +102,6 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
