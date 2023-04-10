@@ -22,8 +22,8 @@ const io = new Server(server);
 const cors = require("cors");
 var path = require("path");
 const bodyParser = require("body-parser");
-const routes = require("./src/api/routes.js");
-const { verifyUserByToken } = require("./src/api/controllers/users.js");
+const routes = require("./dist/api/routes.js");
+const { verifyUserByToken } = require("./dist/api/controllers/users.js");
 const {
   userJoin,
   getProjectUsers,
@@ -143,7 +143,7 @@ io.on("connection", (socket) => {
 });
 
 /***************************** Run ***************************/
-let PORT = 80;
+let PORT = 4000;
 if (process.env.SERVER_ENV === "dev") {
   server.listen({ port: PORT }, async () => {
     console.log(`Server Running at http://localhost:${PORT}`);

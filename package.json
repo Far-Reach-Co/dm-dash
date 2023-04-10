@@ -6,7 +6,7 @@
   "scripts": {
     "build": "npx tsc",
     "start": "node server.js",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q server.js\"",
+    "dev": "nodemon -q server.js",
     "migrate:up": "node-pg-migrate up",
     "migrate:down": "node-pg-migrate down",
     "migrate:redo": "node-pg-migrate redo",
@@ -30,5 +30,8 @@
     "pm2": "^5.2.2",
     "rollup": "^3.19.1",
     "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5"
   }
 }
