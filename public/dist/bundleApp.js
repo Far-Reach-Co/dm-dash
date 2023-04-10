@@ -2923,6 +2923,14 @@ class RichText {
             }
           },
         },
+        {
+          type: "paste",
+          event: (event) => {
+            event.preventDefault();
+            var text = event.clipboardData.getData("text/plain");
+            document.execCommand("insertText", false, text);
+          },
+        },
       ]
     );
 
