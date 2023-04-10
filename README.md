@@ -11,7 +11,6 @@ The server is in express.js with socket.io. The database is postgres and the fro
 - Setup local postgres server using data found in a `.env` which you will need to request
 - Install all the NPM packages: `npm i`
 - Start dev mode: `sh ./commands/start_dev.sh`
-- Run live bundling for frontend dev: `sh ./commands/start_bundler.sh`
 - Run prod mode: `sh ./commands/start_prod.sh`
 
 ## DB Migration:
