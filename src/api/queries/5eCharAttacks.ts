@@ -1,4 +1,4 @@
-const db = require('../dbconfig')
+const db = require('../dbconfig');
 
 async function add5eCharAttackQuery(data) {
   const query = {
