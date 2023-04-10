@@ -43,13 +43,17 @@ export default class PlayersView {
     );
     if (!projectPlayerIds.length)
       return [createElement("small", {}, "None...")];
-
     let myPlayerCharacters = await getThings(`/api/get_5e_characters_by_user`);
     return await Promise.all(
       myPlayerCharacters
         .filter((pc) => {
+          const list = [];
           for (var pp of projectPlayerIds) {
-            return pp.player_id === pc.id;
+            console.log(pp);
+            if (pp.player_id === pc.id) {
+              list.push(pc);
+            }
+            return list;
           }
         })
         .map(async (player) => {
@@ -149,7 +153,8 @@ export default class PlayersView {
       const sheetMap = sheetData
         .filter((characterSheet) => {
           for (var projectPlayer of projectPlayers) {
-            if (projectPlayer.player_id === characterSheet.id) return characterSheet;
+            if (projectPlayer.player_id === characterSheet.id)
+              return characterSheet;
           }
         })
         .map((characterSheet) => {
