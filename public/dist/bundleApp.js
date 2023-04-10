@@ -9327,38 +9327,6 @@ class SpellsComponent {
     this.render();
   }
 
-  calculateSpellSaveDC = () => {
-    let spellSaveDC = 8;
-    if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore =
-        this.generalData[this.generalData.spell_slots.spell_casting_ability];
-      let mod = this.calculateAbilityScoreModifier(abilityScore);
-      if (mod === "0") mod = 0;
-      spellSaveDC += mod;
-    }
-
-    spellSaveDC += this.calculateProBonus();
-
-    if (spellSaveDC === 0) spellSaveDC = 0;
-    return spellSaveDC;
-  };
-
-  calculateSpellAttackBonus = () => {
-    let bonus = 0;
-    if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore =
-        this.generalData[this.generalData.spell_slots.spell_casting_ability];
-      let mod = this.calculateAbilityScoreModifier(abilityScore);
-      if (mod === "0") mod = 0;
-      bonus += mod;
-    }
-
-    bonus += this.calculateProBonus();
-
-    if (bonus === 0) bonus = 0;
-    return bonus;
-  };
-
   renderSpellSlotsElems = () => {
     const list = [
       {
@@ -9435,6 +9403,50 @@ class SpellsComponent {
     return elem;
   };
 
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.newLoading) {
+      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+    }
+
+    const spellInfoComponent = new SpellInfoComponent({
+      domComponent: createElement("div"),
+      generalData: this.generalData,
+      updateSpellSlotValue: this.updateSpellSlotValue,
+      calculateAbilityScoreModifier: this.calculateAbilityScoreModifier,
+      calculateProBonus: this.calculateProBonus,
+    });
+
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          style: "display: flex; flex-direction: column; align-items: center;",
+        },
+        [
+          spellInfoComponent.domComponent,
+          createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+            this.renderCantrip(),
+            ...this.renderSpellSlotsElems(),
+          ]),
+        ]
+      )
+    );
+  };
+}
+
+class SpellInfoComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.generalData = props.generalData;
+    this.updateSpellSlotValue = props.updateSpellSlotValue;
+    this.calculateAbilityScoreModifier = props.calculateAbilityScoreModifier;
+    this.calculateProBonus = props.calculateProBonus;
+
+    this.render();
+  }
+
   renderTypeSelectOptions = (currentType) => {
     const types = [
       "strength",
@@ -9457,110 +9469,126 @@ class SpellsComponent {
     return typeList;
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+  calculateSpellAttackBonus = () => {
+    let bonus = 0;
+    if (this.generalData.spell_slots.spell_casting_ability) {
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
+      let mod = this.calculateAbilityScoreModifier(abilityScore);
+      if (mod === "0") mod = 0;
+      bonus += mod;
     }
 
+    bonus += this.calculateProBonus();
+
+    if (bonus === 0) bonus = 0;
+    return bonus;
+  };
+
+  calculateSpellSaveDC = () => {
+    let spellSaveDC = 8;
+    if (this.generalData.spell_slots.spell_casting_ability) {
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
+      let mod = this.calculateAbilityScoreModifier(abilityScore);
+      if (mod === "0") mod = 0;
+      spellSaveDC += mod;
+    }
+
+    spellSaveDC += this.calculateProBonus();
+
+    if (spellSaveDC === 0) spellSaveDC = 0;
+    return spellSaveDC;
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
     this.domComponent.append(
-      createElement(
-        "div",
-        {
-          style: "display: flex; flex-direction: column; align-items: center;",
-        },
-        [
-          createElement("div", {}, [
+      createElement("div", {}, [
+        createElement(
+          "div",
+          {
+            class: "cp-info-container-row",
+            style: "width: fit-content; align-items: flex-start;",
+          },
+          [
             createElement(
               "div",
               {
-                class: "cp-info-container-row",
-                style: "width: fit-content; align-items: flex-start;",
+                style:
+                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
               },
               [
                 createElement(
-                  "div",
-                  {
-                    style:
-                      "display: flex; flex-direction: column; align-items: center; justify-content: center;",
-                  },
-                  [
-                    createElement(
-                      "small",
-                      { style: "margin-bottom: 8px;" },
-                      "Spell Casting Ability"
-                    ),
-                    createElement(
-                      "select",
-                      {
-                        id: "spell_casting_ability",
-                        name: "spell_casting_ability",
-                        style: "margin-right: 10px; width: fit-content",
-                      },
-                      [
-                        createElement("option", { value: "None" }, "None"),
-                        ...this.renderTypeSelectOptions(
-                          this.generalData.spell_slots.spell_casting_ability
-                        ),
-                      ],
-                      {
-                        type: "change",
-                        event: (e) => {
-                          e.preventDefault();
-                          this.updateSpellSlotValue(
-                            "spell_casting_ability",
-                            e.target.value
-                          );
-                          this.render();
-                        },
-                      }
-                    ),
-                  ]
+                  "small",
+                  { style: "margin-bottom: 8px;" },
+                  "Spell Casting Ability"
                 ),
                 createElement(
-                  "div",
+                  "select",
                   {
-                    style:
-                      "display: flex; flex-direction: column; align-items: center; margin-right: 10px; margin-left: 10px;",
+                    id: "spell_casting_ability",
+                    name: "spell_casting_ability",
+                    style: "margin-right: 10px; width: fit-content",
                   },
                   [
-                    createElement("small", {}, "Spell Save DC"),
-                    createElement(
-                      "div",
-                      {
-                        class: "cp-content-long-number",
-                      },
-                      this.calculateSpellSaveDC()
+                    createElement("option", { value: "None" }, "None"),
+                    ...this.renderTypeSelectOptions(
+                      this.generalData.spell_slots.spell_casting_ability
                     ),
-                  ]
-                ),
-                createElement(
-                  "div",
+                  ],
                   {
-                    style:
-                      "display: flex; flex-direction: column; align-items: center; justify-content: center;",
-                  },
-                  [
-                    createElement("small", {}, "Spell Attack Bonus"),
-                    createElement(
-                      "div",
-                      {
-                        class: "cp-content-long-number",
-                      },
-                      `+${this.calculateSpellAttackBonus()}`
-                    ),
-                  ]
+                    type: "change",
+                    event: (e) => {
+                      e.preventDefault();
+                      this.updateSpellSlotValue(
+                        "spell_casting_ability",
+                        e.target.value
+                      );
+                      this.render();
+                    },
+                  }
                 ),
               ]
             ),
-          ]),
-          createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
-            this.renderCantrip(),
-            ...this.renderSpellSlotsElems(),
-          ]),
-        ]
-      )
+            createElement(
+              "div",
+              {
+                style:
+                  "display: flex; flex-direction: column; align-items: center; margin-right: 10px; margin-left: 10px;",
+              },
+              [
+                createElement("small", {}, "Spell Save DC"),
+                createElement(
+                  "div",
+                  {
+                    class: "cp-content-long-number",
+                  },
+                  this.calculateSpellSaveDC()
+                ),
+              ]
+            ),
+            createElement(
+              "div",
+              {
+                style:
+                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+              },
+              [
+                createElement("small", {}, "Spell Attack Bonus"),
+                createElement(
+                  "div",
+                  {
+                    class: "cp-content-long-number",
+                  },
+                  `+${this.calculateSpellAttackBonus()}`
+                ),
+              ]
+            ),
+          ]
+        ),
+      ])
     );
   };
 }
@@ -9846,7 +9874,10 @@ class SingleSpell {
             {
               type: "focusout",
               event: (e) => {
-                this.updateSpellSlotValue(e.target.name, e.target.valueAsNumber);
+                this.updateSpellSlotValue(
+                  e.target.name,
+                  e.target.valueAsNumber
+                );
               },
             }
           ),
