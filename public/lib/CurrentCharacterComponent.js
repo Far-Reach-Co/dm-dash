@@ -81,6 +81,7 @@ export default class CurrentCharacterComponent {
           event: () =>
             this.navigate({
               title: "single-character",
+              id: character.id,
               sidebar: true,
               params: { content: character },
             }),

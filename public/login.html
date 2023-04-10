@@ -4,20 +4,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wyrld Dashboard | Login</title>
+    <title>Far Reach Co. | Login</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <nav>
-      <div style="display: flex; align-items: center">
-        <img height="30px" src="/assets/dmlogo.png" alt="" />
-        <a
-          class="title-anchor"
-          href="/index.html"
-
-          >Wyrld Dashboard</a
-        >
-      </div>
+      <a style="display: flex; align-items: center" href="/index.html">
+        <img height="35px" src="/assets/frlogo.webp" alt="" />
+      </a>
     </nav>
     <div class="container">
       <form id="login-form">
@@ -45,8 +39,12 @@
         <div>
           <button type="submit">Login</button>
         </div>
+        <br />
+        <small>Don't have an account or forgot your password?</small>
+        <a onclick=" window.location.pathname = '/register.html' "
+          ><small>Register</small></a
+        >
         <a href="/forgotpassword.html"><small>Forgot Password</small></a>
-        <a href="/register.html"><small>Register</small></a>
       </form>
     </div>
   </body>
@@ -64,9 +62,17 @@
         });
         const resData = await res.json();
         if (res.status === 200) {
+          // set token
           const token = resData.token;
           localStorage.setItem("token", token);
-          window.location.pathname = "/dashboard.html";
+          // if invite UUID in params push to invite page
+          var searchParams = new URLSearchParams(window.location.search);
+          var inviteUUID = searchParams.get("invite");
+          if (inviteUUID) {
+            return (window.location.pathname = "/invite.html");
+          }
+          // else push to account page
+          window.location.pathname = "/account.html";
         } else if (res.status === 400) {
           alert(resData.message);
         } else {

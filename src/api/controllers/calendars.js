@@ -5,8 +5,8 @@ const {
   removeCalendarQuery,
   editCalendarQuery,
 } = require("../queries/calendars.js");
-const { getMonthsQuery } = require("../queries/months.js");
-const { getDaysQuery } = require("../queries/days.js");
+const { getMonthsQuery, removeMonthQuery } = require("../queries/months.js");
+const { getDaysQuery, removeDayQuery } = require("../queries/days.js");
 const { getProjectQuery } = require("../queries/projects.js");
 const {
   getProjectUserByUserAndProjectQuery,
@@ -101,6 +101,16 @@ async function removeCalendar(req, res, next) {
     }
 
     await removeCalendarQuery(req.params.id);
+    // remove months and days associated
+    const monthsData = await getMonthsQuery(req.params.id);
+    monthsData.rows.forEach(async (month) => {
+      await removeMonthQuery(month.id);
+    });
+    const daysData = await getDaysQuery(req.params.id);
+    daysData.rows.forEach(async (day) => {
+      await removeDayQuery(day.id);
+    });
+
     res.status(204).send();
   } catch (err) {
     next(err);

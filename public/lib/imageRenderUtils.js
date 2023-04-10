@@ -30,7 +30,10 @@ export async function renderImageLarge(imageId) {
   } else return createElement("div", { style: "visibility: hidden;" });
 }
 
-export async function renderImageSmallOrPlaceholder(imageId, placeholderImageLocation) {
+export async function renderImageSmallOrPlaceholder(
+  imageId,
+  placeholderImageLocation
+) {
   if (imageId) {
     const imageSource = await getPresignedForImageDownload(imageId);
     if (imageSource) {
@@ -40,17 +43,21 @@ export async function renderImageSmallOrPlaceholder(imageId, placeholderImageLoc
         height: 30,
       });
     } else {
+      if (placeholderImageLocation) {
+        return createElement("img", {
+          src: placeholderImageLocation,
+          width: 30,
+          height: 30,
+        });
+      }
+    }
+  } else {
+    if (placeholderImageLocation) {
       return createElement("img", {
         src: placeholderImageLocation,
         width: 30,
         height: 30,
       });
     }
-  } else {
-    return createElement("img", {
-      src: placeholderImageLocation,
-      width: 30,
-      height: 30,
-    });
   }
 }

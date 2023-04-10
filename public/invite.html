@@ -4,15 +4,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wyrld Dashboard</title>
+    <title>Far Reach Co.</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <nav>
-      <div style="display: flex; align-items: center">
-        <img height="30px" src="/assets/dmlogo.png" alt="" />
-        <a class="title-anchor" href="/index.html">Wyrld Dashboard</a>
-      </div>
+      <a style="display: flex; align-items: center" href="/index.html">
+        <img height="35px" src="/assets/frlogo.webp" alt="" />
+      </a>
     </nav>
     <div class="container">
       <div class="invite">
@@ -38,12 +37,11 @@
             throw new Error();
           } else return resData;
         } catch (err) {
-          console.log(err);
-          alert("You aren't logged in. Please login before visiting this page");
+          // console.log(err);
           window.location.pathname = "/login.html";
         }
       } else {
-        alert("You aren't logged in. Please login before visiting this page");
+        alert("You aren't logged in. Please login or register first.");
         window.location.pathname = "/login.html";
       }
     }
@@ -139,10 +137,10 @@
           if (project) {
             // check if user already has this project
             const hasJoinedProject = await getProjectUser(project.id);
-              if (hasJoinedProject) {
-                alert("You already have this project...");
-                return (window.location.pathname = "/dashboard.html");
-              }
+            if (hasJoinedProject) {
+              alert("You already have this project...");
+              return (window.location.pathname = "/dashboard.html");
+            }
             // check if user has this project
             if (project.user_id === user.id) {
               alert("You already have this project...");
@@ -169,7 +167,7 @@
                   "click",
                   () => (window.location.pathname = "/dashboard.html")
                 );
-                inviteDiv.append(message, button);
+                inviteDiv.append(message, document.createElement("br"), button);
               }
             });
 

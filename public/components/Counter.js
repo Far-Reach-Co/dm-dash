@@ -91,7 +91,13 @@ export default class Counter {
 
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
-        await listItemTitle(this.title, this.toggleEdit),
+        createElement("div", { class: "title-edit" }, [
+          this.title,
+          createElement("div", { class: "edit-btn" }, "[Edit]", {
+            type: "click",
+            event: this.toggleEdit,
+          }),
+        ]),
         createElement("img", {
           src: "/assets/counter.svg",
           width: 30,

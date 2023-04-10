@@ -1,11 +1,15 @@
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
-import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
+import RichText from "../lib/RichText.js";
 
 export default class Lore {
   constructor(props) {
@@ -41,9 +45,10 @@ export default class Lore {
     this.render();
   };
 
-  saveLore = async (e) => {
+  saveLore = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -51,7 +56,11 @@ export default class Lore {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -59,7 +68,7 @@ export default class Lore {
         this.lore.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
 
     // update UI
@@ -74,12 +83,59 @@ export default class Lore {
     await postThing(`/api/edit_lore/${this.id}`, formProps);
   };
 
+  renderRemoveImage = async () => {
+    if (this.imageId) {
+      const imageSource = await getPresignedForImageDownload(this.imageId);
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_lore/${this.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.imageId}`
+                  );
+                  e.target.parentElement.remove();
+                  this.imageId = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
+  };
+
   renderEdit = async () => {
     if (this.uploadingImage) {
       return this.domComponent.append(
         renderLoadingWithMessage("Uploading your image...")
       );
     }
+
+    const richText = new RichText({
+      value: this.description,
+    });
 
     this.domComponent.append(
       createElement(
@@ -96,22 +152,14 @@ export default class Lore {
             value: this.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",
@@ -126,7 +174,7 @@ export default class Lore {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLore(e);
+            this.saveLore(e, richText.children[1].innerHTML);
           },
         }
       ),
@@ -189,19 +237,23 @@ export default class Lore {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderLoreType(),
         await renderImageSmallOrPlaceholder(this.imageId, "/assets/lore.svg"),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
       createElement("button", {}, "Open", {
         type: "click",
         event: () =>
           this.navigate({
             title: "single-lore",
+            id: this.id,
             sidebar: true,
             params: { content: this.lore },
           }),

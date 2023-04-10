@@ -1,4 +1,5 @@
 import toast from "../components/Toast.js";
+import renderTierLimitWarning from "./renderTierLimitWarning.js";
 
 async function getThings(endpoint) {
   try {
@@ -26,12 +27,12 @@ async function deleteThing(endpoint) {
       },
     });
     if (res.status === 204) {
-      toast.show("Removed")
+      toast.show("Removed");
     } else {
       throw new Error();
     }
   } catch (err) {
-    toast.error("Error")
+    toast.error("Error");
     console.log(err);
   }
 }
@@ -47,14 +48,23 @@ async function postThing(endpoint, body) {
       body: JSON.stringify(body),
     });
     const data = await res.json();
+    console.log(res, data);
     if (res.status === 200 || res.status === 201) {
-      toast.show("Success")
+      // toast.show("Success");
       return data;
-    } else throw new Error();
+    } else if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
+      renderTierLimitWarning(
+        'Please subscribe to our "Pro" package to gain access. In order to continue providing our services we need your support <3. Please read about our available tiers <insert link here> and choose the best option for your future.'
+      );
+    } else {
+      let error = new Error();
+      if (data && data.error) error = data.error;
+      throw error;
+    }
   } catch (err) {
-    // window.alert("Failed to save note...");
     console.log(err);
-    toast.error("Error")
+    toast.error("Error");
+
     return null;
   }
 }

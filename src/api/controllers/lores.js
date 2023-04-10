@@ -51,6 +51,32 @@ async function addLore(req, res, next) {
   }
 }
 
+async function getLore(req, res, next) {
+  try {
+    // if no user
+    if (!req.user) throw { status: 401, message: "Missing Credentials" };
+    // get lore to get project id
+    const loreData = await getLoreQuery(req.params.id);
+    const lore = loreData.rows[0];
+    // If user is not author or editor
+    const projectData = await getProjectQuery(lore.project_id);
+    const project = projectData.rows[0];
+
+    if (project.user_id !== req.user.id) {
+      // not editor
+      const projectUser = await getProjectUserByUserAndProjectQuery(
+        req.user.id,
+        project.id
+      );
+      if (!projectUser) throw { status: 403, message: "Forbidden" };
+    }
+
+    res.send(lore);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getLores(req, res, next) {
   // if no user
   if (!req.user) throw { status: 401, message: "Missing Credentials" };
@@ -200,6 +226,7 @@ async function editLore(req, res, next) {
 }
 
 module.exports = {
+  getLore,
   getLores,
   addLore,
   removeLore,

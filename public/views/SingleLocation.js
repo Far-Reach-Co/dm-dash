@@ -3,17 +3,20 @@ import state from "../lib/state.js";
 import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import {
+  getPresignedForImageDownload,
   uploadImage,
 } from "../lib/imageUtils.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import NoteManager from "./NoteManager.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
+import renderLoreList from "../lib/renderLoreList.js";
+import RichText from "../lib/RichText.js";
 
 export default class SingleLocationView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.location = props.params.content;
+
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -24,8 +27,19 @@ export default class SingleLocationView {
     this.parentLocationLoading = false;
     this.subLocationLoading = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.location = props.params.content;
+    } else this.location = await getThings(`/api/get_location/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -61,14 +75,20 @@ export default class SingleLocationView {
     this.toggleParentLocationLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    //transform to parent location id
     formProps.parent_location_id = formProps.location_id;
+    if (formProps.parent_location_id == 0) delete formProps.parent_location_id;
     delete formProps.location_id;
-    formProps.is_sub = true;
-    // Update UI
-    this.location.parent_location_id = formProps.parent_location_id;
-    this.location.is_sub = true;
 
-    await postThing(`/api/edit_location/${this.location.id}`, formProps);
+    if (formProps.parent_location_id) {
+      formProps.is_sub = true;
+      // Update UI
+      this.location.parent_location_id = formProps.parent_location_id;
+      this.location.is_sub = true;
+
+      await postThing(`/api/edit_location/${this.location.id}`, formProps);
+    }
+
     this.toggleParentLocationLoading();
   };
 
@@ -194,6 +214,7 @@ export default class SingleLocationView {
           event: () => {
             this.navigate({
               title: "single-location",
+              id: location.id,
               sidebar: true,
               params: { content: location },
             });
@@ -226,6 +247,7 @@ export default class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-character",
+              id: character.id,
               sidebar: true,
               params: { content: character },
             }),
@@ -237,41 +259,6 @@ export default class SingleLocationView {
 
     if (elemMap.length) return elemMap;
     else return [createElement("small", {}, "None...")];
-  };
-
-  renderLore = async () => {
-    let loresByLocation = await getThings(
-      `/api/get_lores_by_location/${this.location.id}`
-    );
-    if (!loresByLocation) loresByLocation = [];
-
-    const elemMap = loresByLocation.map((lore) => {
-      const elem = createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "margin: 3px",
-        },
-        lore.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-lore",
-              sidebar: true,
-              params: { content: lore },
-            }),
-        }
-      );
-
-      return elem;
-    });
-
-    if (elemMap.length) return elemMap;
-    else
-      return [
-        createElement("small", { style: "margin-left: 5px;" }, "None..."),
-      ];
   };
 
   renderItems = async () => {
@@ -293,6 +280,7 @@ export default class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-item",
+              id: item.id,
               sidebar: true,
               params: { content: item },
             }),
@@ -324,13 +312,17 @@ export default class SingleLocationView {
           event: () =>
             this.navigate({
               title: "single-location",
+              id: parentLocation.id,
               sidebar: true,
               params: { content: parentLocation },
             }),
         }
       );
     } else {
-      return createElement("button", {}, "+ Parent-Location", {
+      if (state.currentProject.isEditor === false) {
+        return createElement("small", {}, "None...");
+      }
+      return createElement("button", {}, "🔗 Parent-Location", {
         type: "click",
         event: this.toggleAddParentLocation,
       });
@@ -358,9 +350,10 @@ export default class SingleLocationView {
     }
   };
 
-  saveLocation = async (e) => {
+  saveLocation = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -368,14 +361,18 @@ export default class SingleLocationView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.location.image_id);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.location.image_id
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
         this.location.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
 
     // update UI
@@ -388,12 +385,61 @@ export default class SingleLocationView {
     await postThing(`/api/edit_location/${this.location.id}`, formProps);
   };
 
+  renderRemoveImage = async () => {
+    if (this.location.image_id) {
+      const imageSource = await getPresignedForImageDownload(
+        this.location.image_id
+      );
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_location/${this.location.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.location.image_id}`
+                  );
+                  e.target.parentElement.remove();
+                  this.location.image_id = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
+  };
+
   renderEdit = async () => {
     if (this.uploadingImage) {
       return this.domComponent.append(
         renderLoadingWithMessage("Uploading your image...")
       );
     }
+
+    const richText = new RichText({
+      value: this.location.description,
+    });
 
     this.domComponent.append(
       createElement(
@@ -411,22 +457,14 @@ export default class SingleLocationView {
           }),
           createElement("br"),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.location.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",
@@ -441,7 +479,7 @@ export default class SingleLocationView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLocation(e);
+            this.saveLocation(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -502,6 +540,9 @@ export default class SingleLocationView {
       locationId: this.location.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.location.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -524,9 +565,7 @@ export default class SingleLocationView {
             { class: "single-item-subheading" },
             "Description"
           ),
-          createElement("div", { class: "description" }, [
-            `"${this.location.description}"`,
-          ]),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           createElement(
@@ -543,12 +582,12 @@ export default class SingleLocationView {
           ),
           ...(await this.renderItems()),
           createElement("br"),
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Lore"
-          ),
-          ...(await this.renderLore()),
+          createElement("div", { class: "single-info-box-subheading" }, "Lore"),
+          ...(await renderLoreList(
+            "location",
+            this.location.id,
+            this.navigate
+          )),
           createElement("br"),
           createElement(
             "div",
@@ -569,7 +608,7 @@ export default class SingleLocationView {
       await renderImageLarge(this.location.image_id),
       createElement("br"),
       createElement("br"),
-      noteManagerElem,
+      noteManagerElem
     );
   };
 }

@@ -1,27 +1,40 @@
 import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import characterTypeSelect from "../lib/characterTypeSelect.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
 import {
+  getPresignedForImageDownload,
   uploadImage,
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import CurrentLocationComponent from "../lib/CurrentLocationComponent.js";
+import renderLoreList from "../lib/renderLoreList.js";
+import RichText from "../lib/RichText.js";
 
 export default class SingleCharacterView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.character = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
     this.edit = false;
     this.uploadingImage = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.character = props.params.content;
+    } else this.character = await getThings(`/api/get_character/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -62,6 +75,7 @@ export default class SingleCharacterView {
           event: () =>
             this.navigate({
               title: "single-item",
+              id: item.id,
               sidebar: true,
               params: { content: item },
             }),
@@ -78,44 +92,10 @@ export default class SingleCharacterView {
       ];
   };
 
-  renderLore = async () => {
-    let loresByCharacter = await getThings(
-      `/api/get_lores_by_character/${this.character.id}`
-    );
-    if (!loresByCharacter) loresByCharacter = [];
-
-    const elemMap = loresByCharacter.map((lore) => {
-      const elem = createElement(
-        "a",
-        {
-          class: "small-clickable",
-          style: "margin: 3px",
-        },
-        lore.title,
-        {
-          type: "click",
-          event: () =>
-            this.navigate({
-              title: "single-lore",
-              sidebar: true,
-              params: { content: lore },
-            }),
-        }
-      );
-
-      return elem;
-    });
-
-    if (elemMap.length) return elemMap;
-    else
-      return [
-        createElement("small", { style: "margin-left: 5px;" }, "None..."),
-      ];
-  };
-
-  saveCharacter = async (e) => {
+  saveCharacter = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -123,14 +103,18 @@ export default class SingleCharacterView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.character.image_id);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.character.image_id
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
         this.character.image_id = newImage.id;
       }
       delete formProps.image;
-      this.toggleUploadingImage();
+      this.uploadingImage = false;
     }
     // update UI
     this.character.title = formProps.title;
@@ -141,12 +125,61 @@ export default class SingleCharacterView {
     await postThing(`/api/edit_character/${this.character.id}`, formProps);
   };
 
+  renderRemoveImage = async () => {
+    if (this.character.image_id) {
+      const imageSource = await getPresignedForImageDownload(
+        this.character.image_id
+      );
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_character/${this.character.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${this.character.image_id}`
+                  );
+                  e.target.parentElement.remove();
+                  this.character.image_id = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
+  };
+
   renderEdit = async () => {
     if (this.uploadingImage) {
       return this.domComponent.append(
         renderLoadingWithMessage("Uploading your image...")
       );
     }
+
+    const richText = new RichText({
+      value: this.character.description,
+    });
 
     this.domComponent.append(
       createElement(
@@ -163,22 +196,14 @@ export default class SingleCharacterView {
             value: this.character.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.character.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
             { for: "image", class: "file-input" },
-            "Upload Image"
+            "Add/Change Image"
           ),
+          await this.renderRemoveImage(),
           createElement("input", {
             id: "image",
             name: "image",
@@ -193,7 +218,7 @@ export default class SingleCharacterView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveCharacter(e);
+            this.saveCharacter(e, richText.children[1].innerHTML);
           },
         }
       )
@@ -238,6 +263,9 @@ export default class SingleCharacterView {
       characterId: this.character.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.character.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -260,11 +288,7 @@ export default class SingleCharacterView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.character.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           currentLocationComponent,
@@ -276,12 +300,12 @@ export default class SingleCharacterView {
           ),
           ...(await this.renderItems()),
           createElement("br"),
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Lore"
-          ),
-          ...(await this.renderLore()),
+          createElement("div", { class: "single-info-box-subheading" }, "Lore"),
+          ...(await renderLoreList(
+            "character",
+            this.character.id,
+            this.navigate
+          )),
           createElement("br"),
         ]),
       ]),

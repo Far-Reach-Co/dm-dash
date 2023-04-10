@@ -66,8 +66,7 @@ async function getCharacter(req, res, next) {
       if (!projectUser) throw { status: 403, message: "Forbidden" };
     }
 
-    const data = await getCharacterQuery(req.params.id);
-    res.send(data.rows[0]);
+    res.send(character);
   } catch (err) {
     next(err);
   }

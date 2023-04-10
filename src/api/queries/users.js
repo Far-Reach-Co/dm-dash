@@ -23,11 +23,12 @@ async function getUserByEmailQuery(email) {
   return await db.query(query)
 }
 
-async function registerUserQuery({email, password}) {
+async function registerUserQuery({email , username, password}) {
   const query = {
-    text: /*sql*/ `insert into public."User" (email, password) values($1,$2) RETURNING *`,
+    text: /*sql*/ `insert into public."User" (email, username, password) values($1,$2,$3) RETURNING *`,
     values: [
       email, 
+      username,
       password
     ],
   }

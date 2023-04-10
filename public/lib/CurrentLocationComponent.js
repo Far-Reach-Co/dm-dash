@@ -60,15 +60,11 @@ export default class CurrentLocationComponent {
       return createElement(
         "div",
         { style: "display: flex; flex-direction: column;" },
-        await locationSelect(
-          this.module.location_id,
-          null,
-          (newLocationId) => {
-            this.module.location_id = newLocationId;
-            this.toggleEditingCurrentLocation();
-            this.updateCurrentLocation(newLocationId);
-          }
-        )
+        await locationSelect(this.module.location_id, null, (newLocationId) => {
+          this.module.location_id = newLocationId;
+          this.toggleEditingCurrentLocation();
+          this.updateCurrentLocation(newLocationId);
+        })
       );
     }
 
@@ -84,6 +80,7 @@ export default class CurrentLocationComponent {
           event: () =>
             this.navigate({
               title: "single-location",
+              id: location.id,
               sidebar: true,
               params: { content: location },
             }),

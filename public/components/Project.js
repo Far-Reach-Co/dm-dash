@@ -14,9 +14,10 @@ export default class Project {
     this.domComponent = props.domComponent;
     this.domComponent.className = "project-btn-container";
 
-    this.resetViewsOnProjectChange = props.resetViewsOnProjectChange;
     this.id = props.id;
     this.title = props.title;
+    this.description = props.description;
+    this.userId = props.userId;
     this.dateCreated = props.dateCreated;
     this.projectInvite = props.projectInvite;
     this.isEditor = props.isEditor;
@@ -29,8 +30,17 @@ export default class Project {
     this.parentRender = props.parentRender;
     this.loadingProjectInvite = false;
 
-    this.render();
+    this.projectUsers = [];
+
+    this.init();
   }
+
+  init = async () => {
+    this.projectUsers = await getThings(
+      `/api/get_project_users_by_project/${this.id}`
+    );
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -98,9 +108,12 @@ export default class Project {
 
       const elem = createElement(
         "div",
-        { style: "display: flex; justify-content: space-between;" },
+        {
+          style:
+            "display: flex; justify-content: space-between; margin-bottom: 5px;",
+        },
         [
-          createElement("div", {}, user.email),
+          createElement("div", {}, user.username),
           createElement("label", { class: "switch" }, [
             checkbox,
             createElement("span", { class: "slider round" }),
@@ -216,7 +229,7 @@ export default class Project {
     const removeButton = createElement(
       "button",
       { class: "btn-red" },
-      `${this.wasJoined ? "Leave" : "Delete"} Project`
+      `${this.wasJoined ? "Leave" : "Delete"} Wyrld`
     );
     removeButton.addEventListener("click", async () => {
       if (
@@ -240,7 +253,7 @@ export default class Project {
     if (this.isEditor === false) {
       return this.domComponent.append(
         createElement("div", { class: "project-edit-container" }, [
-          createElement("h2", {}, `Edit Project: "${this.title}"`),
+          createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
           doneButton,
           createElement("br"),
           removeButton,
@@ -251,7 +264,7 @@ export default class Project {
     // append
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h2", {}, `Edit Project: "${this.title}"`),
+        createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
         createElement("br"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement("div", { style: "margin-right: 10px" }, "Title"),
@@ -287,8 +300,8 @@ export default class Project {
   };
 
   calculateUsedData = () => {
-    return "Data Size:" + " " + humanFileSize(this.usedDataInBytes)
-  }
+    return "Data Size:" + " " + humanFileSize(this.usedDataInBytes);
+  };
 
   render = () => {
     this.domComponent.innerHTML = "";
@@ -304,6 +317,7 @@ export default class Project {
         {
           id: `project-${this.id}`,
           class: "project-button",
+          title: "Enter wyrld",
         },
         [
           createElement("h1", {}, this.title),
@@ -317,6 +331,11 @@ export default class Project {
             { class: "project-extra-info" },
             this.calculateUsedData()
           ),
+          createElement(
+            "div",
+            { class: "project-extra-info" },
+            `${this.projectUsers.length + 1} Members`
+          ),
         ],
         {
           type: "click",
@@ -324,6 +343,8 @@ export default class Project {
             state.currentProject = {
               id: this.id,
               title: this.title,
+              description: this.description,
+              userId: this.userId,
               dateCreated: this.dateCreated,
               projectInvite: this.projectInvite,
               isEditor: this.isEditor,
@@ -331,8 +352,7 @@ export default class Project {
               dateJoined: this.dateJoined,
               projectUserId: this.projectUserId,
             };
-            this.resetViewsOnProjectChange();
-            this.navigate({ title: "modules", sidebar: true });
+            this.navigate({ title: "landing", sidebar: true });
           },
         }
       ),

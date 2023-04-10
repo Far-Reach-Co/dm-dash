@@ -10,8 +10,6 @@ export default class ProjectsView {
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
-    this.resetViewsOnProjectChange = props.resetViewsOnProjectChange;
-
     this.newProjectLoading = false;
 
     this.render();
@@ -25,7 +23,7 @@ export default class ProjectsView {
   newProject = async () => {
     this.toggleLoadingNewProject();
     await postThing("/api/add_project", {
-      title: `My Project ${state.projects.length + 1}`,
+      title: `My Wyrld ${state.projects.length + 1}`,
     });
     this.toggleLoadingNewProject();
   };
@@ -44,6 +42,8 @@ export default class ProjectsView {
         domComponent: elem,
         id: project.id,
         title: project.title,
+        description: project.description,
+        userId: project.user_id,
         dateCreated: project.date_created,
         usedDataInBytes: project.used_data_in_bytes,
         isEditor: project.is_editor,
@@ -53,7 +53,6 @@ export default class ProjectsView {
         projectInvite: project.project_invite,
         parentRender: this.render,
         navigate: this.navigate,
-        resetViewsOnProjectChange: this.resetViewsOnProjectChange
       });
       return elem;
     });
@@ -72,13 +71,9 @@ export default class ProjectsView {
 
     // append
     this.domComponent.append(
-      // createElement(
-      //   "h1",
-      //   { class: "projects-view-title" },
-      //   "Choose your project"
-      //   ),
-      //   createElement("hr", { class: "special-hr" }),
-      createElement("button", { class: "new-btn" }, "+ Project", {
+      createElement("h1", { class: "projects-view-title" }, "Wyrlds"),
+      createElement("hr", { class: "special-hr" }),
+      createElement("button", { class: "new-btn" }, "+ Wyrld", {
         type: "click",
         event: this.newProject,
       }),

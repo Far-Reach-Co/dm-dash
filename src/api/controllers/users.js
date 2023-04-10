@@ -10,6 +10,7 @@ const {
   editUserPasswordQuery,
 } = require("../queries/users");
 const { addProjectQuery } = require("../queries/projects");
+const { addTableViewQuery } = require("../queries/tableViews.js");
 
 const validLoginLength = "30d";
 
@@ -21,7 +22,7 @@ function sendResetEmail(user, token) {
   mail.sendMessage({
     user: user,
     title: "Reset Password",
-    message: `Visit the following link to reset your password: <a href="http://165.227.88.65/resetpassword.html?token=${token}">Reset Password</a>`,
+    message: `Visit the following link to reset your password: <a href="https://farreachco.com/resetpassword.html?token=${token}">Reset Password</a>`,
   });
 }
 
@@ -51,7 +52,7 @@ async function getUserById(req, res, next) {
   try {
     const userData = await getUserByIdQuery(req.params.id);
 
-    res.send(userData);
+    res.send(userData.rows[0]);
   } catch (err) {
     next(err);
   }
@@ -59,19 +60,24 @@ async function getUserById(req, res, next) {
 
 async function registerUser(req, res, next) {
   try {
-    const { email, password } = req.body;
+    const { email, username, password } = req.body;
     // hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const userData = await registerUserQuery({
       email: email.toLowerCase(),
+      username: username,
       password: hashedPassword,
     });
     const data = userData.rows[0];
 
     // create first project for user
-    await addProjectQuery({ title: "First Project", user_id: data.id });
+    const projectData = await addProjectQuery({
+      title: "First Project",
+      user_id: data.id,
+    });
+    await addTableViewQuery({ project_id: projectData.rows[0].id });
 
     // login
     const token = generateAccessToken(data.id, validLoginLength);
@@ -133,9 +139,10 @@ async function verifyJwt(req, res, next) {
 
 async function editUser(req, res, next) {
   try {
-    console.log(req.user, req.params)
+    console.log(req.user, req.params);
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    if (req.user.id != req.params.id) throw { status: 403, message: "Forbidden" };
+    if (req.user.id != req.params.id)
+      throw { status: 403, message: "Forbidden" };
 
     const userEditData = await editUserQuery(req.params.id, req.body);
     res.send(userEditData.rows[0]);

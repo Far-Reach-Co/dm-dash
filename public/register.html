@@ -4,20 +4,14 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Wyrld Dashboard | Register</title>
+    <title>Far Reach Co. | Register</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <nav>
-      <div style="display: flex; align-items: center">
-        <img height="30px" src="/assets/dmlogo.png" alt="" />
-        <a
-          class="title-anchor"
-          href="/index.html"
-
-          >Wyrld Dashboard</a
-        >
-      </div>
+      <a style="display: flex; align-items: center" href="/index.html">
+        <img height="35px" src="/assets/frlogo.webp" alt="" />
+      </a>
     </nav>
     <div class="container">
       <form id="register-form">
@@ -32,12 +26,21 @@
           />
         </div>
         <div class="form-item">
+          <label for="username">Username</label>
+          <input
+            name="username"
+            id="username"
+            placeholder="user_name"
+            required
+          />
+        </div>
+        <div class="form-item">
           <label for="email">Password</label>
           <input
             type="password"
             name="password"
             id="password"
-            placeholder="Yeah!LetMeIn1"
+            placeholder="Yeah!Password@"
             required
           />
         </div>
@@ -45,7 +48,11 @@
         <div>
           <button type="submit">Register</button>
         </div>
-        <a href="/login.html"><small>Login</small></a>
+        <br />
+        <small>Already have an account?</small>
+        <a onclick=" window.location.pathname = '/login.html' "
+          ><small>Login</small></a
+        >
       </form>
     </div>
   </body>
@@ -65,9 +72,17 @@
         });
         const resData = await res.json();
         if (res.status === 201) {
+          // set token
           const token = resData.token;
           localStorage.setItem("token", token);
-          window.location.pathname = "/dashboard.html";
+          // if invite UUID in params push to invite page
+          var searchParams = new URLSearchParams(window.location.search);
+          var inviteUUID = searchParams.get("invite");
+          if (inviteUUID) {
+            return (window.location.pathname = "/invite.html");
+          }
+          // else push to account page
+          window.location.pathname = "/account.html";
         } else if (res.status === 400) {
           alert("Email has already been registered");
         } else {

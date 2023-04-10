@@ -1,7 +1,6 @@
 class MobileNavHandler {
   constructor() {
     this.visible = false;
-    
     const mobileNav = document.getElementById("nav-links-container-mobile");
     // set event listener on nav hamburger
     document.getElementById("nav-ham").addEventListener("click", () => {
