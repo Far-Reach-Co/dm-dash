@@ -5,6 +5,7 @@
     "checkJs": true,
     "strict": true,
     "noImplicitAny": true,
+    "noImplicitReturns": true,
     "removeComments": true,
     "preserveConstEnums": true,
     // "outFile": "",

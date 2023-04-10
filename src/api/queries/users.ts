@@ -1,6 +1,6 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function getUserByIdQuery(id) {
+async function getUserByIdQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."User" where id = $1`,
     values: [id],
@@ -15,7 +15,7 @@ async function getAllUsersQuery() {
   return await db.query(query)
 }
 
-async function getUserByEmailQuery(email) {
+async function getUserByEmailQuery(email: string) {
   const query = {
     text: /*sql*/ `select * from public."User" where email = $1`,
     values: [email],
@@ -23,7 +23,7 @@ async function getUserByEmailQuery(email) {
   return await db.query(query)
 }
 
-async function registerUserQuery({email , username, password}) {
+async function registerUserQuery({email , username, password}: {email: string, username: string, password: string}) {
   const query = {
     text: /*sql*/ `insert into public."User" (email, username, password) values($1,$2,$3) RETURNING *`,
     values: [
@@ -36,7 +36,7 @@ async function registerUserQuery({email , username, password}) {
   return await db.query(query)
 }
 
-async function editUserQuery(id, data) {
+async function editUserQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -58,7 +58,7 @@ async function editUserQuery(id, data) {
   return await db.query(query)
 }
 
-async function editUserPasswordQuery(id, password) {
+async function editUserPasswordQuery(id: string, password: string) {
   const query = {
     text: /*sql*/ `update public."User" set password = $2 where id = $1 returning *`,
     values: [id, password]

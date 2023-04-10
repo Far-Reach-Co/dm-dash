@@ -1,4 +1,4 @@
-var { Pool } = require("pg");
+import { Pool, QueryArrayResult } from "pg";
 
 // LOCAL
 var credentials = {
@@ -11,14 +11,19 @@ var credentials = {
 
 var pool = new Pool(credentials);
 
-async function query<T>(text: string, params: T) {
+async function query(
+  queryObject: { text: string; values?: any[] },
+  params?: any
+): Promise<QueryArrayResult<any[]>> {
   const start = Date.now();
-  const res = await pool.query(text, params);
+  const res = await pool.query(queryObject, params);
   const duration = Date.now() - start;
-  console.log("executed query", { text, duration, rows: res.rowCount });
+  console.log("executed query", { queryObject, duration, rows: res.rowCount });
   return res;
 }
 
-module.exports = {
+const db = {
   query,
 };
+
+export default db;

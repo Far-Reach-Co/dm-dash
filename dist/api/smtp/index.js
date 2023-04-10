@@ -35,7 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var nodemailer = require("nodemailer");
+exports.__esModule = true;
+var nodemailer_1 = require("nodemailer");
 var Mail = (function () {
     function Mail() {
         var _this = this;
@@ -57,7 +58,7 @@ var Mail = (function () {
                 });
             });
         };
-        this.transporter = nodemailer.createTransport({
+        this.transporter = (0, nodemailer_1.createTransport)({
             host: "smtp.googlemail.com",
             port: 587,
             secure: false,
