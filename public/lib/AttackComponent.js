@@ -6,7 +6,7 @@ export default class AttackComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "cp-info-container-column";
-    this.domComponent.style = "max-width: 100%;"
+    this.domComponent.style = "max-width: 100%;";
     this.general_id = props.general_id;
 
     this.newLoading = false;
@@ -115,8 +115,7 @@ export default class AttackComponent {
       return createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; margin-bottom: 5px;",
+          style: "display: flex; align-items: center; margin-bottom: 5px;",
         },
         [
           createElement(
@@ -218,6 +217,7 @@ export default class AttackComponent {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove attack",
             },
             "ⓧ",
             {
@@ -228,9 +228,7 @@ export default class AttackComponent {
                     `Are you sure you want to delete ${item.title}`
                   )
                 ) {
-                  deleteThing(
-                    `/api/remove_5e_character_attack/${item.id}`
-                  );
+                  deleteThing(`/api/remove_5e_character_attack/${item.id}`);
                   e.target.parentElement.remove();
                 }
               },
@@ -262,23 +260,27 @@ export default class AttackComponent {
       createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center;",
+          style: "display: flex; align-items: center;",
         },
         [
-          createElement("small", {style: "margin-right: 115px;"}, "Name"),
-          createElement("small", {style: "margin-right: 32px;"}, "Range"),
-          createElement("small", {style: "margin-right: 18px;"}, "Duration"),
-          createElement("small", {style: "margin-right: 30px;"}, "ATK Bonus"),
+          createElement("small", { style: "margin-right: 115px;" }, "Name"),
+          createElement("small", { style: "margin-right: 32px;" }, "Range"),
+          createElement("small", { style: "margin-right: 18px;" }, "Duration"),
+          createElement("small", { style: "margin-right: 30px;" }, "ATK Bonus"),
           createElement("small", {}, "Damage/Type"),
         ]
       ),
       createElement("br"),
       ...(await this.renderAttacksElems()),
-      createElement("a", { style: "align-self: flex-start;" }, "+", {
-        type: "click",
-        event: this.toggleCreating,
-      })
+      createElement(
+        "a",
+        { style: "align-self: flex-start;", title: "Create a new attack" },
+        "+",
+        {
+          type: "click",
+          event: this.toggleCreating,
+        }
+      )
     );
   };
 }

@@ -197,10 +197,15 @@ export default class LoresView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", { class: "new-btn" }, "+ Lore", {
-        type: "click",
-        event: this.toggleCreatingLore,
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new lore" },
+        "+ Lore",
+        {
+          type: "click",
+          event: this.toggleCreatingLore,
+        }
+      );
   };
 
   render = async () => {

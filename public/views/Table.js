@@ -173,6 +173,7 @@ class TopLayer {
           {
             class:
               this.canvasLayer.currentLayer === "Object" ? "btn-h-orange" : "",
+            title: "Change the layer you are interacting with",
           },
           "Switch Layer",
           {
@@ -191,7 +192,7 @@ class TopLayer {
       this.renderLayersElem(),
       createElement(
         "div",
-        { class: "table-config info-elem" },
+        { class: "table-config info-elem", title: "Open key command info box" },
         [createElement("div", {}, "?")],
         {
           type: "click",

@@ -32,7 +32,7 @@ export default class Note {
     this.title = formProps.title;
     this.description = formProps.description;
 
-    await postThing(`/api/edit_note/${this.id}`, formProps)
+    await postThing(`/api/edit_note/${this.id}`, formProps);
   };
 
   renderEdit = async () => {
@@ -95,10 +95,15 @@ export default class Note {
       createElement("div", { class: "component-title" }, [
         createElement("div", { class: "title-edit" }, [
           this.title,
-          createElement("div", { class: "edit-btn" }, "[Edit]", {
-            type: "click",
-            event: this.toggleEdit,
-          }),
+          createElement(
+            "div",
+            { class: "edit-btn", title: "Open note edit utility" },
+            "[Edit]",
+            {
+              type: "click",
+              event: this.toggleEdit,
+            }
+          ),
         ]),
         createElement(
           "div",

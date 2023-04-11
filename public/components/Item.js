@@ -102,6 +102,7 @@ export default class Item {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -196,14 +197,19 @@ export default class Item {
 
   renderItemType = () => {
     if (this.type) {
-      return createElement("a", { class: "small-clickable" }, this.type, {
-        type: "click",
-        event: () => {
-          if (this.handleTypeFilterChange) {
-            this.handleTypeFilterChange(this.type);
-          }
-        },
-      });
+      return createElement(
+        "a",
+        { class: "small-clickable", title: "Set filter to this type" },
+        this.type,
+        {
+          type: "click",
+          event: () => {
+            if (this.handleTypeFilterChange) {
+              this.handleTypeFilterChange(this.type);
+            }
+          },
+        }
+      );
     } else return createElement("div", { style: "display: none;" });
   };
 
@@ -250,7 +256,7 @@ export default class Item {
       ]),
       descriptionComponent,
       createElement("br"),
-      createElement("button", {}, "Open", {
+      createElement("button", { title: "Open detail view" }, "Open", {
         type: "click",
         event: () =>
           this.navigate({

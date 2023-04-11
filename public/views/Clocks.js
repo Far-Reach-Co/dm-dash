@@ -73,10 +73,15 @@ export default class ClocksView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", { class: "new-btn" }, "+ Clock", {
-        type: "click",
-        event: this.newClock,
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new clock" },
+        "+ Clock",
+        {
+          type: "click",
+          event: this.newClock,
+        }
+      );
   };
 
   render = async () => {

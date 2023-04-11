@@ -70,7 +70,10 @@ export default class TableSidebarComponent {
           const elem = createElement("div", { class: "sidebar-image-item" }, [
             createElement(
               "a",
-              { style: "display: flex; align-items: center; flex: 1;" },
+              {
+                style: "display: flex; align-items: center; flex: 1;",
+                title: "Click and drag image to the table",
+              },
               [
                 createElement(
                   "div",
@@ -98,6 +101,7 @@ export default class TableSidebarComponent {
               {
                 style:
                   "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                title: "Remove image from wyrld asset library",
               },
               "ⓧ",
               {
@@ -170,6 +174,7 @@ export default class TableSidebarComponent {
         {
           for: "image",
           class: "label-btn",
+          title: "Upload image to be used on virtual table",
         },
         "+ Image"
       ),

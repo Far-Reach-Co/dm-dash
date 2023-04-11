@@ -56,7 +56,12 @@ export default async function locationSelect(
 
   return createElement(
     "select",
-    { id: "location_id", name: "location_id", required: false },
+    {
+      id: "location_id",
+      name: "location_id",
+      required: false,
+      title: "Select a location",
+    },
     [
       createElement("option", { value: 0 }, "None"),
       ...(await renderLocationSelectOptions()),

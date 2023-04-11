@@ -68,6 +68,7 @@ export default class SingleCharacterView {
         {
           class: "small-clickable",
           style: "margin: 3px",
+          title: "Navigate to the detail view of this item",
         },
         item.title,
         {
@@ -144,6 +145,7 @@ export default class SingleCharacterView {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -231,7 +233,11 @@ export default class SingleCharacterView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin-left: 3px;",
+          title: "Open edit utility",
+        },
         "Edit",
         {
           type: "click",

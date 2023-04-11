@@ -96,11 +96,13 @@ export default class Clock {
 
     const titleInput = createElement("input", {
       value: this.title,
+      title: "Edit the title",
     });
 
     const timeInput = createElement("input", {
       value: valueForInput,
       type: "time",
+      title: "Set the time",
     });
     timeInput.addEventListener(
       "change",
@@ -124,7 +126,11 @@ export default class Clock {
         this.toggleEdit();
       }
     });
-    const resetButton = createElement("button", {}, "Reset");
+    const resetButton = createElement(
+      "button",
+      { title: "Reset the clock to midnight" },
+      "Reset"
+    );
     resetButton.addEventListener("click", async () => {
       if (window.confirm(`Are you sure you want to reset ${this.title}`)) {
         this.reset();
@@ -150,18 +156,22 @@ export default class Clock {
     if (state.currentProject.isEditor === false) {
       return [createElement("div", { style: "visibility: hidden;" })];
     } else {
-      const selectSpeed = createElement("select", { name: "speed" }, [
-        createElement("option", { value: 1 }, "Speed"),
-        createElement("option", { value: 1 }, "1"),
-        createElement("option", { value: 0.5 }, "1/2"),
-        createElement("option", { value: 0.25 }, "1/4"),
-        createElement("option", { value: 2 }, "2x"),
-        createElement("option", { value: 4 }, "4x"),
-        createElement("option", { value: 10 }, "10x"),
-        createElement("option", { value: 25 }, "25x"),
-        createElement("option", { value: 50 }, "50x"),
-        createElement("option", { value: 100 }, "100x"),
-      ]);
+      const selectSpeed = createElement(
+        "select",
+        { name: "speed", title: "Select a speed" },
+        [
+          createElement("option", { value: 1 }, "Speed"),
+          createElement("option", { value: 1 }, "1"),
+          createElement("option", { value: 0.5 }, "1/2"),
+          createElement("option", { value: 0.25 }, "1/4"),
+          createElement("option", { value: 2 }, "2x"),
+          createElement("option", { value: 4 }, "4x"),
+          createElement("option", { value: 10 }, "10x"),
+          createElement("option", { value: 25 }, "25x"),
+          createElement("option", { value: 50 }, "50x"),
+          createElement("option", { value: 100 }, "100x"),
+        ]
+      );
       selectSpeed.addEventListener("change", (e) => {
         this.stop();
         this.runSpeed = parseFloat(e.target.value);
@@ -176,14 +186,24 @@ export default class Clock {
 
       return [
         createElement("br"),
-        createElement("button", { class: "new-btn" }, "Start", {
-          type: "click",
-          event: this.start,
-        }),
-        createElement("button", { class: "btn-red" }, "Stop", {
-          type: "click",
-          event: this.stop,
-        }),
+        createElement(
+          "button",
+          { class: "new-btn", title: "Start running" },
+          "Start",
+          {
+            type: "click",
+            event: this.start,
+          }
+        ),
+        createElement(
+          "button",
+          { class: "btn-red", title: "Stop running" },
+          "Stop",
+          {
+            type: "click",
+            event: this.stop,
+          }
+        ),
         createElement("br"),
         selectSpeed,
       ];

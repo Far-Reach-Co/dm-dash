@@ -33,6 +33,7 @@ export default class CurrentCharacterComponent {
         {
           class: "small-clickable",
           style: "align-self: flex-end;",
+          title: "Open the selection menu to change the current character",
         },
         "Edit",
         {
@@ -74,7 +75,11 @@ export default class CurrentCharacterComponent {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin: 3px;",
+          title: "Navigate to the detail view of this character",
+        },
         character.title,
         {
           type: "click",

@@ -96,6 +96,7 @@ export default class Campaign {
         {
           class: "icon",
           src: "/assets/gears.svg",
+          title: "Open campaign settings",
         },
         null,
         {
@@ -119,7 +120,7 @@ export default class Campaign {
         "div",
         {
           class: "project-button",
-          title: "Open Campaign in new tab",
+          title: "Open campaign in new tab",
         },
         [
           createElement("h1", {}, this.title + "↗"),

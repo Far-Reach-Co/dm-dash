@@ -317,7 +317,7 @@ export default class Project {
         {
           id: `project-${this.id}`,
           class: "project-button",
-          title: "Enter wyrld",
+          title: "Open wyrld",
         },
         [
           createElement("h1", {}, this.title),
@@ -361,6 +361,7 @@ export default class Project {
         {
           class: "icon",
           src: "/assets/gears.svg",
+          title: "Open wyrld settings",
         },
         null,
         {

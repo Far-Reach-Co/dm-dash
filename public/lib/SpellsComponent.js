@@ -343,6 +343,7 @@ class SingleSpell {
                 {
                   style:
                     "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  title: "Remove spell",
                 },
                 "ⓧ",
                 {
@@ -506,10 +507,18 @@ class SingleSpell {
           createElement("h2", {}, "Cantrips"),
           createElement("hr"),
           ...(await this.renderSpells()),
-          createElement("a", { style: "align-self: flex-start;" }, "+", {
-            type: "click",
-            event: () => this.newSpell("cantrip"),
-          }),
+          createElement(
+            "a",
+            {
+              style: "align-self: flex-start;",
+              title: "Create a new cantrip",
+            },
+            "+",
+            {
+              type: "click",
+              event: () => this.newSpell("cantrip"),
+            }
+          ),
         ])
       );
     }
@@ -574,10 +583,18 @@ class SingleSpell {
         ]),
         createElement("hr"),
         ...(await this.renderSpells()),
-        createElement("a", { style: "align-self: flex-start;" }, "+", {
-          type: "click",
-          event: () => this.newSpell(this.spellSlot.title),
-        }),
+        createElement(
+          "a",
+          {
+            style: "align-self: flex-start;",
+            title: "Create a new spell",
+          },
+          "+",
+          {
+            type: "click",
+            event: () => this.newSpell(this.spellSlot.title),
+          }
+        ),
       ])
     );
   };

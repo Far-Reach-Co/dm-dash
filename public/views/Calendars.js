@@ -26,7 +26,7 @@ export default class CalendarView {
   toggleLoading = () => {
     this.loading = !this.loading;
     this.render();
-  }
+  };
 
   resetCalendarCreation = () => {
     this.creatingNewCalendar = false;
@@ -178,7 +178,8 @@ export default class CalendarView {
 
     const completeButton = createElement("button", {}, "Complete");
     completeButton.addEventListener("click", async () => {
-      if (!this.daysOfTheWeek.length) return alert("Please create at least one day");
+      if (!this.daysOfTheWeek.length)
+        return alert("Please create at least one day");
       this.toggleLoading();
       this.resetCalendarCreation();
       await this.updateDays();
@@ -401,12 +402,12 @@ export default class CalendarView {
               this.calendarBeingCreated = newCal;
               this.creatingNewMonths = true;
             }
-            this.toggleLoading()
+            this.toggleLoading();
           },
         }
       ),
       createElement("br"),
-      createElement("button", {class: "btn-red"}, "Cancel", {
+      createElement("button", { class: "btn-red" }, "Cancel", {
         type: "click",
         event: () => {
           this.creatingNewCalendar = false;
@@ -453,13 +454,18 @@ export default class CalendarView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", {class: "new-btn"}, "+ Calendar", {
-        type: "click",
-        event: () => {
-          this.creatingNewCalendar = true;
-          this.render();
-        },
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new calendar" },
+        "+ Calendar",
+        {
+          type: "click",
+          event: () => {
+            this.creatingNewCalendar = true;
+            this.render();
+          },
+        }
+      );
   };
 
   render = async () => {

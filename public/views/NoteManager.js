@@ -8,10 +8,10 @@ import searchElement from "../lib/searchElement.js";
 export default class NoteManager {
   constructor(props) {
     this.domComponent = props.domComponent;
-    
+
     // options
     this.standAlone = props.standAlone;
-    if (this.standAlone) this.domComponent.className = "standard-view"
+    if (this.standAlone) this.domComponent.className = "standard-view";
     this.altEndpoint = props.altEndpoint;
     this.locationId = props.locationId;
     this.itemId = props.itemId;
@@ -105,16 +105,16 @@ export default class NoteManager {
   renderNoteElems = async () => {
     let endpoint = `/api/get_notes/${state.currentProject.id}/${this.limit}/${this.offset}/${this.searchTerm}`;
     if (this.altEndpoint) endpoint = this.altEndpoint;
-    
+
     let notesList = await getThings(endpoint);
     if (!notesList) notesList = [];
-    
+
     return notesList.map((note) => {
       const elem = createElement("div", {
         class: "sub-view-component",
       });
       if (this.standAlone) elem.className = "component";
-      
+
       new Note({
         domComponent: elem,
         parentRender: this.render,
@@ -148,10 +148,15 @@ export default class NoteManager {
     if (this.standAlone) {
       return this.domComponent.append(
         createElement("div", { class: "view-options-container" }, [
-          createElement("button", { class: "new-btn" }, "+ Note", {
-            type: "click",
-            event: this.toggleCreatingNote,
-          }),
+          createElement(
+            "button",
+            { class: "new-btn", title: "Create new note" },
+            "+ Note",
+            {
+              type: "click",
+              event: this.toggleCreatingNote,
+            }
+          ),
           searchElement("Search Notes", this),
         ]),
         createElement("hr"),
@@ -170,12 +175,17 @@ export default class NoteManager {
     this.domComponent.append(
       createElement("div", { class: "single-item-subheading" }, [
         "Personal Notes",
-        createElement("button", { style: "align-self: flex-end;" }, "+ Note", {
-          type: "click",
-          event: () => {
-            this.toggleCreatingNote();
-          },
-        }),
+        createElement(
+          "button",
+          { style: "align-self: flex-end;", title: "Create new note" },
+          "+ Note",
+          {
+            type: "click",
+            event: () => {
+              this.toggleCreatingNote();
+            },
+          }
+        ),
       ]),
       createElement("div", { class: "sub-view" }, [
         ...(await this.renderNoteElems()),

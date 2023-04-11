@@ -18,6 +18,7 @@ export default async function renderLoreList(type, id, navigate) {
           {
             class: "small-clickable",
             style: "margin: 3px",
+            title: "Navigate to the detail view of this lore",
           },
           lore.title,
           {

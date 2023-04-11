@@ -805,6 +805,7 @@ footer {
 }
 
 .small-clickable {
+  width: max-content;
   font-size: 12px;
   color: var(--link-blue);
 }

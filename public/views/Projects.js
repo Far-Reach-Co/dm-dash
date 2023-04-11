@@ -73,10 +73,15 @@ export default class ProjectsView {
     this.domComponent.append(
       createElement("h1", { class: "projects-view-title" }, "Wyrlds"),
       createElement("hr", { class: "special-hr" }),
-      createElement("button", { class: "new-btn" }, "+ Wyrld", {
-        type: "click",
-        event: this.newProject,
-      }),
+      createElement(
+        "button",
+        { class: "new-btn", title: "Create a new wyrld" },
+        "+ Wyrld",
+        {
+          type: "click",
+          event: this.newProject,
+        }
+      ),
       createElement("hr"),
       ...(await this.renderProjectsElems())
     );

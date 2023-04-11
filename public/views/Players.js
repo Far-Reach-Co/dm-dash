@@ -71,6 +71,7 @@ export default class PlayersView {
                   {
                     style:
                       "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                    title: "Remove connection",
                   },
                   "ⓧ",
                   {
@@ -199,10 +200,15 @@ export default class PlayersView {
     }
 
     this.domComponent.append(
-      createElement("button", {}, "🔗 Player Character", {
-        type: "click",
-        event: this.toggleConnect,
-      }),
+      createElement(
+        "button",
+        { title: "Connect a player character sheet to this wyrld" },
+        "🔗 Player Character",
+        {
+          type: "click",
+          event: this.toggleConnect,
+        }
+      ),
       createElement("hr"),
       createElement("br"),
       ...(await this.renderCharacterList())
@@ -243,6 +249,7 @@ class PlayerComponent {
         "div",
         {
           class: "project-button",
+          title: "Open player character sheet",
           style:
             "flex-direction: row; align-items: center; justify-content: space-between;",
         },
