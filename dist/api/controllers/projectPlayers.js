@@ -35,103 +35,67 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var get5eCharGeneralQuery = require("../queries/5eCharGeneral.js").get5eCharGeneralQuery;
-var _a = require("../queries/projectPlayers.js"), addProjectPlayerQuery = _a.addProjectPlayerQuery, getProjectPlayersByProjectQuery = _a.getProjectPlayersByProjectQuery, removeProjectPlayerQuery = _a.removeProjectPlayerQuery, editProjectPlayerQuery = _a.editProjectPlayerQuery, getProjectPlayersByPlayerQuery = _a.getProjectPlayersByPlayerQuery;
-var getProjectQuery = require("../queries/projects.js").getProjectQuery;
-var getProjectUserByUserAndProjectQuery = require("../queries/projectUsers.js").getProjectUserByUserAndProjectQuery;
+exports.__esModule = true;
+var projectPlayers_1 = require("../queries/projectPlayers");
 function addProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.body.project_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, projectPlayers_1.addProjectPlayerQuery)(req.body)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, addProjectPlayerQuery(req.body)];
-                case 4:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function getProjectPlayersByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, projectPlayerData, err_2;
+        var projectPlayerData, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.params.project_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, projectPlayers_1.getProjectPlayersByProjectQuery)(req.params.project_id)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, getProjectPlayersByProjectQuery(req.params.project_id)];
-                case 4:
                     projectPlayerData = _a.sent();
                     res.status(200).json(projectPlayerData.rows);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_2 = _a.sent();
                     next(err_2);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function getProjectPlayersByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var characterData, character, projectPlayerData, err_3;
+        var projectPlayerData, err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, get5eCharGeneralQuery(req.params.player_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, projectPlayers_1.getProjectPlayersByPlayerQuery)(req.params.player_id)];
                 case 1:
-                    characterData = _a.sent();
-                    character = characterData.rows[0];
-                    if (character.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
-                    return [4, getProjectPlayersByPlayerQuery(req.params.player_id)];
-                case 2:
                     projectPlayerData = _a.sent();
                     res.status(200).json(projectPlayerData.rows);
-                    return [3, 4];
-                case 3:
+                    return [3, 3];
+                case 2:
                     err_3 = _a.sent();
                     next(err_3);
-                    return [3, 4];
-                case 4: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
@@ -143,9 +107,7 @@ function removeProjectPlayer(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, removeProjectPlayerQuery(req.params.id)];
+                    return [4, (0, projectPlayers_1.removeProjectPlayerQuery)(req.params.id)];
                 case 1:
                     _a.sent();
                     res.status(204).send();
@@ -161,29 +123,21 @@ function removeProjectPlayer(req, res, next) {
 }
 function editProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var characterData, character, data, err_5;
+        var data, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, get5eCharGeneralQuery(req.params.player_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, projectPlayers_1.editProjectPlayerQuery)(req.params.id, req.body)];
                 case 1:
-                    characterData = _a.sent();
-                    character = characterData.rows[0];
-                    if (character.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
-                    return [4, editProjectPlayerQuery(req.params.id, req.body)];
-                case 2:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
-                    return [3, 4];
-                case 3:
+                    return [3, 3];
+                case 2:
                     err_5 = _a.sent();
                     next(err_5);
-                    return [3, 4];
-                case 4: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });

@@ -35,178 +35,88 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var get5eCharGeneralQuery = require("../queries/5eCharGeneral.js").get5eCharGeneralQuery;
-var _a = require("../queries/5eCharFeats.js"), add5eCharFeatQuery = _a.add5eCharFeatQuery, get5eCharFeatQuery = _a.get5eCharFeatQuery, get5eCharFeatsByGeneralQuery = _a.get5eCharFeatsByGeneralQuery, remove5eCharFeatQuery = _a.remove5eCharFeatQuery, edit5eCharFeatQuery = _a.edit5eCharFeatQuery;
-var getProjectPlayersByPlayerQuery = require("../queries/projectPlayers.js").getProjectPlayersByPlayerQuery;
-var getProjectQuery = require("../queries/projects.js").getProjectQuery;
+exports.__esModule = true;
+var _5eCharFeats_1 = require("../queries/5eCharFeats");
 function add5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var generalsData, general, projectPlayersData, projectPlayer, projectData, project, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 7, , 8]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, get5eCharGeneralQuery(req.body.general_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, _5eCharFeats_1.add5eCharFeatQuery)(req.body)];
                 case 1:
-                    generalsData = _a.sent();
-                    general = generalsData.rows[0];
-                    if (!(general.user_id !== req.user.id)) return [3, 5];
-                    return [4, getProjectPlayersByPlayerQuery(general.id)];
-                case 2:
-                    projectPlayersData = _a.sent();
-                    if (!projectPlayersData.rows.length) return [3, 4];
-                    projectPlayer = projectPlayersData.rows[0];
-                    return [4, getProjectQuery(projectPlayer.project_id)];
-                case 3:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (project.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
-                    return [3, 5];
-                case 4: throw { status: 403, message: "Forbidden" };
-                case 5: return [4, add5eCharFeatQuery(req.body)];
-                case 6:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 8];
-                case 7:
+                    return [3, 3];
+                case 2:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 8];
-                case 8: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function get5eCharFeatsByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var generalsData, general, projectPlayersData, projectPlayer, projectData, project, data, err_2;
+        var data, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 7, , 8]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, get5eCharGeneralQuery(req.params.general_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(req.params.general_id)];
                 case 1:
-                    generalsData = _a.sent();
-                    general = generalsData.rows[0];
-                    if (!(general.user_id !== req.user.id)) return [3, 5];
-                    return [4, getProjectPlayersByPlayerQuery(general.id)];
-                case 2:
-                    projectPlayersData = _a.sent();
-                    if (!projectPlayersData.rows.length) return [3, 4];
-                    projectPlayer = projectPlayersData.rows[0];
-                    return [4, getProjectQuery(projectPlayer.project_id)];
-                case 3:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (project.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
-                    return [3, 5];
-                case 4: throw { status: 403, message: "Forbidden" };
-                case 5: return [4, get5eCharFeatsByGeneralQuery(req.params.general_id)];
-                case 6:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 8];
-                case 7:
+                    return [3, 3];
+                case 2:
                     err_2 = _a.sent();
                     next(err_2);
-                    return [3, 8];
-                case 8: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function remove5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var otherProLangData, otherProLang, generalsData, general, projectPlayersData, projectPlayer, projectData, project, err_3;
+        var err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 8, , 9]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, get5eCharFeatQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, _5eCharFeats_1.remove5eCharFeatQuery)(req.params.id)];
                 case 1:
-                    otherProLangData = _a.sent();
-                    otherProLang = otherProLangData.rows[0];
-                    return [4, get5eCharGeneralQuery(otherProLang.general_id)];
-                case 2:
-                    generalsData = _a.sent();
-                    general = generalsData.rows[0];
-                    if (!(general.user_id !== req.user.id)) return [3, 6];
-                    return [4, getProjectPlayersByPlayerQuery(general.id)];
-                case 3:
-                    projectPlayersData = _a.sent();
-                    if (!projectPlayersData.rows.length) return [3, 5];
-                    projectPlayer = projectPlayersData.rows[0];
-                    return [4, getProjectQuery(projectPlayer.project_id)];
-                case 4:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (project.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
-                    return [3, 6];
-                case 5: throw { status: 403, message: "Forbidden" };
-                case 6: return [4, remove5eCharFeatQuery(req.params.id)];
-                case 7:
                     _a.sent();
                     res.status(204).send();
-                    return [3, 9];
-                case 8:
+                    return [3, 3];
+                case 2:
                     err_3 = _a.sent();
                     next(err_3);
-                    return [3, 9];
-                case 9: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function edit5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var otherProLangData, otherProLang, generalsData, general, projectPlayersData, projectPlayer, projectData, project, data, err_4;
+        var data, err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 8, , 9]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, get5eCharFeatQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, _5eCharFeats_1.edit5eCharFeatQuery)(req.params.id, req.body)];
                 case 1:
-                    otherProLangData = _a.sent();
-                    otherProLang = otherProLangData.rows[0];
-                    return [4, get5eCharGeneralQuery(otherProLang.general_id)];
-                case 2:
-                    generalsData = _a.sent();
-                    general = generalsData.rows[0];
-                    if (!(general.user_id !== req.user.id)) return [3, 6];
-                    return [4, getProjectPlayersByPlayerQuery(general.id)];
-                case 3:
-                    projectPlayersData = _a.sent();
-                    if (!projectPlayersData.rows.length) return [3, 5];
-                    projectPlayer = projectPlayersData.rows[0];
-                    return [4, getProjectQuery(projectPlayer.project_id)];
-                case 4:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (project.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
-                    return [3, 6];
-                case 5: throw { status: 403, message: "Forbidden" };
-                case 6: return [4, edit5eCharFeatQuery(req.params.id, req.body)];
-                case 7:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
-                    return [3, 9];
-                case 8:
+                    return [3, 3];
+                case 2:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 9];
-                case 9: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });

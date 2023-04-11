@@ -36,196 +36,116 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 var _a = require("../queries/tableViews.js"), getTableViewsQuery = _a.getTableViewsQuery, getTableViewQuery = _a.getTableViewQuery, removeTableViewQuery = _a.removeTableViewQuery, editTableViewQuery = _a.editTableViewQuery, addTableViewQuery = _a.addTableViewQuery;
-var getProjectQuery = require("../queries/projects.js").getProjectQuery;
-var getProjectUserByUserAndProjectQuery = require("../queries/projectUsers.js").getProjectUserByUserAndProjectQuery;
 var USER_IS_NOT_PRO = require("../../lib/enums.js").USER_IS_NOT_PRO;
 function addTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, tableViewsData, data, err_1;
+        var tableViewsData, data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.body.project_id)];
+                    _a.trys.push([0, 3, , 4]);
+                    return [4, getTableViewsQuery(req.body.project_id)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, getTableViewsQuery(req.body.project_id)];
-                case 4:
                     tableViewsData = _a.sent();
                     if (tableViewsData.rows.length >= 2) {
                         if (!req.user.is_pro)
                             throw { status: 402, message: USER_IS_NOT_PRO };
                     }
                     return [4, addTableViewQuery(req.body)];
-                case 5:
+                case 2:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 7];
-                case 6:
+                    return [3, 4];
+                case 3:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 4];
+                case 4: return [2];
             }
         });
     });
 }
 function getTableViews(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, data, err_2;
+        var data, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.params.project_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, getTableViewsQuery(req.params.project_id)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, getTableViewsQuery(req.params.project_id)];
-                case 4:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_2 = _a.sent();
                     next(err_2);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function getTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewData, tableView, projectData, project, projectUser, err_3;
+        var tableViewData, tableView, err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
+                    _a.trys.push([0, 2, , 3]);
                     return [4, getTableViewQuery(req.params.id)];
                 case 1:
                     tableViewData = _a.sent();
                     tableView = tableViewData.rows[0];
-                    return [4, getProjectQuery(tableView.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4:
                     res.send(tableView);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_3 = _a.sent();
                     next(err_3);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function removeTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewData, tableView, projectData, project, projectUser, err_4;
+        var err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getTableViewQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, removeTableViewQuery(req.params.id)];
                 case 1:
-                    tableViewData = _a.sent();
-                    tableView = tableViewData.rows[0];
-                    return [4, getProjectQuery(tableView.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, removeTableViewQuery(req.params.id)];
-                case 5:
                     _a.sent();
                     res.status(204).send();
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function editTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewData, tableView, projectData, project, projectUser, data, err_5;
+        var data, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getTableViewQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, editTableViewQuery(req.params.id, req.body)];
                 case 1:
-                    tableViewData = _a.sent();
-                    tableView = tableViewData.rows[0];
-                    return [4, getProjectQuery(tableView.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, editTableViewQuery(req.params.id, req.body)];
-                case 5:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_5 = _a.sent();
                     next(err_5);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
