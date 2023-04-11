@@ -97,7 +97,12 @@ export default class LandingView {
             this.saveProject(e, richText.children[1].innerHTML);
           },
         }
-      )
+      ),
+      createElement("br"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      })
     );
   };
 

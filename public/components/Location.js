@@ -185,6 +185,11 @@ export default class Location {
           },
         }
       ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      }),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Location", {
         type: "click",

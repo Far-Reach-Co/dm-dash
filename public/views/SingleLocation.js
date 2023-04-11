@@ -505,7 +505,12 @@ export default class SingleLocationView {
             this.saveLocation(e, richText.children[1].innerHTML);
           },
         }
-      )
+      ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      })
     );
   };
 
