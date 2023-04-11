@@ -55,17 +55,30 @@ app.use(express.static("public"));
 // Body Parse
 app.use(bodyParser.json());
 
-// Before
+// MIDDLEWARE
 app.use(async (req, res, next) => {
+  console.log("*********** REQUEST ***********");
+
+  const pathName = req.url;
+  const subApiPath1 = pathName.split("/")[2];
+
+  // check for token
   if (req.headers["x-access-token"]) {
     let token = req.headers["x-access-token"];
     token = token.split(" ")[1];
-
-    if (req.path === "/api/verify_jwt") {
+    // set token or user on request
+    if (subApiPath1 === "verify_jwt") {
       req.token = token;
     } else {
       const user = await getUserByToken(token);
-      if (user) req.user = user;
+      req.user = user;
+      if (user) {
+        // handle requests that require user
+        // TODO: handle security for different groups
+        // switch (subApiPath1) {
+        //   case "user":
+        // }
+      } else return res.json({ status: 401, message: "Missing Credentials" });
     }
   }
   next();

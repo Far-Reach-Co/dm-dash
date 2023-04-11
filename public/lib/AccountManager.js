@@ -158,10 +158,7 @@ class AccountManager {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
 
-    const resData = await postThing(
-      `/api/edit_user/${this.userInfo.id}`,
-      formProps
-    );
+    const resData = await postThing(`/api/user/edit_user`, formProps);
     if (resData) this.userInfo.username = resData.username;
   };
 
@@ -232,10 +229,7 @@ class AccountManager {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
 
-    const resData = await postThing(
-      `/api/edit_user/${this.userInfo.id}`,
-      formProps
-    );
+    const resData = await postThing(`/api/user/edit_user`, formProps);
     if (resData) this.userInfo.email = resData.email;
   };
 

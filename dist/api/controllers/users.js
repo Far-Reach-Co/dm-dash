@@ -240,11 +240,7 @@ function editUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    if (req.user.id != req.params.id)
-                        throw { status: 403, message: "Forbidden" };
-                    return [4, editUserQuery(req.params.id, req.body)];
+                    return [4, editUserQuery(req.user.id, req.body)];
                 case 1:
                     userEditData = _a.sent();
                     res.send(userEditData.rows[0]);

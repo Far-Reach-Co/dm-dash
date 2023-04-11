@@ -435,15 +435,17 @@ router.post("/add_project", addProject);
 router.delete("/remove_project/:id", removeProject);
 router.post("/edit_project/:id", editProject);
 
-// users
+// Auth and Users
 // router.get("/users", getAllUsers);
 // router.get("/get_user", getUserByToken);
-router.get("/get_user_by_id/:id", getUserById);
-router.post("/register", registerUser); // needs verification and google login
+router.get("/get_user_by_id/:id", getUserById); // needs security
+router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/verify_jwt", verifyJwt);
-router.post("/edit_user/:id", editUser);
-router.post("/reset_password", resetPassword);
 router.post("/request_reset_email", requestResetEmail);
+
+// sub heading user
+router.post("/user/edit_user", editUser);
+router.post("/user/reset_password", resetPassword);
 
 module.exports = router;
