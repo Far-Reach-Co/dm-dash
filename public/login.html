@@ -6,12 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Far Reach Co. | Login</title>
     <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/AccountManager.js" defer type="module"></script>
+    <script src="/lib/MobileNavHandler.js" defer></script>
   </head>
   <body>
+    <div id="nav-links-container-mobile"></div>
     <nav>
       <a style="display: flex; align-items: center" href="/index.html">
         <img height="35px" src="/assets/frlogo.webp" alt="" />
       </a>
+      <img
+        src="/assets/hamburger.svg"
+        height="32"
+        width="32"
+        id="nav-ham"
+        alt=""
+      />
+      <div id="nav-links-container" style="display: flex"></div>
     </nav>
     <div class="container">
       <form id="login-form">
