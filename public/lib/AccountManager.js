@@ -137,18 +137,28 @@ class AccountManager {
         })
       );
     } else {
-      navContainer.appendChild(
+      navContainer.append(
         createElement(
           "a",
           { class: "top-nav-btn", href: "/login.html" },
           "Login"
+        ),
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/register.html" },
+          "Register"
         )
       );
-      navContainerMobile.appendChild(
+      navContainerMobile.append(
         createElement(
           "a",
           { class: "top-nav-btn", href: "/login.html" },
           "Login"
+        ),
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/register.html" },
+          "Register"
         )
       );
     }
