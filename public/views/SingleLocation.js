@@ -241,6 +241,7 @@ export default class SingleLocationView {
         {
           class: "small-clickable",
           style: "margin: 3px",
+          title: "Navigate to the detail view of this character",
         },
         character.title,
         {
@@ -274,6 +275,7 @@ export default class SingleLocationView {
         {
           class: "small-clickable",
           style: "margin: 3px",
+          title: "Navigate to the detail view of this item",
         },
         item.title,
         {
@@ -306,7 +308,11 @@ export default class SingleLocationView {
     if (parentLocation) {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin: 3px" },
+        {
+          class: "small-clickable",
+          style: "margin: 3px",
+          title: "Navigate to the detail view of this parent-location",
+        },
         parentLocation.title,
         {
           type: "click",
