@@ -87,6 +87,12 @@ class App {
           displayTitle: "About",
           params: {},
         },
+        // {
+        //   id: "sidebar-notes",
+        //   title: "notes",
+        //   displayTitle: "Notes",
+        //   params: {},
+        // },
         {
           id: "sidebar-campaigns",
           title: "campaigns",
@@ -94,15 +100,21 @@ class App {
           params: {},
         },
         {
-          id: "sidebar-locations",
-          title: "locations",
-          displayTitle: "Locations",
+          id: "sidebar-players",
+          title: "players",
+          displayTitle: "Players Characters",
           params: {},
         },
         {
           id: "sidebar-characters",
           title: "characters",
-          displayTitle: "Characters",
+          displayTitle: "NPC Characters",
+          params: {},
+        },
+        {
+          id: "sidebar-locations",
+          title: "locations",
+          displayTitle: "Locations",
           params: {},
         },
         {
@@ -137,18 +149,6 @@ class App {
         },
       ],
       secondRoutes: [
-        {
-          id: "sidebar-players",
-          title: "players",
-          displayTitle: "Connected Players",
-          params: {},
-        },
-        {
-          id: "sidebar-notes",
-          title: "notes",
-          displayTitle: "Notes",
-          params: {},
-        },
         // {
         //   id: "sidebar-counters",
         //   title: "counters",
