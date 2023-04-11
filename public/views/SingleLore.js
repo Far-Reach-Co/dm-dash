@@ -106,6 +106,7 @@ export default class SingleLoreView {
                   {
                     style:
                       "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                    title: "Remove connection",
                   },
                   "ⓧ",
                   {
@@ -125,6 +126,10 @@ export default class SingleLoreView {
               {
                 class: "small-clickable",
                 style: "margin: 3px",
+                title: `Navigate to the detail view of this ${type.substring(
+                  0,
+                  type.length - 1
+                )}`,
               },
               item.title,
               {
@@ -263,6 +268,7 @@ export default class SingleLoreView {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -351,7 +357,11 @@ export default class SingleLoreView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "align-self: flex-end;" },
+        {
+          class: "small-clickable",
+          style: "align-self: flex-end;",
+          title: `Open manage menu to add/remove connections for ${type}`,
+        },
         "Manage",
         {
           type: "click",
@@ -367,7 +377,11 @@ export default class SingleLoreView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin-left: 3px;",
+          title: "Open edit utility",
+        },
         "Edit",
         {
           type: "click",

@@ -102,6 +102,7 @@ export default class OtherProLangComponent {
             "div",
             {
               style: "color: var(--red1); margin-left: 10px; cursor: pointer;",
+              title: "Remove proficiency",
             },
             "ⓧ",
             {
@@ -153,10 +154,15 @@ export default class OtherProLangComponent {
       ),
       createElement("br"),
       ...(await this.renderOtherProLangElems()),
-      createElement("a", { style: "align-self: flex-start;" }, "+", {
-        type: "click",
-        event: this.newOtherProLang,
-      })
+      createElement(
+        "a",
+        { style: "align-self: flex-start;", title: "Create a new proficiency" },
+        "+",
+        {
+          type: "click",
+          event: this.newOtherProLang,
+        }
+      )
     );
   };
 }

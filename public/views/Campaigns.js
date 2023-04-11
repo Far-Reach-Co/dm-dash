@@ -49,10 +49,18 @@ export default class CampaignsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", { class: "new-btn" }, "+ Campaign", {
-        type: "click",
-        event: this.newCampaign,
-      });
+      return createElement(
+        "button",
+        {
+          class: "new-btn",
+          title: "Create a new campaign with virtual table",
+        },
+        "+ Campaign",
+        {
+          type: "click",
+          event: this.newCampaign,
+        }
+      );
   };
 
   render = async () => {

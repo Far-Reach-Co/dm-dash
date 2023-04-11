@@ -28,7 +28,12 @@ export default async function characterSelect(
 
   return createElement(
     "select",
-    { id: "character_id", name: "character_id", required: false },
+    {
+      id: "character_id",
+      name: "character_id",
+      required: false,
+      title: "Select a character",
+    },
     [
       createElement("option", { value: 0 }, "None"),
       ...(await renderCharacterSelectOptions()),

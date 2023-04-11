@@ -33,6 +33,7 @@ export class Hamburger {
           width: "40px",
           src: "/assets/sidebar.svg",
           class: "flipXAxis",
+          title: "Toggle sidebar",
         },
         null
       )

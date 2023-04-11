@@ -130,10 +130,15 @@ class Sheets {
         { style: "text-align: center; align-self: center; width: 80%;" },
         "*We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games."
       ),
-      createElement("button", { class: "new-btn" }, "+ Player", {
-        type: "click",
-        event: this.toggleCreating,
-      }),
+      createElement(
+        "button",
+        { class: "new-btn", title: "Create a new player character sheet" },
+        "+ Player",
+        {
+          type: "click",
+          event: this.toggleCreating,
+        }
+      ),
       createElement("hr"),
       createElement("br"),
       ...(await this.renderSheetElems())
@@ -192,6 +197,7 @@ class PlayerComponent {
                 {
                   style:
                     "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  title: "Remove connection",
                 },
                 "ⓧ",
                 {
@@ -325,6 +331,7 @@ class PlayerComponent {
         "div",
         {
           class: "project-button",
+          title: "Open player character sheet",
           style:
             "flex-direction: row; align-items: center; justify-content: space-between;",
         },
@@ -377,6 +384,7 @@ class PlayerComponent {
         {
           class: "icon",
           src: "/assets/gears.svg",
+          title: "Open player character sheet settings",
         },
         null,
         {

@@ -107,7 +107,11 @@ export default class LandingView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin-left: 3px;",
+          title: "Edit the title and description of the about tab",
+        },
         "Edit",
         {
           type: "click",

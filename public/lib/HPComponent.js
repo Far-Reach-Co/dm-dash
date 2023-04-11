@@ -54,7 +54,11 @@ export default class HPComponent {
       createElement("div", { class: "cp-content-container-center" }, [
         createElement(
           "img",
-          { class: "edit-hp", src: "/assets/gears.svg" },
+          {
+            class: "edit-hp",
+            src: "/assets/gears.svg",
+            title: "Close temporary HP view",
+          },
           null,
           {
             type: "click",
@@ -97,7 +101,11 @@ export default class HPComponent {
       createElement("div", { class: "cp-content-container-center" }, [
         createElement(
           "img",
-          { class: "edit-hp", src: "/assets/gears.svg" },
+          {
+            class: "edit-hp",
+            src: "/assets/gears.svg",
+            title: "Open temporary HP view",
+          },
           null,
           {
             type: "click",

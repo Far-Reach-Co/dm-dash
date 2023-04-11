@@ -16,6 +16,7 @@ export default class SideBar {
       id: "close-sidebar",
       class: "close-sidebar",
       src: "/assets/sidebar.svg",
+      title: "Toggle sidebar",
       height: 32,
       width: 32,
     });
