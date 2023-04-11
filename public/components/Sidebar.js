@@ -110,7 +110,7 @@ export default class SideBar {
         class: "sidebar-container",
       },
       [
-        createElement("div", { class: "sidebar-header" }, "Shared"),
+        createElement("div", { class: "sidebar-header" }, "Resources"),
         ...this.renderMainRoutesElems(),
         // createElement("a", { class: "sidebar-item" }, "Table ↗", {
         //   type: "click",
@@ -122,8 +122,8 @@ export default class SideBar {
         //     window.open("/vtt.html", "_blank").focus();
         //   },
         // }),
-        createElement("div", { class: "sidebar-header" }, "Personal"),
-        ...this.renderToolRoutesElems(),
+        // createElement("div", { class: "sidebar-header" }, "Personal"),
+        // ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),
       ]
     );
