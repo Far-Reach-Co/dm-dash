@@ -179,6 +179,11 @@ export default class Lore {
           },
         }
       ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      }),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Lore", {
         type: "click",

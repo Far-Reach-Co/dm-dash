@@ -180,6 +180,11 @@ export default class Character {
           },
         }
       ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      }),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Character", {
         type: "click",

@@ -53,8 +53,6 @@ export default class Note {
             {
               id: "description",
               name: "description",
-              cols: "30",
-              rows: "7",
             },
             this.description
           ),
@@ -70,6 +68,11 @@ export default class Note {
           },
         }
       ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      }),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Note", {
         type: "click",
