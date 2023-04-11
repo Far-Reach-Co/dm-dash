@@ -15,33 +15,11 @@ const {
 
   editProjectQuery,
 } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+
 const { removeFile } = require("./s3.js");
 
 async function addLocation(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // If user is not author or editor
-    const projectData = await getProjectQuery(req.body.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
-        throw { status: 403, message: "Forbidden" };
-    }
-
     const data = await addLocationQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -51,23 +29,8 @@ async function addLocation(req, res, next) {
 
 async function getLocation(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get location to get project id
     const locationData = await getLocationQuery(req.params.id);
     const location = locationData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(location.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (!projectUser) throw { status: 403, message: "Forbidden" };
-    }
 
     res.send(location);
   } catch (err) {
@@ -76,21 +39,6 @@ async function getLocation(req, res, next) {
 }
 
 async function getLocations(req, res, next) {
-  // if no user
-  if (!req.user) throw { status: 401, message: "Missing Credentials" };
-  // If user is not author or editor
-  const projectData = await getProjectQuery(req.params.project_id);
-  const project = projectData.rows[0];
-
-  if (project.user_id !== req.user.id) {
-    // not editor
-    const projectUser = getProjectUserByUserAndProjectQuery(
-      req.user.id,
-      project.id
-    );
-    if (!projectUser) throw { status: 403, message: "Forbidden" };
-  }
-
   if (req.params.keyword && req.params.filter) {
     try {
       const data = await getLocationsWithKeywordAndFilterQuery({
@@ -148,24 +96,6 @@ async function getLocations(req, res, next) {
 
 async function getSubLocations(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get location to get project id
-    const locationData = await getLocationQuery(req.params.parent_location_id);
-    const location = locationData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(location.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (!projectUser) throw { status: 403, message: "Forbidden" };
-    }
-
     const data = await getSubLocationsQuery(req.params.parent_location_id);
 
     res.send(data.rows);
@@ -176,28 +106,11 @@ async function getSubLocations(req, res, next) {
 
 async function removeLocation(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get location to get project id
     const locationData = await getLocationQuery(req.params.id);
     const location = locationData.rows[0];
-    // If user is not author or editor
+
     const projectData = await getProjectQuery(location.project_id);
     const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
-        throw { status: 403, message: "Forbidden" };
-    }
 
     const subLocations = await getSubLocationsQuery(req.params.id);
     subLocations.rows.forEach(async (location) => {
@@ -229,30 +142,6 @@ async function removeLocation(req, res, next) {
 
 async function editLocation(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get location to get project id
-    const locationData = await getLocationQuery(req.params.id);
-    const location = locationData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(location.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
-        throw { status: 403, message: "Forbidden" };
-    }
-
     const data = await editLocationQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

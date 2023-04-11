@@ -240,7 +240,6 @@ function editUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    console.log(req.user, req.params);
                     if (!req.user)
                         throw { status: 401, message: "Missing Credentials" };
                     if (req.user.id != req.params.id)

@@ -8,42 +8,18 @@ const {
   removeLoreQuery,
   editLoreQuery,
 } = require("../queries/lores.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const { getCharacterQuery } = require("../queries/characters.js");
+
 const {
   getProjectQuery,
 
   editProjectQuery,
 } = require("../queries/projects.js");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers.js");
+
 const { removeFile } = require("./s3.js");
 const { removeImageQuery, getImageQuery } = require("../queries/images.js");
-const { getItemQuery } = require("../queries/items.js");
 
 async function addLore(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // If user is not author or editor
-    const projectData = await getProjectQuery(req.body.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
-        throw { status: 403, message: "Forbidden" };
-    }
-
     const data = await addLoreQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -53,23 +29,8 @@ async function addLore(req, res, next) {
 
 async function getLore(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get lore to get project id
     const loreData = await getLoreQuery(req.params.id);
     const lore = loreData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(lore.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (!projectUser) throw { status: 403, message: "Forbidden" };
-    }
 
     res.send(lore);
   } catch (err) {
@@ -78,21 +39,6 @@ async function getLore(req, res, next) {
 }
 
 async function getLores(req, res, next) {
-  // if no user
-  if (!req.user) throw { status: 401, message: "Missing Credentials" };
-  // If user is not author or editor
-  const projectData = await getProjectQuery(req.params.project_id);
-  const project = projectData.rows[0];
-
-  if (project.user_id !== req.user.id) {
-    // not editor
-    const projectUser = getProjectUserByUserAndProjectQuery(
-      req.user.id,
-      project.id
-    );
-    if (!projectUser) throw { status: 403, message: "Forbidden" };
-  }
-
   if (req.params.keyword && req.params.filter) {
     try {
       const data = await getLoresWithKeywordAndFilterQuery({
@@ -150,28 +96,12 @@ async function getLores(req, res, next) {
 
 async function removeLore(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
     // get Lore to get project id
     const LoreData = await getLoreQuery(req.params.id);
     const Lore = LoreData.rows[0];
     // If user is not author or editor
     const projectData = await getProjectQuery(Lore.project_id);
     const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
-        throw { status: 403, message: "Forbidden" };
-    }
 
     const data = await removeLoreQuery(req.params.id);
     res.status(204).send();
@@ -195,29 +125,6 @@ async function removeLore(req, res, next) {
 
 async function editLore(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // get Lore to get project id
-    const LoreData = await getLoreQuery(req.params.id);
-    const Lore = LoreData.rows[0];
-    // If user is not author or editor
-    const projectData = await getProjectQuery(Lore.project_id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
-        throw { status: 403, message: "Forbidden" };
-    }
-
     const data = await editLoreQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

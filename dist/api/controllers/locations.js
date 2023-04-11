@@ -38,101 +38,60 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 var _a = require("../queries/images.js"), getImageQuery = _a.getImageQuery, removeImageQuery = _a.removeImageQuery;
 var _b = require("../queries/locations.js"), addLocationQuery = _b.addLocationQuery, getLocationsQuery = _b.getLocationsQuery, getLocationsWithKeywordAndFilterQuery = _b.getLocationsWithKeywordAndFilterQuery, getLocationsWithKeywordQuery = _b.getLocationsWithKeywordQuery, getLocationsWithFilterQuery = _b.getLocationsWithFilterQuery, getLocationQuery = _b.getLocationQuery, getSubLocationsQuery = _b.getSubLocationsQuery, removeLocationQuery = _b.removeLocationQuery, editLocationQuery = _b.editLocationQuery;
 var _c = require("../queries/projects.js"), getProjectQuery = _c.getProjectQuery, editProjectQuery = _c.editProjectQuery;
-var getProjectUserByUserAndProjectQuery = require("../queries/projectUsers.js").getProjectUserByUserAndProjectQuery;
 var removeFile = require("./s3.js").removeFile;
 function addLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.body.project_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, addLocationQuery(req.body)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, addLocationQuery(req.body)];
-                case 4:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function getLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var locationData, location_1, projectData, project, projectUser, err_2;
+        var locationData, location_1, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
+                    _a.trys.push([0, 2, , 3]);
                     return [4, getLocationQuery(req.params.id)];
                 case 1:
                     locationData = _a.sent();
                     location_1 = locationData.rows[0];
-                    return [4, getProjectQuery(location_1.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4:
                     res.send(location_1);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_2 = _a.sent();
                     next(err_2);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function getLocations(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, data, err_3, data, err_4, data, err_5, data, err_6;
+        var data, err_3, data, err_4, data, err_5, data, err_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.params.project_id)];
+                    if (!(req.params.keyword && req.params.filter)) return [3, 5];
+                    _a.label = 1;
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (project.user_id !== req.user.id) {
-                        projectUser = getProjectUserByUserAndProjectQuery(req.user.id, project.id);
-                        if (!projectUser)
-                            throw { status: 403, message: "Forbidden" };
-                    }
-                    if (!(req.params.keyword && req.params.filter)) return [3, 6];
-                    _a.label = 2;
-                case 2:
-                    _a.trys.push([2, 4, , 5]);
+                    _a.trys.push([1, 3, , 4]);
                     return [4, getLocationsWithKeywordAndFilterQuery({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
@@ -140,85 +99,105 @@ function getLocations(req, res, next) {
                             keyword: req.params.keyword,
                             filter: req.params.filter
                         })];
-                case 3:
+                case 2:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 5];
-                case 4:
+                    return [3, 4];
+                case 3:
                     err_3 = _a.sent();
                     next(err_3);
-                    return [3, 5];
-                case 5: return [3, 19];
+                    return [3, 4];
+                case 4: return [3, 18];
+                case 5:
+                    if (!(req.params.keyword && !req.params.filter)) return [3, 10];
+                    _a.label = 6;
                 case 6:
-                    if (!(req.params.keyword && !req.params.filter)) return [3, 11];
-                    _a.label = 7;
-                case 7:
-                    _a.trys.push([7, 9, , 10]);
+                    _a.trys.push([6, 8, , 9]);
                     return [4, getLocationsWithKeywordQuery({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
                             keyword: req.params.keyword
                         })];
-                case 8:
+                case 7:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 10];
-                case 9:
+                    return [3, 9];
+                case 8:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 10];
-                case 10: return [3, 19];
+                    return [3, 9];
+                case 9: return [3, 18];
+                case 10:
+                    if (!(req.params.filter && !req.params.keyword)) return [3, 15];
+                    _a.label = 11;
                 case 11:
-                    if (!(req.params.filter && !req.params.keyword)) return [3, 16];
-                    _a.label = 12;
-                case 12:
-                    _a.trys.push([12, 14, , 15]);
+                    _a.trys.push([11, 13, , 14]);
                     return [4, getLocationsWithFilterQuery({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
                             filter: req.params.filter
                         })];
-                case 13:
+                case 12:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 15];
-                case 14:
+                    return [3, 14];
+                case 13:
                     err_5 = _a.sent();
                     next(err_5);
-                    return [3, 15];
-                case 15: return [3, 19];
-                case 16:
-                    _a.trys.push([16, 18, , 19]);
+                    return [3, 14];
+                case 14: return [3, 18];
+                case 15:
+                    _a.trys.push([15, 17, , 18]);
                     return [4, getLocationsQuery({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset
                         })];
-                case 17:
+                case 16:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 19];
-                case 18:
+                    return [3, 18];
+                case 17:
                     err_6 = _a.sent();
                     next(err_6);
-                    return [3, 19];
-                case 19: return [2];
+                    return [3, 18];
+                case 18: return [2];
             }
         });
     });
 }
 function getSubLocations(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var locationData, location_2, projectData, project, projectUser, data, err_7;
+        var data, err_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getLocationQuery(req.params.parent_location_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, getSubLocationsQuery(req.params.parent_location_id)];
+                case 1:
+                    data = _a.sent();
+                    res.send(data.rows);
+                    return [3, 3];
+                case 2:
+                    err_7 = _a.sent();
+                    next(err_7);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+function removeLocation(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var locationData, location_2, projectData, project, subLocations, imageData, image, newCalculatedData, err_8;
+        var _this = this;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 10, , 11]);
+                    return [4, getLocationQuery(req.params.id)];
                 case 1:
                     locationData = _a.sent();
                     location_2 = locationData.rows[0];
@@ -226,56 +205,8 @@ function getSubLocations(req, res, next) {
                 case 2:
                     projectData = _a.sent();
                     project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
+                    return [4, getSubLocationsQuery(req.params.id)];
                 case 3:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, getSubLocationsQuery(req.params.parent_location_id)];
-                case 5:
-                    data = _a.sent();
-                    res.send(data.rows);
-                    return [3, 7];
-                case 6:
-                    err_7 = _a.sent();
-                    next(err_7);
-                    return [3, 7];
-                case 7: return [2];
-            }
-        });
-    });
-}
-function removeLocation(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var locationData, location_3, projectData, project, projectUser, subLocations, imageData, image, newCalculatedData, err_8;
-        var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 12, , 13]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getLocationQuery(req.params.id)];
-                case 1:
-                    locationData = _a.sent();
-                    location_3 = locationData.rows[0];
-                    return [4, getProjectQuery(location_3.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, getSubLocationsQuery(req.params.id)];
-                case 5:
                     subLocations = _a.sent();
                     subLocations.rows.forEach(function (location) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -291,73 +222,54 @@ function removeLocation(req, res, next) {
                         });
                     }); });
                     return [4, removeLocationQuery(req.params.id)];
-                case 6:
+                case 4:
                     _a.sent();
                     res.status(204).send();
-                    if (!location_3.image_id) return [3, 11];
-                    return [4, getImageQuery(location_3.image_id)];
-                case 7:
+                    if (!location_2.image_id) return [3, 9];
+                    return [4, getImageQuery(location_2.image_id)];
+                case 5:
                     imageData = _a.sent();
                     image = imageData.rows[0];
                     return [4, removeFile("wyrld/images", image)];
-                case 8:
+                case 6:
                     _a.sent();
                     return [4, removeImageQuery(image.id)];
-                case 9:
+                case 7:
                     _a.sent();
                     newCalculatedData = project.used_data_in_bytes - image.size;
                     return [4, editProjectQuery(project.id, {
                             used_data_in_bytes: newCalculatedData
                         })];
-                case 10:
+                case 8:
                     _a.sent();
-                    _a.label = 11;
-                case 11: return [3, 13];
-                case 12:
+                    _a.label = 9;
+                case 9: return [3, 11];
+                case 10:
                     err_8 = _a.sent();
                     next(err_8);
-                    return [3, 13];
-                case 13: return [2];
+                    return [3, 11];
+                case 11: return [2];
             }
         });
     });
 }
 function editLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var locationData, location_4, projectData, project, projectUser, data, err_9;
+        var data, err_9;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getLocationQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, editLocationQuery(req.params.id, req.body)];
                 case 1:
-                    locationData = _a.sent();
-                    location_4 = locationData.rows[0];
-                    return [4, getProjectQuery(location_4.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, editLocationQuery(req.params.id, req.body)];
-                case 5:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_9 = _a.sent();
                     next(err_9);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });

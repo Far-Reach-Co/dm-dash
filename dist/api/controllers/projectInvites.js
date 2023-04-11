@@ -37,11 +37,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 var _a = require("../queries/projectInvites.js"), addProjectInviteQuery = _a.addProjectInviteQuery, getProjectInviteQuery = _a.getProjectInviteQuery, getProjectInviteByUUIDQuery = _a.getProjectInviteByUUIDQuery, removeProjectInviteQuery = _a.removeProjectInviteQuery;
 var uuidv4 = require("uuid/v4");
-var getProjectQuery = require("../queries/projects.js").getProjectQuery;
-var getProjectUserByUserAndProjectQuery = require("../queries/projectUsers.js").getProjectUserByUserAndProjectQuery;
 function addProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var uuid, projectData, project, projectUser, data, err_1;
+        var uuid, data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -49,32 +47,17 @@ function addProjectInvite(req, res, next) {
                     req.body.uuid = uuid;
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.body.project_id)];
+                    _a.trys.push([1, 3, , 4]);
+                    return [4, addProjectInviteQuery(req.body)];
                 case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, addProjectInviteQuery(req.body)];
-                case 5:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 7];
-                case 6:
+                    return [3, 4];
+                case 3:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 4];
+                case 4: return [2];
             }
         });
     });
@@ -86,8 +69,6 @@ function getProjectInviteByUUID(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, getProjectInviteByUUIDQuery(req.params.uuid)];
                 case 1:
                     data = _a.sent();
@@ -104,40 +85,21 @@ function getProjectInviteByUUID(req, res, next) {
 }
 function removeProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var inviteData, invite, projectData, project, projectUser, err_3;
+        var err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectInviteQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, removeProjectInviteQuery(req.params.id)];
                 case 1:
-                    inviteData = _a.sent();
-                    invite = inviteData.rows[0];
-                    return [4, getProjectQuery(invite.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, removeProjectInviteQuery(req.params.id)];
-                case 5:
                     _a.sent();
                     res.status(204).send();
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_3 = _a.sent();
                     next(err_3);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });

@@ -139,7 +139,6 @@ async function verifyJwt(req, res, next) {
 
 async function editUser(req, res, next) {
   try {
-    console.log(req.user, req.params);
     if (!req.user) throw { status: 401, message: "Missing Credentials" };
     if (req.user.id != req.params.id)
       throw { status: 403, message: "Forbidden" };

@@ -35,149 +35,88 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/tableImages.js"), addTableImageQuery = _a.addTableImageQuery, getTableImagesQuery = _a.getTableImagesQuery, getTableImageQuery = _a.getTableImageQuery, removeTableImageQuery = _a.removeTableImageQuery, editTableImageQuery = _a.editTableImageQuery;
-var getProjectQuery = require("../queries/projects.js").getProjectQuery;
-var getProjectUserByUserAndProjectQuery = require("../queries/projectUsers.js").getProjectUserByUserAndProjectQuery;
+exports.__esModule = true;
+var tableImages_1 = require("../queries/tableImages");
 function addTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.body.project_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, tableImages_1.addTableImageQuery)(req.body)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (!projectUser && projectUser.rows.length)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, addTableImageQuery(req.body)];
-                case 4:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function getTableImages(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, data, err_2;
+        var data, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.params.project_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, tableImages_1.getTableImagesQuery)(req.params.project_id)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, getTableImagesQuery(req.params.project_id)];
-                case 4:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_2 = _a.sent();
                     next(err_2);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function removeTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableImageData, tableImage, projectData, project, projectUser, err_3;
+        var err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getTableImageQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, tableImages_1.removeTableImageQuery)(req.params.id)];
                 case 1:
-                    tableImageData = _a.sent();
-                    tableImage = tableImageData.rows[0];
-                    return [4, getProjectQuery(tableImage.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (!projectUser && projectUser.rows.length)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, removeTableImageQuery(req.params.id)];
-                case 5:
                     _a.sent();
                     res.status(204).send();
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_3 = _a.sent();
                     next(err_3);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function editTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableImageData, tableImage, projectData, project, projectUser, data, err_4;
+        var data, err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getTableImageQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, tableImages_1.editTableImageQuery)(req.params.id, req.body)];
                 case 1:
-                    tableImageData = _a.sent();
-                    tableImage = tableImageData.rows[0];
-                    return [4, getProjectQuery(tableImage.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (!projectUser && projectUser.rows.length)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, editTableImageQuery(req.params.id, req.body)];
-                case 5:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
