@@ -178,7 +178,7 @@ class AccountManager {
         "div",
         { style: "display: flex; flex-direction: column;" },
         [
-          createElement("h2", {}, "Edit Username"),
+          createElement("b", {}, "Edit Username"),
           createElement(
             "form",
             {},
@@ -218,7 +218,7 @@ class AccountManager {
       "div",
       { style: "display: flex; justify-content: space-between;" },
       [
-        createElement("h2", {}, "Username"),
+        createElement("b", {}, "Username"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement(
             "a",
@@ -249,7 +249,7 @@ class AccountManager {
         "div",
         { style: "display: flex; flex-direction: column;" },
         [
-          createElement("h2", {}, "Edit Email"),
+          createElement("b", {}, "Edit Email"),
           createElement(
             "form",
             {},
@@ -289,7 +289,7 @@ class AccountManager {
       "div",
       { style: "display: flex; justify-content: space-between;" },
       [
-        createElement("h2", {}, "Email"),
+        createElement("b", {}, "Email"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement(
             "a",
@@ -322,17 +322,29 @@ class AccountManager {
         createElement("h1", { style: "margin: auto;" }, "Account"),
         createElement("hr", { class: "special-hr" }),
         createElement("div", { class: "component" }, [
+          createElement("h2", {}, "General Info"),
+          createElement("br"),
           this.renderEmailOrEditEmail(),
           createElement("br"),
           this.renderUsernameOrEditUsername(),
           createElement("br"),
+          createElement(
+            "div",
+            { style: "display: flex; justify-content: space-between;" },
+            [
+              createElement("b", {}, "Password"),
+              createElement("button", {}, "Reset Password", {
+                type: "click",
+                event: () => {
+                  window.location.pathname = "/resetpassword.html";
+                },
+              }),
+            ]
+          ),
           createElement("hr"),
-          createElement("button", {}, "Reset Password", {
-            type: "click",
-            event: () => {
-              window.location.pathname = "/resetpassword.html";
-            },
-          }),
+          createElement("h2", {}, "Subscriptions"),
+          createElement("br"),
+          createElement("div", { style: "text-align: center" }, "Coming Soon!"),
         ]),
       ])
     );
