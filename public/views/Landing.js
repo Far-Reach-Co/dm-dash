@@ -133,7 +133,10 @@ export default class LandingView {
       return this.renderEdit();
     }
 
-    const descriptionComponent = createElement("div", { class: "description" });
+    const descriptionComponent = createElement("div", {
+      class: "description",
+      style: "max-height: max-content;",
+    });
     descriptionComponent.innerHTML = state.currentProject.description;
 
     this.domComponent.append(
