@@ -802,6 +802,17 @@ footer {
   align-items: flex-start;
 }
 
+.single-item-main-section .description {
+  font-size: small;
+  word-wrap: break-word;
+  padding-left: 5px;
+  padding-right: 5px;
+  max-width: 700px;
+  max-height: max-content;
+  white-space: pre-line;
+  margin-bottom: 10px;
+}
+
 .note-date {
   font-size: 12px;
   color: var(--light-gray);
