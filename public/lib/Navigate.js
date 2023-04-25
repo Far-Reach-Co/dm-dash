@@ -45,6 +45,7 @@ export default class Navigate {
           wasJoined: projectData.was_joined,
           dateJoined: projectData.date_joined,
           projectUserId: projectData.project_user_id,
+          imageId: projectData.image_id,
         };
       }
     }
