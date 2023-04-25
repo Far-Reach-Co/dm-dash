@@ -32,33 +32,45 @@ export default class ProjectsView {
     const projectData = await getThings("/api/get_projects");
     if (projectData) state.projects = projectData;
 
-    const map = projectData.map((project) => {
-      // create element
-      const elem = createElement("div", {
-        id: `project-component-${project.id}`,
+    let map = projectData
+      .sort((a, b) => {
+        const aDate = a.date_joined
+          ? new Date(a.date_joined)
+          : new Date(a.date_created);
+        const bDate = b.date_joined
+          ? new Date(b.date_joined)
+          : new Date(b.date_created);
+
+        return bDate - aDate;
+      })
+      .map((project) => {
+        // create element
+        const elem = createElement("div", {
+          id: `project-component-${project.id}`,
+        });
+        // instantiate javascript
+        new Project({
+          domComponent: elem,
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          userId: project.user_id,
+          imageId: project.image_id,
+          dateCreated: project.date_created,
+          usedDataInBytes: project.used_data_in_bytes,
+          isEditor: project.is_editor,
+          wasJoined: project.was_joined,
+          dateJoined: project.date_joined,
+          projectUserId: project.project_user_id,
+          projectInvite: project.project_invite,
+          parentRender: this.render,
+          navigate: this.navigate,
+        });
+        return elem;
       });
-      // instantiate javascript
-      new Project({
-        domComponent: elem,
-        id: project.id,
-        title: project.title,
-        description: project.description,
-        userId: project.user_id,
-        imageId: project.image_id,
-        dateCreated: project.date_created,
-        usedDataInBytes: project.used_data_in_bytes,
-        isEditor: project.is_editor,
-        wasJoined: project.was_joined,
-        dateJoined: project.date_joined,
-        projectUserId: project.project_user_id,
-        projectInvite: project.project_invite,
-        parentRender: this.render,
-        navigate: this.navigate,
-      });
-      return elem;
-    });
-    if (map.length) return map;
-    else return [createElement("div", {}, "None...")];
+    if (map.length) {
+      return map;
+    } else return [createElement("div", {}, "None...")];
   };
 
   render = async () => {
