@@ -122,7 +122,12 @@ io.on("connection", (socket) => {
     }
   });
 
-  // VTT
+  // ************************* VTT *************************
+
+  // grid
+  socket.on("grid-changed", ({ project, gridState }) => {
+    socket.broadcast.to(project).emit("grid-change", gridState);
+  });
   // update images
   socket.on("image-added", ({ project, image }) => {
     socket.broadcast.to(project).emit("image-add", image);

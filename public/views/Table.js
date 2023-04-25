@@ -39,16 +39,26 @@ class Table {
       tableView,
       tableSidebarComponent: this.sidebar.tableSidebarComponent,
     });
+    // setup top layer
+    this.topLayer = new TopLayer({
+      domComponent: createElement("div"),
+      canvasLayer: this.canvasLayer,
+    });
+    // provide top layer to socket int
     // provide socket necessary variables
     socketIntegration.projectId = this.projectId;
     socketIntegration.user = state.user;
     socketIntegration.sidebar = this.sidebar;
+    socketIntegration.topLayer = this.topLayer;
     // setup socket listeners after canvas instantiation
     socketIntegration.setupListeners(this.canvasLayer);
     socketIntegration.socketJoined();
 
+    // VERY IMPORTANT RENDERING SYSTEM
     this.render();
-    this.canvasLayer.init();
+    await this.canvasLayer.init();
+    this.topLayer.render();
+    this.renderSidebarAndHamburger();
   };
 
   instantiateSidebar = () => {
@@ -78,17 +88,9 @@ class Table {
   };
 
   render = async () => {
-    this.renderSidebarAndHamburger();
-
-    const topLayerElem = createElement("div");
-    new TopLayer({
-      domComponent: topLayerElem,
-      canvasLayer: this.canvasLayer,
-    });
-
     this.domComponent.append(
       createElement("div", { style: "position: relative;" }, [
-        topLayerElem,
+        this.topLayer.domComponent,
         this.canvasElem,
       ])
     );
@@ -99,7 +101,6 @@ class TopLayer {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.canvasLayer = props.canvasLayer;
-    this.render();
   }
 
   handleChangeCanvasLayer = () => {
@@ -185,11 +186,37 @@ class TopLayer {
     }
   };
 
+  renderGridControlElem = () => {
+    if (state.currentProject.is_editor === false) {
+      return createElement("div", { style: "display: none;" });
+    } else {
+      return createElement("div", { class: "table-config grid-control-elem" }, [
+        createElement("small", {}, "Grid Control"),
+        createElement("br"),
+        createElement(
+          "button",
+          {},
+          this.canvasLayer.oGridGroup.visible ? "Hide" : "Show",
+          {
+            type: "click",
+            event: () => {
+              this.canvasLayer.oGridGroup.visible
+                ? this.canvasLayer.hideGrid()
+                : this.canvasLayer.showGrid();
+              this.render();
+            },
+          }
+        ),
+      ]);
+    }
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
     this.domComponent.append(
       this.renderLayersElem(),
+      this.renderGridControlElem(),
       createElement(
         "div",
         { class: "table-config info-elem", title: "Open key command info box" },

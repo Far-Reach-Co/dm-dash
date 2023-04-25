@@ -7,8 +7,8 @@ export default class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
     this.currentTableView = props.tableView;
-    console.log(this.currentTableView);
     this.currentLayer = "Object";
+    this.snapToGrid = true;
 
     // table sidebar component
     this.tableSidebarComponent = props.tableSidebarComponent;
@@ -18,6 +18,7 @@ export default class CanvasLayer {
     this.unitScale = 10;
     this.canvasWidth = 250 * this.unitScale;
     this.canvasHeight = 250 * this.unitScale;
+    this.oGridGroup;
 
     // event setup
     this.rightClick = false;
@@ -43,7 +44,7 @@ export default class CanvasLayer {
     fabric.Group.prototype.lockScalingY = true;
     fabric.Group.prototype.lockRotation = true;
 
-    // init canvas
+    // init fabric canvas
     this.canvas = new fabric.Canvas("canvas-layer", {
       containerClass: "canvas-layer",
       height: window.innerHeight,
@@ -57,6 +58,7 @@ export default class CanvasLayer {
       defaultCursor: "grab",
       hoverCursor: "pointer",
     });
+
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
       this.renderGridObjects();
@@ -66,7 +68,6 @@ export default class CanvasLayer {
       } else {
         // update image links
         const imageSrcList = {};
-
         for (var object of this.currentTableView.data.objects) {
           // if (object.type === "group") return object;
           if (object.imageId) {
@@ -83,59 +84,25 @@ export default class CanvasLayer {
             }
           }
         }
-        // render old data
-        this.canvas.loadFromJSON(this.currentTableView.data, () => {
-          this.canvas.getObjects().forEach((object) => {
-            // group layer events
-            if (object.type === "group") {
-              this.oGridGroup = object;
-              object.selectable = false;
-              object.evented = false;
-              return;
-            }
-            // set event listeners
-            object.on("selected", (options) => {
-              this.moveObjectUp(options.target);
-            });
-            // handle layer events
-            if (this.currentLayer === "Map") {
-              if (object.layer === "Object") {
-                object.opacity = "0.5";
-                object.selectable = false;
-                object.evented = false;
-              } else {
-                object.opacity = "1";
-                object.selectable = true;
-                object.evented = true;
-              }
-            } else {
-              if (object.layer === "Map") {
-                object.opacity = "1";
-                object.selectable = false;
-                object.evented = false;
-              } else {
-                object.opacity = "1";
-                object.selectable = true;
-                object.evented = true;
-              }
-            }
-          });
-          this.canvas.renderAll();
-        });
+        // render the saved data for the current table view
+        await this.renderSavedData();
       }
     }
+    // init event listeners
     this.setupEventListeners();
   };
 
   setupEventListeners = () => {
     this.canvas.on("object:moving", (options) => {
-      // align to grid
-      const left = Math.round(options.target.left / this.grid) * this.grid;
-      const top = Math.round(options.target.top / this.grid) * this.grid;
-      options.target.set({
-        left,
-        top,
-      });
+      if (this.snapToGrid) {
+        // align to grid
+        const left = Math.round(options.target.left / this.grid) * this.grid;
+        const top = Math.round(options.target.top / this.grid) * this.grid;
+        options.target.set({
+          left,
+          top,
+        });
+      }
 
       // if multiple objects calculate special distance
       if (options.target.hasOwnProperty("_objects")) {
@@ -376,6 +343,53 @@ export default class CanvasLayer {
     }
   };
 
+  renderSavedData = async () => {
+    return new Promise((resolve) => {
+      // render old data
+      this.canvas.loadFromJSON(this.currentTableView.data, () => {
+        this.canvas.getObjects().forEach((object) => {
+          // group layer events
+          if (object.type === "group") {
+            this.oGridGroup = object;
+            // handle if grid is snapping based on visibility
+            if (!this.oGridGroup.visible) this.snapToGrid = false;
+            object.selectable = false;
+            object.evented = false;
+            return;
+          }
+          // set event listeners
+          object.on("selected", (options) => {
+            this.moveObjectUp(options.target);
+          });
+          // handle layer events
+          if (this.currentLayer === "Map") {
+            if (object.layer === "Object") {
+              object.opacity = "0.5";
+              object.selectable = false;
+              object.evented = false;
+            } else {
+              object.opacity = "1";
+              object.selectable = true;
+              object.evented = true;
+            }
+          } else {
+            if (object.layer === "Map") {
+              object.opacity = "1";
+              object.selectable = false;
+              object.evented = false;
+            } else {
+              object.opacity = "1";
+              object.selectable = true;
+              object.evented = true;
+            }
+          }
+        });
+        this.canvas.renderAll();
+        resolve();
+      });
+    });
+  };
+
   renderGridObjects = () => {
     // create grid
     const gridLineList = [];
@@ -407,6 +421,20 @@ export default class CanvasLayer {
       evented: false,
     });
     this.canvas.add(this.oGridGroup);
+  };
+
+  hideGrid = () => {
+    this.oGridGroup.set("visible", false);
+    this.canvas.renderAll();
+    this.snapToGrid = false;
+    socketIntegration.gridChange(false);
+  };
+
+  showGrid = () => {
+    this.oGridGroup.set("visible", true);
+    this.canvas.renderAll();
+    this.snapToGrid = true;
+    socketIntegration.gridChange(true);
   };
 }
 
