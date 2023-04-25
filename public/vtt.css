@@ -33,6 +33,11 @@
   background-color: var(--green);
 }
 
+.grid-control-elem {
+  top: 10px;
+  left: 140px;
+}
+
 .help-content {
   padding: 10px;
   width: 50vw;

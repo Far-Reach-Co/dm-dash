@@ -5,6 +5,7 @@ class SocketIntegration {
     this.projectId = null;
     this.user = null;
     this.sidebar = null;
+    this.topLayer = null;
   }
 
   // Listeners
@@ -19,6 +20,17 @@ class SocketIntegration {
       if (this.sidebar) {
         this.sidebar.onlineUsersComponent.usersList = list;
         this.sidebar.onlineUsersComponent.render();
+      }
+    });
+
+    // GRID
+    this.socket.on("grid-change", (gridState) => {
+      // console.log("grid change", gridState)
+      canvasLayer.oGridGroup.visible = gridState;
+      canvasLayer.snapToGrid = gridState;
+      canvasLayer.canvas.renderAll();
+      if (this.topLayer) {
+        this.topLayer.render();
       }
     });
 
@@ -68,7 +80,7 @@ class SocketIntegration {
     });
 
     this.socket.on("image-move", (image) => {
-      console.log("Move socket image", image);
+      // console.log("Move socket image", image);
       canvasLayer.canvas.getObjects().forEach((object) => {
         if (object.id && object.id === image.id) {
           for (var [key, value] of Object.entries(image)) {
@@ -160,6 +172,14 @@ class SocketIntegration {
     this.socket.emit("project-joined", {
       username: this.user.username,
       project: `project-${this.projectId}`,
+    });
+  };
+
+  // GRID
+  gridChange = (gridState) => {
+    this.socket.emit("grid-changed", {
+      project: `project-${this.projectId}`,
+      gridState,
     });
   };
 
