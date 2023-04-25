@@ -1,7 +1,10 @@
 import RichText from "../lib/RichText.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
+import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import state from "../lib/state.js";
+import { uploadImage } from "../lib/imageUtils.js";
+import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
 export default class LandingView {
   constructor(props) {
@@ -14,6 +17,11 @@ export default class LandingView {
 
   toggleEdit = () => {
     this.edit = !this.edit;
+    this.render();
+  };
+
+  toggleUploadingImage = () => {
+    this.uploadingImage = !this.uploadingImage;
     this.render();
   };
 
@@ -47,10 +55,75 @@ export default class LandingView {
     );
   };
 
+  renderRemoveImage = async () => {
+    if (state.currentProject.imageId) {
+      const imageSource = await getPresignedForImageDownload(
+        state.currentProject.imageId
+      );
+
+      return createElement(
+        "div",
+        { style: "display: flex; align-items: baseline;" },
+        [
+          createElement("img", {
+            src: imageSource.url,
+            width: 100,
+            height: "auto",
+          }),
+          createElement(
+            "div",
+            {
+              style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
+            },
+            "ⓧ",
+            {
+              type: "click",
+              event: (e) => {
+                e.preventDefault();
+                if (
+                  window.confirm("Are you sure you want to delete this image?")
+                ) {
+                  postThing(`/api/edit_project/${state.currentProject.id}`, {
+                    image_id: null,
+                  });
+                  deleteThing(
+                    `/api/remove_image/${state.currentProject.id}/${state.currentProject.imageId}`
+                  );
+                  e.target.parentElement.remove();
+                  state.currentProject.imageId = null;
+                }
+              },
+            }
+          ),
+        ]
+      );
+    } else return createElement("div", { style: "visibility: none;" });
+  };
+
   saveProject = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     formProps.description = description;
+    if (formProps.image.size === 0) delete formProps.image;
+
+    // if there is an image
+    if (formProps.image) {
+      // upload to bucket
+      this.toggleUploadingImage();
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        state.currentProject.imageId
+      );
+      // if success update formProps and set imageRef for UI
+      if (newImage) {
+        formProps.image_id = newImage.id;
+        state.currentProject.imageId = newImage.id;
+      }
+      delete formProps.image;
+      this.uploadingImage = false;
+    }
 
     // update UI
     state.currentProject.title = formProps.title;
@@ -60,6 +133,8 @@ export default class LandingView {
       history.state.applicationState.currentProject.title = formProps.title;
       history.state.applicationState.currentProject.description =
         formProps.description;
+      history.state.applicationState.currentProject.imageId =
+        state.currentProject.imageId;
       history.pushState(history.state, null);
     }
     this.toggleEdit();
@@ -67,7 +142,13 @@ export default class LandingView {
     await postThing(`/api/edit_project/${state.currentProject.id}`, formProps);
   };
 
-  renderEdit = () => {
+  renderEdit = async () => {
+    if (this.uploadingImage) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Uploading your image...")
+      );
+    }
+
     const richText = new RichText({
       value: state.currentProject.description,
     });
@@ -87,6 +168,20 @@ export default class LandingView {
           createElement("label", { for: "description" }, "Description (About)"),
           richText,
           createElement("br"),
+          createElement(
+            "label",
+            { for: "image", class: "file-input" },
+            "Add/Change Image"
+          ),
+          await this.renderRemoveImage(),
+          createElement("input", {
+            id: "image",
+            name: "image",
+            type: "file",
+            accept: "image/*",
+          }),
+          createElement("br"),
+          createElement("br"),
           createElement("br"),
           createElement("button", { type: "submit" }, "Done"),
         ],
@@ -104,6 +199,44 @@ export default class LandingView {
         event: this.toggleEdit,
       })
     );
+  };
+
+  renderCampaignsList = async () => {
+    const campaignData = await getThings(
+      `/api/get_table_views/${state.currentProject.id}`
+    );
+    if (!campaignData) campaignData = [];
+
+    const elemMap = campaignData.map((campaign) => {
+      const elem = createElement(
+        "a",
+        {
+          class: "small-clickable",
+          style: "margin: 3px",
+          title: "Open this campaign in new tab",
+        },
+        campaign.title + " ↗",
+        {
+          type: "click",
+          event: () => {
+            localStorage.setItem(
+              "current-table-project-id",
+              state.currentProject.id
+            );
+            localStorage.setItem("current-campaign-id", campaign.id);
+            window.open("/vtt.html", "_blank").focus();
+          },
+        }
+      );
+
+      return elem;
+    });
+
+    if (elemMap.length) return elemMap;
+    else
+      return [
+        createElement("small", { style: "margin-left: 5px;" }, "None..."),
+      ];
   };
 
   renderEditButtonOrNull = () => {
@@ -147,14 +280,27 @@ export default class LandingView {
       ]),
       this.renderEditButtonOrNull(),
       createElement("br"),
-      createElement("div", {}, [
-        createElement(
-          "div",
-          { class: "single-item-subheading" },
-          "About this wyrld"
-        ),
-        descriptionComponent,
+      createElement("div", { class: "single-item-main-section" }, [
+        createElement("div", {}, [
+          createElement(
+            "div",
+            { class: "single-item-subheading" },
+            "About this wyrld"
+          ),
+          descriptionComponent,
+        ]),
+        createElement("div", { class: "single-info-box" }, [
+          createElement(
+            "div",
+            { class: "single-info-box-subheading" },
+            "Current Campaigns"
+          ),
+          ...(await this.renderCampaignsList()),
+          createElement("br"),
+        ]),
       ]),
+      createElement("br"),
+      await renderImageLarge(state.currentProject.imageId),
       createElement("hr"),
       createElement("h1", {}, "Owner"),
       await this.renderOwner(),

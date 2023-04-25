@@ -25,6 +25,7 @@ export default class Project {
     this.dateJoined = props.dateJoined;
     this.projectUserId = props.projectUserId;
     this.usedDataInBytes = props.usedDataInBytes;
+    this.imageId = props.imageId;
 
     this.edit = false;
     this.parentRender = props.parentRender;
@@ -351,6 +352,7 @@ export default class Project {
               wasJoined: this.wasJoined,
               dateJoined: this.dateJoined,
               projectUserId: this.projectUserId,
+              imageId: this.imageId,
             };
             this.navigate({ title: "landing", sidebar: true });
           },

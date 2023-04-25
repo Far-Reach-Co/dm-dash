@@ -123,7 +123,7 @@ export default class Campaign {
           title: "Open campaign in new tab",
         },
         [
-          createElement("h1", {}, this.title + "↗"),
+          createElement("h1", {}, this.title + " ↗"),
           createElement(
             "div",
             { class: "project-extra-info" },
