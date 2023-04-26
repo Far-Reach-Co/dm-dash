@@ -19,6 +19,8 @@ import LoresView from "./views/lores.js";
 import EventsView from "./views/Events.js";
 import PlayersView from "./views/Players.js";
 import FiveEPlayerSheet from "./components/5ePlayerSheet.js";
+import LandingView from "./views/Landing.js";
+import CampaignsView from "./views/Campaigns.js";
 
 class App {
   constructor(props) {
@@ -27,6 +29,8 @@ class App {
 
     // save view instantiations
     this.views = {
+      landing: null,
+      campaigns: null,
       projects: null,
       notes: null,
       counters: null,
@@ -51,9 +55,23 @@ class App {
     this.instantiateSidebar();
     this.instantiateHamburger();
     // navigate to first view or refresh to current view
+    const searchParams = new URLSearchParams(window.location.search);
+    const currentView = searchParams.get("view");
+    const viewId = searchParams.get("id");
     if (history.state) {
-      this.navigate.navigate(history.state);
-    } else this.navigate.navigate({ title: "app", sidebar: false, params: {} });
+      return this.navigate.navigate(history.state);
+    }
+    if (currentView && currentView != "app" && currentView != "landing") {
+      if (viewId) {
+        return this.navigate.navigate({
+          title: currentView,
+          sidebar: true,
+          id: viewId,
+        });
+      }
+      return this.navigate.navigate({ title: currentView, sidebar: true });
+    }
+    this.navigate.navigate({ title: "app", sidebar: false, params: {} });
   };
 
   instantiateSidebar = () => {
@@ -64,21 +82,39 @@ class App {
       navigate: this.navigate,
       mainRoutes: [
         {
-          id: "sidebar-locations",
-          title: "locations",
-          displayTitle: "Locations",
+          id: "sidebar-landing",
+          title: "landing",
+          displayTitle: "About",
           params: {},
         },
+        // {
+        //   id: "sidebar-notes",
+        //   title: "notes",
+        //   displayTitle: "Notes",
+        //   params: {},
+        // },
         {
-          id: "sidebar-characters",
-          title: "characters",
-          displayTitle: "Characters",
+          id: "sidebar-campaigns",
+          title: "campaigns",
+          displayTitle: "Campaigns",
           params: {},
         },
         {
           id: "sidebar-players",
           title: "players",
-          displayTitle: "Players",
+          displayTitle: "Players Characters",
+          params: {},
+        },
+        {
+          id: "sidebar-characters",
+          title: "characters",
+          displayTitle: "NPC Characters",
+          params: {},
+        },
+        {
+          id: "sidebar-locations",
+          title: "locations",
+          displayTitle: "Locations",
           params: {},
         },
         {
@@ -113,18 +149,12 @@ class App {
         },
       ],
       secondRoutes: [
-        {
-          id: "sidebar-notes",
-          title: "notes",
-          displayTitle: "Notes",
-          params: {},
-        },
-        {
-          id: "sidebar-counters",
-          title: "counters",
-          displayTitle: "Counters",
-          params: {},
-        },
+        // {
+        //   id: "sidebar-counters",
+        //   title: "counters",
+        //   displayTitle: "Counters",
+        //   params: {},
+        // },
       ],
     });
     this.sidebar = sidebar;
@@ -272,6 +302,19 @@ class App {
     });
   };
 
+  renderCampaignsView = ({ navigate }) => {
+    if (this.views.campaigns) {
+      return this.domComponent.appendChild(this.views.campaigns.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new CampaignsView({
+      domComponent: element,
+      navigate,
+    });
+    this.views.campaigns = view;
+  };
+
   renderProjectsView = ({ navigate }) => {
     if (this.views.projects) {
       return this.domComponent.appendChild(this.views.projects.domComponent);
@@ -285,18 +328,19 @@ class App {
     this.views.projects = view;
   };
 
-  renderModulesView = () => {
-    this.domComponent.appendChild(
-      createElement(
-        "div",
-        { class: "standard-view" },
-        createElement(
-          "h2",
-          { style: "align-self: center;" },
-          "Select a module from the sidebar ➔"
-        )
-      )
-    );
+  renderLandingView = ({ navigate }) => {
+    if (this.views.landing) {
+      return this.domComponent.appendChild(this.views.landing.domComponent);
+    }
+    const element = createElement("div");
+    this.domComponent.appendChild(element);
+    const view = new LandingView({
+      domComponent: element,
+      navigate,
+    });
+    this.views.landing = view;
+
+    // open sidebar for first time
     this.sidebar.open();
   };
 
@@ -371,8 +415,10 @@ class App {
           navigate: this.navigate.navigate,
           params: this.navigate.currentRoute.params,
         });
-      case "main":
-        return this.renderModulesView();
+      case "campaigns":
+        return this.renderCampaignsView({ navigate: this.navigate.navigate });
+      case "landing":
+        return this.renderLandingView({ navigate: this.navigate.navigate });
       default:
         return this.renderProjectsView({ navigate: this.navigate.navigate });
     }

@@ -43,13 +43,17 @@ export default class PlayersView {
     );
     if (!projectPlayerIds.length)
       return [createElement("small", {}, "None...")];
-
     let myPlayerCharacters = await getThings(`/api/get_5e_characters_by_user`);
     return await Promise.all(
       myPlayerCharacters
         .filter((pc) => {
+          const list = [];
           for (var pp of projectPlayerIds) {
-            return pp.player_id === pc.id;
+            console.log(pp);
+            if (pp.player_id === pc.id) {
+              list.push(pc);
+            }
+            return list;
           }
         })
         .map(async (player) => {
@@ -67,6 +71,7 @@ export default class PlayersView {
                   {
                     style:
                       "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                    title: "Remove connection",
                   },
                   "ⓧ",
                   {
@@ -149,7 +154,8 @@ export default class PlayersView {
       const sheetMap = sheetData
         .filter((characterSheet) => {
           for (var projectPlayer of projectPlayers) {
-            return projectPlayer.player_id === characterSheet.id;
+            if (projectPlayer.player_id === characterSheet.id)
+              return characterSheet;
           }
         })
         .map((characterSheet) => {
@@ -194,10 +200,15 @@ export default class PlayersView {
     }
 
     this.domComponent.append(
-      createElement("button", {}, "🔗 Player Character", {
-        type: "click",
-        event: this.toggleConnect,
-      }),
+      createElement(
+        "button",
+        { title: "Connect a player character sheet to this wyrld" },
+        "🔗 Player Character",
+        {
+          type: "click",
+          event: this.toggleConnect,
+        }
+      ),
       createElement("hr"),
       createElement("br"),
       ...(await this.renderCharacterList())
@@ -238,6 +249,7 @@ class PlayerComponent {
         "div",
         {
           class: "project-button",
+          title: "Open player character sheet",
           style:
             "flex-direction: row; align-items: center; justify-content: space-between;",
         },

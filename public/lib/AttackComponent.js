@@ -6,7 +6,7 @@ export default class AttackComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "cp-info-container-column";
-    this.domComponent.style = "max-width: 100%;"
+    this.domComponent.style = "max-width: 100%;";
     this.general_id = props.general_id;
 
     this.newLoading = false;
@@ -48,26 +48,29 @@ export default class AttackComponent {
         placeholder: "Name",
         required: true,
       }),
-      // createElement("label", { for: "range" }, "Range"),
-      // createElement("input", {
-      //   id: "range",
-      //   name: "range",
-      //   placeholder: "Range",
-      //   required: false,
-      // }),
+      createElement("label", { for: "range" }, "Range"),
+      createElement("input", {
+        id: "range",
+        name: "range",
+        placeholder: "Range",
+      }),
+      createElement("label", { for: "duration" }, "Duration"),
+      createElement("input", {
+        id: "duration",
+        name: "duration",
+        placeholder: "Range",
+      }),
       createElement("label", { for: "bonus" }, "ATK Bonus"),
       createElement("input", {
         id: "bonus",
         name: "bonus",
         placeholder: "+6",
-        required: false,
       }),
       createElement("label", { for: "damage_type" }, "Damage/Type"),
       createElement("input", {
         id: "damage_type",
         name: "damage_type",
         placeholder: "1d4+3 Piercing",
-        required: false,
       }),
       // createElement("label", { for: "description" }, "Description"),
       // createElement("textarea", {
@@ -112,8 +115,7 @@ export default class AttackComponent {
       return createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; margin-bottom: 5px;",
+          style: "display: flex; align-items: center; margin-bottom: 5px;",
         },
         [
           createElement(
@@ -135,29 +137,48 @@ export default class AttackComponent {
               },
             }
           ),
-          // createElement(
-          //   "input",
-          //   {
-          //     class: "cp-input-gen input-small",
-          //     style: "margin-right: 5px;",
-          //     name: "range",
-          //     value: item.range ? item.range : "",
-          //   },
-          //   null,
-          //   {
-          //     type: "focusout",
-          //     event: (e) => {
-          //       e.preventDefault();
-          //       postThing(`/api/edit_5e_character_attack/${item.id}`, {
-          //         range: e.target.value,
-          //       });
-          //     },
-          //   }
-          // ),
           createElement(
             "input",
             {
-              class: "cp-input-gen input-small",
+              class: "cp-input-gen-short input-small",
+              style: "margin-right: 5px;",
+              name: "range",
+              value: item.range ? item.range : "",
+            },
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_attack/${item.id}`, {
+                  range: e.target.value,
+                });
+              },
+            }
+          ),
+          createElement(
+            "input",
+            {
+              class: "cp-input-gen-short input-small",
+              style: "margin-right: 5px;",
+              name: "duration",
+              value: item.duration ? item.duration : "",
+            },
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_attack/${item.id}`, {
+                  duration: e.target.value,
+                });
+              },
+            }
+          ),
+          createElement(
+            "input",
+            {
+              class: "cp-input-gen-short input-small",
               style: "margin-right: 5px;",
               name: "bonus",
               value: item.bonus ? item.bonus : "",
@@ -196,6 +217,7 @@ export default class AttackComponent {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove attack",
             },
             "ⓧ",
             {
@@ -206,9 +228,7 @@ export default class AttackComponent {
                     `Are you sure you want to delete ${item.title}`
                   )
                 ) {
-                  deleteThing(
-                    `/api/remove_5e_character_attack/${item.id}`
-                  );
+                  deleteThing(`/api/remove_5e_character_attack/${item.id}`);
                   e.target.parentElement.remove();
                 }
               },
@@ -240,22 +260,27 @@ export default class AttackComponent {
       createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center;",
+          style: "display: flex; align-items: center;",
         },
         [
-          createElement("small", {style: "margin-right: 115px;"}, "Name"),
-          // createElement("small", {style: "margin-right: 120px;"}, "Range"),
-          createElement("small", {style: "margin-right: 90px;"}, "ATK Bonus"),
+          createElement("small", { style: "margin-right: 115px;" }, "Name"),
+          createElement("small", { style: "margin-right: 32px;" }, "Range"),
+          createElement("small", { style: "margin-right: 18px;" }, "Duration"),
+          createElement("small", { style: "margin-right: 30px;" }, "ATK Bonus"),
           createElement("small", {}, "Damage/Type"),
         ]
       ),
       createElement("br"),
       ...(await this.renderAttacksElems()),
-      createElement("a", { style: "align-self: flex-start;" }, "+", {
-        type: "click",
-        event: this.toggleCreating,
-      })
+      createElement(
+        "a",
+        { style: "align-self: flex-start;", title: "Create a new attack" },
+        "+",
+        {
+          type: "click",
+          event: this.toggleCreating,
+        }
+      )
     );
   };
 }

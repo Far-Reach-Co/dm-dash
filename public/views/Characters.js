@@ -6,6 +6,7 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { uploadImage } from "../lib/imageUtils.js";
+import RichText from "../lib/RichText.js";
 
 export default class CharactersView {
   constructor(props) {
@@ -62,10 +63,11 @@ export default class CharactersView {
     return await getThings(url);
   };
 
-  newCharacter = async (e) => {
+  newCharacter = async (e, description) => {
     this.toggleNewCharacterLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     const projectId = state.currentProject.id;
     formProps.project_id = projectId;
     if (formProps.type === "None") formProps.type = null;
@@ -74,7 +76,11 @@ export default class CharactersView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -92,6 +98,9 @@ export default class CharactersView {
       { class: "component-title" },
       "Create new character"
     );
+
+    const richText = new RichText({});
+
     const form = createElement("form", {}, [
       createElement("div", {}, "Type Select (Optional)"),
       characterTypeSelect(null, null),
@@ -104,10 +113,7 @@ export default class CharactersView {
         required: true,
       }),
       createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
+      richText,
       createElement("br"),
       createElement(
         "label",
@@ -127,7 +133,7 @@ export default class CharactersView {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.creatingCharacter = false;
-      await this.newCharacter(e);
+      await this.newCharacter(e, richText.children[1].innerHTML);
     });
 
     const cancelButton = createElement(
@@ -191,10 +197,15 @@ export default class CharactersView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", { class: "new-btn" }, "+ Character", {
-        type: "click",
-        event: this.toggleCreatingCharacter,
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new character" },
+        "+ Character",
+        {
+          type: "click",
+          event: this.toggleCreatingCharacter,
+        }
+      );
   };
 
   render = async () => {

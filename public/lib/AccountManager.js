@@ -8,7 +8,8 @@ class AccountManager {
     this.userInfo = null;
 
     this.editEmail = false;
-    this.saveEmailLoading = false;
+    this.editUsername = false;
+    this.saveLoading = false;
     this.init();
   }
 
@@ -17,8 +18,13 @@ class AccountManager {
     this.renderAccountApp();
   };
 
-  toggleSaveEmailLoading = () => {
-    this.saveEmailLoading = !this.saveEmailLoading;
+  toggleEditUsername = () => {
+    this.editUsername = !this.editUsername;
+    this.renderAccountApp();
+  };
+
+  toggleSaveLoading = () => {
+    this.saveLoading = !this.saveLoading;
     this.renderAccountApp();
   };
 
@@ -27,7 +33,15 @@ class AccountManager {
       // try to append tabs
       await this.appendAccountTabOrLogin();
       if (!this.userInfo) {
-        return (window.location.pathname = "/login.html");
+        if (
+          window.location.pathname === "/dashboard.html" ||
+          window.location.pathname === "/account.html" ||
+          window.location.pathname === "/vtt.html" ||
+          window.location.pathname === "/sheets.html" ||
+          window.location.pathname === "/5eplayer.html"
+        ) {
+          return (window.location.pathname = "/login.html");
+        }
       }
       // stop initial spinner
       if (document.getElementById("initial-spinner")) {
@@ -36,6 +50,7 @@ class AccountManager {
 
       // do account app if account page
       if (window.location.pathname === "/account.html") {
+        this.domComponent = document.getElementById("app");
         this.renderAccountApp();
       }
     } catch (err) {
@@ -122,31 +137,109 @@ class AccountManager {
         })
       );
     } else {
-      navContainer.appendChild(
+      navContainer.append(
         createElement(
           "a",
           { class: "top-nav-btn", href: "/login.html" },
           "Login"
+        ),
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/register.html" },
+          "Register"
         )
       );
-      navContainerMobile.appendChild(
+      navContainerMobile.append(
         createElement(
           "a",
           { class: "top-nav-btn", href: "/login.html" },
           "Login"
+        ),
+        createElement(
+          "a",
+          { class: "top-nav-btn", href: "/register.html" },
+          "Register"
         )
       );
     }
+  };
+
+  saveUsername = async (e) => {
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+
+    const resData = await postThing(`/api/user/edit_user`, formProps);
+    if (resData) this.userInfo.username = resData.username;
+  };
+
+  renderUsernameOrEditUsername = () => {
+    if (this.editUsername) {
+      return createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement("b", {}, "Edit Username"),
+          createElement(
+            "form",
+            {},
+            [
+              createElement("label", { for: "username" }, "New Username"),
+              createElement("input", {
+                type: "username",
+                id: "username",
+                name: "username",
+                value: this.userInfo.username,
+                required: true,
+              }),
+              createElement("br"),
+              createElement("button", { type: "submit" }, "Done"),
+            ],
+            {
+              type: "submit",
+              event: async (e) => {
+                e.preventDefault();
+                this.editUsername = false;
+                this.toggleSaveLoading();
+                await this.saveUsername(e);
+                this.toggleSaveLoading();
+              },
+            }
+          ),
+          createElement("br"),
+          createElement("button", { class: "btn-red" }, "Cancel", {
+            type: "click",
+            event: this.toggleEditUsername,
+          }),
+        ]
+      );
+    }
+
+    return createElement(
+      "div",
+      { style: "display: flex; justify-content: space-between;" },
+      [
+        createElement("b", {}, "Username"),
+        createElement("div", { style: "display: flex; align-items: center;" }, [
+          createElement(
+            "a",
+            { class: "small-clickable", style: "margin-right: 5px" },
+            "Edit",
+            {
+              type: "click",
+              event: this.toggleEditUsername,
+            }
+          ),
+          createElement("div", {}, this.userInfo.username),
+        ]),
+      ]
+    );
   };
 
   saveEmail = async (e) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
 
-    const resData = await postThing(
-      `/api/edit_user/${this.userInfo.id}`,
-      formProps
-    );
+    const resData = await postThing(`/api/user/edit_user`, formProps);
     if (resData) this.userInfo.email = resData.email;
   };
 
@@ -156,7 +249,7 @@ class AccountManager {
         "div",
         { style: "display: flex; flex-direction: column;" },
         [
-          createElement("h2", {}, "Edit Email"),
+          createElement("b", {}, "Edit Email"),
           createElement(
             "form",
             {},
@@ -177,9 +270,9 @@ class AccountManager {
               event: async (e) => {
                 e.preventDefault();
                 this.editEmail = false;
-                this.toggleSaveEmailLoading();
+                this.toggleSaveLoading();
                 await this.saveEmail(e);
-                this.toggleSaveEmailLoading();
+                this.toggleSaveLoading();
               },
             }
           ),
@@ -196,7 +289,7 @@ class AccountManager {
       "div",
       { style: "display: flex; justify-content: space-between;" },
       [
-        createElement("h2", {}, "Email"),
+        createElement("b", {}, "Email"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement(
             "a",
@@ -214,30 +307,44 @@ class AccountManager {
   };
 
   renderAccountApp = () => {
-    const domComponent = document.getElementById("app");
-    domComponent.innerHTML = "";
+    // clear
+    this.domComponent.innerHTML = "";
 
-    if (this.saveEmailLoading) {
-      return domComponent.append(
-        renderLoadingWithMessage("Saving your new email...")
+    if (this.saveLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Saving your data...")
       );
     }
 
     // domComponent.className = "component";
-    domComponent.append(
+    this.domComponent.append(
       createElement("div", { class: "standard-view" }, [
         createElement("h1", { style: "margin: auto;" }, "Account"),
-        createElement("br"),
+        createElement("hr", { class: "special-hr" }),
         createElement("div", { class: "component" }, [
+          createElement("h2", {}, "General Info"),
+          createElement("br"),
           this.renderEmailOrEditEmail(),
           createElement("br"),
+          this.renderUsernameOrEditUsername(),
+          createElement("br"),
+          createElement(
+            "div",
+            { style: "display: flex; justify-content: space-between;" },
+            [
+              createElement("b", {}, "Password"),
+              createElement("button", {}, "Reset Password", {
+                type: "click",
+                event: () => {
+                  window.location.pathname = "/resetpassword.html";
+                },
+              }),
+            ]
+          ),
           createElement("hr"),
-          createElement("button", {}, "Reset Password", {
-            type: "click",
-            event: () => {
-              window.location.pathname = "/resetpassword.html";
-            },
-          }),
+          createElement("h2", {}, "Subscriptions"),
+          createElement("br"),
+          createElement("div", { style: "text-align: center" }, "Coming Soon!"),
         ]),
       ])
     );

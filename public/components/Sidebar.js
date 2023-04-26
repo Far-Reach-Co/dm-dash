@@ -16,6 +16,7 @@ export default class SideBar {
       id: "close-sidebar",
       class: "close-sidebar",
       src: "/assets/sidebar.svg",
+      title: "Toggle sidebar",
       height: 32,
       width: 32,
     });
@@ -109,17 +110,20 @@ export default class SideBar {
         class: "sidebar-container",
       },
       [
-        createElement("div", { class: "sidebar-header" }, "Main Modules"),
+        createElement("div", { class: "sidebar-header" }, "Resources"),
         ...this.renderMainRoutesElems(),
-        createElement("a", {class: "sidebar-item"}, "Table", {
-          type: "click",
-          event: () => {
-            history.pushState(state.currentProject.id, null, `/vtt.html`);
-            window.location.reload();
-          }
-        }),
-        createElement("div", { class: "sidebar-header" }, "Personal Tools"),
-        ...this.renderToolRoutesElems(),
+        // createElement("a", { class: "sidebar-item" }, "Table ↗", {
+        //   type: "click",
+        //   event: () => {
+        //     localStorage.setItem(
+        //       "current-table-project-id",
+        //       state.currentProject.id
+        //     );
+        //     window.open("/vtt.html", "_blank").focus();
+        //   },
+        // }),
+        // createElement("div", { class: "sidebar-header" }, "Personal"),
+        // ...this.renderToolRoutesElems(),
         this.renderCloseSidebarElem(),
       ]
     );

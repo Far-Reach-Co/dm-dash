@@ -18,6 +18,7 @@ export default async function renderLoreList(type, id, navigate) {
           {
             class: "small-clickable",
             style: "margin: 3px",
+            title: "Navigate to the detail view of this lore",
           },
           lore.title,
           {
@@ -25,6 +26,7 @@ export default async function renderLoreList(type, id, navigate) {
             event: () =>
               navigate({
                 title: "single-lore",
+                id: lore.id,
                 sidebar: true,
                 params: { content: lore },
               }),

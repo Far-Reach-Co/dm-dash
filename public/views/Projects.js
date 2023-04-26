@@ -23,7 +23,7 @@ export default class ProjectsView {
   newProject = async () => {
     this.toggleLoadingNewProject();
     await postThing("/api/add_project", {
-      title: `My Project ${state.projects.length + 1}`,
+      title: `My Wyrld ${state.projects.length + 1}`,
     });
     this.toggleLoadingNewProject();
   };
@@ -32,30 +32,45 @@ export default class ProjectsView {
     const projectData = await getThings("/api/get_projects");
     if (projectData) state.projects = projectData;
 
-    const map = projectData.map((project) => {
-      // create element
-      const elem = createElement("div", {
-        id: `project-component-${project.id}`,
+    let map = projectData
+      .sort((a, b) => {
+        const aDate = a.date_joined
+          ? new Date(a.date_joined)
+          : new Date(a.date_created);
+        const bDate = b.date_joined
+          ? new Date(b.date_joined)
+          : new Date(b.date_created);
+
+        return bDate - aDate;
+      })
+      .map((project) => {
+        // create element
+        const elem = createElement("div", {
+          id: `project-component-${project.id}`,
+        });
+        // instantiate javascript
+        new Project({
+          domComponent: elem,
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          userId: project.user_id,
+          imageId: project.image_id,
+          dateCreated: project.date_created,
+          usedDataInBytes: project.used_data_in_bytes,
+          isEditor: project.is_editor,
+          wasJoined: project.was_joined,
+          dateJoined: project.date_joined,
+          projectUserId: project.project_user_id,
+          projectInvite: project.project_invite,
+          parentRender: this.render,
+          navigate: this.navigate,
+        });
+        return elem;
       });
-      // instantiate javascript
-      new Project({
-        domComponent: elem,
-        id: project.id,
-        title: project.title,
-        dateCreated: project.date_created,
-        usedDataInBytes: project.used_data_in_bytes,
-        isEditor: project.is_editor,
-        wasJoined: project.was_joined,
-        dateJoined: project.date_joined,
-        projectUserId: project.project_user_id,
-        projectInvite: project.project_invite,
-        parentRender: this.render,
-        navigate: this.navigate,
-      });
-      return elem;
-    });
-    if (map.length) return map;
-    else return [createElement("div", {}, "None...")];
+    if (map.length) {
+      return map;
+    } else return [createElement("div", {}, "None...")];
   };
 
   render = async () => {
@@ -69,16 +84,17 @@ export default class ProjectsView {
 
     // append
     this.domComponent.append(
-      // createElement(
-      //   "h1",
-      //   { class: "projects-view-title" },
-      //   "Choose your project"
-      //   ),
-      //   createElement("hr", { class: "special-hr" }),
-      createElement("button", { class: "new-btn" }, "+ Project", {
-        type: "click",
-        event: this.newProject,
-      }),
+      createElement("h1", { class: "projects-view-title" }, "Wyrlds"),
+      createElement("hr", { class: "special-hr" }),
+      createElement(
+        "button",
+        { class: "new-btn", title: "Create a new wyrld" },
+        "+ Wyrld",
+        {
+          type: "click",
+          event: this.newProject,
+        }
+      ),
       createElement("hr"),
       ...(await this.renderProjectsElems())
     );

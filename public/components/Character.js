@@ -9,6 +9,7 @@ import {
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
 import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
+import RichText from "../lib/RichText.js";
 
 export default class Character {
   constructor(props) {
@@ -46,9 +47,10 @@ export default class Character {
     this.render();
   };
 
-  saveCharacter = async (e) => {
+  saveCharacter = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -56,7 +58,11 @@ export default class Character {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(formProps.image, state.currentProject.id, this.imageId);
+      const newImage = await uploadImage(
+        formProps.image,
+        state.currentProject.id,
+        this.imageId
+      );
       // if success update formProps and set imageRef for UI
       if (newImage) {
         formProps.image_id = newImage.id;
@@ -95,6 +101,7 @@ export default class Character {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -128,6 +135,10 @@ export default class Character {
       );
     }
 
+    const richText = new RichText({
+      value: this.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -143,16 +154,7 @@ export default class Character {
             value: this.title,
           }),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -174,10 +176,15 @@ export default class Character {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveCharacter(e);
+            this.saveCharacter(e, richText.children[1].innerHTML);
           },
         }
       ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      }),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Character", {
         type: "click",
@@ -194,14 +201,19 @@ export default class Character {
 
   renderCharacterType = () => {
     if (this.type) {
-      return createElement("a", { class: "small-clickable" }, this.type, {
-        type: "click",
-        event: () => {
-          if (this.handleTypeFilterChange) {
-            this.handleTypeFilterChange(this.type);
-          }
-        },
-      });
+      return createElement(
+        "a",
+        { class: "small-clickable", title: "Set filter to this type" },
+        this.type,
+        {
+          type: "click",
+          event: () => {
+            if (this.handleTypeFilterChange) {
+              this.handleTypeFilterChange(this.type);
+            }
+          },
+        }
+      );
     } else return createElement("div", { style: "display: none;" });
   };
 
@@ -212,19 +224,26 @@ export default class Character {
       return this.renderEdit();
     }
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.description;
+
     this.domComponent.append(
       createElement("div", { class: "component-title" }, [
         await listItemTitle(this.title, this.toggleEdit),
         this.renderCharacterType(),
-        await renderImageSmallOrPlaceholder(this.imageId, "/assets/character.svg"),
+        await renderImageSmallOrPlaceholder(
+          this.imageId,
+          "/assets/character.svg"
+        ),
       ]),
-      createElement("div", { class: "description" }, this.description),
+      descriptionComponent,
       createElement("br"),
-      createElement("button", {}, "Open", {
+      createElement("button", { title: "Open detail view" }, "Open", {
         type: "click",
         event: () =>
           this.navigate({
             title: "single-character",
+            id: this.id,
             sidebar: true,
             params: { content: this.character },
           }),

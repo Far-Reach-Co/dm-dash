@@ -3,6 +3,7 @@ import accountManager from "../lib/AccountManager.js"; // dont remove
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import projectSelect from "../lib/projectSelect.js";
+import state from "../lib/state.js";
 
 class Sheets {
   constructor() {
@@ -55,7 +56,7 @@ class Sheets {
     this.toggleLoadingNew();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    formProps.user_id = this.user.id;
+    formProps.user_id = state.user.id;
 
     await postThing("/api/add_5e_character", formProps);
 
@@ -119,14 +120,25 @@ class Sheets {
 
     this.domComponent.append(
       createElement(
+        "h1",
+        { class: "projects-view-title" },
+        "Player Character Sheets"
+      ),
+      createElement("hr", { class: "special-hr" }),
+      createElement(
         "div",
         { style: "text-align: center; align-self: center; width: 80%;" },
         "*We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games."
       ),
-      createElement("button", { class: "new-btn" }, "+ Player", {
-        type: "click",
-        event: this.toggleCreating,
-      }),
+      createElement(
+        "button",
+        { class: "new-btn", title: "Create a new player character sheet" },
+        "+ Player",
+        {
+          type: "click",
+          event: this.toggleCreating,
+        }
+      ),
       createElement("hr"),
       createElement("br"),
       ...(await this.renderSheetElems())
@@ -185,6 +197,7 @@ class PlayerComponent {
                 {
                   style:
                     "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  title: "Remove connection",
                 },
                 "ⓧ",
                 {
@@ -318,6 +331,7 @@ class PlayerComponent {
         "div",
         {
           class: "project-button",
+          title: "Open player character sheet",
           style:
             "flex-direction: row; align-items: center; justify-content: space-between;",
         },
@@ -370,6 +384,7 @@ class PlayerComponent {
         {
           class: "icon",
           src: "/assets/gears.svg",
+          title: "Open player character sheet settings",
         },
         null,
         {

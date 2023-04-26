@@ -115,8 +115,7 @@ export default class FeatComponent {
     const featsData = await getThings(
       `/api/get_5e_character_feats/${this.general_id}`
     );
-    if (!featsData.length)
-      return [createElement("small", {}, "None...")];
+    if (!featsData.length) return [createElement("small", {}, "None...")];
 
     return featsData.map((item) => {
       return createElement(
@@ -125,49 +124,54 @@ export default class FeatComponent {
           style: "display: flex; flex-direction: column;",
         },
         [
-          createElement("div", { style: "display: flex; margin-bottom: 5px;" }, [
-            createElement(
-              "input",
-              {
-                class: "cp-input-gen",
-                style: "color: var(--orange2)",
-                name: "title",
-                value: item.title ? item.title : "",
-              },
-              null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_feat/${item.id}`, {
-                    title: e.target.value,
-                  });
+          createElement(
+            "div",
+            { style: "display: flex; margin-bottom: 5px;" },
+            [
+              createElement(
+                "input",
+                {
+                  class: "cp-input-gen",
+                  style: "color: var(--orange2)",
+                  name: "title",
+                  value: item.title ? item.title : "",
                 },
-              }
-            ),
-            createElement(
-              "div",
-              {
-                style:
-                  "color: var(--red1); margin-left: 10px; cursor: pointer;",
-              },
-              "ⓧ",
-              {
-                type: "click",
-                event: (e) => {
-                  e.preventDefault();
-                  if (
-                    window.confirm(
-                      `Are you sure you want to delete ${item.title}`
-                    )
-                  ) {
-                    deleteThing(`/api/remove_5e_character_feat/${item.id}`);
-                    e.target.parentElement.parentElement.remove();
-                  }
+                null,
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    e.preventDefault();
+                    postThing(`/api/edit_5e_character_feat/${item.id}`, {
+                      title: e.target.value,
+                    });
+                  },
+                }
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  title: "Remove feat/trait",
                 },
-              }
-            ),
-          ]),
+                "ⓧ",
+                {
+                  type: "click",
+                  event: (e) => {
+                    e.preventDefault();
+                    if (
+                      window.confirm(
+                        `Are you sure you want to delete ${item.title}`
+                      )
+                    ) {
+                      deleteThing(`/api/remove_5e_character_feat/${item.id}`);
+                      e.target.parentElement.parentElement.remove();
+                    }
+                  },
+                }
+              ),
+            ]
+          ),
           createElement(
             "select",
             {
@@ -208,7 +212,7 @@ export default class FeatComponent {
               },
             }
           ),
-          createElement("hr")
+          createElement("hr"),
         ]
       );
     });
@@ -233,10 +237,15 @@ export default class FeatComponent {
       ),
       createElement("br"),
       ...(await this.renderFeatElems()),
-      createElement("a", { style: "align-self: flex-start;" }, "+", {
-        type: "click",
-        event: this.toggleCreating,
-      })
+      createElement(
+        "a",
+        { style: "align-self: flex-start;", title: "Create a new feat/trait" },
+        "+",
+        {
+          type: "click",
+          event: this.toggleCreating,
+        }
+      )
     );
   };
 }

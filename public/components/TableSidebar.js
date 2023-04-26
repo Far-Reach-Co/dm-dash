@@ -5,9 +5,20 @@ export default class TableSidebar {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "sidebar";
-    this.canvasLayer = props.canvasLayer;
     this.isVisible = false;
     this.navigate = props.navigate;
+
+    // table sidebar component
+    this.tableSidebarComponent = new TableSidebarComponent({
+      domComponent: createElement("div", {
+        style: "display: flex; flex-direction: column;",
+      }),
+    });
+
+    // setup online users component
+    this.onlineUsersComponent = new OnlineUsersComponent({
+      domComponent: createElement("div"),
+    });
   }
 
   renderCloseSidebarElem = () => {
@@ -15,6 +26,7 @@ export default class TableSidebar {
       id: "close-sidebar",
       class: "close-sidebar",
       src: "/assets/sidebar.svg",
+      title: "Toggle sidebar",
       height: 32,
       width: 32,
     });
@@ -46,13 +58,6 @@ export default class TableSidebar {
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    const tableSidebarComponentElem = createElement("div", {
-      style: "display: flex; flex-direction: column;",
-    });
-    new TableSidebarComponent({
-      domComponent: tableSidebarComponentElem,
-      canvasLayer: this.canvasLayer,
-    });
     const container = createElement(
       "div",
       {
@@ -60,12 +65,48 @@ export default class TableSidebar {
       },
       [
         createElement("div", { class: "sidebar-header" }, "Images"),
-        tableSidebarComponentElem,
+        this.tableSidebarComponent.domComponent,
+        createElement("div", { class: "sidebar-header" }, "Online Users"),
+        this.onlineUsersComponent.domComponent,
         this.renderCloseSidebarElem(),
       ]
     );
     this.container = container;
     this.open();
     return this.domComponent.append(container);
+  };
+}
+
+class OnlineUsersComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "online-users-container";
+
+    this.usersList = [];
+
+    this.render();
+  }
+
+  renderUsersList = () => {
+    if (!this.usersList.length) return [createElement("small", {}, "None...")];
+
+    return this.usersList.map((user) => {
+      return createElement(
+        "div",
+        {
+          class: "online-user-item",
+        },
+        [
+          createElement("div", { class: "online-indicator" }),
+          createElement("div", {}, user.username),
+        ]
+      );
+    });
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(...this.renderUsersList());
   };
 }

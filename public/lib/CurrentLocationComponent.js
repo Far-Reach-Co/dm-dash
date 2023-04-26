@@ -32,6 +32,7 @@ export default class CurrentLocationComponent {
         {
           class: "small-clickable",
           style: "align-self: flex-end;",
+          title: "Open the selection menu to change the current location",
         },
         "Edit",
         {
@@ -60,15 +61,11 @@ export default class CurrentLocationComponent {
       return createElement(
         "div",
         { style: "display: flex; flex-direction: column;" },
-        await locationSelect(
-          this.module.location_id,
-          null,
-          (newLocationId) => {
-            this.module.location_id = newLocationId;
-            this.toggleEditingCurrentLocation();
-            this.updateCurrentLocation(newLocationId);
-          }
-        )
+        await locationSelect(this.module.location_id, null, (newLocationId) => {
+          this.module.location_id = newLocationId;
+          this.toggleEditingCurrentLocation();
+          this.updateCurrentLocation(newLocationId);
+        })
       );
     }
 
@@ -77,13 +74,18 @@ export default class CurrentLocationComponent {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin: 3px;",
+          title: "Navigate to the detail view of this location",
+        },
         location.title,
         {
           type: "click",
           event: () =>
             this.navigate({
               title: "single-location",
+              id: location.id,
               sidebar: true,
               params: { content: location },
             }),

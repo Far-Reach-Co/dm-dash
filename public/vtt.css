@@ -1,20 +1,85 @@
-.canvas-ui-elem {
+* {
+  user-select: none;
+  -moz-user-select: none;
+}
+
+.table-config {
   width: max-content;
+  padding: 5px;
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-  padding: 5px;
   border-radius: var(--border-radius);
-  top: 10px;
-  left: 10px;
   z-index: 3;
   background-color: var(--blue4);
 }
 
-.table-sidebar {
+.layers-elem {
+  top: 10px;
+  left: 10px;
+}
+
+.info-elem {
+  top: 10px;
+  right: 208px;
+  padding: 3px 10px;
+  border-radius: 30px;
+}
+
+.info-elem:hover {
+  cursor: help;
+  background-color: var(--green);
+}
+
+.grid-control-elem {
+  top: 10px;
+  left: 140px;
+}
+
+.help-content {
+  padding: 10px;
+  width: 50vw;
+  height: 50vh;
+  position: inherit;
+  border-radius: var(--border-radius);
+  z-index: 3;
+  background-color: var(--blue4);
+  display: flex;
+  flex-direction: column;
+}
+
+.table-sidebar-images {
   border-bottom: 1px solid var(--main-gray);
   overflow-y: auto;
   height: 500px;
+}
+
+#image-following-cursor {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.online-users-container {
+  padding: 5px;
+  border-bottom: 1px solid var(--main-gray);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.online-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 30px;
+  background-color: var(--green);
+  margin-right: 5px;
+}
+
+.online-user-item {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  justify-content: space-between;
 }

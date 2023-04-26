@@ -3,17 +3,20 @@ import state from "../lib/state.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
-import { getPresignedForImageDownload, uploadImage } from "../lib/imageUtils.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import characterSelect from "../lib/characterSelect.js";
 import locationSelect from "../lib/locationSelect.js";
 import itemSelect from "../lib/itemSelect.js";
+import RichText from "../lib/RichText.js";
 
 export default class SingleLoreView {
   constructor(props) {
     this.navigate = props.navigate;
-    this.lore = props.params.content;
     this.domComponent = props.domComponent;
     this.domComponent.className = "standard-view";
 
@@ -23,8 +26,19 @@ export default class SingleLoreView {
     this.manageType = "";
     this.manageLoading = false;
 
-    this.render();
+    this.init(props);
   }
+
+  init = async (props) => {
+    // set params if not from navigation
+    var searchParams = new URLSearchParams(window.location.search);
+    var contentId = searchParams.get("id");
+    if (props.params && props.params.content) {
+      this.lore = props.params.content;
+    } else this.lore = await getThings(`/api/get_lore/${contentId}`);
+
+    this.render();
+  };
 
   toggleEdit = () => {
     this.edit = !this.edit;
@@ -51,7 +65,6 @@ export default class SingleLoreView {
       await postThing(`/api/add_lore_relation`, formProps);
       this.toggleManageLoading();
     }
-
   };
 
   renderLoreRelationList = async (type) => {
@@ -93,6 +106,7 @@ export default class SingleLoreView {
                   {
                     style:
                       "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                    title: "Remove connection",
                   },
                   "ⓧ",
                   {
@@ -112,6 +126,10 @@ export default class SingleLoreView {
               {
                 class: "small-clickable",
                 style: "margin: 3px",
+                title: `Navigate to the detail view of this ${type.substring(
+                  0,
+                  type.length - 1
+                )}`,
               },
               item.title,
               {
@@ -119,6 +137,7 @@ export default class SingleLoreView {
                 event: () => {
                   this.navigate({
                     title: navigateComponentTitle,
+                    id: item.id,
                     sidebar: true,
                     params: { content: item },
                   });
@@ -196,9 +215,10 @@ export default class SingleLoreView {
     this.render();
   };
 
-  saveLore = async (e) => {
+  saveLore = async (e, description) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
+    formProps.description = description;
     if (formProps.type === "None") formProps.type = null;
     if (formProps.image.size === 0) delete formProps.image;
 
@@ -231,7 +251,9 @@ export default class SingleLoreView {
 
   renderRemoveImage = async () => {
     if (this.lore.image_id) {
-      const imageSource = await getPresignedForImageDownload(this.lore.image_id);
+      const imageSource = await getPresignedForImageDownload(
+        this.lore.image_id
+      );
 
       return createElement(
         "div",
@@ -246,6 +268,7 @@ export default class SingleLoreView {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -279,6 +302,10 @@ export default class SingleLoreView {
       );
     }
 
+    const richText = new RichText({
+      value: this.lore.description,
+    });
+
     this.domComponent.append(
       createElement(
         "form",
@@ -293,17 +320,9 @@ export default class SingleLoreView {
             name: "title",
             value: this.lore.title,
           }),
+          createElement("br"),
           createElement("label", { for: "description" }, "Description"),
-          createElement(
-            "textarea",
-            {
-              id: "description",
-              name: "description",
-              cols: "30",
-              rows: "7",
-            },
-            this.lore.description
-          ),
+          richText,
           createElement("br"),
           createElement(
             "label",
@@ -325,10 +344,15 @@ export default class SingleLoreView {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            this.saveLore(e);
+            this.saveLore(e, richText.children[1].innerHTML);
           },
         }
-      )
+      ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      })
     );
   };
 
@@ -338,7 +362,11 @@ export default class SingleLoreView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "align-self: flex-end;" },
+        {
+          class: "small-clickable",
+          style: "align-self: flex-end;",
+          title: `Open manage menu to add/remove connections for ${type}`,
+        },
         "Manage",
         {
           type: "click",
@@ -354,7 +382,11 @@ export default class SingleLoreView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin-left: 3px;",
+          title: "Open edit utility",
+        },
         "Edit",
         {
           type: "click",
@@ -382,6 +414,9 @@ export default class SingleLoreView {
       loreId: this.lore.id,
     });
 
+    const descriptionComponent = createElement("div", { class: "description" });
+    descriptionComponent.innerHTML = this.lore.description;
+
     // append
     this.domComponent.append(
       createElement("div", { class: "single-item-title-container" }, [
@@ -404,11 +439,7 @@ export default class SingleLoreView {
             { class: "single-item-subheading" },
             "Description:"
           ),
-          createElement(
-            "div",
-            { class: "description" },
-            `"${this.lore.description}"`
-          ),
+          descriptionComponent,
         ]),
         createElement("div", { class: "single-info-box" }, [
           createElement("div", { class: "single-info-box-subheading" }, [

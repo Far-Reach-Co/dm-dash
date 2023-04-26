@@ -16,38 +16,6 @@ export default class SpellsComponent {
     this.render();
   }
 
-  calculateSpellSaveDC = () => {
-    let spellSaveDC = 8;
-    if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore =
-        this.generalData[this.generalData.spell_slots.spell_casting_ability];
-      let mod = this.calculateAbilityScoreModifier(abilityScore);
-      if (mod === "0") mod = 0;
-      spellSaveDC += mod;
-    }
-
-    spellSaveDC += this.calculateProBonus();
-
-    if (spellSaveDC === 0) spellSaveDC = 0;
-    return spellSaveDC;
-  };
-
-  calculateSpellAttackBonus = () => {
-    let bonus = 0;
-    if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore =
-        this.generalData[this.generalData.spell_slots.spell_casting_ability];
-      let mod = this.calculateAbilityScoreModifier(abilityScore);
-      if (mod === "0") mod = 0;
-      bonus += mod;
-    }
-
-    bonus += this.calculateProBonus();
-
-    if (bonus === 0) bonus = 0;
-    return bonus;
-  };
-
   renderSpellSlotsElems = () => {
     const list = [
       {
@@ -124,6 +92,50 @@ export default class SpellsComponent {
     return elem;
   };
 
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.newLoading) {
+      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+    }
+
+    const spellInfoComponent = new SpellInfoComponent({
+      domComponent: createElement("div"),
+      generalData: this.generalData,
+      updateSpellSlotValue: this.updateSpellSlotValue,
+      calculateAbilityScoreModifier: this.calculateAbilityScoreModifier,
+      calculateProBonus: this.calculateProBonus,
+    });
+
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          style: "display: flex; flex-direction: column; align-items: center;",
+        },
+        [
+          spellInfoComponent.domComponent,
+          createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+            this.renderCantrip(),
+            ...this.renderSpellSlotsElems(),
+          ]),
+        ]
+      )
+    );
+  };
+}
+
+class SpellInfoComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.generalData = props.generalData;
+    this.updateSpellSlotValue = props.updateSpellSlotValue;
+    this.calculateAbilityScoreModifier = props.calculateAbilityScoreModifier;
+    this.calculateProBonus = props.calculateProBonus;
+
+    this.render();
+  }
+
   renderTypeSelectOptions = (currentType) => {
     const types = [
       "strength",
@@ -146,110 +158,126 @@ export default class SpellsComponent {
     return typeList;
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+  calculateSpellAttackBonus = () => {
+    let bonus = 0;
+    if (this.generalData.spell_slots.spell_casting_ability) {
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
+      let mod = this.calculateAbilityScoreModifier(abilityScore);
+      if (mod === "0") mod = 0;
+      bonus += mod;
     }
 
+    bonus += this.calculateProBonus();
+
+    if (bonus === 0) bonus = 0;
+    return bonus;
+  };
+
+  calculateSpellSaveDC = () => {
+    let spellSaveDC = 8;
+    if (this.generalData.spell_slots.spell_casting_ability) {
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
+      let mod = this.calculateAbilityScoreModifier(abilityScore);
+      if (mod === "0") mod = 0;
+      spellSaveDC += mod;
+    }
+
+    spellSaveDC += this.calculateProBonus();
+
+    if (spellSaveDC === 0) spellSaveDC = 0;
+    return spellSaveDC;
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
     this.domComponent.append(
-      createElement(
-        "div",
-        {
-          style: "display: flex; flex-direction: column; align-items: center;",
-        },
-        [
-          createElement("div", {}, [
+      createElement("div", {}, [
+        createElement(
+          "div",
+          {
+            class: "cp-info-container-row",
+            style: "width: fit-content; align-items: flex-start;",
+          },
+          [
             createElement(
               "div",
               {
-                class: "cp-info-container-row",
-                style: "width: fit-content; align-items: flex-start;",
+                style:
+                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
               },
               [
                 createElement(
-                  "div",
-                  {
-                    style:
-                      "display: flex; flex-direction: column; align-items: center; justify-content: center;",
-                  },
-                  [
-                    createElement(
-                      "small",
-                      { style: "margin-bottom: 8px;" },
-                      "Spell Casting Ability"
-                    ),
-                    createElement(
-                      "select",
-                      {
-                        id: "spell_casting_ability",
-                        name: "spell_casting_ability",
-                        style: "margin-right: 10px; width: fit-content",
-                      },
-                      [
-                        createElement("option", { value: "None" }, "None"),
-                        ...this.renderTypeSelectOptions(
-                          this.generalData.spell_slots.spell_casting_ability
-                        ),
-                      ],
-                      {
-                        type: "change",
-                        event: (e) => {
-                          e.preventDefault();
-                          this.updateSpellSlotValue(
-                            "spell_casting_ability",
-                            e.target.value
-                          );
-                          this.render();
-                        },
-                      }
-                    ),
-                  ]
+                  "small",
+                  { style: "margin-bottom: 8px;" },
+                  "Spell Casting Ability"
                 ),
                 createElement(
-                  "div",
+                  "select",
                   {
-                    style:
-                      "display: flex; flex-direction: column; align-items: center; margin-right: 10px; margin-left: 10px;",
+                    id: "spell_casting_ability",
+                    name: "spell_casting_ability",
+                    style: "margin-right: 10px; width: fit-content",
                   },
                   [
-                    createElement("small", {}, "Spell Save DC"),
-                    createElement(
-                      "div",
-                      {
-                        class: "cp-content-long-number",
-                      },
-                      this.calculateSpellSaveDC()
+                    createElement("option", { value: "None" }, "None"),
+                    ...this.renderTypeSelectOptions(
+                      this.generalData.spell_slots.spell_casting_ability
                     ),
-                  ]
-                ),
-                createElement(
-                  "div",
+                  ],
                   {
-                    style:
-                      "display: flex; flex-direction: column; align-items: center; justify-content: center;",
-                  },
-                  [
-                    createElement("small", {}, "Spell Attack Bonus"),
-                    createElement(
-                      "div",
-                      {
-                        class: "cp-content-long-number",
-                      },
-                      `+${this.calculateSpellAttackBonus()}`
-                    ),
-                  ]
+                    type: "change",
+                    event: (e) => {
+                      e.preventDefault();
+                      this.updateSpellSlotValue(
+                        "spell_casting_ability",
+                        e.target.value
+                      );
+                      this.render();
+                    },
+                  }
                 ),
               ]
             ),
-          ]),
-          createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
-            this.renderCantrip(),
-            ...this.renderSpellSlotsElems(),
-          ]),
-        ]
-      )
+            createElement(
+              "div",
+              {
+                style:
+                  "display: flex; flex-direction: column; align-items: center; margin-right: 10px; margin-left: 10px;",
+              },
+              [
+                createElement("small", {}, "Spell Save DC"),
+                createElement(
+                  "div",
+                  {
+                    class: "cp-content-long-number",
+                  },
+                  this.calculateSpellSaveDC()
+                ),
+              ]
+            ),
+            createElement(
+              "div",
+              {
+                style:
+                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+              },
+              [
+                createElement("small", {}, "Spell Attack Bonus"),
+                createElement(
+                  "div",
+                  {
+                    class: "cp-content-long-number",
+                  },
+                  `+${this.calculateSpellAttackBonus()}`
+                ),
+              ]
+            ),
+          ]
+        ),
+      ])
     );
   };
 }
@@ -315,6 +343,7 @@ class SingleSpell {
                 {
                   style:
                     "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  title: "Remove spell",
                 },
                 "ⓧ",
                 {
@@ -334,6 +363,112 @@ class SingleSpell {
               ),
             ]
           ),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Casting Time"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "casting_time",
+                value: spell.casting_time ? spell.casting_time : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    casting_time: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Duration"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "duration",
+                value: spell.duration ? spell.duration : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    duration: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Range"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "range",
+                value: spell.range ? spell.range : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    range: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Damage Type"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "damage_type",
+                value: spell.damage_type ? spell.damage_type : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    damage_type: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("div", { class: "cp-content-container-row" }, [
+            createElement("small", {}, "Components"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen input-small",
+                name: "components",
+                value: spell.components ? spell.components : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    components: e.target.value,
+                  });
+                },
+              }
+            ),
+          ]),
+          createElement("br"),
           createElement(
             "textarea",
             {
@@ -370,12 +505,20 @@ class SingleSpell {
       return this.domComponent.append(
         createElement("div", { class: "cp-info-container-column" }, [
           createElement("h2", {}, "Cantrips"),
-          createElement("br"),
+          createElement("hr"),
           ...(await this.renderSpells()),
-          createElement("a", { style: "align-self: flex-start;" }, "+", {
-            type: "click",
-            event: () => this.newSpell("cantrip"),
-          }),
+          createElement(
+            "a",
+            {
+              style: "align-self: flex-start;",
+              title: "Create a new cantrip",
+            },
+            "+",
+            {
+              type: "click",
+              event: () => this.newSpell("cantrip"),
+            }
+          ),
         ])
       );
     }
@@ -429,7 +572,10 @@ class SingleSpell {
             {
               type: "focusout",
               event: (e) => {
-                this.updateSpellSlotValue(e.target.name, e.target.valueAsNumber);
+                this.updateSpellSlotValue(
+                  e.target.name,
+                  e.target.valueAsNumber
+                );
               },
             }
           ),
@@ -437,10 +583,18 @@ class SingleSpell {
         ]),
         createElement("hr"),
         ...(await this.renderSpells()),
-        createElement("a", { style: "align-self: flex-start;" }, "+", {
-          type: "click",
-          event: () => this.newSpell(this.spellSlot.title),
-        }),
+        createElement(
+          "a",
+          {
+            style: "align-self: flex-start;",
+            title: "Create a new spell",
+          },
+          "+",
+          {
+            type: "click",
+            event: () => this.newSpell(this.spellSlot.title),
+          }
+        ),
       ])
     );
   };

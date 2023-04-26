@@ -6,6 +6,7 @@ import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/TableSidebar.js";
 import CanvasLayer from "../components/CanvasLayer.js";
 import socketIntegration from "../lib/socketIntegration.js";
+import modal from "../components/modal.js";
 
 class Table {
   constructor(props) {
@@ -13,47 +14,63 @@ class Table {
     this.domComponent.className = "app";
     this.params = props.params;
 
-    this.canvasLayer;
+    this.canvasLayer = null;
+    this.sidebar = null;
+    this.hamburger = null;
 
     this.init();
   }
 
   init = async () => {
     // get table views
-    this.projectId = history.state;
+    this.projectId = localStorage.getItem("current-table-project-id");
+    this.campaignId = localStorage.getItem("current-campaign-id");
+
     const project = await getThings(`/api/get_project/${this.projectId}`);
     state.currentProject = project;
-    const tableViews = await getThings(
-      `/api/get_table_views/${state.currentProject.id}`
-    );
-    // create canvas elem and append
-    this.canvasElem = createElement("canvas", { id: "canvas-layer" });
-    this.canvasLayer = new CanvasLayer({ tableViews });
-    socketIntegration.projectId = this.projectId;
-    // setup socket listeners after canvas instantiation
-    socketIntegration.socketTest();
-    socketIntegration.setupListeners(this.canvasLayer);
 
+    const tableView = await getThings(`/api/get_table_view/${this.campaignId}`);
+    // sidebar and hamburger inst
     this.instantiateSidebar();
     this.instantiateHamburger();
+    // create canvas elem and append
+    this.canvasElem = createElement("canvas", { id: "canvas-layer" });
+    this.canvasLayer = new CanvasLayer({
+      tableView,
+      tableSidebarComponent: this.sidebar.tableSidebarComponent,
+    });
+    // setup top layer
+    this.topLayer = new TopLayer({
+      domComponent: createElement("div"),
+      canvasLayer: this.canvasLayer,
+    });
+    // provide top layer to socket int
+    // provide socket necessary variables
+    socketIntegration.projectId = this.projectId;
+    socketIntegration.user = state.user;
+    socketIntegration.sidebar = this.sidebar;
+    socketIntegration.topLayer = this.topLayer;
+    // setup socket listeners after canvas instantiation
+    socketIntegration.setupListeners(this.canvasLayer);
+    socketIntegration.socketJoined();
 
+    // VERY IMPORTANT RENDERING SYSTEM
     this.render();
-    this.canvasLayer.init();
+    await this.canvasLayer.init();
+    this.topLayer.render();
+    this.renderSidebarAndHamburger();
   };
 
   instantiateSidebar = () => {
-    const sidebarElem = createElement("div", {});
-    // SIDEBAR
     const sidebar = new TableSidebar({
-      domComponent: sidebarElem,
-      canvasLayer: this.canvasLayer,
+      domComponent: createElement("div", {}),
     });
     this.sidebar = sidebar;
   };
 
   instantiateHamburger = () => {
     const hamburgerElem = createElement("div", {});
-    // SIDEBAR
+
     const hamburger = new Hamburger({
       domComponent: hamburgerElem,
       sidebar: this.sidebar,
@@ -70,27 +87,10 @@ class Table {
     this.hamburger.render();
   };
 
-  renderTopLayerOrNot = () => {
-    // create UI layer above canvas and append
-    const topLayerElem = createElement("div");
-    new TopLayer({
-      domComponent: topLayerElem,
-      canvasLayer: this.canvasLayer,
-    });
-
-    if (state.currentProject.is_editor === false) {
-      return createElement("div", {style: "display: none;"});
-    } else {
-      return topLayerElem;
-    }
-  };
-
   render = async () => {
-    this.renderSidebarAndHamburger();
-
     this.domComponent.append(
       createElement("div", { style: "position: relative;" }, [
-        this.renderTopLayerOrNot(),
+        this.topLayer.domComponent,
         this.canvasElem,
       ])
     );
@@ -101,11 +101,12 @@ class TopLayer {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.canvasLayer = props.canvasLayer;
-    this.render();
   }
 
   handleChangeCanvasLayer = () => {
-    const gridObjectIndex = this.canvasLayer.canvas.getObjects().indexOf(this.canvasLayer.oGridGroup)
+    const gridObjectIndex = this.canvasLayer.canvas
+      .getObjects()
+      .indexOf(this.canvasLayer.oGridGroup);
 
     if (this.canvasLayer.currentLayer === "Map") {
       this.canvasLayer.currentLayer = "Object";
@@ -139,28 +140,126 @@ class TopLayer {
     this.render();
   };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      createElement("div", { class: "canvas-ui-elem" }, [
+  renderStyledLayerInfoComponent = () => {
+    if (this.canvasLayer.currentLayer === "Map") {
+      return createElement("div", { style: "display: flex;" }, [
         createElement(
           "small",
-          {},
-          `Current Layer: ${this.canvasLayer.currentLayer}`
+          { style: "margin-right: 3px;" },
+          "Current Layer:"
         ),
+        createElement("small", { style: "color: var(--orange2)" }, "Map"),
+      ]);
+    } else {
+      return createElement("div", { style: "display: flex;" }, [
+        createElement(
+          "small",
+          { style: "margin-right: 3px;" },
+          "Current Layer:"
+        ),
+        createElement("small", { style: "color: var(--green)" }, "Object"),
+      ]);
+    }
+  };
+
+  renderLayersElem = () => {
+    if (state.currentProject.is_editor === false) {
+      return createElement("div", { style: "display: none;" });
+    } else {
+      return createElement("div", { class: "table-config layers-elem" }, [
+        this.renderStyledLayerInfoComponent(),
+        createElement("br"),
         createElement(
           "button",
-          {},
-          `View ${
-            this.canvasLayer.currentLayer === "Map" ? "Object" : "Map"
-          } Layer`,
+          {
+            class:
+              this.canvasLayer.currentLayer === "Object" ? "btn-h-orange" : "",
+            title: "Change the layer you are interacting with",
+          },
+          "Switch Layer",
           {
             type: "click",
             event: () => this.handleChangeCanvasLayer(),
           }
         ),
-      ])
+      ]);
+    }
+  };
+
+  renderGridControlElem = () => {
+    if (state.currentProject.is_editor === false) {
+      return createElement("div", { style: "display: none;" });
+    } else {
+      return createElement("div", { class: "table-config grid-control-elem" }, [
+        createElement("small", {}, "Grid Control"),
+        createElement("br"),
+        createElement(
+          "button",
+          {},
+          this.canvasLayer.oGridGroup.visible ? "Hide" : "Show",
+          {
+            type: "click",
+            event: () => {
+              this.canvasLayer.oGridGroup.visible
+                ? this.canvasLayer.hideGrid()
+                : this.canvasLayer.showGrid();
+              this.render();
+            },
+          }
+        ),
+      ]);
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      this.renderLayersElem(),
+      this.renderGridControlElem(),
+      createElement(
+        "div",
+        { class: "table-config info-elem", title: "Open key command info box" },
+        [createElement("div", {}, "?")],
+        {
+          type: "click",
+          event: () => {
+            modal.show(
+              createElement("div", { class: "help-content" }, [
+                createElement("h1", {}, "Key Commands"),
+                createElement("hr"),
+                createElement("b", {}, "Option/Alt (⌥)"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Control (⌃)"),
+                createElement(
+                  "small",
+                  {},
+                  "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Shift"),
+                createElement(
+                  "small",
+                  {},
+                  "Hold key and click multiple objects to select multiple objects."
+                ),
+                createElement("br"),
+                createElement("b", {}, "Delete/Backspace"),
+                createElement(
+                  "small",
+                  {},
+                  "While object is selected, press key to remove object from table."
+                ),
+              ])
+            );
+          },
+        }
+      )
     );
   };
 }

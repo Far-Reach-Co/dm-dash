@@ -4,12 +4,14 @@ class Modal {
     this.domContent = document.getElementById("modal-content");
     this.closeButton = document.getElementById("close-modal");
 
-    this.closeButton.addEventListener("click", this.hide)
-    document.addEventListener('click', (e) => {
-      if(e.target.id === "modal") {
-        this.hide()
-      }
-    })
+    if (this.closeButton) {
+      this.closeButton.addEventListener("click", this.hide);
+      document.addEventListener("click", (e) => {
+        if (e.target.id === "modal") {
+          this.hide();
+        }
+      });
+    }
   }
 
   show = (content) => {

@@ -1,12 +1,16 @@
 DS_Store
 node_modules
-dist
-dist-ssr
+
+
 *.local
+
+# Bundles
+public/dist/*
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/settings.json
 .idea
 .DS_Store
 *.suo
@@ -98,7 +102,6 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
