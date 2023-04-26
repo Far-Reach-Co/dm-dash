@@ -1,3 +1,4 @@
+import { tipBoxHor, tipBoxVert } from "./tipBox.js";
 import { postThing } from "./apiUtils.js";
 import createElement from "./createElement.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
@@ -321,31 +322,54 @@ class AccountManager {
       createElement("div", { class: "standard-view" }, [
         createElement("h1", { style: "margin: auto;" }, "Account"),
         createElement("hr", { class: "special-hr" }),
-        createElement("div", { class: "component" }, [
-          createElement("h2", {}, "General Info"),
-          createElement("br"),
-          this.renderEmailOrEditEmail(),
-          createElement("br"),
-          this.renderUsernameOrEditUsername(),
-          createElement("br"),
-          createElement(
-            "div",
-            { style: "display: flex; justify-content: space-between;" },
-            [
-              createElement("b", {}, "Password"),
-              createElement("button", {}, "Reset Password", {
-                type: "click",
-                event: () => {
-                  window.location.pathname = "/resetpassword.html";
-                },
-              }),
-            ]
-          ),
-          createElement("hr"),
-          createElement("h2", {}, "Subscriptions"),
-          createElement("br"),
-          createElement("div", { style: "text-align: center" }, "Coming Soon!"),
-        ]),
+        tipBoxHor(
+          "Hi friend! My name is Peli, I'm here to give you tips on how to use these tools so that you can have a pleasant experience on your new adventures! You will find me on the top or the side of many pages with some guidance about how to use each of our features."
+        ),
+        createElement("br"),
+        createElement(
+          "div",
+          {
+            style: "display: flex; align-self: center",
+          },
+          [
+            tipBoxVert(
+              "usernames are not unique to a specific user. You can update yours at anytime."
+            ),
+            createElement(
+              "div",
+              { class: "component", style: "align-self: flex-start;" },
+              [
+                createElement("h2", {}, "General Info"),
+                createElement("br"),
+                this.renderEmailOrEditEmail(),
+                createElement("br"),
+                this.renderUsernameOrEditUsername(),
+                createElement("br"),
+                createElement(
+                  "div",
+                  { style: "display: flex; justify-content: space-between;" },
+                  [
+                    createElement("b", {}, "Password"),
+                    createElement("button", {}, "Reset Password", {
+                      type: "click",
+                      event: () => {
+                        window.location.pathname = "/resetpassword.html";
+                      },
+                    }),
+                  ]
+                ),
+                createElement("hr"),
+                createElement("h2", {}, "Subscriptions"),
+                createElement("br"),
+                createElement(
+                  "div",
+                  { style: "text-align: center" },
+                  "Coming Soon!"
+                ),
+              ]
+            ),
+          ]
+        ),
       ])
     );
   };
