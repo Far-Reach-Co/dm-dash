@@ -19,6 +19,7 @@
 }
 
 @font-face {
+<<<<<<< HEAD
   font-family: "MonaSans";
   /* font-style: normal; */
   /* letter-spacing: 2rem; */
@@ -35,6 +36,8 @@
 }
 
 @font-face {
+=======
+>>>>>>> navel
   font-family: "YoungSerif";
   font-style: normal;
   letter-spacing: 2rem;
