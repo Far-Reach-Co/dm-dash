@@ -19,7 +19,6 @@
 }
 
 @font-face {
-<<<<<<< HEAD
   font-family: "MonaSans";
   /* font-style: normal; */
   /* letter-spacing: 2rem; */
@@ -36,8 +35,6 @@
 }
 
 @font-face {
-=======
->>>>>>> navel
   font-family: "YoungSerif";
   font-style: normal;
   letter-spacing: 2rem;
@@ -85,6 +82,20 @@
   font-size: 18px;
   color: var(--main-white);
   z-index: 2;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--blue3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 0.5em;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--blue3);
+  border-radius: 20px;
 }
 
 span {
@@ -519,7 +530,7 @@ footer {
   /* text-align: center; */
   /* align-self: center; */
   overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .standard-view form {
