@@ -19,6 +19,22 @@
 }
 
 @font-face {
+  font-family: "MonaSans";
+  /* font-style: normal; */
+  /* letter-spacing: 2rem; */
+  /* font-display: swap; */
+  src: url("./assets/fonts/Mona_Sans/Mona-Sans.woff2");
+}
+
+@font-face {
+  font-family: "SeriousSans";
+  /* font-style: normal; */
+  /* letter-spacing: 2rem; */
+  /* font-display: swap; */
+  src: url("./assets/fonts/seriousSans/otf/SeriousSans.otf");
+}
+
+@font-face {
   font-family: "YoungSerif";
   font-style: normal;
   letter-spacing: 2rem;
@@ -644,7 +660,10 @@ footer {
 
 .edit-btn {
   cursor: pointer;
-  font-size: 0.75em;
+  font-family: "MonaSans", "IBM Plex Sans", system-ui, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
+  font-size: 0.6em;
   font-weight: normal;
   color: var(--link-blue);
 }
@@ -794,7 +813,7 @@ footer {
 }
 
 .description {
-  font-family: "YoungSerifLight", "IBM Plex Sans", system-ui, "Segoe UI", Roboto,
+  font-family: "MonaSans", "IBM Plex Sans", system-ui, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
   font-size: small;
@@ -804,6 +823,10 @@ footer {
   max-width: 700px;
   min-height: 100px;
   max-height: 100px;
+  font-weight: 450;
+  /* font-stretch: 95%; */
+  font-variation-settings: "wdth" 95;
+  line-height: 1.2em;
   overflow-y: auto;
   white-space: pre-line;
   margin-bottom: 10px;
