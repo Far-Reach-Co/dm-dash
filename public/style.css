@@ -925,6 +925,7 @@ footer {
 }
 
 .tip-box-x {
+  margin: 5px;
   padding: 5px;
   width: fit-content;
   height: fit-content;
@@ -936,6 +937,7 @@ footer {
 }
 
 .tip-box-y {
+  margin: 5px;
   padding: 5px;
   width: 120px;
   text-align: center;
