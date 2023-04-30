@@ -116,7 +116,7 @@ export default class ProjectsView {
             ),
             createElement("br"),
             tipBox(
-              'Giving a invited-user "edit" access to a wyrld allows them to manage different resources including virtual table tools.',
+              'Giving an invited-user "edit" access to a wyrld allows them to manage different resources including virtual table tools.',
               "/assets/peli/small/peli_dm_small.png",
               true
             ),
