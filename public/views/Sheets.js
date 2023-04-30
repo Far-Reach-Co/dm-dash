@@ -132,17 +132,42 @@ class Sheets {
         false
       ),
       createElement(
-        "button",
-        { class: "new-btn", title: "Create a new player character sheet" },
-        "+ Player",
-        {
-          type: "click",
-          event: this.toggleCreating,
-        }
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement(
+            "button",
+            { class: "new-btn", title: "Create a new player character sheet" },
+            "+ Create",
+            {
+              type: "click",
+              event: this.toggleCreating,
+            }
+          ),
+          createElement(
+            "div",
+            { class: "hint" },
+            "*Create a new player character sheet"
+          ),
+        ]
       ),
       createElement("hr"),
       createElement("br"),
-      ...(await this.renderSheetElems())
+      createElement("div", { style: "display: flex;" }, [
+        tipBox(
+          "You can make your character sheets accessible to the Game Masters of your wyrlds by using the connection settings which can be found inside the character settings.",
+          "/assets/peli/small/peli_question_small.png",
+          true
+        ),
+        createElement(
+          "div",
+          {
+            style:
+              "display: flex; flex-direction: column; flex: 1; margin-left: 10px; margin-top: 5px;",
+          },
+          [...(await this.renderSheetElems())]
+        ),
+      ])
     );
   };
 }
@@ -190,9 +215,13 @@ class PlayerComponent {
         if (project) {
           const elem = createElement(
             "div",
-            { style: "margin-left: 10px; display: flex;" },
+            { style: "margin-left: 10px; display: flex; align-items: center;" },
             [
-              project.title,
+              createElement(
+                "div",
+                { class: "highlighted-item" },
+                `- ${project.title}`
+              ),
               createElement(
                 "div",
                 {
@@ -241,22 +270,45 @@ class PlayerComponent {
 
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h1", {}, `Connect Character: "${this.sheet.name}"`),
+        createElement("h1", {}, `~ ${this.sheet.name} ~`),
+        createElement("h2", {}, `Connection Settings`),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Connect your player character sheets to your wyrlds for ease of access and to allow your Game Masters the ability to view and edit your sheet."
+        ),
         createElement("hr"),
-        createElement("h2", {}, "Current connections"),
+        createElement("h3", {}, "Current Wyrlds"),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Your character sheet is currently connected to these wyrlds"
+        ),
         ...(await this.renderCurrentConnections()),
-        createElement("hr"),
-        createElement("h2", {}, "Add connections"),
+        createElement("br"),
+        createElement("h3", {}, "Add a wyrld"),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Choose from the list of your created/joined wyrlds to connect your player sheet to."
+        ),
         createElement(
           "form",
-          {},
+          {
+            style:
+              "flex-direction: row; align-items: flex-start; justify-content: flex-start;",
+          },
           [
             await projectSelect(),
-            createElement("br"),
             createElement(
               "button",
-              { class: "new-btn", type: "submit" },
-              "Add"
+              {
+                class: "new-btn",
+                type: "submit",
+                title: "Add your sheet to this wyrld",
+                style: "margin-left: 10px;",
+              },
+              "+"
             ),
           ],
           {
@@ -281,7 +333,26 @@ class PlayerComponent {
   renderEdit = async () => {
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h1", {}, `Manage Character: "${this.sheet.name}"`),
+        createElement("h1", {}, `~ ${this.sheet.name} ~`),
+        createElement("h2", {}, `Character Settings`),
+        createElement("br"),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("button", {}, "Open Connection Settings", {
+              type: "click",
+              event: () => {
+                this.toggleConnect();
+              },
+            }),
+            createElement(
+              "div",
+              { class: "hint" },
+              "*Connect character sheets to wyrlds"
+            ),
+          ]
+        ),
         createElement("br"),
         createElement("button", {}, "Done", {
           type: "click",
@@ -289,14 +360,8 @@ class PlayerComponent {
             this.toggleEdit();
           },
         }),
-        createElement("br"),
-        createElement("button", {}, "Connect to projects", {
-          type: "click",
-          event: () => {
-            this.toggleConnect();
-          },
-        }),
-        createElement("br"),
+        createElement("hr"),
+        createElement("div", { class: "danger-heading" }, "Danger"),
         createElement("button", { class: "btn-red" }, "Delete Character", {
           type: "click",
           event: (e) => {

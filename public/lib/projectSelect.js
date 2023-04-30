@@ -21,7 +21,12 @@ export default async function projectSelect() {
 
   return createElement(
     "select",
-    { id: "project_id", name: "project_id", required: false },
+    {
+      id: "project_id",
+      name: "project_id",
+      required: false,
+      title: "Choose a wyrld",
+    },
     [
       createElement("option", { value: 0 }, "None"),
       ...(await renderProjectSelectOptions()),

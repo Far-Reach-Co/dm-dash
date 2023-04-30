@@ -8,7 +8,11 @@ export function tipBox(message, imageSrc, orientationVertical) {
         src: imageSrc,
         width: 50,
       }),
-      createElement("small", { style: "margin-top: 5px;" }, message),
+      createElement(
+        "div",
+        { class: "tipbox-text", style: "margin-top: 5px; color: var(--pink);" },
+        message
+      ),
     ]);
   } else {
     // horizontal
@@ -17,7 +21,14 @@ export function tipBox(message, imageSrc, orientationVertical) {
         src: imageSrc,
         width: 50,
       }),
-      createElement("small", { style: "margin-left: 5px;" }, message),
+      createElement(
+        "div",
+        {
+          class: "tipbox-text",
+          style: "margin-left: 5px; color: var(--pink);",
+        },
+        message
+      ),
     ]);
   }
 }
