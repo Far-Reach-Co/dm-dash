@@ -4,6 +4,7 @@ import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import projectSelect from "../lib/projectSelect.js";
 import state from "../lib/state.js";
+import { tipBox } from "../lib/tipBox.js";
 
 class Sheets {
   constructor() {
@@ -125,10 +126,10 @@ class Sheets {
         "Player Character Sheets"
       ),
       createElement("hr", { class: "special-hr" }),
-      createElement(
-        "div",
-        { style: "text-align: center; align-self: center; width: 80%;" },
-        "*We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games."
+      tipBox(
+        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
+        "/assets/peli/small/peli_hide_small.png",
+        false
       ),
       createElement(
         "button",

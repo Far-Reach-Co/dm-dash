@@ -1,4 +1,4 @@
-import { tipBoxHor, tipBoxVert } from "./tipBox.js";
+import { tipBox } from "./tipBox.js";
 import { postThing } from "./apiUtils.js";
 import createElement from "./createElement.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
@@ -322,8 +322,10 @@ class AccountManager {
       createElement("div", { class: "standard-view" }, [
         createElement("h1", { style: "margin: auto;" }, "Account"),
         createElement("hr", { class: "special-hr" }),
-        tipBoxHor(
-          "Hi friend! My name is Peli, I'm here to give you tips on how to use these tools so that you can have a pleasant experience on your new adventures! You will find me on the top or the side of many pages with some guidance about how to use each of our features."
+        tipBox(
+          "Hi friend! My name is Peli, I'm here to give you tips on how to use these tools so that you can have a pleasant experience on your new adventures! You will find me on the top or the side of many pages with some guidance about how to use each of our features.",
+          "/assets/peli/small/peli_question_small.png",
+          false
         ),
         createElement("br"),
         createElement(
@@ -332,8 +334,10 @@ class AccountManager {
             style: "display: flex; align-self: center",
           },
           [
-            tipBoxVert(
-              "usernames are not unique to a specific user. You can update yours at anytime."
+            tipBox(
+              "usernames are not unique to a specific user. You can update yours at anytime.",
+              "/assets/peli/small/peli_note_small.png",
+              true
             ),
             createElement(
               "div",

@@ -931,6 +931,7 @@ footer {
   height: fit-content;
   display: flex;
   align-items: center;
+  align-self: center;
   /* flex-direction: column; */
   border: 0.5px solid var(--main-gray);
   background-color: var(--blue5);
