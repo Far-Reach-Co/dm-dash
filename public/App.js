@@ -108,7 +108,7 @@ class App {
         {
           id: "sidebar-characters",
           title: "characters",
-          displayTitle: "NPC Characters",
+          displayTitle: "NPCs",
           params: {},
         },
         {

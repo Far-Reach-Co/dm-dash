@@ -65,20 +65,15 @@ class Sheets {
   };
 
   renderCreateNew = async () => {
-    const titleOfForm = createElement(
-      "h2",
-      { class: "component-title" },
-      "Create new player character"
-    );
     const form = createElement("form", {}, [
-      createElement("label", { for: "name" }, "Character Name"),
+      createElement("label", { for: "name" }, "Choose Character Name"),
       createElement("input", {
         id: "name",
         name: "name",
-        placeholder: "Choose Carefully...",
+        placeholder: "Character Name",
         required: true,
+        style: "max-width: 500px;",
       }),
-      createElement("br"),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
@@ -88,21 +83,26 @@ class Sheets {
       await this.newPlayer(e);
     });
 
-    const cancelButton = createElement(
-      "button",
-      { class: "btn-red" },
-      "Cancel"
-    );
-    cancelButton.addEventListener("click", () => {
-      this.toggleCreating();
-    });
-
     this.domComponent.append(
-      titleOfForm,
+      createElement("h1", {}, "Create Player Character Sheet"),
       createElement("br"),
+      tipBox(
+        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
+        "/assets/peli/small/peli_hide_small.png",
+        false
+      ),
+      createElement("br"),
+      createElement(
+        "h2",
+        { style: "text-decoration: underline;" },
+        "New 5e Character Sheet"
+      ),
       form,
-      createElement("br"),
-      cancelButton
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleCreating,
+      })
     );
   };
 
@@ -133,7 +133,7 @@ class Sheets {
           createElement(
             "button",
             { class: "new-btn", title: "Create a new player character sheet" },
-            "+ Create",
+            "+ Sheet",
             {
               type: "click",
               event: this.toggleCreating,
@@ -147,11 +147,10 @@ class Sheets {
         ]
       ),
       createElement("hr"),
-      createElement("br"),
       createElement("div", { style: "display: flex;" }, [
         tipBox(
           "You can make your character sheets accessible to the Game Masters of your Wyrlds by using the connection settings which can be found inside the character settings.",
-          "/assets/peli/small/peli_question_small.png",
+          "/assets/peli/small/peli_note_small.png",
           true
         ),
         createElement(
@@ -352,6 +351,11 @@ class PlayerComponent {
       createElement("div", { class: "project-edit-container" }, [
         createElement("h1", {}, `~ ${this.sheet.name} ~`),
         createElement("h2", {}, `Character Settings`),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Manage important settings for your character sheet."
+        ),
         createElement("br"),
         createElement(
           "div",
@@ -435,7 +439,7 @@ class PlayerComponent {
           ),
           createElement(
             "div",
-            { style: "display: flex; flex-direction: column;" },
+            { style: "display: flex; flex-direction: column; width: 30%;" },
             [
               createElement(
                 "small",

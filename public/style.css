@@ -530,11 +530,6 @@ footer {
   background-color: var(--blue);
 }
 
-.project-extra-info {
-  font-size: 15px;
-  color: var(--orange3);
-}
-
 .project-edit-container {
   display: flex;
   flex-direction: column;

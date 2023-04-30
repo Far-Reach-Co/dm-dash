@@ -3,6 +3,7 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
+import { tipBox } from "../lib/tipBox.js";
 
 export default class ProjectsView {
   constructor(props) {
@@ -87,16 +88,49 @@ export default class ProjectsView {
       createElement("h1", { class: "projects-view-title" }, "Wyrlds"),
       createElement("hr", { class: "special-hr" }),
       createElement(
-        "button",
-        { class: "new-btn", title: "Create a new wyrld" },
-        "+ Wyrld",
-        {
-          type: "click",
-          event: this.newProject,
-        }
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement(
+            "button",
+            { class: "new-btn", title: "Create a new wyrld" },
+            "+ Wyrld",
+            {
+              type: "click",
+              event: this.newProject,
+            }
+          ),
+          createElement("div", { class: "hint" }, "*Create a new wyrld"),
+        ]
       ),
       createElement("hr"),
-      ...(await this.renderProjectsElems())
+      createElement("div", { style: "display: flex;" }, [
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            tipBox(
+              "Invite your friends to join a wyrld by sending them an invite link which can be created in the wyrld settings.",
+              "/assets/peli/small/peli_love_small.png",
+              true
+            ),
+            createElement("br"),
+            tipBox(
+              'Giving a invited-user "edit" access to a wyrld allows them to manage different resources including virtual table tools.',
+              "/assets/peli/small/peli_dm_small.png",
+              true
+            ),
+          ]
+        ),
+        createElement(
+          "div",
+          {
+            style:
+              "display: flex; flex-direction: column; flex: 1; margin-left: 10px; margin-top: 5px;",
+          },
+          [...(await this.renderProjectsElems())]
+        ),
+      ])
     );
   };
 }

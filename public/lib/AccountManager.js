@@ -93,12 +93,12 @@ class AccountManager {
         createElement(
           "a",
           { class: "top-nav-btn", href: "/dashboard.html" },
-          "Dashboard"
+          "Wyrlds"
         ),
         createElement(
           "a",
           { class: "top-nav-btn", href: "/sheets.html" },
-          "Players"
+          "Sheets"
         ),
         createElement(
           "a",
@@ -117,12 +117,12 @@ class AccountManager {
         createElement(
           "a",
           { class: "top-nav-btn", href: "/dashboard.html" },
-          "Dashboard"
+          "Wyrlds"
         ),
         createElement(
           "a",
           { class: "top-nav-btn", href: "/sheets.html" },
-          "Players"
+          "Sheets"
         ),
         createElement(
           "a",
