@@ -343,7 +343,11 @@ class AccountManager {
               "div",
               { class: "component", style: "align-self: flex-start;" },
               [
-                createElement("h2", {}, "General Info"),
+                createElement(
+                  "h2",
+                  { style: "text-decoration: underline;" },
+                  "General Info"
+                ),
                 createElement("br"),
                 this.renderEmailOrEditEmail(),
                 createElement("br"),
@@ -363,7 +367,11 @@ class AccountManager {
                   ]
                 ),
                 createElement("hr"),
-                createElement("h2", {}, "Subscriptions"),
+                createElement(
+                  "h2",
+                  { style: "text-decoration: underline;" },
+                  "Subscriptions"
+                ),
                 createElement("br"),
                 createElement(
                   "div",

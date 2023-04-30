@@ -303,7 +303,7 @@ class PlayerComponent {
       // createElement(
       //   "img",
       //   {
-      //     class: "icon",
+      //     class: "icon gear",
       //     src: "/assets/gears.svg",
       //   },
       //   null,

@@ -126,11 +126,6 @@ class Sheets {
         "Player Character Sheets"
       ),
       createElement("hr", { class: "special-hr" }),
-      tipBox(
-        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
-        "/assets/peli/small/peli_hide_small.png",
-        false
-      ),
       createElement(
         "div",
         { style: "display: flex; flex-direction: column;" },
@@ -155,7 +150,7 @@ class Sheets {
       createElement("br"),
       createElement("div", { style: "display: flex;" }, [
         tipBox(
-          "You can make your character sheets accessible to the Game Masters of your wyrlds by using the connection settings which can be found inside the character settings.",
+          "You can make your character sheets accessible to the Game Masters of your Wyrlds by using the connection settings which can be found inside the character settings.",
           "/assets/peli/small/peli_question_small.png",
           true
         ),
@@ -163,9 +158,17 @@ class Sheets {
           "div",
           {
             style:
-              "display: flex; flex-direction: column; flex: 1; margin-left: 10px; margin-top: 5px;",
+              "display: flex; flex-direction: column; flex: 1; margin-left: 10px;",
           },
-          [...(await this.renderSheetElems())]
+          [
+            tipBox(
+              "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
+              "/assets/peli/small/peli_hide_small.png",
+              false
+            ),
+            createElement("br"),
+            ...(await this.renderSheetElems()),
+          ]
         ),
       ])
     );
@@ -187,6 +190,7 @@ class PlayerComponent {
 
   toggleEdit = () => {
     this.edit = !this.edit;
+    if (this.connect) this.connect = false;
     this.render();
   };
 
@@ -308,7 +312,7 @@ class PlayerComponent {
                 title: "Add your sheet to this wyrld",
                 style: "margin-left: 10px;",
               },
-              "+"
+              "Add"
             ),
           ],
           {
@@ -320,13 +324,26 @@ class PlayerComponent {
           }
         ),
         createElement("hr"),
-        createElement("button", {}, "Done", {
+        createElement("button", {}, "Return to character settings", {
           type: "click",
           event: () => {
             this.toggleConnect();
           },
         }),
-      ])
+      ]),
+      createElement(
+        "img",
+        {
+          class: "icon gear",
+          src: "/assets/gears.svg",
+          title: "Toggle player character sheet settings",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
     );
   };
 
@@ -353,13 +370,6 @@ class PlayerComponent {
             ),
           ]
         ),
-        createElement("br"),
-        createElement("button", {}, "Done", {
-          type: "click",
-          event: () => {
-            this.toggleEdit();
-          },
-        }),
         createElement("hr"),
         createElement("div", { class: "danger-heading" }, "Danger"),
         createElement("button", { class: "btn-red" }, "Delete Character", {
@@ -377,7 +387,20 @@ class PlayerComponent {
             }
           },
         }),
-      ])
+      ]),
+      createElement(
+        "img",
+        {
+          class: "icon gear",
+          src: "/assets/gears.svg",
+          title: "Toggle player character sheet settings",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
     );
   };
 
@@ -448,9 +471,9 @@ class PlayerComponent {
       createElement(
         "img",
         {
-          class: "icon",
+          class: "icon gear",
           src: "/assets/gears.svg",
-          title: "Open player character sheet settings",
+          title: "Toggle player character sheet settings",
         },
         null,
         {

@@ -361,7 +361,7 @@ export default class Project {
       createElement(
         "img",
         {
-          class: "icon",
+          class: "icon gear",
           src: "/assets/gears.svg",
           title: "Open wyrld settings",
         },

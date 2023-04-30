@@ -371,7 +371,7 @@ select {
   height: fit-content;
   margin: 0;
   outline: 0;
-  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  background: linear-gradient(var(--blue6) 10%, var(--blue) 90%);
   /* border: 0.5px solid var(--main-gray); */
   border: none;
   padding: 2px 4px;
@@ -440,6 +440,10 @@ footer {
 
 .icon:hover {
   opacity: 0.8;
+}
+
+.gear {
+  margin-left: 5px;
 }
 
 .form-item {
@@ -955,7 +959,7 @@ footer {
   height: fit-content;
   display: flex;
   align-items: center;
-  align-self: center;
+  /* align-self: center; */
   /* flex-direction: column; */
   border: 0.5px solid var(--main-gray);
   background-color: var(--blue5);
