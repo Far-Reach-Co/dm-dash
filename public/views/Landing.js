@@ -35,7 +35,7 @@ export default class LandingView {
     return projectUsers.map((user) => {
       return createElement(
         "div",
-        { style: "margin-left: 5px; color: var(--blue6)" },
+        { style: "font-size: small; margin-top: 5px;" },
         user.username
       );
     });
@@ -50,7 +50,7 @@ export default class LandingView {
 
     return createElement(
       "div",
-      { style: "margin-left: 5px; color: var(--blue6)" },
+      { style: "font-size: small; margin-top: 5px;" },
       projectOwner.username
     );
   };
@@ -297,16 +297,24 @@ export default class LandingView {
           ),
           ...(await this.renderCampaignsList()),
           createElement("br"),
+          createElement(
+            "div",
+            { class: "single-info-box-subheading" },
+            "Owner"
+          ),
+          await this.renderOwner(),
+          createElement("br"),
+          createElement(
+            "div",
+            { class: "single-info-box-subheading" },
+            "Members"
+          ),
+          ...(await this.renderMembers()),
+          createElement("br"),
         ]),
       ]),
       createElement("br"),
-      await renderImageLarge(state.currentProject.imageId),
-      createElement("hr"),
-      createElement("h1", {}, "Owner"),
-      await this.renderOwner(),
-      createElement("br"),
-      createElement("h1", {}, "Members"),
-      ...(await this.renderMembers())
+      await renderImageLarge(state.currentProject.imageId)
     );
   };
 }
