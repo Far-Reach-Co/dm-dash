@@ -3,8 +3,12 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import state from "../lib/state.js";
-import { uploadImage } from "../lib/imageUtils.js";
+import {
+  getPresignedForImageDownload,
+  uploadImage,
+} from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import { tipBox } from "../lib/tipBox.js";
 
 export default class LandingView {
   constructor(props) {
@@ -73,7 +77,7 @@ export default class LandingView {
           createElement(
             "div",
             {
-              style: "color: var(--red1); cursor: pointer;",
+              style: "color: var(--red1); cursor: pointer; margin-left: 5px;",
               title: "Remove image",
             },
             "ⓧ",
@@ -154,50 +158,64 @@ export default class LandingView {
     });
 
     this.domComponent.append(
-      createElement(
-        "form",
-        {},
-        [
-          createElement("label", { for: "title" }, "Title"),
-          createElement("input", {
-            id: "title",
-            name: "title",
-            value: state.currentProject.title,
-          }),
-          createElement("br"),
-          createElement("label", { for: "description" }, "Description (About)"),
-          richText,
-          createElement("br"),
-          createElement(
-            "label",
-            { for: "image", class: "file-input" },
-            "Add/Change Image"
-          ),
-          await this.renderRemoveImage(),
-          createElement("input", {
-            id: "image",
-            name: "image",
-            type: "file",
-            accept: "image/*",
-          }),
-          createElement("br"),
-          createElement("br"),
-          createElement("br"),
-          createElement("button", { type: "submit" }, "Done"),
-        ],
-        {
-          type: "submit",
-          event: (e) => {
-            e.preventDefault();
-            this.saveProject(e, richText.children[1].innerHTML);
-          },
-        }
-      ),
+      createElement("h1", {}, "Edit About"),
       createElement("br"),
-      createElement("button", { class: "btn-red" }, "Cancel", {
-        type: "click",
-        event: this.toggleEdit,
-      })
+      createElement("div", { style: "display: flex;" }, [
+        createElement("div", {}, [
+          createElement(
+            "form",
+            {},
+            [
+              createElement("label", { for: "title" }, "Title"),
+              createElement("input", {
+                id: "title",
+                name: "title",
+                value: state.currentProject.title,
+              }),
+              createElement("br"),
+              createElement("label", { for: "description" }, "Description"),
+              richText,
+              createElement("br"),
+              createElement(
+                "label",
+                { for: "image", class: "file-input" },
+                "Add/Change Image"
+              ),
+              await this.renderRemoveImage(),
+              createElement("input", {
+                id: "image",
+                name: "image",
+                type: "file",
+                accept: "image/*",
+              }),
+              createElement("br"),
+              createElement("br"),
+              createElement(
+                "button",
+                { class: "new-btn", type: "submit" },
+                "Save"
+              ),
+            ],
+            {
+              type: "submit",
+              event: (e) => {
+                e.preventDefault();
+                this.saveProject(e, richText.children[1].innerHTML);
+              },
+            }
+          ),
+          createElement("hr"),
+          createElement("button", { class: "btn-red" }, "Cancel", {
+            type: "click",
+            event: this.toggleEdit,
+          }),
+        ]),
+        tipBox(
+          "You can add an image that will display below the text, we recommend a general map of your wyrld.",
+          "/assets/peli/small/peli_note_small.png",
+          true
+        ),
+      ])
     );
   };
 
@@ -212,7 +230,7 @@ export default class LandingView {
         "a",
         {
           class: "small-clickable",
-          style: "margin: 3px",
+          style: "margin-top: 5px",
           title: "Open this campaign in new tab",
         },
         campaign.title + " ↗",
@@ -289,29 +307,44 @@ export default class LandingView {
           ),
           descriptionComponent,
         ]),
-        createElement("div", { class: "single-info-box" }, [
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Current Campaigns"
-          ),
-          ...(await this.renderCampaignsList()),
-          createElement("br"),
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Owner"
-          ),
-          await this.renderOwner(),
-          createElement("br"),
-          createElement(
-            "div",
-            { class: "single-info-box-subheading" },
-            "Members"
-          ),
-          ...(await this.renderMembers()),
-          createElement("br"),
-        ]),
+        createElement(
+          "div",
+          {
+            style:
+              "display: flex; flex-direction: column; align-items: flex-end;",
+          },
+          [
+            createElement("div", { class: "single-info-box" }, [
+              createElement(
+                "div",
+                { class: "single-info-box-subheading" },
+                "Open Campaigns"
+              ),
+              ...(await this.renderCampaignsList()),
+              createElement("br"),
+              createElement(
+                "div",
+                { class: "single-info-box-subheading" },
+                "Owner"
+              ),
+              await this.renderOwner(),
+              createElement("br"),
+              createElement(
+                "div",
+                { class: "single-info-box-subheading" },
+                "Members"
+              ),
+              ...(await this.renderMembers()),
+              createElement("br"),
+            ]),
+            createElement("br"),
+            tipBox(
+              "This page serves to display general information about your wyrld. What do your players need to know before they start?",
+              "/assets/peli/small/peli_question_small.png",
+              true
+            ),
+          ]
+        ),
       ]),
       createElement("br"),
       await renderImageLarge(state.currentProject.imageId)

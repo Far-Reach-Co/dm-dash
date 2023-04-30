@@ -149,7 +149,7 @@ class Sheets {
       createElement("hr"),
       createElement("div", { style: "display: flex;" }, [
         tipBox(
-          "You can make your character sheets accessible to the Game Masters of your Wyrlds by using the connection settings which can be found inside the character settings.",
+          "You can make your character sheets accessible to the GMs of your wyrlds by using the wyrld-connection settings which can be found inside the character settings.",
           "/assets/peli/small/peli_note_small.png",
           true
         ),
@@ -274,7 +274,7 @@ class PlayerComponent {
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
         createElement("h1", {}, `~ ${this.sheet.name} ~`),
-        createElement("h2", {}, `Connection Settings`),
+        createElement("h2", {}, `Wyrld Connection Settings`),
         createElement(
           "div",
           { class: "hint" },

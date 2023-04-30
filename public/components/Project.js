@@ -170,7 +170,7 @@ export default class Project {
   renderInviteLinkComponent = () => {
     if (!this.projectInvite) {
       return [
-        createElement("hr"),
+        createElement("br"),
         createElement("h3", {}, "Share This Project"),
         createElement("br"),
         createElement("button", {}, "+ Invite Link", {
@@ -217,7 +217,7 @@ export default class Project {
       });
 
       return [
-        createElement("hr"),
+        createElement("br"),
         createElement("h3", {}, "Share Invite Link"),
         createElement("div", { class: "hint" }, "*Manage invite links."),
         createElement("br"),
@@ -317,7 +317,7 @@ export default class Project {
           "*Manage important settings and invited players for your wyrld."
         ),
         ...this.renderInviteLinkComponent(),
-        createElement("hr"),
+        createElement("br"),
         ...(await this.renderManageUsersComponent()),
         createElement("div", { class: "danger-heading" }, "Danger"),
         removeButton,
