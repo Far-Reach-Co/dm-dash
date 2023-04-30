@@ -94,7 +94,7 @@ export default class Campaign {
       return createElement(
         "img",
         {
-          class: "icon",
+          class: "icon gear",
           src: "/assets/gears.svg",
           title: "Open campaign settings",
         },

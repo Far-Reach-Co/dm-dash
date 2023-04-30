@@ -4,6 +4,7 @@ import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import projectSelect from "../lib/projectSelect.js";
 import state from "../lib/state.js";
+import { tipBox } from "../lib/tipBox.js";
 
 class Sheets {
   constructor() {
@@ -64,20 +65,15 @@ class Sheets {
   };
 
   renderCreateNew = async () => {
-    const titleOfForm = createElement(
-      "h2",
-      { class: "component-title" },
-      "Create new player character"
-    );
     const form = createElement("form", {}, [
-      createElement("label", { for: "name" }, "Character Name"),
+      createElement("label", { for: "name" }, "Choose Character Name"),
       createElement("input", {
         id: "name",
         name: "name",
-        placeholder: "Choose Carefully...",
+        placeholder: "Character Name",
         required: true,
+        style: "max-width: 500px;",
       }),
-      createElement("br"),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
     ]);
@@ -87,21 +83,26 @@ class Sheets {
       await this.newPlayer(e);
     });
 
-    const cancelButton = createElement(
-      "button",
-      { class: "btn-red" },
-      "Cancel"
-    );
-    cancelButton.addEventListener("click", () => {
-      this.toggleCreating();
-    });
-
     this.domComponent.append(
-      titleOfForm,
+      createElement("h1", {}, "Create Player Character Sheet"),
       createElement("br"),
+      tipBox(
+        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
+        "/assets/peli/small/peli_hide_small.png",
+        false
+      ),
+      createElement("br"),
+      createElement(
+        "h2",
+        { style: "text-decoration: underline;" },
+        "New 5e Character Sheet"
+      ),
       form,
-      createElement("br"),
-      cancelButton
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleCreating,
+      })
     );
   };
 
@@ -127,21 +128,48 @@ class Sheets {
       createElement("hr", { class: "special-hr" }),
       createElement(
         "div",
-        { style: "text-align: center; align-self: center; width: 80%;" },
-        "*We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games."
-      ),
-      createElement(
-        "button",
-        { class: "new-btn", title: "Create a new player character sheet" },
-        "+ Player",
-        {
-          type: "click",
-          event: this.toggleCreating,
-        }
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement(
+            "button",
+            { class: "new-btn", title: "Create a new player character sheet" },
+            "+ Sheet",
+            {
+              type: "click",
+              event: this.toggleCreating,
+            }
+          ),
+          createElement(
+            "div",
+            { class: "hint" },
+            "*Create a new player character sheet"
+          ),
+        ]
       ),
       createElement("hr"),
-      createElement("br"),
-      ...(await this.renderSheetElems())
+      createElement("div", { style: "display: flex;" }, [
+        tipBox(
+          "You can make your character sheets accessible to the Game Masters of your Wyrlds by using the connection settings which can be found inside the character settings.",
+          "/assets/peli/small/peli_note_small.png",
+          true
+        ),
+        createElement(
+          "div",
+          {
+            style:
+              "display: flex; flex-direction: column; flex: 1; margin-left: 10px;",
+          },
+          [
+            tipBox(
+              "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
+              "/assets/peli/small/peli_hide_small.png",
+              false
+            ),
+            createElement("br"),
+            ...(await this.renderSheetElems()),
+          ]
+        ),
+      ])
     );
   };
 }
@@ -161,6 +189,7 @@ class PlayerComponent {
 
   toggleEdit = () => {
     this.edit = !this.edit;
+    if (this.connect) this.connect = false;
     this.render();
   };
 
@@ -189,9 +218,13 @@ class PlayerComponent {
         if (project) {
           const elem = createElement(
             "div",
-            { style: "margin-left: 10px; display: flex;" },
+            { style: "margin-left: 10px; display: flex; align-items: center;" },
             [
-              project.title,
+              createElement(
+                "div",
+                { class: "highlighted-item" },
+                `- ${project.title}`
+              ),
               createElement(
                 "div",
                 {
@@ -240,21 +273,44 @@ class PlayerComponent {
 
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h1", {}, `Connect Character: "${this.sheet.name}"`),
+        createElement("h1", {}, `~ ${this.sheet.name} ~`),
+        createElement("h2", {}, `Connection Settings`),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Connect your player character sheets to your wyrlds for ease of access and to allow your Game Masters the ability to view and edit your sheet."
+        ),
         createElement("hr"),
-        createElement("h2", {}, "Current connections"),
+        createElement("h3", {}, "Current Wyrlds"),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Your character sheet is currently connected to these wyrlds"
+        ),
         ...(await this.renderCurrentConnections()),
-        createElement("hr"),
-        createElement("h2", {}, "Add connections"),
+        createElement("br"),
+        createElement("h3", {}, "Add a wyrld"),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Choose from the list of your created/joined wyrlds to connect your player sheet to."
+        ),
         createElement(
           "form",
-          {},
+          {
+            style:
+              "flex-direction: row; align-items: flex-start; justify-content: flex-start;",
+          },
           [
             await projectSelect(),
-            createElement("br"),
             createElement(
               "button",
-              { class: "new-btn", type: "submit" },
+              {
+                class: "new-btn",
+                type: "submit",
+                title: "Add your sheet to this wyrld",
+                style: "margin-left: 10px;",
+              },
               "Add"
             ),
           ],
@@ -267,35 +323,59 @@ class PlayerComponent {
           }
         ),
         createElement("hr"),
-        createElement("button", {}, "Done", {
+        createElement("button", {}, "Return to character settings", {
           type: "click",
           event: () => {
             this.toggleConnect();
           },
         }),
-      ])
+      ]),
+      createElement(
+        "img",
+        {
+          class: "icon gear",
+          src: "/assets/gears.svg",
+          title: "Toggle player character sheet settings",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
     );
   };
 
   renderEdit = async () => {
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h1", {}, `Manage Character: "${this.sheet.name}"`),
+        createElement("h1", {}, `~ ${this.sheet.name} ~`),
+        createElement("h2", {}, `Character Settings`),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Manage important settings for your character sheet."
+        ),
         createElement("br"),
-        createElement("button", {}, "Done", {
-          type: "click",
-          event: () => {
-            this.toggleEdit();
-          },
-        }),
-        createElement("br"),
-        createElement("button", {}, "Connect to projects", {
-          type: "click",
-          event: () => {
-            this.toggleConnect();
-          },
-        }),
-        createElement("br"),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("button", {}, "Open Connection Settings", {
+              type: "click",
+              event: () => {
+                this.toggleConnect();
+              },
+            }),
+            createElement(
+              "div",
+              { class: "hint" },
+              "*Connect character sheets to wyrlds"
+            ),
+          ]
+        ),
+        createElement("hr"),
+        createElement("div", { class: "danger-heading" }, "Danger"),
         createElement("button", { class: "btn-red" }, "Delete Character", {
           type: "click",
           event: (e) => {
@@ -311,7 +391,20 @@ class PlayerComponent {
             }
           },
         }),
-      ])
+      ]),
+      createElement(
+        "img",
+        {
+          class: "icon gear",
+          src: "/assets/gears.svg",
+          title: "Toggle player character sheet settings",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
     );
   };
 
@@ -346,7 +439,7 @@ class PlayerComponent {
           ),
           createElement(
             "div",
-            { style: "display: flex; flex-direction: column;" },
+            { style: "display: flex; flex-direction: column; width: 30%;" },
             [
               createElement(
                 "small",
@@ -382,9 +475,9 @@ class PlayerComponent {
       createElement(
         "img",
         {
-          class: "icon",
+          class: "icon gear",
           src: "/assets/gears.svg",
-          title: "Open player character sheet settings",
+          title: "Toggle player character sheet settings",
         },
         null,
         {
