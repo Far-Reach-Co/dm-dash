@@ -295,7 +295,7 @@ export default class Project {
           {
             class: "icon gear",
             src: "/assets/gears.svg",
-            title: "Open wyrld settings",
+            title: "Toggle wyrld settings",
           },
           null,
           {
@@ -327,7 +327,7 @@ export default class Project {
         {
           class: "icon gear",
           src: "/assets/gears.svg",
-          title: "Open wyrld settings",
+          title: "Toggle wyrld settings",
         },
         null,
         {
@@ -414,7 +414,7 @@ export default class Project {
         {
           class: "icon gear",
           src: "/assets/gears.svg",
-          title: "Open wyrld settings",
+          title: "Toggle wyrld settings",
         },
         null,
         {
