@@ -99,6 +99,17 @@
   border-radius: 20px;
 }
 
+/* ios hack */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+
+  .text-area-rich,
+  select,
+  textarea,
+  input {
+    font-size: 16px;
+  }
+}
+
 span {
   /* specifically for rich text */
   font-size: inherit;
