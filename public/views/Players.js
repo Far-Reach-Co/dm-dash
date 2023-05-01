@@ -225,7 +225,7 @@ export default class PlayersView {
                 "div",
                 {},
                 tipBox(
-                  "Player character sheets, which have been connected to this wyrld, will be accessible by the GMs to view and edit.",
+                  "Player character sheets, which have been connected to this wyrld, will be accessible by the Managers to view and edit.",
                   "/assets/peli/small/peli_dm_small.png",
                   true
                 )

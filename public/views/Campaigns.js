@@ -105,7 +105,7 @@ export default class CampaignsView {
             "div",
             { style: "margin-right: var(--main-distance);" },
             tipBox(
-              "The current features only allow GMs to manipulate the map and grid layers of the table while others users may only move the images on the object-layer.",
+              "The current features only allow Managers to manipulate the map and grid layers of the table while other players may only move the images on the object-layer.",
               "/assets/peli/small/peli_dm_small.png",
               true
             )

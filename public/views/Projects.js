@@ -121,7 +121,7 @@ export default class ProjectsView {
             "div",
             { style: "margin-right: var(--main-distance);" },
             tipBox(
-              'Giving an invited-user "edit" access to a wyrld allows them to manage different resources including virtual table tools.',
+              'Allowing a player, "Manager" access to a wyrld, allows them to update different resources including virtual table tools and player character sheets. As an owner, you can manage this from the "Player Permissions" section in the wyrld settings.',
               "/assets/peli/small/peli_dm_small.png",
               true
             )

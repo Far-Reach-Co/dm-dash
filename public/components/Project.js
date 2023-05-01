@@ -137,11 +137,11 @@ export default class Project {
   renderManageUsersComponent = async () => {
     if (!this.wasJoined) {
       return [
-        createElement("h3", {}, "Manage Invited-Users"),
+        createElement("h3", {}, "Player Permissions"),
         createElement(
           "div",
           { class: "hint" },
-          "*Give an invited-user access to edit the resources in your wyrld."
+          "*Give an invited-user access to edit the resources in your wyrld by making them a Manager."
         ),
         createElement("br"),
         createElement(
@@ -156,7 +156,7 @@ export default class Project {
             createElement(
               "small",
               { style: "text-decoration: underline;" },
-              "Is Editor"
+              "Manager"
             ),
           ]
         ),
