@@ -109,6 +109,7 @@ body {
   background-color: var(--main-dark);
   display: flex;
   flex: 1;
+  overflow: hidden;
   flex-direction: column;
   letter-spacing: 0.05rem;
   line-height: 1.3;
@@ -116,8 +117,6 @@ body {
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol";
   text-shadow: 0.5px 0.5px black;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 small {
@@ -471,8 +470,7 @@ footer {
   display: flex;
   flex-direction: column;
   flex: 1;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 .container {
@@ -481,16 +479,13 @@ footer {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .dashboard-container {
   display: flex;
   flex: 1;
   background-color: var(--blue3);
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .icon {
@@ -527,6 +522,11 @@ footer {
   align-self: center;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.standard-view form {
+  flex: 1;
+  background-color: inherit;
 }
 
 .sub-view {
