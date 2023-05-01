@@ -37,7 +37,7 @@ export default class Campaign {
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
-      style: "margin-right: 10px;",
+      style: "margin-right: var(--main-distance);",
     });
 
     this.domComponent.append(
@@ -45,7 +45,11 @@ export default class Campaign {
         createElement("h1", {}, `Manage Campaign: "${this.title}"`),
         createElement("br"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
-          createElement("div", { style: "margin-right: 10px" }, "Title"),
+          createElement(
+            "div",
+            { style: "margin-right: var(--main-distance)" },
+            "Title"
+          ),
           titleInput,
         ]),
         createElement("br"),

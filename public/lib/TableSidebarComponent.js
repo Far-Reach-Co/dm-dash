@@ -100,7 +100,7 @@ export default class TableSidebarComponent {
               "div",
               {
                 style:
-                  "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
                 title: "Remove image from wyrld asset library",
               },
               "ⓧ",

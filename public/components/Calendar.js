@@ -189,7 +189,9 @@ export default class Calendar {
         // index
         const indexLabel = createElement(
           "div",
-          { style: "display: inline-block; margin-right: 10px;" },
+          {
+            style: "display: inline-block; margin-right: var(--main-distance);",
+          },
           `Day ${index + 1}`
         );
         // title
@@ -283,7 +285,9 @@ export default class Calendar {
         // index
         const indexLabel = createElement(
           "div",
-          { style: "display: inline-block; margin-right: 10px;" },
+          {
+            style: "display: inline-block; margin-right: var(--main-distance);",
+          },
           `Month ${index + 1}`
         );
         // title
@@ -297,7 +301,10 @@ export default class Calendar {
         // number of days
         const numOfDaysLabel = createElement(
           "label",
-          { for: "number_of_days", style: "margin-right: 10px;" },
+          {
+            for: "number_of_days",
+            style: "margin-right: var(--main-distance);",
+          },
           "Days"
         );
         const numOfDaysInput = createElement("input", {
@@ -399,7 +406,7 @@ export default class Calendar {
       }),
       createElement(
         "button",
-        { type: "submit", style: "margin-top: 10px;" },
+        { type: "submit", style: "margin-top: var(--main-distance);" },
         "Done"
       ),
     ]);
@@ -430,7 +437,7 @@ export default class Calendar {
     }
 
     const manageBtnContainer = createElement("div", {
-      style: "margin-bottom: 10px;",
+      style: "margin-bottom: var(--main-distance);",
     });
 
     const manageCalendarBtn = createElement("button", {}, "Manage Calendar");

@@ -104,33 +104,35 @@ export default class ProjectsView {
         ]
       ),
       createElement("hr"),
-      createElement("div", { style: "display: flex;" }, [
-        createElement(
-          "div",
-          { style: "display: flex; flex-direction: column;" },
-          [
-            tipBox(
-              "Invite your friends to join a wyrld by sending them an invite link which can be created in the wyrld settings.",
-              "/assets/peli/small/peli_love_small.png",
-              true
-            ),
-            createElement("br"),
+      tipBox(
+        "Invite your friends to join a wyrld by sending them an invite link which can be created in the wyrld settings.",
+        "/assets/peli/small/peli_love_small.png",
+        false
+      ),
+      createElement("br"),
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; flex: 1; align-items: flex-end; flex-wrap: wrap-reverse;",
+        },
+        [
+          createElement(
+            "div",
+            { style: "margin-right: var(--main-distance);" },
             tipBox(
               'Giving an invited-user "edit" access to a wyrld allows them to manage different resources including virtual table tools.',
               "/assets/peli/small/peli_dm_small.png",
               true
-            ),
-          ]
-        ),
-        createElement(
-          "div",
-          {
-            style:
-              "display: flex; flex-direction: column; flex: 1; margin-left: 10px; margin-top: 5px;",
-          },
-          [...(await this.renderProjectsElems())]
-        ),
-      ])
+            )
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex: 1; flex-direction: column;" },
+            [...(await this.renderProjectsElems())]
+          ),
+        ]
+      )
     );
   };
 }
