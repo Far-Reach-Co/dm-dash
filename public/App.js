@@ -102,7 +102,7 @@ class App {
         {
           id: "sidebar-players",
           title: "players",
-          displayTitle: "Players Characters",
+          displayTitle: "Player Sheets",
           params: {},
         },
         {

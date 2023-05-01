@@ -604,6 +604,10 @@ footer {
   background-color: var(--blue);
 }
 
+.pb-inactive:hover {
+  background-color: inherit;
+}
+
 .project-edit-container {
   display: flex;
   flex-direction: column;
