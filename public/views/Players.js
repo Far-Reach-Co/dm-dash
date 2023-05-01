@@ -3,6 +3,7 @@ import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import playerCharacterSelect from "../lib/playerCharacterSelect.js";
 import state from "../lib/state.js";
+import { tipBox } from "../lib/tipBox.js";
 
 export default class PlayersView {
   constructor(props) {
@@ -41,55 +42,51 @@ export default class PlayersView {
     const projectPlayerIds = await getThings(
       `/api/get_project_players_by_project/${state.currentProject.id}`
     );
+
     if (!projectPlayerIds.length)
       return [createElement("small", {}, "None...")];
-    let myPlayerCharacters = await getThings(`/api/get_5e_characters_by_user`);
-    return await Promise.all(
-      myPlayerCharacters
-        .filter((pc) => {
-          const list = [];
-          for (var pp of projectPlayerIds) {
-            console.log(pp);
-            if (pp.player_id === pc.id) {
-              list.push(pc);
-            }
-            return list;
-          }
-        })
-        .map(async (player) => {
-          if (player) {
-            const projectPlayerId = projectPlayerIds.filter(
-              (pp) => player.id === pp.player_id
-            )[0].id;
-            const elem = createElement(
-              "div",
-              { style: "margin-left: var(--main-distance); display: flex;" },
-              [
-                player.name,
-                createElement(
-                  "div",
-                  {
-                    style:
-                      "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
-                    title: "Remove connection",
-                  },
-                  "ⓧ",
-                  {
-                    type: "click",
-                    event: () => {
-                      deleteThing(
-                        `/api/remove_project_player/${projectPlayerId}`
-                      );
-                      elem.remove();
-                    },
-                  }
-                ),
-              ]
-            );
-            return elem;
-          }
-        })
+
+    const sheets = await Promise.all(
+      projectPlayerIds.map(async (projectPlayer) => {
+        // get character sheet for linked player character
+        const characterSheet = await getThings(
+          `/api/get_5e_character_general/${projectPlayer.player_id}`
+        );
+
+        return characterSheet;
+      })
     );
+    return sheets
+      .filter((sheet) => sheet.user_id === state.user.id)
+      .map((characterSheet) => {
+        const elem = createElement(
+          "div",
+          {
+            style:
+              "margin-left: var(--main-distance); display: flex; color: var(--blue6);",
+          },
+          [
+            characterSheet.name,
+            createElement(
+              "div",
+              {
+                style:
+                  "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                title: "Remove connection",
+              },
+              "ⓧ",
+              {
+                type: "click",
+                event: () => {
+                  deleteThing(`/api/remove_project_player/${projectPlayer.id}`);
+                  elem.remove();
+                },
+              }
+            ),
+          ]
+        );
+        return elem;
+      });
   };
 
   renderConnect = async () => {
@@ -103,21 +100,33 @@ export default class PlayersView {
 
     this.domComponent.append(
       createElement("div", {}, [
-        createElement("h1", {}, `Connect Players`),
-        createElement("hr"),
-        createElement("h2", {}, "Current connections"),
+        createElement("h2", {}, `Connection existing sheets`),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Connect your player character sheets to this wyrld for ease of access, and to allow your Game Master the ability to view and edit."
+        ),
+        createElement("br"),
+        createElement("h3", {}, "Current connections"),
         ...(await this.renderCurrentConnections()),
-        createElement("hr"),
-        createElement("h2", {}, "Add connections"),
+        createElement("br"),
+        createElement("h3", {}, "Add connections"),
         createElement(
           "form",
-          {},
+          {
+            style:
+              "flex-direction: row; align-items: center; flex-start; justify-content: flex-start;",
+          },
           [
             await playerCharacterSelect(),
-            createElement("br"),
             createElement(
               "button",
-              { class: "new-btn", type: "submit" },
+              {
+                class: "new-btn",
+                type: "submit",
+                title: "Add your sheet to this wyrld",
+                style: "margin-left: var(--main-distance);",
+              },
               "Add"
             ),
           ],
@@ -145,51 +154,24 @@ export default class PlayersView {
     const projectPlayers = await getThings(
       `/api/get_project_players_by_project/${state.currentProject.id}`
     );
-    // if not the creator of this project only view your own characters
-    if (state.currentProject.wasJoined) {
-      const sheetData = await getThings("/api/get_5e_characters_by_user");
-      if (!sheetData.length) {
-        return [createElement("div", {}, "*You have not linked a player yet.")];
-      }
-      const sheetMap = sheetData
-        .filter((characterSheet) => {
-          for (var projectPlayer of projectPlayers) {
-            if (projectPlayer.player_id === characterSheet.id)
-              return characterSheet;
-          }
-        })
-        .map((characterSheet) => {
-          const elem = createElement("div");
-          new PlayerComponent({
-            domComponent: elem,
-            sheet: characterSheet,
-            navigate: this.navigate,
-          });
-          return elem;
-        });
-      if (!sheetMap.length) {
-        return [createElement("div", {}, "*You have not linked a player yet.")];
-      } else return sheetMap;
-    } else {
-      // show all connected characters
-      if (!projectPlayers.length) {
-        return [createElement("div", {}, "*No players have been linked yet.")];
-      }
-      return await Promise.all(
-        projectPlayers.map(async (projectPlayer) => {
-          const characterSheet = await getThings(
-            `/api/get_5e_character_general/${projectPlayer.player_id}`
-          );
-          const elem = createElement("div");
-          new PlayerComponent({
-            domComponent: elem,
-            sheet: characterSheet,
-            navigate: this.navigate,
-          });
-          return elem;
-        })
-      );
+    // show all connected characters
+    if (!projectPlayers.length) {
+      return [createElement("div", {}, "*No players have been linked yet.")];
     }
+    return await Promise.all(
+      projectPlayers.map(async (projectPlayer) => {
+        const characterSheet = await getThings(
+          `/api/get_5e_character_general/${projectPlayer.player_id}`
+        );
+        const elem = createElement("div");
+        new PlayerComponent({
+          domComponent: elem,
+          sheet: characterSheet,
+          navigate: this.navigate,
+        });
+        return elem;
+      })
+    );
   };
 
   render = async () => {
@@ -203,15 +185,60 @@ export default class PlayersView {
       createElement(
         "button",
         { title: "Connect a player character sheet to this wyrld" },
-        "🔗 Player Character",
+        "Connect existing sheet 🔗",
         {
           type: "click",
           event: this.toggleConnect,
         }
       ),
       createElement("hr"),
+      tipBox(
+        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
+        "/assets/peli/small/peli_hide_small.png",
+        false
+      ),
       createElement("br"),
-      ...(await this.renderCharacterList())
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; flex: 1; align-items: flex-end; flex-wrap: wrap-reverse;",
+        },
+        [
+          createElement(
+            "div",
+            {
+              style:
+                "display: flex; flex-direction: column; margin-right: var(--main-distance);",
+            },
+            [
+              createElement(
+                "div",
+                { style: "margin-bottom: var(--main-distance);" },
+                tipBox(
+                  "As a non-GM you only have access to view/edit your own player sheets.",
+                  "/assets/peli/small/peli_note_small.png",
+                  true
+                )
+              ),
+              createElement(
+                "div",
+                {},
+                tipBox(
+                  "Player character sheets, which have been connected to this wyrld, will be accessible by the GMs to view and edit.",
+                  "/assets/peli/small/peli_dm_small.png",
+                  true
+                )
+              ),
+            ]
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex: 1; flex-direction: column;" },
+            [...(await this.renderCharacterList())]
+          ),
+        ]
+      )
     );
   };
 }
@@ -223,75 +250,54 @@ class PlayerComponent {
     this.sheet = props.sheet;
     this.navigate = props.navigate;
 
-    this.edit = false;
+    this.hasAccess =
+      state.currentProject.isEditor ||
+      !state.currentProject.wasJoined ||
+      this.sheet.user_id === state.user.id
+        ? true
+        : false;
 
     this.render();
   }
 
-  toggleEdit = () => {
-    this.edit = !this.edit;
-    this.render();
-  };
-
-  renderEdit = async () => {
-    this.domComponent.append(createElement("div", {}, []));
-  };
-
   render = () => {
     this.domComponent.innerHTML = "";
-
-    if (this.edit) {
-      return this.renderEdit();
-    }
-
     this.domComponent.append(
       createElement(
         "div",
         {
-          class: "project-button",
+          class: `project-button ${this.hasAccess ? null : "pb-inactive"}`,
           title: "Open player character sheet",
-          style:
-            "flex-direction: row; align-items: center; justify-content: space-between;",
         },
         [
-          createElement(
-            "div",
-            {
-              style:
-                "display: flex; align-items: center; justify-content: center;",
-            },
-            createElement("h1", {}, this.sheet.name)
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              createElement(
-                "small",
-                {},
-                `Race: ${this.sheet.race ? this.sheet.race : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `Class: ${this.sheet.class ? this.sheet.class : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `Level: ${this.sheet.level ? this.sheet.level : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `EXP: ${this.sheet.exp ? this.sheet.exp : "None"}`
-              ),
-            ]
-          ),
+          createElement("h1", {}, this.sheet.name),
+          createElement("div", { class: "project-btn-info-box" }, [
+            createElement(
+              "small",
+              {},
+              `Race: ${this.sheet.race ? this.sheet.race : "None"}`
+            ),
+            createElement(
+              "small",
+              {},
+              `Class: ${this.sheet.class ? this.sheet.class : "None"}`
+            ),
+            createElement(
+              "small",
+              {},
+              `Level: ${this.sheet.level ? this.sheet.level : "None"}`
+            ),
+            createElement(
+              "small",
+              {},
+              `EXP: ${this.sheet.exp ? this.sheet.exp : "None"}`
+            ),
+          ]),
         ],
         {
           type: "click",
           event: () => {
+            if (!this.hasAccess) return;
             this.navigate({
               title: "single-player",
               sidebar: true,
@@ -300,18 +306,6 @@ class PlayerComponent {
           },
         }
       )
-      // createElement(
-      //   "img",
-      //   {
-      //     class: "icon gear",
-      //     src: "/assets/gears.svg",
-      //   },
-      //   null,
-      //   {
-      //     type: "click",
-      //     event: this.toggleEdit,
-      //   }
-      // )
     );
   };
 }

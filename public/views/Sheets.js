@@ -232,7 +232,7 @@ class PlayerComponent {
               createElement(
                 "div",
                 { class: "highlighted-item" },
-                `- ${project.title}`
+                project.title
               ),
               createElement(
                 "div",
@@ -287,9 +287,9 @@ class PlayerComponent {
         createElement(
           "div",
           { class: "hint" },
-          "*Connect your player character sheets to your wyrlds for ease of access and to allow your Game Masters the ability to view and edit your sheet."
+          "*Connect your player character sheets to wyrlds for ease of access, and to allow your Game Masters the ability to view and edit."
         ),
-        createElement("hr"),
+        createElement("br"),
         createElement("h3", {}, "Current Wyrlds"),
         createElement(
           "div",
@@ -304,11 +304,12 @@ class PlayerComponent {
           { class: "hint" },
           "*Choose from the list of your created/joined wyrlds to connect your player sheet to."
         ),
+        createElement("br"),
         createElement(
           "form",
           {
             style:
-              "flex-direction: row; align-items: flex-start; justify-content: flex-start;",
+              "flex-direction: row; align-items: center; flex-start; justify-content: flex-start;",
           },
           [
             await projectSelect(),
