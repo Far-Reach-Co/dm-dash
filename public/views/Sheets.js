@@ -164,7 +164,7 @@ class Sheets {
             "div",
             { style: "margin-right: var(--main-distance);" },
             tipBox(
-              "You can make your character sheets accessible to the GMs of your wyrlds by using the wyrld-connection settings which can be found inside the character settings.",
+              "You can make your character sheets accessible to the Managers of your wyrlds by using the wyrld-connection settings which can be found inside the character settings.",
               "/assets/peli/small/peli_note_small.png",
               true
             )

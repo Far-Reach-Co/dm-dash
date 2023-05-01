@@ -33,24 +33,45 @@ export default class LandingView {
     const projectUsers = await getThings(
       `/api/get_project_users_by_project/${state.currentProject.id}`
     );
-    if (!projectUsers.length)
-      return [createElement("div", { style: "display: none;" })];
 
-    return projectUsers.map((user) => {
-      return createElement(
-        "div",
-        { style: "font-size: small; margin-top: 5px;" },
-        user.username
-      );
-    });
+    const elems = projectUsers
+      .filter((user) => !user.is_editor)
+      .map((user) => {
+        return createElement(
+          "div",
+          { style: "font-size: small; margin-top: 5px;" },
+          user.username
+        );
+      });
+
+    if (!elems.length) return [createElement("small", {}, "None...")];
+    else return elems;
+  };
+
+  renderManagers = async () => {
+    const projectUsers = await getThings(
+      `/api/get_project_users_by_project/${state.currentProject.id}`
+    );
+
+    const elems = projectUsers
+      .filter((user) => user.is_editor)
+      .map((user) => {
+        return createElement(
+          "div",
+          { style: "font-size: small; margin-top: 5px;" },
+          user.username
+        );
+      });
+
+    if (!elems.length) return [createElement("small", {}, "None...")];
+    else return elems;
   };
 
   renderOwner = async () => {
     const projectOwner = await getThings(
       `/api/get_user_by_id/${state.currentProject.userId}`
     );
-    if (!projectOwner)
-      return [createElement("div", { style: "display: none;" })];
+    if (!projectOwner) return [createElement("small", {}, "None...")];
 
     return createElement(
       "div",
@@ -333,6 +354,13 @@ export default class LandingView {
                 "Owner"
               ),
               await this.renderOwner(),
+              createElement("br"),
+              createElement(
+                "div",
+                { class: "single-info-box-subheading" },
+                "Managers"
+              ),
+              ...(await this.renderManagers()),
               createElement("br"),
               createElement(
                 "div",
