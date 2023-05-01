@@ -147,29 +147,35 @@ class Sheets {
         ]
       ),
       createElement("hr"),
-      createElement("div", { style: "display: flex;" }, [
-        tipBox(
-          "You can make your character sheets accessible to the GMs of your wyrlds by using the wyrld-connection settings which can be found inside the character settings.",
-          "/assets/peli/small/peli_note_small.png",
-          true
-        ),
-        createElement(
-          "div",
-          {
-            style:
-              "display: flex; flex-direction: column; flex: 1; margin-left: 10px;",
-          },
-          [
+      tipBox(
+        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
+        "/assets/peli/small/peli_hide_small.png",
+        false
+      ),
+      createElement("br"),
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; flex: 1; align-items: flex-end; flex-wrap: wrap-reverse;",
+        },
+        [
+          createElement(
+            "div",
+            { style: "margin-right: var(--main-distance);" },
             tipBox(
-              "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
-              "/assets/peli/small/peli_hide_small.png",
-              false
-            ),
-            createElement("br"),
-            ...(await this.renderSheetElems()),
-          ]
-        ),
-      ])
+              "You can make your character sheets accessible to the GMs of your wyrlds by using the wyrld-connection settings which can be found inside the character settings.",
+              "/assets/peli/small/peli_note_small.png",
+              true
+            )
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex: 1; flex-direction: column;" },
+            [...(await this.renderSheetElems())]
+          ),
+        ]
+      )
     );
   };
 }
@@ -218,7 +224,10 @@ class PlayerComponent {
         if (project) {
           const elem = createElement(
             "div",
-            { style: "margin-left: 10px; display: flex; align-items: center;" },
+            {
+              style:
+                "margin-left: var(--main-distance); display: flex; align-items: center;",
+            },
             [
               createElement(
                 "div",
@@ -229,7 +238,7 @@ class PlayerComponent {
                 "div",
                 {
                   style:
-                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
                   title: "Remove connection",
                 },
                 "ⓧ",
@@ -309,7 +318,7 @@ class PlayerComponent {
                 class: "new-btn",
                 type: "submit",
                 title: "Add your sheet to this wyrld",
-                style: "margin-left: 10px;",
+                style: "margin-left: var(--main-distance);",
               },
               "Add"
             ),
@@ -425,44 +434,31 @@ class PlayerComponent {
         {
           class: "project-button",
           title: "Open player character sheet",
-          style:
-            "flex-direction: row; align-items: center; justify-content: space-between;",
         },
         [
-          createElement(
-            "div",
-            {
-              style:
-                "display: flex; align-items: center; justify-content: center;",
-            },
-            createElement("h1", {}, this.sheet.name)
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column; width: 30%;" },
-            [
-              createElement(
-                "small",
-                {},
-                `Race: ${this.sheet.race ? this.sheet.race : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `Class: ${this.sheet.class ? this.sheet.class : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `Level: ${this.sheet.level ? this.sheet.level : "None"}`
-              ),
-              createElement(
-                "small",
-                {},
-                `EXP: ${this.sheet.exp ? this.sheet.exp : "None"}`
-              ),
-            ]
-          ),
+          createElement("h1", {}, this.sheet.name),
+          createElement("div", { class: "project-btn-info-box" }, [
+            createElement(
+              "small",
+              {},
+              `Race: ${this.sheet.race ? this.sheet.race : "None"}`
+            ),
+            createElement(
+              "small",
+              {},
+              `Class: ${this.sheet.class ? this.sheet.class : "None"}`
+            ),
+            createElement(
+              "small",
+              {},
+              `Level: ${this.sheet.level ? this.sheet.level : "None"}`
+            ),
+            createElement(
+              "small",
+              {},
+              `EXP: ${this.sheet.exp ? this.sheet.exp : "None"}`
+            ),
+          ]),
         ],
         {
           type: "click",

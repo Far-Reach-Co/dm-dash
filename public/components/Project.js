@@ -194,7 +194,7 @@ export default class Project {
 
       const inviteLinkButton = createElement(
         "button",
-        { style: "margin-right: 10px;" },
+        { style: "margin-right: var(--main-distance);" },
         "Copy Link"
       );
       inviteLinkButton.addEventListener("click", () => {
@@ -376,24 +376,18 @@ export default class Project {
           id: `project-${this.id}`,
           class: "project-button",
           title: "Open wyrld",
-          style:
-            "flex-direction: row; align-items: center; justify-content: space-between;",
         },
         [
           createElement("h1", {}, this.title),
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column; width: 30%;" },
-            [
-              createElement("small", {}, this.calculateDateDisplay()),
-              createElement("small", {}, this.calculateUsedData()),
-              createElement(
-                "small",
-                {},
-                `${this.projectUsers.length + 1} Members`
-              ),
-            ]
-          ),
+          createElement("div", { class: "project-btn-info-box" }, [
+            createElement("small", {}, this.calculateDateDisplay()),
+            createElement("small", {}, this.calculateUsedData()),
+            createElement(
+              "small",
+              {},
+              `${this.projectUsers.length + 1} Members`
+            ),
+          ]),
         ],
         {
           type: "click",

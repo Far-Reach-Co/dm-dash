@@ -56,7 +56,7 @@ export default class FeatComponent {
           class: "select-option-small",
           id: "type",
           name: "type",
-          style: "margin-right: 10px;",
+          style: "margin-right: var(--main-distance);",
         },
         [
           createElement("option", { value: "None" }, "None"),
@@ -151,7 +151,7 @@ export default class FeatComponent {
                 "div",
                 {
                   style:
-                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
                   title: "Remove feat/trait",
                 },
                 "ⓧ",

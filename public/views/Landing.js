@@ -161,7 +161,7 @@ export default class LandingView {
       createElement("h1", {}, "Edit About"),
       createElement("br"),
       createElement("div", { style: "display: flex;" }, [
-        createElement("div", {}, [
+        createElement("div", { style: "margin-right: var(--main-distance);" }, [
           createElement(
             "form",
             {},
@@ -347,7 +347,8 @@ export default class LandingView {
         ),
       ]),
       createElement("br"),
-      await renderImageLarge(state.currentProject.imageId)
+      await renderImageLarge(state.currentProject.imageId),
+      createElement("br")
     );
   };
 }

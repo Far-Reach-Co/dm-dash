@@ -98,14 +98,14 @@ export default class SingleLoreView {
           if (this.managing) {
             const elem = createElement(
               "div",
-              { style: "margin-left: 10px; display: flex;" },
+              { style: "margin-left: var(--main-distance); display: flex;" },
               [
                 item.title,
                 createElement(
                   "div",
                   {
                     style:
-                      "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                      "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
                     title: "Remove connection",
                   },
                   "ⓧ",

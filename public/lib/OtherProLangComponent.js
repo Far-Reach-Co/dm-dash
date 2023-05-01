@@ -64,7 +64,7 @@ export default class OtherProLangComponent {
               class: "select-option-small",
               id: "type",
               name: "type",
-              style: "margin-right: 10px;",
+              style: "margin-right: var(--main-distance);",
             },
             [
               createElement("option", { value: "None" }, "None"),
@@ -101,7 +101,8 @@ export default class OtherProLangComponent {
           createElement(
             "div",
             {
-              style: "color: var(--red1); margin-left: 10px; cursor: pointer;",
+              style:
+                "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
               title: "Remove proficiency",
             },
             "ⓧ",

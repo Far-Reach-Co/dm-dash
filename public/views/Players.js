@@ -63,14 +63,14 @@ export default class PlayersView {
             )[0].id;
             const elem = createElement(
               "div",
-              { style: "margin-left: 10px; display: flex;" },
+              { style: "margin-left: var(--main-distance); display: flex;" },
               [
                 player.name,
                 createElement(
                   "div",
                   {
                     style:
-                      "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                      "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
                     title: "Remove connection",
                   },
                   "ⓧ",

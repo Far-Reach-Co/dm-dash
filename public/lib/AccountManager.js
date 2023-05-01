@@ -179,12 +179,11 @@ class AccountManager {
         "div",
         { style: "display: flex; flex-direction: column;" },
         [
-          createElement("b", {}, "Edit Username"),
           createElement(
             "form",
             {},
             [
-              createElement("label", { for: "username" }, "New Username"),
+              createElement("label", { for: "username" }, "Edit Username"),
               createElement("input", {
                 type: "username",
                 id: "username",
@@ -217,9 +216,12 @@ class AccountManager {
 
     return createElement(
       "div",
-      { style: "display: flex; justify-content: space-between;" },
+      {
+        style:
+          "display: flex; justify-content: space-between; flex-wrap: wrap;",
+      },
       [
-        createElement("b", {}, "Username"),
+        createElement("h3", {}, "Username"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement(
             "a",
@@ -250,12 +252,11 @@ class AccountManager {
         "div",
         { style: "display: flex; flex-direction: column;" },
         [
-          createElement("b", {}, "Edit Email"),
           createElement(
             "form",
             {},
             [
-              createElement("label", { for: "email" }, "New Email"),
+              createElement("label", { for: "email" }, "Edit Email"),
               createElement("input", {
                 type: "email",
                 id: "email",
@@ -288,9 +289,12 @@ class AccountManager {
 
     return createElement(
       "div",
-      { style: "display: flex; justify-content: space-between;" },
+      {
+        style:
+          "display: flex; justify-content: space-between; flex-wrap: wrap;",
+      },
       [
-        createElement("b", {}, "Email"),
+        createElement("h3", {}, "Email"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement(
             "a",
@@ -331,17 +335,27 @@ class AccountManager {
         createElement(
           "div",
           {
-            style: "display: flex; align-self: center",
+            style: "display: flex; flex: 1; flex-wrap: wrap-reverse;",
           },
           [
-            tipBox(
-              "usernames are not unique to a specific user. You can update yours at anytime.",
-              "/assets/peli/small/peli_note_small.png",
-              true
+            createElement(
+              "div",
+              {
+                style:
+                  "margin-top: var(--main-distance); margin-right: var(--main-distance);",
+              },
+              tipBox(
+                "usernames are not unique to a specific user. You can update yours at anytime.",
+                "/assets/peli/small/peli_note_small.png",
+                true
+              )
             ),
             createElement(
               "div",
-              { class: "component", style: "align-self: flex-start;" },
+              {
+                class: "component",
+                style: "margin: 0; flex: 1;",
+              },
               [
                 createElement(
                   "h2",
@@ -349,21 +363,33 @@ class AccountManager {
                   "General Info"
                 ),
                 createElement("br"),
-                this.renderEmailOrEditEmail(),
-                createElement("br"),
-                this.renderUsernameOrEditUsername(),
-                createElement("br"),
                 createElement(
                   "div",
-                  { style: "display: flex; justify-content: space-between;" },
+                  {
+                    style:
+                      "margin-left: var(--main-distance); margin-right: var(--main-distance)",
+                  },
                   [
-                    createElement("b", {}, "Password"),
-                    createElement("button", {}, "Reset Password", {
-                      type: "click",
-                      event: () => {
-                        window.location.pathname = "/resetpassword.html";
+                    this.renderEmailOrEditEmail(),
+                    createElement("br"),
+                    this.renderUsernameOrEditUsername(),
+                    createElement("br"),
+                    createElement(
+                      "div",
+                      {
+                        style:
+                          "display: flex; justify-content: space-between; flex-wrap: wrap;",
                       },
-                    }),
+                      [
+                        createElement("h3", {}, "Password"),
+                        createElement("button", {}, "Reset Password", {
+                          type: "click",
+                          event: () => {
+                            window.location.pathname = "/resetpassword.html";
+                          },
+                        }),
+                      ]
+                    ),
                   ]
                 ),
                 createElement("hr"),
