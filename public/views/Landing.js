@@ -160,7 +160,7 @@ export default class LandingView {
     this.domComponent.append(
       createElement("h1", {}, "Edit About"),
       createElement("br"),
-      createElement("div", { style: "display: flex;" }, [
+      createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
         createElement("div", { style: "margin-right: var(--main-distance);" }, [
           createElement(
             "form",
@@ -205,10 +205,15 @@ export default class LandingView {
             }
           ),
           createElement("hr"),
-          createElement("button", { class: "btn-red" }, "Cancel", {
-            type: "click",
-            event: this.toggleEdit,
-          }),
+          createElement(
+            "button",
+            { class: "btn-red", style: "margin-bottom: var(--main-distance);" },
+            "Cancel",
+            {
+              type: "click",
+              event: this.toggleEdit,
+            }
+          ),
         ]),
         tipBox(
           "You can add an image that will display below the text, we recommend a general map of your wyrld.",
