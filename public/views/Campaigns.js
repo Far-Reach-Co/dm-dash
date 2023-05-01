@@ -3,6 +3,7 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
+import { tipBox } from "../lib/tipBox.js";
 
 export default class CampaignsView {
   constructor(props) {
@@ -49,18 +50,25 @@ export default class CampaignsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement(
-        "button",
-        {
-          class: "new-btn",
-          title: "Create a new campaign with virtual table",
-        },
-        "+ Campaign",
-        {
-          type: "click",
-          event: this.newCampaign,
-        }
-      );
+      return createElement("div", {}, [
+        createElement(
+          "button",
+          {
+            class: "new-btn",
+            title: "Create a new campaign with virtual table",
+          },
+          "+ Campaign",
+          {
+            type: "click",
+            event: this.newCampaign,
+          }
+        ),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Create new campaign with virtual table"
+        ),
+      ]);
   };
 
   render = async () => {
@@ -76,10 +84,39 @@ export default class CampaignsView {
 
     // append
     this.domComponent.append(
+      createElement("h1", { class: "projects-view-title" }, "Campaigns"),
+      createElement("hr", { class: "special-hr" }),
       this.renderAddButtonOrNull(),
       createElement("hr"),
+      tipBox(
+        "A campaign provides a real-time virtual table where users can upload and manipulate images to use as a visual aid for their game.",
+        "/assets/peli/small/peli_question_small.png",
+        false
+      ),
       createElement("br"),
-      ...(await this.getCampaignElements())
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; flex: 1; align-items: flex-end; flex-wrap: wrap-reverse;",
+        },
+        [
+          createElement(
+            "div",
+            { style: "margin-right: var(--main-distance);" },
+            tipBox(
+              "The current features only allow GMs to manipulate the map and grid layers of the table while others users may only move the images on the object-layer.",
+              "/assets/peli/small/peli_dm_small.png",
+              true
+            )
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex: 1; flex-direction: column;" },
+            [...(await this.getCampaignElements())]
+          ),
+        ]
+      )
     );
   };
 }

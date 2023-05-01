@@ -42,18 +42,19 @@ export default class Campaign {
 
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h1", {}, `Manage Campaign: "${this.title}"`),
+        createElement("h1", {}, `~ ${this.title} ~`),
+        createElement("h2", {}, "Campaign Settings"),
         createElement("br"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
           createElement(
-            "div",
+            "label",
             { style: "margin-right: var(--main-distance)" },
             "Title"
           ),
           titleInput,
         ]),
         createElement("br"),
-        createElement("button", {}, "Done", {
+        createElement("button", { class: "new-btn" }, "Save", {
           type: "click",
           event: () => {
             this.editTitle(titleInput.value);
@@ -61,7 +62,8 @@ export default class Campaign {
             this.toggleEdit();
           },
         }),
-        createElement("br"),
+        createElement("hr"),
+        createElement("div", { class: "danger-heading" }, "Danger"),
         createElement("button", { class: "btn-red" }, "Delete Campaign", {
           type: "click",
           event: (e) => {
@@ -75,7 +77,8 @@ export default class Campaign {
             }
           },
         }),
-      ])
+      ]),
+      this.renderEditButtonOrNull()
     );
   };
 
@@ -100,7 +103,7 @@ export default class Campaign {
         {
           class: "icon gear",
           src: "/assets/gears.svg",
-          title: "Open campaign settings",
+          title: "Toggle campaign settings",
         },
         null,
         {
@@ -129,7 +132,7 @@ export default class Campaign {
         [
           createElement("h1", {}, this.title + " ↗"),
           createElement(
-            "div",
+            "small",
             { class: "project-extra-info" },
             this.calculateDateDisplay()
           ),
