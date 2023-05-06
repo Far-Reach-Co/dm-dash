@@ -11,11 +11,28 @@ export default class FiveEPlayerSheet {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.navigate = props.navigate;
-    (this.domComponent.className = "standard-view"),
-      (this.domComponent.style = "align-items: center; max-width: 100%;"),
-      (this.generalData = props.params.content);
+    this.domComponent.className = "standard-view";
+    if (window.innerWidth > 500)
+      this.domComponent.style =
+        "align-items: center; overflow-x: auto; max-width: 100%";
+    else {
+      this.domComponent.style = this.domComponent.style =
+        "overflow-x: auto; max-width: 100%;";
+    }
+    this.generalData = props.params.content;
     // general, background, etc
     this.mainView = "general";
+
+    // styling fix for mobile
+    const smallDevice = window.matchMedia("(min-width: 500px)");
+    smallDevice.addEventListener("change", (e) => {
+      if (e.matches) {
+        this.domComponent.style =
+          "align-items: center; overflow-x: auto; max-width: 100%";
+      } else {
+        this.domComponent.style = "overflow-x: auto; max-width: 100%;";
+      }
+    });
 
     this.render();
   }
