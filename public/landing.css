@@ -1,0 +1,87 @@
+:root {
+  --bg-color-blue-dark: #061f35;
+  --bg-color-blue-light: #28456b;
+}
+
+body {
+  height: auto;
+  overflow: auto;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* border: 1px solid red; */
+}
+
+/* FIRST */
+
+.first {
+  height: calc(100vh - var(--nav-height));
+  background-color: var(--bg-color-blue-dark);
+  justify-content: space-between;
+}
+
+.first p {
+  font-size: 1rem;
+  text-align: center;
+  width: 600px;
+  max-width: 90vw;
+  padding: 10px;
+}
+
+.first #city-img {
+  width: 100%;
+  padding-top: 13%;
+  background-image: url("/assets/landing/city.webp");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.first #main-logo {
+  width: 50%;
+}
+
+.first #peli-signup {
+  width: 300px;
+  max-width: 60%;
+}
+
+/* SECOND */
+
+.second {
+  width: 100%;
+  padding-top: 8%;
+  background-color: var(--bg-color-blue-light);
+  background-image: url("/assets/landing/water_bg.webp");
+  background-size: 65%;
+  background-position: right;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap-reverse;
+  align-items: center;
+  justify-content: center;
+}
+
+.second #scroll-img {
+  width: 60%;
+}
+
+.second h1 {
+  font-size: 22;
+  text-align: center;
+  color: var(--main-white);
+}
+
+.second p {
+  padding: 10px;
+  font-size: 1rem;
+  text-align: center;
+  max-width: 100vw;
+}
