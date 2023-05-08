@@ -247,9 +247,15 @@ nav {
   }
 
   #nav-links-container {
+    display: none;
     visibility: hidden;
     position: absolute;
     z-index: 0;
+  }
+
+  #nav-links-container a {
+    display: none;
+    visibility: hidden;
   }
 }
 

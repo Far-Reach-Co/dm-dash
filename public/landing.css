@@ -10,7 +10,7 @@ body {
 }
 
 h1 {
-  font-size: 22;
+  font-size: 25;
   text-align: center;
   color: var(--main-white);
 }
@@ -56,6 +56,11 @@ section {
 .first #peli-signup {
   width: 300px;
   max-width: 60%;
+  cursor: pointer;
+}
+
+.first #peli-signup:hover {
+  opacity: 0.8;
 }
 
 /* SECOND */
