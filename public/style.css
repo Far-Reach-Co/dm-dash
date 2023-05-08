@@ -74,6 +74,7 @@
   --red3: rgb(245, 123, 123);
   --border-radius: 4px;
   --main-distance: 10px;
+  --nav-height: 35px;
 }
 
 * {
@@ -90,9 +91,9 @@
   scrollbar-color: var(--blue3) transparent;
 }
 
-*::-webkit-scrollbar {
+/* *::-webkit-scrollbar {
   width: 0.5em;
-}
+} */
 
 *::-webkit-scrollbar-thumb {
   background-color: var(--blue3);
@@ -179,7 +180,7 @@ h3 {
 nav {
   padding-left: var(--main-distance);
   padding-right: var(--main-distance);
-  height: 35px;
+  height: var(--nav-height);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -246,9 +247,15 @@ nav {
   }
 
   #nav-links-container {
+    display: none;
     visibility: hidden;
     position: absolute;
     z-index: 0;
+  }
+
+  #nav-links-container a {
+    display: none;
+    visibility: hidden;
   }
 }
 
@@ -702,7 +709,7 @@ footer {
   right: 0px;
   z-index: 2;
   width: 200px;
-  height: calc(100% - 35px);
+  height: calc(100% - var(--nav-height));
   /* based on nav height */
   position: absolute;
   background: transparent;
@@ -769,7 +776,7 @@ footer {
 }
 
 .hamburger {
-  top: 35px;
+  top: var(--nav-height);
   /* from nav height */
   right: 5px;
   z-index: 3;
