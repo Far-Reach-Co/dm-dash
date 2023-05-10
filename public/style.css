@@ -554,7 +554,7 @@ footer {
   height: 400px;
   display: flex;
   flex-direction: column;
-  overflow-y: hidden;
+  overflow-y: auto;
 }
 
 .sub-view-component {
