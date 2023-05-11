@@ -211,55 +211,59 @@ class TopLayer {
     }
   };
 
+  renderInfoMenu = () => {
+    return createElement(
+      "div",
+      { class: "table-config info-elem", title: "Open key command info box" },
+      [createElement("div", {}, "?")],
+      {
+        type: "click",
+        event: () => {
+          modal.show(
+            createElement("div", { class: "help-content" }, [
+              createElement("h1", {}, "Key Commands"),
+              createElement("hr"),
+              createElement("b", {}, "Option/Alt (⌥)"),
+              createElement(
+                "small",
+                {},
+                "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+              ),
+              createElement("br"),
+              createElement("b", {}, "Control (⌃)"),
+              createElement(
+                "small",
+                {},
+                "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
+              ),
+              createElement("br"),
+              createElement("b", {}, "Shift"),
+              createElement(
+                "small",
+                {},
+                "Hold key and click multiple objects to select multiple objects."
+              ),
+              createElement("br"),
+              createElement("b", {}, "Delete/Backspace"),
+              createElement(
+                "small",
+                {},
+                "While object is selected, press key to remove object from table."
+              ),
+            ])
+          );
+        },
+      }
+    );
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
     this.domComponent.append(
       this.renderLayersElem(),
       this.renderGridControlElem(),
-      createElement(
-        "div",
-        { class: "table-config info-elem", title: "Open key command info box" },
-        [createElement("div", {}, "?")],
-        {
-          type: "click",
-          event: () => {
-            modal.show(
-              createElement("div", { class: "help-content" }, [
-                createElement("h1", {}, "Key Commands"),
-                createElement("hr"),
-                createElement("b", {}, "Option/Alt (⌥)"),
-                createElement(
-                  "small",
-                  {},
-                  "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
-                ),
-                createElement("br"),
-                createElement("b", {}, "Control (⌃)"),
-                createElement(
-                  "small",
-                  {},
-                  "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
-                ),
-                createElement("br"),
-                createElement("b", {}, "Shift"),
-                createElement(
-                  "small",
-                  {},
-                  "Hold key and click multiple objects to select multiple objects."
-                ),
-                createElement("br"),
-                createElement("b", {}, "Delete/Backspace"),
-                createElement(
-                  "small",
-                  {},
-                  "While object is selected, press key to remove object from table."
-                ),
-              ])
-            );
-          },
-        }
-      )
+      this.renderInfoMenu()
     );
   };
 }
