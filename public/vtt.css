@@ -3,6 +3,10 @@
   -moz-user-select: none;
 }
 
+.upper-canvas {
+  z-index: 3;
+}
+
 .table-config {
   width: max-content;
   padding: 5px;
@@ -12,7 +16,7 @@
   align-items: center;
   justify-content: space-evenly;
   border-radius: var(--border-radius);
-  z-index: 3;
+  z-index: 4;
   background-color: var(--blue4);
 }
 
@@ -22,9 +26,13 @@
 }
 
 .info-elem {
-  top: var(--main-distance);
-  right: 208px;
-  padding: 3px var(--main-distance);
+  top: 80px;
+  left: var(--main-distance);
+  padding-left: 8px;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  width: 30px;
   border-radius: 30px;
 }
 
@@ -40,14 +48,15 @@
 
 .help-content {
   padding: var(--main-distance);
-  width: 50vw;
-  height: 50vh;
+  width: 60vw;
+  height: 60vh;
   position: inherit;
   border-radius: var(--border-radius);
-  z-index: 3;
+  z-index: 4;
   background-color: var(--blue4);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
 }
 
 .table-sidebar-images {

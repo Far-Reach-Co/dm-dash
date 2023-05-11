@@ -83,7 +83,7 @@
   box-sizing: border-box;
   font-size: 18px;
   color: var(--main-white);
-  z-index: 2;
+  z-index: 3;
 }
 
 * {
@@ -1014,7 +1014,7 @@ footer {
 }
 
 .toast {
-  z-index: 1;
+  z-index: 4;
   position: absolute;
   left: 50%;
   top: 10%;
@@ -1075,7 +1075,7 @@ footer {
   /* Hidden by default */
   position: fixed;
   /* Stay in place */
-  z-index: 3;
+  z-index: 4;
   /* Sit on top */
   left: 0;
   top: 0;
@@ -1275,7 +1275,7 @@ input:checked+.slider:before {
   position: inherit;
   border-radius: var(--border-radius);
   border: 0.5px solid var(--main-gray);
-  z-index: 3;
+  z-index: 4;
   background-color: var(--blue4);
   display: flex;
   flex-direction: column;
