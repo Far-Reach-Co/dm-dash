@@ -12,6 +12,8 @@ export default class FeatComponent {
     this.newLoading = false;
     this.creating = false;
 
+    this.featComponents = [];
+
     this.render();
   }
 
@@ -25,13 +27,32 @@ export default class FeatComponent {
     this.render();
   };
 
+  removeItem = (id) => {
+    this.featComponents = this.featComponents.filter((item) => item.id != id);
+    this.render();
+  };
+
   newFeat = async (e) => {
     this.toggleNewLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
     if (formProps.type === "None") formProps.type = null;
     formProps.general_id = this.general_id;
-    await postThing("/api/add_5e_character_feat", formProps);
+    const featData = await postThing("/api/add_5e_character_feat", formProps);
+    if (featData) {
+      const elem = createElement("div");
+      const featComponent = new SingleFeatComponent({
+        parentRemoveItem: this.removeItem,
+        domComponent: elem,
+        renderTypeSelectOptions: this.renderTypeSelectOptions,
+        id: featData.id,
+        type: featData.type,
+        title: featData.title,
+        description: featData.description,
+      });
+      // save the components
+      this.featComponents.push(featComponent);
+    }
     this.toggleNewLoading();
   };
 
@@ -112,109 +133,31 @@ export default class FeatComponent {
   };
 
   renderFeatElems = async () => {
+    // check if we have some components instantiated already
+    if (this.featComponents.length) {
+      return this.featComponents.map((item) => item.domComponent);
+    }
+
     const featsData = await getThings(
       `/api/get_5e_character_feats/${this.general_id}`
     );
     if (!featsData.length) return [createElement("small", {}, "None...")];
 
     return featsData.map((item) => {
-      return createElement(
-        "div",
-        {
-          style: "display: flex; flex-direction: column;",
-        },
-        [
-          createElement(
-            "div",
-            { style: "display: flex; margin-bottom: 5px;" },
-            [
-              createElement(
-                "input",
-                {
-                  class: "cp-input-gen",
-                  style: "color: var(--orange2)",
-                  name: "title",
-                  value: item.title ? item.title : "",
-                },
-                null,
-                {
-                  type: "focusout",
-                  event: (e) => {
-                    e.preventDefault();
-                    postThing(`/api/edit_5e_character_feat/${item.id}`, {
-                      title: e.target.value,
-                    });
-                  },
-                }
-              ),
-              createElement(
-                "div",
-                {
-                  style:
-                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
-                  title: "Remove feat/trait",
-                },
-                "ⓧ",
-                {
-                  type: "click",
-                  event: (e) => {
-                    e.preventDefault();
-                    if (
-                      window.confirm(
-                        `Are you sure you want to delete ${item.title}`
-                      )
-                    ) {
-                      deleteThing(`/api/remove_5e_character_feat/${item.id}`);
-                      e.target.parentElement.parentElement.remove();
-                    }
-                  },
-                }
-              ),
-            ]
-          ),
-          createElement(
-            "select",
-            {
-              class: "select-option-small",
-              style: "margin-bottom: 5px;",
-              id: "type",
-              name: "type",
-            },
-            [
-              createElement("option", { value: "None" }, "None"),
-              ...this.renderTypeSelectOptions(item.type),
-            ],
-            {
-              type: "change",
-              event: (e) => {
-                e.preventDefault();
-                postThing(`/api/edit_5e_character_feat/${item.id}`, {
-                  type: e.target.value,
-                });
-              },
-            }
-          ),
-          createElement(
-            "textarea",
-            {
-              class: "cp-input-gen input-small",
-              style: "height: 100px;",
-              name: "description",
-            },
-            item.description ? item.description : "",
-            {
-              type: "focusout",
-              event: (e) => {
-                e.preventDefault();
-                postThing(`/api/edit_5e_character_feat/${item.id}`, {
-                  description: e.target.value,
-                });
-              },
-            }
-          ),
-          createElement("hr"),
-        ]
-      );
+      const elem = createElement("div");
+      const featComponent = new SingleFeatComponent({
+        parentRemoveItem: this.removeItem,
+        domComponent: elem,
+        renderTypeSelectOptions: this.renderTypeSelectOptions,
+        id: item.id,
+        type: item.type,
+        title: item.title,
+        description: item.description,
+      });
+      // save the components
+      this.featComponents.push(featComponent);
+
+      return elem;
     });
   };
 
@@ -232,10 +175,46 @@ export default class FeatComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { style: "align-self: center;" },
-        "Feats and Traits"
+        {
+          style:
+            "display: flex; flex: 1; align-items: center; justify-content: center; position: relative; margin-bottom: var(--main-distance);",
+        },
+        [
+          createElement("div", { style: "" }, "Feats and Traits"),
+          createElement(
+            "div",
+            {
+              style:
+                "position: absolute; right: 0; top: 0; display: flex; flex-direction: column;",
+            },
+            [
+              createElement(
+                "a",
+                { style: "font-size: small; margin-bottom: 5px;" },
+                "+ Expand all",
+                {
+                  type: "click",
+                  event: () => {
+                    this.featComponents.forEach((item) => item.show());
+                  },
+                }
+              ),
+              createElement(
+                "a",
+                { style: "font-size: small;" },
+                "- Collapse all",
+                {
+                  type: "click",
+                  event: () => {
+                    this.featComponents.forEach((item) => item.hide());
+                  },
+                }
+              ),
+            ]
+          ),
+        ]
       ),
-      createElement("br"),
+      createElement("hr"),
       ...(await this.renderFeatElems()),
       createElement(
         "a",
@@ -245,6 +224,177 @@ export default class FeatComponent {
           type: "click",
           event: this.toggleCreating,
         }
+      )
+    );
+  };
+}
+
+class SingleFeatComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.parentRemoveItem = props.parentRemoveItem;
+    this.renderTypeSelectOptions = props.renderTypeSelectOptions;
+    this.id = props.id;
+    this.title = props.title;
+    this.description = props.description;
+    this.type = props.type;
+
+    this.hidden = false;
+
+    this.render();
+  }
+
+  hide = () => {
+    this.hidden = true;
+    this.render();
+  };
+
+  show = () => {
+    this.hidden = false;
+    this.render();
+  };
+
+  toggleHide = () => {
+    this.hidden = !this.hidden;
+    this.render();
+  };
+
+  renderHideFeatButton = () => {
+    if (!this.hidden) {
+      return createElement("a", { style: "font-size: small;" }, "- Collapse", {
+        type: "click",
+        event: this.toggleHide,
+      });
+    } else {
+      return createElement("a", { style: "font-size: small;" }, "+ Expand", {
+        type: "click",
+        event: this.toggleHide,
+      });
+    }
+  };
+
+  renderDescriptionOrHidden = () => {
+    if (this.hidden) {
+      return createElement("div", { style: "display: none;" }, "");
+    } else {
+      return createElement(
+        "textarea",
+        {
+          class: "cp-input-gen input-small",
+          name: "description",
+        },
+        this.description ? this.description : "",
+        {
+          type: "focusout",
+          event: (e) => {
+            e.preventDefault();
+            postThing(`/api/edit_5e_character_feat/${this.id}`, {
+              description: e.target.value,
+            });
+          },
+        }
+      );
+    }
+  };
+
+  render = async () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          style: "display: flex; flex-direction: column;",
+        },
+        [
+          createElement(
+            "div",
+            {
+              style:
+                "display: flex; margin-bottom: 5px; align-items: center; justify-content: space-between;",
+            },
+            [
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; align-items: center; justify-content: center;",
+                },
+                [
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen",
+                      style: "color: var(--orange2)",
+                      name: "title",
+                      value: this.title ? this.title : "",
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        e.preventDefault();
+                        postThing(`/api/edit_5e_character_feat/${this.id}`, {
+                          title: e.target.value,
+                        });
+                      },
+                    }
+                  ),
+                  createElement(
+                    "div",
+                    {
+                      style:
+                        "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                      title: "Remove feat/trait",
+                    },
+                    "ⓧ",
+                    {
+                      type: "click",
+                      event: async (e) => {
+                        e.preventDefault();
+                        if (
+                          window.confirm(
+                            `Are you sure you want to delete ${this.title}`
+                          )
+                        ) {
+                          await deleteThing(
+                            `/api/remove_5e_character_feat/${this.id}`
+                          );
+                          this.parentRemoveItem(this.id);
+                        }
+                      },
+                    }
+                  ),
+                ]
+              ),
+              this.renderHideFeatButton(),
+            ]
+          ),
+          createElement(
+            "select",
+            {
+              class: "select-option-small",
+              style: "margin-bottom: 5px;",
+              id: "type",
+              name: "type",
+            },
+            [
+              createElement("option", { value: "None" }, "None"),
+              ...this.renderTypeSelectOptions(this.type),
+            ],
+            {
+              type: "change",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_feat/${this.id}`, {
+                  type: e.target.value,
+                });
+              },
+            }
+          ),
+          this.renderDescriptionOrHidden(),
+          createElement("hr"),
+        ]
       )
     );
   };

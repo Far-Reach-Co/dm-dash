@@ -208,7 +208,7 @@
 }
 
 .edit-hp {
-  z-index: 3;
+  z-index: 4;
   height: 20px;
   width: 20px;
   position: absolute;
@@ -264,7 +264,7 @@
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  width: 200px;
+  min-width: 230px;
   margin: 4px;
 }
 
