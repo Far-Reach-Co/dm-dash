@@ -4,7 +4,7 @@ export default function locationTypeSelect(onChangeCallback, currentType) {
   function renderLocationTypeSelectOptions() {
     const types = [
       "Shop",
-      "store",
+      "Store",
       "Place",
       "Temple",
       "Building",
