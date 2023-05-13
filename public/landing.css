@@ -18,7 +18,7 @@ h1 {
 p {
   font-size: 1rem;
   text-align: center;
-  max-width: 90vw;
+  max-width: 100%;
   padding: 10px;
   width: 500px;
 }
@@ -32,7 +32,7 @@ section {
 /* FIRST */
 
 .first {
-  height: calc(100vh - var(--nav-height));
+  height: calc(100% - var(--nav-height));
   background-color: var(--bg-color-blue-dark);
   justify-content: space-between;
 }
@@ -86,7 +86,7 @@ section {
 
 .third {
   background-color: var(--bg-color-brown-dark);
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -107,9 +107,11 @@ section {
   justify-content: center;
 }
 
-.third h1 {}
+.third h1 {
+}
 
-.third p {}
+.third p {
+}
 
 #scroll-svg {
   width: 17%;
