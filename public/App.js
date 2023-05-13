@@ -329,9 +329,9 @@ class App {
   };
 
   renderLandingView = ({ navigate }) => {
-    if (this.views.landing) {
-      return this.domComponent.appendChild(this.views.landing.domComponent);
-    }
+    // if (this.views.landing) {
+    //   return this.domComponent.appendChild(this.views.landing.domComponent);
+    // }
     const element = createElement("div");
     this.domComponent.appendChild(element);
     const view = new LandingView({
