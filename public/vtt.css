@@ -48,8 +48,8 @@
 
 .help-content {
   padding: var(--main-distance);
-  width: 60vw;
-  height: 60vh;
+  width: 75%;
+  height: 100%;
   position: inherit;
   border-radius: var(--border-radius);
   z-index: 4;
