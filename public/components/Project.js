@@ -405,7 +405,11 @@ export default class Project {
               projectUserId: this.projectUserId,
               imageId: this.imageId,
             };
-            this.navigate({ title: "landing", sidebar: true });
+            this.navigate({
+              title: "landing",
+              sidebar: true,
+              params: { refreshComponentState: true },
+            });
           },
         }
       ),

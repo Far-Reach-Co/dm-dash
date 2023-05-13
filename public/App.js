@@ -328,8 +328,8 @@ class App {
     this.views.projects = view;
   };
 
-  renderLandingView = ({ navigate }) => {
-    if (this.views.landing) {
+  renderLandingView = ({ navigate, params }) => {
+    if (this.views.landing && !params.refreshComponentState) {
       return this.domComponent.appendChild(this.views.landing.domComponent);
     }
     const element = createElement("div");
@@ -418,7 +418,10 @@ class App {
       case "campaigns":
         return this.renderCampaignsView({ navigate: this.navigate.navigate });
       case "landing":
-        return this.renderLandingView({ navigate: this.navigate.navigate });
+        return this.renderLandingView({
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
+        });
       default:
         return this.renderProjectsView({ navigate: this.navigate.navigate });
     }

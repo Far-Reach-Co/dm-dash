@@ -23,7 +23,6 @@ export default class OtherProLangComponent {
     const res = await postThing("/api/add_5e_character_other_pro_lang", {
       general_id: this.general_id,
       type: null,
-      proficiency: "New Proficiency",
     });
     this.toggleNewLoading();
   };
@@ -85,6 +84,7 @@ export default class OtherProLangComponent {
             {
               class: "cp-input-gen input-small",
               name: "name",
+              placeHolder: "Proficiency",
               value: item.proficiency ? item.proficiency : "",
             },
             null,
@@ -111,7 +111,9 @@ export default class OtherProLangComponent {
               event: (e) => {
                 if (
                   window.confirm(
-                    `Are you sure you want to delete ${item.proficiency}`
+                    `Are you sure you want to delete ${
+                      item.proficiency ? item.proficiency : "Empty"
+                    }`
                   )
                 ) {
                   deleteThing(

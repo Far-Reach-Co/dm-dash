@@ -43,11 +43,10 @@ function add5eCharOtherProLangQuery(data) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"dnd_5e_character_other_pro_lang\" (general_id, type, proficiency) values($1,$2,$3) returning *",
+                        text: "insert into public.\"dnd_5e_character_other_pro_lang\" (general_id, type) values($1,$2) returning *",
                         values: [
                             data.general_id,
                             data.type,
-                            data.proficiency
                         ]
                     };
                     return [4, db.query(query)];

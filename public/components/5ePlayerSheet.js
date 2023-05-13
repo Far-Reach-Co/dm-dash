@@ -6,6 +6,7 @@ import AttackComponent from "../lib/AttackComponent.js";
 import EquipmentComponent from "../lib/EquipmentComponent.js";
 import FeatComponent from "../lib/FeatComponent.js";
 import SpellsComponent from "../lib/SpellsComponent.js";
+import calculateColorMod from "../lib/calculateColorMod.js";
 
 export default class FiveEPlayerSheet {
   constructor(props) {
@@ -153,11 +154,14 @@ export default class FiveEPlayerSheet {
   };
 
   calculatePassivePerception = () => {
-    let wisMod = this.calculateAbilityScoreModifier(this.generalData.wisdom);
-    if (wisMod === "0") wisMod = 0;
-    let pp = 10 + wisMod;
+    let wis = this.calculateAbilityScoreModifier(this.generalData.wisdom);
+    if (wis === "0") wis = 0;
+    let pp = 10 + wis;
     if (this.generalData.proficiencies.perception) {
       pp += this.calculateProBonus();
+    }
+    if (this.generalData.wisdom_mod) {
+      pp += this.generalData.wisdom_mod;
     }
     return pp;
   };
@@ -433,6 +437,19 @@ export default class FiveEPlayerSheet {
         ]),
       ]);
     });
+  };
+
+  renderPassivePerceptionComponent = () => {
+    const elem = createElement("div");
+    new PassivePerceptionComponent({
+      domComponent: elem,
+      calculatePassivePerception: this.calculatePassivePerception,
+      wisdom: this.generalData.wisdom,
+      wisdomMod: this.generalData.wisdom_mod,
+      updateGeneralValue: this.updateGeneralValue,
+    });
+
+    return elem;
   };
 
   renderGeneralView = async () => {
@@ -791,20 +808,7 @@ export default class FiveEPlayerSheet {
             createElement("small", {}, "Proficiency Bonus")
           ),
         ]),
-        createElement("div", { class: "cp-content-container-long" }, [
-          createElement(
-            "div",
-            {
-              class: "cp-content-long-number",
-            },
-            this.calculatePassivePerception()
-          ),
-          createElement(
-            "div",
-            { class: "cp-content-long-title" },
-            createElement("small", {}, "Passive Perception (Wis)")
-          ),
-        ]),
+        this.renderPassivePerceptionComponent(),
       ]),
       createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
         createElement(
@@ -1645,5 +1649,127 @@ export default class FiveEPlayerSheet {
     if (this.mainView === "spells") {
       return this.renderSpellsView();
     }
+  };
+}
+
+class PassivePerceptionComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.calculatePassivePerception = props.calculatePassivePerception;
+    this.wisdom = props.wisdom;
+    this.wisdomMod = props.wisdomMod;
+    this.updateGeneralValue = props.updateGeneralValue;
+
+    this.modView = false;
+
+    this.render();
+  }
+
+  toggleModView = () => {
+    this.modView = !this.modView;
+    this.render();
+  };
+
+  renderModView() {
+    this.domComponent.append(
+      createElement("div", { class: "cp-content-container-long" }, [
+        createElement(
+          "input",
+          {
+            class: "cp-content-long-number",
+            style: `max-width: 50px;`,
+            type: "number",
+            name: "wisdome_mod",
+            value: this.wisdomMod ? this.wisdomMod : 0,
+          },
+          null,
+          {
+            type: "focusout",
+            event: (e) => {
+              if (e.target.value === "") e.target.value = 0;
+              this.wisdomMod = e.target.valueAsNumber;
+              this.updateGeneralValue("wisdom_mod", e.target.valueAsNumber);
+            },
+          }
+        ),
+        createElement(
+          "div",
+          { class: "cp-content-long-title", style: "align-items: baseline" },
+          [
+            createElement(
+              "img",
+              {
+                width: 15,
+                class: "gear-gen",
+                style: "margin-right: 3px;",
+                src: "/assets/gears.svg",
+                title: "Toggle modifier view",
+              },
+              null,
+              {
+                type: "click",
+                event: () => {
+                  this.toggleModView();
+                },
+              }
+            ),
+            createElement(
+              "small",
+              { style: "color: var(--pink)" },
+              "Passive Perception Modifier"
+            ),
+          ]
+        ),
+      ])
+    );
+  }
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
+    if (this.modView) {
+      return this.renderModView();
+    }
+
+    this.domComponent.append(
+      createElement("div", { class: "cp-content-container-long" }, [
+        createElement(
+          "div",
+          {
+            class: "cp-content-long-number",
+            style: `color: ${calculateColorMod(
+              this.calculatePassivePerception(),
+              this.wisdomMod,
+              "var(--blue6)"
+            )}`,
+          },
+          this.calculatePassivePerception()
+        ),
+        createElement(
+          "div",
+          { class: "cp-content-long-title", style: "align-items: baseline" },
+          [
+            createElement(
+              "img",
+              {
+                width: 15,
+                class: "gear-gen",
+                style: "margin-right: 3px;",
+                src: "/assets/gears.svg",
+                title: "Toggle modifier view",
+              },
+              null,
+              {
+                type: "click",
+                event: () => {
+                  this.toggleModView();
+                },
+              }
+            ),
+            createElement("small", {}, "Passive Perception (Wis)"),
+          ]
+        ),
+      ])
+    );
   };
 }
