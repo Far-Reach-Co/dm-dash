@@ -14,8 +14,6 @@ export default class TableSidebarComponent {
 
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
-
-    this.render();
   }
 
   toggleImageLoading = () => {
@@ -116,6 +114,9 @@ export default class TableSidebarComponent {
         }
       })
     );
+    // remove temp loading spinner
+    this.tempLoadingSpinner.remove();
+
     imageElems = imageElems.sort((a, b) => {
       if (
         a.children[1].innerText.toUpperCase() <
@@ -150,6 +151,10 @@ export default class TableSidebarComponent {
     if (this.imageLoading) {
       return this.domComponent.append(renderLoadingWithMessage(""));
     }
+
+    // temp spinner while loading image assets
+    this.tempLoadingSpinner = renderLoadingWithMessage("");
+    this.domComponent.append(this.tempLoadingSpinner);
 
     this.domComponent.append(
       createElement(

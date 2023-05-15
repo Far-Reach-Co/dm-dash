@@ -58,6 +58,9 @@ export default class TableSidebar {
   render = async () => {
     this.domComponent.innerHTML = "";
 
+    this.tableSidebarComponent.render();
+    this.onlineUsersComponent.render();
+
     const container = createElement(
       "div",
       {
@@ -83,8 +86,6 @@ class OnlineUsersComponent {
     this.domComponent.className = "online-users-container";
 
     this.usersList = [];
-
-    this.render();
   }
 
   renderUsersList = () => {
