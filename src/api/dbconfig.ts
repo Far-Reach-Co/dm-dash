@@ -1,4 +1,4 @@
-import { Pool, QueryArrayResult } from "pg";
+import { Pool, QueryResult, QueryResultRow } from "pg";
 
 // LOCAL
 var credentials = {
@@ -11,10 +11,10 @@ var credentials = {
 
 var pool = new Pool(credentials);
 
-async function query(
+async function query<T extends QueryResultRow>(
   queryObject: { text: string; values?: any[] },
   params?: any
-) {
+): Promise<QueryResult<T>> {
   const start = Date.now();
   const res = await pool.query(queryObject, params);
   const duration = Date.now() - start;

@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-async function addProjectQuery(data: {title: string, user_id: string}) {
+async function addProjectQuery(data: {title: string, user_id: string | number}) {
   const query = {
     text: /*sql*/ `insert into public."Project" (title, user_id) values($1,$2) returning *`,
     values: [
