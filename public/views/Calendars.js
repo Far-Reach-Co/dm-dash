@@ -26,7 +26,7 @@ export default class CalendarView {
   toggleLoading = () => {
     this.loading = !this.loading;
     this.render();
-  }
+  };
 
   resetCalendarCreation = () => {
     this.creatingNewCalendar = false;
@@ -106,7 +106,9 @@ export default class CalendarView {
         // index
         const indexLabel = createElement(
           "div",
-          { style: "display: inline-block; margin-right: 10px;" },
+          {
+            style: "display: inline-block; margin-right: var(--main-distance);",
+          },
           `Day ${index + 1}`
         );
         // title
@@ -178,7 +180,8 @@ export default class CalendarView {
 
     const completeButton = createElement("button", {}, "Complete");
     completeButton.addEventListener("click", async () => {
-      if (!this.daysOfTheWeek.length) return alert("Please create at least one day");
+      if (!this.daysOfTheWeek.length)
+        return alert("Please create at least one day");
       this.toggleLoading();
       this.resetCalendarCreation();
       await this.updateDays();
@@ -250,7 +253,9 @@ export default class CalendarView {
         // index
         const indexLabel = createElement(
           "div",
-          { style: "display: inline-block; margin-right: 10px;" },
+          {
+            style: "display: inline-block; margin-right: var(--main-distance);",
+          },
           `Month ${index + 1}`
         );
         // title
@@ -264,7 +269,10 @@ export default class CalendarView {
         // number of days
         const numOfDaysLabel = createElement(
           "label",
-          { for: "number_of_days", style: "margin-right: 10px;" },
+          {
+            for: "number_of_days",
+            style: "margin-right: var(--main-distance);",
+          },
           "Days"
         );
         const numOfDaysInput = createElement("input", {
@@ -401,12 +409,12 @@ export default class CalendarView {
               this.calendarBeingCreated = newCal;
               this.creatingNewMonths = true;
             }
-            this.toggleLoading()
+            this.toggleLoading();
           },
         }
       ),
       createElement("br"),
-      createElement("button", {class: "btn-red"}, "Cancel", {
+      createElement("button", { class: "btn-red" }, "Cancel", {
         type: "click",
         event: () => {
           this.creatingNewCalendar = false;
@@ -453,13 +461,18 @@ export default class CalendarView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", {class: "new-btn"}, "+ Calendar", {
-        type: "click",
-        event: () => {
-          this.creatingNewCalendar = true;
-          this.render();
-        },
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new calendar" },
+        "+ Calendar",
+        {
+          type: "click",
+          event: () => {
+            this.creatingNewCalendar = true;
+            this.render();
+          },
+        }
+      );
   };
 
   render = async () => {

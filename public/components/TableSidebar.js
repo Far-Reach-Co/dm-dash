@@ -26,6 +26,7 @@ export default class TableSidebar {
       id: "close-sidebar",
       class: "close-sidebar",
       src: "/assets/sidebar.svg",
+      title: "Toggle sidebar",
       height: 32,
       width: 32,
     });
@@ -57,6 +58,9 @@ export default class TableSidebar {
   render = async () => {
     this.domComponent.innerHTML = "";
 
+    this.tableSidebarComponent.render();
+    this.onlineUsersComponent.render();
+
     const container = createElement(
       "div",
       {
@@ -82,8 +86,6 @@ class OnlineUsersComponent {
     this.domComponent.className = "online-users-container";
 
     this.usersList = [];
-
-    this.render();
   }
 
   renderUsersList = () => {

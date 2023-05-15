@@ -197,10 +197,15 @@ export default class CharactersView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", { class: "new-btn" }, "+ Character", {
-        type: "click",
-        event: this.toggleCreatingCharacter,
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new character" },
+        "+ Character",
+        {
+          type: "click",
+          event: this.toggleCreatingCharacter,
+        }
+      );
   };
 
   render = async () => {

@@ -121,7 +121,7 @@ export default class EquipmentComponent {
                 postThing(`/api/edit_5e_character_equipment/${item.id}`, {
                   title: e.target.value,
                 });
-                this.equipmentData[index].title = e.target.value
+                this.equipmentData[index].title = e.target.value;
               },
             }
           ),
@@ -143,7 +143,7 @@ export default class EquipmentComponent {
                 await postThing(`/api/edit_5e_character_equipment/${item.id}`, {
                   quantity: e.target.valueAsNumber,
                 });
-                this.equipmentData[index].quantity = e.target.valueAsNumber
+                this.equipmentData[index].quantity = e.target.valueAsNumber;
                 // re-calc weight
                 this.updateWeight();
               },
@@ -166,7 +166,7 @@ export default class EquipmentComponent {
                 await postThing(`/api/edit_5e_character_equipment/${item.id}`, {
                   weight: e.target.valueAsNumber,
                 });
-                this.equipmentData[index].weight = e.target.valueAsNumber
+                this.equipmentData[index].weight = e.target.valueAsNumber;
                 // re-calc weight
                 this.updateWeight();
               },
@@ -176,6 +176,7 @@ export default class EquipmentComponent {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove equipment",
             },
             "ⓧ",
             {
@@ -253,10 +254,18 @@ export default class EquipmentComponent {
             "display: flex; align-items: center; justify-content: space-between",
         },
         [
-          createElement("a", { style: "align-self: flex-start;" }, "+", {
-            type: "click",
-            event: this.toggleCreating,
-          }),
+          createElement(
+            "a",
+            {
+              style: "align-self: flex-start;",
+              title: "Create a new equipment",
+            },
+            "+",
+            {
+              type: "click",
+              event: this.toggleCreating,
+            }
+          ),
           createElement("div", { style: "display: flex;" }, [
             createElement(
               "div",

@@ -207,6 +207,7 @@ export default class SingleLocationView {
         {
           class: "small-clickable",
           style: "margin: 3px",
+          title: "Navigate to the detail view of this sub-location",
         },
         location.title,
         {
@@ -240,6 +241,7 @@ export default class SingleLocationView {
         {
           class: "small-clickable",
           style: "margin: 3px",
+          title: "Navigate to the detail view of this character",
         },
         character.title,
         {
@@ -273,6 +275,7 @@ export default class SingleLocationView {
         {
           class: "small-clickable",
           style: "margin: 3px",
+          title: "Navigate to the detail view of this item",
         },
         item.title,
         {
@@ -305,7 +308,11 @@ export default class SingleLocationView {
     if (parentLocation) {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin: 3px" },
+        {
+          class: "small-clickable",
+          style: "margin: 3px",
+          title: "Navigate to the detail view of this parent-location",
+        },
         parentLocation.title,
         {
           type: "click",
@@ -322,10 +329,17 @@ export default class SingleLocationView {
       if (state.currentProject.isEditor === false) {
         return createElement("small", {}, "None...");
       }
-      return createElement("button", {}, "🔗 Parent-Location", {
-        type: "click",
-        event: this.toggleAddParentLocation,
-      });
+      return createElement(
+        "button",
+        {
+          title: "Assign another location as a parent-location to this one",
+        },
+        "🔗 Parent-Location",
+        {
+          type: "click",
+          event: this.toggleAddParentLocation,
+        }
+      );
     }
   };
 
@@ -343,10 +357,18 @@ export default class SingleLocationView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else {
-      return createElement("a", { style: "align-self: flex-end;" }, "+", {
-        type: "click",
-        event: this.toggleCreatingSubLocation,
-      });
+      return createElement(
+        "a",
+        {
+          style: "align-self: flex-end;",
+          title: "Create new sub-location of this location",
+        },
+        "+",
+        {
+          type: "click",
+          event: this.toggleCreatingSubLocation,
+        }
+      );
     }
   };
 
@@ -404,6 +426,7 @@ export default class SingleLocationView {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -482,7 +505,12 @@ export default class SingleLocationView {
             this.saveLocation(e, richText.children[1].innerHTML);
           },
         }
-      )
+      ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      })
     );
   };
 
@@ -492,7 +520,11 @@ export default class SingleLocationView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin-left: 3px;",
+          title: "Open edit utility",
+        },
         "Edit",
         {
           type: "click",

@@ -6,15 +6,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Far Reach Co. | Login</title>
     <link rel="stylesheet" href="/style.css" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="/assets/favicons/peli_favicon_16.ico"
+      sizes="16x16"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="/assets/favicons/peli_favicon_32.ico"
+      sizes="32x32"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="/assets/favicons/peli_favicon_96.ico"
+      sizes="96x96"
+    />
+    <script src="/lib/AccountManager.js" defer type="module"></script>
+    <script src="/lib/MobileNavHandler.js" defer></script>
   </head>
   <body>
+    <div id="nav-links-container-mobile"></div>
     <nav>
       <a style="display: flex; align-items: center" href="/index.html">
         <img height="35px" src="/assets/frlogo.webp" alt="" />
       </a>
+      <img
+        src="/assets/hamburger.svg"
+        height="32"
+        width="32"
+        id="nav-ham"
+        alt=""
+      />
+      <div id="nav-links-container" style="display: flex"></div>
     </nav>
     <div class="container">
-      <form id="login-form">
+      <form id="login-form" class="auth-container">
         <div class="form-item">
           <label for="email">Email</label>
           <input
@@ -72,7 +101,7 @@
             return (window.location.pathname = "/invite.html");
           }
           // else push to account page
-          window.location.pathname = "/account.html";
+          window.location.pathname = "/dashboard.html";
         } else if (res.status === 400) {
           alert(resData.message);
         } else {

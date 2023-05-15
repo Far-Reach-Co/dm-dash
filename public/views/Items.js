@@ -199,10 +199,15 @@ export default class ItemsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", { class: "new-btn" }, "+ Item", {
-        type: "click",
-        event: this.toggleCreatingItem,
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new item" },
+        "+ Item",
+        {
+          type: "click",
+          event: this.toggleCreatingItem,
+        }
+      );
   };
 
   render = async () => {

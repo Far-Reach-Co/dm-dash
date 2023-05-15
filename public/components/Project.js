@@ -25,6 +25,7 @@ export default class Project {
     this.dateJoined = props.dateJoined;
     this.projectUserId = props.projectUserId;
     this.usedDataInBytes = props.usedDataInBytes;
+    this.imageId = props.imageId;
 
     this.edit = false;
     this.parentRender = props.parentRender;
@@ -47,15 +48,15 @@ export default class Project {
     this.render();
   };
 
-  editTitle = (title) => {
-    this.title = title.trim();
-  };
+  // editTitle = (title) => {
+  //   this.title = title.trim();
+  // };
 
-  saveProject = async () => {
-    await postThing(`/api/edit_project/${this.id}`, {
-      title: this.title,
-    });
-  };
+  // saveProject = async () => {
+  //   await postThing(`/api/edit_project/${this.id}`, {
+  //     title: this.title,
+  //   });
+  // };
 
   addInviteLink = async () => {
     try {
@@ -110,10 +111,14 @@ export default class Project {
         "div",
         {
           style:
-            "display: flex; justify-content: space-between; margin-bottom: 5px;",
+            "display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;",
         },
         [
-          createElement("div", {}, user.username),
+          createElement(
+            "div",
+            { style: "color: var(--blue6); margin-left: 3px;" },
+            user.username
+          ),
           createElement("label", { class: "switch" }, [
             checkbox,
             createElement("span", { class: "slider round" }),
@@ -123,20 +128,36 @@ export default class Project {
       return elem;
     });
     if (map.length) return map;
-    else return [createElement("div", { style: "visibility: hidden;" })];
+    else
+      return [
+        createElement("small", { style: "margin-left: 20px;" }, "None..."),
+      ];
   };
 
   renderManageUsersComponent = async () => {
     if (!this.wasJoined) {
       return [
-        createElement("h2", {}, "Manage Invited-Users"),
+        createElement("h3", {}, "Player Permissions"),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Give an invited-user access to edit the resources in your wyrld by making them a Manager."
+        ),
         createElement("br"),
         createElement(
           "div",
           { style: "display: flex; justify-content: space-between;" },
           [
-            createElement("small", {}, "Email"),
-            createElement("small", {}, "Is Editor"),
+            createElement(
+              "small",
+              { style: "text-decoration: underline;" },
+              "Email"
+            ),
+            createElement(
+              "small",
+              { style: "text-decoration: underline;" },
+              "Manager"
+            ),
           ]
         ),
         createElement("br"),
@@ -149,10 +170,10 @@ export default class Project {
   renderInviteLinkComponent = () => {
     if (!this.projectInvite) {
       return [
-        createElement("hr"),
-        createElement("h2", {}, "Share This Project"),
         createElement("br"),
-        createElement("button", {}, "Create Invite Link", {
+        createElement("h3", {}, "Share This Project"),
+        createElement("br"),
+        createElement("button", {}, "+ Invite Link", {
           type: "click",
           event: async () => {
             this.loadingProjectInvite = true;
@@ -162,13 +183,18 @@ export default class Project {
             this.render();
           },
         }),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Create an invite link to allow other users to join your wyrld."
+        ),
       ];
     } else {
       const inviteLink = `${window.location.origin}/invite.html?invite=${this.projectInvite.uuid}`;
 
       const inviteLinkButton = createElement(
         "button",
-        { style: "margin-right: 10px;" },
+        { style: "margin-right: var(--main-distance);" },
         "Copy Link"
       );
       inviteLinkButton.addEventListener("click", () => {
@@ -191,13 +217,30 @@ export default class Project {
       });
 
       return [
-        createElement("hr"),
-        createElement("h2", {}, "Share Invite Link"),
         createElement("br"),
-        createElement("div", {}, inviteLink),
-        inviteLinkButton,
+        createElement("h3", {}, "Share Invite Link"),
+        createElement("div", { class: "hint" }, "*Manage invite links."),
         createElement("br"),
-        removeInviteButton,
+        createElement(
+          "small",
+          { style: "color: var(--blue6); margin-bottom: 3px;" },
+          inviteLink
+        ),
+        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+          inviteLinkButton,
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              removeInviteButton,
+              createElement(
+                "div",
+                { class: "hint" },
+                "*It will no longer be used to gain access to this wyrld."
+              ),
+            ]
+          ),
+        ]),
       ];
     }
   };
@@ -208,23 +251,6 @@ export default class Project {
         renderLoadingWithMessage("Creating invite link...")
       );
     }
-
-    const titleInput = createElement("input", {
-      id: `edit-project-title-${this.id}`,
-      value: this.title,
-      style: "margin-right: 10px;",
-    });
-
-    const doneButton = createElement(
-      "button",
-      { style: "margin-right: 10px;" },
-      "Done"
-    );
-    doneButton.addEventListener("click", async () => {
-      this.editTitle(titleInput.value);
-      this.saveProject();
-      this.toggleEdit();
-    });
 
     const removeButton = createElement(
       "button",
@@ -253,30 +279,62 @@ export default class Project {
     if (this.isEditor === false) {
       return this.domComponent.append(
         createElement("div", { class: "project-edit-container" }, [
-          createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
-          doneButton,
-          createElement("br"),
+          createElement("h1", {}, `~ ${this.title} ~`),
+          createElement("h2", {}, `Wylrd Settings`),
+          createElement(
+            "div",
+            { class: "hint" },
+            "*Manage important settings for this joined wyrld."
+          ),
+          createElement("hr"),
+          createElement("div", { class: "danger-heading" }, "Danger"),
           removeButton,
-        ])
+        ]),
+        createElement(
+          "img",
+          {
+            class: "icon gear",
+            src: "/assets/gears.svg",
+            title: "Toggle wyrld settings",
+          },
+          null,
+          {
+            type: "click",
+            event: this.toggleEdit,
+          }
+        )
       );
     }
 
     // append
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h2", {}, `Edit Wyrld: "${this.title}"`),
-        createElement("br"),
-        createElement("div", { style: "display: flex; align-items: center;" }, [
-          createElement("div", { style: "margin-right: 10px" }, "Title"),
-          titleInput,
-        ]),
+        createElement("h1", {}, `~ ${this.title} ~`),
+        createElement("h2", {}, `Wyrld Settings`),
+        createElement(
+          "div",
+          { class: "hint" },
+          "*Manage important settings and invited players for your wyrld."
+        ),
         ...this.renderInviteLinkComponent(),
-        createElement("hr"),
-        ...(await this.renderManageUsersComponent()),
-        doneButton,
         createElement("br"),
+        ...(await this.renderManageUsersComponent()),
+        createElement("div", { class: "danger-heading" }, "Danger"),
         removeButton,
-      ])
+      ]),
+      createElement(
+        "img",
+        {
+          class: "icon gear",
+          src: "/assets/gears.svg",
+          title: "Toggle wyrld settings",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleEdit,
+        }
+      )
     );
   };
 
@@ -317,25 +375,19 @@ export default class Project {
         {
           id: `project-${this.id}`,
           class: "project-button",
-          title: "Enter wyrld",
+          title: "Open wyrld",
         },
         [
           createElement("h1", {}, this.title),
-          createElement(
-            "div",
-            { class: "project-extra-info" },
-            this.calculateDateDisplay()
-          ),
-          createElement(
-            "div",
-            { class: "project-extra-info" },
-            this.calculateUsedData()
-          ),
-          createElement(
-            "div",
-            { class: "project-extra-info" },
-            `${this.projectUsers.length + 1} Members`
-          ),
+          createElement("div", { class: "project-btn-info-box" }, [
+            createElement("small", {}, this.calculateDateDisplay()),
+            createElement("small", {}, this.calculateUsedData()),
+            createElement(
+              "small",
+              {},
+              `${this.projectUsers.length + 1} Members`
+            ),
+          ]),
         ],
         {
           type: "click",
@@ -351,16 +403,22 @@ export default class Project {
               wasJoined: this.wasJoined,
               dateJoined: this.dateJoined,
               projectUserId: this.projectUserId,
+              imageId: this.imageId,
             };
-            this.navigate({ title: "landing", sidebar: true });
+            this.navigate({
+              title: "landing",
+              sidebar: true,
+              params: { refreshComponentState: true },
+            });
           },
         }
       ),
       createElement(
         "img",
         {
-          class: "icon",
+          class: "icon gear",
           src: "/assets/gears.svg",
+          title: "Toggle wyrld settings",
         },
         null,
         {

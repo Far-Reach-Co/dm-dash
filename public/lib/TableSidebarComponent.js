@@ -14,8 +14,6 @@ export default class TableSidebarComponent {
 
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
-
-    this.render();
   }
 
   toggleImageLoading = () => {
@@ -70,7 +68,10 @@ export default class TableSidebarComponent {
           const elem = createElement("div", { class: "sidebar-image-item" }, [
             createElement(
               "a",
-              { style: "display: flex; align-items: center; flex: 1;" },
+              {
+                style: "display: flex; align-items: center; flex: 1;",
+                title: "Click and drag image to the table",
+              },
               [
                 createElement(
                   "div",
@@ -97,7 +98,8 @@ export default class TableSidebarComponent {
               "div",
               {
                 style:
-                  "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                  "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                title: "Remove image from wyrld asset library",
               },
               "ⓧ",
               {
@@ -112,6 +114,9 @@ export default class TableSidebarComponent {
         }
       })
     );
+    // remove temp loading spinner
+    this.tempLoadingSpinner.remove();
+
     imageElems = imageElems.sort((a, b) => {
       if (
         a.children[1].innerText.toUpperCase() <
@@ -147,6 +152,10 @@ export default class TableSidebarComponent {
       return this.domComponent.append(renderLoadingWithMessage(""));
     }
 
+    // temp spinner while loading image assets
+    this.tempLoadingSpinner = renderLoadingWithMessage("");
+    this.domComponent.append(this.tempLoadingSpinner);
+
     this.domComponent.append(
       createElement(
         "input",
@@ -170,6 +179,7 @@ export default class TableSidebarComponent {
         {
           for: "image",
           class: "label-btn",
+          title: "Upload image to be used on virtual table",
         },
         "+ Image"
       ),

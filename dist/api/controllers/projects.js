@@ -62,8 +62,6 @@ function addProject(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 4, , 5]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, getProjectsQuery(req.user.id)];
                 case 1:
                     projectsData = _a.sent();
@@ -186,25 +184,17 @@ function getProjects(req, res, next) {
 }
 function removeProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, calendarData, locationsData, charactersData, clocksData, countersData, eventsData, itemsData, loreData, notesData, projectInvitesData, projectUsersData, tableImages, tableViews, err_4;
+        var calendarData, locationsData, charactersData, clocksData, countersData, eventsData, itemsData, loreData, notesData, projectInvitesData, projectUsersData, tableImages, tableViews, err_4;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 16, , 17]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.params.id)];
-                case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (project.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
+                    _a.trys.push([0, 15, , 16]);
                     return [4, removeProjectQuery(req.params.id)];
-                case 2:
+                case 1:
                     _a.sent();
                     return [4, getCalendarQuery(req.params.id)];
-                case 3:
+                case 2:
                     calendarData = _a.sent();
                     calendarData.rows.forEach(function (calendar) { return __awaiter(_this, void 0, void 0, function () {
                         var monthsData, daysData;
@@ -249,7 +239,7 @@ function removeProject(req, res, next) {
                             limit: 10000,
                             offset: 0
                         })];
-                case 4:
+                case 3:
                     locationsData = _a.sent();
                     locationsData.rows.forEach(function (location) { return __awaiter(_this, void 0, void 0, function () {
                         var imageData, image;
@@ -279,7 +269,7 @@ function removeProject(req, res, next) {
                             limit: 10000,
                             offset: 0
                         })];
-                case 5:
+                case 4:
                     charactersData = _a.sent();
                     charactersData.rows.forEach(function (character) { return __awaiter(_this, void 0, void 0, function () {
                         var imageData, image;
@@ -305,7 +295,7 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     return [4, getClocksQuery(req.params.id)];
-                case 6:
+                case 5:
                     clocksData = _a.sent();
                     clocksData.rows.forEach(function (clock) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -318,7 +308,7 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     return [4, getAllCountersByProjectQuery(req.params.id)];
-                case 7:
+                case 6:
                     countersData = _a.sent();
                     countersData.rows.forEach(function (counter) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -335,7 +325,7 @@ function removeProject(req, res, next) {
                             limit: 1000000,
                             offset: 0
                         })];
-                case 8:
+                case 7:
                     eventsData = _a.sent();
                     eventsData.rows.forEach(function (event) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -352,7 +342,7 @@ function removeProject(req, res, next) {
                             limit: 10000,
                             offset: 0
                         })];
-                case 9:
+                case 8:
                     itemsData = _a.sent();
                     itemsData.rows.forEach(function (item) { return __awaiter(_this, void 0, void 0, function () {
                         var imageData, image;
@@ -382,7 +372,7 @@ function removeProject(req, res, next) {
                             limit: 10000,
                             offset: 0
                         })];
-                case 10:
+                case 9:
                     loreData = _a.sent();
                     loreData.rows.forEach(function (lore) { return __awaiter(_this, void 0, void 0, function () {
                         var imageData, image, relationsData;
@@ -422,7 +412,7 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     return [4, getAllNotesByProjectQuery(req.params.id)];
-                case 11:
+                case 10:
                     notesData = _a.sent();
                     notesData.rows.forEach(function (note) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -435,7 +425,7 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     return [4, getProjectInviteByProjectQuery(req.params.id)];
-                case 12:
+                case 11:
                     projectInvitesData = _a.sent();
                     projectInvitesData.rows.forEach(function (invite) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -448,7 +438,7 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     return [4, getProjectUsersByProjectQuery(req.params.id)];
-                case 13:
+                case 12:
                     projectUsersData = _a.sent();
                     projectUsersData.rows.forEach(function (user) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -461,7 +451,7 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     return [4, getTableImagesQuery(req.params.id)];
-                case 14:
+                case 13:
                     tableImages = _a.sent();
                     tableImages.rows.forEach(function (tableImage) { return __awaiter(_this, void 0, void 0, function () {
                         var imageData, image;
@@ -482,7 +472,7 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     return [4, getTableViewsQuery(req.params.id)];
-                case 15:
+                case 14:
                     tableViews = _a.sent();
                     tableViews.rows.forEach(function (tableView) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
@@ -495,48 +485,33 @@ function removeProject(req, res, next) {
                         });
                     }); });
                     res.status(204).send();
-                    return [3, 17];
-                case 16:
+                    return [3, 16];
+                case 15:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 17];
-                case 17: return [2];
+                    return [3, 16];
+                case 16: return [2];
             }
         });
     });
 }
 function editProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUser, data, err_5;
+        var data, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getProjectQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, editProjectQuery(req.params.id, req.body)];
                 case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 3];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 2:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 3;
-                case 3: return [4, editProjectQuery(req.params.id, req.body)];
-                case 4:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_5 = _a.sent();
                     next(err_5);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });

@@ -35,172 +35,88 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/days.js"), addDayQuery = _a.addDayQuery, getDaysQuery = _a.getDaysQuery, getDayQuery = _a.getDayQuery, removeDayQuery = _a.removeDayQuery, editDayQuery = _a.editDayQuery;
-var getCalendarQuery = require("../queries/calendars.js").getCalendarQuery;
-var getProjectQuery = require("../queries/projects.js").getProjectQuery;
-var getProjectUserByUserAndProjectQuery = require("../queries/projectUsers.js").getProjectUserByUserAndProjectQuery;
+exports.__esModule = true;
+var days_1 = require("../queries/days");
 function addDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var calendarData, calendar, projectData, project, projectUser, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getCalendarQuery(req.body.calendar_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, days_1.addDayQuery)(req.body)];
                 case 1:
-                    calendarData = _a.sent();
-                    calendar = calendarData.rows[0];
-                    return [4, getProjectQuery(calendar.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, addDayQuery(req.body)];
-                case 5:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function getDays(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var calendarData, calendar, projectData, project, projectUser, data, err_2;
+        var data, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getCalendarQuery(req.params.calendar_id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, days_1.getDaysQuery)(req.params.calendar_id)];
                 case 1:
-                    calendarData = _a.sent();
-                    calendar = calendarData.rows[0];
-                    return [4, getProjectQuery(calendar.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 4];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 3:
-                    projectUser = _a.sent();
-                    if (!projectUser)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 4;
-                case 4: return [4, getDaysQuery(req.params.calendar_id)];
-                case 5:
                     data = _a.sent();
                     res.send(data.rows);
-                    return [3, 7];
-                case 6:
+                    return [3, 3];
+                case 2:
                     err_2 = _a.sent();
                     next(err_2);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function removeDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var dayData, day, calendarData, calendar, projectData, project, projectUser, err_3;
+        var err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 7, , 8]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getDayQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, days_1.removeDayQuery)(req.params.id)];
                 case 1:
-                    dayData = _a.sent();
-                    day = dayData.rows[0];
-                    return [4, getCalendarQuery(day.calendar_id)];
-                case 2:
-                    calendarData = _a.sent();
-                    calendar = calendarData.rows[0];
-                    return [4, getProjectQuery(calendar.project_id)];
-                case 3:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 5];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 4:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 5;
-                case 5: return [4, removeDayQuery(req.params.id)];
-                case 6:
                     _a.sent();
                     res.status(204).send();
-                    return [3, 8];
-                case 7:
+                    return [3, 3];
+                case 2:
                     err_3 = _a.sent();
                     next(err_3);
-                    return [3, 8];
-                case 8: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
 function editDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var dayData, day, calendarData, calendar, projectData, project, projectUser, data, err_4;
+        var data, err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 7, , 8]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
-                    return [4, getDayQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, days_1.editDayQuery)(req.params.id, req.body)];
                 case 1:
-                    dayData = _a.sent();
-                    day = dayData.rows[0];
-                    return [4, getCalendarQuery(day.calendar_id)];
-                case 2:
-                    calendarData = _a.sent();
-                    calendar = calendarData.rows[0];
-                    return [4, getProjectQuery(calendar.project_id)];
-                case 3:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!(project.user_id !== req.user.id)) return [3, 5];
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, project.id)];
-                case 4:
-                    projectUser = _a.sent();
-                    if (projectUser.rows &&
-                        projectUser.rows.length &&
-                        !projectUser.rows[0].is_editor)
-                        throw { status: 403, message: "Forbidden" };
-                    _a.label = 5;
-                case 5: return [4, editDayQuery(req.params.id, req.body)];
-                case 6:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
-                    return [3, 8];
-                case 7:
+                    return [3, 3];
+                case 2:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 8];
-                case 8: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });

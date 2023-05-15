@@ -37,19 +37,24 @@ export default class Campaign {
     const titleInput = createElement("input", {
       id: `edit-project-title-${this.id}`,
       value: this.title,
-      style: "margin-right: 10px;",
+      style: "margin-right: var(--main-distance);",
     });
 
     this.domComponent.append(
       createElement("div", { class: "project-edit-container" }, [
-        createElement("h1", {}, `Manage Campaign: "${this.title}"`),
+        createElement("h1", {}, `~ ${this.title} ~`),
+        createElement("h2", {}, "Campaign Settings"),
         createElement("br"),
         createElement("div", { style: "display: flex; align-items: center;" }, [
-          createElement("div", { style: "margin-right: 10px" }, "Title"),
+          createElement(
+            "label",
+            { style: "margin-right: var(--main-distance)" },
+            "Title"
+          ),
           titleInput,
         ]),
         createElement("br"),
-        createElement("button", {}, "Done", {
+        createElement("button", { class: "new-btn" }, "Save", {
           type: "click",
           event: () => {
             this.editTitle(titleInput.value);
@@ -57,7 +62,8 @@ export default class Campaign {
             this.toggleEdit();
           },
         }),
-        createElement("br"),
+        createElement("hr"),
+        createElement("div", { class: "danger-heading" }, "Danger"),
         createElement("button", { class: "btn-red" }, "Delete Campaign", {
           type: "click",
           event: (e) => {
@@ -71,7 +77,8 @@ export default class Campaign {
             }
           },
         }),
-      ])
+      ]),
+      this.renderEditButtonOrNull()
     );
   };
 
@@ -94,8 +101,9 @@ export default class Campaign {
       return createElement(
         "img",
         {
-          class: "icon",
+          class: "icon gear",
           src: "/assets/gears.svg",
+          title: "Toggle campaign settings",
         },
         null,
         {
@@ -119,12 +127,12 @@ export default class Campaign {
         "div",
         {
           class: "project-button",
-          title: "Open Campaign in new tab",
+          title: "Open campaign in new tab",
         },
         [
-          createElement("h1", {}, this.title + "↗"),
+          createElement("h1", {}, this.title + " ↗"),
           createElement(
-            "div",
+            "small",
             { class: "project-extra-info" },
             this.calculateDateDisplay()
           ),

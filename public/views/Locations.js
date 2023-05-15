@@ -202,10 +202,15 @@ export default class LocationsView {
     if (state.currentProject.isEditor === false) {
       return createElement("div", { style: "visibility: hidden;" });
     } else
-      return createElement("button", { class: "new-btn" }, "+ Location", {
-        type: "click",
-        event: this.toggleCreatingLocation,
-      });
+      return createElement(
+        "button",
+        { class: "new-btn", title: "Create new location" },
+        "+ Location",
+        {
+          type: "click",
+          event: this.toggleCreatingLocation,
+        }
+      );
   };
 
   render = async () => {

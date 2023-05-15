@@ -87,6 +87,12 @@ class App {
           displayTitle: "About",
           params: {},
         },
+        // {
+        //   id: "sidebar-notes",
+        //   title: "notes",
+        //   displayTitle: "Notes",
+        //   params: {},
+        // },
         {
           id: "sidebar-campaigns",
           title: "campaigns",
@@ -94,15 +100,21 @@ class App {
           params: {},
         },
         {
-          id: "sidebar-locations",
-          title: "locations",
-          displayTitle: "Locations",
+          id: "sidebar-players",
+          title: "players",
+          displayTitle: "Player Sheets",
           params: {},
         },
         {
           id: "sidebar-characters",
           title: "characters",
-          displayTitle: "Characters",
+          displayTitle: "NPCs",
+          params: {},
+        },
+        {
+          id: "sidebar-locations",
+          title: "locations",
+          displayTitle: "Locations",
           params: {},
         },
         {
@@ -137,18 +149,6 @@ class App {
         },
       ],
       secondRoutes: [
-        {
-          id: "sidebar-players",
-          title: "players",
-          displayTitle: "Connected Players",
-          params: {},
-        },
-        {
-          id: "sidebar-notes",
-          title: "notes",
-          displayTitle: "Notes",
-          params: {},
-        },
         // {
         //   id: "sidebar-counters",
         //   title: "counters",
@@ -328,8 +328,8 @@ class App {
     this.views.projects = view;
   };
 
-  renderLandingView = ({ navigate }) => {
-    if (this.views.landing) {
+  renderLandingView = ({ navigate, params }) => {
+    if (this.views.landing && !params.refreshComponentState) {
       return this.domComponent.appendChild(this.views.landing.domComponent);
     }
     const element = createElement("div");
@@ -418,7 +418,10 @@ class App {
       case "campaigns":
         return this.renderCampaignsView({ navigate: this.navigate.navigate });
       case "landing":
-        return this.renderLandingView({ navigate: this.navigate.navigate });
+        return this.renderLandingView({
+          navigate: this.navigate.navigate,
+          params: this.navigate.currentRoute.params,
+        });
       default:
         return this.renderProjectsView({ navigate: this.navigate.navigate });
     }

@@ -16,7 +16,7 @@ export default function itemTypeSelect(onChangeCallback, currentType) {
       "Artifact",
       "Component",
       "Structure",
-      "Unknown"
+      "Unknown",
     ];
     const typeList = [];
     types.forEach((type) => {
@@ -29,13 +29,16 @@ export default function itemTypeSelect(onChangeCallback, currentType) {
 
   return createElement(
     "select",
-    { id: "type", name: "type", required: false },
+    { id: "type", name: "type", required: false, title: "Choose an item type" },
     [
       createElement("option", { value: "None" }, "None"),
       ...renderItemTypeSelectOptions(),
     ],
-    {type: "change", event: (e) => {
-      if(onChangeCallback) onChangeCallback(e.target.value);
-    }}
+    {
+      type: "change",
+      event: (e) => {
+        if (onChangeCallback) onChangeCallback(e.target.value);
+      },
+    }
   );
 }

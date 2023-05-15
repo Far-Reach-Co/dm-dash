@@ -55,8 +55,6 @@ function add5eChar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 6, , 7]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, get5eCharsGeneralByUserQuery(req.user.id)];
                 case 1:
                     generalsData = _a.sent();
@@ -96,15 +94,11 @@ function get5eCharsByUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 8, , 9]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, get5eCharsGeneralByUserQuery(req.user.id)];
                 case 1:
                     generalsData = _a.sent();
                     generals = generalsData.rows;
                     if (!generals.length) return [3, 7];
-                    if (generals[0].user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
                     _i = 0, generals_1 = generals;
                     _a.label = 2;
                 case 2:
@@ -148,8 +142,6 @@ function get5eCharGeneral(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 5, , 6]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, get5eCharGeneralQuery(req.params.id)];
                 case 1:
                     generalsData = _a.sent();
@@ -188,14 +180,10 @@ function remove5eChar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 15, , 16]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, get5eCharGeneralQuery(req.params.id)];
                 case 1:
                     generalData = _a.sent();
                     general = generalData.rows[0];
-                    if (general.user_id !== req.user.id)
-                        throw { status: 403, message: "Forbidden" };
                     return [4, get5eCharProByGeneralQuery(general.id)];
                 case 2:
                     proData = _a.sent();
@@ -316,8 +304,6 @@ function edit5eCharGeneral(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, edit5eCharGeneralQuery(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
@@ -339,8 +325,6 @@ function edit5eCharPro(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, edit5eCharProQuery(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
@@ -362,8 +346,6 @@ function edit5eCharBack(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    if (!req.user)
-                        throw { status: 401, message: "Missing Credentials" };
                     return [4, edit5eCharBackQuery(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();

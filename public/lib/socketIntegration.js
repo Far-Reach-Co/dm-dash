@@ -5,6 +5,7 @@ class SocketIntegration {
     this.projectId = null;
     this.user = null;
     this.sidebar = null;
+    this.topLayer = null;
   }
 
   // Listeners
@@ -22,10 +23,34 @@ class SocketIntegration {
       }
     });
 
+    // GRID
+    this.socket.on("grid-change", (gridState) => {
+      // console.log("grid change", gridState)
+      canvasLayer.oGridGroup.visible = gridState;
+      canvasLayer.snapToGrid = gridState;
+      canvasLayer.canvas.renderAll();
+      if (this.topLayer) {
+        this.topLayer.render();
+      }
+    });
+
     // OBJECTS LISTENERS
     this.socket.on("image-add", (newImg) => {
       // console.log("New socket image", newImg);
-
+      // Path drawing
+      if ((newImg.type = "path")) {
+        const newPath = new fabric.Path(newImg.path);
+        newPath.set({
+          id: newImg.id,
+          left: newImg.left,
+          top: newImg.top,
+          fill: false,
+          stroke: newImg.stroke,
+          strokeWidth: newImg.strokeWidth,
+        });
+        return canvasLayer.canvas.add(newPath);
+      }
+      // uploaded images
       fabric.Image.fromURL(newImg.src, function (img) {
         // reconstruct new image
         for (const [key, value] of Object.entries(newImg)) {
@@ -68,7 +93,7 @@ class SocketIntegration {
     });
 
     this.socket.on("image-move", (image) => {
-      console.log("Move socket image", image);
+      // console.log("Move socket image", image);
       canvasLayer.canvas.getObjects().forEach((object) => {
         if (object.id && object.id === image.id) {
           for (var [key, value] of Object.entries(image)) {
@@ -160,6 +185,14 @@ class SocketIntegration {
     this.socket.emit("project-joined", {
       username: this.user.username,
       project: `project-${this.projectId}`,
+    });
+  };
+
+  // GRID
+  gridChange = (gridState) => {
+    this.socket.emit("grid-changed", {
+      project: `project-${this.projectId}`,
+      gridState,
     });
   };
 

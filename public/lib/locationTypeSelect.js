@@ -4,6 +4,19 @@ export default function locationTypeSelect(onChangeCallback, currentType) {
   function renderLocationTypeSelectOptions() {
     const types = [
       "Shop",
+      "Store",
+      "Place",
+      "Temple",
+      "Building",
+      "House",
+      "Container",
+      "Realm",
+      "Section",
+      "Underground",
+      "Floating",
+      "Island",
+      "Institution",
+      "School",
       "Town",
       "Village",
       "City",
@@ -24,13 +37,21 @@ export default function locationTypeSelect(onChangeCallback, currentType) {
 
   return createElement(
     "select",
-    { id: "type", name: "type", required: false },
+    {
+      id: "type",
+      name: "type",
+      required: false,
+      title: "Choose a location type",
+    },
     [
       createElement("option", { value: "None" }, "None"),
       ...renderLocationTypeSelectOptions(),
     ],
-    {type: "change", event: (e) => {
-      if(onChangeCallback) onChangeCallback(e.target.value);
-    }}
+    {
+      type: "change",
+      event: (e) => {
+        if (onChangeCallback) onChangeCallback(e.target.value);
+      },
+    }
   );
 }

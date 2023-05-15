@@ -219,7 +219,8 @@ class SpellInfoComponent {
                   {
                     id: "spell_casting_ability",
                     name: "spell_casting_ability",
-                    style: "margin-right: 10px; width: fit-content",
+                    style:
+                      "margin-right: var(--main-distance); width: fit-content",
                   },
                   [
                     createElement("option", { value: "None" }, "None"),
@@ -245,7 +246,7 @@ class SpellInfoComponent {
               "div",
               {
                 style:
-                  "display: flex; flex-direction: column; align-items: center; margin-right: 10px; margin-left: 10px;",
+                  "display: flex; flex-direction: column; align-items: center; margin-right: var(--main-distance); margin-left: var(--main-distance);",
               },
               [
                 createElement("small", {}, "Spell Save DC"),
@@ -342,7 +343,8 @@ class SingleSpell {
                 "div",
                 {
                   style:
-                    "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                  title: "Remove spell",
                 },
                 "ⓧ",
                 {
@@ -506,10 +508,18 @@ class SingleSpell {
           createElement("h2", {}, "Cantrips"),
           createElement("hr"),
           ...(await this.renderSpells()),
-          createElement("a", { style: "align-self: flex-start;" }, "+", {
-            type: "click",
-            event: () => this.newSpell("cantrip"),
-          }),
+          createElement(
+            "a",
+            {
+              style: "align-self: flex-start;",
+              title: "Create a new cantrip",
+            },
+            "+",
+            {
+              type: "click",
+              event: () => this.newSpell("cantrip"),
+            }
+          ),
         ])
       );
     }
@@ -574,10 +584,18 @@ class SingleSpell {
         ]),
         createElement("hr"),
         ...(await this.renderSpells()),
-        createElement("a", { style: "align-self: flex-start;" }, "+", {
-          type: "click",
-          event: () => this.newSpell(this.spellSlot.title),
-        }),
+        createElement(
+          "a",
+          {
+            style: "align-self: flex-start;",
+            title: "Create a new spell",
+          },
+          "+",
+          {
+            type: "click",
+            event: () => this.newSpell(this.spellSlot.title),
+          }
+        ),
       ])
     );
   };

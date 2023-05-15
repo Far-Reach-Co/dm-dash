@@ -100,6 +100,7 @@ export default class Lore {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -178,6 +179,11 @@ export default class Lore {
           },
         }
       ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      }),
       createElement("br"),
       createElement("button", { class: "btn-red" }, "Remove Lore", {
         type: "click",
@@ -194,14 +200,19 @@ export default class Lore {
 
   renderLoreType = () => {
     if (this.type) {
-      return createElement("a", { class: "small-clickable" }, this.type, {
-        type: "click",
-        event: () => {
-          if (this.handleTypeFilterChange) {
-            this.handleTypeFilterChange(this.type);
-          }
-        },
-      });
+      return createElement(
+        "a",
+        { class: "small-clickable", title: "Set filter to this type" },
+        this.type,
+        {
+          type: "click",
+          event: () => {
+            if (this.handleTypeFilterChange) {
+              this.handleTypeFilterChange(this.type);
+            }
+          },
+        }
+      );
     } else return createElement("div", { style: "display: none;" });
   };
 
@@ -248,7 +259,7 @@ export default class Lore {
       ]),
       descriptionComponent,
       createElement("br"),
-      createElement("button", {}, "Open", {
+      createElement("button", { title: "Open detail view" }, "Open", {
         type: "click",
         event: () =>
           this.navigate({

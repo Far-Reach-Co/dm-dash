@@ -3,6 +3,7 @@ import { getThings, postThing } from "../lib/apiUtils.js";
 import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
+import { tipBox } from "../lib/tipBox.js";
 
 export default class ProjectsView {
   constructor(props) {
@@ -32,32 +33,45 @@ export default class ProjectsView {
     const projectData = await getThings("/api/get_projects");
     if (projectData) state.projects = projectData;
 
-    const map = projectData.map((project) => {
-      // create element
-      const elem = createElement("div", {
-        id: `project-component-${project.id}`,
+    let map = projectData
+      .sort((a, b) => {
+        const aDate = a.date_joined
+          ? new Date(a.date_joined)
+          : new Date(a.date_created);
+        const bDate = b.date_joined
+          ? new Date(b.date_joined)
+          : new Date(b.date_created);
+
+        return bDate - aDate;
+      })
+      .map((project) => {
+        // create element
+        const elem = createElement("div", {
+          id: `project-component-${project.id}`,
+        });
+        // instantiate javascript
+        new Project({
+          domComponent: elem,
+          id: project.id,
+          title: project.title,
+          description: project.description,
+          userId: project.user_id,
+          imageId: project.image_id,
+          dateCreated: project.date_created,
+          usedDataInBytes: project.used_data_in_bytes,
+          isEditor: project.is_editor,
+          wasJoined: project.was_joined,
+          dateJoined: project.date_joined,
+          projectUserId: project.project_user_id,
+          projectInvite: project.project_invite,
+          parentRender: this.render,
+          navigate: this.navigate,
+        });
+        return elem;
       });
-      // instantiate javascript
-      new Project({
-        domComponent: elem,
-        id: project.id,
-        title: project.title,
-        description: project.description,
-        userId: project.user_id,
-        dateCreated: project.date_created,
-        usedDataInBytes: project.used_data_in_bytes,
-        isEditor: project.is_editor,
-        wasJoined: project.was_joined,
-        dateJoined: project.date_joined,
-        projectUserId: project.project_user_id,
-        projectInvite: project.project_invite,
-        parentRender: this.render,
-        navigate: this.navigate,
-      });
-      return elem;
-    });
-    if (map.length) return map;
-    else return [createElement("div", {}, "None...")];
+    if (map.length) {
+      return map;
+    } else return [createElement("div", {}, "None...")];
   };
 
   render = async () => {
@@ -73,12 +87,52 @@ export default class ProjectsView {
     this.domComponent.append(
       createElement("h1", { class: "projects-view-title" }, "Wyrlds"),
       createElement("hr", { class: "special-hr" }),
-      createElement("button", { class: "new-btn" }, "+ Wyrld", {
-        type: "click",
-        event: this.newProject,
-      }),
+      createElement(
+        "div",
+        { style: "display: flex; flex-direction: column;" },
+        [
+          createElement(
+            "button",
+            { class: "new-btn", title: "Create a new wyrld" },
+            "+ Wyrld",
+            {
+              type: "click",
+              event: this.newProject,
+            }
+          ),
+          createElement("div", { class: "hint" }, "*Create a new wyrld"),
+        ]
+      ),
       createElement("hr"),
-      ...(await this.renderProjectsElems())
+      tipBox(
+        "Invite your friends to join a wyrld by sending them an invite link which can be created in the wyrld settings.",
+        "/assets/peli/small/peli_love_small.png",
+        false
+      ),
+      createElement("br"),
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; flex: 1; align-items: flex-end; flex-wrap: wrap-reverse;",
+        },
+        [
+          createElement(
+            "div",
+            { style: "margin-right: var(--main-distance);" },
+            tipBox(
+              'Allowing a player, "Manager" access to a wyrld, allows them to update different resources including virtual table tools and player character sheets. As an owner, you can manage this from the "Player Permissions" section in the wyrld settings.',
+              "/assets/peli/small/peli_dm_small.png",
+              true
+            )
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex: 1; flex-direction: column;" },
+            [...(await this.renderProjectsElems())]
+          ),
+        ]
+      )
     );
   };
 }

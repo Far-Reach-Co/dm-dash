@@ -23,7 +23,6 @@ export default class OtherProLangComponent {
     const res = await postThing("/api/add_5e_character_other_pro_lang", {
       general_id: this.general_id,
       type: null,
-      proficiency: "New Proficiency",
     });
     this.toggleNewLoading();
   };
@@ -64,7 +63,7 @@ export default class OtherProLangComponent {
               class: "select-option-small",
               id: "type",
               name: "type",
-              style: "margin-right: 10px;",
+              style: "margin-right: var(--main-distance);",
             },
             [
               createElement("option", { value: "None" }, "None"),
@@ -85,6 +84,7 @@ export default class OtherProLangComponent {
             {
               class: "cp-input-gen input-small",
               name: "name",
+              placeHolder: "Proficiency",
               value: item.proficiency ? item.proficiency : "",
             },
             null,
@@ -101,7 +101,9 @@ export default class OtherProLangComponent {
           createElement(
             "div",
             {
-              style: "color: var(--red1); margin-left: 10px; cursor: pointer;",
+              style:
+                "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+              title: "Remove proficiency",
             },
             "ⓧ",
             {
@@ -109,7 +111,9 @@ export default class OtherProLangComponent {
               event: (e) => {
                 if (
                   window.confirm(
-                    `Are you sure you want to delete ${item.proficiency}`
+                    `Are you sure you want to delete ${
+                      item.proficiency ? item.proficiency : "Empty"
+                    }`
                   )
                 ) {
                   deleteThing(
@@ -153,10 +157,15 @@ export default class OtherProLangComponent {
       ),
       createElement("br"),
       ...(await this.renderOtherProLangElems()),
-      createElement("a", { style: "align-self: flex-start;" }, "+", {
-        type: "click",
-        event: this.newOtherProLang,
-      })
+      createElement(
+        "a",
+        { style: "align-self: flex-start;", title: "Create a new proficiency" },
+        "+",
+        {
+          type: "click",
+          event: this.newOtherProLang,
+        }
+      )
     );
   };
 }

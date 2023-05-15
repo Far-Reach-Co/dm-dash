@@ -110,6 +110,7 @@ export default class SingleItemView {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -187,7 +188,12 @@ export default class SingleItemView {
             this.saveItem(e, richText.children[1].innerHTML);
           },
         }
-      )
+      ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      })
     );
   };
 
@@ -197,7 +203,11 @@ export default class SingleItemView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin-left: 3px;",
+          title: "Open edit utility",
+        },
         "Edit",
         {
           type: "click",

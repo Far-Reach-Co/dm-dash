@@ -1,3 +1,4 @@
+import calculateColorMod from "./calculateColorMod.js";
 import createElement from "./createElement.js";
 
 export default class HPComponent {
@@ -34,27 +35,16 @@ export default class HPComponent {
     }
   };
 
-  calculateHPColor = () => {
-    let color = "inherit";
-    if (this.current_hp) {
-      if (this.temp_hp) {
-        if (Math.sign(this.temp_hp) === 1) {
-          color = "var(--green)";
-          return color;
-        } else if (Math.sign(this.temp_hp) === -1) {
-          color = "var(--pink)";
-          return color;
-        }
-      } else return color;
-    }
-  };
-
   renderTempView = () => {
     this.domComponent.append(
       createElement("div", { class: "cp-content-container-center" }, [
         createElement(
           "img",
-          { class: "edit-hp", src: "/assets/gears.svg" },
+          {
+            class: "edit-hp",
+            src: "/assets/gears.svg",
+            title: "Close temporary HP view",
+          },
           null,
           {
             type: "click",
@@ -81,7 +71,7 @@ export default class HPComponent {
             },
           }
         ),
-        createElement("small", {}, "Temporary HP"),
+        createElement("small", { style: "color: var(--pink)" }, "Temporary HP"),
       ])
     );
   };
@@ -97,7 +87,11 @@ export default class HPComponent {
       createElement("div", { class: "cp-content-container-center" }, [
         createElement(
           "img",
-          { class: "edit-hp", src: "/assets/gears.svg" },
+          {
+            class: "edit-hp",
+            src: "/assets/gears.svg",
+            title: "Open temporary HP view",
+          },
           null,
           {
             type: "click",
@@ -138,7 +132,7 @@ export default class HPComponent {
           "input",
           {
             class: "cp-input-no-border cp-input-large",
-            style: `color: ${this.calculateHPColor()}`,
+            style: `color: ${calculateColorMod(this.current_hp, this.temp_hp)}`,
             type: "number",
             name: "current_hp",
             value: this.calculateCurrentHP() ? this.calculateCurrentHP() : 0,

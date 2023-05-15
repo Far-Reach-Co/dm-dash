@@ -6,7 +6,7 @@ import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/TableSidebar.js";
 import CanvasLayer from "../components/CanvasLayer.js";
 import socketIntegration from "../lib/socketIntegration.js";
-import modal from "../components/modal.js";
+import TopLayer from "../lib/TopLayer.js";
 
 class Table {
   constructor(props) {
@@ -39,16 +39,26 @@ class Table {
       tableView,
       tableSidebarComponent: this.sidebar.tableSidebarComponent,
     });
+    // setup top layer
+    this.topLayer = new TopLayer({
+      domComponent: createElement("div"),
+      canvasLayer: this.canvasLayer,
+    });
+    // provide top layer to socket int
     // provide socket necessary variables
     socketIntegration.projectId = this.projectId;
     socketIntegration.user = state.user;
     socketIntegration.sidebar = this.sidebar;
+    socketIntegration.topLayer = this.topLayer;
     // setup socket listeners after canvas instantiation
     socketIntegration.setupListeners(this.canvasLayer);
     socketIntegration.socketJoined();
 
+    // VERY IMPORTANT RENDERING SYSTEM
     this.render();
-    this.canvasLayer.init();
+    await this.canvasLayer.init();
+    this.topLayer.render();
+    this.renderSidebarAndHamburger();
   };
 
   instantiateSidebar = () => {
@@ -78,160 +88,11 @@ class Table {
   };
 
   render = async () => {
-    this.renderSidebarAndHamburger();
-
-    const topLayerElem = createElement("div");
-    new TopLayer({
-      domComponent: topLayerElem,
-      canvasLayer: this.canvasLayer,
-    });
-
     this.domComponent.append(
       createElement("div", { style: "position: relative;" }, [
-        topLayerElem,
+        this.topLayer.domComponent,
         this.canvasElem,
       ])
-    );
-  };
-}
-
-class TopLayer {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.canvasLayer = props.canvasLayer;
-    this.render();
-  }
-
-  handleChangeCanvasLayer = () => {
-    const gridObjectIndex = this.canvasLayer.canvas
-      .getObjects()
-      .indexOf(this.canvasLayer.oGridGroup);
-
-    if (this.canvasLayer.currentLayer === "Map") {
-      this.canvasLayer.currentLayer = "Object";
-      this.canvasLayer.canvas.getObjects().forEach((object, index) => {
-        if (object.layer === "Map") {
-          object.selectable = false;
-          object.evented = false;
-        }
-        if (object.layer === "Object") {
-          object.selectable = true;
-          object.evented = true;
-          object.opacity = "1";
-        }
-        this.canvasLayer.canvas.renderAll();
-      });
-    } else {
-      this.canvasLayer.currentLayer = "Map";
-      this.canvasLayer.canvas.getObjects().forEach((object, index) => {
-        if (object.layer === "Map") {
-          object.selectable = true;
-          object.evented = true;
-        }
-        if (object.layer === "Object") {
-          object.selectable = false;
-          object.evented = false;
-          object.opacity = "0.5";
-        }
-        this.canvasLayer.canvas.renderAll();
-      });
-    }
-    this.render();
-  };
-
-  renderStyledLayerInfoComponent = () => {
-    if (this.canvasLayer.currentLayer === "Map") {
-      return createElement("div", { style: "display: flex;" }, [
-        createElement(
-          "small",
-          { style: "margin-right: 3px;" },
-          "Current Layer:"
-        ),
-        createElement("small", { style: "color: var(--orange2)" }, "Map"),
-      ]);
-    } else {
-      return createElement("div", { style: "display: flex;" }, [
-        createElement(
-          "small",
-          { style: "margin-right: 3px;" },
-          "Current Layer:"
-        ),
-        createElement("small", { style: "color: var(--green)" }, "Object"),
-      ]);
-    }
-  };
-
-  renderLayersElem = () => {
-    if (state.currentProject.is_editor === false) {
-      return createElement("div", { style: "display: none;" });
-    } else {
-      return createElement("div", { class: "table-config layers-elem" }, [
-        this.renderStyledLayerInfoComponent(),
-        createElement("br"),
-        createElement(
-          "button",
-          {
-            class:
-              this.canvasLayer.currentLayer === "Object" ? "btn-h-orange" : "",
-          },
-          "Switch Layer",
-          {
-            type: "click",
-            event: () => this.handleChangeCanvasLayer(),
-          }
-        ),
-      ]);
-    }
-  };
-
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
-      this.renderLayersElem(),
-      createElement(
-        "div",
-        { class: "table-config info-elem" },
-        [createElement("div", {}, "?")],
-        {
-          type: "click",
-          event: () => {
-            modal.show(
-              createElement("div", { class: "help-content" }, [
-                createElement("h1", {}, "Key Commands"),
-                createElement("hr"),
-                createElement("b", {}, "Option/Alt (⌥)"),
-                createElement(
-                  "small",
-                  {},
-                  "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
-                ),
-                createElement("br"),
-                createElement("b", {}, "Control (⌃)"),
-                createElement(
-                  "small",
-                  {},
-                  "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
-                ),
-                createElement("br"),
-                createElement("b", {}, "Shift"),
-                createElement(
-                  "small",
-                  {},
-                  "Hold key and click multiple objects to select multiple objects."
-                ),
-                createElement("br"),
-                createElement("b", {}, "Delete/Backspace"),
-                createElement(
-                  "small",
-                  {},
-                  "While object is selected, press key to remove object from table."
-                ),
-              ])
-            );
-          },
-        }
-      )
     );
   };
 }

@@ -60,8 +60,6 @@ const { USER_IS_NOT_PRO } = require("../../lib/enums.js");
 
 async function addProject(req, res, next) {
   try {
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-
     // check if user is pro
     const projectsData = await getProjectsQuery(req.user.id);
     // limit to three projects
@@ -137,15 +135,6 @@ async function getProjects(req, res, next) {
 
 async function removeProject(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // If user is not author or editor
-    const projectData = await getProjectQuery(req.params.id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id)
-      throw { status: 403, message: "Forbidden" };
-
     // remove project
     await removeProjectQuery(req.params.id);
     // remove all project data
@@ -285,26 +274,6 @@ async function removeProject(req, res, next) {
 
 async function editProject(req, res, next) {
   try {
-    // if no user
-    if (!req.user) throw { status: 401, message: "Missing Credentials" };
-    // If user is not author or editor
-    const projectData = await getProjectQuery(req.params.id);
-    const project = projectData.rows[0];
-
-    if (project.user_id !== req.user.id) {
-      // not editor
-      const projectUser = await getProjectUserByUserAndProjectQuery(
-        req.user.id,
-        project.id
-      );
-      if (
-        projectUser.rows &&
-        projectUser.rows.length &&
-        !projectUser.rows[0].is_editor
-      )
-        throw { status: 403, message: "Forbidden" };
-    }
-
     const data = await editProjectQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

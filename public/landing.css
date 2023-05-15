@@ -1,0 +1,124 @@
+:root {
+  --bg-color-blue-dark: #061f35;
+  --bg-color-blue-light: #28456b;
+  --bg-color-brown-dark: #1e1c1a;
+}
+
+body {
+  height: auto;
+  overflow: auto;
+}
+
+h1 {
+  font-size: 25;
+  text-align: center;
+  color: var(--main-white);
+}
+
+p {
+  font-size: 1rem;
+  text-align: center;
+  max-width: 100%;
+  padding: 10px;
+  width: 500px;
+}
+
+section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* FIRST */
+
+.first {
+  height: calc(100% - var(--nav-height));
+  background-color: var(--bg-color-blue-dark);
+  justify-content: space-between;
+}
+
+.first #city-img {
+  width: 100%;
+  padding-top: 13%;
+  background-image: url("/assets/landing/city.webp");
+  background-size: cover;
+  background-position: top;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.first #main-logo {
+  width: 50%;
+}
+
+.first #peli-signup {
+  width: 300px;
+  max-width: 60%;
+  cursor: pointer;
+}
+
+.first #peli-signup:hover {
+  opacity: 0.8;
+}
+
+/* SECOND */
+
+.second {
+  width: 100%;
+  padding-top: 8%;
+  background-color: var(--bg-color-blue-light);
+  background-image: url("/assets/landing/water_bg.webp");
+  background-size: 65%;
+  background-position: right;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap-reverse;
+  align-items: center;
+  justify-content: center;
+}
+
+.second #scroll-img {
+  width: 60%;
+}
+
+.third {
+  background-color: var(--bg-color-brown-dark);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.third #sm-map-img {
+  /* border: 1px solid red; */
+  width: 100%;
+  height: 50%;
+  background-image: url("/assets/landing/small_map_bg.webp");
+  background-size: 35%;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.third h1 {
+}
+
+.third p {
+}
+
+#scroll-svg {
+  width: 17%;
+  height: auto;
+}
+
+#lg-map-img {
+  width: 100%;
+  height: auto;
+}

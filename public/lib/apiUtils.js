@@ -48,7 +48,6 @@ async function postThing(endpoint, body) {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    console.log(res, data);
     if (res.status === 200 || res.status === 201) {
       // toast.show("Success");
       return data;

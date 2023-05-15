@@ -98,14 +98,15 @@ export default class SingleLoreView {
           if (this.managing) {
             const elem = createElement(
               "div",
-              { style: "margin-left: 10px; display: flex;" },
+              { style: "margin-left: var(--main-distance); display: flex;" },
               [
                 item.title,
                 createElement(
                   "div",
                   {
                     style:
-                      "color: var(--red1); margin-left: 10px; cursor: pointer;",
+                      "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                    title: "Remove connection",
                   },
                   "ⓧ",
                   {
@@ -125,6 +126,10 @@ export default class SingleLoreView {
               {
                 class: "small-clickable",
                 style: "margin: 3px",
+                title: `Navigate to the detail view of this ${type.substring(
+                  0,
+                  type.length - 1
+                )}`,
               },
               item.title,
               {
@@ -263,6 +268,7 @@ export default class SingleLoreView {
             "div",
             {
               style: "color: var(--red1); cursor: pointer;",
+              title: "Remove image",
             },
             "ⓧ",
             {
@@ -341,7 +347,12 @@ export default class SingleLoreView {
             this.saveLore(e, richText.children[1].innerHTML);
           },
         }
-      )
+      ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Cancel", {
+        type: "click",
+        event: this.toggleEdit,
+      })
     );
   };
 
@@ -351,7 +362,11 @@ export default class SingleLoreView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "align-self: flex-end;" },
+        {
+          class: "small-clickable",
+          style: "align-self: flex-end;",
+          title: `Open manage menu to add/remove connections for ${type}`,
+        },
         "Manage",
         {
           type: "click",
@@ -367,7 +382,11 @@ export default class SingleLoreView {
     } else {
       return createElement(
         "a",
-        { class: "small-clickable", style: "margin-left: 3px;" },
+        {
+          class: "small-clickable",
+          style: "margin-left: 3px;",
+          title: "Open edit utility",
+        },
         "Edit",
         {
           type: "click",
