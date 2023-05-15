@@ -4,7 +4,7 @@
 
 This contains the main website for Far Reach Co. which includes the dashboard view, the player character sheets (currently only DnD 5e) and the virtual table top.
 
-The server is in express.js with socket.io. The database is postgres and the frontend is vanilla js with ES modules bundled with rollup.
+The server is in express.js with socket.io. The database is postgres, backend is Typescript and the frontend is vanilla JS with ES modules bundled with rollup.
 
 ## Setup:
 
