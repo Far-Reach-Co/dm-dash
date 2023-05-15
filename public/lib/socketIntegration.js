@@ -37,7 +37,20 @@ class SocketIntegration {
     // OBJECTS LISTENERS
     this.socket.on("image-add", (newImg) => {
       // console.log("New socket image", newImg);
-
+      // Path drawing
+      if ((newImg.type = "path")) {
+        const newPath = new fabric.Path(newImg.path);
+        newPath.set({
+          id: newImg.id,
+          left: newImg.left,
+          top: newImg.top,
+          fill: false,
+          stroke: newImg.stroke,
+          strokeWidth: newImg.strokeWidth,
+        });
+        return canvasLayer.canvas.add(newPath);
+      }
+      // uploaded images
       fabric.Image.fromURL(newImg.src, function (img) {
         // reconstruct new image
         for (const [key, value] of Object.entries(newImg)) {

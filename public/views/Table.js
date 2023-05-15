@@ -172,8 +172,6 @@ class TopLayer {
         createElement(
           "button",
           {
-            class:
-              this.canvasLayer.currentLayer === "Object" ? "btn-h-orange" : "",
             title: "Change the layer you are interacting with",
           },
           "Switch Layer",
@@ -195,7 +193,7 @@ class TopLayer {
         createElement("br"),
         createElement(
           "button",
-          {},
+          { title: "Hide or show the grid lines and toggle snap-to-grid" },
           this.canvasLayer.oGridGroup.visible ? "Hide" : "Show",
           {
             type: "click",
@@ -209,6 +207,33 @@ class TopLayer {
         ),
       ]);
     }
+  };
+
+  renderDrawModeToggle = () => {
+    return createElement(
+      "div",
+      { class: "table-config draw-mode-toggle-elem" },
+      [
+        createElement("small", {}, "Draw Mode"),
+        createElement("br"),
+        createElement(
+          "button",
+          {
+            title: "Toggle the drawing tool",
+            class: `${this.canvasLayer.canvas.isDrawingMode ? "new-btn" : ""}`,
+          },
+          this.canvasLayer.canvas.isDrawingMode ? "On" : "Off",
+          {
+            type: "click",
+            event: () => {
+              this.canvasLayer.canvas.isDrawingMode =
+                !this.canvasLayer.canvas.isDrawingMode;
+              this.render();
+            },
+          }
+        ),
+      ]
+    );
   };
 
   renderInfoMenu = () => {
@@ -261,6 +286,7 @@ class TopLayer {
     this.domComponent.innerHTML = "";
 
     this.domComponent.append(
+      this.renderDrawModeToggle(),
       this.renderLayersElem(),
       this.renderGridControlElem(),
       this.renderInfoMenu()

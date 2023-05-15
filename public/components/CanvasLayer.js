@@ -57,6 +57,7 @@ export default class CanvasLayer {
       stopContextMenu: true, // <--  prevent context menu from showing
       defaultCursor: "grab",
       hoverCursor: "pointer",
+      freeDrawingCursor: "cell",
     });
 
     // write new grid if there isn't objects in previous data
@@ -93,6 +94,7 @@ export default class CanvasLayer {
   };
 
   setupEventListeners = () => {
+    // objects
     this.canvas.on("object:moving", (options) => {
       if (this.snapToGrid) {
         // align to grid
@@ -103,7 +105,6 @@ export default class CanvasLayer {
           top,
         });
       }
-
       // if multiple objects calculate special distance
       if (options.target.hasOwnProperty("_objects")) {
         for (var object of options.target._objects) {
@@ -130,11 +131,12 @@ export default class CanvasLayer {
       opt.e.preventDefault();
       opt.e.stopPropagation();
     });
-
+    // mouse down
     this.canvas.on("mouse:down", (opt) => {
       var evt = opt.e;
       // select multiple with altkey which is tehcnically default behavior
       if (evt.altKey === true) return; // overriding default to allow for panning around as default
+      if (this.canvas.isDrawingMode) return;
       // else pan
       if (!opt.target || !opt.target.selectable) {
         this.canvas.isDragging = true;
@@ -143,8 +145,9 @@ export default class CanvasLayer {
         this.canvas.lastPosY = evt.clientY;
       }
     });
-
+    // normal movement
     this.canvas.on("mouse:move", (opt) => {
+      // dont use for mobile
       if (detectMob()) return;
 
       if (this.canvas.isDragging) {
@@ -157,6 +160,7 @@ export default class CanvasLayer {
         this.canvas.lastPosY = e.clientY;
       }
     });
+    // for mobile
     this.canvas.on("touch:drag", (opt) => {
       if (!detectMob()) return;
 
@@ -175,12 +179,20 @@ export default class CanvasLayer {
         this.canvas.lastPosTouchY = opt.self.y;
       }
     });
+    // on mouse up we want to recalculate new interaction
+    // for all objects, so we call setViewportTransform
     this.canvas.on("mouse:up", (opt) => {
-      // on mouse up we want to recalculate new interaction
-      // for all objects, so we call setViewportTransform
       this.canvas.setViewportTransform(this.canvas.viewportTransform);
       this.canvas.isDragging = false;
       this.canvas.selection = true;
+    });
+
+    // PATH for drawing
+    this.canvas.on("path:created", (opt) => {
+      console.log(opt);
+      const id = uuidv4();
+      opt.path.set("id", id);
+      socketIntegration.imageAdded(opt.path);
     });
 
     // KEYS
