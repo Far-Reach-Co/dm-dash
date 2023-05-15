@@ -51,6 +51,11 @@
   left: var(--main-distance);
 }
 
+.draw-mode-picker-elem {
+  top: 50px;
+  left: 102.5px;
+}
+
 .help-content {
   padding: var(--main-distance);
   width: 75%;

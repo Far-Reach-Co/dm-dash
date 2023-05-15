@@ -189,7 +189,6 @@ export default class CanvasLayer {
 
     // PATH for drawing
     this.canvas.on("path:created", (opt) => {
-      console.log(opt);
       const id = uuidv4();
       opt.path.set("id", id);
       socketIntegration.imageAdded(opt.path);
