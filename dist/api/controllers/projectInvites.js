@@ -35,20 +35,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/projectInvites.js"), addProjectInviteQuery = _a.addProjectInviteQuery, getProjectInviteQuery = _a.getProjectInviteQuery, getProjectInviteByUUIDQuery = _a.getProjectInviteByUUIDQuery, removeProjectInviteQuery = _a.removeProjectInviteQuery;
-var uuidv4 = require("uuid/v4");
+exports.__esModule = true;
+exports.removeProjectInvite = exports.addProjectInvite = exports.getProjectInviteByUUID = void 0;
+var projectInvites_js_1 = require("../queries/projectInvites.js");
+var uuid_1 = require("uuid");
 function addProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var uuid, data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    uuid = uuidv4();
+                    uuid = (0, uuid_1.v4)();
                     req.body.uuid = uuid;
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4, addProjectInviteQuery(req.body)];
+                    return [4, (0, projectInvites_js_1.addProjectInviteQuery)(req.body)];
                 case 2:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -62,6 +64,7 @@ function addProjectInvite(req, res, next) {
         });
     });
 }
+exports.addProjectInvite = addProjectInvite;
 function getProjectInviteByUUID(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -69,7 +72,7 @@ function getProjectInviteByUUID(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getProjectInviteByUUIDQuery(req.params.uuid)];
+                    return [4, (0, projectInvites_js_1.getProjectInviteByUUIDQuery)(req.params.uuid)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows[0]);
@@ -83,6 +86,7 @@ function getProjectInviteByUUID(req, res, next) {
         });
     });
 }
+exports.getProjectInviteByUUID = getProjectInviteByUUID;
 function removeProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -90,7 +94,7 @@ function removeProjectInvite(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, removeProjectInviteQuery(req.params.id)];
+                    return [4, (0, projectInvites_js_1.removeProjectInviteQuery)(req.params.id)];
                 case 1:
                     _a.sent();
                     res.status(204).send();
@@ -104,8 +108,4 @@ function removeProjectInvite(req, res, next) {
         });
     });
 }
-module.exports = {
-    getProjectInviteByUUID: getProjectInviteByUUID,
-    addProjectInvite: addProjectInvite,
-    removeProjectInvite: removeProjectInvite
-};
+exports.removeProjectInvite = removeProjectInvite;

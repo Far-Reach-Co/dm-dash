@@ -5,8 +5,13 @@ import {
   editProjectPlayerQuery,
   getProjectPlayersByPlayerQuery,
 } from "../queries/projectPlayers";
+import { Request, Response, NextFunction } from "express";
 
-async function addProjectPlayer(req, res, next) {
+async function addProjectPlayer(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await addProjectPlayerQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -15,7 +20,11 @@ async function addProjectPlayer(req, res, next) {
   }
 }
 
-async function getProjectPlayersByProject(req, res, next) {
+async function getProjectPlayersByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const projectPlayerData = await getProjectPlayersByProjectQuery(
       req.params.project_id
@@ -27,7 +36,11 @@ async function getProjectPlayersByProject(req, res, next) {
   }
 }
 
-async function getProjectPlayersByPlayer(req, res, next) {
+async function getProjectPlayersByPlayer(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const projectPlayerData = await getProjectPlayersByPlayerQuery(
       req.params.player_id
@@ -39,7 +52,11 @@ async function getProjectPlayersByPlayer(req, res, next) {
   }
 }
 
-async function removeProjectPlayer(req, res, next) {
+async function removeProjectPlayer(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     await removeProjectPlayerQuery(req.params.id);
     res.status(204).send();
@@ -48,7 +65,11 @@ async function removeProjectPlayer(req, res, next) {
   }
 }
 
-async function editProjectPlayer(req, res, next) {
+async function editProjectPlayer(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await editProjectPlayerQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -57,7 +78,7 @@ async function editProjectPlayer(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   addProjectPlayer,
   getProjectPlayersByProject,
   getProjectPlayersByPlayer,

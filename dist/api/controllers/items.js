@@ -35,13 +35,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/items.js"), addItemQuery = _a.addItemQuery, getItemsQuery = _a.getItemsQuery, getItemQuery = _a.getItemQuery, getItemsWithFilterQuery = _a.getItemsWithFilterQuery, getItemsWithKeywordQuery = _a.getItemsWithKeywordQuery, getItemsWithKeywordAndFilterQuery = _a.getItemsWithKeywordAndFilterQuery, getItemsByLocationQuery = _a.getItemsByLocationQuery, getItemsByCharacterQuery = _a.getItemsByCharacterQuery, removeItemQuery = _a.removeItemQuery, editItemQuery = _a.editItemQuery;
-var getLocationQuery = require("../queries/locations.js").getLocationQuery;
-var getCharacterQuery = require("../queries/characters.js").getCharacterQuery;
-var _b = require("../queries/projects.js"), getProjectQuery = _b.getProjectQuery, editProjectQuery = _b.editProjectQuery;
-var removeFile = require("./s3.js").removeFile;
-var _c = require("../queries/images.js"), removeImageQuery = _c.removeImageQuery, getImageQuery = _c.getImageQuery;
-var addEventQuery = require("../queries/events.js").addEventQuery;
+exports.__esModule = true;
+exports.editItem = exports.removeItem = exports.addItem = exports.getItemsByCharacter = exports.getItemsByLocation = exports.getItems = exports.getItem = void 0;
+var items_js_1 = require("../queries/items.js");
+var locations_js_1 = require("../queries/locations.js");
+var characters_js_1 = require("../queries/characters.js");
+var projects_js_1 = require("../queries/projects.js");
+var s3_js_1 = require("./s3.js");
+var images_js_1 = require("../queries/images.js");
+var events_js_1 = require("../queries/events.js");
 function addItem(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
@@ -49,7 +51,7 @@ function addItem(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, addItemQuery(req.body)];
+                    return [4, (0, items_js_1.addItemQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -63,6 +65,7 @@ function addItem(req, res, next) {
         });
     });
 }
+exports.addItem = addItem;
 function getItem(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var itemData, item, err_2;
@@ -70,7 +73,7 @@ function getItem(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getItemQuery(req.params.id)];
+                    return [4, (0, items_js_1.getItemQuery)(req.params.id)];
                 case 1:
                     itemData = _a.sent();
                     item = itemData.rows[0];
@@ -85,6 +88,7 @@ function getItem(req, res, next) {
         });
     });
 }
+exports.getItem = getItem;
 function getItems(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_3, data, err_4, data, err_5, data, err_6;
@@ -95,7 +99,7 @@ function getItems(req, res, next) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4, getItemsWithKeywordAndFilterQuery({
+                    return [4, (0, items_js_1.getItemsWithKeywordAndFilterQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -116,7 +120,7 @@ function getItems(req, res, next) {
                     _a.label = 6;
                 case 6:
                     _a.trys.push([6, 8, , 9]);
-                    return [4, getItemsWithKeywordQuery({
+                    return [4, (0, items_js_1.getItemsWithKeywordQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -136,7 +140,7 @@ function getItems(req, res, next) {
                     _a.label = 11;
                 case 11:
                     _a.trys.push([11, 13, , 14]);
-                    return [4, getItemsWithFilterQuery({
+                    return [4, (0, items_js_1.getItemsWithFilterQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -153,7 +157,7 @@ function getItems(req, res, next) {
                 case 14: return [3, 18];
                 case 15:
                     _a.trys.push([15, 17, , 18]);
-                    return [4, getItemsQuery({
+                    return [4, (0, items_js_1.getItemsQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset
@@ -171,6 +175,7 @@ function getItems(req, res, next) {
         });
     });
 }
+exports.getItems = getItems;
 function getItemsByLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_7;
@@ -178,7 +183,7 @@ function getItemsByLocation(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getItemsByLocationQuery(req.params.location_id)];
+                    return [4, (0, items_js_1.getItemsByLocationQuery)(req.params.location_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -192,6 +197,7 @@ function getItemsByLocation(req, res, next) {
         });
     });
 }
+exports.getItemsByLocation = getItemsByLocation;
 function getItemsByCharacter(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_8;
@@ -199,7 +205,7 @@ function getItemsByCharacter(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getItemsByCharacterQuery(req.params.character_id)];
+                    return [4, (0, items_js_1.getItemsByCharacterQuery)(req.params.character_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -213,6 +219,7 @@ function getItemsByCharacter(req, res, next) {
         });
     });
 }
+exports.getItemsByCharacter = getItemsByCharacter;
 function removeItem(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var itemData, item, projectData, project, data, imageData, image, newCalculatedData, err_9;
@@ -220,31 +227,31 @@ function removeItem(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 9, , 10]);
-                    return [4, getItemQuery(req.params.id)];
+                    return [4, (0, items_js_1.getItemQuery)(req.params.id)];
                 case 1:
                     itemData = _a.sent();
                     item = itemData.rows[0];
-                    return [4, getProjectQuery(item.project_id)];
+                    return [4, (0, projects_js_1.getProjectQuery)(item.project_id)];
                 case 2:
                     projectData = _a.sent();
                     project = projectData.rows[0];
-                    return [4, removeItemQuery(req.params.id)];
+                    return [4, (0, items_js_1.removeItemQuery)(req.params.id)];
                 case 3:
                     data = _a.sent();
                     res.status(204).send();
                     if (!item.image_id) return [3, 8];
-                    return [4, getImageQuery(item.image_id)];
+                    return [4, (0, images_js_1.getImageQuery)(item.image_id)];
                 case 4:
                     imageData = _a.sent();
                     image = imageData.rows[0];
-                    return [4, removeFile("wyrld/images", image)];
+                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
                 case 5:
                     _a.sent();
-                    return [4, removeImageQuery(image.id)];
+                    return [4, (0, images_js_1.removeImageQuery)(image.id)];
                 case 6:
                     _a.sent();
                     newCalculatedData = project.used_data_in_bytes - image.size;
-                    return [4, editProjectQuery(project.id, {
+                    return [4, (0, projects_js_1.editProjectQuery)(project.id, {
                             used_data_in_bytes: newCalculatedData
                         })];
                 case 7:
@@ -260,6 +267,7 @@ function removeItem(req, res, next) {
         });
     });
 }
+exports.removeItem = removeItem;
 function editItem(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var itemData, item, projectData, project, data, locationData, location_1, title, previousLocationData, previousLocation, characterData, character, title, previousCharacterData, previousCharacter, err_10;
@@ -267,26 +275,26 @@ function editItem(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 16, , 17]);
-                    return [4, getItemQuery(req.params.id)];
+                    return [4, (0, items_js_1.getItemQuery)(req.params.id)];
                 case 1:
                     itemData = _a.sent();
                     item = itemData.rows[0];
-                    return [4, getProjectQuery(item.project_id)];
+                    return [4, (0, projects_js_1.getProjectQuery)(item.project_id)];
                 case 2:
                     projectData = _a.sent();
                     project = projectData.rows[0];
-                    return [4, editItemQuery(req.params.id, req.body)];
+                    return [4, (0, items_js_1.editItemQuery)(req.params.id, req.body)];
                 case 3:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
                     if (!req.body.location_id) return [3, 9];
-                    return [4, getLocationQuery(req.body.location_id)];
+                    return [4, (0, locations_js_1.getLocationQuery)(req.body.location_id)];
                 case 4:
                     locationData = _a.sent();
                     location_1 = locationData.rows[0];
                     title = "".concat(item.title, " moved to ").concat(location_1.title);
                     if (!item.location_id) return [3, 7];
-                    return [4, getLocationQuery(item.location_id)];
+                    return [4, (0, locations_js_1.getLocationQuery)(item.location_id)];
                 case 5:
                     previousLocationData = _a.sent();
                     return [4, previousLocationData.rows[0]];
@@ -294,7 +302,7 @@ function editItem(req, res, next) {
                     previousLocation = _a.sent();
                     title += " from ".concat(previousLocation.title);
                     _a.label = 7;
-                case 7: return [4, addEventQuery({
+                case 7: return [4, (0, events_js_1.addEventQuery)({
                         project_id: project.id,
                         title: title,
                         item_id: item.id,
@@ -305,13 +313,13 @@ function editItem(req, res, next) {
                     _a.label = 9;
                 case 9:
                     if (!req.body.character_id) return [3, 15];
-                    return [4, getCharacterQuery(req.body.character_id)];
+                    return [4, (0, characters_js_1.getCharacterQuery)(req.body.character_id)];
                 case 10:
                     characterData = _a.sent();
                     character = characterData.rows[0];
                     title = "".concat(item.title, " moved to ").concat(character.title);
                     if (!item.character_id) return [3, 13];
-                    return [4, getCharacterQuery(item.character_id)];
+                    return [4, (0, characters_js_1.getCharacterQuery)(item.character_id)];
                 case 11:
                     previousCharacterData = _a.sent();
                     return [4, previousCharacterData.rows[0]];
@@ -319,7 +327,7 @@ function editItem(req, res, next) {
                     previousCharacter = _a.sent();
                     title += " from ".concat(previousCharacter.title);
                     _a.label = 13;
-                case 13: return [4, addEventQuery({
+                case 13: return [4, (0, events_js_1.addEventQuery)({
                         project_id: project.id,
                         title: title,
                         item_id: item.id,
@@ -338,12 +346,4 @@ function editItem(req, res, next) {
         });
     });
 }
-module.exports = {
-    getItem: getItem,
-    getItems: getItems,
-    getItemsByLocation: getItemsByLocation,
-    getItemsByCharacter: getItemsByCharacter,
-    addItem: addItem,
-    removeItem: removeItem,
-    editItem: editItem
-};
+exports.editItem = editItem;

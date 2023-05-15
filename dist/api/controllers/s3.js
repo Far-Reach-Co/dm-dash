@@ -35,18 +35,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var AWS = require("aws-sdk");
-var fs = require("fs");
-var USER_IS_NOT_PRO = require("../../lib/enums").USER_IS_NOT_PRO;
-var _a = require("../queries/images"), addImageQuery = _a.addImageQuery, getImageQuery = _a.getImageQuery, removeImageQuery = _a.removeImageQuery;
-var _b = require("../queries/projects"), getProjectQuery = _b.getProjectQuery, editProjectQuery = _b.editProjectQuery;
-AWS.config.update({
+exports.__esModule = true;
+exports.removeImage = exports.removeFile = exports.uploadToAws = exports.getImage = exports.getSignedUrlForDownload = void 0;
+var aws_sdk_1 = require("aws-sdk");
+var fs_1 = require("fs");
+var enums_js_1 = require("../../lib/enums.js");
+var images_1 = require("../queries/images");
+var projects_1 = require("../queries/projects");
+aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: "us-east-1"
 });
-var s3 = new AWS.S3();
+var s3 = new aws_sdk_1.S3();
 function getSignedUrlForDownload(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var imageData, objectName, params_1, url, err_1;
@@ -54,7 +56,7 @@ function getSignedUrlForDownload(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
-                    return [4, getImageQuery(req.body.image_id)];
+                    return [4, (0, images_1.getImageQuery)(req.body.image_id)];
                 case 1:
                     imageData = _a.sent();
                     objectName = imageData.rows[0].file_name;
@@ -81,6 +83,7 @@ function getSignedUrlForDownload(req, res, next) {
         });
     });
 }
+exports.getSignedUrlForDownload = getSignedUrlForDownload;
 function uploadToAws(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         function splitAtIndex(value, index) {
@@ -90,6 +93,8 @@ function uploadToAws(req, res, next) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (!req.file)
+                        return [2, next()];
                     name = req.file.originalname;
                     ind2 = name.lastIndexOf(".");
                     type = splitAtIndex(name, ind2);
@@ -98,20 +103,20 @@ function uploadToAws(req, res, next) {
                     params = {
                         Bucket: "".concat(req.body.bucket_name, "/").concat(req.body.folder_name),
                         Key: imageRef,
-                        Body: fs.readFileSync("file_uploads/".concat(req.file.filename))
+                        Body: (0, fs_1.readFileSync)("file_uploads/".concat(req.file.filename))
                     };
                     image = null;
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
-                    return [4, getProjectQuery(req.body.project_id)];
+                    return [4, (0, projects_1.getProjectQuery)(req.body.project_id)];
                 case 2:
                     projectData = _a.sent();
                     project = projectData.rows[0];
                     projectDataCount = project.used_data_in_bytes;
                     if (projectDataCount >= 104857600) {
                         if (!req.user.is_pro)
-                            throw { status: 402, message: USER_IS_NOT_PRO };
+                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
                     }
                     return [4, new Promise(function (resolve, reject) {
                             s3.upload(params, function (err, data) {
@@ -123,7 +128,7 @@ function uploadToAws(req, res, next) {
                         })];
                 case 3:
                     _a.sent();
-                    return [4, addImageQuery({
+                    return [4, (0, images_1.addImageQuery)({
                             original_name: req.file.originalname,
                             size: req.file.size,
                             file_name: imageRef
@@ -137,7 +142,7 @@ function uploadToAws(req, res, next) {
                     err_2 = _a.sent();
                     console.log(err_2);
                     filePath = "file_uploads/".concat(fileName);
-                    fs.unlinkSync(filePath);
+                    (0, fs_1.unlinkSync)(filePath);
                     next(err_2);
                     return [3, 6];
                 case 6:
@@ -146,28 +151,28 @@ function uploadToAws(req, res, next) {
                 case 7:
                     _a.trys.push([7, 14, , 15]);
                     filePath = "file_uploads/".concat(fileName);
-                    fs.unlinkSync(filePath);
+                    (0, fs_1.unlinkSync)(filePath);
                     dataUsageCount = 0;
                     dataUsageCount += image.size;
                     if (!req.body.current_file_id) return [3, 11];
-                    return [4, getImageQuery(req.body.current_file_id)];
+                    return [4, (0, images_1.getImageQuery)(req.body.current_file_id)];
                 case 8:
                     oldImageData = _a.sent();
                     oldImage = oldImageData.rows[0];
                     return [4, removeFile(params.Bucket, oldImage)];
                 case 9:
                     _a.sent();
-                    return [4, removeImageQuery(req.body.current_file_id)];
+                    return [4, (0, images_1.removeImageQuery)(req.body.current_file_id)];
                 case 10:
                     _a.sent();
                     dataUsageCount -= oldImage.size;
                     _a.label = 11;
-                case 11: return [4, getProjectQuery(req.body.project_id)];
+                case 11: return [4, (0, projects_1.getProjectQuery)(req.body.project_id)];
                 case 12:
                     projectData = _a.sent();
                     project = projectData.rows[0];
                     newCalculatedData = project.used_data_in_bytes + dataUsageCount;
-                    return [4, editProjectQuery(project.id, {
+                    return [4, (0, projects_1.editProjectQuery)(project.id, {
                             used_data_in_bytes: newCalculatedData
                         })];
                 case 13:
@@ -183,6 +188,7 @@ function uploadToAws(req, res, next) {
         });
     });
 }
+exports.uploadToAws = uploadToAws;
 function getImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var imageData, err_4;
@@ -190,7 +196,7 @@ function getImage(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getImageQuery(req.params.id)];
+                    return [4, (0, images_1.getImageQuery)(req.params.id)];
                 case 1:
                     imageData = _a.sent();
                     res.send(imageData.rows[0]);
@@ -205,6 +211,7 @@ function getImage(req, res, next) {
         });
     });
 }
+exports.getImage = getImage;
 function removeImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var imageData, image, projectData, project, newCalculatedData, err_5;
@@ -212,22 +219,22 @@ function removeImage(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 6, , 7]);
-                    return [4, getImageQuery(req.params.image_id)];
+                    return [4, (0, images_1.getImageQuery)(req.params.image_id)];
                 case 1:
                     imageData = _a.sent();
                     image = imageData.rows[0];
                     return [4, removeFile("wyrld/images", image)];
                 case 2:
                     _a.sent();
-                    return [4, removeImageQuery(req.body.image_id)];
+                    return [4, (0, images_1.removeImageQuery)(req.body.image_id)];
                 case 3:
                     _a.sent();
-                    return [4, getProjectQuery(req.params.project_id)];
+                    return [4, (0, projects_1.getProjectQuery)(req.params.project_id)];
                 case 4:
                     projectData = _a.sent();
                     project = projectData.rows[0];
                     newCalculatedData = project.used_data_in_bytes - image.size;
-                    return [4, editProjectQuery(project.id, {
+                    return [4, (0, projects_1.editProjectQuery)(project.id, {
                             used_data_in_bytes: newCalculatedData
                         })];
                 case 5:
@@ -244,6 +251,7 @@ function removeImage(req, res, next) {
         });
     });
 }
+exports.removeImage = removeImage;
 function removeFile(bucket, image) {
     return __awaiter(this, void 0, void 0, function () {
         var params_2, err_6;
@@ -275,10 +283,4 @@ function removeFile(bucket, image) {
         });
     });
 }
-module.exports = {
-    getSignedUrlForDownload: getSignedUrlForDownload,
-    getImage: getImage,
-    uploadToAws: uploadToAws,
-    removeFile: removeFile,
-    removeImage: removeImage
-};
+exports.removeFile = removeFile;

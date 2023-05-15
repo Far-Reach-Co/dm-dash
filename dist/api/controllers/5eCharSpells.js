@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.edit5eCharSpell = exports.remove5eCharSpell = exports.add5eCharSpell = exports.get5eCharSpellsByType = void 0;
 var _5eCharSpells_1 = require("../queries/5eCharSpells");
 function add5eCharSpell(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function add5eCharSpell(req, res, next) {
         });
     });
 }
+exports.add5eCharSpell = add5eCharSpell;
 function get5eCharSpellsByType(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function get5eCharSpellsByType(req, res, next) {
         });
     });
 }
+exports.get5eCharSpellsByType = get5eCharSpellsByType;
 function remove5eCharSpell(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function remove5eCharSpell(req, res, next) {
         });
     });
 }
+exports.remove5eCharSpell = remove5eCharSpell;
 function edit5eCharSpell(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function edit5eCharSpell(req, res, next) {
         });
     });
 }
-module.exports = {
-    get5eCharSpellsByType: get5eCharSpellsByType,
-    add5eCharSpell: add5eCharSpell,
-    remove5eCharSpell: remove5eCharSpell,
-    edit5eCharSpell: edit5eCharSpell
-};
+exports.edit5eCharSpell = edit5eCharSpell;

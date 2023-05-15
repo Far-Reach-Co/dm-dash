@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-async function getUserByIdQuery(id: string) {
+async function getUserByIdQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."User" where id = $1`,
     values: [id],

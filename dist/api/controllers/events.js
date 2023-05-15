@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.getEventsByLore = exports.getEventsByItem = exports.getEventsByCharacter = exports.editEvent = exports.removeEvent = exports.addEvent = exports.getEventsByLocation = exports.getEvents = void 0;
 var events_1 = require("../queries/events");
 function addEvent(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function addEvent(req, res, next) {
         });
     });
 }
+exports.addEvent = addEvent;
 function getEvents(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -83,6 +85,7 @@ function getEvents(req, res, next) {
         });
     });
 }
+exports.getEvents = getEvents;
 function getEventsByLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_3;
@@ -104,6 +107,7 @@ function getEventsByLocation(req, res, next) {
         });
     });
 }
+exports.getEventsByLocation = getEventsByLocation;
 function getEventsByCharacter(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -125,6 +129,7 @@ function getEventsByCharacter(req, res, next) {
         });
     });
 }
+exports.getEventsByCharacter = getEventsByCharacter;
 function getEventsByItem(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_5;
@@ -146,6 +151,7 @@ function getEventsByItem(req, res, next) {
         });
     });
 }
+exports.getEventsByItem = getEventsByItem;
 function getEventsByLore(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_6;
@@ -167,6 +173,7 @@ function getEventsByLore(req, res, next) {
         });
     });
 }
+exports.getEventsByLore = getEventsByLore;
 function removeEvent(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_7;
@@ -188,6 +195,7 @@ function removeEvent(req, res, next) {
         });
     });
 }
+exports.removeEvent = removeEvent;
 function editEvent(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_8;
@@ -209,13 +217,4 @@ function editEvent(req, res, next) {
         });
     });
 }
-module.exports = {
-    getEvents: getEvents,
-    getEventsByLocation: getEventsByLocation,
-    addEvent: addEvent,
-    removeEvent: removeEvent,
-    editEvent: editEvent,
-    getEventsByCharacter: getEventsByCharacter,
-    getEventsByItem: getEventsByItem,
-    getEventsByLore: getEventsByLore
-};
+exports.editEvent = editEvent;

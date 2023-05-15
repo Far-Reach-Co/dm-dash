@@ -24,7 +24,7 @@ async function addLocationQuery(data: {
   return await db.query(query)
 }
 
-async function getLocationQuery(id) {
+async function getLocationQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Location" where id = $1`,
     values: [id]
@@ -56,7 +56,7 @@ async function getLocationsWithFilterQuery({projectId, limit, offset, filter}: {
   return await db.query(query)
 }
 
-async function getLocationsQuery({projectId, limit, offset}: {projectId: string, limit: string, offset: string}) {
+async function getLocationsQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
   const query = {
     text: /*sql*/ `select * from public."Location" where project_id = $1 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset]

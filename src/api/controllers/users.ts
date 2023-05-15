@@ -1,69 +1,77 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const mail = require("../smtp/index.js");
-const {
+import { genSalt, hash, compare } from "bcrypt";
+import { sign, verify } from "jsonwebtoken";
+import mail from "../smtp/index.js";
+import { Request, Response, NextFunction } from "express";
+
+import {
   getUserByIdQuery,
   getAllUsersQuery,
   getUserByEmailQuery,
   registerUserQuery,
   editUserQuery,
   editUserPasswordQuery,
-} = require("../queries/users");
-const { addProjectQuery } = require("../queries/projects");
-const { addTableViewQuery } = require("../queries/tableViews.js");
+} from "../queries/users";
+import { addProjectQuery } from "../queries/projects";
+import { addTableViewQuery } from "../queries/tableViews.js";
 
 const validLoginLength = "30d";
 
-function generateAccessToken(id, expires) {
-  return jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: expires });
+function generateAccessToken(id: string | number, expires: string) {
+  return sign({ id }, process.env.SECRET_KEY as string, { expiresIn: expires });
 }
 
-function sendResetEmail(user, token) {
+function sendResetEmail(user: { email: string }, token: string) {
   mail.sendMessage({
     user: user,
     title: "Reset Password",
     message: `Visit the following link to reset your password: <a href="https://farreachco.com/resetpassword.html?token=${token}">Reset Password</a>`,
   });
 }
+interface UserPayload {
+  id: string;
+}
 
-async function verifyUserByToken(token) {
-  return jwt.verify(token, process.env.SECRET_KEY, async (err, user) => {
-    if (err) return null;
+async function verifyUserByToken(token: string) {
+  const userVerifiedOrNull = verify(
+    token,
+    process.env.SECRET_KEY as string
+  ) as unknown as UserPayload;
 
-    const userData = await getUserByIdQuery(user.id);
+  if (userVerifiedOrNull) {
+    const userData = await getUserByIdQuery(userVerifiedOrNull.id);
 
     if (userData.rows.length === 0) return null;
 
     return userData;
-  });
+  } else return null;
 }
 
-async function getAllUsers(req, res, next) {
+async function getAllUsers(req: Request, res: Response, next: NextFunction) {
   try {
     const usersData = await getAllUsersQuery();
 
     res.send(usersData);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-async function getUserById(req, res, next) {
+async function getUserById(req: Request, res: Response, next: NextFunction) {
   try {
     const userData = await getUserByIdQuery(req.params.id);
 
     res.send(userData.rows[0]);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-async function registerUser(req, res, next) {
+async function registerUser(req: Request, res: Response, next: NextFunction) {
   try {
     const { email, username, password } = req.body;
     // hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const salt = await genSalt(10);
+    const hashedPassword = await hash(password, salt);
 
     const userData = await registerUserQuery({
       email: email.toLowerCase(),
@@ -90,11 +98,11 @@ async function registerUser(req, res, next) {
       message: `Hi friend, our team would like to welcome you aboard our ship as we sail into our next adventure together with courage and strength!\nIf you find yourself in need of any assistance feel free to reach out to us at farreachco@gmail.com<br>Thanks for joining us, have a wonderful day.<br> - Far Reach Co.`,
     });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-async function loginUser(req, res, next) {
+async function loginUser(req: Request, res: Response, next: NextFunction) {
   try {
     const email = req.body.email.toLowerCase();
     const password = req.body.password;
@@ -110,18 +118,18 @@ async function loginUser(req, res, next) {
         .json({ message: "This email account has not been registered" });
 
     if (user) {
-      const validPassword = await bcrypt.compare(password, user.password);
+      const validPassword = await compare(password, user.password);
       if (validPassword) {
         const token = generateAccessToken(user.id, validLoginLength);
         res.send({ token: token });
       } else return res.status(400).json({ message: "Invalid Password" });
     }
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-async function verifyJwt(req, res, next) {
+async function verifyJwt(req: Request, res: Response, next: NextFunction) {
   try {
     const token = req.token ? req.token : null;
     if (token) {
@@ -133,20 +141,20 @@ async function verifyJwt(req, res, next) {
       res.send(userData.rows[0]);
     } else return res.status(400).json({ message: "No token sent in headers" });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-async function editUser(req, res, next) {
+async function editUser(req: Request, res: Response, next: NextFunction) {
   try {
     const userEditData = await editUserQuery(req.user.id, req.body);
     res.send(userEditData.rows[0]);
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-async function resetPassword(req, res, next) {
+async function resetPassword(req: Request, res: Response, next: NextFunction) {
   try {
     const token = req.body.token;
     const password = req.body.password;
@@ -154,8 +162,8 @@ async function resetPassword(req, res, next) {
     const userData = await verifyUserByToken(token);
     if (userData) {
       // hash password
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
+      const salt = await genSalt(10);
+      const hashedPassword = await hash(password, salt);
       const user = await editUserPasswordQuery(
         userData.rows[0].id,
         hashedPassword
@@ -165,11 +173,15 @@ async function resetPassword(req, res, next) {
       });
     } else res.status(400).json({ message: "Invalid Token" });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-async function requestResetEmail(req, res, next) {
+async function requestResetEmail(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const userData = await getUserByEmailQuery(req.body.email.toLowerCase());
 
@@ -184,11 +196,11 @@ async function requestResetEmail(req, res, next) {
     } else
       return res.status(400).json({ message: "No user found by this email" });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
-module.exports = {
+export {
   verifyUserByToken,
   getAllUsers,
   getUserById,

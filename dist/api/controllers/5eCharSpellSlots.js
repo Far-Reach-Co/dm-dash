@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.edit5eCharSpellSlotInfo = void 0;
 var _5eCharSpellSlots_1 = require("../queries/5eCharSpellSlots");
 function edit5eCharSpellSlotInfo(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,4 @@ function edit5eCharSpellSlotInfo(req, res, next) {
         });
     });
 }
-module.exports = {
-    edit5eCharSpellSlotInfo: edit5eCharSpellSlotInfo
-};
+exports.edit5eCharSpellSlotInfo = edit5eCharSpellSlotInfo;

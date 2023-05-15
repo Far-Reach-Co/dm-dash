@@ -5,8 +5,9 @@ import {
   removeClockQuery,
   editClockQuery,
 } from "../queries/clocks";
+import { Request, Response, NextFunction } from "express";
 
-async function addClock(req, res, next) {
+async function addClock(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addClockQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -15,7 +16,7 @@ async function addClock(req, res, next) {
   }
 }
 
-async function getClocks(req, res, next) {
+async function getClocks(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await getClocksQuery(req.params.project_id);
 
@@ -25,7 +26,7 @@ async function getClocks(req, res, next) {
   }
 }
 
-async function removeClock(req, res, next) {
+async function removeClock(req: Request, res: Response, next: NextFunction) {
   try {
     await removeClockQuery(req.params.id);
     res.status(204).send();
@@ -34,7 +35,7 @@ async function removeClock(req, res, next) {
   }
 }
 
-async function editClock(req, res, next) {
+async function editClock(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editClockQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -43,9 +44,4 @@ async function editClock(req, res, next) {
   }
 }
 
-module.exports = {
-  getClocks,
-  addClock,
-  removeClock,
-  editClock,
-};
+export { getClocks, addClock, removeClock, editClock };

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.editClock = exports.removeClock = exports.addClock = exports.getClocks = void 0;
 var clocks_1 = require("../queries/clocks");
 function addClock(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function addClock(req, res, next) {
         });
     });
 }
+exports.addClock = addClock;
 function getClocks(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function getClocks(req, res, next) {
         });
     });
 }
+exports.getClocks = getClocks;
 function removeClock(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function removeClock(req, res, next) {
         });
     });
 }
+exports.removeClock = removeClock;
 function editClock(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function editClock(req, res, next) {
         });
     });
 }
-module.exports = {
-    getClocks: getClocks,
-    addClock: addClock,
-    removeClock: removeClock,
-    editClock: editClock
-};
+exports.editClock = editClock;

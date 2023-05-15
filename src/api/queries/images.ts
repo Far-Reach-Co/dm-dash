@@ -2,7 +2,7 @@ import db from "../dbconfig";
 
 async function addImageQuery(data: {
   original_name: string,
-  size: string,
+  size: number,
   file_name: string
 }) {
   const query = {

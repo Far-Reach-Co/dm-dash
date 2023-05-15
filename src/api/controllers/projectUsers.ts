@@ -1,18 +1,15 @@
-const {
+import {
   addProjectUserQuery,
   getProjectUserQuery,
   getProjectUserByUserAndProjectQuery,
   getProjectUsersByProjectQuery,
   removeProjectUserQuery,
   editProjectUserQuery,
-} = require("../queries/projectUsers.js");
-const { getProjectQuery } = require("../queries/projects.js");
-const {
-  getProjectInviteByProjectQuery,
-} = require("../queries/projectInvites.js");
-const { getUserByIdQuery } = require("../queries/users.js");
+} from "../queries/projectUsers.js";
+import { getUserByIdQuery } from "../queries/users.js";
+import { Request, Response, NextFunction } from "express";
 
-async function addProjectUser(req, res, next) {
+async function addProjectUser(req: Request, res: Response, next: NextFunction) {
   try {
     req.body.is_editor = false;
     req.body.user_id = req.user.id;
@@ -23,7 +20,11 @@ async function addProjectUser(req, res, next) {
   }
 }
 
-async function getProjectUserByUserAndProject(req, res, next) {
+async function getProjectUserByUserAndProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getProjectUserByUserAndProjectQuery(
       req.user.id,
@@ -35,7 +36,11 @@ async function getProjectUserByUserAndProject(req, res, next) {
   }
 }
 
-async function getProjectUsersByProject(req, res, next) {
+async function getProjectUsersByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const projectUsersData = await getProjectUsersByProjectQuery(
       req.params.project_id
@@ -57,21 +62,12 @@ async function getProjectUsersByProject(req, res, next) {
   }
 }
 
-async function removeProjectUser(req, res, next) {
+async function removeProjectUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    // get projectUser to get project id
-    const projectUserData = await getProjectUserQuery(req.params.id);
-    const projectUser = projectUserData.rows[0];
-
-    // If user is not author or editor
-    if (!projectUser.user_id === req.user.id) {
-      const projectData = await getProjectQuery(projectUser.project_id);
-      const project = projectData.rows[0];
-      if (project.user_id !== req.user.id) {
-        throw { status: 403, message: "Forbidden" };
-      }
-    }
-
     await removeProjectUserQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -79,7 +75,11 @@ async function removeProjectUser(req, res, next) {
   }
 }
 
-async function editProjectUser(req, res, next) {
+async function editProjectUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await editProjectUserQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -88,7 +88,7 @@ async function editProjectUser(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   addProjectUser,
   getProjectUserByUserAndProject,
   getProjectUsersByProject,

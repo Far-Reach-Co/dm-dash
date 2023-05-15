@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.edit5eCharFeat = exports.remove5eCharFeat = exports.add5eCharFeat = exports.get5eCharFeatsByGeneral = void 0;
 var _5eCharFeats_1 = require("../queries/5eCharFeats");
 function add5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function add5eCharFeat(req, res, next) {
         });
     });
 }
+exports.add5eCharFeat = add5eCharFeat;
 function get5eCharFeatsByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function get5eCharFeatsByGeneral(req, res, next) {
         });
     });
 }
+exports.get5eCharFeatsByGeneral = get5eCharFeatsByGeneral;
 function remove5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function remove5eCharFeat(req, res, next) {
         });
     });
 }
+exports.remove5eCharFeat = remove5eCharFeat;
 function edit5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function edit5eCharFeat(req, res, next) {
         });
     });
 }
-module.exports = {
-    get5eCharFeatsByGeneral: get5eCharFeatsByGeneral,
-    add5eCharFeat: add5eCharFeat,
-    remove5eCharFeat: remove5eCharFeat,
-    edit5eCharFeat: edit5eCharFeat
-};
+exports.edit5eCharFeat = edit5eCharFeat;

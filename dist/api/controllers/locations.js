@@ -35,10 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/images.js"), getImageQuery = _a.getImageQuery, removeImageQuery = _a.removeImageQuery;
-var _b = require("../queries/locations.js"), addLocationQuery = _b.addLocationQuery, getLocationsQuery = _b.getLocationsQuery, getLocationsWithKeywordAndFilterQuery = _b.getLocationsWithKeywordAndFilterQuery, getLocationsWithKeywordQuery = _b.getLocationsWithKeywordQuery, getLocationsWithFilterQuery = _b.getLocationsWithFilterQuery, getLocationQuery = _b.getLocationQuery, getSubLocationsQuery = _b.getSubLocationsQuery, removeLocationQuery = _b.removeLocationQuery, editLocationQuery = _b.editLocationQuery;
-var _c = require("../queries/projects.js"), getProjectQuery = _c.getProjectQuery, editProjectQuery = _c.editProjectQuery;
-var removeFile = require("./s3.js").removeFile;
+exports.__esModule = true;
+exports.editLocation = exports.removeLocation = exports.addLocation = exports.getSubLocations = exports.getLocations = exports.getLocation = void 0;
+var images_js_1 = require("../queries/images.js");
+var locations_js_1 = require("../queries/locations.js");
+var projects_js_1 = require("../queries/projects.js");
+var s3_js_1 = require("./s3.js");
 function addLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
@@ -46,7 +48,7 @@ function addLocation(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, addLocationQuery(req.body)];
+                    return [4, (0, locations_js_1.addLocationQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -60,6 +62,7 @@ function addLocation(req, res, next) {
         });
     });
 }
+exports.addLocation = addLocation;
 function getLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var locationData, location_1, err_2;
@@ -67,7 +70,7 @@ function getLocation(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getLocationQuery(req.params.id)];
+                    return [4, (0, locations_js_1.getLocationQuery)(req.params.id)];
                 case 1:
                     locationData = _a.sent();
                     location_1 = locationData.rows[0];
@@ -82,6 +85,7 @@ function getLocation(req, res, next) {
         });
     });
 }
+exports.getLocation = getLocation;
 function getLocations(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_3, data, err_4, data, err_5, data, err_6;
@@ -92,7 +96,7 @@ function getLocations(req, res, next) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4, getLocationsWithKeywordAndFilterQuery({
+                    return [4, (0, locations_js_1.getLocationsWithKeywordAndFilterQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -113,7 +117,7 @@ function getLocations(req, res, next) {
                     _a.label = 6;
                 case 6:
                     _a.trys.push([6, 8, , 9]);
-                    return [4, getLocationsWithKeywordQuery({
+                    return [4, (0, locations_js_1.getLocationsWithKeywordQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -133,7 +137,7 @@ function getLocations(req, res, next) {
                     _a.label = 11;
                 case 11:
                     _a.trys.push([11, 13, , 14]);
-                    return [4, getLocationsWithFilterQuery({
+                    return [4, (0, locations_js_1.getLocationsWithFilterQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -150,7 +154,7 @@ function getLocations(req, res, next) {
                 case 14: return [3, 18];
                 case 15:
                     _a.trys.push([15, 17, , 18]);
-                    return [4, getLocationsQuery({
+                    return [4, (0, locations_js_1.getLocationsQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset
@@ -168,6 +172,7 @@ function getLocations(req, res, next) {
         });
     });
 }
+exports.getLocations = getLocations;
 function getSubLocations(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_7;
@@ -175,7 +180,7 @@ function getSubLocations(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getSubLocationsQuery(req.params.parent_location_id)];
+                    return [4, (0, locations_js_1.getSubLocationsQuery)(req.params.parent_location_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -189,6 +194,7 @@ function getSubLocations(req, res, next) {
         });
     });
 }
+exports.getSubLocations = getSubLocations;
 function removeLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var locationData, location_2, projectData, project, subLocations, imageData, image, newCalculatedData, err_8;
@@ -197,21 +203,21 @@ function removeLocation(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 10, , 11]);
-                    return [4, getLocationQuery(req.params.id)];
+                    return [4, (0, locations_js_1.getLocationQuery)(req.params.id)];
                 case 1:
                     locationData = _a.sent();
                     location_2 = locationData.rows[0];
-                    return [4, getProjectQuery(location_2.project_id)];
+                    return [4, (0, projects_js_1.getProjectQuery)(location_2.project_id)];
                 case 2:
                     projectData = _a.sent();
                     project = projectData.rows[0];
-                    return [4, getSubLocationsQuery(req.params.id)];
+                    return [4, (0, locations_js_1.getSubLocationsQuery)(req.params.id)];
                 case 3:
                     subLocations = _a.sent();
                     subLocations.rows.forEach(function (location) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, editLocationQuery(location.id, {
+                                case 0: return [4, (0, locations_js_1.editLocationQuery)(location.id, {
                                         parent_location_id: null,
                                         is_sub: false
                                     })];
@@ -221,23 +227,23 @@ function removeLocation(req, res, next) {
                             }
                         });
                     }); });
-                    return [4, removeLocationQuery(req.params.id)];
+                    return [4, (0, locations_js_1.removeLocationQuery)(req.params.id)];
                 case 4:
                     _a.sent();
                     res.status(204).send();
                     if (!location_2.image_id) return [3, 9];
-                    return [4, getImageQuery(location_2.image_id)];
+                    return [4, (0, images_js_1.getImageQuery)(location_2.image_id)];
                 case 5:
                     imageData = _a.sent();
                     image = imageData.rows[0];
-                    return [4, removeFile("wyrld/images", image)];
+                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
                 case 6:
                     _a.sent();
-                    return [4, removeImageQuery(image.id)];
+                    return [4, (0, images_js_1.removeImageQuery)(image.id)];
                 case 7:
                     _a.sent();
                     newCalculatedData = project.used_data_in_bytes - image.size;
-                    return [4, editProjectQuery(project.id, {
+                    return [4, (0, projects_js_1.editProjectQuery)(project.id, {
                             used_data_in_bytes: newCalculatedData
                         })];
                 case 8:
@@ -253,6 +259,7 @@ function removeLocation(req, res, next) {
         });
     });
 }
+exports.removeLocation = removeLocation;
 function editLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_9;
@@ -260,7 +267,7 @@ function editLocation(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editLocationQuery(req.params.id, req.body)];
+                    return [4, (0, locations_js_1.editLocationQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -274,11 +281,4 @@ function editLocation(req, res, next) {
         });
     });
 }
-module.exports = {
-    getLocation: getLocation,
-    getLocations: getLocations,
-    getSubLocations: getSubLocations,
-    addLocation: addLocation,
-    removeLocation: removeLocation,
-    editLocation: editLocation
-};
+exports.editLocation = editLocation;

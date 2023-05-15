@@ -38,4 +38,4 @@ class Mail {
 
 const mail = new Mail();
 
-module.exports = mail;
+export default mail;

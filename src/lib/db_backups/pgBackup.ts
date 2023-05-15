@@ -1,18 +1,18 @@
-const { exec } = require("child_process");
-const fs = require("fs");
-const AWS = require("aws-sdk");
-const dotenv = require("dotenv");
-dotenv.config({ path: "../../../.env" });
-const mail = require("../../api/smtp");
+import { exec } from "child_process";
+import {readFileSync} from "fs";
+import {config as awsConfig, S3} from "aws-sdk";
+import {config} from "dotenv";
+config({ path: "../../../.env" });
+import mail from "../../api/smtp";
 
-AWS.config.update({
+awsConfig.update({
   signatureVersion: "v4",
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   region: "us-east-1",
 });
 
-const s3 = new AWS.S3();
+const s3 = new S3();
 
 function pgBackup() {
   function doBackup() {
@@ -32,7 +32,7 @@ function pgBackup() {
 
   async function uploadToAws() {
     const filename = "backup.sql";
-    const fileContent = fs.readFileSync(filename);
+    const fileContent = readFileSync(filename);
 
     const params = {
       Bucket: "wyrld/pg_backups",
@@ -41,7 +41,7 @@ function pgBackup() {
     };
     try {
       const res = await new Promise((resolve, reject) => {
-        s3.upload(params, (err, data) => {
+        s3.upload(params, (err: any, data: { Location: unknown; }) => {
           if (err) {
             reject(err);
           }

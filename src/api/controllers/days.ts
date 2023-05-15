@@ -5,8 +5,9 @@ import {
   removeDayQuery,
   editDayQuery,
 } from "../queries/days";
+import { Request, Response, NextFunction } from "express";
 
-async function addDay(req, res, next) {
+async function addDay(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addDayQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -15,7 +16,7 @@ async function addDay(req, res, next) {
   }
 }
 
-async function getDays(req, res, next) {
+async function getDays(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await getDaysQuery(req.params.calendar_id);
     res.send(data.rows);
@@ -24,7 +25,7 @@ async function getDays(req, res, next) {
   }
 }
 
-async function removeDay(req, res, next) {
+async function removeDay(req: Request, res: Response, next: NextFunction) {
   try {
     await removeDayQuery(req.params.id);
     res.status(204).send();
@@ -33,7 +34,7 @@ async function removeDay(req, res, next) {
   }
 }
 
-async function editDay(req, res, next) {
+async function editDay(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editDayQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -42,9 +43,4 @@ async function editDay(req, res, next) {
   }
 }
 
-module.exports = {
-  getDays,
-  addDay,
-  removeDay,
-  editDay,
-};
+export { getDays, addDay, removeDay, editDay };

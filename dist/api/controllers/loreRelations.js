@@ -35,6 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+exports.__esModule = true;
+exports.getLoreRelationsByItem = exports.getLoreRelationsByCharacter = exports.getLoreRelationsByLocation = exports.getLoreRelationsByLore = exports.getLoreRelation = exports.editLoreRelation = exports.removeLoreRelation = exports.addLoreRelation = void 0;
 var _a = require("../queries/loreRelations.js"), addLoreRelationQuery = _a.addLoreRelationQuery, getLoreRelationQuery = _a.getLoreRelationQuery, removeLoreRelationQuery = _a.removeLoreRelationQuery, editLoreRelationQuery = _a.editLoreRelationQuery, getLoreRelationsByLoreQuery = _a.getLoreRelationsByLoreQuery, getLoreRelationsByLocationQuery = _a.getLoreRelationsByLocationQuery, getLoreRelationsByCharacterQuery = _a.getLoreRelationsByCharacterQuery, getLoreRelationsByItemQuery = _a.getLoreRelationsByItemQuery;
 function addLoreRelation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -57,6 +59,7 @@ function addLoreRelation(req, res, next) {
         });
     });
 }
+exports.addLoreRelation = addLoreRelation;
 function getLoreRelation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -78,6 +81,7 @@ function getLoreRelation(req, res, next) {
         });
     });
 }
+exports.getLoreRelation = getLoreRelation;
 function getLoreRelationsByLore(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_3;
@@ -99,6 +103,7 @@ function getLoreRelationsByLore(req, res, next) {
         });
     });
 }
+exports.getLoreRelationsByLore = getLoreRelationsByLore;
 function getLoreRelationsByLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -120,6 +125,7 @@ function getLoreRelationsByLocation(req, res, next) {
         });
     });
 }
+exports.getLoreRelationsByLocation = getLoreRelationsByLocation;
 function getLoreRelationsByCharacter(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_5;
@@ -141,6 +147,7 @@ function getLoreRelationsByCharacter(req, res, next) {
         });
     });
 }
+exports.getLoreRelationsByCharacter = getLoreRelationsByCharacter;
 function getLoreRelationsByItem(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_6;
@@ -162,6 +169,7 @@ function getLoreRelationsByItem(req, res, next) {
         });
     });
 }
+exports.getLoreRelationsByItem = getLoreRelationsByItem;
 function removeLoreRelation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_7;
@@ -183,6 +191,7 @@ function removeLoreRelation(req, res, next) {
         });
     });
 }
+exports.removeLoreRelation = removeLoreRelation;
 function editLoreRelation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_8;
@@ -204,13 +213,4 @@ function editLoreRelation(req, res, next) {
         });
     });
 }
-module.exports = {
-    addLoreRelation: addLoreRelation,
-    removeLoreRelation: removeLoreRelation,
-    editLoreRelation: editLoreRelation,
-    getLoreRelation: getLoreRelation,
-    getLoreRelationsByLore: getLoreRelationsByLore,
-    getLoreRelationsByLocation: getLoreRelationsByLocation,
-    getLoreRelationsByCharacter: getLoreRelationsByCharacter,
-    getLoreRelationsByItem: getLoreRelationsByItem
-};
+exports.editLoreRelation = editLoreRelation;

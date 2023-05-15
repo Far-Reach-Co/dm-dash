@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.edit5eCharEquipment = exports.remove5eCharEquipment = exports.add5eCharEquipment = exports.get5eCharEquipmentsByGeneral = void 0;
 var _5eCharEquipment_1 = require("../queries/5eCharEquipment");
 function add5eCharEquipment(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function add5eCharEquipment(req, res, next) {
         });
     });
 }
+exports.add5eCharEquipment = add5eCharEquipment;
 function get5eCharEquipmentsByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function get5eCharEquipmentsByGeneral(req, res, next) {
         });
     });
 }
+exports.get5eCharEquipmentsByGeneral = get5eCharEquipmentsByGeneral;
 function remove5eCharEquipment(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function remove5eCharEquipment(req, res, next) {
         });
     });
 }
+exports.remove5eCharEquipment = remove5eCharEquipment;
 function edit5eCharEquipment(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function edit5eCharEquipment(req, res, next) {
         });
     });
 }
-module.exports = {
-    get5eCharEquipmentsByGeneral: get5eCharEquipmentsByGeneral,
-    add5eCharEquipment: add5eCharEquipment,
-    remove5eCharEquipment: remove5eCharEquipment,
-    edit5eCharEquipment: edit5eCharEquipment
-};
+exports.edit5eCharEquipment = edit5eCharEquipment;

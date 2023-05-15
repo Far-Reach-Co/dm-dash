@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/notes.js"), addNoteQuery = _a.addNoteQuery, getNotesQuery = _a.getNotesQuery, getNoteQuery = _a.getNoteQuery, getNotesByLocationQuery = _a.getNotesByLocationQuery, getNotesByCharacterQuery = _a.getNotesByCharacterQuery, getNotesByItemQuery = _a.getNotesByItemQuery, removeNoteQuery = _a.removeNoteQuery, editNoteQuery = _a.editNoteQuery, getNotesByLoreQuery = _a.getNotesByLoreQuery;
+exports.__esModule = true;
+exports.getNotesByLore = exports.getNotesByItem = exports.getNotesByCharacter = exports.editNote = exports.removeNote = exports.addNote = exports.getNotesByLocation = exports.getNotes = void 0;
+var notes_js_1 = require("../queries/notes.js");
 function addNote(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
@@ -43,7 +45,7 @@ function addNote(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, addNoteQuery(req.body)];
+                    return [4, (0, notes_js_1.addNoteQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -57,6 +59,7 @@ function addNote(req, res, next) {
         });
     });
 }
+exports.addNote = addNote;
 function getNotes(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -64,7 +67,7 @@ function getNotes(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getNotesQuery(req.user.id, req.params.project_id, req.params.limit, req.params.offset, req.params.keyword)];
+                    return [4, (0, notes_js_1.getNotesQuery)(req.user.id, req.params.project_id, req.params.limit, req.params.offset, req.params.keyword)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -78,6 +81,7 @@ function getNotes(req, res, next) {
         });
     });
 }
+exports.getNotes = getNotes;
 function getNotesByLocation(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_3;
@@ -85,7 +89,7 @@ function getNotesByLocation(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getNotesByLocationQuery(req.user.id, req.params.location_id)];
+                    return [4, (0, notes_js_1.getNotesByLocationQuery)(req.user.id, req.params.location_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -99,6 +103,7 @@ function getNotesByLocation(req, res, next) {
         });
     });
 }
+exports.getNotesByLocation = getNotesByLocation;
 function getNotesByCharacter(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -106,7 +111,7 @@ function getNotesByCharacter(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getNotesByCharacterQuery(req.user.id, req.params.character_id)];
+                    return [4, (0, notes_js_1.getNotesByCharacterQuery)(req.user.id, req.params.character_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -120,6 +125,7 @@ function getNotesByCharacter(req, res, next) {
         });
     });
 }
+exports.getNotesByCharacter = getNotesByCharacter;
 function getNotesByItem(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_5;
@@ -127,7 +133,7 @@ function getNotesByItem(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getNotesByItemQuery(req.user.id, req.params.item_id)];
+                    return [4, (0, notes_js_1.getNotesByItemQuery)(req.user.id, req.params.item_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -141,6 +147,7 @@ function getNotesByItem(req, res, next) {
         });
     });
 }
+exports.getNotesByItem = getNotesByItem;
 function getNotesByLore(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_6;
@@ -148,7 +155,7 @@ function getNotesByLore(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getNotesByLoreQuery(req.user.id, req.params.lore_id)];
+                    return [4, (0, notes_js_1.getNotesByLoreQuery)(req.user.id, req.params.lore_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -162,6 +169,7 @@ function getNotesByLore(req, res, next) {
         });
     });
 }
+exports.getNotesByLore = getNotesByLore;
 function removeNote(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_7;
@@ -169,7 +177,7 @@ function removeNote(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, removeNoteQuery(req.params.id)];
+                    return [4, (0, notes_js_1.removeNoteQuery)(req.params.id)];
                 case 1:
                     _a.sent();
                     res.status(204).send();
@@ -183,6 +191,7 @@ function removeNote(req, res, next) {
         });
     });
 }
+exports.removeNote = removeNote;
 function editNote(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_8;
@@ -190,7 +199,7 @@ function editNote(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editNoteQuery(req.params.id, req.body)];
+                    return [4, (0, notes_js_1.editNoteQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -204,13 +213,4 @@ function editNote(req, res, next) {
         });
     });
 }
-module.exports = {
-    getNotes: getNotes,
-    getNotesByLocation: getNotesByLocation,
-    addNote: addNote,
-    removeNote: removeNote,
-    editNote: editNote,
-    getNotesByCharacter: getNotesByCharacter,
-    getNotesByItem: getNotesByItem,
-    getNotesByLore: getNotesByLore
-};
+exports.editNote = editNote;

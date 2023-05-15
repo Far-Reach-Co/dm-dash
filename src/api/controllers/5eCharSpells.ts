@@ -5,8 +5,9 @@ import {
   remove5eCharSpellQuery,
   edit5eCharSpellQuery,
 } from "../queries/5eCharSpells";
+import { Request, Response, NextFunction } from "express";
 
-async function add5eCharSpell(req, res, next) {
+async function add5eCharSpell(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await add5eCharSpellQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -15,7 +16,11 @@ async function add5eCharSpell(req, res, next) {
   }
 }
 
-async function get5eCharSpellsByType(req, res, next) {
+async function get5eCharSpellsByType(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await get5eCharSpellsByTypeQuery(
       req.params.general_id,
@@ -28,7 +33,11 @@ async function get5eCharSpellsByType(req, res, next) {
   }
 }
 
-async function remove5eCharSpell(req, res, next) {
+async function remove5eCharSpell(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     await remove5eCharSpellQuery(req.params.id);
     res.status(204).send();
@@ -37,7 +46,11 @@ async function remove5eCharSpell(req, res, next) {
   }
 }
 
-async function edit5eCharSpell(req, res, next) {
+async function edit5eCharSpell(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await edit5eCharSpellQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -46,7 +59,7 @@ async function edit5eCharSpell(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   get5eCharSpellsByType,
   add5eCharSpell,
   remove5eCharSpell,

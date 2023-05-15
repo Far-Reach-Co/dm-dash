@@ -1,23 +1,28 @@
-const AWS = require("aws-sdk");
-const fs = require("fs");
-const { USER_IS_NOT_PRO } = require("../../lib/enums");
-const {
+import { S3, config } from "aws-sdk";
+import { readFileSync, unlinkSync } from "fs";
+import { userSubscriptionStatus } from "../../lib/enums.js";
+import {
   addImageQuery,
   getImageQuery,
   removeImageQuery,
-} = require("../queries/images");
-const { getProjectQuery, editProjectQuery } = require("../queries/projects");
+} from "../queries/images";
+import { getProjectQuery, editProjectQuery } from "../queries/projects";
+import { Request, Response, NextFunction } from "express";
 
-AWS.config.update({
+config.update({
   signatureVersion: "v4",
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
   region: "us-east-1",
 });
 
-const s3 = new AWS.S3();
+const s3 = new S3();
 
-async function getSignedUrlForDownload(req, res, next) {
+async function getSignedUrlForDownload(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const imageData = await getImageQuery(req.body.image_id);
     const objectName = imageData.rows[0].file_name;
@@ -38,7 +43,7 @@ async function getSignedUrlForDownload(req, res, next) {
   }
 }
 
-// async function getSignedUrlForUpload(req, res, next) {
+// async function getSignedUrlForUpload(req: Request, res: Response, next: NextFunction) {
 //   function splitAtIndex(value, index) {
 //     return [value.substring(0, index), value.substring(index)];
 //   }
@@ -69,9 +74,12 @@ async function getSignedUrlForDownload(req, res, next) {
 //   }
 // }
 
-async function uploadToAws(req, res, next) {
+async function uploadToAws(req: Request, res: Response, next: NextFunction) {
+  // check if no file
+  if (!req.file) return next();
+
   // helper function to split at index
-  function splitAtIndex(value, index) {
+  function splitAtIndex(value: string, index: number) {
     return [value.substring(0, index), value.substring(index)];
   }
 
@@ -85,7 +93,7 @@ async function uploadToAws(req, res, next) {
   const params = {
     Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
     Key: imageRef,
-    Body: fs.readFileSync(`file_uploads/${req.file.filename}`),
+    Body: readFileSync(`file_uploads/${req.file.filename}`),
   };
 
   let image = null;
@@ -99,12 +107,13 @@ async function uploadToAws(req, res, next) {
 
       if (projectDataCount >= 104857600) {
         // 100 MB
-        if (!req.user.is_pro) throw { status: 402, message: USER_IS_NOT_PRO };
+        if (!req.user.is_pro)
+          throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
       }
     }
 
     await new Promise((resolve, reject) => {
-      s3.upload(params, (err, data) => {
+      s3.upload(params, (err: any, data: { Location: unknown }) => {
         if (err) {
           reject(err);
         }
@@ -124,7 +133,7 @@ async function uploadToAws(req, res, next) {
     console.log(err);
     // delete file in storage
     const filePath = `file_uploads/${fileName}`;
-    fs.unlinkSync(filePath);
+    unlinkSync(filePath);
     next(err);
   }
 
@@ -132,7 +141,7 @@ async function uploadToAws(req, res, next) {
     try {
       // delete file in storage
       const filePath = `file_uploads/${fileName}`;
-      fs.unlinkSync(filePath);
+      unlinkSync(filePath);
 
       // prepare to update project data usage
       let dataUsageCount = 0;
@@ -161,7 +170,7 @@ async function uploadToAws(req, res, next) {
   }
 }
 
-async function getImage(req, res, next) {
+async function getImage(req: Request, res: Response, next: NextFunction) {
   try {
     const imageData = await getImageQuery(req.params.id);
     res.send(imageData.rows[0]);
@@ -171,7 +180,7 @@ async function getImage(req, res, next) {
   }
 }
 
-async function removeImage(req, res, next) {
+async function removeImage(req: Request, res: Response, next: NextFunction) {
   try {
     // remove current file
     const imageData = await getImageQuery(req.params.image_id);
@@ -194,7 +203,7 @@ async function removeImage(req, res, next) {
   }
 }
 
-async function removeFile(bucket, image) {
+async function removeFile(bucket: string, image: { file_name: string }) {
   try {
     const params = {
       Bucket: bucket,
@@ -214,7 +223,7 @@ async function removeFile(bucket, image) {
   }
 }
 
-module.exports = {
+export {
   getSignedUrlForDownload,
   getImage,
   // getSignedUrlForUpload,

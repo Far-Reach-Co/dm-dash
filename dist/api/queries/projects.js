@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.editProjectQuery = exports.removeProjectQuery = exports.getProjectsQuery = exports.getProjectQuery = exports.addProjectQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function addProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
@@ -56,6 +57,7 @@ function addProjectQuery(data) {
         });
     });
 }
+exports.addProjectQuery = addProjectQuery;
 function getProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -72,6 +74,7 @@ function getProjectQuery(projectId) {
         });
     });
 }
+exports.getProjectQuery = getProjectQuery;
 function removeProjectQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -88,6 +91,7 @@ function removeProjectQuery(id) {
         });
     });
 }
+exports.removeProjectQuery = removeProjectQuery;
 function getProjectsQuery(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -104,6 +108,7 @@ function getProjectsQuery(userId) {
         });
     });
 }
+exports.getProjectsQuery = getProjectsQuery;
 function editProjectQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -131,10 +136,4 @@ function editProjectQuery(id, data) {
         });
     });
 }
-module.exports = {
-    addProjectQuery: addProjectQuery,
-    getProjectQuery: getProjectQuery,
-    getProjectsQuery: getProjectsQuery,
-    removeProjectQuery: removeProjectQuery,
-    editProjectQuery: editProjectQuery
-};
+exports.editProjectQuery = editProjectQuery;

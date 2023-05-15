@@ -52,7 +52,7 @@ async function getLoresWithFilterQuery({projectId, limit, offset, filter}: {proj
   return await db.query(query)
 }
 
-async function getLoresQuery({projectId, limit, offset}: {projectId: string, limit: string, offset: string}) {
+async function getLoresQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where project_id = $1 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset]

@@ -1,4 +1,4 @@
-const {
+import {
   addItemQuery,
   getItemsQuery,
   getItemQuery,
@@ -9,20 +9,17 @@ const {
   getItemsByCharacterQuery,
   removeItemQuery,
   editItemQuery,
-} = require("../queries/items.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const { getCharacterQuery } = require("../queries/characters.js");
-const {
-  getProjectQuery,
+} from "../queries/items.js";
+import { getLocationQuery } from "../queries/locations.js";
+import { getCharacterQuery } from "../queries/characters.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
 
-  editProjectQuery,
-} = require("../queries/projects.js");
+import { removeFile } from "./s3.js";
+import { removeImageQuery, getImageQuery } from "../queries/images.js";
+import { addEventQuery } from "../queries/events.js";
+import { Request, Response, NextFunction } from "express";
 
-const { removeFile } = require("./s3.js");
-const { removeImageQuery, getImageQuery } = require("../queries/images.js");
-const { addEventQuery } = require("../queries/events.js");
-
-async function addItem(req, res, next) {
+async function addItem(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addItemQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -31,7 +28,7 @@ async function addItem(req, res, next) {
   }
 }
 
-async function getItem(req, res, next) {
+async function getItem(req: Request, res: Response, next: NextFunction) {
   try {
     const itemData = await getItemQuery(req.params.id);
     const item = itemData.rows[0];
@@ -42,7 +39,7 @@ async function getItem(req, res, next) {
   }
 }
 
-async function getItems(req, res, next) {
+async function getItems(req: Request, res: Response, next: NextFunction) {
   if (req.params.keyword && req.params.filter) {
     try {
       const data = await getItemsWithKeywordAndFilterQuery({
@@ -98,7 +95,11 @@ async function getItems(req, res, next) {
   }
 }
 
-async function getItemsByLocation(req, res, next) {
+async function getItemsByLocation(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getItemsByLocationQuery(req.params.location_id);
     res.send(data.rows);
@@ -107,7 +108,11 @@ async function getItemsByLocation(req, res, next) {
   }
 }
 
-async function getItemsByCharacter(req, res, next) {
+async function getItemsByCharacter(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getItemsByCharacterQuery(req.params.character_id);
     res.send(data.rows);
@@ -116,7 +121,7 @@ async function getItemsByCharacter(req, res, next) {
   }
 }
 
-async function removeItem(req, res, next) {
+async function removeItem(req: Request, res: Response, next: NextFunction) {
   try {
     // if no user
 
@@ -146,7 +151,7 @@ async function removeItem(req, res, next) {
   }
 }
 
-async function editItem(req, res, next) {
+async function editItem(req: Request, res: Response, next: NextFunction) {
   try {
     const itemData = await getItemQuery(req.params.id);
     const item = itemData.rows[0];
@@ -207,7 +212,7 @@ async function editItem(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getItem,
   getItems,
   getItemsByLocation,

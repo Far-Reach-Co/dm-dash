@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 
 async function add5eCharBackQuery(data: {
-  genera_id: string
+  general_id: any
 }) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_character_background" (general_id) values($1) returning *`,

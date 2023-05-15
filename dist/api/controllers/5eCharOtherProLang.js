@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.edit5eCharOtherProLang = exports.remove5eCharOtherProLang = exports.add5eCharOtherProLang = exports.get5eCharOtherProLangsByGeneral = void 0;
 var _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 function add5eCharOtherProLang(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function add5eCharOtherProLang(req, res, next) {
         });
     });
 }
+exports.add5eCharOtherProLang = add5eCharOtherProLang;
 function get5eCharOtherProLangsByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function get5eCharOtherProLangsByGeneral(req, res, next) {
         });
     });
 }
+exports.get5eCharOtherProLangsByGeneral = get5eCharOtherProLangsByGeneral;
 function remove5eCharOtherProLang(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function remove5eCharOtherProLang(req, res, next) {
         });
     });
 }
+exports.remove5eCharOtherProLang = remove5eCharOtherProLang;
 function edit5eCharOtherProLang(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function edit5eCharOtherProLang(req, res, next) {
         });
     });
 }
-module.exports = {
-    get5eCharOtherProLangsByGeneral: get5eCharOtherProLangsByGeneral,
-    add5eCharOtherProLang: add5eCharOtherProLang,
-    remove5eCharOtherProLang: remove5eCharOtherProLang,
-    edit5eCharOtherProLang: edit5eCharOtherProLang
-};
+exports.edit5eCharOtherProLang = edit5eCharOtherProLang;

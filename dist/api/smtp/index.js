@@ -71,4 +71,4 @@ var Mail = (function () {
     return Mail;
 }());
 var mail = new Mail();
-module.exports = mail;
+exports["default"] = mail;

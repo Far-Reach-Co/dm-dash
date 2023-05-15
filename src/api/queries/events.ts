@@ -2,12 +2,12 @@ import db from "../dbconfig";
 
 async function addEventQuery(data: {
   title: string,
-  description: string,
+  description?: string,
   project_id: string,
-  location_id: string,
-  character_id: string,
-  item_id: string,
-  lore_id: string
+  location_id?: string,
+  character_id?: string,
+  item_id?: string,
+  lore_id?: string
 }) {
   const query = {
     text: /*sql*/ `insert into public."Event" (title, description, project_id, location_id, character_id, item_id, lore_id) values($1,$2,$3,$4,$5,$6,$7) returning *`,
@@ -32,7 +32,7 @@ async function getEventQuery(id: string) {
   return await db.query(query)
 }
 
-async function getEventsQuery({projectId, limit, offset}: {projectId: string, limit: string, offset: string}) {
+async function getEventsQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
   const query = {
     text: /*sql*/ `select * from public."Event" where project_id = $1 order by date_created desc limit $2 offset $3`,
     values: [projectId, limit, offset]

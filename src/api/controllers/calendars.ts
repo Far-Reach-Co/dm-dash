@@ -1,14 +1,15 @@
-const {
+import {
   addCalendarQuery,
   getCalendarsQuery,
   getCalendarQuery,
   removeCalendarQuery,
   editCalendarQuery,
-} = require("../queries/calendars.js");
-const { getMonthsQuery, removeMonthQuery } = require("../queries/months.js");
-const { getDaysQuery, removeDayQuery } = require("../queries/days.js");
+} from "../queries/calendars.js";
+import { getMonthsQuery, removeMonthQuery } from "../queries/months.js";
+import { getDaysQuery, removeDayQuery } from "../queries/days.js";
+import { Request, Response, NextFunction } from "express";
 
-async function addCalendar(req, res, next) {
+async function addCalendar(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addCalendarQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -17,7 +18,7 @@ async function addCalendar(req, res, next) {
   }
 }
 
-async function getCalendars(req, res, next) {
+async function getCalendars(req: Request, res: Response, next: NextFunction) {
   try {
     const calendars = await getCalendarsQuery(req.params.project_id);
 
@@ -36,16 +37,16 @@ async function getCalendars(req, res, next) {
   }
 }
 
-async function removeCalendar(req, res, next) {
+async function removeCalendar(req: Request, res: Response, next: NextFunction) {
   try {
     await removeCalendarQuery(req.params.id);
     // remove months and days associated
     const monthsData = await getMonthsQuery(req.params.id);
-    monthsData.rows.forEach(async (month) => {
+    monthsData.rows.forEach(async (month: { id: any }) => {
       await removeMonthQuery(month.id);
     });
     const daysData = await getDaysQuery(req.params.id);
-    daysData.rows.forEach(async (day) => {
+    daysData.rows.forEach(async (day: { id: any }) => {
       await removeDayQuery(day.id);
     });
 
@@ -55,7 +56,7 @@ async function removeCalendar(req, res, next) {
   }
 }
 
-async function editCalendar(req, res, next) {
+async function editCalendar(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editCalendarQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -64,9 +65,4 @@ async function editCalendar(req, res, next) {
   }
 }
 
-module.exports = {
-  getCalendars,
-  addCalendar,
-  removeCalendar,
-  editCalendar,
-};
+export { getCalendars, addCalendar, removeCalendar, editCalendar };

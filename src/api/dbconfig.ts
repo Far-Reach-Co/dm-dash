@@ -14,7 +14,7 @@ var pool = new Pool(credentials);
 async function query(
   queryObject: { text: string; values?: any[] },
   params?: any
-): Promise<QueryArrayResult<any[]>> {
+) {
   const start = Date.now();
   const res = await pool.query(queryObject, params);
   const duration = Date.now() - start;

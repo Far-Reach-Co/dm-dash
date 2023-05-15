@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.editTableImage = exports.removeTableImage = exports.addTableImage = exports.getTableImages = void 0;
 var tableImages_1 = require("../queries/tableImages");
 function addTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function addTableImage(req, res, next) {
         });
     });
 }
+exports.addTableImage = addTableImage;
 function getTableImages(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function getTableImages(req, res, next) {
         });
     });
 }
+exports.getTableImages = getTableImages;
 function removeTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function removeTableImage(req, res, next) {
         });
     });
 }
+exports.removeTableImage = removeTableImage;
 function editTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function editTableImage(req, res, next) {
         });
     });
 }
-module.exports = {
-    getTableImages: getTableImages,
-    addTableImage: addTableImage,
-    removeTableImage: removeTableImage,
-    editTableImage: editTableImage
-};
+exports.editTableImage = editTableImage;

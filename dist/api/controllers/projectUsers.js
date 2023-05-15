@@ -35,10 +35,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/projectUsers.js"), addProjectUserQuery = _a.addProjectUserQuery, getProjectUserQuery = _a.getProjectUserQuery, getProjectUserByUserAndProjectQuery = _a.getProjectUserByUserAndProjectQuery, getProjectUsersByProjectQuery = _a.getProjectUsersByProjectQuery, removeProjectUserQuery = _a.removeProjectUserQuery, editProjectUserQuery = _a.editProjectUserQuery;
-var getProjectQuery = require("../queries/projects.js").getProjectQuery;
-var getProjectInviteByProjectQuery = require("../queries/projectInvites.js").getProjectInviteByProjectQuery;
-var getUserByIdQuery = require("../queries/users.js").getUserByIdQuery;
+exports.__esModule = true;
+exports.editProjectUser = exports.removeProjectUser = exports.getProjectUsersByProject = exports.getProjectUserByUserAndProject = exports.addProjectUser = void 0;
+var projectUsers_js_1 = require("../queries/projectUsers.js");
+var users_js_1 = require("../queries/users.js");
 function addProjectUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
@@ -48,7 +48,7 @@ function addProjectUser(req, res, next) {
                     _a.trys.push([0, 2, , 3]);
                     req.body.is_editor = false;
                     req.body.user_id = req.user.id;
-                    return [4, addProjectUserQuery(req.body)];
+                    return [4, (0, projectUsers_js_1.addProjectUserQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -62,6 +62,7 @@ function addProjectUser(req, res, next) {
         });
     });
 }
+exports.addProjectUser = addProjectUser;
 function getProjectUserByUserAndProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -69,7 +70,7 @@ function getProjectUserByUserAndProject(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getProjectUserByUserAndProjectQuery(req.user.id, req.params.project_id)];
+                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.user.id, req.params.project_id)];
                 case 1:
                     data = _a.sent();
                     res.status(200).json(data.rows[0]);
@@ -83,6 +84,7 @@ function getProjectUserByUserAndProject(req, res, next) {
         });
     });
 }
+exports.getProjectUserByUserAndProject = getProjectUserByUserAndProject;
 function getProjectUsersByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var projectUsersData, usersList, _i, _a, projectUser, userData, user, err_3;
@@ -90,7 +92,7 @@ function getProjectUsersByProject(req, res, next) {
             switch (_b.label) {
                 case 0:
                     _b.trys.push([0, 6, , 7]);
-                    return [4, getProjectUsersByProjectQuery(req.params.project_id)];
+                    return [4, (0, projectUsers_js_1.getProjectUsersByProjectQuery)(req.params.project_id)];
                 case 1:
                     projectUsersData = _b.sent();
                     usersList = [];
@@ -99,7 +101,7 @@ function getProjectUsersByProject(req, res, next) {
                 case 2:
                     if (!(_i < _a.length)) return [3, 5];
                     projectUser = _a[_i];
-                    return [4, getUserByIdQuery(projectUser.user_id)];
+                    return [4, (0, users_js_1.getUserByIdQuery)(projectUser.user_id)];
                 case 3:
                     userData = _b.sent();
                     user = userData.rows[0];
@@ -122,40 +124,29 @@ function getProjectUsersByProject(req, res, next) {
         });
     });
 }
+exports.getProjectUsersByProject = getProjectUsersByProject;
 function removeProjectUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectUserData, projectUser, projectData, project, err_4;
+        var err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    return [4, getProjectUserQuery(req.params.id)];
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, projectUsers_js_1.removeProjectUserQuery)(req.params.id)];
                 case 1:
-                    projectUserData = _a.sent();
-                    projectUser = projectUserData.rows[0];
-                    if (!(!projectUser.user_id === req.user.id)) return [3, 3];
-                    return [4, getProjectQuery(projectUser.project_id)];
-                case 2:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (project.user_id !== req.user.id) {
-                        throw { status: 403, message: "Forbidden" };
-                    }
-                    _a.label = 3;
-                case 3: return [4, removeProjectUserQuery(req.params.id)];
-                case 4:
                     _a.sent();
                     res.status(204).send();
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
+exports.removeProjectUser = removeProjectUser;
 function editProjectUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_5;
@@ -163,7 +154,7 @@ function editProjectUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editProjectUserQuery(req.params.id, req.body)];
+                    return [4, (0, projectUsers_js_1.editProjectUserQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -177,10 +168,4 @@ function editProjectUser(req, res, next) {
         });
     });
 }
-module.exports = {
-    addProjectUser: addProjectUser,
-    getProjectUserByUserAndProject: getProjectUserByUserAndProject,
-    getProjectUsersByProject: getProjectUsersByProject,
-    removeProjectUser: removeProjectUser,
-    editProjectUser: editProjectUser
-};
+exports.editProjectUser = editProjectUser;

@@ -35,23 +35,24 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var exec = require("child_process").exec;
-var fs = require("fs");
-var AWS = require("aws-sdk");
-var dotenv = require("dotenv");
-dotenv.config({ path: "../../../.env" });
-var mail = require("../../api/smtp");
-AWS.config.update({
+exports.__esModule = true;
+var child_process_1 = require("child_process");
+var fs_1 = require("fs");
+var aws_sdk_1 = require("aws-sdk");
+var dotenv_1 = require("dotenv");
+(0, dotenv_1.config)({ path: "../../../.env" });
+var smtp_1 = require("../../api/smtp");
+aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: "us-east-1"
 });
-var s3 = new AWS.S3();
+var s3 = new aws_sdk_1.S3();
 function pgBackup() {
     function doBackup() {
         var command = "pg_dump --data-only --no-acl ".concat(process.env.DATABASE_URL, " > backup.sql");
-        exec(command, function (err, stdout, stderr) {
+        (0, child_process_1.exec)(command, function (err, stdout, stderr) {
             if (err) {
                 return;
             }
@@ -66,7 +67,7 @@ function pgBackup() {
                 switch (_a.label) {
                     case 0:
                         filename = "backup.sql";
-                        fileContent = fs.readFileSync(filename);
+                        fileContent = (0, fs_1.readFileSync)(filename);
                         params = {
                             Bucket: "wyrld/pg_backups",
                             Key: filename,
@@ -111,7 +112,7 @@ function pgBackup() {
                                     case 1:
                                         uploadStatus = _a.sent();
                                         console.log(uploadStatus);
-                                        mail.sendMessage({
+                                        smtp_1["default"].sendMessage({
                                             user: { email: "farreachco@gmail.com" },
                                             title: "Database Backup",
                                             message: "This information will either be a location of the new backup file, or an error message: ".concat(uploadStatus)

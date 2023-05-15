@@ -35,19 +35,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/5eCharGeneral"), get5eCharsGeneralByUserQuery = _a.get5eCharsGeneralByUserQuery, add5eCharGeneralQuery = _a.add5eCharGeneralQuery, get5eCharGeneralQuery = _a.get5eCharGeneralQuery, remove5eCharGeneralQuery = _a.remove5eCharGeneralQuery, edit5eCharGeneralQuery = _a.edit5eCharGeneralQuery;
-var _b = require("../queries/5eCharPro"), get5eCharProQuery = _b.get5eCharProQuery, add5eCharProQuery = _b.add5eCharProQuery, get5eCharProByGeneralQuery = _b.get5eCharProByGeneralQuery, remove5eCharProQuery = _b.remove5eCharProQuery, edit5eCharProQuery = _b.edit5eCharProQuery;
-var _c = require("../queries/5eCharBack"), add5eCharBackQuery = _c.add5eCharBackQuery, get5eCharBackByGeneralQuery = _c.get5eCharBackByGeneralQuery, remove5eCharBackQuery = _c.remove5eCharBackQuery, get5eCharBackQuery = _c.get5eCharBackQuery, edit5eCharBackQuery = _c.edit5eCharBackQuery;
-var _d = require("../queries/5eCharSpellSlots"), get5eCharSpellSlotInfosByGeneralQuery = _d.get5eCharSpellSlotInfosByGeneralQuery, add5eCharSpellSlotInfoQuery = _d.add5eCharSpellSlotInfoQuery, remove5eCharSpellSlotInfoQuery = _d.remove5eCharSpellSlotInfoQuery;
-var _e = require("../queries/5eCharAttacks"), get5eCharAttacksByGeneralQuery = _e.get5eCharAttacksByGeneralQuery, remove5eCharAttackQuery = _e.remove5eCharAttackQuery;
-var _f = require("../queries/5eCharEquipment"), remove5eCharEquipmentQuery = _f.remove5eCharEquipmentQuery, get5eCharEquipmentsByGeneralQuery = _f.get5eCharEquipmentsByGeneralQuery;
-var _g = require("../queries/5eCharFeats"), get5eCharFeatsByGeneralQuery = _g.get5eCharFeatsByGeneralQuery, remove5eCharFeatQuery = _g.remove5eCharFeatQuery;
-var _h = require("../queries/5eCharSpells"), get5eCharSpellsByGeneralQuery = _h.get5eCharSpellsByGeneralQuery, remove5eCharSpellQuery = _h.remove5eCharSpellQuery;
-var _j = require("../queries/5eCharOtherProLang"), get5eCharOtherProLangsByGeneralQuery = _j.get5eCharOtherProLangsByGeneralQuery, remove5eCharOtherProLangQuery = _j.remove5eCharOtherProLangQuery;
-var _k = require("../queries/projectPlayers"), getProjectPlayersByPlayerQuery = _k.getProjectPlayersByPlayerQuery, removeProjectPlayerQuery = _k.removeProjectPlayerQuery;
-var getProjectQuery = require("../queries/projects").getProjectQuery;
-var getProjectUserByUserAndProjectQuery = require("../queries/projectUsers").getProjectUserByUserAndProjectQuery;
-var USER_IS_NOT_PRO = require("../../lib/enums").USER_IS_NOT_PRO;
+exports.__esModule = true;
+exports.edit5eCharBack = exports.edit5eCharPro = exports.edit5eCharGeneral = exports.remove5eChar = exports.get5eCharGeneral = exports.get5eCharsByUser = exports.add5eChar = void 0;
+var _5eCharGeneral_1 = require("../queries/5eCharGeneral");
+var _5eCharPro_1 = require("../queries/5eCharPro");
+var _5eCharBack_1 = require("../queries/5eCharBack");
+var _5eCharSpellSlots_1 = require("../queries/5eCharSpellSlots");
+var _5eCharAttacks_1 = require("../queries/5eCharAttacks");
+var _5eCharEquipment_1 = require("../queries/5eCharEquipment");
+var _5eCharFeats_1 = require("../queries/5eCharFeats");
+var _5eCharSpells_1 = require("../queries/5eCharSpells");
+var _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
+var projectPlayers_1 = require("../queries/projectPlayers");
+var enums_js_1 = require("../../lib/enums.js");
 function add5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var generalsData, generalData, general, err_1;
@@ -55,25 +55,25 @@ function add5eChar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 6, , 7]);
-                    return [4, get5eCharsGeneralByUserQuery(req.user.id)];
+                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.user.id)];
                 case 1:
                     generalsData = _a.sent();
                     if (generalsData.rows.length >= 5) {
                         if (!req.user.is_pro)
-                            throw { status: 402, message: USER_IS_NOT_PRO };
+                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
                     }
                     req.body.user_id = req.user.id;
-                    return [4, add5eCharGeneralQuery(req.body)];
+                    return [4, (0, _5eCharGeneral_1.add5eCharGeneralQuery)(req.body)];
                 case 2:
                     generalData = _a.sent();
                     general = generalData.rows[0];
-                    return [4, add5eCharProQuery({ general_id: general.id })];
+                    return [4, (0, _5eCharPro_1.add5eCharProQuery)({ general_id: general.id })];
                 case 3:
                     _a.sent();
-                    return [4, add5eCharBackQuery({ general_id: general.id })];
+                    return [4, (0, _5eCharBack_1.add5eCharBackQuery)({ general_id: general.id })];
                 case 4:
                     _a.sent();
-                    return [4, add5eCharSpellSlotInfoQuery({ general_id: general.id })];
+                    return [4, (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id })];
                 case 5:
                     _a.sent();
                     res.status(201).json(general);
@@ -87,6 +87,7 @@ function add5eChar(req, res, next) {
         });
     });
 }
+exports.add5eChar = add5eChar;
 function get5eCharsByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var generalsData, generals, _i, generals_1, general, proData, pro, backData, back, spellSlotsData, spellSlots, err_2;
@@ -94,7 +95,7 @@ function get5eCharsByUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 8, , 9]);
-                    return [4, get5eCharsGeneralByUserQuery(req.user.id)];
+                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.user.id)];
                 case 1:
                     generalsData = _a.sent();
                     generals = generalsData.rows;
@@ -104,15 +105,15 @@ function get5eCharsByUser(req, res, next) {
                 case 2:
                     if (!(_i < generals_1.length)) return [3, 7];
                     general = generals_1[_i];
-                    return [4, get5eCharProByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharPro_1.get5eCharProByGeneralQuery)(general.id)];
                 case 3:
                     proData = _a.sent();
                     pro = proData.rows[0];
-                    return [4, get5eCharBackByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharBack_1.get5eCharBackByGeneralQuery)(general.id)];
                 case 4:
                     backData = _a.sent();
                     back = backData.rows[0];
-                    return [4, get5eCharSpellSlotInfosByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfosByGeneralQuery)(general.id)];
                 case 5:
                     spellSlotsData = _a.sent();
                     spellSlots = spellSlotsData.rows[0];
@@ -135,6 +136,7 @@ function get5eCharsByUser(req, res, next) {
         });
     });
 }
+exports.get5eCharsByUser = get5eCharsByUser;
 function get5eCharGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var generalsData, general, proData, pro, backData, back, spellSlotsData, spellSlots, err_3;
@@ -142,19 +144,19 @@ function get5eCharGeneral(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 5, , 6]);
-                    return [4, get5eCharGeneralQuery(req.params.id)];
+                    return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(req.params.id)];
                 case 1:
                     generalsData = _a.sent();
                     general = generalsData.rows[0];
-                    return [4, get5eCharProByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharPro_1.get5eCharProByGeneralQuery)(general.id)];
                 case 2:
                     proData = _a.sent();
                     pro = proData.rows[0];
-                    return [4, get5eCharBackByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharBack_1.get5eCharBackByGeneralQuery)(general.id)];
                 case 3:
                     backData = _a.sent();
                     back = backData.rows[0];
-                    return [4, get5eCharSpellSlotInfosByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfosByGeneralQuery)(general.id)];
                 case 4:
                     spellSlotsData = _a.sent();
                     spellSlots = spellSlotsData.rows[0];
@@ -172,6 +174,7 @@ function get5eCharGeneral(req, res, next) {
         });
     });
 }
+exports.get5eCharGeneral = get5eCharGeneral;
 function remove5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var generalData, general, proData, pro, backData, back, spellSlotsData, spellSlots, attacksData, equipmentData, featsData, spellsData, otherProLangsData, projectPlayerData, err_4;
@@ -180,106 +183,106 @@ function remove5eChar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 15, , 16]);
-                    return [4, get5eCharGeneralQuery(req.params.id)];
+                    return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(req.params.id)];
                 case 1:
                     generalData = _a.sent();
                     general = generalData.rows[0];
-                    return [4, get5eCharProByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharPro_1.get5eCharProByGeneralQuery)(general.id)];
                 case 2:
                     proData = _a.sent();
                     pro = proData.rows[0];
-                    return [4, get5eCharBackByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharBack_1.get5eCharBackByGeneralQuery)(general.id)];
                 case 3:
                     backData = _a.sent();
                     back = backData.rows[0];
-                    return [4, get5eCharSpellSlotInfosByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfosByGeneralQuery)(general.id)];
                 case 4:
                     spellSlotsData = _a.sent();
                     spellSlots = spellSlotsData.rows[0];
-                    return [4, remove5eCharGeneralQuery(general.id)];
+                    return [4, (0, _5eCharGeneral_1.remove5eCharGeneralQuery)(general.id)];
                 case 5:
                     _a.sent();
-                    return [4, remove5eCharProQuery(pro.id)];
+                    return [4, (0, _5eCharPro_1.remove5eCharProQuery)(pro.id)];
                 case 6:
                     _a.sent();
-                    return [4, remove5eCharBackQuery(back.id)];
+                    return [4, (0, _5eCharBack_1.remove5eCharBackQuery)(back.id)];
                 case 7:
                     _a.sent();
-                    return [4, remove5eCharSpellSlotInfoQuery(spellSlots.id)];
+                    return [4, (0, _5eCharSpellSlots_1.remove5eCharSpellSlotInfoQuery)(spellSlots.id)];
                 case 8:
                     _a.sent();
-                    return [4, get5eCharAttacksByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharAttacks_1.get5eCharAttacksByGeneralQuery)(general.id)];
                 case 9:
                     attacksData = _a.sent();
                     attacksData.rows.forEach(function (attack) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, remove5eCharAttackQuery(attack.id)];
+                                case 0: return [4, (0, _5eCharAttacks_1.remove5eCharAttackQuery)(attack.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
                             }
                         });
                     }); });
-                    return [4, get5eCharEquipmentsByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharEquipment_1.get5eCharEquipmentsByGeneralQuery)(general.id)];
                 case 10:
                     equipmentData = _a.sent();
                     equipmentData.rows.forEach(function (equipment) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, remove5eCharEquipmentQuery(equipment.id)];
+                                case 0: return [4, (0, _5eCharEquipment_1.remove5eCharEquipmentQuery)(equipment.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
                             }
                         });
                     }); });
-                    return [4, get5eCharFeatsByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(general.id)];
                 case 11:
                     featsData = _a.sent();
                     featsData.rows.forEach(function (feat) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, remove5eCharFeatQuery(feat.id)];
+                                case 0: return [4, (0, _5eCharFeats_1.remove5eCharFeatQuery)(feat.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
                             }
                         });
                     }); });
-                    return [4, get5eCharSpellsByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharSpells_1.get5eCharSpellsByGeneralQuery)(general.id)];
                 case 12:
                     spellsData = _a.sent();
                     spellsData.rows.forEach(function (spell) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, remove5eCharSpellQuery(spell.id)];
+                                case 0: return [4, (0, _5eCharSpells_1.remove5eCharSpellQuery)(spell.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
                             }
                         });
                     }); });
-                    return [4, get5eCharOtherProLangsByGeneralQuery(general.id)];
+                    return [4, (0, _5eCharOtherProLang_1.get5eCharOtherProLangsByGeneralQuery)(general.id)];
                 case 13:
                     otherProLangsData = _a.sent();
                     otherProLangsData.rows.forEach(function (other) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, remove5eCharOtherProLangQuery(other.id)];
+                                case 0: return [4, (0, _5eCharOtherProLang_1.remove5eCharOtherProLangQuery)(other.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
                             }
                         });
                     }); });
-                    return [4, getProjectPlayersByPlayerQuery(general.id)];
+                    return [4, (0, projectPlayers_1.getProjectPlayersByPlayerQuery)(general.id)];
                 case 14:
                     projectPlayerData = _a.sent();
                     projectPlayerData.rows.forEach(function (projectPlayer) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, removeProjectPlayerQuery(projectPlayer.id)];
+                                case 0: return [4, (0, projectPlayers_1.removeProjectPlayerQuery)(projectPlayer.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
@@ -297,6 +300,7 @@ function remove5eChar(req, res, next) {
         });
     });
 }
+exports.remove5eChar = remove5eChar;
 function edit5eCharGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_5;
@@ -304,7 +308,7 @@ function edit5eCharGeneral(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, edit5eCharGeneralQuery(req.params.id, req.body)];
+                    return [4, (0, _5eCharGeneral_1.edit5eCharGeneralQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -318,6 +322,7 @@ function edit5eCharGeneral(req, res, next) {
         });
     });
 }
+exports.edit5eCharGeneral = edit5eCharGeneral;
 function edit5eCharPro(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_6;
@@ -325,7 +330,7 @@ function edit5eCharPro(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, edit5eCharProQuery(req.params.id, req.body)];
+                    return [4, (0, _5eCharPro_1.edit5eCharProQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -339,6 +344,7 @@ function edit5eCharPro(req, res, next) {
         });
     });
 }
+exports.edit5eCharPro = edit5eCharPro;
 function edit5eCharBack(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_7;
@@ -346,7 +352,7 @@ function edit5eCharBack(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, edit5eCharBackQuery(req.params.id, req.body)];
+                    return [4, (0, _5eCharBack_1.edit5eCharBackQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -360,12 +366,4 @@ function edit5eCharBack(req, res, next) {
         });
     });
 }
-module.exports = {
-    add5eChar: add5eChar,
-    get5eCharsByUser: get5eCharsByUser,
-    get5eCharGeneral: get5eCharGeneral,
-    remove5eChar: remove5eChar,
-    edit5eCharGeneral: edit5eCharGeneral,
-    edit5eCharPro: edit5eCharPro,
-    edit5eCharBack: edit5eCharBack
-};
+exports.edit5eCharBack = edit5eCharBack;

@@ -58,7 +58,7 @@ async function editProjectQuery(id: string, data: any) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addProjectQuery,
   getProjectQuery,
   getProjectsQuery,
