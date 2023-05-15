@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.getAllNotesByProjectQuery = exports.editNoteQuery = exports.removeNoteQuery = exports.getNotesByLoreQuery = exports.getNotesByItemQuery = exports.getNotesByCharacterQuery = exports.getNotesByLocationQuery = exports.getNoteQuery = exports.getNotesQuery = exports.addNoteQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addNoteQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -55,12 +57,13 @@ function addNoteQuery(data) {
                             data.lore_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addNoteQuery = addNoteQuery;
 function getNoteQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -71,12 +74,13 @@ function getNoteQuery(id) {
                         text: "select * from public.\"Note\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getNoteQuery = getNoteQuery;
 function getAllNotesByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -87,12 +91,13 @@ function getAllNotesByProjectQuery(projectId) {
                         text: "select * from public.\"Note\" where project_id = $1",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getAllNotesByProjectQuery = getAllNotesByProjectQuery;
 function getNotesQuery(userId, projectId, limit, offset, keyword) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -104,19 +109,20 @@ function getNotesQuery(userId, projectId, limit, offset, keyword) {
                         text: "select * from public.\"Note\" where user_id = $1 and project_id = $2 and location_id is null and character_id is null and item_id is null and lore_id is null order by date_created desc limit $3 offset $4",
                         values: [userId, projectId, limit, offset]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
                 case 2:
                     query = {
                         text: "select * from public.\"Note\" where user_id = $1 and project_id = $2 and position($5 in lower(title))>0 and location_id is null and character_id is null and item_id is null and lore_id is null order by date_created desc limit $3 offset $4",
                         values: [userId, projectId, limit, offset, keyword]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 3: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getNotesQuery = getNotesQuery;
 function getNotesByLocationQuery(userId, locationId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -127,12 +133,13 @@ function getNotesByLocationQuery(userId, locationId) {
                         text: "select * from public.\"Note\" where user_id = $2 and location_id = $1 order by date_created desc",
                         values: [locationId, userId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getNotesByLocationQuery = getNotesByLocationQuery;
 function getNotesByCharacterQuery(userId, characterId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -143,13 +150,14 @@ function getNotesByCharacterQuery(userId, characterId) {
                         text: "select * from public.\"Note\" where user_id = $2 and character_id = $1 order by date_created desc",
                         values: [characterId, userId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
-function getNotesByItemQuery(userId, item) {
+exports.getNotesByCharacterQuery = getNotesByCharacterQuery;
+function getNotesByItemQuery(userId, itemId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
@@ -157,15 +165,16 @@ function getNotesByItemQuery(userId, item) {
                 case 0:
                     query = {
                         text: "select * from public.\"Note\" where user_id = $2 and item_id = $1 order by date_created desc",
-                        values: [item, userId]
+                        values: [itemId, userId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
-function getNotesByLoreQuery(userId, lore) {
+exports.getNotesByItemQuery = getNotesByItemQuery;
+function getNotesByLoreQuery(userId, loreId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
@@ -173,14 +182,15 @@ function getNotesByLoreQuery(userId, lore) {
                 case 0:
                     query = {
                         text: "select * from public.\"Note\" where user_id = $2 and lore_id = $1 order by date_created desc",
-                        values: [lore, userId]
+                        values: [loreId, userId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getNotesByLoreQuery = getNotesByLoreQuery;
 function removeNoteQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -191,12 +201,13 @@ function removeNoteQuery(id) {
                         text: "delete from public.\"Note\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeNoteQuery = removeNoteQuery;
 function editNoteQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -218,21 +229,10 @@ function editNoteQuery(id, data) {
                         text: "update public.\"Note\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addNoteQuery: addNoteQuery,
-    getNotesQuery: getNotesQuery,
-    getNoteQuery: getNoteQuery,
-    getNotesByLocationQuery: getNotesByLocationQuery,
-    getNotesByCharacterQuery: getNotesByCharacterQuery,
-    getNotesByItemQuery: getNotesByItemQuery,
-    getNotesByLoreQuery: getNotesByLoreQuery,
-    removeNoteQuery: removeNoteQuery,
-    editNoteQuery: editNoteQuery,
-    getAllNotesByProjectQuery: getAllNotesByProjectQuery
-};
+exports.editNoteQuery = editNoteQuery;

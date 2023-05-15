@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.removeProjectInviteQuery = exports.getProjectInviteByProjectQuery = exports.getProjectInviteByUUIDQuery = exports.getProjectInviteQuery = exports.addProjectInviteQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addProjectInviteQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -49,12 +51,13 @@ function addProjectInviteQuery(data) {
                             data.project_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addProjectInviteQuery = addProjectInviteQuery;
 function getProjectInviteQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -65,12 +68,13 @@ function getProjectInviteQuery(id) {
                         text: "select * from public.\"ProjectInvite\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectInviteQuery = getProjectInviteQuery;
 function getProjectInviteByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -81,12 +85,13 @@ function getProjectInviteByProjectQuery(projectId) {
                         text: "select * from public.\"ProjectInvite\" where project_id = $1",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectInviteByProjectQuery = getProjectInviteByProjectQuery;
 function getProjectInviteByUUIDQuery(uuid) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -97,12 +102,13 @@ function getProjectInviteByUUIDQuery(uuid) {
                         text: "select * from public.\"ProjectInvite\" where uuid = $1",
                         values: [uuid]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectInviteByUUIDQuery = getProjectInviteByUUIDQuery;
 function removeProjectInviteQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -113,16 +119,10 @@ function removeProjectInviteQuery(id) {
                         text: "delete from public.\"ProjectInvite\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
-module.exports = {
-    addProjectInviteQuery: addProjectInviteQuery,
-    getProjectInviteQuery: getProjectInviteQuery,
-    getProjectInviteByUUIDQuery: getProjectInviteByUUIDQuery,
-    getProjectInviteByProjectQuery: getProjectInviteByProjectQuery,
-    removeProjectInviteQuery: removeProjectInviteQuery
-};
+exports.removeProjectInviteQuery = removeProjectInviteQuery;

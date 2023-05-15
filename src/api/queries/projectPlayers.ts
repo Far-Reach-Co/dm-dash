@@ -1,6 +1,6 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addProjectPlayerQuery(data) {
+async function addProjectPlayerQuery(data: {project_id: string, player_id: string}) {
   const query = {
     text: /*sql*/ `insert into public."ProjectPlayer" (project_id, player_id) values($1,$2) returning *`,
     values: [
@@ -11,7 +11,7 @@ async function addProjectPlayerQuery(data) {
   return await db.query(query)
 }
 
-async function getProjectPlayersByProjectQuery(projectId) {
+async function getProjectPlayersByProjectQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectPlayer" where project_id = $1`,
     values: [projectId]
@@ -19,7 +19,7 @@ async function getProjectPlayersByProjectQuery(projectId) {
   return await db.query(query)
 }
 
-async function getProjectPlayersByPlayerQuery(playerId) {
+async function getProjectPlayersByPlayerQuery(playerId: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectPlayer" where player_id = $1`,
     values: [playerId]
@@ -27,7 +27,7 @@ async function getProjectPlayersByPlayerQuery(playerId) {
   return await db.query(query)
 }
 
-async function getProjectPlayerQuery(id) {
+async function getProjectPlayerQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectPlayer" where id = $1`,
     values: [id]
@@ -35,7 +35,7 @@ async function getProjectPlayerQuery(id) {
   return await db.query(query)
 }
 
-async function removeProjectPlayerQuery(id) {
+async function removeProjectPlayerQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."ProjectPlayer" where id = $1`,
     values: [id]
@@ -44,7 +44,7 @@ async function removeProjectPlayerQuery(id) {
   return await db.query(query)
 }
 
-async function editProjectPlayerQuery(id, data) {
+async function editProjectPlayerQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -66,7 +66,7 @@ async function editProjectPlayerQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addProjectPlayerQuery,
   getProjectPlayerQuery,
   getProjectPlayersByProjectQuery,

@@ -1,6 +1,11 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addMonthQuery(data) {
+async function addMonthQuery(data: {
+  calendar_id: string,
+  index: string,
+  title: string,
+  number_of_days: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Month" (calendar_id, index, title, number_of_days) values($1,$2,$3,$4) returning *`,
     values: [
@@ -13,7 +18,7 @@ async function addMonthQuery(data) {
   return await db.query(query)
 }
 
-async function getMonthQuery(id) {
+async function getMonthQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Month" where id = $1`,
     values: [id]
@@ -21,7 +26,7 @@ async function getMonthQuery(id) {
   return await db.query(query)
 }
 
-async function getMonthsQuery(calendarId) {
+async function getMonthsQuery(calendarId: string) {
   const query = {
     text: /*sql*/ `select * from public."Month" where calendar_id = $1 order by index asc`,
     values: [calendarId]
@@ -29,7 +34,7 @@ async function getMonthsQuery(calendarId) {
   return await db.query(query)
 }
 
-async function removeMonthQuery(id) {
+async function removeMonthQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Month" where id = $1`,
     values: [id]
@@ -38,7 +43,7 @@ async function removeMonthQuery(id) {
   return await db.query(query)
 }
 
-async function editMonthQuery(id, data) {
+async function editMonthQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -60,7 +65,7 @@ async function editMonthQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addMonthQuery,
   getMonthsQuery,
   getMonthQuery,

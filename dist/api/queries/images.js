@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editImageQuery = exports.removeImageQuery = exports.getImageQuery = exports.addImageQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addImageQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -50,12 +52,13 @@ function addImageQuery(data) {
                             data.file_name
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addImageQuery = addImageQuery;
 function getImageQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -66,12 +69,13 @@ function getImageQuery(id) {
                         text: "select * from public.\"Image\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getImageQuery = getImageQuery;
 function removeImageQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -82,12 +86,13 @@ function removeImageQuery(id) {
                         text: "delete from public.\"Image\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeImageQuery = removeImageQuery;
 function editImageQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -109,15 +114,10 @@ function editImageQuery(id, data) {
                         text: "update public.\"Image\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addImageQuery: addImageQuery,
-    getImageQuery: getImageQuery,
-    removeImageQuery: removeImageQuery,
-    editImageQuery: editImageQuery
-};
+exports.editImageQuery = editImageQuery;

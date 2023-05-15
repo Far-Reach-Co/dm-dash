@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.edit5eCharFeatQuery = exports.remove5eCharFeatQuery = exports.get5eCharFeatQuery = exports.get5eCharFeatsByGeneralQuery = exports.add5eCharFeatQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function add5eCharFeatQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -51,12 +53,13 @@ function add5eCharFeatQuery(data) {
                             data.type,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.add5eCharFeatQuery = add5eCharFeatQuery;
 function get5eCharFeatQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -67,12 +70,13 @@ function get5eCharFeatQuery(id) {
                         text: "select * from public.\"dnd_5e_character_feat_trait\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharFeatQuery = get5eCharFeatQuery;
 function get5eCharFeatsByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -83,12 +87,13 @@ function get5eCharFeatsByGeneralQuery(generalId) {
                         text: "select * from public.\"dnd_5e_character_feat_trait\" where general_id = $1 order by Lower(title)",
                         values: [generalId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharFeatsByGeneralQuery = get5eCharFeatsByGeneralQuery;
 function remove5eCharFeatQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -99,12 +104,13 @@ function remove5eCharFeatQuery(id) {
                         text: "delete from public.\"dnd_5e_character_feat_trait\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.remove5eCharFeatQuery = remove5eCharFeatQuery;
 function edit5eCharFeatQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -126,16 +132,10 @@ function edit5eCharFeatQuery(id, data) {
                         text: "update public.\"dnd_5e_character_feat_trait\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    add5eCharFeatQuery: add5eCharFeatQuery,
-    get5eCharFeatsByGeneralQuery: get5eCharFeatsByGeneralQuery,
-    get5eCharFeatQuery: get5eCharFeatQuery,
-    remove5eCharFeatQuery: remove5eCharFeatQuery,
-    edit5eCharFeatQuery: edit5eCharFeatQuery
-};
+exports.edit5eCharFeatQuery = edit5eCharFeatQuery;

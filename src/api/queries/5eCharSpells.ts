@@ -1,6 +1,11 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function add5eCharSpellQuery(data) {
+async function add5eCharSpellQuery(data: {
+  general_id: string,
+  title: string,
+  description: string,
+  type: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_character_spell" (general_id, title, description, type) values($1,$2,$3,$4) returning *`,
     values: [
@@ -13,7 +18,7 @@ async function add5eCharSpellQuery(data) {
   return await db.query(query)
 }
 
-async function get5eCharSpellQuery(id) {
+async function get5eCharSpellQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_spell" where id = $1`,
     values: [id]
@@ -21,7 +26,7 @@ async function get5eCharSpellQuery(id) {
   return await db.query(query)
 }
 
-async function get5eCharSpellsByTypeQuery(generalId, type) {
+async function get5eCharSpellsByTypeQuery(generalId: string, type: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_spell" where general_id = $1 and type = $2 order by LOWER(title)`,
     values: [generalId, type]
@@ -29,7 +34,7 @@ async function get5eCharSpellsByTypeQuery(generalId, type) {
   return await db.query(query)
 }
 
-async function get5eCharSpellsByGeneralQuery(generalId) {
+async function get5eCharSpellsByGeneralQuery(generalId: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_spell" where general_id = $1`,
     values: [generalId]
@@ -37,7 +42,7 @@ async function get5eCharSpellsByGeneralQuery(generalId) {
   return await db.query(query)
 }
 
-async function remove5eCharSpellQuery(id) {
+async function remove5eCharSpellQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_spell" where id = $1`,
     values: [id]
@@ -46,7 +51,7 @@ async function remove5eCharSpellQuery(id) {
   return await db.query(query)
 }
 
-async function edit5eCharSpellQuery(id, data) {
+async function edit5eCharSpellQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -68,7 +73,7 @@ async function edit5eCharSpellQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   add5eCharSpellQuery,
   get5eCharSpellsByTypeQuery,
   get5eCharSpellsByGeneralQuery,

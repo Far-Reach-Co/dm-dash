@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editLocationQuery = exports.removeLocationQuery = exports.getSubLocationsQuery = exports.getLocationsWithKeywordAndFilterQuery = exports.getLocationsWithKeywordQuery = exports.getLocationsWithFilterQuery = exports.getLocationsQuery = exports.addLocationQuery = exports.getLocationQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addLocationQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -54,12 +56,13 @@ function addLocationQuery(data) {
                             data.image_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addLocationQuery = addLocationQuery;
 function getLocationQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -70,12 +73,13 @@ function getLocationQuery(id) {
                         text: "select * from public.\"Location\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getLocationQuery = getLocationQuery;
 function getLocationsWithKeywordAndFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -87,12 +91,13 @@ function getLocationsWithKeywordAndFilterQuery(_a) {
                         text: "select * from public.\"Location\" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLocationsWithKeywordAndFilterQuery = getLocationsWithKeywordAndFilterQuery;
 function getLocationsWithKeywordQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword;
     return __awaiter(this, void 0, void 0, function () {
@@ -104,12 +109,13 @@ function getLocationsWithKeywordQuery(_a) {
                         text: "select * from public.\"Location\" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLocationsWithKeywordQuery = getLocationsWithKeywordQuery;
 function getLocationsWithFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -121,12 +127,13 @@ function getLocationsWithFilterQuery(_a) {
                         text: "select * from public.\"Location\" where project_id = $1 and type = $4 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLocationsWithFilterQuery = getLocationsWithFilterQuery;
 function getLocationsQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset;
     return __awaiter(this, void 0, void 0, function () {
@@ -138,12 +145,13 @@ function getLocationsQuery(_a) {
                         text: "select * from public.\"Location\" where project_id = $1 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLocationsQuery = getLocationsQuery;
 function getSubLocationsQuery(parentLocationId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -154,12 +162,13 @@ function getSubLocationsQuery(parentLocationId) {
                         text: "select * from public.\"Location\" where parent_location_id = $1 order by title asc",
                         values: [parentLocationId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getSubLocationsQuery = getSubLocationsQuery;
 function removeLocationQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -170,12 +179,13 @@ function removeLocationQuery(id) {
                         text: "delete from public.\"Location\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeLocationQuery = removeLocationQuery;
 function editLocationQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -197,20 +207,10 @@ function editLocationQuery(id, data) {
                         text: "update public.\"Location\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    getLocationQuery: getLocationQuery,
-    addLocationQuery: addLocationQuery,
-    getLocationsQuery: getLocationsQuery,
-    getLocationsWithFilterQuery: getLocationsWithFilterQuery,
-    getLocationsWithKeywordQuery: getLocationsWithKeywordQuery,
-    getLocationsWithKeywordAndFilterQuery: getLocationsWithKeywordAndFilterQuery,
-    getSubLocationsQuery: getSubLocationsQuery,
-    removeLocationQuery: removeLocationQuery,
-    editLocationQuery: editLocationQuery
-};
+exports.editLocationQuery = editLocationQuery;

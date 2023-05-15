@@ -1,6 +1,6 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addProjectUserQuery(data) {
+async function addProjectUserQuery(data: {project_id: string, user_id: string, is_editor: boolean}) {
   const query = {
     text: /*sql*/ `insert into public."ProjectUser" (project_id, user_id, is_editor) values($1,$2,$3) returning *`,
     values: [
@@ -12,7 +12,7 @@ async function addProjectUserQuery(data) {
   return await db.query(query)
 }
 
-async function getProjectUsersQuery(userId) {
+async function getProjectUsersQuery(userId: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where user_id = $1`,
     values: [userId]
@@ -20,7 +20,7 @@ async function getProjectUsersQuery(userId) {
   return await db.query(query)
 }
 
-async function getProjectUserByUserAndProjectQuery(userId, projectId) {
+async function getProjectUserByUserAndProjectQuery(userId: string, projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where user_id = $1 and project_id = $2`,
     values: [userId, projectId]
@@ -28,7 +28,7 @@ async function getProjectUserByUserAndProjectQuery(userId, projectId) {
   return await db.query(query)
 }
 
-async function getProjectUsersByProjectQuery(projectId) {
+async function getProjectUsersByProjectQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where project_id = $1`,
     values: [projectId]
@@ -36,7 +36,7 @@ async function getProjectUsersByProjectQuery(projectId) {
   return await db.query(query)
 }
 
-async function getProjectUserQuery(id) {
+async function getProjectUserQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where id = $1`,
     values: [id]
@@ -44,7 +44,7 @@ async function getProjectUserQuery(id) {
   return await db.query(query)
 }
 
-async function removeProjectUserQuery(id) {
+async function removeProjectUserQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."ProjectUser" where id = $1`,
     values: [id]
@@ -53,7 +53,7 @@ async function removeProjectUserQuery(id) {
   return await db.query(query)
 }
 
-async function editProjectUserQuery(id, data) {
+async function editProjectUserQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -75,7 +75,7 @@ async function editProjectUserQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addProjectUserQuery,
   getProjectUserQuery,
   getProjectUsersQuery,

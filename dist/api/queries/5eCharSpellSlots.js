@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.edit5eCharSpellSlotInfoQuery = exports.remove5eCharSpellSlotInfoQuery = exports.get5eCharSpellSlotInfoQuery = exports.get5eCharSpellSlotInfosByGeneralQuery = exports.add5eCharSpellSlotInfoQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function add5eCharSpellSlotInfoQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -48,12 +50,13 @@ function add5eCharSpellSlotInfoQuery(data) {
                             data.general_id,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.add5eCharSpellSlotInfoQuery = add5eCharSpellSlotInfoQuery;
 function get5eCharSpellSlotInfoQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -64,12 +67,13 @@ function get5eCharSpellSlotInfoQuery(id) {
                         text: "select * from public.\"dnd_5e_spell_slots\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharSpellSlotInfoQuery = get5eCharSpellSlotInfoQuery;
 function get5eCharSpellSlotInfosByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -80,12 +84,13 @@ function get5eCharSpellSlotInfosByGeneralQuery(generalId) {
                         text: "select * from public.\"dnd_5e_spell_slots\" where general_id = $1",
                         values: [generalId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharSpellSlotInfosByGeneralQuery = get5eCharSpellSlotInfosByGeneralQuery;
 function remove5eCharSpellSlotInfoQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -96,12 +101,13 @@ function remove5eCharSpellSlotInfoQuery(id) {
                         text: "delete from public.\"dnd_5e_spell_slots\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.remove5eCharSpellSlotInfoQuery = remove5eCharSpellSlotInfoQuery;
 function edit5eCharSpellSlotInfoQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -123,16 +129,10 @@ function edit5eCharSpellSlotInfoQuery(id, data) {
                         text: "update public.\"dnd_5e_spell_slots\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    add5eCharSpellSlotInfoQuery: add5eCharSpellSlotInfoQuery,
-    get5eCharSpellSlotInfosByGeneralQuery: get5eCharSpellSlotInfosByGeneralQuery,
-    get5eCharSpellSlotInfoQuery: get5eCharSpellSlotInfoQuery,
-    remove5eCharSpellSlotInfoQuery: remove5eCharSpellSlotInfoQuery,
-    edit5eCharSpellSlotInfoQuery: edit5eCharSpellSlotInfoQuery
-};
+exports.edit5eCharSpellSlotInfoQuery = edit5eCharSpellSlotInfoQuery;

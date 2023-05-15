@@ -35,7 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+var dbconfig_1 = require("../dbconfig");
 function addProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -49,7 +50,7 @@ function addProjectQuery(data) {
                             data.user_id,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
@@ -65,7 +66,7 @@ function getProjectQuery(projectId) {
                         text: "select * from public.\"Project\" where id = $1",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
@@ -81,7 +82,7 @@ function removeProjectQuery(id) {
                         text: "delete from public.\"Project\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
@@ -97,23 +98,7 @@ function getProjectsQuery(userId) {
                         text: "select * from public.\"Project\" where user_id = $1 order by title asc",
                         values: [userId]
                     };
-                    return [4, db.query(query)];
-                case 1: return [2, _a.sent()];
-            }
-        });
-    });
-}
-function removeProjectQuery(id) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = {
-                        text: "delete from public.\"Project\" where id = $1",
-                        values: [id]
-                    };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
@@ -140,7 +125,7 @@ function editProjectQuery(id, data) {
                         text: "update public.\"Project\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });

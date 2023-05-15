@@ -1,6 +1,11 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addCounterQuery(data) {
+async function addCounterQuery(data: {
+  user_id: string,
+  project_id: string,
+  current_count: string,
+  title: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Counter" (user_id, project_id, current_count, title) values($1,$2,$3,$4) returning *`,
     values: [
@@ -13,7 +18,7 @@ async function addCounterQuery(data) {
   return await db.query(query)
 }
 
-async function getCounterQuery(id) {
+async function getCounterQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Counter" where id = $1`,
     values: [id]
@@ -21,7 +26,7 @@ async function getCounterQuery(id) {
   return await db.query(query)
 }
 
-async function getCountersQuery(userId, projectId) {
+async function getCountersQuery(userId: string, projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."Counter" where user_id = $1 and project_id = $2 order by title asc`,
     values: [userId, projectId]
@@ -29,7 +34,7 @@ async function getCountersQuery(userId, projectId) {
   return await db.query(query)
 }
 
-async function getAllCountersByProjectQuery(projectId) {
+async function getAllCountersByProjectQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."Counter" where project_id = $1 order by title asc`,
     values: [projectId]
@@ -37,7 +42,7 @@ async function getAllCountersByProjectQuery(projectId) {
   return await db.query(query)
 }
 
-async function removeCounterQuery(id) {
+async function removeCounterQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Counter" where id = $1`,
     values: [id]
@@ -46,7 +51,7 @@ async function removeCounterQuery(id) {
   return await db.query(query)
 }
 
-async function editCounterQuery(id, data) {
+async function editCounterQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -68,7 +73,7 @@ async function editCounterQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addCounterQuery,
   getCountersQuery,
   getCounterQuery,

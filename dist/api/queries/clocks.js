@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editClockQuery = exports.removeClockQuery = exports.getClockQuery = exports.getClocksQuery = exports.addClockQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addClockQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -50,12 +52,13 @@ function addClockQuery(data) {
                             data.project_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addClockQuery = addClockQuery;
 function getClockQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -66,12 +69,13 @@ function getClockQuery(id) {
                         text: "select * from public.\"Clock\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getClockQuery = getClockQuery;
 function getClocksQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -82,12 +86,13 @@ function getClocksQuery(projectId) {
                         text: "select * from public.\"Clock\" where project_id = $1 order by title asc",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getClocksQuery = getClocksQuery;
 function removeClockQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -98,12 +103,13 @@ function removeClockQuery(id) {
                         text: "delete from public.\"Clock\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeClockQuery = removeClockQuery;
 function editClockQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -125,16 +131,10 @@ function editClockQuery(id, data) {
                         text: "update public.\"Clock\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addClockQuery: addClockQuery,
-    getClocksQuery: getClocksQuery,
-    getClockQuery: getClockQuery,
-    removeClockQuery: removeClockQuery,
-    editClockQuery: editClockQuery
-};
+exports.editClockQuery = editClockQuery;

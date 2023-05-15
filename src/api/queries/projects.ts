@@ -1,6 +1,6 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addProjectQuery(data) {
+async function addProjectQuery(data: {title: string, user_id: string}) {
   const query = {
     text: /*sql*/ `insert into public."Project" (title, user_id) values($1,$2) returning *`,
     values: [
@@ -11,7 +11,7 @@ async function addProjectQuery(data) {
   return await db.query(query)
 }
 
-async function getProjectQuery(projectId) {
+async function getProjectQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."Project" where id = $1`,
     values: [projectId]
@@ -19,7 +19,7 @@ async function getProjectQuery(projectId) {
   return await db.query(query)
 }
 
-async function removeProjectQuery(id) {
+async function removeProjectQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Project" where id = $1`,
     values: [id]
@@ -28,7 +28,7 @@ async function removeProjectQuery(id) {
   return await db.query(query)
 }
 
-async function getProjectsQuery(userId) {
+async function getProjectsQuery(userId: string) {
   const query = {
     text: /*sql*/ `select * from public."Project" where user_id = $1 order by title asc`,
     values: [userId]
@@ -36,16 +36,7 @@ async function getProjectsQuery(userId) {
   return await db.query(query)
 }
 
-async function removeProjectQuery(id) {
-  const query = {
-    text: /*sql*/ `delete from public."Project" where id = $1`,
-    values: [id]
-  }
-
-  return await db.query(query)
-}
-
-async function editProjectQuery(id, data) {
+async function editProjectQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1

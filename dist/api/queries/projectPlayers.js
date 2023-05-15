@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editProjectPlayerQuery = exports.removeProjectPlayerQuery = exports.getProjectPlayersByPlayerQuery = exports.getProjectPlayersByProjectQuery = exports.getProjectPlayerQuery = exports.addProjectPlayerQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addProjectPlayerQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -49,12 +51,13 @@ function addProjectPlayerQuery(data) {
                             data.player_id,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addProjectPlayerQuery = addProjectPlayerQuery;
 function getProjectPlayersByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -65,12 +68,13 @@ function getProjectPlayersByProjectQuery(projectId) {
                         text: "select * from public.\"ProjectPlayer\" where project_id = $1",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectPlayersByProjectQuery = getProjectPlayersByProjectQuery;
 function getProjectPlayersByPlayerQuery(playerId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -81,12 +85,13 @@ function getProjectPlayersByPlayerQuery(playerId) {
                         text: "select * from public.\"ProjectPlayer\" where player_id = $1",
                         values: [playerId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectPlayersByPlayerQuery = getProjectPlayersByPlayerQuery;
 function getProjectPlayerQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -97,12 +102,13 @@ function getProjectPlayerQuery(id) {
                         text: "select * from public.\"ProjectPlayer\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectPlayerQuery = getProjectPlayerQuery;
 function removeProjectPlayerQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -113,12 +119,13 @@ function removeProjectPlayerQuery(id) {
                         text: "delete from public.\"ProjectPlayer\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeProjectPlayerQuery = removeProjectPlayerQuery;
 function editProjectPlayerQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -140,17 +147,10 @@ function editProjectPlayerQuery(id, data) {
                         text: "update public.\"ProjectPlayer\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addProjectPlayerQuery: addProjectPlayerQuery,
-    getProjectPlayerQuery: getProjectPlayerQuery,
-    getProjectPlayersByProjectQuery: getProjectPlayersByProjectQuery,
-    getProjectPlayersByPlayerQuery: getProjectPlayersByPlayerQuery,
-    removeProjectPlayerQuery: removeProjectPlayerQuery,
-    editProjectPlayerQuery: editProjectPlayerQuery
-};
+exports.editProjectPlayerQuery = editProjectPlayerQuery;

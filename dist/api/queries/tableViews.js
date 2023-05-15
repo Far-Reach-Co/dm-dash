@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addTableViewQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -48,12 +50,13 @@ function addTableViewQuery(data) {
                             data.project_id,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addTableViewQuery = addTableViewQuery;
 function getTableViewQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -64,12 +67,13 @@ function getTableViewQuery(id) {
                         text: "select * from public.\"TableView\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getTableViewQuery = getTableViewQuery;
 function getTableViewsQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -80,12 +84,13 @@ function getTableViewsQuery(projectId) {
                         text: "select * from public.\"TableView\" where project_id = $1",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getTableViewsQuery = getTableViewsQuery;
 function removeTableViewQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -96,12 +101,13 @@ function removeTableViewQuery(id) {
                         text: "delete from public.\"TableView\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeTableViewQuery = removeTableViewQuery;
 function editTableViewQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -123,16 +129,10 @@ function editTableViewQuery(id, data) {
                         text: "update public.\"TableView\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addTableViewQuery: addTableViewQuery,
-    getTableViewsQuery: getTableViewsQuery,
-    getTableViewQuery: getTableViewQuery,
-    removeTableViewQuery: removeTableViewQuery,
-    editTableViewQuery: editTableViewQuery
-};
+exports.editTableViewQuery = editTableViewQuery;

@@ -67,7 +67,7 @@ async function editUserPasswordQuery(id: string, password: string) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   getAllUsersQuery,
   getUserByIdQuery,
   getUserByEmailQuery,

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.editUserPasswordQuery = exports.editUserQuery = exports.registerUserQuery = exports.getUserByEmailQuery = exports.getUserByIdQuery = exports.getAllUsersQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function getUserByIdQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
@@ -53,6 +54,7 @@ function getUserByIdQuery(id) {
         });
     });
 }
+exports.getUserByIdQuery = getUserByIdQuery;
 function getAllUsersQuery() {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -68,6 +70,7 @@ function getAllUsersQuery() {
         });
     });
 }
+exports.getAllUsersQuery = getAllUsersQuery;
 function getUserByEmailQuery(email) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -84,6 +87,7 @@ function getUserByEmailQuery(email) {
         });
     });
 }
+exports.getUserByEmailQuery = getUserByEmailQuery;
 function registerUserQuery(_a) {
     var email = _a.email, username = _a.username, password = _a.password;
     return __awaiter(this, void 0, void 0, function () {
@@ -105,6 +109,7 @@ function registerUserQuery(_a) {
         });
     });
 }
+exports.registerUserQuery = registerUserQuery;
 function editUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -132,6 +137,7 @@ function editUserQuery(id, data) {
         });
     });
 }
+exports.editUserQuery = editUserQuery;
 function editUserPasswordQuery(id, password) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -148,11 +154,4 @@ function editUserPasswordQuery(id, password) {
         });
     });
 }
-module.exports = {
-    getAllUsersQuery: getAllUsersQuery,
-    getUserByIdQuery: getUserByIdQuery,
-    getUserByEmailQuery: getUserByEmailQuery,
-    registerUserQuery: registerUserQuery,
-    editUserQuery: editUserQuery,
-    editUserPasswordQuery: editUserPasswordQuery
-};
+exports.editUserPasswordQuery = editUserPasswordQuery;

@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editEventQuery = exports.removeEventQuery = exports.getEventsByLoreQuery = exports.getEventsByItemQuery = exports.getEventsByCharacterQuery = exports.getEventsByLocationQuery = exports.getEventQuery = exports.getEventsQuery = exports.addEventQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addEventQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -54,12 +56,13 @@ function addEventQuery(data) {
                             data.lore_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addEventQuery = addEventQuery;
 function getEventQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -70,12 +73,13 @@ function getEventQuery(id) {
                         text: "select * from public.\"Event\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getEventQuery = getEventQuery;
 function getEventsQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset;
     return __awaiter(this, void 0, void 0, function () {
@@ -87,12 +91,13 @@ function getEventsQuery(_a) {
                         text: "select * from public.\"Event\" where project_id = $1 order by date_created desc limit $2 offset $3",
                         values: [projectId, limit, offset]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getEventsQuery = getEventsQuery;
 function getEventsByLocationQuery(locationId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -103,12 +108,13 @@ function getEventsByLocationQuery(locationId) {
                         text: "select * from public.\"Event\" where location_id = $1 order by date_created desc",
                         values: [locationId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getEventsByLocationQuery = getEventsByLocationQuery;
 function getEventsByCharacterQuery(characterId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -119,13 +125,14 @@ function getEventsByCharacterQuery(characterId) {
                         text: "select * from public.\"Event\" where character_id = $1 order by date_created desc",
                         values: [characterId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
-function getEventsByItemQuery(item) {
+exports.getEventsByCharacterQuery = getEventsByCharacterQuery;
+function getEventsByItemQuery(itemId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
@@ -133,15 +140,16 @@ function getEventsByItemQuery(item) {
                 case 0:
                     query = {
                         text: "select * from public.\"Event\" where item_id = $1 order by date_created desc",
-                        values: [item]
+                        values: [itemId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
-function getEventsByLoreQuery(lore) {
+exports.getEventsByItemQuery = getEventsByItemQuery;
+function getEventsByLoreQuery(loreId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
@@ -149,14 +157,15 @@ function getEventsByLoreQuery(lore) {
                 case 0:
                     query = {
                         text: "select * from public.\"Event\" where lore_id = $1 order by date_created desc",
-                        values: [lore]
+                        values: [loreId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getEventsByLoreQuery = getEventsByLoreQuery;
 function removeEventQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -167,12 +176,13 @@ function removeEventQuery(id) {
                         text: "delete from public.\"Event\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeEventQuery = removeEventQuery;
 function editEventQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -194,20 +204,10 @@ function editEventQuery(id, data) {
                         text: "update public.\"Event\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addEventQuery: addEventQuery,
-    getEventsQuery: getEventsQuery,
-    getEventQuery: getEventQuery,
-    getEventsByLocationQuery: getEventsByLocationQuery,
-    getEventsByCharacterQuery: getEventsByCharacterQuery,
-    getEventsByItemQuery: getEventsByItemQuery,
-    getEventsByLoreQuery: getEventsByLoreQuery,
-    removeEventQuery: removeEventQuery,
-    editEventQuery: editEventQuery
-};
+exports.editEventQuery = editEventQuery;
