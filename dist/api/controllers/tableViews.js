@@ -35,8 +35,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/tableViews.js"), getTableViewsQuery = _a.getTableViewsQuery, getTableViewQuery = _a.getTableViewQuery, removeTableViewQuery = _a.removeTableViewQuery, editTableViewQuery = _a.editTableViewQuery, addTableViewQuery = _a.addTableViewQuery;
-var USER_IS_NOT_PRO = require("../../lib/enums.js").USER_IS_NOT_PRO;
+exports.__esModule = true;
+exports.editTableView = exports.removeTableView = exports.getTableView = exports.getTableViews = exports.addTableView = void 0;
+var tableViews_js_1 = require("../queries/tableViews.js");
+var enums_js_1 = require("../../lib/enums.js");
 function addTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var tableViewsData, data, err_1;
@@ -44,14 +46,14 @@ function addTableView(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 3, , 4]);
-                    return [4, getTableViewsQuery(req.body.project_id)];
+                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.body.project_id)];
                 case 1:
                     tableViewsData = _a.sent();
                     if (tableViewsData.rows.length >= 2) {
                         if (!req.user.is_pro)
-                            throw { status: 402, message: USER_IS_NOT_PRO };
+                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
                     }
-                    return [4, addTableViewQuery(req.body)];
+                    return [4, (0, tableViews_js_1.addTableViewQuery)(req.body)];
                 case 2:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -65,6 +67,7 @@ function addTableView(req, res, next) {
         });
     });
 }
+exports.addTableView = addTableView;
 function getTableViews(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -72,7 +75,7 @@ function getTableViews(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getTableViewsQuery(req.params.project_id)];
+                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.params.project_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -86,6 +89,7 @@ function getTableViews(req, res, next) {
         });
     });
 }
+exports.getTableViews = getTableViews;
 function getTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var tableViewData, tableView, err_3;
@@ -93,7 +97,7 @@ function getTableView(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getTableViewQuery(req.params.id)];
+                    return [4, (0, tableViews_js_1.getTableViewQuery)(req.params.id)];
                 case 1:
                     tableViewData = _a.sent();
                     tableView = tableViewData.rows[0];
@@ -108,6 +112,7 @@ function getTableView(req, res, next) {
         });
     });
 }
+exports.getTableView = getTableView;
 function removeTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_4;
@@ -115,7 +120,7 @@ function removeTableView(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, removeTableViewQuery(req.params.id)];
+                    return [4, (0, tableViews_js_1.removeTableViewQuery)(req.params.id)];
                 case 1:
                     _a.sent();
                     res.status(204).send();
@@ -129,6 +134,7 @@ function removeTableView(req, res, next) {
         });
     });
 }
+exports.removeTableView = removeTableView;
 function editTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_5;
@@ -136,7 +142,7 @@ function editTableView(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editTableViewQuery(req.params.id, req.body)];
+                    return [4, (0, tableViews_js_1.editTableViewQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -150,10 +156,4 @@ function editTableView(req, res, next) {
         });
     });
 }
-module.exports = {
-    addTableView: addTableView,
-    getTableViews: getTableViews,
-    getTableView: getTableView,
-    removeTableView: removeTableView,
-    editTableView: editTableView
-};
+exports.editTableView = editTableView;

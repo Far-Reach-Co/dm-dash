@@ -1,6 +1,10 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addDayQuery(data) {
+async function addDayQuery(data: {
+  calendar_id: string,
+  index: string,
+  title: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Day" (calendar_id, index, title) values($1,$2,$3) returning *`,
     values: [
@@ -12,7 +16,7 @@ async function addDayQuery(data) {
   return await db.query(query)
 }
 
-async function getDayQuery(id) {
+async function getDayQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Day" where id = $1`,
     values: [id]
@@ -20,7 +24,7 @@ async function getDayQuery(id) {
   return await db.query(query)
 }
 
-async function getDaysQuery(calendarId) {
+async function getDaysQuery(calendarId: string) {
   const query = {
     text: /*sql*/ `select * from public."Day" where calendar_id = $1 order by index asc`,
     values: [calendarId]
@@ -28,7 +32,7 @@ async function getDaysQuery(calendarId) {
   return await db.query(query)
 }
 
-async function removeDayQuery(id) {
+async function removeDayQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Day" where id = $1`,
     values: [id]
@@ -37,7 +41,7 @@ async function removeDayQuery(id) {
   return await db.query(query)
 }
 
-async function editDayQuery(id, data) {
+async function editDayQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -59,7 +63,7 @@ async function editDayQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addDayQuery,
   getDaysQuery,
   getDayQuery,

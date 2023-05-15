@@ -1,6 +1,12 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addLoreQuery(data) {
+async function addLoreQuery(data: {
+  project_id: string,
+  title: string,
+  description: string,
+  type: string,
+  image_id: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Lore" (project_id, title, description, type, image_id) values($1,$2,$3,$4,$5) returning *`,
     values: [
@@ -14,7 +20,7 @@ async function addLoreQuery(data) {
   return await db.query(query)
 }
 
-async function getLoreQuery(id) {
+async function getLoreQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where id = $1`,
     values: [id]
@@ -22,21 +28,23 @@ async function getLoreQuery(id) {
   return await db.query(query)
 }
 
-async function getLoresWithKeywordAndFilterQuery({projectId, limit, offset, keyword, filter}) {
+async function getLoresWithKeywordAndFilterQuery(
+  {projectId, limit, offset, keyword, filter}: {projectId: string, limit: string, offset: string, keyword: string, filter: string}
+) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword, filter]
   }
   return await db.query(query)
 }
-async function getLoresWithKeywordQuery({projectId, limit, offset, keyword}) {
+async function getLoresWithKeywordQuery({projectId, limit, offset, keyword}: {projectId: string, limit: string, offset: string, keyword: string}) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword]
   }
   return await db.query(query)
 }
-async function getLoresWithFilterQuery({projectId, limit, offset, filter}) {
+async function getLoresWithFilterQuery({projectId, limit, offset, filter}: {projectId: string, limit: string, offset: string, filter: string}) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where project_id = $1 and type = $4 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, filter]
@@ -44,7 +52,7 @@ async function getLoresWithFilterQuery({projectId, limit, offset, filter}) {
   return await db.query(query)
 }
 
-async function getLoresQuery({projectId, limit, offset}) {
+async function getLoresQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where project_id = $1 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset]
@@ -52,7 +60,7 @@ async function getLoresQuery({projectId, limit, offset}) {
   return await db.query(query)
 }
 
-async function removeLoreQuery(id) {
+async function removeLoreQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Lore" where id = $1`,
     values: [id]
@@ -61,7 +69,7 @@ async function removeLoreQuery(id) {
   return await db.query(query)
 }
 
-async function editLoreQuery(id, data) {
+async function editLoreQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -83,7 +91,7 @@ async function editLoreQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addLoreQuery,
   getLoresQuery,
   getLoreQuery,

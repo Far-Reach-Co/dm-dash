@@ -1,6 +1,9 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function add5eCharOtherProLangQuery(data) {
+async function add5eCharOtherProLangQuery(data: {
+  general_id: string,
+  type: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_character_other_pro_lang" (general_id, type) values($1,$2) returning *`,
     values: [
@@ -11,7 +14,7 @@ async function add5eCharOtherProLangQuery(data) {
   return await db.query(query)
 }
 
-async function get5eCharOtherProLangQuery(id) {
+async function get5eCharOtherProLangQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where id = $1`,
     values: [id]
@@ -19,7 +22,7 @@ async function get5eCharOtherProLangQuery(id) {
   return await db.query(query)
 }
 
-async function get5eCharOtherProLangsByGeneralQuery(generalId) {
+async function get5eCharOtherProLangsByGeneralQuery(generalId: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where general_id = $1`,
     values: [generalId]
@@ -27,7 +30,7 @@ async function get5eCharOtherProLangsByGeneralQuery(generalId) {
   return await db.query(query)
 }
 
-async function remove5eCharOtherProLangQuery(id) {
+async function remove5eCharOtherProLangQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_other_pro_lang" where id = $1`,
     values: [id]
@@ -36,7 +39,7 @@ async function remove5eCharOtherProLangQuery(id) {
   return await db.query(query)
 }
 
-async function edit5eCharOtherProLangQuery(id, data) {
+async function edit5eCharOtherProLangQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -58,7 +61,7 @@ async function edit5eCharOtherProLangQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   add5eCharOtherProLangQuery,
   get5eCharOtherProLangsByGeneralQuery,
   get5eCharOtherProLangQuery,

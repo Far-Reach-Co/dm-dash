@@ -1,6 +1,10 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addCalendarQuery(data) {
+async function addCalendarQuery(data: {
+  project_id: string,
+  title: string,
+  year: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Calendar" (project_id, title, year) values($1,$2,$3) returning *`,
     values: [
@@ -12,7 +16,7 @@ async function addCalendarQuery(data) {
   return await db.query(query)
 }
 
-async function getCalendarQuery(id) {
+async function getCalendarQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Calendar" where id = $1`,
     values: [id]
@@ -20,7 +24,7 @@ async function getCalendarQuery(id) {
   return await db.query(query)
 }
 
-async function getCalendarsQuery(projectId) {
+async function getCalendarsQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."Calendar" where project_id = $1 order by title asc`,
     values: [projectId]
@@ -28,7 +32,7 @@ async function getCalendarsQuery(projectId) {
   return await db.query(query)
 }
 
-async function removeCalendarQuery(id) {
+async function removeCalendarQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Calendar" where id = $1`,
     values: [id]
@@ -37,7 +41,7 @@ async function removeCalendarQuery(id) {
   return await db.query(query)
 }
 
-async function editCalendarQuery(id, data) {
+async function editCalendarQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -59,7 +63,7 @@ async function editCalendarQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addCalendarQuery,
   getCalendarsQuery,
   getCalendarQuery,

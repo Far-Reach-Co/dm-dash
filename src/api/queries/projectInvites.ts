@@ -1,6 +1,6 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addProjectInviteQuery(data) {
+async function addProjectInviteQuery(data: {uuid: string, project_id: string}) {
   const query = {
     text: /*sql*/ `insert into public."ProjectInvite" (uuid, project_id) values($1,$2) returning *`,
     values: [
@@ -11,7 +11,7 @@ async function addProjectInviteQuery(data) {
   return await db.query(query)
 }
 
-async function getProjectInviteQuery(id) {
+async function getProjectInviteQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectInvite" where id = $1`,
     values: [id]
@@ -19,7 +19,7 @@ async function getProjectInviteQuery(id) {
   return await db.query(query)
 }
 
-async function getProjectInviteByProjectQuery(projectId) {
+async function getProjectInviteByProjectQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectInvite" where project_id = $1`,
     values: [projectId]
@@ -27,7 +27,7 @@ async function getProjectInviteByProjectQuery(projectId) {
   return await db.query(query)
 }
 
-async function getProjectInviteByUUIDQuery(uuid) {
+async function getProjectInviteByUUIDQuery(uuid: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectInvite" where uuid = $1`,
     values: [uuid]
@@ -35,7 +35,7 @@ async function getProjectInviteByUUIDQuery(uuid) {
   return await db.query(query)
 }
 
-async function removeProjectInviteQuery(id) {
+async function removeProjectInviteQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."ProjectInvite" where id = $1`,
     values: [id]
@@ -44,7 +44,7 @@ async function removeProjectInviteQuery(id) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addProjectInviteQuery,
   getProjectInviteQuery,
   getProjectInviteByUUIDQuery,

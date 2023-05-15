@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.edit5eCharProQuery = exports.remove5eCharProQuery = exports.get5eCharProQuery = exports.get5eCharProByGeneralQuery = exports.add5eCharProQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function add5eCharProQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -48,12 +50,13 @@ function add5eCharProQuery(data) {
                             data.general_id,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.add5eCharProQuery = add5eCharProQuery;
 function get5eCharProQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -64,12 +67,13 @@ function get5eCharProQuery(id) {
                         text: "select * from public.\"dnd_5e_character_proficiencies\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharProQuery = get5eCharProQuery;
 function get5eCharProByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -80,12 +84,13 @@ function get5eCharProByGeneralQuery(generalId) {
                         text: "select * from public.\"dnd_5e_character_proficiencies\" where general_id = $1",
                         values: [generalId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharProByGeneralQuery = get5eCharProByGeneralQuery;
 function remove5eCharProQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -96,12 +101,13 @@ function remove5eCharProQuery(id) {
                         text: "delete from public.\"dnd_5e_character_proficiencies\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.remove5eCharProQuery = remove5eCharProQuery;
 function edit5eCharProQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -123,16 +129,10 @@ function edit5eCharProQuery(id, data) {
                         text: "update public.\"dnd_5e_character_proficiencies\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    add5eCharProQuery: add5eCharProQuery,
-    get5eCharProByGeneralQuery: get5eCharProByGeneralQuery,
-    get5eCharProQuery: get5eCharProQuery,
-    remove5eCharProQuery: remove5eCharProQuery,
-    edit5eCharProQuery: edit5eCharProQuery
-};
+exports.edit5eCharProQuery = edit5eCharProQuery;

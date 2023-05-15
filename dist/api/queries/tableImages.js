@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editTableImageQuery = exports.removeTableImageQuery = exports.getTableImageQuery = exports.getTableImagesQuery = exports.addTableImageQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addTableImageQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -49,12 +51,13 @@ function addTableImageQuery(data) {
                             data.image_id,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addTableImageQuery = addTableImageQuery;
 function getTableImageQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -65,12 +68,13 @@ function getTableImageQuery(id) {
                         text: "select * from public.\"TableImage\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getTableImageQuery = getTableImageQuery;
 function getTableImagesQuery(project_id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -81,12 +85,13 @@ function getTableImagesQuery(project_id) {
                         text: "select * from public.\"TableImage\" where project_id = $1",
                         values: [project_id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getTableImagesQuery = getTableImagesQuery;
 function removeTableImageQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -97,12 +102,13 @@ function removeTableImageQuery(id) {
                         text: "delete from public.\"TableImage\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeTableImageQuery = removeTableImageQuery;
 function editTableImageQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -124,16 +130,10 @@ function editTableImageQuery(id, data) {
                         text: "update public.\"TableImage\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addTableImageQuery: addTableImageQuery,
-    getTableImagesQuery: getTableImagesQuery,
-    getTableImageQuery: getTableImageQuery,
-    removeTableImageQuery: removeTableImageQuery,
-    editTableImageQuery: editTableImageQuery
-};
+exports.editTableImageQuery = editTableImageQuery;

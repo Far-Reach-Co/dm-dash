@@ -9,8 +9,9 @@ import {
   editEventQuery,
   getEventsByLoreQuery,
 } from "../queries/events";
+import { Request, Response, NextFunction } from "express";
 
-async function addEvent(req, res, next) {
+async function addEvent(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addEventQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -19,7 +20,7 @@ async function addEvent(req, res, next) {
   }
 }
 
-async function getEvents(req, res, next) {
+async function getEvents(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await getEventsQuery({
       projectId: req.params.project_id,
@@ -33,7 +34,11 @@ async function getEvents(req, res, next) {
   }
 }
 
-async function getEventsByLocation(req, res, next) {
+async function getEventsByLocation(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getEventsByLocationQuery(req.params.location_id);
 
@@ -43,7 +48,11 @@ async function getEventsByLocation(req, res, next) {
   }
 }
 
-async function getEventsByCharacter(req, res, next) {
+async function getEventsByCharacter(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getEventsByCharacterQuery(req.params.character_id);
 
@@ -53,7 +62,11 @@ async function getEventsByCharacter(req, res, next) {
   }
 }
 
-async function getEventsByItem(req, res, next) {
+async function getEventsByItem(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getEventsByItemQuery(req.params.item_id);
 
@@ -63,7 +76,11 @@ async function getEventsByItem(req, res, next) {
   }
 }
 
-async function getEventsByLore(req, res, next) {
+async function getEventsByLore(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getEventsByLoreQuery(req.params.lore_id);
 
@@ -73,7 +90,7 @@ async function getEventsByLore(req, res, next) {
   }
 }
 
-async function removeEvent(req, res, next) {
+async function removeEvent(req: Request, res: Response, next: NextFunction) {
   try {
     await removeEventQuery(req.params.id);
     res.status(204).send();
@@ -82,7 +99,7 @@ async function removeEvent(req, res, next) {
   }
 }
 
-async function editEvent(req, res, next) {
+async function editEvent(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editEventQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -91,7 +108,7 @@ async function editEvent(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getEvents,
   getEventsByLocation,
   addEvent,

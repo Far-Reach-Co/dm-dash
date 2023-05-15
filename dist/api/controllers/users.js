@@ -35,18 +35,20 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var bcrypt = require("bcrypt");
-var jwt = require("jsonwebtoken");
-var mail = require("../smtp/index.js");
-var _a = require("../queries/users"), getUserByIdQuery = _a.getUserByIdQuery, getAllUsersQuery = _a.getAllUsersQuery, getUserByEmailQuery = _a.getUserByEmailQuery, registerUserQuery = _a.registerUserQuery, editUserQuery = _a.editUserQuery, editUserPasswordQuery = _a.editUserPasswordQuery;
-var addProjectQuery = require("../queries/projects").addProjectQuery;
-var addTableViewQuery = require("../queries/tableViews.js").addTableViewQuery;
+exports.__esModule = true;
+exports.requestResetEmail = exports.resetPassword = exports.editUser = exports.verifyJwt = exports.loginUser = exports.registerUser = exports.getUserById = exports.getAllUsers = exports.verifyUserByToken = void 0;
+var bcrypt_1 = require("bcrypt");
+var jsonwebtoken_1 = require("jsonwebtoken");
+var index_js_1 = require("../smtp/index.js");
+var users_1 = require("../queries/users");
+var projects_1 = require("../queries/projects");
+var tableViews_js_1 = require("../queries/tableViews.js");
 var validLoginLength = "30d";
 function generateAccessToken(id, expires) {
-    return jwt.sign({ id: id }, process.env.SECRET_KEY, { expiresIn: expires });
+    return (0, jsonwebtoken_1.sign)({ id: id }, process.env.SECRET_KEY, { expiresIn: expires });
 }
 function sendResetEmail(user, token) {
-    mail.sendMessage({
+    index_js_1["default"].sendMessage({
         user: user,
         title: "Reset Password",
         message: "Visit the following link to reset your password: <a href=\"https://farreachco.com/resetpassword.html?token=".concat(token, "\">Reset Password</a>")
@@ -54,27 +56,24 @@ function sendResetEmail(user, token) {
 }
 function verifyUserByToken(token) {
     return __awaiter(this, void 0, void 0, function () {
-        var _this = this;
+        var userVerifiedOrNull, userData;
         return __generator(this, function (_a) {
-            return [2, jwt.verify(token, process.env.SECRET_KEY, function (err, user) { return __awaiter(_this, void 0, void 0, function () {
-                    var userData;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                if (err)
-                                    return [2, null];
-                                return [4, getUserByIdQuery(user.id)];
-                            case 1:
-                                userData = _a.sent();
-                                if (userData.rows.length === 0)
-                                    return [2, null];
-                                return [2, userData];
-                        }
-                    });
-                }); })];
+            switch (_a.label) {
+                case 0:
+                    userVerifiedOrNull = (0, jsonwebtoken_1.verify)(token, process.env.SECRET_KEY);
+                    if (!userVerifiedOrNull) return [3, 2];
+                    return [4, (0, users_1.getUserByIdQuery)(userVerifiedOrNull.id)];
+                case 1:
+                    userData = _a.sent();
+                    if (userData.rows.length === 0)
+                        return [2, null];
+                    return [2, userData];
+                case 2: return [2, null];
+            }
         });
     });
 }
+exports.verifyUserByToken = verifyUserByToken;
 function getAllUsers(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var usersData, err_1;
@@ -82,20 +81,20 @@ function getAllUsers(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getAllUsersQuery()];
+                    return [4, (0, users_1.getAllUsersQuery)()];
                 case 1:
                     usersData = _a.sent();
                     res.send(usersData);
                     return [3, 3];
                 case 2:
                     err_1 = _a.sent();
-                    next(err_1);
-                    return [3, 3];
+                    return [2, next(err_1)];
                 case 3: return [2];
             }
         });
     });
 }
+exports.getAllUsers = getAllUsers;
 function getUserById(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var userData, err_2;
@@ -103,20 +102,20 @@ function getUserById(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getUserByIdQuery(req.params.id)];
+                    return [4, (0, users_1.getUserByIdQuery)(req.params.id)];
                 case 1:
                     userData = _a.sent();
                     res.send(userData.rows[0]);
                     return [3, 3];
                 case 2:
                     err_2 = _a.sent();
-                    next(err_2);
-                    return [3, 3];
+                    return [2, next(err_2)];
                 case 3: return [2];
             }
         });
     });
 }
+exports.getUserById = getUserById;
 function registerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var _a, email, username, password, salt, hashedPassword, userData, data, projectData, token, err_3;
@@ -125,13 +124,13 @@ function registerUser(req, res, next) {
                 case 0:
                     _b.trys.push([0, 6, , 7]);
                     _a = req.body, email = _a.email, username = _a.username, password = _a.password;
-                    return [4, bcrypt.genSalt(10)];
+                    return [4, (0, bcrypt_1.genSalt)(10)];
                 case 1:
                     salt = _b.sent();
-                    return [4, bcrypt.hash(password, salt)];
+                    return [4, (0, bcrypt_1.hash)(password, salt)];
                 case 2:
                     hashedPassword = _b.sent();
-                    return [4, registerUserQuery({
+                    return [4, (0, users_1.registerUserQuery)({
                             email: email.toLowerCase(),
                             username: username,
                             password: hashedPassword
@@ -139,18 +138,18 @@ function registerUser(req, res, next) {
                 case 3:
                     userData = _b.sent();
                     data = userData.rows[0];
-                    return [4, addProjectQuery({
+                    return [4, (0, projects_1.addProjectQuery)({
                             title: "First Project",
                             user_id: data.id
                         })];
                 case 4:
                     projectData = _b.sent();
-                    return [4, addTableViewQuery({ project_id: projectData.rows[0].id })];
+                    return [4, (0, tableViews_js_1.addTableViewQuery)({ project_id: projectData.rows[0].id })];
                 case 5:
                     _b.sent();
                     token = generateAccessToken(data.id, validLoginLength);
                     res.status(201).send({ token: token });
-                    mail.sendMessage({
+                    index_js_1["default"].sendMessage({
                         user: data,
                         title: "Welcome",
                         message: "Hi friend, our team would like to welcome you aboard our ship as we sail into our next adventure together with courage and strength!\nIf you find yourself in need of any assistance feel free to reach out to us at farreachco@gmail.com<br>Thanks for joining us, have a wonderful day.<br> - Far Reach Co."
@@ -158,13 +157,13 @@ function registerUser(req, res, next) {
                     return [3, 7];
                 case 6:
                     err_3 = _b.sent();
-                    next(err_3);
-                    return [3, 7];
+                    return [2, next(err_3)];
                 case 7: return [2];
             }
         });
     });
 }
+exports.registerUser = registerUser;
 function loginUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var email, password, user, userEmailData, validPassword, token, err_4;
@@ -175,7 +174,7 @@ function loginUser(req, res, next) {
                     email = req.body.email.toLowerCase();
                     password = req.body.password;
                     user = void 0;
-                    return [4, getUserByEmailQuery(email)];
+                    return [4, (0, users_1.getUserByEmailQuery)(email)];
                 case 1:
                     userEmailData = _a.sent();
                     if (userEmailData.rows.length !== 0) {
@@ -186,7 +185,7 @@ function loginUser(req, res, next) {
                                 .status(400)
                                 .json({ message: "This email account has not been registered" })];
                     if (!user) return [3, 3];
-                    return [4, bcrypt.compare(password, user.password)];
+                    return [4, (0, bcrypt_1.compare)(password, user.password)];
                 case 2:
                     validPassword = _a.sent();
                     if (validPassword) {
@@ -199,13 +198,13 @@ function loginUser(req, res, next) {
                 case 3: return [3, 5];
                 case 4:
                     err_4 = _a.sent();
-                    next(err_4);
-                    return [3, 5];
+                    return [2, next(err_4)];
                 case 5: return [2];
             }
         });
     });
 }
+exports.loginUser = loginUser;
 function verifyJwt(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var token, userData, err_5;
@@ -226,13 +225,13 @@ function verifyJwt(req, res, next) {
                 case 3: return [3, 5];
                 case 4:
                     err_5 = _a.sent();
-                    next(err_5);
-                    return [3, 5];
+                    return [2, next(err_5)];
                 case 5: return [2];
             }
         });
     });
 }
+exports.verifyJwt = verifyJwt;
 function editUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var userEditData, err_6;
@@ -240,20 +239,20 @@ function editUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editUserQuery(req.user.id, req.body)];
+                    return [4, (0, users_1.editUserQuery)(req.user.id, req.body)];
                 case 1:
                     userEditData = _a.sent();
                     res.send(userEditData.rows[0]);
                     return [3, 3];
                 case 2:
                     err_6 = _a.sent();
-                    next(err_6);
-                    return [3, 3];
+                    return [2, next(err_6)];
                 case 3: return [2];
             }
         });
     });
 }
+exports.editUser = editUser;
 function resetPassword(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var token, password, userData, salt, hashedPassword, user, err_7;
@@ -267,13 +266,13 @@ function resetPassword(req, res, next) {
                 case 1:
                     userData = _a.sent();
                     if (!userData) return [3, 5];
-                    return [4, bcrypt.genSalt(10)];
+                    return [4, (0, bcrypt_1.genSalt)(10)];
                 case 2:
                     salt = _a.sent();
-                    return [4, bcrypt.hash(password, salt)];
+                    return [4, (0, bcrypt_1.hash)(password, salt)];
                 case 3:
                     hashedPassword = _a.sent();
-                    return [4, editUserPasswordQuery(userData.rows[0].id, hashedPassword)];
+                    return [4, (0, users_1.editUserPasswordQuery)(userData.rows[0].id, hashedPassword)];
                 case 4:
                     user = _a.sent();
                     res.send({
@@ -286,13 +285,13 @@ function resetPassword(req, res, next) {
                 case 6: return [3, 8];
                 case 7:
                     err_7 = _a.sent();
-                    next(err_7);
-                    return [3, 8];
+                    return [2, next(err_7)];
                 case 8: return [2];
             }
         });
     });
 }
+exports.resetPassword = resetPassword;
 function requestResetEmail(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var userData, user, token, err_8;
@@ -300,7 +299,7 @@ function requestResetEmail(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getUserByEmailQuery(req.body.email.toLowerCase())];
+                    return [4, (0, users_1.getUserByEmailQuery)(req.body.email.toLowerCase())];
                 case 1:
                     userData = _a.sent();
                     if (userData.rows.length !== 0) {
@@ -314,21 +313,10 @@ function requestResetEmail(req, res, next) {
                     return [3, 3];
                 case 2:
                     err_8 = _a.sent();
-                    next(err_8);
-                    return [3, 3];
+                    return [2, next(err_8)];
                 case 3: return [2];
             }
         });
     });
 }
-module.exports = {
-    verifyUserByToken: verifyUserByToken,
-    getAllUsers: getAllUsers,
-    getUserById: getUserById,
-    registerUser: registerUser,
-    loginUser: loginUser,
-    verifyJwt: verifyJwt,
-    editUser: editUser,
-    resetPassword: resetPassword,
-    requestResetEmail: requestResetEmail
-};
+exports.requestResetEmail = requestResetEmail;

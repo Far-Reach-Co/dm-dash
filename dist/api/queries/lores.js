@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editLoreQuery = exports.removeLoreQuery = exports.getLoresWithKeywordAndFilterQuery = exports.getLoresWithKeywordQuery = exports.getLoresWithFilterQuery = exports.getLoreQuery = exports.getLoresQuery = exports.addLoreQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addLoreQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -52,12 +54,13 @@ function addLoreQuery(data) {
                             data.image_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addLoreQuery = addLoreQuery;
 function getLoreQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -68,12 +71,13 @@ function getLoreQuery(id) {
                         text: "select * from public.\"Lore\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getLoreQuery = getLoreQuery;
 function getLoresWithKeywordAndFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -85,12 +89,13 @@ function getLoresWithKeywordAndFilterQuery(_a) {
                         text: "select * from public.\"Lore\" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLoresWithKeywordAndFilterQuery = getLoresWithKeywordAndFilterQuery;
 function getLoresWithKeywordQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword;
     return __awaiter(this, void 0, void 0, function () {
@@ -102,12 +107,13 @@ function getLoresWithKeywordQuery(_a) {
                         text: "select * from public.\"Lore\" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLoresWithKeywordQuery = getLoresWithKeywordQuery;
 function getLoresWithFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -119,12 +125,13 @@ function getLoresWithFilterQuery(_a) {
                         text: "select * from public.\"Lore\" where project_id = $1 and type = $4 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLoresWithFilterQuery = getLoresWithFilterQuery;
 function getLoresQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset;
     return __awaiter(this, void 0, void 0, function () {
@@ -136,12 +143,13 @@ function getLoresQuery(_a) {
                         text: "select * from public.\"Lore\" where project_id = $1 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getLoresQuery = getLoresQuery;
 function removeLoreQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -152,12 +160,13 @@ function removeLoreQuery(id) {
                         text: "delete from public.\"Lore\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeLoreQuery = removeLoreQuery;
 function editLoreQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -179,19 +188,10 @@ function editLoreQuery(id, data) {
                         text: "update public.\"Lore\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addLoreQuery: addLoreQuery,
-    getLoresQuery: getLoresQuery,
-    getLoreQuery: getLoreQuery,
-    getLoresWithFilterQuery: getLoresWithFilterQuery,
-    getLoresWithKeywordQuery: getLoresWithKeywordQuery,
-    getLoresWithKeywordAndFilterQuery: getLoresWithKeywordAndFilterQuery,
-    removeLoreQuery: removeLoreQuery,
-    editLoreQuery: editLoreQuery
-};
+exports.editLoreQuery = editLoreQuery;

@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/months.js"), addMonthQuery = _a.addMonthQuery, getMonthsQuery = _a.getMonthsQuery, getMonthQuery = _a.getMonthQuery, removeMonthQuery = _a.removeMonthQuery, editMonthQuery = _a.editMonthQuery;
+exports.__esModule = true;
+exports.editMonth = exports.removeMonth = exports.addMonth = exports.getMonths = void 0;
+var months_js_1 = require("../queries/months.js");
 function addMonth(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
@@ -43,7 +45,7 @@ function addMonth(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, addMonthQuery(req.body)];
+                    return [4, (0, months_js_1.addMonthQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -57,6 +59,7 @@ function addMonth(req, res, next) {
         });
     });
 }
+exports.addMonth = addMonth;
 function getMonths(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -64,7 +67,7 @@ function getMonths(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getMonthsQuery(req.params.calendar_id)];
+                    return [4, (0, months_js_1.getMonthsQuery)(req.params.calendar_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -78,6 +81,7 @@ function getMonths(req, res, next) {
         });
     });
 }
+exports.getMonths = getMonths;
 function removeMonth(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -85,7 +89,7 @@ function removeMonth(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, removeMonthQuery(req.params.id)];
+                    return [4, (0, months_js_1.removeMonthQuery)(req.params.id)];
                 case 1:
                     _a.sent();
                     res.status(204).send();
@@ -99,6 +103,7 @@ function removeMonth(req, res, next) {
         });
     });
 }
+exports.removeMonth = removeMonth;
 function editMonth(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -106,7 +111,7 @@ function editMonth(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editMonthQuery(req.params.id, req.body)];
+                    return [4, (0, months_js_1.editMonthQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -120,9 +125,4 @@ function editMonth(req, res, next) {
         });
     });
 }
-module.exports = {
-    getMonths: getMonths,
-    addMonth: addMonth,
-    removeMonth: removeMonth,
-    editMonth: editMonth
-};
+exports.editMonth = editMonth;

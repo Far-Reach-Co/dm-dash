@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.editDay = exports.removeDay = exports.addDay = exports.getDays = void 0;
 var days_1 = require("../queries/days");
 function addDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function addDay(req, res, next) {
         });
     });
 }
+exports.addDay = addDay;
 function getDays(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function getDays(req, res, next) {
         });
     });
 }
+exports.getDays = getDays;
 function removeDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function removeDay(req, res, next) {
         });
     });
 }
+exports.removeDay = removeDay;
 function editDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function editDay(req, res, next) {
         });
     });
 }
-module.exports = {
-    getDays: getDays,
-    addDay: addDay,
-    removeDay: removeDay,
-    editDay: editDay
-};
+exports.editDay = editDay;

@@ -1,18 +1,18 @@
-const express = require("express");
-const {
+import { Router } from "express";
+import {
   getClocks,
   addClock,
   removeClock,
   editClock,
-} = require("./controllers/clocks.js");
-const {
+} from "./controllers/clocks.js";
+import {
   getProject,
   getProjects,
   addProject,
   removeProject,
   editProject,
-} = require("./controllers/projects.js");
-const {
+} from "./controllers/projects.js";
+import {
   getAllUsers,
   getUserById,
   registerUser,
@@ -21,34 +21,29 @@ const {
   editUser,
   resetPassword,
   requestResetEmail,
-} = require("./controllers/users.js");
-const {
+} from "./controllers/users.js";
+import {
   getCalendars,
   addCalendar,
   removeCalendar,
   editCalendar,
-} = require("./controllers/calendars.js");
-const {
+} from "./controllers/calendars.js";
+import {
   getMonths,
   addMonth,
   removeMonth,
   editMonth,
-} = require("./controllers/months.js");
-const {
-  getDays,
-  addDay,
-  removeDay,
-  editDay,
-} = require("./controllers/days.js");
-const {
+} from "./controllers/months.js";
+import { getDays, addDay, removeDay, editDay } from "./controllers/days.js";
+import {
   getLocation,
   getLocations,
   getSubLocations,
   addLocation,
   removeLocation,
   editLocation,
-} = require("./controllers/locations.js");
-const {
+} from "./controllers/locations.js";
+import {
   getNotes,
   addNote,
   getNotesByLocation,
@@ -57,8 +52,8 @@ const {
   editNote,
   getNotesByItem,
   getNotesByLore,
-} = require("./controllers/notes.js");
-const {
+} from "./controllers/notes.js";
+import {
   getEvents,
   addEvent,
   getEventsByLocation,
@@ -67,22 +62,22 @@ const {
   editEvent,
   getEventsByItem,
   getEventsByLore,
-} = require("./controllers/events.js");
-const {
+} from "./controllers/events.js";
+import {
   getCounters,
   addCounter,
   removeCounter,
   editCounter,
-} = require("./controllers/counters.js");
-const {
+} from "./controllers/counters.js";
+import {
   getCharacter,
   getCharacters,
   getCharactersByLocation,
   addCharacter,
   removeCharacter,
   editCharacter,
-} = require("./controllers/characters.js");
-const {
+} from "./controllers/characters.js";
+import {
   getItem,
   getItems,
   getItemsByLocation,
@@ -90,35 +85,35 @@ const {
   addItem,
   removeItem,
   editItem,
-} = require("./controllers/items.js");
-const {
+} from "./controllers/items.js";
+import {
   getProjectInviteByUUID,
   addProjectInvite,
   removeProjectInvite,
-} = require("./controllers/projectInvites.js");
-const {
+} from "./controllers/projectInvites.js";
+import {
   getProjectUserByUserAndProject,
   getProjectUsersByProject,
   addProjectUser,
   removeProjectUser,
   editProjectUser,
-} = require("./controllers/projectUsers.js");
-const {
+} from "./controllers/projectUsers.js";
+import {
   getSignedUrlForDownload,
   uploadToAws,
   removeImage,
   getImage,
-} = require("./controllers/s3.js");
+} from "./controllers/s3.js";
 // for uploading files
-const multer = require("multer");
-const {
+import multer = require("multer");
+import {
   getLore,
   getLores,
   addLore,
   removeLore,
   editLore,
-} = require("./controllers/lores.js");
-const {
+} from "./controllers/lores.js";
+import {
   getLoreRelation,
   getLoreRelationsByLore,
   getLoreRelationsByLocation,
@@ -127,8 +122,8 @@ const {
   addLoreRelation,
   removeLoreRelation,
   editLoreRelation,
-} = require("./controllers/loreRelations.js");
-const {
+} from "./controllers/loreRelations.js";
+import {
   get5eCharsByUser,
   add5eChar,
   remove5eChar,
@@ -136,63 +131,61 @@ const {
   edit5eCharPro,
   edit5eCharBack,
   get5eCharGeneral,
-} = require("./controllers/5eCharGeneral.js");
-const {
+} from "./controllers/5eCharGeneral.js";
+import {
   get5eCharOtherProLangsByGeneral,
   add5eCharOtherProLang,
   remove5eCharOtherProLang,
   edit5eCharOtherProLang,
-} = require("./controllers/5eCharOtherProLang.js");
-const {
+} from "./controllers/5eCharOtherProLang.js";
+import {
   get5eCharAttacksByGeneral,
   add5eCharAttack,
   remove5eCharAttack,
   edit5eCharAttack,
-} = require("./controllers/5eCharAttacks.js");
-const {
+} from "./controllers/5eCharAttacks.js";
+import {
   get5eCharEquipmentsByGeneral,
   add5eCharEquipment,
   remove5eCharEquipment,
   edit5eCharEquipment,
-} = require("./controllers/5eCharEquipment.js");
-const {
+} from "./controllers/5eCharEquipment.js";
+import {
   get5eCharFeatsByGeneral,
   add5eCharFeat,
   remove5eCharFeat,
   edit5eCharFeat,
-} = require("./controllers/5eCharFeats.js");
-const {
-  edit5eCharSpellSlotInfo,
-} = require("./controllers/5eCharSpellSlots.js");
-const {
+} from "./controllers/5eCharFeats.js";
+import { edit5eCharSpellSlotInfo } from "./controllers/5eCharSpellSlots.js";
+import {
   get5eCharSpellsByType,
   add5eCharSpell,
   remove5eCharSpell,
   edit5eCharSpell,
-} = require("./controllers/5eCharSpells.js");
-const {
+} from "./controllers/5eCharSpells.js";
+import {
   getProjectPlayersByProject,
   addProjectPlayer,
   removeProjectPlayer,
   editProjectPlayer,
   getProjectPlayersByPlayer,
-} = require("./controllers/projectPlayers.js");
-const {
+} from "./controllers/projectPlayers.js";
+import {
   getTableImages,
   addTableImage,
   removeTableImage,
   editTableImage,
-} = require("./controllers/tableImages.js");
-const {
+} from "./controllers/tableImages.js";
+import {
   getTableViews,
   removeTableView,
   editTableView,
   addTableView,
   getTableView,
-} = require("./controllers/tableViews.js");
+} from "./controllers/tableViews.js";
 const upload = multer({ dest: "file_uploads/" });
 
-var router = express.Router();
+var router = Router();
 
 // s3
 router.get("/get_image/:id", getImage);

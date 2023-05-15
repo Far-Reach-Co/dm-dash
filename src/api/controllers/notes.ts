@@ -1,4 +1,4 @@
-const {
+import {
   addNoteQuery,
   getNotesQuery,
   getNoteQuery,
@@ -8,9 +8,10 @@ const {
   removeNoteQuery,
   editNoteQuery,
   getNotesByLoreQuery,
-} = require("../queries/notes.js");
+} from "../queries/notes.js";
+import { Request, Response, NextFunction } from "express";
 
-async function addNote(req, res, next) {
+async function addNote(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addNoteQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -19,7 +20,7 @@ async function addNote(req, res, next) {
   }
 }
 
-async function getNotes(req, res, next) {
+async function getNotes(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await getNotesQuery(
       req.user.id,
@@ -35,7 +36,11 @@ async function getNotes(req, res, next) {
   }
 }
 
-async function getNotesByLocation(req, res, next) {
+async function getNotesByLocation(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getNotesByLocationQuery(
       req.user.id,
@@ -48,7 +53,11 @@ async function getNotesByLocation(req, res, next) {
   }
 }
 
-async function getNotesByCharacter(req, res, next) {
+async function getNotesByCharacter(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getNotesByCharacterQuery(
       req.user.id,
@@ -61,7 +70,7 @@ async function getNotesByCharacter(req, res, next) {
   }
 }
 
-async function getNotesByItem(req, res, next) {
+async function getNotesByItem(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await getNotesByItemQuery(req.user.id, req.params.item_id);
 
@@ -71,7 +80,7 @@ async function getNotesByItem(req, res, next) {
   }
 }
 
-async function getNotesByLore(req, res, next) {
+async function getNotesByLore(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await getNotesByLoreQuery(req.user.id, req.params.lore_id);
 
@@ -81,7 +90,7 @@ async function getNotesByLore(req, res, next) {
   }
 }
 
-async function removeNote(req, res, next) {
+async function removeNote(req: Request, res: Response, next: NextFunction) {
   try {
     await removeNoteQuery(req.params.id);
     res.status(204).send();
@@ -90,7 +99,7 @@ async function removeNote(req, res, next) {
   }
 }
 
-async function editNote(req, res, next) {
+async function editNote(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editNoteQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -99,7 +108,7 @@ async function editNote(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getNotes,
   getNotesByLocation,
   addNote,

@@ -35,10 +35,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/lores.js"), addLoreQuery = _a.addLoreQuery, getLoresQuery = _a.getLoresQuery, getLoreQuery = _a.getLoreQuery, getLoresWithFilterQuery = _a.getLoresWithFilterQuery, getLoresWithKeywordQuery = _a.getLoresWithKeywordQuery, getLoresWithKeywordAndFilterQuery = _a.getLoresWithKeywordAndFilterQuery, removeLoreQuery = _a.removeLoreQuery, editLoreQuery = _a.editLoreQuery;
-var _b = require("../queries/projects.js"), getProjectQuery = _b.getProjectQuery, editProjectQuery = _b.editProjectQuery;
-var removeFile = require("./s3.js").removeFile;
-var _c = require("../queries/images.js"), removeImageQuery = _c.removeImageQuery, getImageQuery = _c.getImageQuery;
+exports.__esModule = true;
+exports.editLore = exports.removeLore = exports.addLore = exports.getLores = exports.getLore = void 0;
+var lores_js_1 = require("../queries/lores.js");
+var projects_js_1 = require("../queries/projects.js");
+var s3_js_1 = require("./s3.js");
+var images_js_1 = require("../queries/images.js");
 function addLore(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
@@ -46,7 +48,7 @@ function addLore(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, addLoreQuery(req.body)];
+                    return [4, (0, lores_js_1.addLoreQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -60,6 +62,7 @@ function addLore(req, res, next) {
         });
     });
 }
+exports.addLore = addLore;
 function getLore(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var loreData, lore, err_2;
@@ -67,7 +70,7 @@ function getLore(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, getLoreQuery(req.params.id)];
+                    return [4, (0, lores_js_1.getLoreQuery)(req.params.id)];
                 case 1:
                     loreData = _a.sent();
                     lore = loreData.rows[0];
@@ -82,6 +85,7 @@ function getLore(req, res, next) {
         });
     });
 }
+exports.getLore = getLore;
 function getLores(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_3, data, err_4, data, err_5, data, err_6;
@@ -92,7 +96,7 @@ function getLores(req, res, next) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    return [4, getLoresWithKeywordAndFilterQuery({
+                    return [4, (0, lores_js_1.getLoresWithKeywordAndFilterQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -113,7 +117,7 @@ function getLores(req, res, next) {
                     _a.label = 6;
                 case 6:
                     _a.trys.push([6, 8, , 9]);
-                    return [4, getLoresWithKeywordQuery({
+                    return [4, (0, lores_js_1.getLoresWithKeywordQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -133,7 +137,7 @@ function getLores(req, res, next) {
                     _a.label = 11;
                 case 11:
                     _a.trys.push([11, 13, , 14]);
-                    return [4, getLoresWithFilterQuery({
+                    return [4, (0, lores_js_1.getLoresWithFilterQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset,
@@ -150,7 +154,7 @@ function getLores(req, res, next) {
                 case 14: return [3, 18];
                 case 15:
                     _a.trys.push([15, 17, , 18]);
-                    return [4, getLoresQuery({
+                    return [4, (0, lores_js_1.getLoresQuery)({
                             projectId: req.params.project_id,
                             limit: req.params.limit,
                             offset: req.params.offset
@@ -168,6 +172,7 @@ function getLores(req, res, next) {
         });
     });
 }
+exports.getLores = getLores;
 function removeLore(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var LoreData, Lore, projectData, project, data, imageData, image, newCalculatedData, err_7;
@@ -175,31 +180,31 @@ function removeLore(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 9, , 10]);
-                    return [4, getLoreQuery(req.params.id)];
+                    return [4, (0, lores_js_1.getLoreQuery)(req.params.id)];
                 case 1:
                     LoreData = _a.sent();
                     Lore = LoreData.rows[0];
-                    return [4, getProjectQuery(Lore.project_id)];
+                    return [4, (0, projects_js_1.getProjectQuery)(Lore.project_id)];
                 case 2:
                     projectData = _a.sent();
                     project = projectData.rows[0];
-                    return [4, removeLoreQuery(req.params.id)];
+                    return [4, (0, lores_js_1.removeLoreQuery)(req.params.id)];
                 case 3:
                     data = _a.sent();
                     res.status(204).send();
                     if (!Lore.image_id) return [3, 8];
-                    return [4, getImageQuery(Lore.image_id)];
+                    return [4, (0, images_js_1.getImageQuery)(Lore.image_id)];
                 case 4:
                     imageData = _a.sent();
                     image = imageData.rows[0];
-                    return [4, removeFile("wyrld/images", image)];
+                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
                 case 5:
                     _a.sent();
-                    return [4, removeImageQuery(image.id)];
+                    return [4, (0, images_js_1.removeImageQuery)(image.id)];
                 case 6:
                     _a.sent();
                     newCalculatedData = project.used_data_in_bytes - image.size;
-                    return [4, editProjectQuery(project.id, {
+                    return [4, (0, projects_js_1.editProjectQuery)(project.id, {
                             used_data_in_bytes: newCalculatedData
                         })];
                 case 7:
@@ -215,6 +220,7 @@ function removeLore(req, res, next) {
         });
     });
 }
+exports.removeLore = removeLore;
 function editLore(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_8;
@@ -222,7 +228,7 @@ function editLore(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editLoreQuery(req.params.id, req.body)];
+                    return [4, (0, lores_js_1.editLoreQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -236,10 +242,4 @@ function editLore(req, res, next) {
         });
     });
 }
-module.exports = {
-    getLore: getLore,
-    getLores: getLores,
-    addLore: addLore,
-    removeLore: removeLore,
-    editLore: editLore
-};
+exports.editLore = editLore;

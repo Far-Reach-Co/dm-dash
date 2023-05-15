@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editProjectQuery = exports.removeProjectQuery = exports.getProjectsQuery = exports.getProjectQuery = exports.addProjectQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -49,12 +51,13 @@ function addProjectQuery(data) {
                             data.user_id,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addProjectQuery = addProjectQuery;
 function getProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -65,12 +68,13 @@ function getProjectQuery(projectId) {
                         text: "select * from public.\"Project\" where id = $1",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectQuery = getProjectQuery;
 function removeProjectQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -81,12 +85,13 @@ function removeProjectQuery(id) {
                         text: "delete from public.\"Project\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeProjectQuery = removeProjectQuery;
 function getProjectsQuery(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -97,28 +102,13 @@ function getProjectsQuery(userId) {
                         text: "select * from public.\"Project\" where user_id = $1 order by title asc",
                         values: [userId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
-function removeProjectQuery(id) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = {
-                        text: "delete from public.\"Project\" where id = $1",
-                        values: [id]
-                    };
-                    return [4, db.query(query)];
-                case 1: return [2, _a.sent()];
-            }
-        });
-    });
-}
+exports.getProjectsQuery = getProjectsQuery;
 function editProjectQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -140,16 +130,10 @@ function editProjectQuery(id, data) {
                         text: "update public.\"Project\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addProjectQuery: addProjectQuery,
-    getProjectQuery: getProjectQuery,
-    getProjectsQuery: getProjectsQuery,
-    removeProjectQuery: removeProjectQuery,
-    editProjectQuery: editProjectQuery
-};
+exports.editProjectQuery = editProjectQuery;

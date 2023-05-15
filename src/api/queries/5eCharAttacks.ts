@@ -1,6 +1,14 @@
-const db = require('../dbconfig');
+import db from "../dbconfig";
 
-async function add5eCharAttackQuery(data) {
+async function add5eCharAttackQuery(data: {
+  general_id: string,
+  title: string,
+  description: string,
+  range: string,
+  duration: string,
+  damage_type: string,
+  bonus: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_character_attack" (general_id, title, description, range, duration, damage_type, bonus) values($1,$2,$3,$4,$5,$6,$7) returning *`,
     values: [
@@ -16,7 +24,7 @@ async function add5eCharAttackQuery(data) {
   return await db.query(query)
 }
 
-async function get5eCharAttackQuery(id) {
+async function get5eCharAttackQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_attack" where id = $1`,
     values: [id]
@@ -24,7 +32,7 @@ async function get5eCharAttackQuery(id) {
   return await db.query(query)
 }
 
-async function get5eCharAttacksByGeneralQuery(generalId) {
+async function get5eCharAttacksByGeneralQuery(generalId: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_attack" where general_id = $1 order by LOWER(title)`,
     values: [generalId]
@@ -32,7 +40,7 @@ async function get5eCharAttacksByGeneralQuery(generalId) {
   return await db.query(query)
 }
 
-async function remove5eCharAttackQuery(id) {
+async function remove5eCharAttackQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_attack" where id = $1`,
     values: [id]
@@ -41,7 +49,7 @@ async function remove5eCharAttackQuery(id) {
   return await db.query(query)
 }
 
-async function edit5eCharAttackQuery(id, data) {
+async function edit5eCharAttackQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -63,7 +71,7 @@ async function edit5eCharAttackQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   add5eCharAttackQuery,
   get5eCharAttacksByGeneralQuery,
   get5eCharAttackQuery,

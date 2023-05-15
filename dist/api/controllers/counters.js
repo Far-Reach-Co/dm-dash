@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.editCounter = exports.removeCounter = exports.addCounter = exports.getCounters = void 0;
 var counters_1 = require("../queries/counters");
 function addCounter(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function addCounter(req, res, next) {
         });
     });
 }
+exports.addCounter = addCounter;
 function getCounters(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function getCounters(req, res, next) {
         });
     });
 }
+exports.getCounters = getCounters;
 function removeCounter(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function removeCounter(req, res, next) {
         });
     });
 }
+exports.removeCounter = removeCounter;
 function editCounter(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function editCounter(req, res, next) {
         });
     });
 }
-module.exports = {
-    getCounters: getCounters,
-    addCounter: addCounter,
-    removeCounter: removeCounter,
-    editCounter: editCounter
-};
+exports.editCounter = editCounter;

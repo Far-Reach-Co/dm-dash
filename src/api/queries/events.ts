@@ -1,6 +1,14 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addEventQuery(data) {
+async function addEventQuery(data: {
+  title: string,
+  description?: string,
+  project_id: string,
+  location_id?: string,
+  character_id?: string,
+  item_id?: string,
+  lore_id?: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Event" (title, description, project_id, location_id, character_id, item_id, lore_id) values($1,$2,$3,$4,$5,$6,$7) returning *`,
     values: [
@@ -16,7 +24,7 @@ async function addEventQuery(data) {
   return await db.query(query)
 }
 
-async function getEventQuery(id) {
+async function getEventQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Event" where id = $1`,
     values: [id]
@@ -24,7 +32,7 @@ async function getEventQuery(id) {
   return await db.query(query)
 }
 
-async function getEventsQuery({projectId, limit, offset}) {
+async function getEventsQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
   const query = {
     text: /*sql*/ `select * from public."Event" where project_id = $1 order by date_created desc limit $2 offset $3`,
     values: [projectId, limit, offset]
@@ -32,7 +40,7 @@ async function getEventsQuery({projectId, limit, offset}) {
   return await db.query(query)
 }
 
-async function getEventsByLocationQuery(locationId) {
+async function getEventsByLocationQuery(locationId: string) {
   const query = {
     text: /*sql*/ `select * from public."Event" where location_id = $1 order by date_created desc`,
     values: [locationId]
@@ -40,7 +48,7 @@ async function getEventsByLocationQuery(locationId) {
   return await db.query(query)
 }
 
-async function getEventsByCharacterQuery(characterId) {
+async function getEventsByCharacterQuery(characterId: string) {
   const query = {
     text: /*sql*/ `select * from public."Event" where character_id = $1 order by date_created desc`,
     values: [characterId]
@@ -48,23 +56,23 @@ async function getEventsByCharacterQuery(characterId) {
   return await db.query(query)
 }
 
-async function getEventsByItemQuery(item) {
+async function getEventsByItemQuery(itemId: string) {
   const query = {
     text: /*sql*/ `select * from public."Event" where item_id = $1 order by date_created desc`,
-    values: [item]
+    values: [itemId]
   }
   return await db.query(query)
 }
 
-async function getEventsByLoreQuery(lore) {
+async function getEventsByLoreQuery(loreId: string) {
   const query = {
     text: /*sql*/ `select * from public."Event" where lore_id = $1 order by date_created desc`,
-    values: [lore]
+    values: [loreId]
   }
   return await db.query(query)
 }
 
-async function removeEventQuery(id) {
+async function removeEventQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Event" where id = $1`,
     values: [id]
@@ -73,7 +81,7 @@ async function removeEventQuery(id) {
   return await db.query(query)
 }
 
-async function editEventQuery(id, data) {
+async function editEventQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -95,7 +103,7 @@ async function editEventQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addEventQuery,
   getEventsQuery,
   getEventQuery,

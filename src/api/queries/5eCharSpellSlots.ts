@@ -1,6 +1,8 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function add5eCharSpellSlotInfoQuery(data) {
+async function add5eCharSpellSlotInfoQuery(data: {
+  general_id: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_spell_slots" (general_id) values($1) returning *`,
     values: [
@@ -10,7 +12,7 @@ async function add5eCharSpellSlotInfoQuery(data) {
   return await db.query(query)
 }
 
-async function get5eCharSpellSlotInfoQuery(id) {
+async function get5eCharSpellSlotInfoQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where id = $1`,
     values: [id]
@@ -18,7 +20,7 @@ async function get5eCharSpellSlotInfoQuery(id) {
   return await db.query(query)
 }
 
-async function get5eCharSpellSlotInfosByGeneralQuery(generalId) {
+async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where general_id = $1`,
     values: [generalId]
@@ -26,7 +28,7 @@ async function get5eCharSpellSlotInfosByGeneralQuery(generalId) {
   return await db.query(query)
 }
 
-async function remove5eCharSpellSlotInfoQuery(id) {
+async function remove5eCharSpellSlotInfoQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_spell_slots" where id = $1`,
     values: [id]
@@ -35,7 +37,7 @@ async function remove5eCharSpellSlotInfoQuery(id) {
   return await db.query(query)
 }
 
-async function edit5eCharSpellSlotInfoQuery(id, data) {
+async function edit5eCharSpellSlotInfoQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -57,7 +59,7 @@ async function edit5eCharSpellSlotInfoQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   add5eCharSpellSlotInfoQuery,
   get5eCharSpellSlotInfosByGeneralQuery,
   get5eCharSpellSlotInfoQuery,

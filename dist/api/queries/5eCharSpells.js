@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.edit5eCharSpellQuery = exports.remove5eCharSpellQuery = exports.get5eCharSpellQuery = exports.get5eCharSpellsByGeneralQuery = exports.get5eCharSpellsByTypeQuery = exports.add5eCharSpellQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function add5eCharSpellQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -51,12 +53,13 @@ function add5eCharSpellQuery(data) {
                             data.type
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.add5eCharSpellQuery = add5eCharSpellQuery;
 function get5eCharSpellQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -67,12 +70,13 @@ function get5eCharSpellQuery(id) {
                         text: "select * from public.\"dnd_5e_character_spell\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharSpellQuery = get5eCharSpellQuery;
 function get5eCharSpellsByTypeQuery(generalId, type) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -83,12 +87,13 @@ function get5eCharSpellsByTypeQuery(generalId, type) {
                         text: "select * from public.\"dnd_5e_character_spell\" where general_id = $1 and type = $2 order by LOWER(title)",
                         values: [generalId, type]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharSpellsByTypeQuery = get5eCharSpellsByTypeQuery;
 function get5eCharSpellsByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -99,12 +104,13 @@ function get5eCharSpellsByGeneralQuery(generalId) {
                         text: "select * from public.\"dnd_5e_character_spell\" where general_id = $1",
                         values: [generalId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharSpellsByGeneralQuery = get5eCharSpellsByGeneralQuery;
 function remove5eCharSpellQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -115,12 +121,13 @@ function remove5eCharSpellQuery(id) {
                         text: "delete from public.\"dnd_5e_character_spell\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.remove5eCharSpellQuery = remove5eCharSpellQuery;
 function edit5eCharSpellQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -142,17 +149,10 @@ function edit5eCharSpellQuery(id, data) {
                         text: "update public.\"dnd_5e_character_spell\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    add5eCharSpellQuery: add5eCharSpellQuery,
-    get5eCharSpellsByTypeQuery: get5eCharSpellsByTypeQuery,
-    get5eCharSpellsByGeneralQuery: get5eCharSpellsByGeneralQuery,
-    get5eCharSpellQuery: get5eCharSpellQuery,
-    remove5eCharSpellQuery: remove5eCharSpellQuery,
-    edit5eCharSpellQuery: edit5eCharSpellQuery
-};
+exports.edit5eCharSpellQuery = edit5eCharSpellQuery;

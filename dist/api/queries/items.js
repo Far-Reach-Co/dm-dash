@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editItemQuery = exports.removeItemQuery = exports.getItemsByCharacterQuery = exports.getItemsByLocationQuery = exports.getItemsWithKeywordAndFilterQuery = exports.getItemsWithKeywordQuery = exports.getItemsWithFilterQuery = exports.getItemQuery = exports.getItemsQuery = exports.addItemQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addItemQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -54,12 +56,13 @@ function addItemQuery(data) {
                             data.image_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addItemQuery = addItemQuery;
 function getItemQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -70,12 +73,13 @@ function getItemQuery(id) {
                         text: "select * from public.\"Item\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getItemQuery = getItemQuery;
 function getItemsWithKeywordAndFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -87,12 +91,13 @@ function getItemsWithKeywordAndFilterQuery(_a) {
                         text: "select * from public.\"Item\" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getItemsWithKeywordAndFilterQuery = getItemsWithKeywordAndFilterQuery;
 function getItemsWithKeywordQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword;
     return __awaiter(this, void 0, void 0, function () {
@@ -104,12 +109,13 @@ function getItemsWithKeywordQuery(_a) {
                         text: "select * from public.\"Item\" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getItemsWithKeywordQuery = getItemsWithKeywordQuery;
 function getItemsWithFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -121,12 +127,13 @@ function getItemsWithFilterQuery(_a) {
                         text: "select * from public.\"Item\" where project_id = $1 and type = $4 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getItemsWithFilterQuery = getItemsWithFilterQuery;
 function getItemsQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset;
     return __awaiter(this, void 0, void 0, function () {
@@ -138,12 +145,13 @@ function getItemsQuery(_a) {
                         text: "select * from public.\"Item\" where project_id = $1 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getItemsQuery = getItemsQuery;
 function getItemsByLocationQuery(locationId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -154,12 +162,13 @@ function getItemsByLocationQuery(locationId) {
                         text: "select * from public.\"Item\" where location_id = $1 order by title asc",
                         values: [locationId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getItemsByLocationQuery = getItemsByLocationQuery;
 function getItemsByCharacterQuery(characterId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -170,12 +179,13 @@ function getItemsByCharacterQuery(characterId) {
                         text: "select * from public.\"Item\" where character_id = $1 order by title asc",
                         values: [characterId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getItemsByCharacterQuery = getItemsByCharacterQuery;
 function removeItemQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -186,12 +196,13 @@ function removeItemQuery(id) {
                         text: "delete from public.\"Item\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeItemQuery = removeItemQuery;
 function editItemQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -213,21 +224,10 @@ function editItemQuery(id, data) {
                         text: "update public.\"Item\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addItemQuery: addItemQuery,
-    getItemsQuery: getItemsQuery,
-    getItemQuery: getItemQuery,
-    getItemsWithFilterQuery: getItemsWithFilterQuery,
-    getItemsWithKeywordQuery: getItemsWithKeywordQuery,
-    getItemsWithKeywordAndFilterQuery: getItemsWithKeywordAndFilterQuery,
-    getItemsByLocationQuery: getItemsByLocationQuery,
-    getItemsByCharacterQuery: getItemsByCharacterQuery,
-    removeItemQuery: removeItemQuery,
-    editItemQuery: editItemQuery
-};
+exports.editItemQuery = editItemQuery;

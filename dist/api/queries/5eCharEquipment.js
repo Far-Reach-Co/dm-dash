@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.edit5eCharEquipmentQuery = exports.remove5eCharEquipmentQuery = exports.get5eCharEquipmentQuery = exports.get5eCharEquipmentsByGeneralQuery = exports.add5eCharEquipmentQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function add5eCharEquipmentQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -52,12 +54,13 @@ function add5eCharEquipmentQuery(data) {
                             data.weight,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.add5eCharEquipmentQuery = add5eCharEquipmentQuery;
 function get5eCharEquipmentQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -68,12 +71,13 @@ function get5eCharEquipmentQuery(id) {
                         text: "select * from public.\"dnd_5e_character_equipment\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharEquipmentQuery = get5eCharEquipmentQuery;
 function get5eCharEquipmentsByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -84,12 +88,13 @@ function get5eCharEquipmentsByGeneralQuery(generalId) {
                         text: "select * from public.\"dnd_5e_character_equipment\" where general_id = $1 order by LOWER(title)",
                         values: [generalId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharEquipmentsByGeneralQuery = get5eCharEquipmentsByGeneralQuery;
 function remove5eCharEquipmentQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -100,12 +105,13 @@ function remove5eCharEquipmentQuery(id) {
                         text: "delete from public.\"dnd_5e_character_equipment\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.remove5eCharEquipmentQuery = remove5eCharEquipmentQuery;
 function edit5eCharEquipmentQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -127,16 +133,10 @@ function edit5eCharEquipmentQuery(id, data) {
                         text: "update public.\"dnd_5e_character_equipment\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    add5eCharEquipmentQuery: add5eCharEquipmentQuery,
-    get5eCharEquipmentsByGeneralQuery: get5eCharEquipmentsByGeneralQuery,
-    get5eCharEquipmentQuery: get5eCharEquipmentQuery,
-    remove5eCharEquipmentQuery: remove5eCharEquipmentQuery,
-    edit5eCharEquipmentQuery: edit5eCharEquipmentQuery
-};
+exports.edit5eCharEquipmentQuery = edit5eCharEquipmentQuery;

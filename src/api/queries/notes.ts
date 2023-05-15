@@ -1,6 +1,15 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addNoteQuery(data) {
+async function addNoteQuery(data: {
+  title: string, 
+  description: string, 
+  project_id: string, 
+  location_id: string, 
+  character_id: string, 
+  item_id: string, 
+  user_id: string, 
+  lore_id: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Note" (title, description, project_id, location_id, character_id, item_id, user_id, lore_id) values($1,$2,$3,$4,$5,$6,$7,$8) returning *`,
     values: [
@@ -17,7 +26,7 @@ async function addNoteQuery(data) {
   return await db.query(query)
 }
 
-async function getNoteQuery(id) {
+async function getNoteQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where id = $1`,
     values: [id]
@@ -25,7 +34,7 @@ async function getNoteQuery(id) {
   return await db.query(query)
 }
 
-async function getAllNotesByProjectQuery(projectId) {
+async function getAllNotesByProjectQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where project_id = $1`,
     values: [projectId]
@@ -33,7 +42,7 @@ async function getAllNotesByProjectQuery(projectId) {
   return await db.query(query)
 }
 
-async function getNotesQuery(userId, projectId, limit, offset, keyword) {
+async function getNotesQuery(userId: string, projectId: string, limit: string, offset: string, keyword: string) {
   let query;
   if(!keyword) {
     query = {
@@ -49,7 +58,7 @@ async function getNotesQuery(userId, projectId, limit, offset, keyword) {
   return await db.query(query)
 }
 
-async function getNotesByLocationQuery(userId, locationId) {
+async function getNotesByLocationQuery(userId: string, locationId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and location_id = $1 order by date_created desc`,
     values: [locationId, userId]
@@ -57,7 +66,7 @@ async function getNotesByLocationQuery(userId, locationId) {
   return await db.query(query)
 }
 
-async function getNotesByCharacterQuery(userId, characterId) {
+async function getNotesByCharacterQuery(userId: string, characterId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and character_id = $1 order by date_created desc`,
     values: [characterId, userId]
@@ -65,23 +74,23 @@ async function getNotesByCharacterQuery(userId, characterId) {
   return await db.query(query)
 }
 
-async function getNotesByItemQuery(userId, item) {
+async function getNotesByItemQuery(userId: string, itemId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and item_id = $1 order by date_created desc`,
-    values: [item, userId]
+    values: [itemId, userId]
   }
   return await db.query(query)
 }
 
-async function getNotesByLoreQuery(userId, lore) {
+async function getNotesByLoreQuery(userId: string, loreId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and lore_id = $1 order by date_created desc`,
-    values: [lore, userId]
+    values: [loreId, userId]
   }
   return await db.query(query)
 }
 
-async function removeNoteQuery(id) {
+async function removeNoteQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Note" where id = $1`,
     values: [id]
@@ -90,7 +99,7 @@ async function removeNoteQuery(id) {
   return await db.query(query)
 }
 
-async function editNoteQuery(id, data) {
+async function editNoteQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -112,7 +121,7 @@ async function editNoteQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addNoteQuery,
   getNotesQuery,
   getNoteQuery,

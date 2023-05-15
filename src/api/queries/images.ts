@@ -1,6 +1,10 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addImageQuery(data) {
+async function addImageQuery(data: {
+  original_name: string,
+  size: number,
+  file_name: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Image" (original_name, size, file_name) values($1,$2,$3) returning *`,
     values: [
@@ -12,7 +16,7 @@ async function addImageQuery(data) {
   return await db.query(query)
 }
 
-async function getImageQuery(id) {
+async function getImageQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Image" where id = $1`,
     values: [id]
@@ -20,7 +24,7 @@ async function getImageQuery(id) {
   return await db.query(query)
 }
 
-async function removeImageQuery(id) {
+async function removeImageQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Image" where id = $1`,
     values: [id]
@@ -29,7 +33,7 @@ async function removeImageQuery(id) {
   return await db.query(query)
 }
 
-async function editImageQuery(id, data) {
+async function editImageQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -51,7 +55,7 @@ async function editImageQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addImageQuery,
   getImageQuery,
   removeImageQuery,

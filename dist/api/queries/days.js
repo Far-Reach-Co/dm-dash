@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editDayQuery = exports.removeDayQuery = exports.getDayQuery = exports.getDaysQuery = exports.addDayQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addDayQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -50,12 +52,13 @@ function addDayQuery(data) {
                             data.title
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addDayQuery = addDayQuery;
 function getDayQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -66,12 +69,13 @@ function getDayQuery(id) {
                         text: "select * from public.\"Day\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getDayQuery = getDayQuery;
 function getDaysQuery(calendarId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -82,12 +86,13 @@ function getDaysQuery(calendarId) {
                         text: "select * from public.\"Day\" where calendar_id = $1 order by index asc",
                         values: [calendarId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getDaysQuery = getDaysQuery;
 function removeDayQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -98,12 +103,13 @@ function removeDayQuery(id) {
                         text: "delete from public.\"Day\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeDayQuery = removeDayQuery;
 function editDayQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -125,16 +131,10 @@ function editDayQuery(id, data) {
                         text: "update public.\"Day\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addDayQuery: addDayQuery,
-    getDaysQuery: getDaysQuery,
-    getDayQuery: getDayQuery,
-    removeDayQuery: removeDayQuery,
-    editDayQuery: editDayQuery
-};
+exports.editDayQuery = editDayQuery;

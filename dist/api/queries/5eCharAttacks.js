@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.edit5eCharAttackQuery = exports.remove5eCharAttackQuery = exports.get5eCharAttackQuery = exports.get5eCharAttacksByGeneralQuery = exports.add5eCharAttackQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function add5eCharAttackQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -54,12 +56,13 @@ function add5eCharAttackQuery(data) {
                             data.bonus,
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.add5eCharAttackQuery = add5eCharAttackQuery;
 function get5eCharAttackQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -70,12 +73,13 @@ function get5eCharAttackQuery(id) {
                         text: "select * from public.\"dnd_5e_character_attack\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharAttackQuery = get5eCharAttackQuery;
 function get5eCharAttacksByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -86,12 +90,13 @@ function get5eCharAttacksByGeneralQuery(generalId) {
                         text: "select * from public.\"dnd_5e_character_attack\" where general_id = $1 order by LOWER(title)",
                         values: [generalId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.get5eCharAttacksByGeneralQuery = get5eCharAttacksByGeneralQuery;
 function remove5eCharAttackQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -102,12 +107,13 @@ function remove5eCharAttackQuery(id) {
                         text: "delete from public.\"dnd_5e_character_attack\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.remove5eCharAttackQuery = remove5eCharAttackQuery;
 function edit5eCharAttackQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -129,16 +135,10 @@ function edit5eCharAttackQuery(id, data) {
                         text: "update public.\"dnd_5e_character_attack\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    add5eCharAttackQuery: add5eCharAttackQuery,
-    get5eCharAttacksByGeneralQuery: get5eCharAttacksByGeneralQuery,
-    get5eCharAttackQuery: get5eCharAttackQuery,
-    remove5eCharAttackQuery: remove5eCharAttackQuery,
-    edit5eCharAttackQuery: edit5eCharAttackQuery
-};
+exports.edit5eCharAttackQuery = edit5eCharAttackQuery;

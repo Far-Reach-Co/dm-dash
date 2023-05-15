@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editCounterQuery = exports.removeCounterQuery = exports.getAllCountersByProjectQuery = exports.getCounterQuery = exports.getCountersQuery = exports.addCounterQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addCounterQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -51,12 +53,13 @@ function addCounterQuery(data) {
                             data.title
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addCounterQuery = addCounterQuery;
 function getCounterQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -67,12 +70,13 @@ function getCounterQuery(id) {
                         text: "select * from public.\"Counter\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getCounterQuery = getCounterQuery;
 function getCountersQuery(userId, projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -83,12 +87,13 @@ function getCountersQuery(userId, projectId) {
                         text: "select * from public.\"Counter\" where user_id = $1 and project_id = $2 order by title asc",
                         values: [userId, projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getCountersQuery = getCountersQuery;
 function getAllCountersByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -99,12 +104,13 @@ function getAllCountersByProjectQuery(projectId) {
                         text: "select * from public.\"Counter\" where project_id = $1 order by title asc",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getAllCountersByProjectQuery = getAllCountersByProjectQuery;
 function removeCounterQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -115,12 +121,13 @@ function removeCounterQuery(id) {
                         text: "delete from public.\"Counter\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeCounterQuery = removeCounterQuery;
 function editCounterQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -142,17 +149,10 @@ function editCounterQuery(id, data) {
                         text: "update public.\"Counter\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addCounterQuery: addCounterQuery,
-    getCountersQuery: getCountersQuery,
-    getCounterQuery: getCounterQuery,
-    getAllCountersByProjectQuery: getAllCountersByProjectQuery,
-    removeCounterQuery: removeCounterQuery,
-    editCounterQuery: editCounterQuery
-};
+exports.editCounterQuery = editCounterQuery;

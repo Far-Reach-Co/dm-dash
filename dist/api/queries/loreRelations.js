@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.getLoreRelationsQuery = exports.getLoreRelationsByItemQuery = exports.getLoreRelationsByCharacterQuery = exports.getLoreRelationsByLocationQuery = exports.getLoreRelationsByLoreQuery = exports.editLoreRelationQuery = exports.removeLoreRelationQuery = exports.getLoreRelationQuery = exports.addLoreRelationQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addLoreRelationQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -51,42 +53,48 @@ function addLoreRelationQuery(data) {
                             data.item_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addLoreRelationQuery = addLoreRelationQuery;
 function getLoreRelationsByLoreQuery(loreId, type) {
     return __awaiter(this, void 0, void 0, function () {
-        var query;
+        var query, query, query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (type === "locations") {
-                        query = {
-                            text: "select * from public.\"LoreRelation\" where lore_id = $1 and location_id is not null",
-                            values: [loreId]
-                        };
-                    }
-                    if (type === "characters") {
-                        query = {
-                            text: "select * from public.\"LoreRelation\" where lore_id = $1 and character_id is not null",
-                            values: [loreId]
-                        };
-                    }
-                    if (type === "items") {
-                        query = {
-                            text: "select * from public.\"LoreRelation\" where lore_id = $1 and item_id is not null",
-                            values: [loreId]
-                        };
-                    }
-                    return [4, db.query(query)];
+                    if (!(type === "locations")) return [3, 2];
+                    query = {
+                        text: "select * from public.\"LoreRelation\" where lore_id = $1 and location_id is not null",
+                        values: [loreId]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
+                case 2:
+                    if (!(type === "characters")) return [3, 4];
+                    query = {
+                        text: "select * from public.\"LoreRelation\" where lore_id = $1 and character_id is not null",
+                        values: [loreId]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 3: return [2, _a.sent()];
+                case 4:
+                    if (!(type === "items")) return [3, 6];
+                    query = {
+                        text: "select * from public.\"LoreRelation\" where lore_id = $1 and item_id is not null",
+                        values: [loreId]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 5: return [2, _a.sent()];
+                case 6: return [2, []];
             }
         });
     });
 }
+exports.getLoreRelationsByLoreQuery = getLoreRelationsByLoreQuery;
 function getLoreRelationsByLocationQuery(locationId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -97,12 +105,13 @@ function getLoreRelationsByLocationQuery(locationId) {
                         text: "select * from public.\"LoreRelation\" where location_id = $1",
                         values: [locationId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getLoreRelationsByLocationQuery = getLoreRelationsByLocationQuery;
 function getLoreRelationsByCharacterQuery(characterId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -113,12 +122,13 @@ function getLoreRelationsByCharacterQuery(characterId) {
                         text: "select * from public.\"LoreRelation\" where character_id = $1",
                         values: [characterId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getLoreRelationsByCharacterQuery = getLoreRelationsByCharacterQuery;
 function getLoreRelationsByItemQuery(itemId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -129,12 +139,13 @@ function getLoreRelationsByItemQuery(itemId) {
                         text: "select * from public.\"LoreRelation\" where item_id = $1",
                         values: [itemId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getLoreRelationsByItemQuery = getLoreRelationsByItemQuery;
 function getLoreRelationQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -145,12 +156,13 @@ function getLoreRelationQuery(id) {
                         text: "select * from public.\"LoreRelation\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getLoreRelationQuery = getLoreRelationQuery;
 function getLoreRelationsQuery(loreId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -161,12 +173,13 @@ function getLoreRelationsQuery(loreId) {
                         text: "select * from public.\"LoreRelation\" where lore_id = $1",
                         values: [loreId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getLoreRelationsQuery = getLoreRelationsQuery;
 function removeLoreRelationQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -177,12 +190,13 @@ function removeLoreRelationQuery(id) {
                         text: "delete from public.\"LoreRelation\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeLoreRelationQuery = removeLoreRelationQuery;
 function editLoreRelationQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -204,20 +218,10 @@ function editLoreRelationQuery(id, data) {
                         text: "update public.\"LoreRelation\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addLoreRelationQuery: addLoreRelationQuery,
-    getLoreRelationQuery: getLoreRelationQuery,
-    removeLoreRelationQuery: removeLoreRelationQuery,
-    editLoreRelationQuery: editLoreRelationQuery,
-    getLoreRelationsByLoreQuery: getLoreRelationsByLoreQuery,
-    getLoreRelationsByLocationQuery: getLoreRelationsByLocationQuery,
-    getLoreRelationsByCharacterQuery: getLoreRelationsByCharacterQuery,
-    getLoreRelationsByItemQuery: getLoreRelationsByItemQuery,
-    getLoreRelationsQuery: getLoreRelationsQuery
-};
+exports.editLoreRelationQuery = editLoreRelationQuery;

@@ -1,4 +1,4 @@
-const {
+import {
   addLoreQuery,
   getLoresQuery,
   getLoreQuery,
@@ -7,18 +7,13 @@ const {
   getLoresWithKeywordAndFilterQuery,
   removeLoreQuery,
   editLoreQuery,
-} = require("../queries/lores.js");
+} from "../queries/lores.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
+import { removeFile } from "./s3.js";
+import { removeImageQuery, getImageQuery } from "../queries/images.js";
+import { Request, Response, NextFunction } from "express";
 
-const {
-  getProjectQuery,
-
-  editProjectQuery,
-} = require("../queries/projects.js");
-
-const { removeFile } = require("./s3.js");
-const { removeImageQuery, getImageQuery } = require("../queries/images.js");
-
-async function addLore(req, res, next) {
+async function addLore(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addLoreQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -27,7 +22,7 @@ async function addLore(req, res, next) {
   }
 }
 
-async function getLore(req, res, next) {
+async function getLore(req: Request, res: Response, next: NextFunction) {
   try {
     const loreData = await getLoreQuery(req.params.id);
     const lore = loreData.rows[0];
@@ -38,7 +33,7 @@ async function getLore(req, res, next) {
   }
 }
 
-async function getLores(req, res, next) {
+async function getLores(req: Request, res: Response, next: NextFunction) {
   if (req.params.keyword && req.params.filter) {
     try {
       const data = await getLoresWithKeywordAndFilterQuery({
@@ -94,7 +89,7 @@ async function getLores(req, res, next) {
   }
 }
 
-async function removeLore(req, res, next) {
+async function removeLore(req: Request, res: Response, next: NextFunction) {
   try {
     // get Lore to get project id
     const LoreData = await getLoreQuery(req.params.id);
@@ -123,7 +118,7 @@ async function removeLore(req, res, next) {
   }
 }
 
-async function editLore(req, res, next) {
+async function editLore(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editLoreQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -132,10 +127,4 @@ async function editLore(req, res, next) {
   }
 }
 
-module.exports = {
-  getLore,
-  getLores,
-  addLore,
-  removeLore,
-  editLore,
-};
+export { getLore, getLores, addLore, removeLore, editLore };

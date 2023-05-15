@@ -1,5 +1,5 @@
-const { getImageQuery, removeImageQuery } = require("../queries/images.js");
-const {
+import { getImageQuery, removeImageQuery } from "../queries/images.js";
+import {
   addLocationQuery,
   getLocationsQuery,
   getLocationsWithKeywordAndFilterQuery,
@@ -9,16 +9,12 @@ const {
   getSubLocationsQuery,
   removeLocationQuery,
   editLocationQuery,
-} = require("../queries/locations.js");
-const {
-  getProjectQuery,
+} from "../queries/locations.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
+import { Request, Response, NextFunction } from "express";
+import { removeFile } from "./s3.js";
 
-  editProjectQuery,
-} = require("../queries/projects.js");
-
-const { removeFile } = require("./s3.js");
-
-async function addLocation(req, res, next) {
+async function addLocation(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addLocationQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -27,7 +23,7 @@ async function addLocation(req, res, next) {
   }
 }
 
-async function getLocation(req, res, next) {
+async function getLocation(req: Request, res: Response, next: NextFunction) {
   try {
     const locationData = await getLocationQuery(req.params.id);
     const location = locationData.rows[0];
@@ -38,7 +34,7 @@ async function getLocation(req, res, next) {
   }
 }
 
-async function getLocations(req, res, next) {
+async function getLocations(req: Request, res: Response, next: NextFunction) {
   if (req.params.keyword && req.params.filter) {
     try {
       const data = await getLocationsWithKeywordAndFilterQuery({
@@ -94,7 +90,11 @@ async function getLocations(req, res, next) {
   }
 }
 
-async function getSubLocations(req, res, next) {
+async function getSubLocations(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getSubLocationsQuery(req.params.parent_location_id);
 
@@ -104,7 +104,7 @@ async function getSubLocations(req, res, next) {
   }
 }
 
-async function removeLocation(req, res, next) {
+async function removeLocation(req: Request, res: Response, next: NextFunction) {
   try {
     const locationData = await getLocationQuery(req.params.id);
     const location = locationData.rows[0];
@@ -140,7 +140,7 @@ async function removeLocation(req, res, next) {
   }
 }
 
-async function editLocation(req, res, next) {
+async function editLocation(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editLocationQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -149,7 +149,7 @@ async function editLocation(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getLocation,
   getLocations,
   getSubLocations,

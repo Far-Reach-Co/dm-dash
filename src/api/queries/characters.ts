@@ -1,6 +1,13 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addCharacterQuery(data) {
+async function addCharacterQuery(data: {
+  project_id: string,
+  title: string,
+  description: string,
+  type: string,
+  location_id: string,
+  image_id: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Character" (project_id, title, description, type, location_id, image_id) values($1,$2,$3,$4,$5,$6) returning *`,
     values: [
@@ -15,7 +22,7 @@ async function addCharacterQuery(data) {
   return await db.query(query)
 }
 
-async function getCharacterQuery(id) {
+async function getCharacterQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Character" where id = $1`,
     values: [id]
@@ -23,21 +30,23 @@ async function getCharacterQuery(id) {
   return await db.query(query)
 }
 
-async function getCharactersWithKeywordAndFilterQuery({projectId, limit, offset, keyword, filter}) {
+async function getCharactersWithKeywordAndFilterQuery(
+  {projectId, limit, offset, keyword, filter}: {projectId: string, limit: string, offset: string, keyword: string, filter: string}
+) {
   const query = {
     text: /*sql*/ `select * from public."Character" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword, filter]
   }
   return await db.query(query)
 }
-async function getCharactersWithKeywordQuery({projectId, limit, offset, keyword}) {
+async function getCharactersWithKeywordQuery({projectId, limit, offset, keyword}: {projectId: string, limit: string, offset: string, keyword: string}) {
   const query = {
     text: /*sql*/ `select * from public."Character" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword]
   }
   return await db.query(query)
 }
-async function getCharactersWithFilterQuery({projectId, limit, offset, filter}) {
+async function getCharactersWithFilterQuery({projectId, limit, offset, filter}: {projectId: string, limit: string, offset: string, filter: string}) {
   const query = {
     text: /*sql*/ `select * from public."Character" where project_id = $1 and type = $4 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, filter]
@@ -45,7 +54,7 @@ async function getCharactersWithFilterQuery({projectId, limit, offset, filter}) 
   return await db.query(query)
 }
 
-async function getCharactersQuery({projectId, limit, offset}) {
+async function getCharactersQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
   const query = {
     text: /*sql*/ `select * from public."Character" where project_id = $1 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset]
@@ -53,7 +62,7 @@ async function getCharactersQuery({projectId, limit, offset}) {
   return await db.query(query)
 }
 
-async function getCharactersByLocationQuery(locationId) {
+async function getCharactersByLocationQuery(locationId: string) {
   const query = {
     text: /*sql*/ `select * from public."Character" where location_id = $1 order by title asc`,
     values: [locationId]
@@ -61,7 +70,7 @@ async function getCharactersByLocationQuery(locationId) {
   return await db.query(query)
 }
 
-async function removeCharacterQuery(id) {
+async function removeCharacterQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Character" where id = $1`,
     values: [id]
@@ -70,7 +79,7 @@ async function removeCharacterQuery(id) {
   return await db.query(query)
 }
 
-async function editCharacterQuery(id, data) {
+async function editCharacterQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -92,7 +101,7 @@ async function editCharacterQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addCharacterQuery,
   getCharacterQuery,
   getCharactersQuery,

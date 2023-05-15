@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.editProjectPlayer = exports.removeProjectPlayer = exports.getProjectPlayersByPlayer = exports.getProjectPlayersByProject = exports.addProjectPlayer = void 0;
 var projectPlayers_1 = require("../queries/projectPlayers");
 function addProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function addProjectPlayer(req, res, next) {
         });
     });
 }
+exports.addProjectPlayer = addProjectPlayer;
 function getProjectPlayersByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var projectPlayerData, err_2;
@@ -79,6 +81,7 @@ function getProjectPlayersByProject(req, res, next) {
         });
     });
 }
+exports.getProjectPlayersByProject = getProjectPlayersByProject;
 function getProjectPlayersByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var projectPlayerData, err_3;
@@ -100,6 +103,7 @@ function getProjectPlayersByPlayer(req, res, next) {
         });
     });
 }
+exports.getProjectPlayersByPlayer = getProjectPlayersByPlayer;
 function removeProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_4;
@@ -121,6 +125,7 @@ function removeProjectPlayer(req, res, next) {
         });
     });
 }
+exports.removeProjectPlayer = removeProjectPlayer;
 function editProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_5;
@@ -142,10 +147,4 @@ function editProjectPlayer(req, res, next) {
         });
     });
 }
-module.exports = {
-    addProjectPlayer: addProjectPlayer,
-    getProjectPlayersByProject: getProjectPlayersByProject,
-    getProjectPlayersByPlayer: getProjectPlayersByPlayer,
-    removeProjectPlayer: removeProjectPlayer,
-    editProjectPlayer: editProjectPlayer
-};
+exports.editProjectPlayer = editProjectPlayer;

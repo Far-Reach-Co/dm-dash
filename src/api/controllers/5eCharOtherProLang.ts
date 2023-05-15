@@ -1,3 +1,4 @@
+import { Request, Response, NextFunction } from "express";
 import {
   add5eCharOtherProLangQuery,
   get5eCharOtherProLangQuery,
@@ -6,7 +7,11 @@ import {
   edit5eCharOtherProLangQuery,
 } from "../queries/5eCharOtherProLang";
 
-async function add5eCharOtherProLang(req, res, next) {
+async function add5eCharOtherProLang(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await add5eCharOtherProLangQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -15,7 +20,11 @@ async function add5eCharOtherProLang(req, res, next) {
   }
 }
 
-async function get5eCharOtherProLangsByGeneral(req, res, next) {
+async function get5eCharOtherProLangsByGeneral(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await get5eCharOtherProLangsByGeneralQuery(
       req.params.general_id
@@ -27,7 +36,11 @@ async function get5eCharOtherProLangsByGeneral(req, res, next) {
   }
 }
 
-async function remove5eCharOtherProLang(req, res, next) {
+async function remove5eCharOtherProLang(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     await remove5eCharOtherProLangQuery(req.params.id);
     res.status(204).send();
@@ -36,7 +49,11 @@ async function remove5eCharOtherProLang(req, res, next) {
   }
 }
 
-async function edit5eCharOtherProLang(req, res, next) {
+async function edit5eCharOtherProLang(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await edit5eCharOtherProLangQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -45,7 +62,7 @@ async function edit5eCharOtherProLang(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   get5eCharOtherProLangsByGeneral,
   add5eCharOtherProLang,
   remove5eCharOtherProLang,

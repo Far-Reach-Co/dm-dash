@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.getProjectUserByUserAndProjectQuery = exports.editProjectUserQuery = exports.removeProjectUserQuery = exports.getProjectUsersByProjectQuery = exports.getProjectUsersQuery = exports.getProjectUserQuery = exports.addProjectUserQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addProjectUserQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -50,12 +52,13 @@ function addProjectUserQuery(data) {
                             data.is_editor
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addProjectUserQuery = addProjectUserQuery;
 function getProjectUsersQuery(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -66,12 +69,13 @@ function getProjectUsersQuery(userId) {
                         text: "select * from public.\"ProjectUser\" where user_id = $1",
                         values: [userId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectUsersQuery = getProjectUsersQuery;
 function getProjectUserByUserAndProjectQuery(userId, projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -82,12 +86,13 @@ function getProjectUserByUserAndProjectQuery(userId, projectId) {
                         text: "select * from public.\"ProjectUser\" where user_id = $1 and project_id = $2",
                         values: [userId, projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectUserByUserAndProjectQuery = getProjectUserByUserAndProjectQuery;
 function getProjectUsersByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -98,12 +103,13 @@ function getProjectUsersByProjectQuery(projectId) {
                         text: "select * from public.\"ProjectUser\" where project_id = $1",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectUsersByProjectQuery = getProjectUsersByProjectQuery;
 function getProjectUserQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -114,12 +120,13 @@ function getProjectUserQuery(id) {
                         text: "select * from public.\"ProjectUser\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getProjectUserQuery = getProjectUserQuery;
 function removeProjectUserQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -130,12 +137,13 @@ function removeProjectUserQuery(id) {
                         text: "delete from public.\"ProjectUser\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeProjectUserQuery = removeProjectUserQuery;
 function editProjectUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -157,18 +165,10 @@ function editProjectUserQuery(id, data) {
                         text: "update public.\"ProjectUser\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addProjectUserQuery: addProjectUserQuery,
-    getProjectUserQuery: getProjectUserQuery,
-    getProjectUsersQuery: getProjectUsersQuery,
-    getProjectUsersByProjectQuery: getProjectUsersByProjectQuery,
-    removeProjectUserQuery: removeProjectUserQuery,
-    editProjectUserQuery: editProjectUserQuery,
-    getProjectUserByUserAndProjectQuery: getProjectUserByUserAndProjectQuery
-};
+exports.editProjectUserQuery = editProjectUserQuery;

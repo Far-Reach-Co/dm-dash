@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editUserPasswordQuery = exports.editUserQuery = exports.registerUserQuery = exports.getUserByEmailQuery = exports.getUserByIdQuery = exports.getAllUsersQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function getUserByIdQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -46,12 +48,13 @@ function getUserByIdQuery(id) {
                         text: "select * from public.\"User\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getUserByIdQuery = getUserByIdQuery;
 function getAllUsersQuery() {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -61,12 +64,13 @@ function getAllUsersQuery() {
                     query = {
                         text: "select * from public.\"User\""
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getAllUsersQuery = getAllUsersQuery;
 function getUserByEmailQuery(email) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -77,12 +81,13 @@ function getUserByEmailQuery(email) {
                         text: "select * from public.\"User\" where email = $1",
                         values: [email]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getUserByEmailQuery = getUserByEmailQuery;
 function registerUserQuery(_a) {
     var email = _a.email, username = _a.username, password = _a.password;
     return __awaiter(this, void 0, void 0, function () {
@@ -98,12 +103,13 @@ function registerUserQuery(_a) {
                             password
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.registerUserQuery = registerUserQuery;
 function editUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -125,12 +131,13 @@ function editUserQuery(id, data) {
                         text: "update public.\"User\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
+exports.editUserQuery = editUserQuery;
 function editUserPasswordQuery(id, password) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -141,17 +148,10 @@ function editUserPasswordQuery(id, password) {
                         text: "update public.\"User\" set password = $2 where id = $1 returning *",
                         values: [id, password]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
-module.exports = {
-    getAllUsersQuery: getAllUsersQuery,
-    getUserByIdQuery: getUserByIdQuery,
-    getUserByEmailQuery: getUserByEmailQuery,
-    registerUserQuery: registerUserQuery,
-    editUserQuery: editUserQuery,
-    editUserPasswordQuery: editUserPasswordQuery
-};
+exports.editUserPasswordQuery = editUserPasswordQuery;

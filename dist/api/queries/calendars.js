@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editCalendarQuery = exports.removeCalendarQuery = exports.getCalendarQuery = exports.getCalendarsQuery = exports.addCalendarQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addCalendarQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -50,12 +52,13 @@ function addCalendarQuery(data) {
                             data.year
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addCalendarQuery = addCalendarQuery;
 function getCalendarQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -66,12 +69,13 @@ function getCalendarQuery(id) {
                         text: "select * from public.\"Calendar\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getCalendarQuery = getCalendarQuery;
 function getCalendarsQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -82,12 +86,13 @@ function getCalendarsQuery(projectId) {
                         text: "select * from public.\"Calendar\" where project_id = $1 order by title asc",
                         values: [projectId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getCalendarsQuery = getCalendarsQuery;
 function removeCalendarQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -98,12 +103,13 @@ function removeCalendarQuery(id) {
                         text: "delete from public.\"Calendar\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeCalendarQuery = removeCalendarQuery;
 function editCalendarQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -125,16 +131,10 @@ function editCalendarQuery(id, data) {
                         text: "update public.\"Calendar\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addCalendarQuery: addCalendarQuery,
-    getCalendarsQuery: getCalendarsQuery,
-    getCalendarQuery: getCalendarQuery,
-    removeCalendarQuery: removeCalendarQuery,
-    editCalendarQuery: editCalendarQuery
-};
+exports.editCalendarQuery = editCalendarQuery;

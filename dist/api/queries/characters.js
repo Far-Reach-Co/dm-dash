@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editCharacterQuery = exports.removeCharacterQuery = exports.getCharactersByLocationQuery = exports.getCharactersWithKeywordAndFilterQuery = exports.getCharactersWithKeywordQuery = exports.getCharactersWithFilterQuery = exports.getCharactersQuery = exports.getCharacterQuery = exports.addCharacterQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addCharacterQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -53,12 +55,13 @@ function addCharacterQuery(data) {
                             data.image_id
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addCharacterQuery = addCharacterQuery;
 function getCharacterQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -69,12 +72,13 @@ function getCharacterQuery(id) {
                         text: "select * from public.\"Character\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getCharacterQuery = getCharacterQuery;
 function getCharactersWithKeywordAndFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -86,12 +90,13 @@ function getCharactersWithKeywordAndFilterQuery(_a) {
                         text: "select * from public.\"Character\" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getCharactersWithKeywordAndFilterQuery = getCharactersWithKeywordAndFilterQuery;
 function getCharactersWithKeywordQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, keyword = _a.keyword;
     return __awaiter(this, void 0, void 0, function () {
@@ -103,12 +108,13 @@ function getCharactersWithKeywordQuery(_a) {
                         text: "select * from public.\"Character\" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, keyword]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getCharactersWithKeywordQuery = getCharactersWithKeywordQuery;
 function getCharactersWithFilterQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset, filter = _a.filter;
     return __awaiter(this, void 0, void 0, function () {
@@ -120,12 +126,13 @@ function getCharactersWithFilterQuery(_a) {
                         text: "select * from public.\"Character\" where project_id = $1 and type = $4 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset, filter]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getCharactersWithFilterQuery = getCharactersWithFilterQuery;
 function getCharactersQuery(_a) {
     var projectId = _a.projectId, limit = _a.limit, offset = _a.offset;
     return __awaiter(this, void 0, void 0, function () {
@@ -137,12 +144,13 @@ function getCharactersQuery(_a) {
                         text: "select * from public.\"Character\" where project_id = $1 order by title asc limit $2 offset $3",
                         values: [projectId, limit, offset]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _b.sent()];
             }
         });
     });
 }
+exports.getCharactersQuery = getCharactersQuery;
 function getCharactersByLocationQuery(locationId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -153,12 +161,13 @@ function getCharactersByLocationQuery(locationId) {
                         text: "select * from public.\"Character\" where location_id = $1 order by title asc",
                         values: [locationId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getCharactersByLocationQuery = getCharactersByLocationQuery;
 function removeCharacterQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -169,12 +178,13 @@ function removeCharacterQuery(id) {
                         text: "delete from public.\"Character\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeCharacterQuery = removeCharacterQuery;
 function editCharacterQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -196,20 +206,10 @@ function editCharacterQuery(id, data) {
                         text: "update public.\"Character\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addCharacterQuery: addCharacterQuery,
-    getCharacterQuery: getCharacterQuery,
-    getCharactersQuery: getCharactersQuery,
-    getCharactersWithFilterQuery: getCharactersWithFilterQuery,
-    getCharactersWithKeywordQuery: getCharactersWithKeywordQuery,
-    getCharactersWithKeywordAndFilterQuery: getCharactersWithKeywordAndFilterQuery,
-    getCharactersByLocationQuery: getCharactersByLocationQuery,
-    removeCharacterQuery: removeCharacterQuery,
-    editCharacterQuery: editCharacterQuery
-};
+exports.editCharacterQuery = editCharacterQuery;

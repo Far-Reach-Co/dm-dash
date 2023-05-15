@@ -1,4 +1,4 @@
-const {
+import {
   addCharacterQuery,
   getCharacterQuery,
   getCharactersQuery,
@@ -8,18 +8,15 @@ const {
   getCharactersByLocationQuery,
   removeCharacterQuery,
   editCharacterQuery,
-} = require("../queries/characters.js");
-const { addEventQuery } = require("../queries/events.js");
-const { getImageQuery, removeImageQuery } = require("../queries/images.js");
-const { getLocationQuery } = require("../queries/locations.js");
-const {
-  getProjectQuery,
+} from "../queries/characters.js";
+import { addEventQuery } from "../queries/events.js";
+import { getImageQuery, removeImageQuery } from "../queries/images.js";
+import { getLocationQuery } from "../queries/locations.js";
+import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
+import { removeFile } from "./s3.js";
+import { Request, Response, NextFunction } from "express";
 
-  editProjectQuery,
-} = require("../queries/projects.js");
-const { removeFile } = require("./s3.js");
-
-async function addCharacter(req, res, next) {
+async function addCharacter(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addCharacterQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -28,7 +25,7 @@ async function addCharacter(req, res, next) {
   }
 }
 
-async function getCharacter(req, res, next) {
+async function getCharacter(req: Request, res: Response, next: NextFunction) {
   try {
     const characterData = await getCharacterQuery(req.params.id);
     const character = characterData.rows[0];
@@ -39,7 +36,7 @@ async function getCharacter(req, res, next) {
   }
 }
 
-async function getCharacters(req, res, next) {
+async function getCharacters(req: Request, res: Response, next: NextFunction) {
   if (req.params.keyword && req.params.filter) {
     try {
       const data = await getCharactersWithKeywordAndFilterQuery({
@@ -95,7 +92,11 @@ async function getCharacters(req, res, next) {
   }
 }
 
-async function getCharactersByLocation(req, res, next) {
+async function getCharactersByLocation(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getCharactersByLocationQuery(req.params.location_id);
     res.send(data.rows);
@@ -104,7 +105,11 @@ async function getCharactersByLocation(req, res, next) {
   }
 }
 
-async function removeCharacter(req, res, next) {
+async function removeCharacter(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const characterData = await getCharacterQuery(req.params.id);
     const character = characterData.rows[0];
@@ -132,7 +137,7 @@ async function removeCharacter(req, res, next) {
   }
 }
 
-async function editCharacter(req, res, next) {
+async function editCharacter(req: Request, res: Response, next: NextFunction) {
   try {
     const characterData = await getCharacterQuery(req.params.id);
     const character = characterData.rows[0];
@@ -171,7 +176,7 @@ async function editCharacter(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   getCharacter,
   getCharacters,
   getCharactersWithFilterQuery,

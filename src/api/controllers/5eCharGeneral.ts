@@ -1,66 +1,64 @@
-const {
+import {
   get5eCharsGeneralByUserQuery,
   add5eCharGeneralQuery,
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
   edit5eCharGeneralQuery,
-} = require("../queries/5eCharGeneral");
-const {
+} from "../queries/5eCharGeneral";
+import {
   get5eCharProQuery,
   add5eCharProQuery,
   get5eCharProByGeneralQuery,
   remove5eCharProQuery,
   edit5eCharProQuery,
-} = require("../queries/5eCharPro");
-const {
+} from "../queries/5eCharPro";
+import {
   add5eCharBackQuery,
   get5eCharBackByGeneralQuery,
   remove5eCharBackQuery,
   get5eCharBackQuery,
   edit5eCharBackQuery,
-} = require("../queries/5eCharBack");
-const {
+} from "../queries/5eCharBack";
+import {
   get5eCharSpellSlotInfosByGeneralQuery,
   add5eCharSpellSlotInfoQuery,
   remove5eCharSpellSlotInfoQuery,
-} = require("../queries/5eCharSpellSlots");
-const {
+} from "../queries/5eCharSpellSlots";
+import {
   get5eCharAttacksByGeneralQuery,
   remove5eCharAttackQuery,
-} = require("../queries/5eCharAttacks");
-const {
+} from "../queries/5eCharAttacks";
+import {
   remove5eCharEquipmentQuery,
   get5eCharEquipmentsByGeneralQuery,
-} = require("../queries/5eCharEquipment");
-const {
+} from "../queries/5eCharEquipment";
+import {
   get5eCharFeatsByGeneralQuery,
   remove5eCharFeatQuery,
-} = require("../queries/5eCharFeats");
-const {
+} from "../queries/5eCharFeats";
+import {
   get5eCharSpellsByGeneralQuery,
   remove5eCharSpellQuery,
-} = require("../queries/5eCharSpells");
-const {
+} from "../queries/5eCharSpells";
+import {
   get5eCharOtherProLangsByGeneralQuery,
   remove5eCharOtherProLangQuery,
-} = require("../queries/5eCharOtherProLang");
-const {
+} from "../queries/5eCharOtherProLang";
+import {
   getProjectPlayersByPlayerQuery,
   removeProjectPlayerQuery,
-} = require("../queries/projectPlayers");
-const { getProjectQuery } = require("../queries/projects");
-const {
-  getProjectUserByUserAndProjectQuery,
-} = require("../queries/projectUsers");
-const { USER_IS_NOT_PRO } = require("../../lib/enums");
+} from "../queries/projectPlayers";
+import { userSubscriptionStatus } from "../../lib/enums.js";
+import { Request, Response, NextFunction } from "express";
 
-async function add5eChar(req, res, next) {
+async function add5eChar(req: Request, res: Response, next: NextFunction) {
   try {
     // check if user is pro
     const generalsData = await get5eCharsGeneralByUserQuery(req.user.id);
     // limit to three projects
     if (generalsData.rows.length >= 5) {
-      if (!req.user.is_pro) throw { status: 402, message: USER_IS_NOT_PRO };
+      if (!req.user.is_pro)
+        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
     }
 
     req.body.user_id = req.user.id;
@@ -76,7 +74,11 @@ async function add5eChar(req, res, next) {
   }
 }
 
-async function get5eCharsByUser(req, res, next) {
+async function get5eCharsByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const generalsData = await get5eCharsGeneralByUserQuery(req.user.id);
     const generals = generalsData.rows;
@@ -103,7 +105,11 @@ async function get5eCharsByUser(req, res, next) {
   }
 }
 
-async function get5eCharGeneral(req, res, next) {
+async function get5eCharGeneral(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     // not user
     const generalsData = await get5eCharGeneralQuery(req.params.id);
@@ -128,7 +134,7 @@ async function get5eCharGeneral(req, res, next) {
   }
 }
 
-async function remove5eChar(req, res, next) {
+async function remove5eChar(req: Request, res: Response, next: NextFunction) {
   try {
     const generalData = await get5eCharGeneralQuery(req.params.id);
     const general = generalData.rows[0];
@@ -180,7 +186,11 @@ async function remove5eChar(req, res, next) {
   }
 }
 
-async function edit5eCharGeneral(req, res, next) {
+async function edit5eCharGeneral(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await edit5eCharGeneralQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -189,7 +199,7 @@ async function edit5eCharGeneral(req, res, next) {
   }
 }
 
-async function edit5eCharPro(req, res, next) {
+async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await edit5eCharProQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -198,7 +208,7 @@ async function edit5eCharPro(req, res, next) {
   }
 }
 
-async function edit5eCharBack(req, res, next) {
+async function edit5eCharBack(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await edit5eCharBackQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -207,7 +217,7 @@ async function edit5eCharBack(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   add5eChar,
   get5eCharsByUser,
   get5eCharGeneral,

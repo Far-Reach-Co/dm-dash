@@ -35,9 +35,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a = require("../queries/calendars.js"), addCalendarQuery = _a.addCalendarQuery, getCalendarsQuery = _a.getCalendarsQuery, getCalendarQuery = _a.getCalendarQuery, removeCalendarQuery = _a.removeCalendarQuery, editCalendarQuery = _a.editCalendarQuery;
-var _b = require("../queries/months.js"), getMonthsQuery = _b.getMonthsQuery, removeMonthQuery = _b.removeMonthQuery;
-var _c = require("../queries/days.js"), getDaysQuery = _c.getDaysQuery, removeDayQuery = _c.removeDayQuery;
+exports.__esModule = true;
+exports.editCalendar = exports.removeCalendar = exports.addCalendar = exports.getCalendars = void 0;
+var calendars_js_1 = require("../queries/calendars.js");
+var months_js_1 = require("../queries/months.js");
+var days_js_1 = require("../queries/days.js");
 function addCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
@@ -45,7 +47,7 @@ function addCalendar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, addCalendarQuery(req.body)];
+                    return [4, (0, calendars_js_1.addCalendarQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -59,6 +61,7 @@ function addCalendar(req, res, next) {
         });
     });
 }
+exports.addCalendar = addCalendar;
 function getCalendars(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var calendars, _i, _a, calendar, months, _b, _c, calendar, days, err_2;
@@ -66,7 +69,7 @@ function getCalendars(req, res, next) {
             switch (_d.label) {
                 case 0:
                     _d.trys.push([0, 10, , 11]);
-                    return [4, getCalendarsQuery(req.params.project_id)];
+                    return [4, (0, calendars_js_1.getCalendarsQuery)(req.params.project_id)];
                 case 1:
                     calendars = _d.sent();
                     _i = 0, _a = calendars.rows;
@@ -74,7 +77,7 @@ function getCalendars(req, res, next) {
                 case 2:
                     if (!(_i < _a.length)) return [3, 5];
                     calendar = _a[_i];
-                    return [4, getMonthsQuery(calendar.id)];
+                    return [4, (0, months_js_1.getMonthsQuery)(calendar.id)];
                 case 3:
                     months = _d.sent();
                     calendar.months = months.rows;
@@ -88,7 +91,7 @@ function getCalendars(req, res, next) {
                 case 6:
                     if (!(_b < _c.length)) return [3, 9];
                     calendar = _c[_b];
-                    return [4, getDaysQuery(calendar.id)];
+                    return [4, (0, days_js_1.getDaysQuery)(calendar.id)];
                 case 7:
                     days = _d.sent();
                     calendar.days_of_the_week = days.rows;
@@ -108,6 +111,7 @@ function getCalendars(req, res, next) {
         });
     });
 }
+exports.getCalendars = getCalendars;
 function removeCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var monthsData, daysData, err_3;
@@ -116,29 +120,29 @@ function removeCalendar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 4, , 5]);
-                    return [4, removeCalendarQuery(req.params.id)];
+                    return [4, (0, calendars_js_1.removeCalendarQuery)(req.params.id)];
                 case 1:
                     _a.sent();
-                    return [4, getMonthsQuery(req.params.id)];
+                    return [4, (0, months_js_1.getMonthsQuery)(req.params.id)];
                 case 2:
                     monthsData = _a.sent();
                     monthsData.rows.forEach(function (month) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, removeMonthQuery(month.id)];
+                                case 0: return [4, (0, months_js_1.removeMonthQuery)(month.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
                             }
                         });
                     }); });
-                    return [4, getDaysQuery(req.params.id)];
+                    return [4, (0, days_js_1.getDaysQuery)(req.params.id)];
                 case 3:
                     daysData = _a.sent();
                     daysData.rows.forEach(function (day) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4, removeDayQuery(day.id)];
+                                case 0: return [4, (0, days_js_1.removeDayQuery)(day.id)];
                                 case 1:
                                     _a.sent();
                                     return [2];
@@ -156,6 +160,7 @@ function removeCalendar(req, res, next) {
         });
     });
 }
+exports.removeCalendar = removeCalendar;
 function editCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -163,7 +168,7 @@ function editCalendar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, editCalendarQuery(req.params.id, req.body)];
+                    return [4, (0, calendars_js_1.editCalendarQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -177,9 +182,4 @@ function editCalendar(req, res, next) {
         });
     });
 }
-module.exports = {
-    getCalendars: getCalendars,
-    addCalendar: addCalendar,
-    removeCalendar: removeCalendar,
-    editCalendar: editCalendar
-};
+exports.editCalendar = editCalendar;

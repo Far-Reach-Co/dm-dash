@@ -1,6 +1,6 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addTableImageQuery(data) {
+async function addTableImageQuery(data: {project_id: string, image_id: string}) {
   const query = {
     text: /*sql*/ `insert into public."TableImage" (project_id, image_id) values($1,$2) returning *`,
     values: [
@@ -11,7 +11,7 @@ async function addTableImageQuery(data) {
   return await db.query(query)
 }
 
-async function getTableImageQuery(id) {
+async function getTableImageQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."TableImage" where id = $1`,
     values: [id]
@@ -19,7 +19,7 @@ async function getTableImageQuery(id) {
   return await db.query(query)
 }
 
-async function getTableImagesQuery(project_id) {
+async function getTableImagesQuery(project_id: string) {
   const query = {
     text: /*sql*/ `select * from public."TableImage" where project_id = $1`,
     values: [project_id]
@@ -27,7 +27,7 @@ async function getTableImagesQuery(project_id) {
   return await db.query(query)
 }
 
-async function removeTableImageQuery(id) {
+async function removeTableImageQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."TableImage" where id = $1`,
     values: [id]
@@ -36,7 +36,7 @@ async function removeTableImageQuery(id) {
   return await db.query(query)
 }
 
-async function editTableImageQuery(id, data) {
+async function editTableImageQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -58,7 +58,7 @@ async function editTableImageQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addTableImageQuery,
   getTableImagesQuery,
   getTableImageQuery,

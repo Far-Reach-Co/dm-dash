@@ -1,6 +1,10 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addClockQuery(data) {
+async function addClockQuery(data: {
+  title: string,
+  current_time_in_milliseconds: string,
+  project_id: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."Clock" (title, current_time_in_milliseconds, project_id) values($1,$2,$3) returning *`,
     values: [
@@ -12,7 +16,7 @@ async function addClockQuery(data) {
   return await db.query(query)
 }
 
-async function getClockQuery(id) {
+async function getClockQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."Clock" where id = $1`,
     values: [id]
@@ -20,7 +24,7 @@ async function getClockQuery(id) {
   return await db.query(query)
 }
 
-async function getClocksQuery(projectId) {
+async function getClocksQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."Clock" where project_id = $1 order by title asc`,
     values: [projectId]
@@ -28,7 +32,7 @@ async function getClocksQuery(projectId) {
   return await db.query(query)
 }
 
-async function removeClockQuery(id) {
+async function removeClockQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Clock" where id = $1`,
     values: [id]
@@ -37,7 +41,7 @@ async function removeClockQuery(id) {
   return await db.query(query)
 }
 
-async function editClockQuery(id, data) {
+async function editClockQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -59,7 +63,7 @@ async function editClockQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addClockQuery,
   getClocksQuery,
   getClockQuery,

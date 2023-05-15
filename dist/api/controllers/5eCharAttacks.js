@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.edit5eCharAttack = exports.remove5eCharAttack = exports.add5eCharAttack = exports.get5eCharAttacksByGeneral = void 0;
 var _5eCharAttacks_1 = require("../queries/5eCharAttacks");
 function add5eCharAttack(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,6 +59,7 @@ function add5eCharAttack(req, res, next) {
         });
     });
 }
+exports.add5eCharAttack = add5eCharAttack;
 function get5eCharAttacksByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
@@ -79,6 +81,7 @@ function get5eCharAttacksByGeneral(req, res, next) {
         });
     });
 }
+exports.get5eCharAttacksByGeneral = get5eCharAttacksByGeneral;
 function remove5eCharAttack(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_3;
@@ -100,6 +103,7 @@ function remove5eCharAttack(req, res, next) {
         });
     });
 }
+exports.remove5eCharAttack = remove5eCharAttack;
 function edit5eCharAttack(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_4;
@@ -121,9 +125,4 @@ function edit5eCharAttack(req, res, next) {
         });
     });
 }
-module.exports = {
-    get5eCharAttacksByGeneral: get5eCharAttacksByGeneral,
-    add5eCharAttack: add5eCharAttack,
-    remove5eCharAttack: remove5eCharAttack,
-    edit5eCharAttack: edit5eCharAttack
-};
+exports.edit5eCharAttack = edit5eCharAttack;

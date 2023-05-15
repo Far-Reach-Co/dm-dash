@@ -28,7 +28,7 @@ const {
   userJoin,
   getProjectUsers,
   userLeave,
-} = require("./src/lib/socketUsers.js");
+} = require("./dist/lib/socketUsers.js");
 
 /***************************** SETUP AND UTILS ***************************/
 async function getUserByToken(token) {

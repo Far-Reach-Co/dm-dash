@@ -35,7 +35,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var db = require('../dbconfig');
+exports.__esModule = true;
+exports.editMonthQuery = exports.removeMonthQuery = exports.getMonthQuery = exports.getMonthsQuery = exports.addMonthQuery = void 0;
+var dbconfig_1 = require("../dbconfig");
 function addMonthQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -51,12 +53,13 @@ function addMonthQuery(data) {
                             data.number_of_days
                         ]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.addMonthQuery = addMonthQuery;
 function getMonthQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -67,12 +70,13 @@ function getMonthQuery(id) {
                         text: "select * from public.\"Month\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getMonthQuery = getMonthQuery;
 function getMonthsQuery(calendarId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -83,12 +87,13 @@ function getMonthsQuery(calendarId) {
                         text: "select * from public.\"Month\" where calendar_id = $1 order by index asc",
                         values: [calendarId]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.getMonthsQuery = getMonthsQuery;
 function removeMonthQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -99,12 +104,13 @@ function removeMonthQuery(id) {
                         text: "delete from public.\"Month\" where id = $1",
                         values: [id]
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
             }
         });
     });
 }
+exports.removeMonthQuery = removeMonthQuery;
 function editMonthQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
@@ -126,16 +132,10 @@ function editMonthQuery(id, data) {
                         text: "update public.\"Month\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
-                    return [4, db.query(query)];
+                    return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _c.sent()];
             }
         });
     });
 }
-module.exports = {
-    addMonthQuery: addMonthQuery,
-    getMonthsQuery: getMonthsQuery,
-    getMonthQuery: getMonthQuery,
-    removeMonthQuery: removeMonthQuery,
-    editMonthQuery: editMonthQuery
-};
+exports.editMonthQuery = editMonthQuery;

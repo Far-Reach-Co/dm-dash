@@ -1,6 +1,11 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addLoreRelationQuery(data) {
+async function addLoreRelationQuery(data: {
+  lore_id: string,
+  location_id: string,
+  character_id: string,
+  item_id: string
+}) {
   const query = {
     text: /*sql*/ `insert into public."LoreRelation" (lore_id, location_id, character_id, item_id) values($1,$2,$3,$4) returning *`,
     values: [
@@ -13,34 +18,36 @@ async function addLoreRelationQuery(data) {
   return await db.query(query)
 }
 
-async function getLoreRelationsByLoreQuery(loreId, type) {
-  let query;
+async function getLoreRelationsByLoreQuery(loreId: string, type: string) {
 
   if(type === "locations") {
-    query = {
+    const query = {
       text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1 and location_id is not null`,
       values: [loreId]
     }
+      return await db.query(query)
   }
 
   if(type === "characters") {
-    query = {
+    const query = {
       text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1 and character_id is not null`,
       values: [loreId]
     }
+      return await db.query(query)
   }
 
   if(type === "items") {
-    query = {
+    const query = {
       text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1 and item_id is not null`,
       values: [loreId]
     }
+      return await db.query(query)
   }
 
-  return await db.query(query)
+  return [];
 }
 
-async function getLoreRelationsByLocationQuery(locationId) {
+async function getLoreRelationsByLocationQuery(locationId: string) {
   const query = {
     text: /*sql*/ `select * from public."LoreRelation" where location_id = $1`,
     values: [locationId]
@@ -48,7 +55,7 @@ async function getLoreRelationsByLocationQuery(locationId) {
   return await db.query(query)
 }
 
-async function getLoreRelationsByCharacterQuery(characterId) {
+async function getLoreRelationsByCharacterQuery(characterId: string) {
   const query = {
     text: /*sql*/ `select * from public."LoreRelation" where character_id = $1`,
     values: [characterId]
@@ -56,7 +63,7 @@ async function getLoreRelationsByCharacterQuery(characterId) {
   return await db.query(query)
 }
 
-async function getLoreRelationsByItemQuery(itemId) {
+async function getLoreRelationsByItemQuery(itemId: string) {
   const query = {
     text: /*sql*/ `select * from public."LoreRelation" where item_id = $1`,
     values: [itemId]
@@ -64,7 +71,7 @@ async function getLoreRelationsByItemQuery(itemId) {
   return await db.query(query)
 }
 
-async function getLoreRelationQuery(id) {
+async function getLoreRelationQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."LoreRelation" where id = $1`,
     values: [id]
@@ -72,7 +79,7 @@ async function getLoreRelationQuery(id) {
   return await db.query(query)
 }
 
-async function getLoreRelationsQuery(loreId) {
+async function getLoreRelationsQuery(loreId: string) {
   const query = {
     text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1`,
     values: [loreId]
@@ -80,7 +87,7 @@ async function getLoreRelationsQuery(loreId) {
   return await db.query(query)
 }
 
-async function removeLoreRelationQuery(id) {
+async function removeLoreRelationQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."LoreRelation" where id = $1`,
     values: [id]
@@ -89,7 +96,7 @@ async function removeLoreRelationQuery(id) {
   return await db.query(query)
 }
 
-async function editLoreRelationQuery(id, data) {
+async function editLoreRelationQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -111,7 +118,7 @@ async function editLoreRelationQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addLoreRelationQuery,
   getLoreRelationQuery,
   removeLoreRelationQuery,

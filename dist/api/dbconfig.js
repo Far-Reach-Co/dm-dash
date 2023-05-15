@@ -35,7 +35,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var Pool = require("pg").Pool;
+exports.__esModule = true;
+var pg_1 = require("pg");
 var credentials = {
     user: process.env.PG_USER,
     host: process.env.PG_HOST,
@@ -43,24 +44,25 @@ var credentials = {
     password: process.env.PG_PW,
     port: 5432
 };
-var pool = new Pool(credentials);
-function query(text, params) {
+var pool = new pg_1.Pool(credentials);
+function query(queryObject, params) {
     return __awaiter(this, void 0, void 0, function () {
         var start, res, duration;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     start = Date.now();
-                    return [4, pool.query(text, params)];
+                    return [4, pool.query(queryObject, params)];
                 case 1:
                     res = _a.sent();
                     duration = Date.now() - start;
-                    console.log("executed query", { text: text, duration: duration, rows: res.rowCount });
+                    console.log("executed query", { queryObject: queryObject, duration: duration, rows: res.rowCount });
                     return [2, res];
             }
         });
     });
 }
-module.exports = {
+var db = {
     query: query
 };
+exports["default"] = db;

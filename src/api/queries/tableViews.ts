@@ -1,6 +1,6 @@
-const db = require('../dbconfig')
+import db from "../dbconfig";
 
-async function addTableViewQuery(data) {
+async function addTableViewQuery(data: {project_id: string}) {
   const query = {
     text: /*sql*/ `insert into public."TableView" (project_id) values($1) returning *`,
     values: [
@@ -10,7 +10,7 @@ async function addTableViewQuery(data) {
   return await db.query(query)
 }
 
-async function getTableViewQuery(id) {
+async function getTableViewQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."TableView" where id = $1`,
     values: [id]
@@ -18,7 +18,7 @@ async function getTableViewQuery(id) {
   return await db.query(query)
 }
 
-async function getTableViewsQuery(projectId) {
+async function getTableViewsQuery(projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."TableView" where project_id = $1`,
     values: [projectId]
@@ -26,7 +26,7 @@ async function getTableViewsQuery(projectId) {
   return await db.query(query)
 }
 
-async function removeTableViewQuery(id) {
+async function removeTableViewQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."TableView" where id = $1`,
     values: [id]
@@ -35,7 +35,7 @@ async function removeTableViewQuery(id) {
   return await db.query(query)
 }
 
-async function editTableViewQuery(id, data) {
+async function editTableViewQuery(id: string, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
@@ -57,7 +57,7 @@ async function editTableViewQuery(id, data) {
   return await db.query(query)
 }
 
-module.exports = {
+export {
   addTableViewQuery,
   getTableViewsQuery,
   getTableViewQuery,

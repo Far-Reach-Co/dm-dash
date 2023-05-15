@@ -5,6 +5,7 @@ import {
   // remove5eCharSpellSlotInfoQuery,
   edit5eCharSpellSlotInfoQuery,
 } from "../queries/5eCharSpellSlots";
+import { Request, Response, NextFunction } from "express";
 
 // async function add5eCharSpellSlotInfo(req, res, next) {
 //   try {
@@ -39,7 +40,11 @@ import {
 //   }
 // }
 
-async function edit5eCharSpellSlotInfo(req, res, next) {
+async function edit5eCharSpellSlotInfo(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await edit5eCharSpellSlotInfoQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -48,7 +53,7 @@ async function edit5eCharSpellSlotInfo(req, res, next) {
   }
 }
 
-module.exports = {
+export {
   // get5eCharSpellSlotInfosByGeneral,
   // add5eCharSpellSlotInfo,
   // remove5eCharSpellSlotInfo,

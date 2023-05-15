@@ -1,12 +1,13 @@
-const {
+import { Request, Response, NextFunction } from "express";
+import {
   addMonthQuery,
   getMonthsQuery,
   getMonthQuery,
   removeMonthQuery,
   editMonthQuery,
-} = require("../queries/months.js");
+} from "../queries/months.js";
 
-async function addMonth(req, res, next) {
+async function addMonth(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addMonthQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -15,7 +16,7 @@ async function addMonth(req, res, next) {
   }
 }
 
-async function getMonths(req, res, next) {
+async function getMonths(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await getMonthsQuery(req.params.calendar_id);
     res.send(data.rows);
@@ -24,7 +25,7 @@ async function getMonths(req, res, next) {
   }
 }
 
-async function removeMonth(req, res, next) {
+async function removeMonth(req: Request, res: Response, next: NextFunction) {
   try {
     await removeMonthQuery(req.params.id);
     res.status(204).send();
@@ -33,7 +34,7 @@ async function removeMonth(req, res, next) {
   }
 }
 
-async function editMonth(req, res, next) {
+async function editMonth(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editMonthQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
@@ -42,9 +43,4 @@ async function editMonth(req, res, next) {
   }
 }
 
-module.exports = {
-  getMonths,
-  addMonth,
-  removeMonth,
-  editMonth,
-};
+export { getMonths, addMonth, removeMonth, editMonth };
