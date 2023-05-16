@@ -1,5 +1,14 @@
 import db from "../dbconfig";
 
+interface LoreModal {
+  id: number,
+  title: string,
+  description: string,
+  type: string,
+  image_id: number,
+  project_id: number
+}
+
 async function addLoreQuery(data: {
   project_id: string,
   title: string,
@@ -17,7 +26,7 @@ async function addLoreQuery(data: {
       data.image_id
     ]
   }
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 
 async function getLoreQuery(id: string) {
@@ -25,7 +34,7 @@ async function getLoreQuery(id: string) {
     text: /*sql*/ `select * from public."Lore" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 
 async function getLoresWithKeywordAndFilterQuery(
@@ -35,21 +44,21 @@ async function getLoresWithKeywordAndFilterQuery(
     text: /*sql*/ `select * from public."Lore" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword, filter]
   }
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 async function getLoresWithKeywordQuery({projectId, limit, offset, keyword}: {projectId: string, limit: string, offset: string, keyword: string}) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword]
   }
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 async function getLoresWithFilterQuery({projectId, limit, offset, filter}: {projectId: string, limit: string, offset: string, filter: string}) {
   const query = {
     text: /*sql*/ `select * from public."Lore" where project_id = $1 and type = $4 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, filter]
   }
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 
 async function getLoresQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
@@ -57,7 +66,7 @@ async function getLoresQuery({projectId, limit, offset}: {projectId: string, lim
     text: /*sql*/ `select * from public."Lore" where project_id = $1 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset]
   }
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 
 async function removeLoreQuery(id: string) {
@@ -66,7 +75,7 @@ async function removeLoreQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 
 async function editLoreQuery(id: string, data: any) {
@@ -88,7 +97,7 @@ async function editLoreQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<LoreModal>(query)
 }
 
 export {

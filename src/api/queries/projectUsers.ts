@@ -1,5 +1,13 @@
 import db from "../dbconfig";
 
+interface ProjectUserModel {
+  id: number,
+  project_id: number,
+  user_id: number,
+  is_editor: boolean,
+  date_joined: string
+}
+
 async function addProjectUserQuery(data: {project_id: string, user_id: string, is_editor: boolean}) {
   const query = {
     text: /*sql*/ `insert into public."ProjectUser" (project_id, user_id, is_editor) values($1,$2,$3) returning *`,
@@ -9,7 +17,7 @@ async function addProjectUserQuery(data: {project_id: string, user_id: string, i
       data.is_editor
     ]
   }
-  return await db.query(query)
+  return await db.query<ProjectUserModel>(query)
 }
 
 async function getProjectUsersQuery(userId: string) {
@@ -17,7 +25,7 @@ async function getProjectUsersQuery(userId: string) {
     text: /*sql*/ `select * from public."ProjectUser" where user_id = $1`,
     values: [userId]
   }
-  return await db.query(query)
+  return await db.query<ProjectUserModel>(query)
 }
 
 async function getProjectUserByUserAndProjectQuery(userId: string, projectId: string) {
@@ -25,7 +33,7 @@ async function getProjectUserByUserAndProjectQuery(userId: string, projectId: st
     text: /*sql*/ `select * from public."ProjectUser" where user_id = $1 and project_id = $2`,
     values: [userId, projectId]
   }
-  return await db.query(query)
+  return await db.query<ProjectUserModel>(query)
 }
 
 async function getProjectUsersByProjectQuery(projectId: string) {
@@ -33,7 +41,7 @@ async function getProjectUsersByProjectQuery(projectId: string) {
     text: /*sql*/ `select * from public."ProjectUser" where project_id = $1`,
     values: [projectId]
   }
-  return await db.query(query)
+  return await db.query<ProjectUserModel>(query)
 }
 
 async function getProjectUserQuery(id: string) {
@@ -41,7 +49,7 @@ async function getProjectUserQuery(id: string) {
     text: /*sql*/ `select * from public."ProjectUser" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<ProjectUserModel>(query)
 }
 
 async function removeProjectUserQuery(id: string) {
@@ -50,7 +58,7 @@ async function removeProjectUserQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<ProjectUserModel>(query)
 }
 
 async function editProjectUserQuery(id: string, data: any) {
@@ -72,7 +80,7 @@ async function editProjectUserQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<ProjectUserModel>(query)
 }
 
 export {

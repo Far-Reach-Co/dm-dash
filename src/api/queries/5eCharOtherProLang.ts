@@ -1,5 +1,12 @@
 import db from "../dbconfig";
 
+interface DndFiveEOtherProLangModel {
+  id: number,
+  general_id: number,
+  type: string,
+  proficiency: string
+}
+
 async function add5eCharOtherProLangQuery(data: {
   general_id: string,
   type: string
@@ -11,7 +18,7 @@ async function add5eCharOtherProLangQuery(data: {
       data.type,
     ]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEOtherProLangModel>(query)
 }
 
 async function get5eCharOtherProLangQuery(id: string) {
@@ -19,7 +26,7 @@ async function get5eCharOtherProLangQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEOtherProLangModel>(query)
 }
 
 async function get5eCharOtherProLangsByGeneralQuery(generalId: string) {
@@ -27,7 +34,7 @@ async function get5eCharOtherProLangsByGeneralQuery(generalId: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where general_id = $1`,
     values: [generalId]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEOtherProLangModel>(query)
 }
 
 async function remove5eCharOtherProLangQuery(id: string) {
@@ -36,7 +43,7 @@ async function remove5eCharOtherProLangQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEOtherProLangModel>(query)
 }
 
 async function edit5eCharOtherProLangQuery(id: string, data: any) {
@@ -58,7 +65,7 @@ async function edit5eCharOtherProLangQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEOtherProLangModel>(query)
 }
 
 export {

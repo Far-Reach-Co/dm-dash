@@ -1,5 +1,13 @@
 import db from "../dbconfig";
 
+interface DndFiveEFeatModel {
+  id: number,
+  type: string,
+  title: string,
+  description: string,
+  general_id: number
+}
+
 async function add5eCharFeatQuery(data: {
   general_id: string,
   title: string,
@@ -15,7 +23,7 @@ async function add5eCharFeatQuery(data: {
       data.type,
     ]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEFeatModel>(query)
 }
 
 async function get5eCharFeatQuery(id: string) {
@@ -23,7 +31,7 @@ async function get5eCharFeatQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEFeatModel>(query)
 }
 
 async function get5eCharFeatsByGeneralQuery(generalId: string) {
@@ -31,7 +39,7 @@ async function get5eCharFeatsByGeneralQuery(generalId: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where general_id = $1 order by Lower(title)`,
     values: [generalId]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEFeatModel>(query)
 }
 
 async function remove5eCharFeatQuery(id: string) {
@@ -40,7 +48,7 @@ async function remove5eCharFeatQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEFeatModel>(query)
 }
 
 async function edit5eCharFeatQuery(id: string, data: any) {
@@ -62,7 +70,7 @@ async function edit5eCharFeatQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEFeatModel>(query)
 }
 
 export {

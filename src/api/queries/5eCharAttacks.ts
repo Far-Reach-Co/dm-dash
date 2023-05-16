@@ -1,5 +1,16 @@
 import db from "../dbconfig";
 
+interface DndFiveEAttackModel {
+  id: number,
+  title: string,
+  description: string,
+  range: string,
+  damage_type: string,
+  bonus: string,
+  general_id: number,
+  duration: string
+}
+
 async function add5eCharAttackQuery(data: {
   general_id: string,
   title: string,
@@ -21,7 +32,7 @@ async function add5eCharAttackQuery(data: {
       data.bonus,
     ]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEAttackModel>(query)
 }
 
 async function get5eCharAttackQuery(id: string) {
@@ -29,7 +40,7 @@ async function get5eCharAttackQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_attack" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEAttackModel>(query)
 }
 
 async function get5eCharAttacksByGeneralQuery(generalId: string) {
@@ -37,7 +48,7 @@ async function get5eCharAttacksByGeneralQuery(generalId: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_attack" where general_id = $1 order by LOWER(title)`,
     values: [generalId]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEAttackModel>(query)
 }
 
 async function remove5eCharAttackQuery(id: string) {
@@ -46,7 +57,7 @@ async function remove5eCharAttackQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEAttackModel>(query)
 }
 
 async function edit5eCharAttackQuery(id: string, data: any) {
@@ -68,7 +79,7 @@ async function edit5eCharAttackQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEAttackModel>(query)
 }
 
 export {

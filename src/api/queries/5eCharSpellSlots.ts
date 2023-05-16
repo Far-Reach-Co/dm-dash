@@ -1,5 +1,29 @@
 import db from "../dbconfig";
 
+interface DndFiveESpellSlotsModel {
+  id: number,
+  general_id: number,
+  first_total: number,
+  first_expended: number,
+  second_total: number,
+  second_expended: number,
+  third_total: number,
+  third_expended: number,
+  fourth_total: number,
+  fourth_expended: number,
+  fifth_total: number,
+  fifth_expended: number,
+  sixth_total: number,
+  sixth_expended: number,
+  seventh_total: number,
+  seventh_expended: number,
+  eigth_total: number,
+  eigth_expended: number,
+  nineth_total: number,
+  nineth_expended: number,
+  spell_casting_ability: string
+}
+
 async function add5eCharSpellSlotInfoQuery(data: {
   general_id: string
 }) {
@@ -9,7 +33,7 @@ async function add5eCharSpellSlotInfoQuery(data: {
       data.general_id,
     ]
   }
-  return await db.query(query)
+  return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
 async function get5eCharSpellSlotInfoQuery(id: string) {
@@ -17,7 +41,7 @@ async function get5eCharSpellSlotInfoQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
 async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string) {
@@ -25,7 +49,7 @@ async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string) {
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where general_id = $1`,
     values: [generalId]
   }
-  return await db.query(query)
+  return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
 async function remove5eCharSpellSlotInfoQuery(id: string) {
@@ -34,7 +58,7 @@ async function remove5eCharSpellSlotInfoQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
 async function edit5eCharSpellSlotInfoQuery(id: string, data: any) {
@@ -56,7 +80,7 @@ async function edit5eCharSpellSlotInfoQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
 export {

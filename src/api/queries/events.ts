@@ -1,5 +1,21 @@
 import db from "../dbconfig";
 
+interface EventModel {
+  id: number,
+  title: string,
+  description: string,
+  location_id: number,
+  date_created: string,
+  calendar_date: string,
+  calendar_id: number,
+  clock_time_in_milliseconds: number,
+  clock_id: number,
+  project_id: number,
+  character_id: number,
+  item_id: number,
+  lore_id: number
+}
+
 async function addEventQuery(data: {
   title: string,
   description?: string,
@@ -21,7 +37,7 @@ async function addEventQuery(data: {
       data.lore_id
     ]
   }
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function getEventQuery(id: string) {
@@ -29,7 +45,7 @@ async function getEventQuery(id: string) {
     text: /*sql*/ `select * from public."Event" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function getEventsQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
@@ -37,7 +53,7 @@ async function getEventsQuery({projectId, limit, offset}: {projectId: string, li
     text: /*sql*/ `select * from public."Event" where project_id = $1 order by date_created desc limit $2 offset $3`,
     values: [projectId, limit, offset]
   }
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function getEventsByLocationQuery(locationId: string) {
@@ -45,7 +61,7 @@ async function getEventsByLocationQuery(locationId: string) {
     text: /*sql*/ `select * from public."Event" where location_id = $1 order by date_created desc`,
     values: [locationId]
   }
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function getEventsByCharacterQuery(characterId: string) {
@@ -53,7 +69,7 @@ async function getEventsByCharacterQuery(characterId: string) {
     text: /*sql*/ `select * from public."Event" where character_id = $1 order by date_created desc`,
     values: [characterId]
   }
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function getEventsByItemQuery(itemId: string) {
@@ -61,7 +77,7 @@ async function getEventsByItemQuery(itemId: string) {
     text: /*sql*/ `select * from public."Event" where item_id = $1 order by date_created desc`,
     values: [itemId]
   }
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function getEventsByLoreQuery(loreId: string) {
@@ -69,7 +85,7 @@ async function getEventsByLoreQuery(loreId: string) {
     text: /*sql*/ `select * from public."Event" where lore_id = $1 order by date_created desc`,
     values: [loreId]
   }
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function removeEventQuery(id: string) {
@@ -78,7 +94,7 @@ async function removeEventQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 async function editEventQuery(id: string, data: any) {
@@ -100,7 +116,7 @@ async function editEventQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<EventModel>(query)
 }
 
 export {
