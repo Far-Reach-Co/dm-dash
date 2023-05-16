@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface UserModel {
+export interface UserModel {
   id: number,
   username: string,
   email: string,

@@ -4,8 +4,10 @@ import {
   getProjectsQuery,
   removeProjectQuery,
   editProjectQuery,
+  ProjectModel,
 } from "../queries/projects.js";
 import {
+  ProjectInviteModel,
   getProjectInviteByProjectQuery,
   removeProjectInviteQuery,
 } from "../queries/projectInvites.js";
@@ -76,6 +78,14 @@ async function addProject(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+interface GetProjectDataReturnModel extends ProjectModel {
+  was_joined: boolean;
+  project_user_id: number;
+  date_joined: string;
+  is_editor: boolean;
+  project_invite: ProjectInviteModel;
+}
+
 async function getProject(req: Request, res: Response, next: NextFunction) {
   try {
     const projectData = await getProjectQuery(req.params.id);
@@ -86,10 +96,11 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
     );
     if (projectUsersData.rows.length) {
       const projectUser = projectUsersData.rows[0];
-      project.was_joined = true;
-      project.project_user_id = projectUser.id;
-      project.date_joined = projectUser.date_joined;
-      project.is_editor = projectUser.is_editor;
+      (project as GetProjectDataReturnModel).was_joined = true;
+      (project as GetProjectDataReturnModel).project_user_id = projectUser.id;
+      (project as GetProjectDataReturnModel).date_joined =
+        projectUser.date_joined;
+      (project as GetProjectDataReturnModel).is_editor = projectUser.is_editor;
     }
     res.send(project);
   } catch (err) {
@@ -111,10 +122,13 @@ async function getProjects(req: Request, res: Response, next: NextFunction) {
         const projectData = await getProjectQuery(projectUser.project_id);
         if (projectData && projectData.rows && projectData.rows.length) {
           const project = projectData.rows[0];
-          project.was_joined = true;
-          project.project_user_id = projectUser.id;
-          project.date_joined = projectUser.date_joined;
-          project.is_editor = projectUser.is_editor;
+          (project as GetProjectDataReturnModel).was_joined = true;
+          (project as GetProjectDataReturnModel).project_user_id =
+            projectUser.id;
+          (project as GetProjectDataReturnModel).date_joined =
+            projectUser.date_joined;
+          (project as GetProjectDataReturnModel).is_editor =
+            projectUser.is_editor;
           projectsData.rows.push(project);
         }
       }
@@ -123,7 +137,8 @@ async function getProjects(req: Request, res: Response, next: NextFunction) {
     for (var project of projectsData.rows) {
       const projectInvites = await getProjectInviteByProjectQuery(project.id);
       if (projectInvites && projectInvites.rows && projectInvites.rows.length)
-        project.project_invite = projectInvites.rows[0];
+        (project as GetProjectDataReturnModel).project_invite =
+          projectInvites.rows[0];
     }
 
     res.send(projectsData.rows);

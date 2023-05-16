@@ -6,7 +6,7 @@ import {
   removeProjectUserQuery,
   editProjectUserQuery,
 } from "../queries/projectUsers.js";
-import { getUserByIdQuery } from "../queries/users.js";
+import { UserModel, getUserByIdQuery } from "../queries/users.js";
 import { Request, Response, NextFunction } from "express";
 
 async function addProjectUser(req: Request, res: Response, next: NextFunction) {
@@ -36,6 +36,11 @@ async function getProjectUserByUserAndProject(
   }
 }
 
+interface GetProjectUsersByProjectReturnUserModel extends UserModel {
+  project_user_id: number;
+  is_editor: boolean;
+}
+
 async function getProjectUsersByProject(
   req: Request,
   res: Response,
@@ -51,8 +56,10 @@ async function getProjectUsersByProject(
     for (const projectUser of projectUsersData.rows) {
       const userData = await getUserByIdQuery(projectUser.user_id);
       const user = userData.rows[0];
-      user.project_user_id = projectUser.id;
-      user.is_editor = projectUser.is_editor;
+      (user as GetProjectUsersByProjectReturnUserModel).project_user_id =
+        projectUser.id;
+      (user as GetProjectUsersByProjectReturnUserModel).is_editor =
+        projectUser.is_editor;
       usersList.push(user);
     }
 

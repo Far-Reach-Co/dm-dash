@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface ProjectInviteModel {
+export interface ProjectInviteModel {
   id: number,
   uuid: string,
   project_id: number
@@ -25,7 +25,7 @@ async function getProjectInviteQuery(id: string) {
   return await db.query<ProjectInviteModel>(query)
 }
 
-async function getProjectInviteByProjectQuery(projectId: string) {
+async function getProjectInviteByProjectQuery(projectId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectInvite" where project_id = $1`,
     values: [projectId]

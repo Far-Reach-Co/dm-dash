@@ -1,11 +1,11 @@
 import db from "../dbconfig";
 
-interface ProjectModel {
+export interface ProjectModel {
   id: number,
   title: string,
   user_id: number,
   date_created: string,
-  user_data_in_bytes: number,
+  used_data_in_bytes: number,
   description: string,
   image_id: number
 }
@@ -21,7 +21,7 @@ async function addProjectQuery(data: {title: string, user_id: string | number}) 
   return await db.query<ProjectModel>(query)
 }
 
-async function getProjectQuery(projectId: string) {
+async function getProjectQuery(projectId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."Project" where id = $1`,
     values: [projectId]
@@ -46,7 +46,7 @@ async function getProjectsQuery(userId: string) {
   return await db.query<ProjectModel>(query)
 }
 
-async function editProjectQuery(id: string, data: any) {
+async function editProjectQuery(id: string | number, data: any) {
   let edits = ``
   let values = []
   let iterator = 1
