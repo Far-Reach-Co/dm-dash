@@ -324,7 +324,7 @@ export default class FiveEPlayerSheet {
         ability: "intelligence",
       },
       {
-        title: "Atheltics",
+        title: "Athletics",
         key: "athletics",
         ability: "strength",
       },
@@ -369,7 +369,7 @@ export default class FiveEPlayerSheet {
         ability: "wisdom",
       },
       {
-        title: "Performancce",
+        title: "Performance",
         key: "performance",
         ability: "charisma",
       },
