@@ -565,6 +565,48 @@ export default class FiveEPlayerSheet {
               ]),
               createElement("div", {}, [
                 createElement("div", { class: "cp-content-container" }, [
+                  createElement("small", {}, "Sub-Class"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen cp-input-regular",
+                      name: "subclass",
+                      value: this.generalData.subclass
+                        ? this.generalData.subclass
+                        : "",
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(e.target.name, e.target.value);
+                      },
+                    }
+                  ),
+                ]),
+                createElement("div", { class: "cp-content-container" }, [
+                  createElement("small", {}, "Other Class"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen cp-input-regular",
+                      name: "other_class",
+                      value: this.generalData.other_class
+                        ? this.generalData.other_class
+                        : "",
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(e.target.name, e.target.value);
+                      },
+                    }
+                  ),
+                ]),
+              ]),
+              createElement("div", {}, [
+                createElement("div", { class: "cp-content-container" }, [
                   createElement("small", {}, "Level"),
                   createElement(
                     "input",
