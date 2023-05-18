@@ -115,3 +115,16 @@
 .image-name:focus {
   border: 1px solid var(--main-gray)
 }
+
+.sidebar-image-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 40px;
+  padding: 2px;
+}
+
+.sidebar-image-container:hover {
+  border: 1px solid var(--main-white)
+}

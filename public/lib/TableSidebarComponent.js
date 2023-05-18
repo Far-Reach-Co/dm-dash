@@ -21,19 +21,22 @@ export default class TableSidebarComponent {
     this.render();
   };
 
-  renderImage = async (imageId) => {
-    const imageSource = await getPresignedForImageDownload(imageId);
+  renderImage = async (image) => {
+    const imageSource = await getPresignedForImageDownload(image.id);
     if (imageSource) {
-      this.downloadedImageSourceList[imageId] = imageSource.url;
+      this.downloadedImageSourceList[image.id] = imageSource.url;
       return createElement(
-        "img",
+        "div",
         {
-          src: imageSource.url,
-          width: 40,
-          height: 40,
-          style: "pointer-events: none;",
+          class: "sidebar-image-container",
+          title: "Click and drag image to the table",
         },
-        null,
+        createElement("img", {
+          src: imageSource.url,
+          width: "38px",
+          height: "38px",
+          style: "pointer-events: none;",
+        }),
         {
           type: "mousedown",
           event: () => {
@@ -85,7 +88,6 @@ export default class TableSidebarComponent {
               {
                 style:
                   "display: flex; align-items: center; flex: 1; cursor: pointer;",
-                title: "Click and drag image to the table",
               },
               [
                 createElement(
@@ -93,6 +95,7 @@ export default class TableSidebarComponent {
                   {
                     class: "image-name",
                     value: image.original_name,
+                    title: "Click to edit image name",
                   },
                   null,
                   {
@@ -105,7 +108,7 @@ export default class TableSidebarComponent {
                     },
                   }
                 ),
-                await this.renderImage(image.id),
+                await this.renderImage(image),
               ]
             ),
             createElement(
