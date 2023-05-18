@@ -188,7 +188,7 @@ export default class FiveEPlayerSheet {
         key: "dexterity",
       },
       {
-        title: "Consitution",
+        title: "Constitution",
         key: "constitution",
       },
       {
