@@ -34,6 +34,7 @@ var router = (0, express_1.Router)();
 router.get("/get_image/:id", s3_js_1.getImage);
 router.post("/signed_URL_download", s3_js_1.getSignedUrlForDownload);
 router.post("/file_upload", upload.single("file"), s3_js_1.uploadToAws);
+router.post("/edit_image/:id", s3_js_1.editImage);
 router["delete"]("/remove_image/:project_id/:image_id", s3_js_1.removeImage);
 router.get("/get_table_views/:project_id", tableViews_js_1.getTableViews);
 router.get("/get_table_view/:id", tableViews_js_1.getTableView);

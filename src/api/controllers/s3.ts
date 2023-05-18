@@ -3,6 +3,7 @@ import { readFileSync, unlinkSync } from "fs";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import {
   addImageQuery,
+  editImageQuery,
   getImageQuery,
   removeImageQuery,
 } from "../queries/images";
@@ -223,9 +224,19 @@ async function removeFile(bucket: string, image: { file_name: string }) {
   }
 }
 
+async function editImage(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await editImageQuery(req.params.id, req.body);
+    res.status(200).send(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export {
   getSignedUrlForDownload,
   getImage,
+  editImage,
   // getSignedUrlForUpload,
   uploadToAws,
   removeFile,

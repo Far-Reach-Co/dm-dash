@@ -102,6 +102,7 @@ import {
   getSignedUrlForDownload,
   uploadToAws,
   removeImage,
+  editImage,
   getImage,
 } from "./controllers/s3.js";
 // for uploading files
@@ -191,6 +192,7 @@ var router = Router();
 router.get("/get_image/:id", getImage);
 router.post("/signed_URL_download", getSignedUrlForDownload);
 router.post("/file_upload", upload.single("file"), uploadToAws);
+router.post("/edit_image/:id", editImage);
 router.delete("/remove_image/:project_id/:image_id", removeImage);
 
 // table views
