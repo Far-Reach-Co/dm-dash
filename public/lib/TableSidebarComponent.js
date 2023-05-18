@@ -25,12 +25,26 @@ export default class TableSidebarComponent {
     const imageSource = await getPresignedForImageDownload(imageId);
     if (imageSource) {
       this.downloadedImageSourceList[imageId] = imageSource.url;
-      return createElement("img", {
-        src: imageSource.url,
-        width: 30,
-        height: 30,
-        style: "pointer-events: none;",
-      });
+      return createElement(
+        "img",
+        {
+          src: imageSource.url,
+          width: 40,
+          height: 40,
+          style: "pointer-events: none;",
+        },
+        null,
+        {
+          type: "mousedown",
+          event: () => {
+            imageFollowingCursor.setImageSrc(
+              this.downloadedImageSourceList[image.id]
+            );
+            imageFollowingCursor.render();
+            this.currentMouseDownImage = image;
+          },
+        }
+      );
     }
   };
 
@@ -67,32 +81,32 @@ export default class TableSidebarComponent {
         if (image) {
           const elem = createElement("div", { class: "sidebar-image-item" }, [
             createElement(
-              "a",
+              "div",
               {
-                style: "display: flex; align-items: center; flex: 1;",
+                style:
+                  "display: flex; align-items: center; flex: 1; cursor: pointer;",
                 title: "Click and drag image to the table",
               },
               [
                 createElement(
-                  "div",
+                  "input",
                   {
-                    style:
-                      "width: 125px; word-wrap: break-word; margin-right: 3px;",
+                    class: "image-name",
+                    value: image.original_name,
                   },
-                  image.original_name
+                  null,
+                  {
+                    type: "focusout",
+                    event: (e) => {
+                      console.log(e.target.value);
+                      postThing(`/api/edit_image/${image.id}`, {
+                        original_name: e.target.value,
+                      });
+                    },
+                  }
                 ),
                 await this.renderImage(image.id),
-              ],
-              {
-                type: "mousedown",
-                event: () => {
-                  imageFollowingCursor.setImageSrc(
-                    this.downloadedImageSourceList[image.id]
-                  );
-                  imageFollowingCursor.render();
-                  this.currentMouseDownImage = image;
-                },
-              }
+              ]
             ),
             createElement(
               "div",

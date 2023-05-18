@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.removeImage = exports.removeFile = exports.uploadToAws = exports.getImage = exports.getSignedUrlForDownload = void 0;
+exports.removeImage = exports.removeFile = exports.uploadToAws = exports.editImage = exports.getImage = exports.getSignedUrlForDownload = void 0;
 var aws_sdk_1 = require("aws-sdk");
 var fs_1 = require("fs");
 var enums_js_1 = require("../../lib/enums.js");
@@ -284,3 +284,25 @@ function removeFile(bucket, image) {
     });
 }
 exports.removeFile = removeFile;
+function editImage(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var data, err_7;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, images_1.editImageQuery)(req.params.id, req.body)];
+                case 1:
+                    data = _a.sent();
+                    res.status(200).send(data.rows[0]);
+                    return [3, 3];
+                case 2:
+                    err_7 = _a.sent();
+                    next(err_7);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.editImage = editImage;

@@ -102,3 +102,16 @@
   align-items: center;
   justify-content: space-between;
 }
+
+.image-name {
+  width: 125px;
+  word-wrap: break-word;
+  margin-right: 3px;
+  font-size: small;
+  border: none;
+  background-color: inherit;
+}
+
+.image-name:focus {
+  border: 1px solid var(--main-gray)
+}
