@@ -8,8 +8,8 @@ export default class SpellsComponent {
     this.general_id = props.general_id;
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
-    this.calculateAbilityScoreModifier = props.calculateAbilityScoreModifier;
-    this.calculateProBonus = props.calculateProBonus;
+    this.calculateSpellSaveDC = props.calculateSpellSaveDC;
+    this.calculateSpellAttackBonus = props.calculateSpellAttackBonus;
 
     this.newLoading = false;
 
@@ -105,6 +105,8 @@ export default class SpellsComponent {
       updateSpellSlotValue: this.updateSpellSlotValue,
       calculateAbilityScoreModifier: this.calculateAbilityScoreModifier,
       calculateProBonus: this.calculateProBonus,
+      calculateSpellSaveDC: this.calculateSpellSaveDC,
+      calculateSpellAttackBonus: this.calculateSpellAttackBonus,
     });
 
     this.domComponent.append(
@@ -130,8 +132,8 @@ class SpellInfoComponent {
     this.domComponent = props.domComponent;
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
-    this.calculateAbilityScoreModifier = props.calculateAbilityScoreModifier;
-    this.calculateProBonus = props.calculateProBonus;
+    this.calculateSpellSaveDC = props.calculateSpellSaveDC;
+    this.calculateSpellAttackBonus = props.calculateSpellAttackBonus;
 
     this.render();
   }
@@ -156,38 +158,6 @@ class SpellInfoComponent {
       typeList.push(elem);
     });
     return typeList;
-  };
-
-  calculateSpellAttackBonus = () => {
-    let bonus = 0;
-    if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore =
-        this.generalData[this.generalData.spell_slots.spell_casting_ability];
-      let mod = this.calculateAbilityScoreModifier(abilityScore);
-      if (mod === "0") mod = 0;
-      bonus += mod;
-    }
-
-    bonus += this.calculateProBonus();
-
-    if (bonus === 0) bonus = 0;
-    return bonus;
-  };
-
-  calculateSpellSaveDC = () => {
-    let spellSaveDC = 8;
-    if (this.generalData.spell_slots.spell_casting_ability) {
-      const abilityScore =
-        this.generalData[this.generalData.spell_slots.spell_casting_ability];
-      let mod = this.calculateAbilityScoreModifier(abilityScore);
-      if (mod === "0") mod = 0;
-      spellSaveDC += mod;
-    }
-
-    spellSaveDC += this.calculateProBonus();
-
-    if (spellSaveDC === 0) spellSaveDC = 0;
-    return spellSaveDC;
   };
 
   render = () => {

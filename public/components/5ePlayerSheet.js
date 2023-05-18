@@ -177,6 +177,38 @@ export default class FiveEPlayerSheet {
     return pro;
   };
 
+  calculateSpellSaveDC = () => {
+    let spellSaveDC = 8;
+    if (this.generalData.spell_slots.spell_casting_ability) {
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
+      let mod = this.calculateAbilityScoreModifier(abilityScore);
+      if (mod === "0") mod = 0;
+      spellSaveDC += mod;
+    }
+
+    spellSaveDC += this.calculateProBonus();
+
+    if (spellSaveDC === 0) spellSaveDC = 0;
+    return spellSaveDC;
+  };
+
+  calculateSpellAttackBonus = () => {
+    let bonus = 0;
+    if (this.generalData.spell_slots.spell_casting_ability) {
+      const abilityScore =
+        this.generalData[this.generalData.spell_slots.spell_casting_ability];
+      let mod = this.calculateAbilityScoreModifier(abilityScore);
+      if (mod === "0") mod = 0;
+      bonus += mod;
+    }
+
+    bonus += this.calculateProBonus();
+
+    if (bonus === 0) bonus = 0;
+    return bonus;
+  };
+
   renderAbilityScores = () => {
     const abilityScores = [
       {
@@ -851,6 +883,34 @@ export default class FiveEPlayerSheet {
           ),
         ]),
         this.renderPassivePerceptionComponent(),
+        createElement("div", { class: "cp-content-container-long" }, [
+          createElement(
+            "div",
+            {
+              class: "cp-content-long-number",
+            },
+            this.calculateSpellSaveDC()
+          ),
+          createElement(
+            "div",
+            { class: "cp-content-long-title" },
+            createElement("small", {}, "Spell Save DC")
+          ),
+        ]),
+        createElement("div", { class: "cp-content-container-long" }, [
+          createElement(
+            "div",
+            {
+              class: "cp-content-long-number",
+            },
+            `+${this.calculateSpellAttackBonus()}`
+          ),
+          createElement(
+            "div",
+            { class: "cp-content-long-title" },
+            createElement("small", {}, "Spell Attack Bonus")
+          ),
+        ]),
       ]),
       createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
         createElement(
@@ -1616,6 +1676,8 @@ export default class FiveEPlayerSheet {
         updateSpellSlotValue: this.updateSpellSlotValue,
         calculateAbilityScoreModifier: this.calculateAbilityScoreModifier,
         calculateProBonus: this.calculateProBonus,
+        calculateSpellSaveDC: this.calculateSpellSaveDC,
+        calculateSpellAttackBonus: this.calculateSpellAttackBonus,
       });
     }
     this.spellsComponent.generalData = this.generalData;
