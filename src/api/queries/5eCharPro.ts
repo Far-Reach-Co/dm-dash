@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface DndFiveEProModel {
+export interface DndFiveEProModel {
   id: number,
   general_id: number,
   sv_str: boolean,
@@ -30,7 +30,7 @@ interface DndFiveEProModel {
 
 }
 
-async function add5eCharProQuery(data: {general_id: string}) {
+async function add5eCharProQuery(data: {general_id: string | number}) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_character_proficiencies" (general_id) values($1) returning *`,
     values: [
@@ -48,7 +48,7 @@ async function get5eCharProQuery(id: string) {
   return await db.query<DndFiveEProModel>(query)
 }
 
-async function get5eCharProByGeneralQuery(generalId: string) {
+async function get5eCharProByGeneralQuery(generalId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_proficiencies" where general_id = $1`,
     values: [generalId]
@@ -56,7 +56,7 @@ async function get5eCharProByGeneralQuery(generalId: string) {
   return await db.query<DndFiveEProModel>(query)
 }
 
-async function remove5eCharProQuery(id: string) {
+async function remove5eCharProQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_proficiencies" where id = $1`,
     values: [id]

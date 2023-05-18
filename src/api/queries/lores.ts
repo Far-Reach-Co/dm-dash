@@ -69,7 +69,7 @@ async function getLoresQuery({projectId, limit, offset}: {projectId: string, lim
   return await db.query<LoreModal>(query)
 }
 
-async function removeLoreQuery(id: string) {
+async function removeLoreQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Lore" where id = $1`,
     values: [id]

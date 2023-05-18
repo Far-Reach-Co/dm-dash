@@ -17,7 +17,7 @@ async function addProjectPlayerQuery(data: {project_id: string, player_id: strin
   return await db.query<ProjectPlayerModel>(query)
 }
 
-async function getProjectPlayersByProjectQuery(projectId: string) {
+async function getProjectPlayersByProjectQuery(projectId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectPlayer" where project_id = $1`,
     values: [projectId]
@@ -25,7 +25,7 @@ async function getProjectPlayersByProjectQuery(projectId: string) {
   return await db.query<ProjectPlayerModel>(query)
 }
 
-async function getProjectPlayersByPlayerQuery(playerId: string) {
+async function getProjectPlayersByPlayerQuery(playerId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectPlayer" where player_id = $1`,
     values: [playerId]
@@ -33,7 +33,7 @@ async function getProjectPlayersByPlayerQuery(playerId: string) {
   return await db.query<ProjectPlayerModel>(query)
 }
 
-async function getProjectPlayerQuery(id: string) {
+async function getProjectPlayerQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectPlayer" where id = $1`,
     values: [id]
@@ -41,7 +41,7 @@ async function getProjectPlayerQuery(id: string) {
   return await db.query<ProjectPlayerModel>(query)
 }
 
-async function removeProjectPlayerQuery(id: string) {
+async function removeProjectPlayerQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."ProjectPlayer" where id = $1`,
     values: [id]

@@ -34,7 +34,7 @@ async function get5eCharFeatQuery(id: string) {
   return await db.query<DndFiveEFeatModel>(query)
 }
 
-async function get5eCharFeatsByGeneralQuery(generalId: string) {
+async function get5eCharFeatsByGeneralQuery(generalId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where general_id = $1 order by Lower(title)`,
     values: [generalId]
@@ -42,7 +42,7 @@ async function get5eCharFeatsByGeneralQuery(generalId: string) {
   return await db.query<DndFiveEFeatModel>(query)
 }
 
-async function remove5eCharFeatQuery(id: string) {
+async function remove5eCharFeatQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_feat_trait" where id = $1`,
     values: [id]

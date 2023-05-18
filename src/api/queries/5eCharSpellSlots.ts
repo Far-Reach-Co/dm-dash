@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface DndFiveESpellSlotsModel {
+export interface DndFiveESpellSlotsModel {
   id: number,
   general_id: number,
   first_total: number,
@@ -25,7 +25,7 @@ interface DndFiveESpellSlotsModel {
 }
 
 async function add5eCharSpellSlotInfoQuery(data: {
-  general_id: string
+  general_id: string | number
 }) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_spell_slots" (general_id) values($1) returning *`,
@@ -44,7 +44,7 @@ async function get5eCharSpellSlotInfoQuery(id: string) {
   return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
-async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string) {
+async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where general_id = $1`,
     values: [generalId]
@@ -52,7 +52,7 @@ async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string) {
   return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
-async function remove5eCharSpellSlotInfoQuery(id: string) {
+async function remove5eCharSpellSlotInfoQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_spell_slots" where id = $1`,
     values: [id]

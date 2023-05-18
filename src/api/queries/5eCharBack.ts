@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface DndFiveEBackgroundModel {
+export interface DndFiveEBackgroundModel {
   id: number,
   general_id: number,
   personality_traits: string,
@@ -41,7 +41,7 @@ async function get5eCharBackQuery(id: string) {
   return await db.query<DndFiveEBackgroundModel>(query)
 }
 
-async function get5eCharBackByGeneralQuery(generalId: string) {
+async function get5eCharBackByGeneralQuery(generalId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_background" where general_id = $1`,
     values: [generalId]
@@ -49,7 +49,7 @@ async function get5eCharBackByGeneralQuery(generalId: string) {
   return await db.query<DndFiveEBackgroundModel>(query)
 }
 
-async function remove5eCharBackQuery(id: string) {
+async function remove5eCharBackQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_background" where id = $1`,
     values: [id]

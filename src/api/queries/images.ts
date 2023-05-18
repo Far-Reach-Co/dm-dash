@@ -23,7 +23,7 @@ async function addImageQuery(data: {
   return await db.query<ImageModal>(query)
 }
 
-async function getImageQuery(id: string) {
+async function getImageQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."Image" where id = $1`,
     values: [id]
@@ -31,7 +31,7 @@ async function getImageQuery(id: string) {
   return await db.query<ImageModal>(query)
 }
 
-async function removeImageQuery(id: string) {
+async function removeImageQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Image" where id = $1`,
     values: [id]

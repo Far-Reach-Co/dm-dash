@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface DndFiveEGeneralModel {
+export interface DndFiveEGeneralModel {
   id: number,
   user_id: number,
   name: string,
@@ -68,7 +68,7 @@ async function get5eCharsGeneralByUserQuery(userId: string) {
   return await db.query<DndFiveEGeneralModel>(query)
 }
 
-async function remove5eCharGeneralQuery(id: string) {
+async function remove5eCharGeneralQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_general" where id = $1`,
     values: [id]

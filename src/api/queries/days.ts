@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface DayModel {
+export interface DayModel {
   id: number,
   title: string,
   calendar_id: number,
@@ -31,7 +31,7 @@ async function getDayQuery(id: string) {
   return await db.query<DayModel>(query)
 }
 
-async function getDaysQuery(calendarId: string) {
+async function getDaysQuery(calendarId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."Day" where calendar_id = $1 order by index asc`,
     values: [calendarId]

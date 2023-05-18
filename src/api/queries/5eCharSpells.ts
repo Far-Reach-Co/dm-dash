@@ -47,7 +47,7 @@ async function get5eCharSpellsByTypeQuery(generalId: string, type: string) {
   return await db.query<DndFiveESpellModel>(query)
 }
 
-async function get5eCharSpellsByGeneralQuery(generalId: string) {
+async function get5eCharSpellsByGeneralQuery(generalId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_spell" where general_id = $1`,
     values: [generalId]
@@ -55,7 +55,7 @@ async function get5eCharSpellsByGeneralQuery(generalId: string) {
   return await db.query<DndFiveESpellModel>(query)
 }
 
-async function remove5eCharSpellQuery(id: string) {
+async function remove5eCharSpellQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_spell" where id = $1`,
     values: [id]

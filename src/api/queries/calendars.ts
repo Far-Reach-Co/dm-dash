@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface CalendarModel {
+export interface CalendarModel {
   id: number,
   project_id: number,
   title: string,

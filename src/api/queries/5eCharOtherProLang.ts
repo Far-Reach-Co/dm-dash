@@ -29,7 +29,7 @@ async function get5eCharOtherProLangQuery(id: string) {
   return await db.query<DndFiveEOtherProLangModel>(query)
 }
 
-async function get5eCharOtherProLangsByGeneralQuery(generalId: string) {
+async function get5eCharOtherProLangsByGeneralQuery(generalId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where general_id = $1`,
     values: [generalId]
@@ -37,7 +37,7 @@ async function get5eCharOtherProLangsByGeneralQuery(generalId: string) {
   return await db.query<DndFiveEOtherProLangModel>(query)
 }
 
-async function remove5eCharOtherProLangQuery(id: string) {
+async function remove5eCharOtherProLangQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_other_pro_lang" where id = $1`,
     values: [id]

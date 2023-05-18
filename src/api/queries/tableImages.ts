@@ -33,7 +33,7 @@ async function getTableImagesQuery(project_id: string) {
   return await db.query<TableImageModel>(query)
 }
 
-async function removeTableImageQuery(id: string) {
+async function removeTableImageQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."TableImage" where id = $1`,
     values: [id]

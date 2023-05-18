@@ -91,7 +91,7 @@ async function getItemsByCharacterQuery(characterId: string) {
   return await db.query<ItemModal>(query)
 }
 
-async function removeItemQuery(id: string) {
+async function removeItemQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Item" where id = $1`,
     values: [id]

@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface MonthModal {
+export interface MonthModel {
   id: number,
   calendar_id: number,
   index: number,
@@ -23,7 +23,7 @@ async function addMonthQuery(data: {
       data.number_of_days
     ]
   }
-  return await db.query<MonthModal>(query)
+  return await db.query<MonthModel>(query)
 }
 
 async function getMonthQuery(id: string) {
@@ -31,24 +31,24 @@ async function getMonthQuery(id: string) {
     text: /*sql*/ `select * from public."Month" where id = $1`,
     values: [id]
   }
-  return await db.query<MonthModal>(query)
+  return await db.query<MonthModel>(query)
 }
 
-async function getMonthsQuery(calendarId: string) {
+async function getMonthsQuery(calendarId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."Month" where calendar_id = $1 order by index asc`,
     values: [calendarId]
   }
-  return await db.query<MonthModal>(query)
+  return await db.query<MonthModel>(query)
 }
 
-async function removeMonthQuery(id: string) {
+async function removeMonthQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Month" where id = $1`,
     values: [id]
   }
 
-  return await db.query<MonthModal>(query)
+  return await db.query<MonthModel>(query)
 }
 
 async function editMonthQuery(id: string, data: any) {
@@ -70,7 +70,7 @@ async function editMonthQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<MonthModal>(query)
+  return await db.query<MonthModel>(query)
 }
 
 export {

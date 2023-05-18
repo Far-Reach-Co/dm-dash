@@ -172,34 +172,30 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       limit: 10000,
       offset: 0,
     });
-    locationsData.rows.forEach(
-      async (location: { id: any; image_id: string }) => {
-        await removeLocationQuery(location.id);
-        if (location.image_id) {
-          const imageData = await getImageQuery(location.image_id);
-          const image = imageData.rows[0];
-          await removeFile("wyrld/images", image);
-          await removeImageQuery(image.id);
-        }
+    locationsData.rows.forEach(async (location) => {
+      await removeLocationQuery(location.id);
+      if (location.image_id) {
+        const imageData = await getImageQuery(location.image_id);
+        const image = imageData.rows[0];
+        await removeFile("wyrld/images", image);
+        await removeImageQuery(image.id);
       }
-    );
+    });
     // characters
     const charactersData = await getCharactersQuery({
       projectId: req.params.id,
       limit: 10000,
       offset: 0,
     });
-    charactersData.rows.forEach(
-      async (character: { id: any; image_id: string }) => {
-        await removeCharacterQuery(character.id);
-        if (character.image_id) {
-          const imageData = await getImageQuery(character.image_id);
-          const image = imageData.rows[0];
-          await removeFile("wyrld/images", image);
-          await removeImageQuery(image.id);
-        }
+    charactersData.rows.forEach(async (character) => {
+      await removeCharacterQuery(character.id);
+      if (character.image_id) {
+        const imageData = await getImageQuery(character.image_id);
+        const image = imageData.rows[0];
+        await removeFile("wyrld/images", image);
+        await removeImageQuery(image.id);
       }
-    );
+    });
     // clocks
     const clocksData = await getClocksQuery(req.params.id);
     clocksData.rows.forEach(async (clock: { id: any }) => {
@@ -225,7 +221,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       limit: 10000,
       offset: 0,
     });
-    itemsData.rows.forEach(async (item: { id: any; image_id: string }) => {
+    itemsData.rows.forEach(async (item) => {
       await removeItemQuery(item.id);
       if (item.image_id) {
         const imageData = await getImageQuery(item.image_id);
@@ -240,7 +236,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       limit: 10000,
       offset: 0,
     });
-    loreData.rows.forEach(async (lore: { id: any; image_id: string }) => {
+    loreData.rows.forEach(async (lore) => {
       await removeLoreQuery(lore.id);
       if (lore.image_id) {
         const imageData = await getImageQuery(lore.image_id);

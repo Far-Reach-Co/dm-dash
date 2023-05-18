@@ -19,11 +19,11 @@ interface EventModel {
 async function addEventQuery(data: {
   title: string,
   description?: string,
-  project_id: string,
-  location_id?: string,
-  character_id?: string,
-  item_id?: string,
-  lore_id?: string
+  project_id: string | number,
+  location_id?: string | number,
+  character_id?: string | number,
+  item_id?: string | number,
+  lore_id?: string | number
 }) {
   const query = {
     text: /*sql*/ `insert into public."Event" (title, description, project_id, location_id, character_id, item_id, lore_id) values($1,$2,$3,$4,$5,$6,$7) returning *`,

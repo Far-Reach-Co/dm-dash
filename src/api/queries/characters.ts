@@ -32,7 +32,7 @@ async function addCharacterQuery(data: {
   return await db.query<CharacterModel>(query)
 }
 
-async function getCharacterQuery(id: string) {
+async function getCharacterQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."Character" where id = $1`,
     values: [id]
@@ -80,7 +80,7 @@ async function getCharactersByLocationQuery(locationId: string) {
   return await db.query<CharacterModel>(query)
 }
 
-async function removeCharacterQuery(id: string) {
+async function removeCharacterQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Character" where id = $1`,
     values: [id]

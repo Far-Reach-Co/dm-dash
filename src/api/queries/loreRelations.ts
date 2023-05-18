@@ -87,7 +87,7 @@ async function getLoreRelationQuery(id: string) {
   return await db.query<LoreRelationModal>(query)
 }
 
-async function getLoreRelationsQuery(loreId: string) {
+async function getLoreRelationsQuery(loreId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1`,
     values: [loreId]
