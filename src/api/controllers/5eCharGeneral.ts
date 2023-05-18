@@ -4,6 +4,7 @@ import {
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
   edit5eCharGeneralQuery,
+  DndFiveEGeneralModel,
 } from "../queries/5eCharGeneral";
 import {
   get5eCharProQuery,
@@ -11,6 +12,7 @@ import {
   get5eCharProByGeneralQuery,
   remove5eCharProQuery,
   edit5eCharProQuery,
+  DndFiveEProModel,
 } from "../queries/5eCharPro";
 import {
   add5eCharBackQuery,
@@ -18,11 +20,13 @@ import {
   remove5eCharBackQuery,
   get5eCharBackQuery,
   edit5eCharBackQuery,
+  DndFiveEBackgroundModel,
 } from "../queries/5eCharBack";
 import {
   get5eCharSpellSlotInfosByGeneralQuery,
   add5eCharSpellSlotInfoQuery,
   remove5eCharSpellSlotInfoQuery,
+  DndFiveESpellSlotsModel,
 } from "../queries/5eCharSpellSlots";
 import {
   get5eCharAttacksByGeneralQuery,
@@ -74,6 +78,12 @@ async function add5eChar(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+interface Get5eCharsDataReturnModel extends DndFiveEGeneralModel {
+  proficiencies: DndFiveEProModel;
+  background: DndFiveEBackgroundModel;
+  spell_slots: DndFiveESpellSlotsModel;
+}
+
 async function get5eCharsByUser(
   req: Request,
   res: Response,
@@ -93,9 +103,9 @@ async function get5eCharsByUser(
         );
         const spellSlots = spellSlotsData.rows[0];
 
-        general.proficiencies = pro;
-        general.background = back;
-        general.spell_slots = spellSlots;
+        (general as Get5eCharsDataReturnModel).proficiencies = pro;
+        (general as Get5eCharsDataReturnModel).background = back;
+        (general as Get5eCharsDataReturnModel).spell_slots = spellSlots;
       }
     }
 
@@ -124,9 +134,9 @@ async function get5eCharGeneral(
     );
     const spellSlots = spellSlotsData.rows[0];
 
-    general.proficiencies = pro;
-    general.background = back;
-    general.spell_slots = spellSlots;
+    (general as Get5eCharsDataReturnModel).proficiencies = pro;
+    (general as Get5eCharsDataReturnModel).background = back;
+    (general as Get5eCharsDataReturnModel).spell_slots = spellSlots;
 
     res.send(general);
   } catch (err) {

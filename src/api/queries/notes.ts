@@ -1,5 +1,18 @@
 import db from "../dbconfig";
 
+interface NoteModel {
+  id: number,
+  title: string,
+  description: string,
+  location_id: number,
+  date_created: string,
+  project_id: number,
+  character_id: number,
+  item_id: number,
+  user_id: number,
+  lore_id: number
+}
+
 async function addNoteQuery(data: {
   title: string, 
   description: string, 
@@ -23,7 +36,7 @@ async function addNoteQuery(data: {
       data.lore_id
     ]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function getNoteQuery(id: string) {
@@ -31,7 +44,7 @@ async function getNoteQuery(id: string) {
     text: /*sql*/ `select * from public."Note" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function getAllNotesByProjectQuery(projectId: string) {
@@ -39,7 +52,7 @@ async function getAllNotesByProjectQuery(projectId: string) {
     text: /*sql*/ `select * from public."Note" where project_id = $1`,
     values: [projectId]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function getNotesQuery(userId: string, projectId: string, limit: string, offset: string, keyword: string) {
@@ -49,13 +62,13 @@ async function getNotesQuery(userId: string, projectId: string, limit: string, o
       text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and location_id is null and character_id is null and item_id is null and lore_id is null order by date_created desc limit $3 offset $4`,
       values: [userId, projectId, limit, offset]
     }
-    return await db.query(query)
+    return await db.query<NoteModel>(query)
   }
   query = {
     text: /*sql*/ `select * from public."Note" where user_id = $1 and project_id = $2 and position($5 in lower(title))>0 and location_id is null and character_id is null and item_id is null and lore_id is null order by date_created desc limit $3 offset $4`,
     values: [userId, projectId, limit, offset, keyword]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function getNotesByLocationQuery(userId: string, locationId: string) {
@@ -63,7 +76,7 @@ async function getNotesByLocationQuery(userId: string, locationId: string) {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and location_id = $1 order by date_created desc`,
     values: [locationId, userId]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function getNotesByCharacterQuery(userId: string, characterId: string) {
@@ -71,7 +84,7 @@ async function getNotesByCharacterQuery(userId: string, characterId: string) {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and character_id = $1 order by date_created desc`,
     values: [characterId, userId]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function getNotesByItemQuery(userId: string, itemId: string) {
@@ -79,7 +92,7 @@ async function getNotesByItemQuery(userId: string, itemId: string) {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and item_id = $1 order by date_created desc`,
     values: [itemId, userId]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function getNotesByLoreQuery(userId: string, loreId: string) {
@@ -87,7 +100,7 @@ async function getNotesByLoreQuery(userId: string, loreId: string) {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and lore_id = $1 order by date_created desc`,
     values: [loreId, userId]
   }
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function removeNoteQuery(id: string) {
@@ -96,7 +109,7 @@ async function removeNoteQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 async function editNoteQuery(id: string, data: any) {
@@ -118,7 +131,7 @@ async function editNoteQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<NoteModel>(query)
 }
 
 export {

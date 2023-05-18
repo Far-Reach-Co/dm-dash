@@ -1,5 +1,16 @@
 import db from "../dbconfig";
 
+interface ItemModal {
+  id: number,
+  title: string,
+  description: string,
+  project_id: number,
+  location_id: number,
+  character_id: number,
+  type: string,
+  image_id: number
+}
+
 async function addItemQuery(data: {
   project_id: string,
   title: string,
@@ -21,7 +32,7 @@ async function addItemQuery(data: {
       data.image_id
     ]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
 async function getItemQuery(id: string) {
@@ -29,7 +40,7 @@ async function getItemQuery(id: string) {
     text: /*sql*/ `select * from public."Item" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
 async function getItemsWithKeywordAndFilterQuery(
@@ -39,21 +50,21 @@ async function getItemsWithKeywordAndFilterQuery(
     text: /*sql*/ `select * from public."Item" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword, filter]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 async function getItemsWithKeywordQuery({projectId, limit, offset, keyword}: {projectId: string, limit: string, offset: string, keyword: string}) {
   const query = {
     text: /*sql*/ `select * from public."Item" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 async function getItemsWithFilterQuery({projectId, limit, offset, filter}: {projectId: string, limit: string, offset: string, filter: string}) {
   const query = {
     text: /*sql*/ `select * from public."Item" where project_id = $1 and type = $4 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, filter]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
 async function getItemsQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
@@ -61,7 +72,7 @@ async function getItemsQuery({projectId, limit, offset}: {projectId: string, lim
     text: /*sql*/ `select * from public."Item" where project_id = $1 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
 async function getItemsByLocationQuery(locationId: string) {
@@ -69,7 +80,7 @@ async function getItemsByLocationQuery(locationId: string) {
     text: /*sql*/ `select * from public."Item" where location_id = $1 order by title asc`,
     values: [locationId]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
 async function getItemsByCharacterQuery(characterId: string) {
@@ -77,16 +88,16 @@ async function getItemsByCharacterQuery(characterId: string) {
     text: /*sql*/ `select * from public."Item" where character_id = $1 order by title asc`,
     values: [characterId]
   }
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
-async function removeItemQuery(id: string) {
+async function removeItemQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Item" where id = $1`,
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
 async function editItemQuery(id: string, data: any) {
@@ -108,7 +119,7 @@ async function editItemQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<ItemModal>(query)
 }
 
 export {

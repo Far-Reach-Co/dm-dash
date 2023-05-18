@@ -1,5 +1,13 @@
 import db from "../dbconfig";
 
+interface CounterModel {
+  id: number,
+  project_id: number,
+  current_count: number,
+  title: string,
+  user_id: number
+}
+
 async function addCounterQuery(data: {
   user_id: string,
   project_id: string,
@@ -15,7 +23,7 @@ async function addCounterQuery(data: {
       data.title
     ]
   }
-  return await db.query(query)
+  return await db.query<CounterModel>(query)
 }
 
 async function getCounterQuery(id: string) {
@@ -23,7 +31,7 @@ async function getCounterQuery(id: string) {
     text: /*sql*/ `select * from public."Counter" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<CounterModel>(query)
 }
 
 async function getCountersQuery(userId: string, projectId: string) {
@@ -31,7 +39,7 @@ async function getCountersQuery(userId: string, projectId: string) {
     text: /*sql*/ `select * from public."Counter" where user_id = $1 and project_id = $2 order by title asc`,
     values: [userId, projectId]
   }
-  return await db.query(query)
+  return await db.query<CounterModel>(query)
 }
 
 async function getAllCountersByProjectQuery(projectId: string) {
@@ -39,7 +47,7 @@ async function getAllCountersByProjectQuery(projectId: string) {
     text: /*sql*/ `select * from public."Counter" where project_id = $1 order by title asc`,
     values: [projectId]
   }
-  return await db.query(query)
+  return await db.query<CounterModel>(query)
 }
 
 async function removeCounterQuery(id: string) {
@@ -48,7 +56,7 @@ async function removeCounterQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<CounterModel>(query)
 }
 
 async function editCounterQuery(id: string, data: any) {
@@ -70,7 +78,7 @@ async function editCounterQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<CounterModel>(query)
 }
 
 export {

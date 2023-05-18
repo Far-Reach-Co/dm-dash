@@ -1,5 +1,14 @@
 import db from "../dbconfig";
 
+export interface CalendarModel {
+  id: number,
+  project_id: number,
+  title: string,
+  year: number,
+  current_month_id: number,
+  current_day: number
+}
+
 async function addCalendarQuery(data: {
   project_id: string,
   title: string,
@@ -13,7 +22,7 @@ async function addCalendarQuery(data: {
       data.year
     ]
   }
-  return await db.query(query)
+  return await db.query<CalendarModel>(query)
 }
 
 async function getCalendarQuery(id: string) {
@@ -21,7 +30,7 @@ async function getCalendarQuery(id: string) {
     text: /*sql*/ `select * from public."Calendar" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<CalendarModel>(query)
 }
 
 async function getCalendarsQuery(projectId: string) {
@@ -29,7 +38,7 @@ async function getCalendarsQuery(projectId: string) {
     text: /*sql*/ `select * from public."Calendar" where project_id = $1 order by title asc`,
     values: [projectId]
   }
-  return await db.query(query)
+  return await db.query<CalendarModel>(query)
 }
 
 async function removeCalendarQuery(id: string) {
@@ -38,7 +47,7 @@ async function removeCalendarQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<CalendarModel>(query)
 }
 
 async function editCalendarQuery(id: string, data: any) {
@@ -60,7 +69,7 @@ async function editCalendarQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<CalendarModel>(query)
 }
 
 export {

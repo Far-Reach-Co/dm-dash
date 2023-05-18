@@ -1,13 +1,21 @@
 import db from "../dbconfig";
 
-async function addTableViewQuery(data: {project_id: string}) {
+interface TableViewModel {
+  id: number,
+  project_id: number,
+  data: {[key: string]: any},
+  date_created: string
+  title: string
+}
+
+async function addTableViewQuery(data: {project_id: string | number}) {
   const query = {
     text: /*sql*/ `insert into public."TableView" (project_id) values($1) returning *`,
     values: [
       data.project_id,
     ]
   }
-  return await db.query(query)
+  return await db.query<TableViewModel>(query)
 }
 
 async function getTableViewQuery(id: string) {
@@ -15,7 +23,7 @@ async function getTableViewQuery(id: string) {
     text: /*sql*/ `select * from public."TableView" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<TableViewModel>(query)
 }
 
 async function getTableViewsQuery(projectId: string) {
@@ -23,16 +31,16 @@ async function getTableViewsQuery(projectId: string) {
     text: /*sql*/ `select * from public."TableView" where project_id = $1`,
     values: [projectId]
   }
-  return await db.query(query)
+  return await db.query<TableViewModel>(query)
 }
 
-async function removeTableViewQuery(id: string) {
+async function removeTableViewQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."TableView" where id = $1`,
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<TableViewModel>(query)
 }
 
 async function editTableViewQuery(id: string, data: any) {
@@ -54,7 +62,7 @@ async function editTableViewQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<TableViewModel>(query)
 }
 
 export {

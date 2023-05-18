@@ -1,18 +1,28 @@
 import db from "../dbconfig";
 
+export interface UserModel {
+  id: number,
+  username: string,
+  email: string,
+  phone: string,
+  name: string,
+  is_pro: boolean,
+  password: string
+}
+
 async function getUserByIdQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."User" where id = $1`,
     values: [id],
   }
-  return await db.query(query)
+  return await db.query<UserModel>(query)
 }
 
 async function getAllUsersQuery() {
   const query = {
     text: /*sql*/ `select * from public."User"`,
   }
-  return await db.query(query)
+  return await db.query<UserModel>(query)
 }
 
 async function getUserByEmailQuery(email: string) {
@@ -20,7 +30,7 @@ async function getUserByEmailQuery(email: string) {
     text: /*sql*/ `select * from public."User" where email = $1`,
     values: [email],
   }
-  return await db.query(query)
+  return await db.query<UserModel>(query)
 }
 
 async function registerUserQuery({email , username, password}: {email: string, username: string, password: string}) {
@@ -33,7 +43,7 @@ async function registerUserQuery({email , username, password}: {email: string, u
     ],
   }
 
-  return await db.query(query)
+  return await db.query<UserModel>(query)
 }
 
 async function editUserQuery(id: string, data: any) {
@@ -55,16 +65,16 @@ async function editUserQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<UserModel>(query)
 }
 
-async function editUserPasswordQuery(id: string, password: string) {
+async function editUserPasswordQuery(id: string | number, password: string) {
   const query = {
     text: /*sql*/ `update public."User" set password = $2 where id = $1 returning *`,
     values: [id, password]
   }
 
-  return await db.query(query)
+  return await db.query<UserModel>(query)
 }
 
 export {

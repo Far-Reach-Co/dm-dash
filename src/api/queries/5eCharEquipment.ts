@@ -1,5 +1,14 @@
 import db from "../dbconfig";
 
+interface DndFiveEEquipmentModel {
+  id: number,
+  general_id: number,
+  title: string,
+  description: string,
+  quantity: number,
+  weight: number
+}
+
 async function add5eCharEquipmentQuery(data: {
   general_id: string,
   title: string,
@@ -17,7 +26,7 @@ async function add5eCharEquipmentQuery(data: {
       data.weight,
     ]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEEquipmentModel>(query)
 }
 
 async function get5eCharEquipmentQuery(id: string) {
@@ -25,24 +34,24 @@ async function get5eCharEquipmentQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_equipment" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEEquipmentModel>(query)
 }
 
-async function get5eCharEquipmentsByGeneralQuery(generalId: string) {
+async function get5eCharEquipmentsByGeneralQuery(generalId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_equipment" where general_id = $1 order by LOWER(title)`,
     values: [generalId]
   }
-  return await db.query(query)
+  return await db.query<DndFiveEEquipmentModel>(query)
 }
 
-async function remove5eCharEquipmentQuery(id: string) {
+async function remove5eCharEquipmentQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."dnd_5e_character_equipment" where id = $1`,
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEEquipmentModel>(query)
 }
 
 async function edit5eCharEquipmentQuery(id: string, data: any) {
@@ -64,7 +73,7 @@ async function edit5eCharEquipmentQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<DndFiveEEquipmentModel>(query)
 }
 
 export {

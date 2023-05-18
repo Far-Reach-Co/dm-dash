@@ -105,8 +105,10 @@ function getProjectUsersByProject(req, res, next) {
                 case 3:
                     userData = _b.sent();
                     user = userData.rows[0];
-                    user.project_user_id = projectUser.id;
-                    user.is_editor = projectUser.is_editor;
+                    user.project_user_id =
+                        projectUser.id;
+                    user.is_editor =
+                        projectUser.is_editor;
                     usersList.push(user);
                     _b.label = 4;
                 case 4:

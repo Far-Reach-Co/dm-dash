@@ -108,7 +108,8 @@ function getProject(req, res, next) {
                         projectUser = projectUsersData.rows[0];
                         project.was_joined = true;
                         project.project_user_id = projectUser.id;
-                        project.date_joined = projectUser.date_joined;
+                        project.date_joined =
+                            projectUser.date_joined;
                         project.is_editor = projectUser.is_editor;
                     }
                     res.send(project);
@@ -150,9 +151,12 @@ function getProjects(req, res, next) {
                     if (projectData && projectData.rows && projectData.rows.length) {
                         project_1 = projectData.rows[0];
                         project_1.was_joined = true;
-                        project_1.project_user_id = projectUser.id;
-                        project_1.date_joined = projectUser.date_joined;
-                        project_1.is_editor = projectUser.is_editor;
+                        project_1.project_user_id =
+                            projectUser.id;
+                        project_1.date_joined =
+                            projectUser.date_joined;
+                        project_1.is_editor =
+                            projectUser.is_editor;
                         projectsData.rows.push(project_1);
                     }
                     _d.label = 5;
@@ -169,7 +173,8 @@ function getProjects(req, res, next) {
                 case 8:
                     projectInvites = _d.sent();
                     if (projectInvites && projectInvites.rows && projectInvites.rows.length)
-                        project.project_invite = projectInvites.rows[0];
+                        project.project_invite =
+                            projectInvites.rows[0];
                     _d.label = 9;
                 case 9:
                     _b++;

@@ -1,5 +1,12 @@
 import db from "../dbconfig";
 
+interface ImageModal {
+  id: number,
+  original_name: string,
+  size: number,
+  file_name: string
+}
+
 async function addImageQuery(data: {
   original_name: string,
   size: number,
@@ -13,24 +20,24 @@ async function addImageQuery(data: {
       data.file_name
     ]
   }
-  return await db.query(query)
+  return await db.query<ImageModal>(query)
 }
 
-async function getImageQuery(id: string) {
+async function getImageQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."Image" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<ImageModal>(query)
 }
 
-async function removeImageQuery(id: string) {
+async function removeImageQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Image" where id = $1`,
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<ImageModal>(query)
 }
 
 async function editImageQuery(id: string, data: any) {
@@ -52,7 +59,7 @@ async function editImageQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<ImageModal>(query)
 }
 
 export {

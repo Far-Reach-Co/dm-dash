@@ -1,5 +1,15 @@
 import db from "../dbconfig";
 
+interface CharacterModel {
+  id: number,
+  project_id: number,
+  title: string,
+  description: string,
+  type: string,
+  location_id: number,
+  image_id: number
+}
+
 async function addCharacterQuery(data: {
   project_id: string,
   title: string,
@@ -19,15 +29,15 @@ async function addCharacterQuery(data: {
       data.image_id
     ]
   }
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 
-async function getCharacterQuery(id: string) {
+async function getCharacterQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."Character" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 
 async function getCharactersWithKeywordAndFilterQuery(
@@ -37,21 +47,21 @@ async function getCharactersWithKeywordAndFilterQuery(
     text: /*sql*/ `select * from public."Character" where project_id = $1 and position($4 in lower(title))>0 and type = $5 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword, filter]
   }
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 async function getCharactersWithKeywordQuery({projectId, limit, offset, keyword}: {projectId: string, limit: string, offset: string, keyword: string}) {
   const query = {
     text: /*sql*/ `select * from public."Character" where project_id = $1 and position($4 in lower(title))>0 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, keyword]
   }
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 async function getCharactersWithFilterQuery({projectId, limit, offset, filter}: {projectId: string, limit: string, offset: string, filter: string}) {
   const query = {
     text: /*sql*/ `select * from public."Character" where project_id = $1 and type = $4 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset, filter]
   }
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 
 async function getCharactersQuery({projectId, limit, offset}: {projectId: string, limit: string | number, offset: string | number}) {
@@ -59,7 +69,7 @@ async function getCharactersQuery({projectId, limit, offset}: {projectId: string
     text: /*sql*/ `select * from public."Character" where project_id = $1 order by title asc limit $2 offset $3`,
     values: [projectId, limit, offset]
   }
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 
 async function getCharactersByLocationQuery(locationId: string) {
@@ -67,16 +77,16 @@ async function getCharactersByLocationQuery(locationId: string) {
     text: /*sql*/ `select * from public."Character" where location_id = $1 order by title asc`,
     values: [locationId]
   }
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 
-async function removeCharacterQuery(id: string) {
+async function removeCharacterQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Character" where id = $1`,
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 
 async function editCharacterQuery(id: string, data: any) {
@@ -98,7 +108,7 @@ async function editCharacterQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<CharacterModel>(query)
 }
 
 export {

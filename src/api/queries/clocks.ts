@@ -1,5 +1,12 @@
 import db from "../dbconfig";
 
+interface ClockModel {
+  id: number,
+  title: string,
+  current_time_in_milliseconds: number,
+  project_id: number
+}
+
 async function addClockQuery(data: {
   title: string,
   current_time_in_milliseconds: string,
@@ -13,7 +20,7 @@ async function addClockQuery(data: {
       data.project_id
     ]
   }
-  return await db.query(query)
+  return await db.query<ClockModel>(query)
 }
 
 async function getClockQuery(id: string) {
@@ -21,7 +28,7 @@ async function getClockQuery(id: string) {
     text: /*sql*/ `select * from public."Clock" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<ClockModel>(query)
 }
 
 async function getClocksQuery(projectId: string) {
@@ -29,7 +36,7 @@ async function getClocksQuery(projectId: string) {
     text: /*sql*/ `select * from public."Clock" where project_id = $1 order by title asc`,
     values: [projectId]
   }
-  return await db.query(query)
+  return await db.query<ClockModel>(query)
 }
 
 async function removeClockQuery(id: string) {
@@ -38,7 +45,7 @@ async function removeClockQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<ClockModel>(query)
 }
 
 async function editClockQuery(id: string, data: any) {
@@ -60,7 +67,7 @@ async function editClockQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<ClockModel>(query)
 }
 
 export {

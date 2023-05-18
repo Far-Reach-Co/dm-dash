@@ -1,5 +1,13 @@
 import db from "../dbconfig";
 
+interface LoreRelationModal {
+  id: number,
+  lore_id: number,
+  location_id: number,
+  character_id: number,
+  item_id: number
+}
+
 async function addLoreRelationQuery(data: {
   lore_id: string,
   location_id: string,
@@ -15,7 +23,7 @@ async function addLoreRelationQuery(data: {
       data.item_id
     ]
   }
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
 async function getLoreRelationsByLoreQuery(loreId: string, type: string) {
@@ -25,7 +33,7 @@ async function getLoreRelationsByLoreQuery(loreId: string, type: string) {
       text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1 and location_id is not null`,
       values: [loreId]
     }
-      return await db.query(query)
+      return await db.query<LoreRelationModal>(query)
   }
 
   if(type === "characters") {
@@ -33,7 +41,7 @@ async function getLoreRelationsByLoreQuery(loreId: string, type: string) {
       text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1 and character_id is not null`,
       values: [loreId]
     }
-      return await db.query(query)
+      return await db.query<LoreRelationModal>(query)
   }
 
   if(type === "items") {
@@ -41,7 +49,7 @@ async function getLoreRelationsByLoreQuery(loreId: string, type: string) {
       text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1 and item_id is not null`,
       values: [loreId]
     }
-      return await db.query(query)
+      return await db.query<LoreRelationModal>(query)
   }
 
   return [];
@@ -52,7 +60,7 @@ async function getLoreRelationsByLocationQuery(locationId: string) {
     text: /*sql*/ `select * from public."LoreRelation" where location_id = $1`,
     values: [locationId]
   }
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
 async function getLoreRelationsByCharacterQuery(characterId: string) {
@@ -60,7 +68,7 @@ async function getLoreRelationsByCharacterQuery(characterId: string) {
     text: /*sql*/ `select * from public."LoreRelation" where character_id = $1`,
     values: [characterId]
   }
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
 async function getLoreRelationsByItemQuery(itemId: string) {
@@ -68,7 +76,7 @@ async function getLoreRelationsByItemQuery(itemId: string) {
     text: /*sql*/ `select * from public."LoreRelation" where item_id = $1`,
     values: [itemId]
   }
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
 async function getLoreRelationQuery(id: string) {
@@ -76,15 +84,15 @@ async function getLoreRelationQuery(id: string) {
     text: /*sql*/ `select * from public."LoreRelation" where id = $1`,
     values: [id]
   }
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
-async function getLoreRelationsQuery(loreId: string) {
+async function getLoreRelationsQuery(loreId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."LoreRelation" where lore_id = $1`,
     values: [loreId]
   }
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
 async function removeLoreRelationQuery(id: string) {
@@ -93,7 +101,7 @@ async function removeLoreRelationQuery(id: string) {
     values: [id]
   }
 
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
 async function editLoreRelationQuery(id: string, data: any) {
@@ -115,7 +123,7 @@ async function editLoreRelationQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query(query)
+  return await db.query<LoreRelationModal>(query)
 }
 
 export {
