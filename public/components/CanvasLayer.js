@@ -131,6 +131,19 @@ export default class CanvasLayer {
       opt.e.preventDefault();
       opt.e.stopPropagation();
     });
+    this.canvas.on("touch:gesture", (opt) => {
+      if (opt.e.touches && opt.e.touches.length == 2) {
+        this.canvas.isDragging = false;
+        const point = new fabric.Point(opt.self.x, opt.self.y);
+        const zoom = this.canvas.getZoom();
+        const delta = zoom / opt.self.scale;
+
+        this.canvas.zoomToPoint(point, delta);
+
+        opt.e.preventDefault();
+        opt.e.stopPropagation();
+      }
+    });
     // mouse down
     this.canvas.on("mouse:down", (opt) => {
       var evt = opt.e;
@@ -250,6 +263,14 @@ export default class CanvasLayer {
     document.addEventListener(
       "mouseup",
       throttle(async () => {
+        await this.saveToDatabase();
+      }, 3000)
+    );
+    // save data on touch screen up
+    document.addEventListener(
+      "touchend",
+      throttle(async () => {
+        console.log("yeah");
         await this.saveToDatabase();
       }, 3000)
     );
