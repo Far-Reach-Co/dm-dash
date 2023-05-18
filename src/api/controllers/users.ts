@@ -56,7 +56,17 @@ async function getAllUsers(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function getUserById(req: Request, res: Response, next: NextFunction) {
+interface GetUserByIdRequestObject extends Request {
+  params: {
+    id: string;
+  };
+}
+
+async function getUserById(
+  req: GetUserByIdRequestObject,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const userData = await getUserByIdQuery(req.params.id);
 
@@ -66,7 +76,19 @@ async function getUserById(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function registerUser(req: Request, res: Response, next: NextFunction) {
+interface RegisterUserRequestObject extends Request {
+  body: {
+    email: string;
+    username: string;
+    password: string;
+  };
+}
+
+async function registerUser(
+  req: RegisterUserRequestObject,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const { email, username, password } = req.body;
     // hash password
@@ -102,7 +124,18 @@ async function registerUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function loginUser(req: Request, res: Response, next: NextFunction) {
+interface LoginUserRequestObject extends Request {
+  body: {
+    email: string;
+    password: string;
+  };
+}
+
+async function loginUser(
+  req: LoginUserRequestObject,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const email = req.body.email.toLowerCase();
     const password = req.body.password;
@@ -154,7 +187,18 @@ async function editUser(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function resetPassword(req: Request, res: Response, next: NextFunction) {
+interface ResetPasswordRequestObject extends Request {
+  body: {
+    token: string;
+    password: string;
+  };
+}
+
+async function resetPassword(
+  req: ResetPasswordRequestObject,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const token = req.body.token;
     const password = req.body.password;
@@ -177,8 +221,14 @@ async function resetPassword(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+interface RequestResetEmailRequestObject extends Request {
+  body: {
+    email: string;
+  };
+}
+
 async function requestResetEmail(
-  req: Request,
+  req: RequestResetEmailRequestObject,
   res: Response,
   next: NextFunction
 ) {
