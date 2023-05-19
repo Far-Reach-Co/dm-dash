@@ -119,10 +119,46 @@ export default class Project {
             { style: "color: var(--blue6); margin-left: 3px;" },
             user.username
           ),
-          createElement("label", { class: "switch" }, [
-            checkbox,
-            createElement("span", { class: "slider round" }),
-          ]),
+          createElement(
+            "div",
+            {
+              style:
+                "display: flex; align-items: center; justify-content: center;",
+            },
+            [
+              createElement(
+                "label",
+                {
+                  class: "switch",
+                  style: "margin-right: var(--main-distance)",
+                },
+                [checkbox, createElement("span", { class: "slider round" })]
+              ),
+              createElement(
+                "div",
+                {
+                  style: "color: var(--red1); cursor: pointer;",
+                  title: "Remove Invited User",
+                },
+                "ⓧ",
+                {
+                  type: "click",
+                  event: async () => {
+                    if (
+                      window.confirm(
+                        `Are you sure you want to remove this user from ${this.title}?`
+                      )
+                    ) {
+                      await deleteThing(
+                        `/api/remove_project_user/${user.project_user_id}`
+                      );
+                      this.render();
+                    }
+                  },
+                }
+              ),
+            ]
+          ),
         ]
       );
       return elem;
