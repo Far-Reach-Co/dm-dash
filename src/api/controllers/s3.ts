@@ -1,5 +1,5 @@
 import { S3, config } from "aws-sdk";
-import { readFileSync, unlinkSync } from "fs";
+import { readFileSync, statSync, unlinkSync } from "fs";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import {
   addImageQuery,
@@ -9,6 +9,8 @@ import {
 } from "../queries/images";
 import { getProjectQuery, editProjectQuery } from "../queries/projects";
 import { Request, Response, NextFunction } from "express";
+import { getMetadata, resizeImage } from "../../lib/imageProcessing.js";
+import { splitAtIndex } from "../../lib/utils.js";
 
 config.update({
   signatureVersion: "v4",
@@ -75,29 +77,41 @@ async function getSignedUrlForDownload(
 //   }
 // }
 
-async function uploadToAws(req: Request, res: Response, next: NextFunction) {
+interface UploadToAwsRequestObject extends Request {
+  body: {
+    bucket_name: string;
+    folder_name: string;
+    project_id: number;
+    current_file_id: number;
+    make_image_small: boolean;
+  };
+}
+
+async function uploadToAws(
+  req: UploadToAwsRequestObject,
+  res: Response,
+  next: NextFunction
+) {
   // check if no file
   if (!req.file) return next();
-
-  // helper function to split at index
-  function splitAtIndex(value: string, index: number) {
-    return [value.substring(0, index), value.substring(index)];
-  }
 
   const name = req.file.originalname;
   var ind2 = name.lastIndexOf(".");
   const type = splitAtIndex(name, ind2);
   const imageRef = req.file.filename + type[1];
 
+  let fileSize = req.file.size;
+
   const fileName = req.file.filename;
+  let filePath = `file_uploads/${fileName}`;
+
+  let image = null;
 
   const params = {
     Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
     Key: imageRef,
-    Body: readFileSync(`file_uploads/${req.file.filename}`),
+    Body: readFileSync(filePath),
   };
-
-  let image = null;
 
   try {
     // check if pro // yes this is in a code block
@@ -113,6 +127,33 @@ async function uploadToAws(req: Request, res: Response, next: NextFunction) {
       }
     }
 
+    // adjust image
+    if (req.body.make_image_small) {
+      const smallImageWidth: number = 100;
+
+      const imageMetadata = await getMetadata(filePath);
+      if (imageMetadata && imageMetadata.height && imageMetadata.width) {
+        const aspectRatio = imageMetadata.width / imageMetadata.height;
+        const newFilePathFromResizedImage = await resizeImage(
+          filePath,
+          smallImageWidth,
+          smallImageWidth / aspectRatio
+        );
+        // remove old file
+        if (newFilePathFromResizedImage) {
+          // on success
+          unlinkSync(filePath);
+          // set new file path to resized image
+          filePath = newFilePathFromResizedImage;
+          // update params for aws upload
+          params.Body = readFileSync(newFilePathFromResizedImage);
+          const stats = statSync(newFilePathFromResizedImage);
+          const fileSizeInBytes = stats.size;
+          fileSize = fileSizeInBytes;
+        }
+      }
+    }
+
     await new Promise((resolve, reject) => {
       s3.upload(params, (err: any, data: { Location: unknown }) => {
         if (err) {
@@ -124,7 +165,7 @@ async function uploadToAws(req: Request, res: Response, next: NextFunction) {
 
     const imageData = await addImageQuery({
       original_name: req.file.originalname,
-      size: req.file.size,
+      size: fileSize,
       file_name: imageRef,
     });
     image = imageData.rows[0];
@@ -133,7 +174,6 @@ async function uploadToAws(req: Request, res: Response, next: NextFunction) {
   } catch (err) {
     console.log(err);
     // delete file in storage
-    const filePath = `file_uploads/${fileName}`;
     unlinkSync(filePath);
     next(err);
   }
@@ -141,7 +181,6 @@ async function uploadToAws(req: Request, res: Response, next: NextFunction) {
   if (image) {
     try {
       // delete file in storage
-      const filePath = `file_uploads/${fileName}`;
       unlinkSync(filePath);
 
       // prepare to update project data usage

@@ -1,4 +1,5 @@
 import renderTierLimitWarning from "./renderTierLimitWarning.js";
+import toast from "../components/Toast.js";
 
 export async function getPresignedForImageDownload(imageId) {
   try {
@@ -74,7 +75,12 @@ export async function getPresignedForImageDownload(imageId) {
 //   }
 // }
 
-export async function uploadImage(image, currentProjectId, currentImageId) {
+export async function uploadImage(
+  image,
+  currentProjectId,
+  currentImageId,
+  makeImageSmall
+) {
   try {
     const formData = new FormData();
     formData.append("file", image);
@@ -82,6 +88,7 @@ export async function uploadImage(image, currentProjectId, currentImageId) {
     formData.append("folder_name", "images");
     formData.append("project_id", currentProjectId);
     if (currentImageId) formData.append("current_file_id", currentImageId);
+    if (makeImageSmall) formData.append("make_image_small", makeImageSmall);
 
     const res = await fetch(`${window.origin}/api/file_upload`, {
       method: "POST",
@@ -95,15 +102,17 @@ export async function uploadImage(image, currentProjectId, currentImageId) {
 
     // warn about data usage and pro subscription
     if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
-      return renderTierLimitWarning(
+      renderTierLimitWarning(
         'You have reached your limit for uploading data such as images. Please subscribe to our "Pro" package to increase your limit. In order to continue providing our services we need your support <3. Please read about our available tiers <insert link here> and choose the best option for your future.'
       );
+      return null;
     }
 
-    if (data) return data;
+    if (!data.error) return data;
     else throw new Error();
   } catch (err) {
     console.log(err);
+    toast.error("Error");
     return null;
   }
 }

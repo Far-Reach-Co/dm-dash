@@ -146,19 +146,32 @@ export default class TableSidebarComponent {
   };
 
   addImageToSidebar = async (e) => {
+    const makeImageSmall = window.confirm(
+      "Would you like us to resize this image to 100px? Press Cancel to keep the original size."
+    );
+
     const file = e.target.files[0];
     if (file) {
-      this.toggleImageLoading();
-      const newImage = await uploadImage(file, state.currentProject.id);
-      if (newImage) {
-        // add new table image
-        await postThing(`/api/add_table_image`, {
-          project_id: state.currentProject.id,
-          image_id: newImage.id,
-        });
-        // re render
+      try {
+        this.toggleImageLoading();
+        const newImage = await uploadImage(
+          file,
+          state.currentProject.id,
+          null,
+          makeImageSmall
+        );
+        if (newImage) {
+          // add new table image
+          await postThing(`/api/add_table_image`, {
+            project_id: state.currentProject.id,
+            image_id: newImage.id,
+          });
+          // re render
+        }
+        this.toggleImageLoading();
+      } catch (err) {
+        this.toggleImageLoading();
       }
-      this.toggleImageLoading();
     }
   };
 
