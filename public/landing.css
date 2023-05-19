@@ -107,10 +107,10 @@ section {
   justify-content: center;
 }
 
-.third h1 {
-}
+.third h1 {}
 
 .third p {
+  width: fit-content;
 }
 
 #scroll-svg {
@@ -122,3 +122,5 @@ section {
   width: 100%;
   height: auto;
 }
+
+*/
