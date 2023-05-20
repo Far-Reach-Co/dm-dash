@@ -232,7 +232,7 @@ async function removeImage(req: Request, res: Response, next: NextFunction) {
     const image = imageData.rows[0];
 
     await removeFile("wyrld/images", image);
-    await removeImageQuery(req.body.image_id);
+    await removeImageQuery(req.params.image_id);
 
     // update project data usage
     const projectData = await getProjectQuery(req.params.project_id);
