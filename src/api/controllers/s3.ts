@@ -132,7 +132,12 @@ async function uploadToAws(
       const smallImageWidth: number = 100;
 
       const imageMetadata = await getMetadata(filePath);
-      if (imageMetadata && imageMetadata.height && imageMetadata.width) {
+      if (
+        imageMetadata &&
+        imageMetadata.height &&
+        imageMetadata.width &&
+        imageMetadata.width > smallImageWidth
+      ) {
         const aspectRatio = imageMetadata.width / imageMetadata.height;
         const newFilePathFromResizedImage = await resizeImage(
           filePath,
