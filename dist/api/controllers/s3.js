@@ -247,7 +247,7 @@ function removeImage(req, res, next) {
                     return [4, removeFile("wyrld/images", image)];
                 case 2:
                     _a.sent();
-                    return [4, (0, images_1.removeImageQuery)(req.body.image_id)];
+                    return [4, (0, images_1.removeImageQuery)(req.params.image_id)];
                 case 3:
                     _a.sent();
                     return [4, (0, projects_1.getProjectQuery)(req.params.project_id)];
