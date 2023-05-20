@@ -124,7 +124,10 @@ function uploadToAws(req, res, next) {
                     return [4, (0, imageProcessing_js_1.getMetadata)(filePath)];
                 case 3:
                     imageMetadata = _a.sent();
-                    if (!(imageMetadata && imageMetadata.height && imageMetadata.width)) return [3, 5];
+                    if (!(imageMetadata &&
+                        imageMetadata.height &&
+                        imageMetadata.width &&
+                        imageMetadata.width > smallImageWidth)) return [3, 5];
                     aspectRatio = imageMetadata.width / imageMetadata.height;
                     return [4, (0, imageProcessing_js_1.resizeImage)(filePath, smallImageWidth, smallImageWidth / aspectRatio)];
                 case 4:

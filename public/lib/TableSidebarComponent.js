@@ -4,6 +4,7 @@ import state from "./state.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
 import imageFollowingCursor from "./imageFollowingCursor.js";
+import modal from "../components/modal.js";
 
 export default class TableSidebarComponent {
   constructor(props) {
@@ -14,6 +15,8 @@ export default class TableSidebarComponent {
 
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
+
+    this.makeImageSmall = false;
   }
 
   toggleImageLoading = () => {
@@ -146,10 +149,6 @@ export default class TableSidebarComponent {
   };
 
   addImageToSidebar = async (e) => {
-    const makeImageSmall = window.confirm(
-      "Would you like us to resize this image to 100px? Press Cancel to keep the original size."
-    );
-
     const file = e.target.files[0];
     if (file) {
       try {
@@ -158,7 +157,7 @@ export default class TableSidebarComponent {
           file,
           state.currentProject.id,
           null,
-          makeImageSmall
+          this.makeImageSmall
         );
         if (newImage) {
           // add new table image
@@ -186,32 +185,88 @@ export default class TableSidebarComponent {
     this.tempLoadingSpinner = renderLoadingWithMessage("");
     this.domComponent.append(this.tempLoadingSpinner);
 
+    const smallImageCheckboxComponent = createElement(
+      "input",
+      { type: "checkbox" },
+      null,
+      {
+        type: "change",
+        event: (e) => {
+          this.makeImageSmall = e.target.value;
+        },
+      }
+    );
+    smallImageCheckboxComponent.checked = this.makeImageSmall;
+
     this.domComponent.append(
       createElement(
-        "input",
-        {
-          id: "image",
-          name: "image",
-          type: "file",
-          accept: "image/*",
-          style: "display: none",
-        },
-        null,
-        {
-          type: "change",
-          event: async (e) => {
-            await this.addImageToSidebar(e);
-          },
-        }
-      ),
-      createElement(
-        "label",
+        "button",
         {
           for: "image",
-          class: "label-btn",
+          class: "",
           title: "Upload image to be used on virtual table",
         },
-        "+ Image"
+        "+ Image",
+        {
+          type: "click",
+          event: (e) => {
+            modal.show(
+              createElement(
+                "div",
+                { class: "help-content", style: "min-width: 250px;" },
+                [
+                  createElement("h1", {}, "Add new Image"),
+                  createElement("br"),
+                  createElement("h2", {}, "Options:"),
+                  createElement(
+                    "div",
+                    {
+                      style:
+                        "display: flex; align-items: center; justify-content: center;",
+                      title:
+                        "If image width is larger than 100px this resizes the image width to 100px while mainting the aspect ratio. It also will prevent long loading time as the image size will be reduced.",
+                    },
+                    [
+                      createElement(
+                        "small",
+                        { style: "margin-right: var(--main-distance)" },
+                        "Make image small (100px): "
+                      ),
+                      smallImageCheckboxComponent,
+                    ]
+                  ),
+                  createElement("br"),
+                  createElement(
+                    "input",
+                    {
+                      id: "image",
+                      name: "image",
+                      type: "file",
+                      accept: "image/*",
+                      style: "display: none",
+                    },
+                    null,
+                    {
+                      type: "change",
+                      event: async (e) => {
+                        await this.addImageToSidebar(e);
+                      },
+                    }
+                  ),
+                  createElement(
+                    "label",
+                    {
+                      for: "image",
+                      class: "label-btn",
+                      title: "Upload image to be used on virtual table",
+                    },
+                    "Choose Image"
+                  ),
+                ]
+              )
+            );
+          },
+        }
       ),
       createElement("br"),
       ...(await this.renderCurrentImages())
