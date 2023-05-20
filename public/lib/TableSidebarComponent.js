@@ -224,7 +224,7 @@ export default class TableSidebarComponent {
                       style:
                         "display: flex; align-items: center; justify-content: center;",
                       title:
-                        "If image width is larger than 100px this resizes the image width to 100px while mainting the aspect ratio. It also will prevent long loading time as the image size will be reduced.",
+                        "If image width is larger than 100px this resizes the image width to 100px while maintaining the aspect ratio. It also will prevent long loading time as the image size will be reduced.",
                     },
                     [
                       createElement(
