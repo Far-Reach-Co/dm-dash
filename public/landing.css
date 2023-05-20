@@ -111,6 +111,7 @@ section {
 
 .third p {
   width: fit-content;
+  max-width: 500px;
 }
 
 #scroll-svg {
