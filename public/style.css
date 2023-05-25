@@ -855,11 +855,8 @@ footer {
   background-color: var(--blue);
 }
 
-#description,
 .description {
-  font-family: "MonaSans", "IBM Plex Sans", system-ui, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
-    "Segoe UI Symbol";
+  font-family: "MonaSans", "IBM Plex Sans";
   font-size: small;
   word-wrap: break-word;
   padding-left: 5px;
@@ -1240,6 +1237,7 @@ input:checked+.slider:before {
 }
 
 .text-area-rich {
+  font-family: "MonaSans", "IBM Plex Sans";
   padding: 5px;
   height: auto;
   min-height: 250px;
@@ -1249,11 +1247,14 @@ input:checked+.slider:before {
   outline: none;
   color: var(--main-white);
   background-color: var(--blue3);
-  font-size: inherit;
-  font-family: inherit;
+  font-size: small;
   resize: both;
   border: 0.5px solid var(--main-gray);
   white-space: pre-wrap;
+}
+
+.text-area-rich * {
+  font-size: small;
 }
 
 .noselect {

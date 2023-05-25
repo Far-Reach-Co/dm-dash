@@ -14,7 +14,6 @@ export default class RichText {
         wrap: "soft",
         spellcheck: true,
         class: "text-area-rich",
-        id: "description",
         name: "description",
         "data-ph": "...Write your text here.",
       },
