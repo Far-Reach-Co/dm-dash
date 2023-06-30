@@ -25,7 +25,7 @@ remove_challenge_file() {
 
 # Main logic
 case "$CERTBOT_AUTH_DOMAIN" in
-    "yourdomain.com")
+    "farreachco.com")
         # Create challenge file
         create_challenge_file "$CERTBOT_TOKEN" "$CERTBOT_KEY_AUTH"
         ;;
