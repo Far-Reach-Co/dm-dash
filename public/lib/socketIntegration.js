@@ -2,7 +2,7 @@ class SocketIntegration {
   constructor() {
     this.socket = io(window.location.origin);
 
-    this.projectId = null;
+    this.campaignId = null;
     this.user = null;
     this.sidebar = null;
     this.topLayer = null;
@@ -11,7 +11,7 @@ class SocketIntegration {
   // Listeners
   setupListeners = (canvasLayer) => {
     // USER JOIN
-    this.socket.on("project-join", (message) => {
+    this.socket.on("campain-join", (message) => {
       console.log("User Joined:\n", message);
     });
 
@@ -182,16 +182,16 @@ class SocketIntegration {
   };
 
   socketJoined = () => {
-    this.socket.emit("project-joined", {
+    this.socket.emit("campaign-joined", {
       username: this.user.username,
-      project: `project-${this.projectId}`,
+      campaign: `campaign-${this.campaignId}`,
     });
   };
 
   // GRID
   gridChange = (gridState) => {
     this.socket.emit("grid-changed", {
-      project: `project-${this.projectId}`,
+      campaign: `campaign-${this.campaignId}`,
       gridState,
     });
   };
@@ -199,35 +199,35 @@ class SocketIntegration {
   // OBJECTS
   imageAdded = (image) => {
     this.socket.emit("image-added", {
-      project: `project-${this.projectId}`,
+      campaign: `campaign-${this.campaignId}`,
       image,
     });
   };
 
   imageRemoved = (id) => {
     this.socket.emit("image-removed", {
-      project: `project-${this.projectId}`,
+      campaign: `campaign-${this.campaignId}`,
       id,
     });
   };
 
   imageMoved = (image) => {
     this.socket.emit("image-moved", {
-      project: `project-${this.projectId}`,
+      campaign: `campaign-${this.campaignId}`,
       image,
     });
   };
 
   objectMoveUp = (object) => {
     this.socket.emit("object-moved-up", {
-      project: `project-${this.projectId}`,
+      campaign: `campaign-${this.campaignId}`,
       object,
     });
   };
 
   objectChangeLayer = (object) => {
     this.socket.emit("object-changed-layer", {
-      project: `project-${this.projectId}`,
+      campaign: `campaign-${this.campaignId}`,
       object,
     });
   };
