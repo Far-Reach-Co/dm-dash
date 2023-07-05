@@ -1,9 +1,9 @@
 "use strict";
 exports.__esModule = true;
-exports.getProjectUsers = exports.userLeave = exports.getCurrentUser = exports.userJoin = void 0;
+exports.getCampaignUsers = exports.userLeave = exports.getCurrentUser = exports.userJoin = void 0;
 var users = [];
-function userJoin(id, username, project) {
-    var user = { id: id, username: username, project: project };
+function userJoin(id, username, campaign) {
+    var user = { id: id, username: username, campaign: campaign };
     users.push(user);
     return user;
 }
@@ -21,7 +21,7 @@ function userLeave(id) {
         return null;
 }
 exports.userLeave = userLeave;
-function getProjectUsers(project) {
-    return users.filter(function (user) { return user.project === project; });
+function getCampaignUsers(campaign) {
+    return users.filter(function (user) { return user.campaign === campaign; });
 }
-exports.getProjectUsers = getProjectUsers;
+exports.getCampaignUsers = getCampaignUsers;

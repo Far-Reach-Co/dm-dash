@@ -46,7 +46,7 @@ class Table {
     });
     // provide top layer to socket int
     // provide socket necessary variables
-    socketIntegration.projectId = this.projectId;
+    socketIntegration.campaignId = this.campaignId;
     socketIntegration.user = state.user;
     socketIntegration.sidebar = this.sidebar;
     socketIntegration.topLayer = this.topLayer;

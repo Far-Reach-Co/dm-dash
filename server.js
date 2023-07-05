@@ -26,8 +26,8 @@ const routes = require("./dist/api/routes.js");
 const { verifyUserByToken } = require("./dist/api/controllers/users.js");
 const {
   userJoin,
-  getProjectUsers,
   userLeave,
+  getCampaignUsers,
 } = require("./dist/lib/socketUsers.js");
 
 /***************************** SETUP AND UTILS ***************************/
@@ -63,8 +63,6 @@ app.use(bodyParser.json());
 
 // MIDDLEWARE
 app.use(async (req, res, next) => {
-  console.log("*********** REQUEST ***********");
-
   const pathName = req.url;
   const subApiPath1 = pathName.split("/")[2];
 
@@ -109,20 +107,20 @@ app.use((error, req, res, next) => {
 /***************************** SOCKETS ***************************/
 io.on("connection", (socket) => {
   // testing
-  socket.on("project-joined", ({ project, username }) => {
+  socket.on("campaign-joined", ({ campaign, username }) => {
     try {
       console.log("************** SOCKETTTTTT ***********************\n");
-      console.log(project, username, "\n");
+      console.log(campaign, username, "\n");
       console.log("************** SOCKETTTTTT ***********************\n");
 
-      const user = userJoin(socket.id, username, project);
-      socket.join(project);
+      const user = userJoin(socket.id, username, campaign);
+      socket.join(campaign);
 
       // broadcast when a user connects
-      io.to(project).emit("project-join", `Hello ${username}`);
+      io.to(campaign).emit("campaign-join", `Hello ${username}`);
 
       // send users list
-      io.to(user.project).emit("current-users", getProjectUsers(project));
+      io.to(user.campaign).emit("current-users", getCampaignUsers(campaign));
     } catch (err) {
       console.log("SOCKET ERROR", err);
     }
@@ -131,28 +129,28 @@ io.on("connection", (socket) => {
   // ************************* VTT *************************
 
   // grid
-  socket.on("grid-changed", ({ project, gridState }) => {
-    socket.broadcast.to(project).emit("grid-change", gridState);
+  socket.on("grid-changed", ({ campaign, gridState }) => {
+    socket.broadcast.to(campaign).emit("grid-change", gridState);
   });
   // update images
-  socket.on("image-added", ({ project, image }) => {
-    socket.broadcast.to(project).emit("image-add", image);
+  socket.on("image-added", ({ campaign, image }) => {
+    socket.broadcast.to(campaign).emit("image-add", image);
   });
 
-  socket.on("image-removed", ({ project, id }) => {
-    socket.broadcast.to(project).emit("image-remove", id);
+  socket.on("image-removed", ({ campaign, id }) => {
+    socket.broadcast.to(campaign).emit("image-remove", id);
   });
 
-  socket.on("image-moved", ({ project, image }) => {
-    socket.broadcast.to(project).emit("image-move", image);
+  socket.on("image-moved", ({ campaign, image }) => {
+    socket.broadcast.to(campaign).emit("image-move", image);
   });
 
-  socket.on("object-moved-up", ({ project, object }) => {
-    socket.broadcast.to(project).emit("object-move-up", object);
+  socket.on("object-moved-up", ({ campaign, object }) => {
+    socket.broadcast.to(campaign).emit("object-move-up", object);
   });
 
-  socket.on("object-changed-layer", ({ project, object }) => {
-    socket.broadcast.to(project).emit("object-change-layer", object);
+  socket.on("object-changed-layer", ({ campaign, object }) => {
+    socket.broadcast.to(campaign).emit("object-change-layer", object);
   });
 
   // when a user disconnects
@@ -161,7 +159,10 @@ io.on("connection", (socket) => {
 
     if (user) {
       // send users list
-      io.to(user.project).emit("current-users", getProjectUsers(user.project));
+      io.to(user.campaign).emit(
+        "current-users",
+        getCampaignUsers(user.campaign)
+      );
     }
   });
 });
