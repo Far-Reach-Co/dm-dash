@@ -17,6 +17,8 @@ export default class TableSidebarComponent {
     this.downloadedImageSourceList = {};
 
     this.makeImageSmall = false;
+
+    this.tableImageSearchQuery = null;
   }
 
   toggleImageLoading = () => {
@@ -72,6 +74,33 @@ export default class TableSidebarComponent {
       //   }
       // });
     }
+  };
+
+  renderImageElems = () => {
+    let imageElems = this.originalImageElems;
+
+    imageElems = imageElems.filter((elem) => {
+      if (this.tableImageSearchQuery && this.tableImageSearchQuery !== "") {
+        console.log(
+          this.tableImageSearchQuery,
+          elem.children[0].children[0].value
+        );
+        return elem.children[0].children[0].value
+          .toLowerCase()
+          .includes(this.tableImageSearchQuery.toLowerCase());
+      } else return elem;
+    });
+    console.log(imageElems);
+
+    imageElems = imageElems.sort((a, b) => {
+      if (
+        a.children[0].children[0].value.toLowerCase() <
+        b.children[0].children[0].value.toLowerCase()
+      )
+        return -1;
+    });
+    if (imageElems.length) return imageElems;
+    else return [createElement("small", {}, "None...")];
   };
 
   renderCurrentImages = async () => {
@@ -137,15 +166,10 @@ export default class TableSidebarComponent {
     // remove temp loading spinner
     this.tempLoadingSpinner.remove();
 
-    imageElems = imageElems.sort((a, b) => {
-      if (
-        a.children[1].innerText.toUpperCase() <
-        b.children[1].innerText.toUpperCase()
-      )
-        return -1;
-    });
-    if (imageElems.length) return imageElems;
-    else return [createElement("small", {}, "None...")];
+    // create a state of the image elems
+    this.originalImageElems = imageElems;
+
+    return this.renderImageElems();
   };
 
   addImageToSidebar = async (e) => {
@@ -171,6 +195,16 @@ export default class TableSidebarComponent {
       } catch (err) {
         this.toggleImageLoading();
       }
+    }
+  };
+
+  updateImagesList = () => {
+    const imageContainer = document.getElementById("table-sidebar-images");
+    imageContainer.innerHTML = "";
+    const elems = this.renderImageElems();
+    for (var elem of elems) {
+      console.log(elem);
+      imageContainer.appendChild(elem);
     }
   };
 
@@ -269,7 +303,17 @@ export default class TableSidebarComponent {
         }
       ),
       createElement("br"),
-      ...(await this.renderCurrentImages())
+      createElement("input", { placeHolder: "Search" }, null, {
+        type: "input",
+        event: (e) => {
+          e.preventDefault();
+          this.tableImageSearchQuery = e.target.value;
+          this.updateImagesList();
+        },
+      }),
+      createElement("div", { id: "table-sidebar-images" }, [
+        ...(await this.renderCurrentImages()),
+      ])
     );
   };
 }
