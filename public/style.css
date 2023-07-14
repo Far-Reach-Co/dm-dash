@@ -866,7 +866,7 @@ footer {
   max-height: 100px;
   font-weight: 450;
   font-variation-settings: "wdth" 95;
-  line-height: 1.2em;
+  line-height: 1.5;
   overflow-y: auto;
   white-space: pre-line;
   margin-bottom: var(--main-distance);
