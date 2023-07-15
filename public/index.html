@@ -1,139 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co.</title>
-    <link rel="stylesheet" href="./style.css" />
-    <link rel="stylesheet" href="./landing.css" />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_16.ico"
-      sizes="16x16"
-    />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_32.ico"
-      sizes="32x32"
-    />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_96.ico"
-      sizes="96x96"
-    />
-    <script src="/lib/AccountManager.js" defer type="module"></script>
-    <script src="/lib/MobileNavHandler.js" defer></script>
-  </head>
-  <body>
-    <div id="nav-links-container-mobile"></div>
 
-    <nav>
-      <a style="display: flex; align-items: center" href="/index.html">
-        <img height="35px" src="/assets/frlogo.webp" alt="" />
-      </a>
-      <img
-        src="/assets/hamburger.svg"
-        height="32"
-        width="32"
-        id="nav-ham"
-        alt=""
-      />
-      <div id="nav-links-container" style="display: flex"></div>
-    </nav>
-    <section class="first">
-      <div id="city-img">
-        <img id="main-logo" src="/assets/landing/mainlogo.webp" alt="" />
-      </div>
-      <p>
-        Wanting a fun way to unleash your creativity with friends? Far Reach Co.
-        offers an engaging, collaborative, roleplaying experience suitable for
-        all ages. Assemble your group to conquer fearsome beasts, embark on
-        thrilling adventures, and weave fantastical tales brimming with
-        excitement and imagination.
-      </p>
-      <img
-        id="peli-signup"
-        onclick="window.location = '/register.html'"
-        src="/assets/landing/peli_signup.webp"
-        alt=""
-      />
-    </section>
-    <section class="second">
-      <div
-        style="
-          width: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        "
-      >
-        <img id="scroll-img" src="/assets/landing/scroll_dice.webp" alt="" />
-      </div>
-      <div
-        style="
-          min-width: 300px;
-          width: 50%;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        "
-      >
-        <h1>Our Personal Quest</h1>
-        <br />
-        <p>
-          We do whatever it takes to ensure you have more of what you want by
-          keeping things, fast, fun, and intuitive! Players can jump into their
-          games in 3 simple clicks. Our hope, our goal, is to create an
-          environment and community of creators that can run games with old
-          friends and find new friends through innovations that we can not wait
-          to share with you!
-        </p>
-      </div>
-    </section>
-    <section class="third">
-      <div id="sm-map-img">
-        <div
-          style="
-            padding-top: 50px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-          "
-        >
-          <img id="scroll-svg" src="/assets/landing/scroll.svg" alt="" />
-          <h1>Virtual Table Top</h1>
-          <p>
-            Create an adventure for you, your old friends, or even some new ones
-            by using our brand-new virtual tabletop tool to keep everything
-            organized and accessible at the click of a button for you and your
-            players!
-          </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Far Reach Co.</title>
+  <link href="main.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./landing.css" />
+  <link rel="icon" type="image/x-icon" href="/assets/favicons/peli_favicon_16.ico" sizes="16x16" />
+  <link rel="icon" type="image/x-icon" href="/assets/favicons/peli_favicon_32.ico" sizes="32x32" />
+  <link rel="icon" type="image/x-icon" href="/assets/favicons/peli_favicon_96.ico" sizes="96x96" />
+  <script src="/lib/AccountManager.js" defer type="module"></script>
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+  <div id="nav-links-container-mobile"></div>
+  <nav>
+    <a class="logo-link" href="/index.html">
+      <img class="logo" src="/assets/frlogo.webp" alt="" />
+    </a>
+    <img src="/assets/hamburger.svg" height="32" width="32" id="nav-ham" alt="" />
+    <div id="nav-links-container" style="display: flex"></div>
+  </nav>
+  <section class="first">
+    <div class="container-fluid h-100 d-flex align-items-center">
+      <div class="row text-center w-100 justify-content-center">
+        <div class="col-md-8 offset-1 offset-md-0">
+            <img id="main-logo" src="/assets/landing/mainlogo-2.webp" alt="" />
+            <h2 class="animated-text display-5 pt-4">Unleash your creativity</h2>
+            <div class="main-text pt-md-1">
+              <p>Far Reach Co. offers an engaging, collaborative, roleplaying experience suitable for all ages. Assemble your group to conquer fearsome beasts, embark on thrilling adventures, and weave fantastical tales brimming with excitement and imagination.</p>
+            </div>
+            <div class="sign-up-div pt-4">
+              <a href="register.html" class="sign-up-btn display-3">Sign up</a>
+            </div>
+            <div class="scroll-down-div d-block">
+              <span class="scroll-btn"><a href="#scroll-second" class="scroll-down-btn"><span class="mouse"><span></span></span></a></span>
+            </div>
         </div>
       </div>
-      <img id="lg-map-img" src="/assets/landing/large_map_bg.webp" alt="" />
-      <div></div>
-    </section>
-    <footer>
-      <h1>Let's stay connected!</h1>
-      <br />
-      <h2>Support</h2>
-      <a href="mailto:farreachco@gmail.com">FarReachCo@gmail.com</a>
-      <br />
-      <div style="display: flex; align-items: center; justify-content: center">
-        <img
-          style="margin-right: var(--main-distance)"
-          src="/assets/discord_icon.webp"
-          width="30px"
-          height="30px"
-        />
-        <h2>Join our Discord</h2>
+    </div>
+  </section>
+  <section class="second" id="scroll-second">
+    <div class="container-fluid py-5">
+      <div class="row align-items-center gy-5">
+        <div class="col-md-5 offset-md-1">
+          <div class="second-img reveal"></div>
+        </div>
+        <div class="col-md-4 text-center offset-md-1">
+            <h1 class="display-5 reveal">Our Personal Quest</h1><br>
+            <p class="px-2 reveal">We do whatever it takes to ensure you have more of what you want by keeping things, fast, fun, and intuitive! Players can jump into their games in 3 simple clicks. Our hope, our goal, is to create an environment and community of creators that can run games with old friends and find new friends through innovations that we can not wait to share with you!</p>
+        </div>
       </div>
-      <a href="https://discord.gg/Yzw3xZysxe">https://discord.gg/Yzw3xZysxe</a>
+    </div>
+  </section>
+  <section class="third py-5">
+    <div class="container-fluid h-100 d-flex align-items-center py-5">
+      <div class="row text-center w-100 justify-content-center">
+            <h1 class="display-5  reveal">Virtual Table Top</h1><br>
+            <p class="reveal">Create an adventure for you, your old friends, or even some new ones by using our brand-new virtual tabletop tool to keep everything organized and accessible at the click of a button for you and your players!</p>
+        </div>
+    </div>
+  </section>
+  <section class="fourth">
+    <div class="container-fluid py-5">
+      <div class="row align-items-center gy-5">
+        <div class="col-md-4 text-center offset-md-1">
+          <h1 class="display-5 reveal">Character</h1><br>
+          <p class="px-2 reveal">Delve into the enchanting realms of your imagination with a simple yet comprehensive approach to managing your 5E character.  Connect on our discord where your voice will play a pivotal role in orchestrating the symphony of our shared RPG adventures. The story is yours to tell, and we are here to make that narrative journey an effortless flight of fancy.</p>
+        </div>
+        <div class="col-md-5 offset-md-1">
+          <div class="second-img reveal"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+    <footer class="py-5 justify-content-center text-center container-fluid ">
+      <p class="h2 pt-5 text-white cinzel">Let's stay connected!</p>
+      <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-white">Home</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-white">FAQs</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-white">About</a></li>
+        <li class="nav-item"><a href="#" class="nav-link px-2 text-white">Contact</a></li>
+      </ul>
+      <ul class="social-media-icons nav justify-content-center list-unstyled d-flex py-2 mb-3">
+        <li class="ms-3"><a class="text-white" href="mailto:farreachco@gmail.com"><img src="/assets/landing/email.svg"></a></li>
+        <li class="ms-3"><a class="text-white" href="https://discord.gg/Yzw3xZysxe"><img src="/assets/landing/discord.svg"></a></li>
+        <li class="ms-3"><a class="text-white" href="#"><img src="/assets/landing/twitter.svg"></a></li>
+      </ul>
+      <p class="text-center text-white">© 2023 Far Reach Co, Inc.</p>
     </footer>
-  </body>
+</body>
+<script type="text/javascript">
+  function reveal() {
+    var reveals = document.querySelectorAll(".reveal");
+    for (var i = 0; i < reveals.length; i++) {
+      var windowHeight = window.innerHeight;
+      var elementTop = reveals[i].getBoundingClientRect().top;
+      var elementVisible = 150;
+      if (elementTop < windowHeight - elementVisible) {
+        reveals[i].classList.add("active");
+      } else {
+        reveals[i].classList.remove("active");
+      }
+    }
+  }
+  window.addEventListener("scroll", reveal);
+</script>
 </html>
