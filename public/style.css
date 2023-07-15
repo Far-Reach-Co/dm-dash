@@ -575,6 +575,8 @@ textarea {
   flex: 1;
   background-color: var(--blue3);
   overflow-y: auto;
+  margin-top: 8vh;
+  padding-top: 3vh;
 }
 
 .icon {
