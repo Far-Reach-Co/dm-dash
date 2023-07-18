@@ -5,7 +5,8 @@ import renderLoadingWithMessage from "./loadingWithMessage.js";
 export default class AttackComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "cp-info-container-column";
+    this.domComponent.className =
+      "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
     this.domComponent.style = "max-width: 100%;";
     this.general_id = props.general_id;
 
@@ -110,6 +111,8 @@ export default class AttackComponent {
       `/api/get_5e_character_attacks/${this.general_id}`
     );
     if (!attacksData.length) return [createElement("small", {}, "None...")];
+
+    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
     return attacksData.map((item) => {
       return createElement(

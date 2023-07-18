@@ -159,6 +159,24 @@
   border-radius: var(--border-radius);
 }
 
+.cp-info-container-pulsate {
+  animation: pulsate 1s infinite;
+}
+
+@keyframes pulsate {
+  0% {
+    background-color: var(--blue5);
+  }
+
+  50% {
+    background-color: lighten(var(--blue5), 20%);
+  }
+
+  100% {
+    background-color: var(--blue5);
+  }
+}
+
 .boolean-input {
   height: 40px;
   width: 40px;

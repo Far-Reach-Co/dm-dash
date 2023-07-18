@@ -5,7 +5,8 @@ import renderLoadingWithMessage from "./loadingWithMessage.js";
 export default class EquipmentComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "cp-info-container-column";
+    this.domComponent.className =
+      "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
     this.domComponent.style = "max-width: 100%;";
     this.general_id = props.general_id;
 
@@ -228,6 +229,7 @@ export default class EquipmentComponent {
     const equipmentsData = await getThings(
       `/api/get_5e_character_equipments/${this.general_id}`
     );
+    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
     this.equipmentData = equipmentsData;
 
