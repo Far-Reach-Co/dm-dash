@@ -67,6 +67,8 @@ export default class SpellsComponent {
 
     return list.map((spellSlot) => {
       const elem = createElement("div");
+      elem.className = "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
+
       new SingleSpell({
         domComponent: elem,
         general_id: this.general_id,
@@ -81,6 +83,8 @@ export default class SpellsComponent {
 
   renderCantrip = () => {
     const elem = createElement("div");
+    elem.className = "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
+
     new SingleSpell({
       domComponent: elem,
       general_id: this.general_id,
@@ -471,102 +475,96 @@ class SingleSpell {
       `/api/get_5e_character_spells/${this.general_id}/${this.spellSlot.title}`
     );
     if (spells.length) this.spells = spells;
+    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
     if (this.isCantrip) {
       return this.domComponent.append(
-        createElement("div", { class: "cp-info-container-column" }, [
-          createElement("h2", {}, "Cantrips"),
-          createElement("hr"),
-          ...(await this.renderSpells()),
-          createElement(
-            "a",
-            {
-              style: "align-self: flex-start;",
-              title: "Create a new cantrip",
-            },
-            "+",
-            {
-              type: "click",
-              event: () => this.newSpell("cantrip"),
-            }
-          ),
-        ])
-      );
-    }
-
-    this.domComponent.append(
-      createElement("div", { class: "cp-info-container-column" }, [
-        createElement("h2", {}, this.spellSlot.title),
-        createElement("div", { class: "cp-content-container-center" }, [
-          createElement(
-            "div",
-            {
-              style:
-                "display: flex; align-items: center; justify-content: center;",
-            },
-            [
-              createElement("small", {}, "Total"),
-              createElement(
-                "input",
-                {
-                  class: "cp-input-no-border-small",
-                  name: this.spellSlot.totalKey,
-                  type: "number",
-                  value: this.generalData.spell_slots[this.spellSlot.totalKey]
-                    ? this.generalData.spell_slots[this.spellSlot.totalKey]
-                    : "0",
-                },
-                null,
-                {
-                  type: "focusout",
-                  event: (e) => {
-                    this.updateSpellSlotValue(
-                      e.target.name,
-                      e.target.valueAsNumber
-                    );
-                  },
-                }
-              ),
-            ]
-          ),
-          createElement(
-            "input",
-            {
-              class: "cp-input-no-border cp-input-small",
-              name: this.spellSlot.expendedKey,
-              type: "number",
-              value: this.generalData.spell_slots[this.spellSlot.expendedKey]
-                ? this.generalData.spell_slots[this.spellSlot.expendedKey]
-                : "0",
-            },
-            null,
-            {
-              type: "focusout",
-              event: (e) => {
-                this.updateSpellSlotValue(
-                  e.target.name,
-                  e.target.valueAsNumber
-                );
-              },
-            }
-          ),
-          createElement("small", {}, "Expended"),
-        ]),
+        createElement("h2", {}, "Cantrips"),
         createElement("hr"),
         ...(await this.renderSpells()),
         createElement(
           "a",
           {
             style: "align-self: flex-start;",
-            title: "Create a new spell",
+            title: "Create a new cantrip",
           },
           "+",
           {
             type: "click",
-            event: () => this.newSpell(this.spellSlot.title),
+            event: () => this.newSpell("cantrip"),
+          }
+        )
+      );
+    }
+
+    this.domComponent.append(
+      createElement("h2", {}, this.spellSlot.title),
+      createElement("div", { class: "cp-content-container-center" }, [
+        createElement(
+          "div",
+          {
+            style:
+              "display: flex; align-items: center; justify-content: center;",
+          },
+          [
+            createElement("small", {}, "Total"),
+            createElement(
+              "input",
+              {
+                class: "cp-input-no-border-small",
+                name: this.spellSlot.totalKey,
+                type: "number",
+                value: this.generalData.spell_slots[this.spellSlot.totalKey]
+                  ? this.generalData.spell_slots[this.spellSlot.totalKey]
+                  : "0",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  this.updateSpellSlotValue(
+                    e.target.name,
+                    e.target.valueAsNumber
+                  );
+                },
+              }
+            ),
+          ]
+        ),
+        createElement(
+          "input",
+          {
+            class: "cp-input-no-border cp-input-small",
+            name: this.spellSlot.expendedKey,
+            type: "number",
+            value: this.generalData.spell_slots[this.spellSlot.expendedKey]
+              ? this.generalData.spell_slots[this.spellSlot.expendedKey]
+              : "0",
+          },
+          null,
+          {
+            type: "focusout",
+            event: (e) => {
+              this.updateSpellSlotValue(e.target.name, e.target.valueAsNumber);
+            },
           }
         ),
-      ])
+        createElement("small", {}, "Expended"),
+      ]),
+      createElement("hr"),
+      ...(await this.renderSpells()),
+      createElement(
+        "a",
+        {
+          style: "align-self: flex-start;",
+          title: "Create a new spell",
+        },
+        "+",
+        {
+          type: "click",
+          event: () => this.newSpell(this.spellSlot.title),
+        }
+      )
     );
   };
 }
