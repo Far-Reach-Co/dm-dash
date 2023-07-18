@@ -268,8 +268,49 @@ class SingleSpell {
 
     this.spells = [];
 
+    this.hidden = false;
+
     this.render();
   }
+
+  hide = () => {
+    this.hidden = true;
+    this.render();
+  };
+
+  show = () => {
+    this.hidden = false;
+    this.render();
+  };
+
+  toggleHide = () => {
+    this.hidden = !this.hidden;
+    this.render();
+  };
+
+  renderHideFeatButton = () => {
+    if (!this.hidden) {
+      return createElement(
+        "a",
+        { style: "font-size: small; margin-top: 5px;" },
+        "- Collapse all",
+        {
+          type: "click",
+          event: this.toggleHide,
+        }
+      );
+    } else {
+      return createElement(
+        "a",
+        { style: "font-size: small; margin-top: 5px;" },
+        "+ Expand all",
+        {
+          type: "click",
+          event: this.toggleHide,
+        }
+      );
+    }
+  };
 
   newSpell = async (type) => {
     const res = await postThing("/api/add_5e_character_spell", {
@@ -282,7 +323,8 @@ class SingleSpell {
   };
 
   renderSpells = async () => {
-    if (!this.spells.length) return [createElement("div", {}, "None...")];
+    if (!this.spells.length)
+      return [createElement("small", {}, "No spells yet...")];
     return this.spells.map((spell) => {
       return createElement(
         "div",
@@ -292,7 +334,9 @@ class SingleSpell {
         [
           createElement(
             "div",
-            { style: "display: flex; margin-bottom: 5px;" },
+            {
+              style: "display: flex; align-items: center; margin-bottom: 5px;",
+            },
             [
               createElement(
                 "input",
@@ -468,6 +512,14 @@ class SingleSpell {
     });
   };
 
+  renderSpellsOrHidden = async () => {
+    if (this.hidden) {
+      return [createElement("div", { style: "display: none;" }, "")];
+    } else {
+      return [...(await this.renderSpells())];
+    }
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -480,8 +532,9 @@ class SingleSpell {
     if (this.isCantrip) {
       return this.domComponent.append(
         createElement("h2", {}, "Cantrips"),
+        this.renderHideFeatButton(),
         createElement("hr"),
-        ...(await this.renderSpells()),
+        ...(await this.renderSpellsOrHidden()),
         createElement(
           "a",
           {
@@ -551,8 +604,9 @@ class SingleSpell {
         ),
         createElement("small", {}, "Expended"),
       ]),
+      this.renderHideFeatButton(),
       createElement("hr"),
-      ...(await this.renderSpells()),
+      ...(await this.renderSpellsOrHidden()),
       createElement(
         "a",
         {
