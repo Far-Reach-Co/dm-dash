@@ -110,9 +110,8 @@ export default class AttackComponent {
     const attacksData = await getThings(
       `/api/get_5e_character_attacks/${this.general_id}`
     );
-    if (!attacksData.length) return [createElement("small", {}, "None...")];
-
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    if (!attacksData.length) return [createElement("small", {}, "None...")];
 
     return attacksData.map((item) => {
       return createElement(

@@ -142,9 +142,8 @@ export default class FeatComponent {
     const featsData = await getThings(
       `/api/get_5e_character_feats/${this.general_id}`
     );
-    if (!featsData.length) return [createElement("small", {}, "None...")];
-
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    if (!featsData.length) return [createElement("small", {}, "None...")];
 
     return featsData.map((item) => {
       const elem = createElement("div");

@@ -5,7 +5,8 @@ import renderLoadingWithMessage from "./loadingWithMessage.js";
 export default class OtherProLangComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "cp-info-container-column";
+    this.domComponent.className =
+      "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
     this.general_id = props.general_id;
 
     this.newLoading = false;
@@ -46,6 +47,7 @@ export default class OtherProLangComponent {
     const otherProLangsData = await getThings(
       `/api/get_5e_character_other_pro_langs/${this.general_id}`
     );
+    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!otherProLangsData.length)
       return [createElement("small", {}, "None...")];
 
