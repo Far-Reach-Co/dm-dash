@@ -319,7 +319,25 @@
   margin-right: 30px;
   border: 2px solid var(--blue);
   border-radius: 30px;
-  background-color: var();
   background-color: var(--green);
+  cursor: pointer;
+}
+
+.expended-slot-radio {
+  width: 25px;
+  height: 25px;
+  margin-right: 2px;
+  border: 2px solid var(--blue);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+}
+
+.expended-slot-radio-checked {
+  width: 25px;
+  height: 25px;
+  margin-right: 2px;
+  border: 2px solid var(--blue);
+  border-radius: var(--border-radius);
+  background-color: var(--blue6);
   cursor: pointer;
 }
