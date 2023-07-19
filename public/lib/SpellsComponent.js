@@ -268,8 +268,62 @@ class SingleSpell {
 
     this.spells = [];
 
+    // UI based state
+    this.hidden = false;
+
+    this.expendedElement = new ExpendedElement({
+      domComponent: createElement("div"),
+      totalSpellSlotCount: parseInt(
+        this.generalData.spell_slots[this.spellSlot.totalKey]
+      ),
+      expendedSpellSlotCount: parseInt(
+        this.generalData.spell_slots[this.spellSlot.expendedKey]
+      ),
+      expendedKey: this.spellSlot.expendedKey,
+      updateSpellSlotValue: this.updateSpellSlotValue,
+    });
+
     this.render();
   }
+
+  hide = () => {
+    this.hidden = true;
+    this.render();
+  };
+
+  show = () => {
+    this.hidden = false;
+    this.render();
+  };
+
+  toggleHide = () => {
+    this.hidden = !this.hidden;
+    this.render();
+  };
+
+  renderHideFeatButton = () => {
+    if (!this.hidden) {
+      return createElement(
+        "a",
+        { style: "font-size: small; margin-top: 5px;" },
+        "- Collapse all",
+        {
+          type: "click",
+          event: this.toggleHide,
+        }
+      );
+    } else {
+      return createElement(
+        "a",
+        { style: "font-size: small; margin-top: 5px;" },
+        "+ Expand all",
+        {
+          type: "click",
+          event: this.toggleHide,
+        }
+      );
+    }
+  };
 
   newSpell = async (type) => {
     const res = await postThing("/api/add_5e_character_spell", {
@@ -282,7 +336,8 @@ class SingleSpell {
   };
 
   renderSpells = async () => {
-    if (!this.spells.length) return [createElement("div", {}, "None...")];
+    if (!this.spells.length)
+      return [createElement("small", {}, "No spells yet...")];
     return this.spells.map((spell) => {
       return createElement(
         "div",
@@ -292,7 +347,9 @@ class SingleSpell {
         [
           createElement(
             "div",
-            { style: "display: flex; margin-bottom: 5px;" },
+            {
+              style: "display: flex; align-items: center; margin-bottom: 5px;",
+            },
             [
               createElement(
                 "input",
@@ -468,6 +525,14 @@ class SingleSpell {
     });
   };
 
+  renderSpellsOrHidden = async () => {
+    if (this.hidden) {
+      return [createElement("div", { style: "display: none;" }, "")];
+    } else {
+      return [...(await this.renderSpells())];
+    }
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -480,8 +545,9 @@ class SingleSpell {
     if (this.isCantrip) {
       return this.domComponent.append(
         createElement("h2", {}, "Cantrips"),
+        this.renderHideFeatButton(),
         createElement("hr"),
-        ...(await this.renderSpells()),
+        ...(await this.renderSpellsOrHidden()),
         createElement(
           "a",
           {
@@ -514,45 +580,54 @@ class SingleSpell {
                 class: "cp-input-no-border-small",
                 name: this.spellSlot.totalKey,
                 type: "number",
+                max: "10",
                 value: this.generalData.spell_slots[this.spellSlot.totalKey]
                   ? this.generalData.spell_slots[this.spellSlot.totalKey]
                   : "0",
               },
               null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  this.updateSpellSlotValue(
-                    e.target.name,
-                    e.target.valueAsNumber
-                  );
+              [
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    this.updateSpellSlotValue(
+                      e.target.name,
+                      e.target.valueAsNumber ? e.target.valueAsNumber : 0
+                    );
+                    // reset expended
+                    this.updateSpellSlotValue(this.spellSlot.expendedKey, 0);
+                  },
                 },
-              }
+                {
+                  type: "input",
+                  event: (e) => {
+                    // update expended UI
+                    const newVal = e.target.valueAsNumber;
+                    this.expendedElement.totalSpellSlotCount = newVal
+                      ? newVal
+                      : 0;
+                    this.expendedElement.expendedSpellSlotCount = 0;
+                    this.expendedElement.elems = [];
+                    this.expendedElement.render();
+                  },
+                },
+              ]
             ),
           ]
         ),
-        createElement(
-          "input",
-          {
-            class: "cp-input-no-border cp-input-small",
-            name: this.spellSlot.expendedKey,
-            type: "number",
-            value: this.generalData.spell_slots[this.spellSlot.expendedKey]
-              ? this.generalData.spell_slots[this.spellSlot.expendedKey]
-              : "0",
-          },
-          null,
-          {
-            type: "focusout",
-            event: (e) => {
-              this.updateSpellSlotValue(e.target.name, e.target.valueAsNumber);
-            },
-          }
-        ),
         createElement("small", {}, "Expended"),
+        createElement(
+          "div",
+          {
+            style:
+              "display: flex; align-items: center; justify-content: center;",
+          },
+          this.expendedElement.domComponent
+        ),
       ]),
+      this.renderHideFeatButton(),
       createElement("hr"),
-      ...(await this.renderSpells()),
+      ...(await this.renderSpellsOrHidden()),
       createElement(
         "a",
         {
@@ -566,5 +641,93 @@ class SingleSpell {
         }
       )
     );
+  };
+}
+
+class ExpendedElement {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.style =
+      "display: flex; align-items: center; justify-content: center; flex-wrap: wrap;";
+    this.totalSpellSlotCount = props.totalSpellSlotCount;
+    this.expendedSpellSlotCount = props.expendedSpellSlotCount;
+    this.expendedKey = props.expendedKey;
+    this.updateSpellSlotValue = props.updateSpellSlotValue;
+
+    this.elems = [];
+
+    this.render();
+  }
+
+  createElems = () => {
+    if (this.totalSpellSlotCount <= 0) {
+      return [createElement("small", {}, "")];
+    }
+
+    let expendedElems = [];
+    for (var i = 0; i < this.totalSpellSlotCount; i++) {
+      const elem = createElement("div", {
+        class: "expended-slot-radio",
+        id: `expended-slot-${this.expendedKey}-${i}`,
+      });
+      expendedElems.push(elem);
+    }
+
+    if (expendedElems.length && this.expendedSpellSlotCount > 0) {
+      // MISC self correction
+      if (this.expendedSpellSlotCount > this.totalSpellSlotCount) {
+        this.expendedSpellSlotCount = expendedElems.length;
+      }
+
+      // check expended boxes
+      for (var i = 0; i < this.expendedSpellSlotCount; i++) {
+        if (expendedElems[i]) {
+          expendedElems[i].checked = true;
+          expendedElems[i].className = "expended-slot-radio-checked";
+        }
+      }
+    }
+
+    // add event listeners
+    expendedElems = expendedElems.map((elem) => {
+      elem.addEventListener("click", (e) => {
+        // update state
+        if (elem.checked) {
+          this.expendedSpellSlotCount--;
+          elem.className = "expended-slot-radio";
+          elem.checked = false;
+        } else {
+          this.expendedSpellSlotCount++;
+          elem.className = "expended-slot-radio-checked";
+          elem.checked = true;
+        }
+        // update db
+        // careful with inputs
+        if (
+          this.expendedSpellSlotCount <= this.totalSpellSlotCount &&
+          this.expendedSpellSlotCount >= 0
+        ) {
+          this.updateSpellSlotValue(
+            this.expendedKey,
+            this.expendedSpellSlotCount
+          );
+
+          this.render();
+        }
+      });
+      return elem;
+    });
+
+    return expendedElems;
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
+    if (!this.elems.length) {
+      this.elems = this.createElems();
+    }
+
+    this.domComponent.append(...this.elems);
   };
 }
