@@ -33,6 +33,7 @@
     "rollup": "^3.19.1",
     "sharp": "^0.32.1",
     "socket.io": "^4.6.1",
+    "stripe": "^12.13.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
