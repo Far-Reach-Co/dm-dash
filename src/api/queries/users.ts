@@ -7,7 +7,8 @@ export interface UserModel {
   phone: string,
   name: string,
   is_pro: boolean,
-  password: string
+  password: string,
+  stripe_id: string
 }
 
 async function getUserByIdQuery(id: string | number) {

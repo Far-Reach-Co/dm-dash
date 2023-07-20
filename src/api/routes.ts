@@ -184,9 +184,13 @@ import {
   addTableView,
   getTableView,
 } from "./controllers/tableViews.js";
+import { createProSubscription } from "./controllers/stripe.js";
 const upload = multer({ dest: "file_uploads/" });
 
 var router = Router();
+
+// stripe
+router.post("/create_pro_subscription", createProSubscription);
 
 // s3
 router.get("/get_image/:id", getImage);

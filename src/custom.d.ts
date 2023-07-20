@@ -8,6 +8,7 @@ declare namespace Express {
       name: string;
       phone: string;
       password: string;
+      stripe_id: string;
     };
     token: string;
   }
