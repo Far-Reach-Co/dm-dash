@@ -283,8 +283,18 @@ class SingleSpell {
       updateSpellSlotValue: this.updateSpellSlotValue,
     });
 
-    this.render();
+    this.init();
   }
+
+  init = async () => {
+    // init spells
+    const spells = await getThings(
+      `/api/get_5e_character_spells/${this.general_id}/${this.spellSlot.title}`
+    );
+    if (spells.length) this.spells = spells;
+
+    this.render();
+  };
 
   hide = () => {
     this.hidden = true;
@@ -330,216 +340,222 @@ class SingleSpell {
       general_id: this.general_id,
       type,
       title: "New Spell",
-      description: "",
+      description: "Write spell details here...",
     });
-    if (res) this.render();
+    if (res) {
+      this.spells.push(res);
+      this.render();
+    }
   };
 
-  renderSpells = async () => {
-    if (!this.spells.length)
-      return [createElement("small", {}, "No spells yet...")];
-    return this.spells.map((spell) => {
-      return createElement(
-        "div",
-        {
-          style: "display: flex; flex-direction: column;",
-        },
-        [
+  renderSpellElemDescriptionsOrHidden = (spell) => {
+    if (!this.hidden) {
+      return [
+        createElement("div", { class: "cp-content-container-row" }, [
+          createElement("small", {}, "Casting Time"),
           createElement(
-            "div",
-            {
-              style: "display: flex; align-items: center; margin-bottom: 5px;",
-            },
-            [
-              createElement(
-                "input",
-                {
-                  class: "cp-input-gen",
-                  style: "color: var(--orange2)",
-                  name: "title",
-                  value: spell.title ? spell.title : "",
-                },
-                null,
-                {
-                  type: "focusout",
-                  event: (e) => {
-                    e.preventDefault();
-                    postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                      title: e.target.value,
-                    });
-                  },
-                }
-              ),
-              createElement(
-                "div",
-                {
-                  style:
-                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
-                  title: "Remove spell",
-                },
-                "ⓧ",
-                {
-                  type: "click",
-                  event: (e) => {
-                    e.preventDefault();
-                    if (
-                      window.confirm(
-                        `Are you sure you want to delete ${spell.title}`
-                      )
-                    ) {
-                      deleteThing(`/api/remove_5e_character_spell/${spell.id}`);
-                      e.target.parentElement.parentElement.remove();
-                    }
-                  },
-                }
-              ),
-            ]
-          ),
-          createElement("div", { class: "cp-content-container-row" }, [
-            createElement("small", {}, "Casting Time"),
-            createElement(
-              "input",
-              {
-                class: "cp-input-gen input-small",
-                name: "casting_time",
-                value: spell.casting_time ? spell.casting_time : "",
-              },
-              null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                    casting_time: e.target.value,
-                  });
-                },
-              }
-            ),
-          ]),
-          createElement("div", { class: "cp-content-container-row" }, [
-            createElement("small", {}, "Duration"),
-            createElement(
-              "input",
-              {
-                class: "cp-input-gen input-small",
-                name: "duration",
-                value: spell.duration ? spell.duration : "",
-              },
-              null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                    duration: e.target.value,
-                  });
-                },
-              }
-            ),
-          ]),
-          createElement("div", { class: "cp-content-container-row" }, [
-            createElement("small", {}, "Range"),
-            createElement(
-              "input",
-              {
-                class: "cp-input-gen input-small",
-                name: "range",
-                value: spell.range ? spell.range : "",
-              },
-              null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                    range: e.target.value,
-                  });
-                },
-              }
-            ),
-          ]),
-          createElement("div", { class: "cp-content-container-row" }, [
-            createElement("small", {}, "Damage Type"),
-            createElement(
-              "input",
-              {
-                class: "cp-input-gen input-small",
-                name: "damage_type",
-                value: spell.damage_type ? spell.damage_type : "",
-              },
-              null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                    damage_type: e.target.value,
-                  });
-                },
-              }
-            ),
-          ]),
-          createElement("div", { class: "cp-content-container-row" }, [
-            createElement("small", {}, "Components"),
-            createElement(
-              "input",
-              {
-                class: "cp-input-gen input-small",
-                name: "components",
-                value: spell.components ? spell.components : "",
-              },
-              null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                    components: e.target.value,
-                  });
-                },
-              }
-            ),
-          ]),
-          createElement("br"),
-          createElement(
-            "textarea",
+            "input",
             {
               class: "cp-input-gen input-small",
-              style: "height: 100px;",
-              name: "description",
+              name: "casting_time",
+              value: spell.casting_time ? spell.casting_time : "",
             },
-            spell.description ? spell.description : "",
+            null,
             {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
                 postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                  description: e.target.value,
+                  casting_time: e.target.value,
                 });
               },
             }
           ),
-          createElement("hr"),
-        ]
-      );
-    });
+        ]),
+        createElement("div", { class: "cp-content-container-row" }, [
+          createElement("small", {}, "Duration"),
+          createElement(
+            "input",
+            {
+              class: "cp-input-gen input-small",
+              name: "duration",
+              value: spell.duration ? spell.duration : "",
+            },
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                  duration: e.target.value,
+                });
+              },
+            }
+          ),
+        ]),
+        createElement("div", { class: "cp-content-container-row" }, [
+          createElement("small", {}, "Range"),
+          createElement(
+            "input",
+            {
+              class: "cp-input-gen input-small",
+              name: "range",
+              value: spell.range ? spell.range : "",
+            },
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                  range: e.target.value,
+                });
+              },
+            }
+          ),
+        ]),
+        createElement("div", { class: "cp-content-container-row" }, [
+          createElement("small", {}, "Damage Type"),
+          createElement(
+            "input",
+            {
+              class: "cp-input-gen input-small",
+              name: "damage_type",
+              value: spell.damage_type ? spell.damage_type : "",
+            },
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                  damage_type: e.target.value,
+                });
+              },
+            }
+          ),
+        ]),
+        createElement("div", { class: "cp-content-container-row" }, [
+          createElement("small", {}, "Components"),
+          createElement(
+            "input",
+            {
+              class: "cp-input-gen input-small",
+              name: "components",
+              value: spell.components ? spell.components : "",
+            },
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                e.preventDefault();
+                postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                  components: e.target.value,
+                });
+              },
+            }
+          ),
+        ]),
+        createElement("br"),
+        createElement(
+          "textarea",
+          {
+            class: "cp-input-gen input-small",
+            style: "height: 100px;",
+            name: "description",
+          },
+          spell.description ? spell.description : "",
+          {
+            type: "focusout",
+            event: (e) => {
+              e.preventDefault();
+              postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                description: e.target.value,
+              });
+            },
+          }
+        ),
+      ];
+    } else return [createElement("div", { style: "display: none;" })];
   };
 
-  renderSpellsOrHidden = async () => {
-    if (this.hidden) {
-      return [createElement("div", { style: "display: none;" }, "")];
-    } else {
-      return [...(await this.renderSpells())];
-    }
+  renderSpellElem = (spell) => {
+    return createElement(
+      "div",
+      {
+        style: "display: flex; flex-direction: column;",
+      },
+      [
+        createElement(
+          "div",
+          {
+            style: "display: flex; align-items: center; margin-bottom: 5px;",
+          },
+          [
+            createElement(
+              "input",
+              {
+                class: "cp-input-gen",
+                style: "color: var(--orange2)",
+                name: "title",
+                value: spell.title ? spell.title : "",
+              },
+              null,
+              {
+                type: "focusout",
+                event: (e) => {
+                  e.preventDefault();
+                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                    title: e.target.value,
+                  });
+                },
+              }
+            ),
+            createElement(
+              "div",
+              {
+                style:
+                  "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                title: "Remove spell",
+              },
+              "ⓧ",
+              {
+                type: "click",
+                event: (e) => {
+                  e.preventDefault();
+                  if (
+                    window.confirm(
+                      `Are you sure you want to delete ${spell.title}`
+                    )
+                  ) {
+                    deleteThing(`/api/remove_5e_character_spell/${spell.id}`);
+                    const index = this.spells.indexOf(spell);
+                    if (index !== -1) {
+                      this.spells.splice(index, 1);
+                    }
+                    this.render();
+                  }
+                },
+              }
+            ),
+          ]
+        ),
+        ...this.renderSpellElemDescriptionsOrHidden(spell),
+        createElement("hr"),
+      ]
+    );
+  };
+
+  renderSpells = () => {
+    if (!this.spells.length)
+      return [createElement("small", {}, "No spells yet...")];
+    return this.spells.map((spell) => {
+      return this.renderSpellElem(spell);
+    });
   };
 
   render = async () => {
     this.domComponent.innerHTML = "";
-
-    const spells = await getThings(
-      `/api/get_5e_character_spells/${this.general_id}/${this.spellSlot.title}`
-    );
-    if (spells.length) this.spells = spells;
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
     if (this.isCantrip) {
@@ -547,7 +563,7 @@ class SingleSpell {
         createElement("h2", {}, "Cantrips"),
         this.renderHideFeatButton(),
         createElement("hr"),
-        ...(await this.renderSpellsOrHidden()),
+        ...this.renderSpells(),
         createElement(
           "a",
           {
@@ -627,7 +643,7 @@ class SingleSpell {
       ]),
       this.renderHideFeatButton(),
       createElement("hr"),
-      ...(await this.renderSpellsOrHidden()),
+      ...this.renderSpells(),
       createElement(
         "a",
         {
