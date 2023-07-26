@@ -4,29 +4,41 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co. | Player Characters</title>
+    <title>Far Reach Co. | Player Character Sheets</title>
     <link rel="stylesheet" href="/style.css" />
     <%- include('./partials/icons') %>
     <script src="/lib/MobileNavHandler.js" defer></script>
-    <script src="/views/Sheets.js" defer type="module"></script>
+    <!-- <script src="/views/Sheets.js" defer type="module"></script> -->
   </head>
+  <style>
+    .sheet-list-title {
+      cursor: pointer;
+      margin-right: 20px;
+    }
+    .sheet-list-title-container:hover .sheet-list-title {
+      text-decoration: underline;
+    }
+    .sheet-list-title-container:hover a {
+      text-decoration: none;
+      color: var(--green);
+    }
+  </style>
   <body>
     <%- include('./partials/nav') %>
-    <div class="dashboard-container">
-      <div id="app">
-        <!-- Initial spinner -->
-        <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>
+    <div class="container-fluid p-3">
+      <h2>Player Character Sheets</h2>
+      <small>We currently offer Dungeons and Dragons 5e sheets</small>
+      <br />
+      <a href="/new_sheet" title="Create a new player character sheet"
+        >+ New Sheet</a
+      >
+      <hr />
+      <% sheets.forEach(function(sheet) { %>
+      <div class="d-flex sheet-list-title-container">
+        <div class="sheet-list-title mb-3"><%= sheet.name %></div>
+        <a>↗</a>
       </div>
-      <!-- Toast -->
-      <div id="toast"></div>
-      <!-- The Modal -->
-      <div id="modal" class="modal">
-        <!-- Modal content -->
-        <div class="modal-container">
-          <div id="close-modal" class="close-modal">&times;</div>
-          <div id="modal-content" class="modal-content"></div>
-        </div>
-      </div>
+      <% }); %>
     </div>
   </body>
 </html>

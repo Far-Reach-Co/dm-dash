@@ -83,7 +83,7 @@ function add5eChar(req, res, next) {
                     return [4, (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id })];
                 case 7:
                     _a.sent();
-                    res.status(201).json(general);
+                    res.set("HX-Redirect", "/5eplayer").send("Form submission was successful.");
                     return [3, 9];
                 case 8:
                     err_1 = _a.sent();

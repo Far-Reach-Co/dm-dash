@@ -2,8 +2,6 @@ import createElement from "../lib/createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import projectSelect from "../lib/projectSelect.js";
-import state from "../lib/state.js";
-import { tipBox } from "../lib/tipBox.js";
 
 class Sheets {
   constructor() {
@@ -65,13 +63,12 @@ class Sheets {
 
   renderCreateNew = async () => {
     const form = createElement("form", {}, [
-      createElement("label", { for: "name" }, "Choose Character Name"),
+      createElement("label", { for: "name" }, "Name"),
       createElement("input", {
         id: "name",
         name: "name",
         placeholder: "Character Name",
         required: true,
-        style: "max-width: 500px;",
       }),
       createElement("br"),
       createElement("button", { type: "submit" }, "Create"),
@@ -83,19 +80,7 @@ class Sheets {
     });
 
     this.domComponent.append(
-      createElement("h1", {}, "Create Player Character Sheet"),
-      createElement("br"),
-      tipBox(
-        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
-        "/assets/peli/small/peli_hide_small.png",
-        false
-      ),
-      createElement("br"),
-      createElement(
-        "h2",
-        { style: "text-decoration: underline;" },
-        "New 5e Character Sheet"
-      ),
+      createElement("h2", {}, "Create Character Sheet"),
       form,
       createElement("hr"),
       createElement("button", { class: "btn-red" }, "Cancel", {
@@ -119,62 +104,24 @@ class Sheets {
     }
 
     this.domComponent.append(
+      createElement("h2", {}, "Player Character Sheets"),
       createElement(
-        "h1",
-        { class: "projects-view-title" },
-        "Player Character Sheets"
-      ),
-      createElement("hr", { class: "special-hr" }),
-      createElement(
-        "div",
-        { style: "display: flex; flex-direction: column;" },
-        [
-          createElement(
-            "button",
-            { class: "new-btn", title: "Create a new player character sheet" },
-            "+ Sheet",
-            {
-              type: "click",
-              event: this.toggleCreating,
-            }
-          ),
-          createElement(
-            "div",
-            { class: "hint" },
-            "*Create a new player character sheet"
-          ),
-        ]
-      ),
-      createElement("hr"),
-      tipBox(
-        "We currently only offer player character sheets for Dungeons and Dragons 5e. In the future we intend to support more games.",
-        "/assets/peli/small/peli_hide_small.png",
-        false
+        "small",
+        {},
+        "We currently only offer 5e Dungeons and Dragons style sheets"
       ),
       createElement("br"),
       createElement(
-        "div",
+        "a",
+        { title: "Create a new player character sheet" },
+        "+ Sheet",
         {
-          style:
-            "display: flex; flex: 1; align-items: flex-end; flex-wrap: wrap-reverse;",
-        },
-        [
-          createElement(
-            "div",
-            { style: "margin-right: var(--main-distance);" },
-            tipBox(
-              "You can make your character sheets accessible to the Managers of your wyrlds by using the wyrld-connection settings which can be found inside the character settings.",
-              "/assets/peli/small/peli_note_small.png",
-              true
-            )
-          ),
-          createElement(
-            "div",
-            { style: "display: flex; flex: 1; flex-direction: column;" },
-            [...(await this.renderSheetElems())]
-          ),
-        ]
-      )
+          type: "click",
+          event: this.toggleCreating,
+        }
+      ),
+      createElement("hr"),
+      ...(await this.renderSheetElems())
     );
   };
 }
@@ -436,8 +383,8 @@ class PlayerComponent {
           title: "Open player character sheet",
         },
         [
-          createElement("h1", {}, this.sheet.name),
-          createElement("div", { class: "project-btn-info-box" }, [
+          createElement("h2", {}, this.sheet.name),
+          createElement("div", {}, [
             createElement(
               "small",
               {},

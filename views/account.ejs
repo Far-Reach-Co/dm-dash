@@ -10,22 +10,79 @@
     <script src="/lib/htmx.min.js"></script>
     <%- include('./partials/icons') %>
   </head>
+  <style></style>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container">
-      <div class="component"">
-        <h2>General Info</h2>
-        <br>
-        <div>
-          <%- include('./partials/account/email') %>
-          <br>
-          <%- include('./partials/account/username') %>
-        </div>
-        <button class="btn-red" style="margin-top: 30px;" onclick="window.location.pathnamem = '/logout'">Logout</button>
-        <hr>
-        <h2>Subscriptions</h2>
+    <div class="container-fluid p-3">
+      <h2>Account Details</h2>
+      <div id="email-area">
+        <form hx-post="/update_email" hx-target="#email-update-success">
+          <label for="email">Edit Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value="<%= user.email %>"
+            required
+          />
+          <br />
+          <button type="submit">Save</button>
+          <small class="success-message" id="email-update-success"></small>
+        </form>
       </div>
+      <br />
+      <div id="username-area">
+        <form hx-post="/update_username" hx-target="#username-update-success">
+          <label for="username">Edit Username</label>
+          <input
+            type="username"
+            id="username"
+            name="username"
+            value="<%= user.username %>"
+            required
+          />
+          <br />
+          <button type="submit">Save</button>
+          <small class="success-message" id="username-update-success"></small>
+        </form>
+      </div>
+      <br />
+      <button
+        class="btn-red m-2"
+        onclick="window.location.pathname = '/logout'"
+      >
+        Logout
+      </button>
+      <hr />
+      <h2>Subscriptions</h2>
+      <small>-- Under Construction --</small>
     </div>
     <%- include('./partials/footer') %>
   </body>
+  <script>
+    // reset success messages
+    document.body.addEventListener("htmx:afterOnLoad", function (event) {
+      setTimeout(function () {
+        const usernameUpdateMessage = document.querySelector(
+          "#username-update-success"
+        );
+        if (usernameUpdateMessage) {
+          usernameUpdateMessage.innerText = "";
+        }
+        const emailUpdateMessage = document.querySelector(
+          "#email-update-success"
+        );
+        if (emailUpdateMessage) {
+          emailUpdateMessage.innerText = "";
+        }
+      }, 3000); // 10seconds
+    });
+
+    // handle htmx:responseError event
+    document.body.addEventListener("htmx:responseError", function (event) {
+      // event.detail contains details about the htmx request
+      var errorText = JSON.parse(event.detail.xhr.responseText).error.message; // get the response text
+      window.alert(`Server Error: ${errorText}`);
+    });
+  </script>
 </html>

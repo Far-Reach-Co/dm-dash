@@ -11,37 +11,34 @@
   </head>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container">
-      <form id="login-form" class="auth-container">
-        <div class="form-item">
-          <label for="email">Email</label>
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="name@whatever.com"
-            required
-          />
-        </div>
-        <div class="form-item">
-          <label for="email">Password</label>
-          <input
-            type="password"
-            name="password"
-            id="password"
-            placeholder="Yeah!LetMeIn1"
-            required
-          />
-        </div>
+    <div class="container-fluid p-3">
+      <h2>Login</h2>
+      <form id="login-form">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="name@whatever.com"
+          required
+        />
         <br />
-        <div>
-          <button type="submit">Login</button>
-        </div>
+        <label for="email">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="password"
+          required
+        />
         <br />
-        <small>Don't have an account or forgot your password?</small>
+        <button type="submit">Login</button>
+        <br />
+        <small>Don't have an account?</small>
         <a onclick=" window.location.pathname = '/register' "
           ><small>Register</small></a
         >
+        <small>Forgot your password?</small>
         <a href="/forgotpassword"><small>Forgot Password</small></a>
       </form>
     </div>

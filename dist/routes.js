@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var express_1 = require("express");
 var users_1 = require("./api/queries/users");
+var _5eCharGeneral_1 = require("./api/queries/5eCharGeneral");
 var router = (0, express_1.Router)();
 router.get("/", function (req, res, next) {
     try {
@@ -124,6 +125,14 @@ router.get("/dashboard", function (req, res, next) {
         next(err);
     }
 });
+router.get("/dashnew", function (req, res, next) {
+    try {
+        res.render("dashnew", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/5eplayer", function (req, res, next) {
     try {
         res.render("5eplayer", { auth: req.session.user });
@@ -132,9 +141,33 @@ router.get("/5eplayer", function (req, res, next) {
         next(err);
     }
 });
-router.get("/sheets", function (req, res, next) {
+router.get("/sheets", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var generalsData, err_2;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                if (!req.session.user)
+                    throw new Error("User is not logged in");
+                return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
+            case 1:
+                generalsData = _a.sent();
+                res.render("sheets", {
+                    auth: req.session.user,
+                    sheets: generalsData.rows
+                });
+                return [3, 3];
+            case 2:
+                err_2 = _a.sent();
+                next(err_2);
+                return [3, 3];
+            case 3: return [2];
+        }
+    });
+}); });
+router.get("/new_sheet", function (req, res, next) {
     try {
-        res.render("sheets", { auth: req.session.user });
+        res.render("newsheet", { auth: req.session.user });
     }
     catch (err) {
         next(err);
@@ -148,31 +181,8 @@ router.get("/vtt", function (req, res, next) {
         next(err);
     }
 });
-router.get("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var rows, err_2;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                if (!req.session.user)
-                    throw new Error("User is not logged in");
-                return [4, (0, users_1.getUserByIdQuery)(req.session.user)];
-            case 1:
-                rows = (_a.sent()).rows;
-                res.render("partials/account/editusername", {
-                    user: rows[0]
-                });
-                return [3, 3];
-            case 2:
-                err_2 = _a.sent();
-                next(err_2);
-                return [3, 3];
-            case 3: return [2];
-        }
-    });
-}); });
 router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var userData, err_3;
+    var err_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -183,10 +193,8 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
                         username: req.body.username
                     })];
             case 1:
-                userData = _a.sent();
-                res.render("partials/account/username", {
-                    user: userData.rows[0]
-                });
+                _a.sent();
+                res.send("Saved!");
                 return [3, 3];
             case 2:
                 err_3 = _a.sent();
@@ -196,31 +204,8 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
         }
     });
 }); });
-router.get("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var rows, err_4;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                if (!req.session.user)
-                    throw new Error("User is not logged in");
-                return [4, (0, users_1.getUserByIdQuery)(req.session.user)];
-            case 1:
-                rows = (_a.sent()).rows;
-                res.render("partials/account/editemail", {
-                    user: rows[0]
-                });
-                return [3, 3];
-            case 2:
-                err_4 = _a.sent();
-                next(err_4);
-                return [3, 3];
-            case 3: return [2];
-        }
-    });
-}); });
 router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var userData, err_5;
+    var err_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -231,14 +216,12 @@ router.post("/update_email", function (req, res, next) { return __awaiter(void 0
                         email: req.body.email
                     })];
             case 1:
-                userData = _a.sent();
-                res.render("partials/account/email", {
-                    user: userData.rows[0]
-                });
+                _a.sent();
+                res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_5 = _a.sent();
-                next(err_5);
+                err_4 = _a.sent();
+                next(err_4);
                 return [3, 3];
             case 3: return [2];
         }

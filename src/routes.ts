@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { Request, Response, NextFunction } from "express";
 import { editUserQuery, getUserByIdQuery } from "./api/queries/users";
+import { get5eCharsGeneralByUserQuery } from "./api/queries/5eCharGeneral";
 
 var router = Router();
 
@@ -96,6 +97,15 @@ router.get("/dashboard", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get("/dashnew", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //
+    res.render("dashnew", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/5eplayer", (req: Request, res: Response, next: NextFunction) => {
   try {
     //
@@ -105,10 +115,28 @@ router.get("/5eplayer", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-router.get("/sheets", (req: Request, res: Response, next: NextFunction) => {
+router.get(
+  "/sheets",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // get all character sheets by user
+      if (!req.session.user) throw new Error("User is not logged in");
+      const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
+
+      res.render("sheets", {
+        auth: req.session.user,
+        sheets: generalsData.rows,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get("/new_sheet", (req: Request, res: Response, next: NextFunction) => {
   try {
     //
-    res.render("sheets", { auth: req.session.user });
+    res.render("newsheet", { auth: req.session.user });
   } catch (err) {
     next(err);
   }
@@ -123,47 +151,15 @@ router.get("/vtt", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-router.get(
-  "/update_username",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.session.user) throw new Error("User is not logged in");
-      const { rows } = await getUserByIdQuery(req.session.user);
-      res.render("partials/account/editusername", {
-        user: rows[0],
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
-
 router.post(
   "/update_username",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.session.user) throw new Error("User is not logged in");
-      const userData = await editUserQuery(req.session.user, {
+      await editUserQuery(req.session.user, {
         username: req.body.username,
       });
-      res.render("partials/account/username", {
-        user: userData.rows[0],
-      });
-    } catch (err) {
-      next(err);
-    }
-  }
-);
-
-router.get(
-  "/update_email",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.session.user) throw new Error("User is not logged in");
-      const { rows } = await getUserByIdQuery(req.session.user);
-      res.render("partials/account/editemail", {
-        user: rows[0],
-      });
+      res.send("Saved!");
     } catch (err) {
       next(err);
     }
@@ -175,12 +171,10 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.session.user) throw new Error("User is not logged in");
-      const userData = await editUserQuery(req.session.user, {
+      await editUserQuery(req.session.user, {
         email: req.body.email,
       });
-      res.render("partials/account/email", {
-        user: userData.rows[0],
-      });
+      res.send("Saved!");
     } catch (err) {
       next(err);
     }

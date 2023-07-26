@@ -74,8 +74,8 @@ async function add5eChar(req: Request, res: Response, next: NextFunction) {
     await add5eCharProQuery({ general_id: general.id });
     await add5eCharBackQuery({ general_id: general.id });
     await add5eCharSpellSlotInfoQuery({ general_id: general.id });
-
-    res.status(201).json(general);
+    // HTMX redirect
+    res.set("HX-Redirect", "/5eplayer").send("Form submission was successful.");
   } catch (err) {
     next(err);
   }
