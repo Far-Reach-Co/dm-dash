@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
+exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function addTableViewQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
@@ -57,6 +57,25 @@ function addTableViewQuery(data) {
     });
 }
 exports.addTableViewQuery = addTableViewQuery;
+function addTableViewByUserQuery(data) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "insert into public.\"TableView\" (user_id) values($1) returning *",
+                        values: [
+                            data.user_id,
+                        ]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.addTableViewByUserQuery = addTableViewByUserQuery;
 function getTableViewQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

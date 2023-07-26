@@ -667,6 +667,10 @@ footer {
   margin-right: 5px;
 }
 
+.component form {
+  background-color: inherit;
+}
+
 .component-title {
   display: flex;
   flex-direction: row;

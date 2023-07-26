@@ -49,7 +49,7 @@ export default class NoteManager {
     this.toggleNewNoteLoading();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    formProps.user_id = state.user.id;
+    // formProps.user_id = state.user.id;
     formProps.project_id = state.currentProject.id;
     formProps.location_id = this.locationId ? this.locationId : null;
     formProps.character_id = this.characterId ? this.characterId : null;

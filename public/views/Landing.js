@@ -268,7 +268,7 @@ export default class LandingView {
               state.currentProject.id
             );
             localStorage.setItem("current-campaign-id", campaign.id);
-            window.open("/vtt.html", "_blank").focus();
+            window.open("/vtt", "_blank").focus();
           },
         }
       );

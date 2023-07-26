@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container">
+      <div class="invite">
+        <h1>Get ready to enjoy your new project!</h1>
+        <br />
+        <br />
+        <br />
+        <div id="invite-div">Please wait while we find your invitation...</div>
+      </div>
+    </div>
+    <%- include('./partials/footer') %>
+  </body>
+  <script>
+    const token = localStorage.getItem("token");
+
+    async function verifyToken() {
+      if (token) {
+        try {
+          const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
+            headers: { "x-access-token": `Bearer ${token}` },
+          });
+          const resData = await res.json();
+          if (!res.status === 200) {
+            throw new Error();
+          } else return resData;
+        } catch (err) {
+          // console.log(err);
+          window.location.pathname = "/login";
+        }
+      } else {
+        alert("You aren't logged in. Please login or register first.");
+        window.location.pathname = "/login";
+      }
+    }
+
+    async function getProjectInvite() {
+      var searchParams = new URLSearchParams(window.location.search);
+      var inviteUUID = searchParams.get("invite");
+
+      try {
+        const res = await fetch(
+          `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`,
+          {
+            headers: { "x-access-token": `Bearer ${token}` },
+          }
+        );
+        const data = await res.json();
+        if (res.status === 200) {
+          return data;
+        } else throw new Error();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    async function getProject(id) {
+      try {
+        const res = await fetch(
+          `${window.location.origin}/api/get_project/${id}`,
+          {
+            headers: { "x-access-token": `Bearer ${token}` },
+          }
+        );
+        const data = await res.json();
+        if (res.status === 200) {
+          return data;
+        } else throw new Error();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    async function createNewProjectUser(user, projectInvite) {
+      try {
+        const res = await fetch(
+          `${window.location.origin}/api/add_project_user`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-access-token": `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              project_id: projectInvite.project_id,
+            }),
+          }
+        );
+        const data = await res.json();
+        if (res.status === 201) {
+          return data;
+        } else throw new Error();
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    async function getProjectUser(projectId) {
+      try {
+        const res = await fetch(
+          `${window.location.origin}/api/get_project_user_by_user_and_project/${projectId}`,
+          {
+            headers: { "x-access-token": `Bearer ${token}` },
+          }
+        );
+        const data = await res.json();
+        if (res.status === 200) {
+          return data;
+        } else throw new Error();
+      } catch (err) {
+        console.log(err);
+        return null;
+      }
+    }
+
+    void (async function init() {
+      // get the invite
+      const projectInvite = await getProjectInvite();
+      if (projectInvite) {
+        // get the project name
+        const project = await getProject(projectInvite.project_id);
+        if (project) {
+          // check if user already has this project
+          const hasJoinedProject = await getProjectUser(project.id);
+          if (hasJoinedProject) {
+            alert("You already have this project...");
+            return (window.location.pathname = "/dashboard");
+          }
+          // check if user has this project
+          if (project.user_id === user.id) {
+            alert("You already have this project...");
+            return (window.location.pathname = "/dashboard");
+          }
+          const inviteDiv = document.getElementById("invite-div");
+          const button = document.createElement("button");
+          button.innerText = `Accept Invite for "${project.title}"`;
+          button.addEventListener("click", async () => {
+            console.log(projectInvite);
+            console.log(projectInvite.project_id, "project id by invite");
+            const newProjectUser = await createNewProjectUser(
+              user,
+              projectInvite
+            );
+            if (newProjectUser) {
+              inviteDiv.innerHTML = "";
+
+              const message = document.createElement("div");
+              message.innerText = `Success! You have just joined ${project.title}!`;
+              const button = document.createElement("button");
+              button.innerText = "Return To Dashboard";
+              button.addEventListener(
+                "click",
+                () => (window.location.pathname = "/dashboard")
+              );
+              inviteDiv.append(message, document.createElement("br"), button);
+            }
+          });
+
+          inviteDiv.innerHTML = "";
+          inviteDiv.append(button);
+        }
+      } else {
+        alert("Sorry, we weren't able to find your invite!");
+      }
+    })();
+  </script>
+</html>

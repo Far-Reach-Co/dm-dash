@@ -226,7 +226,7 @@ export default class Project {
         ),
       ];
     } else {
-      const inviteLink = `${window.location.origin}/invite.html?invite=${this.projectInvite.uuid}`;
+      const inviteLink = `${window.location.origin}/invite?invite=${this.projectInvite.uuid}`;
 
       const inviteLinkButton = createElement(
         "button",

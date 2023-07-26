@@ -18,7 +18,11 @@ async function addCounter(req: Request, res: Response, next: NextFunction) {
 
 async function getCounters(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await getCountersQuery(req.user.id, req.params.project_id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const data = await getCountersQuery(
+      req.session.user,
+      req.params.project_id
+    );
 
     res.send(data.rows);
   } catch (err) {

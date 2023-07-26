@@ -21,6 +21,7 @@ import {
   editUser,
   resetPassword,
   requestResetEmail,
+  getUserBySession,
 } from "./controllers/users.js";
 import {
   getCalendars,
@@ -432,7 +433,7 @@ router.post("/edit_project/:id", editProject);
 
 // Auth and Users
 // router.get("/users", getAllUsers);
-// router.get("/get_user", getUserByToken);
+router.get("/get_user", getUserBySession);
 router.get("/get_user_by_id/:id", getUserById); // needs security
 router.post("/register", registerUser);
 router.post("/login", loginUser);

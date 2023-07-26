@@ -119,7 +119,7 @@ export default class SideBar {
         //       "current-table-project-id",
         //       state.currentProject.id
         //     );
-        //     window.open("/vtt.html", "_blank").focus();
+        //     window.open("/vtt", "_blank").focus();
         //   },
         // }),
         // createElement("div", { class: "sidebar-header" }, "Personal"),

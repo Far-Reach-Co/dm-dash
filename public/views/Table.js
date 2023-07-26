@@ -1,7 +1,6 @@
 import state from "../lib/state.js";
 import createElement from "../lib/createElement.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
-import accountManager from "../lib/AccountManager.js"; // dont remove
 import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/TableSidebar.js";
 import CanvasLayer from "../components/CanvasLayer.js";
@@ -47,7 +46,7 @@ class Table {
     // provide top layer to socket int
     // provide socket necessary variables
     socketIntegration.campaignId = this.campaignId;
-    socketIntegration.user = state.user;
+    socketIntegration.user = await getThings("/api/get_user");
     socketIntegration.sidebar = this.sidebar;
     socketIntegration.topLayer = this.topLayer;
     // setup socket listeners after canvas instantiation

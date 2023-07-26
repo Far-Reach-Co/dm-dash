@@ -57,18 +57,22 @@ import {
 } from "../queries/tableImages.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
+import { getUserByIdQuery } from "../queries/users.js";
 
 async function addProject(req: Request, res: Response, next: NextFunction) {
   try {
     // check if user is pro
-    const projectsData = await getProjectsQuery(req.user.id);
+    if (!req.session.user) throw new Error("User is not logged in");
+
+    const projectsData = await getProjectsQuery(req.session.user);
     // limit to three projects
     if (projectsData.rows.length >= 3) {
-      if (!req.user.is_pro)
+      const { rows } = await getUserByIdQuery(req.session.user);
+      if (!rows[0].is_pro)
         throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
     }
 
-    req.body.user_id = req.user.id;
+    req.body.user_id = req.session.user;
     const data = await addProjectQuery(req.body);
     // add first project table view
     await addTableViewQuery({ project_id: data.rows[0].id });
@@ -90,8 +94,9 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
   try {
     const projectData = await getProjectQuery(req.params.id);
     const project = projectData.rows[0];
+    if (!req.session.user) throw new Error("User is not logged in");
     const projectUsersData = await getProjectUserByUserAndProjectQuery(
-      req.user.id,
+      req.session.user,
       project.id
     );
     if (projectUsersData.rows.length) {
@@ -110,9 +115,10 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
 
 async function getProjects(req: Request, res: Response, next: NextFunction) {
   try {
-    const projectsData = await getProjectsQuery(req.user.id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const projectsData = await getProjectsQuery(req.session.user);
     // get joined projects
-    const projectUserData = await getProjectUsersQuery(req.user.id);
+    const projectUserData = await getProjectUsersQuery(req.session.user);
     if (
       projectUserData &&
       projectUserData.rows &&

@@ -11,6 +11,7 @@ import { getProjectQuery, editProjectQuery } from "../queries/projects";
 import { Request, Response, NextFunction } from "express";
 import { getMetadata, resizeImage } from "../../lib/imageProcessing.js";
 import { splitAtIndex } from "../../lib/utils.js";
+import { getUserByIdQuery } from "../queries/users.js";
 
 config.update({
   signatureVersion: "v4",
@@ -122,7 +123,9 @@ async function uploadToAws(
 
       if (projectDataCount >= 104857600) {
         // 100 MB
-        if (!req.user.is_pro)
+        if (!req.session.user) throw new Error("User is not logged in");
+        const { rows } = await getUserByIdQuery(req.session.user);
+        if (!rows[0].is_pro)
           throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
       }
     }

@@ -145,7 +145,7 @@ export default class Campaign {
               state.currentProject.id
             );
             localStorage.setItem("current-campaign-id", this.id);
-            window.open("/vtt.html", "_blank").focus();
+            window.open("/vtt", "_blank").focus();
           },
         }
       ),

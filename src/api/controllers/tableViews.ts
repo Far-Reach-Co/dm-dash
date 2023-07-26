@@ -7,6 +7,7 @@ import {
 } from "../queries/tableViews.js";
 import { Request, Response, NextFunction } from "express";
 import { userSubscriptionStatus } from "../../lib/enums.js";
+import { getUserByIdQuery } from "../queries/users.js";
 
 async function addTableView(req: Request, res: Response, next: NextFunction) {
   try {
@@ -14,7 +15,9 @@ async function addTableView(req: Request, res: Response, next: NextFunction) {
     const tableViewsData = await getTableViewsQuery(req.body.project_id);
     // limit to two campaigns
     if (tableViewsData.rows.length >= 2) {
-      if (!req.user.is_pro)
+      if (!req.session.user) throw new Error("User is not logged in");
+      const { rows } = await getUserByIdQuery(req.session.user);
+      if (!rows[0].is_pro)
         throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
     }
 

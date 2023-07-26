@@ -39,30 +39,36 @@ exports.__esModule = true;
 exports.editTableView = exports.removeTableView = exports.getTableView = exports.getTableViews = exports.addTableView = void 0;
 var tableViews_js_1 = require("../queries/tableViews.js");
 var enums_js_1 = require("../../lib/enums.js");
+var users_js_1 = require("../queries/users.js");
 function addTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewsData, data, err_1;
+        var tableViewsData, rows, data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _a.trys.push([0, 5, , 6]);
                     return [4, (0, tableViews_js_1.getTableViewsQuery)(req.body.project_id)];
                 case 1:
                     tableViewsData = _a.sent();
-                    if (tableViewsData.rows.length >= 2) {
-                        if (!req.user.is_pro)
-                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    }
-                    return [4, (0, tableViews_js_1.addTableViewQuery)(req.body)];
+                    if (!(tableViewsData.rows.length >= 2)) return [3, 3];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, users_js_1.getUserByIdQuery)(req.session.user)];
                 case 2:
+                    rows = (_a.sent()).rows;
+                    if (!rows[0].is_pro)
+                        throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
+                    _a.label = 3;
+                case 3: return [4, (0, tableViews_js_1.addTableViewQuery)(req.body)];
+                case 4:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 4];
-                case 3:
+                    return [3, 6];
+                case 5:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 4];
-                case 4: return [2];
+                    return [3, 6];
+                case 6: return [2];
             }
         });
     });

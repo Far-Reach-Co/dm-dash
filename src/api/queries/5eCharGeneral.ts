@@ -60,7 +60,7 @@ async function get5eCharGeneralQuery(id: string) {
   return await db.query<DndFiveEGeneralModel>(query)
 }
 
-async function get5eCharsGeneralByUserQuery(userId: string) {
+async function get5eCharsGeneralByUserQuery(userId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_general" where user_id = $1`,
     values: [userId]

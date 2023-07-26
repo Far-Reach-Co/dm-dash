@@ -172,6 +172,7 @@ router.get("/get_projects", projects_js_1.getProjects);
 router.post("/add_project", projects_js_1.addProject);
 router["delete"]("/remove_project/:id", projects_js_1.removeProject);
 router.post("/edit_project/:id", projects_js_1.editProject);
+router.get("/get_user", users_js_1.getUserBySession);
 router.get("/get_user_by_id/:id", users_js_1.getUserById);
 router.post("/register", users_js_1.registerUser);
 router.post("/login", users_js_1.loginUser);

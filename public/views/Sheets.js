@@ -1,5 +1,4 @@
 import createElement from "../lib/createElement.js";
-import accountManager from "../lib/AccountManager.js"; // dont remove
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import projectSelect from "../lib/projectSelect.js";
@@ -17,6 +16,7 @@ class Sheets {
     this.newLoading = false;
     this.creating = false;
 
+    document.getElementById("initial-spinner").remove();
     this.render();
   }
 
@@ -57,7 +57,6 @@ class Sheets {
     this.toggleLoadingNew();
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    formProps.user_id = state.user.id;
 
     await postThing("/api/add_5e_character", formProps);
 
@@ -464,7 +463,7 @@ class PlayerComponent {
         {
           type: "click",
           event: () => {
-            history.pushState(this.sheet.id, null, `/5eplayer.html`);
+            history.pushState(this.sheet.id, null, `/5eplayer`);
             window.location.reload();
           },
         }

@@ -54,18 +54,21 @@ import {
 } from "../queries/projectPlayers";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
+import { getUserByIdQuery } from "../queries/users";
 
 async function add5eChar(req: Request, res: Response, next: NextFunction) {
   try {
     // check if user is pro
-    const generalsData = await get5eCharsGeneralByUserQuery(req.user.id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
     // limit to three projects
     if (generalsData.rows.length >= 5) {
-      if (!req.user.is_pro)
+      const { rows } = await getUserByIdQuery(req.session.user);
+      if (!rows[0].is_pro)
         throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
     }
 
-    req.body.user_id = req.user.id;
+    req.body.user_id = req.session.user;
     const generalData = await add5eCharGeneralQuery(req.body);
     const general = generalData.rows[0];
     await add5eCharProQuery({ general_id: general.id });
@@ -90,7 +93,8 @@ async function get5eCharsByUser(
   next: NextFunction
 ) {
   try {
-    const generalsData = await get5eCharsGeneralByUserQuery(req.user.id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
     const generals = generalsData.rows;
     if (generals.length) {
       for (var general of generals) {

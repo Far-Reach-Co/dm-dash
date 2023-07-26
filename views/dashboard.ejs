@@ -7,43 +7,12 @@
     <title>Far Reach Co.</title>
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/character.css" />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_16.ico"
-      sizes="16x16"
-    />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_32.ico"
-      sizes="32x32"
-    />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_96.ico"
-      sizes="96x96"
-    />
+    <%- include('./partials/icons') %>
     <script src="/lib/MobileNavHandler.js" defer></script>
     <script src="/dist/bundleApp.js" type="module" defer></script>
   </head>
   <body>
-    <div id="nav-links-container-mobile"></div>
-
-    <nav>
-      <a style="display: flex; align-items: center" href="/index.html">
-        <img height="35px" src="/assets/frlogo.webp" alt="" />
-      </a>
-      <img
-        src="/assets/hamburger.svg"
-        height="32"
-        width="32"
-        id="nav-ham"
-        alt=""
-      />
-      <div id="nav-links-container" style="display: flex"></div>
-    </nav>
+    <%- include('./partials/nav') %>
     <div class="dashboard-container">
       <div id="app">
         <!-- Initial spinner -->
@@ -60,6 +29,5 @@
         </div>
       </div>
     </div>
-    <!-- <footer id="footer"></footer> -->
   </body>
 </html>

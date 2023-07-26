@@ -46,8 +46,10 @@ function addProjectUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
                     req.body.is_editor = false;
-                    req.body.user_id = req.user.id;
+                    req.body.user_id = req.session.user;
                     return [4, (0, projectUsers_js_1.addProjectUserQuery)(req.body)];
                 case 1:
                     data = _a.sent();
@@ -70,7 +72,9 @@ function getProjectUserByUserAndProject(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.user.id, req.params.project_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.session.user, req.params.project_id)];
                 case 1:
                     data = _a.sent();
                     res.status(200).json(data.rows[0]);

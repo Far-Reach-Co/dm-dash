@@ -11,8 +11,9 @@ import { Request, Response, NextFunction } from "express";
 
 async function addProjectUser(req: Request, res: Response, next: NextFunction) {
   try {
+    if (!req.session.user) throw new Error("User is not logged in");
     req.body.is_editor = false;
-    req.body.user_id = req.user.id;
+    req.body.user_id = req.session.user;
     const data = await addProjectUserQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -26,8 +27,9 @@ async function getProjectUserByUserAndProject(
   next: NextFunction
 ) {
   try {
+    if (!req.session.user) throw new Error("User is not logged in");
     const data = await getProjectUserByUserAndProjectQuery(
-      req.user.id,
+      req.session.user,
       req.params.project_id
     );
     res.status(200).json(data.rows[0]);

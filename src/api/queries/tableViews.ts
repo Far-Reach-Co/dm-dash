@@ -3,6 +3,7 @@ import db from "../dbconfig";
 interface TableViewModel {
   id: number,
   project_id: number,
+  user_id: number,
   data: {[key: string]: any},
   date_created: string
   title: string
@@ -13,6 +14,16 @@ async function addTableViewQuery(data: {project_id: string | number}) {
     text: /*sql*/ `insert into public."TableView" (project_id) values($1) returning *`,
     values: [
       data.project_id,
+    ]
+  }
+  return await db.query<TableViewModel>(query)
+}
+
+async function addTableViewByUserQuery(data: {user_id: string | number}) {
+  const query = {
+    text: /*sql*/ `insert into public."TableView" (user_id) values($1) returning *`,
+    values: [
+      data.user_id,
     ]
   }
   return await db.query<TableViewModel>(query)
@@ -70,5 +81,6 @@ export {
   getTableViewsQuery,
   getTableViewQuery,
   removeTableViewQuery,
-  editTableViewQuery
+  editTableViewQuery,
+  addTableViewByUserQuery
 }

@@ -48,41 +48,48 @@ var _5eCharSpells_1 = require("../queries/5eCharSpells");
 var _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 var projectPlayers_1 = require("../queries/projectPlayers");
 var enums_js_1 = require("../../lib/enums.js");
+var users_1 = require("../queries/users");
 function add5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var generalsData, generalData, general, err_1;
+        var generalsData, rows, generalData, general, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.user.id)];
+                    _a.trys.push([0, 8, , 9]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
                 case 1:
                     generalsData = _a.sent();
-                    if (generalsData.rows.length >= 5) {
-                        if (!req.user.is_pro)
-                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    }
-                    req.body.user_id = req.user.id;
-                    return [4, (0, _5eCharGeneral_1.add5eCharGeneralQuery)(req.body)];
+                    if (!(generalsData.rows.length >= 5)) return [3, 3];
+                    return [4, (0, users_1.getUserByIdQuery)(req.session.user)];
                 case 2:
+                    rows = (_a.sent()).rows;
+                    if (!rows[0].is_pro)
+                        throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
+                    _a.label = 3;
+                case 3:
+                    req.body.user_id = req.session.user;
+                    return [4, (0, _5eCharGeneral_1.add5eCharGeneralQuery)(req.body)];
+                case 4:
                     generalData = _a.sent();
                     general = generalData.rows[0];
                     return [4, (0, _5eCharPro_1.add5eCharProQuery)({ general_id: general.id })];
-                case 3:
-                    _a.sent();
-                    return [4, (0, _5eCharBack_1.add5eCharBackQuery)({ general_id: general.id })];
-                case 4:
-                    _a.sent();
-                    return [4, (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id })];
                 case 5:
                     _a.sent();
-                    res.status(201).json(general);
-                    return [3, 7];
+                    return [4, (0, _5eCharBack_1.add5eCharBackQuery)({ general_id: general.id })];
                 case 6:
+                    _a.sent();
+                    return [4, (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id })];
+                case 7:
+                    _a.sent();
+                    res.status(201).json(general);
+                    return [3, 9];
+                case 8:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 9];
+                case 9: return [2];
             }
         });
     });
@@ -95,7 +102,9 @@ function get5eCharsByUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 8, , 9]);
-                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.user.id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
                 case 1:
                     generalsData = _a.sent();
                     generals = generalsData.rows;

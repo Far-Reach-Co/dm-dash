@@ -1,5 +1,4 @@
 import { getThings } from "../lib/apiUtils.js";
-import accountManager from "../lib/AccountManager.js"; // dont remove
 import FiveEPlayerSheet from "../components/5ePlayerSheet.js";
 
 class InitSheet {

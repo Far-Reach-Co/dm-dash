@@ -1,8 +1,6 @@
-import { tipBox } from "./tipBox.js";
-import { postThing } from "./apiUtils.js";
+import { getThings, postThing } from "./apiUtils.js";
 import createElement from "./createElement.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
-import state from "./state.js";
 
 class AccountManager {
   constructor() {
@@ -30,138 +28,17 @@ class AccountManager {
   };
 
   init = async () => {
-    try {
-      // try to append tabs
-      await this.appendAccountTabOrLogin();
-      if (!this.userInfo) {
-        if (
-          window.location.pathname === "/dashboard.html" ||
-          window.location.pathname === "/account.html" ||
-          window.location.pathname === "/vtt.html" ||
-          window.location.pathname === "/sheets.html" ||
-          window.location.pathname === "/5eplayer.html"
-        ) {
-          return (window.location.pathname = "/login.html");
-        }
-      }
-      // stop initial spinner
-      if (document.getElementById("initial-spinner")) {
-        document.getElementById("initial-spinner").remove();
-      }
-
-      // do account app if account page
-      if (window.location.pathname === "/account.html") {
-        this.domComponent = document.getElementById("app");
-        this.renderAccountApp();
-      }
-    } catch (err) {
-      console.log(err);
+    // stop initial spinner
+    if (document.getElementById("initial-spinner")) {
+      document.getElementById("initial-spinner").remove();
     }
-  };
 
-  verifyToken = async () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      try {
-        const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
-          headers: { "x-access-token": `Bearer ${token}` },
-        });
-        const resData = await res.json();
-        if (res.status === 200) {
-          this.userInfo = resData;
-          state.user = resData;
-          return resData;
-        } else if (res.status === 400) {
-          console.log("expired token");
-          return null;
-        } else throw resData.error;
-      } catch (err) {
-        console.log(err);
-        return null;
-      }
-    }
-  };
-
-  appendAccountTabOrLogin = async () => {
-    const token = await this.verifyToken();
-    const navContainer = document.getElementById("nav-links-container");
-    const navContainerMobile = document.getElementById(
-      "nav-links-container-mobile"
-    );
-    if (token) {
-      navContainer.append(
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/dashboard.html" },
-          "Wyrlds"
-        ),
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/sheets.html" },
-          "Sheets"
-        ),
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/account.html" },
-          "Account"
-        ),
-        createElement("a", { class: "top-nav-btn" }, "Logout", {
-          type: "click",
-          event: () => {
-            localStorage.removeItem("token");
-            window.location.pathname = "/";
-          },
-        })
-      );
-      navContainerMobile.append(
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/dashboard.html" },
-          "Wyrlds"
-        ),
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/sheets.html" },
-          "Sheets"
-        ),
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/account.html" },
-          "Account"
-        ),
-        createElement("a", { class: "top-nav-btn" }, "Logout", {
-          type: "click",
-          event: () => {
-            localStorage.removeItem("token");
-            window.location.pathname = "/";
-          },
-        })
-      );
-    } else {
-      navContainer.append(
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/login.html" },
-          "Login"
-        ),
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/register.html" },
-          "Register"
-        )
-      );
-      navContainerMobile.append(
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/login.html" },
-          "Login"
-        ),
-        createElement(
-          "a",
-          { class: "top-nav-btn", href: "/register.html" },
-          "Register"
-        )
-      );
+    // do account app if account page
+    if (window.location.pathname === "/account") {
+      const res = await getThings("/api/get_user");
+      this.userInfo = res;
+      this.domComponent = document.getElementById("app");
+      this.renderAccountApp();
     }
   };
 
@@ -324,87 +201,49 @@ class AccountManager {
     // domComponent.className = "component";
     this.domComponent.append(
       createElement("div", { class: "standard-view" }, [
-        createElement("h1", { style: "margin: auto;" }, "Account"),
-        createElement("hr", { class: "special-hr" }),
-        tipBox(
-          "Hi friend! My name is Peli, I'm here to give you tips on how to use these tools so that you can have a pleasant experience on your new adventures! You will find me on the top or the side of many pages with some guidance about how to use each of our features.",
-          "/assets/peli/small/peli_question_small.png",
-          false
-        ),
-        createElement("br"),
         createElement(
           "div",
           {
-            style: "display: flex; flex: 1; flex-wrap: wrap-reverse;",
+            class: "component",
+            style: "margin: 0; flex: 1;",
           },
           [
+            createElement(
+              "h2",
+              { style: "text-decoration: underline;" },
+              "General Info"
+            ),
+            createElement("br"),
             createElement(
               "div",
               {
                 style:
-                  "margin-top: var(--main-distance); margin-right: var(--main-distance);",
-              },
-              tipBox(
-                "usernames are not unique to a specific user. You can update yours at anytime.",
-                "/assets/peli/small/peli_note_small.png",
-                true
-              )
-            ),
-            createElement(
-              "div",
-              {
-                class: "component",
-                style: "margin: 0; flex: 1;",
+                  "margin-left: var(--main-distance); margin-right: var(--main-distance)",
               },
               [
-                createElement(
-                  "h2",
-                  { style: "text-decoration: underline;" },
-                  "General Info"
-                ),
+                this.renderEmailOrEditEmail(),
                 createElement("br"),
-                createElement(
-                  "div",
-                  {
-                    style:
-                      "margin-left: var(--main-distance); margin-right: var(--main-distance)",
-                  },
-                  [
-                    this.renderEmailOrEditEmail(),
-                    createElement("br"),
-                    this.renderUsernameOrEditUsername(),
-                    createElement("br"),
-                    createElement(
-                      "div",
-                      {
-                        style:
-                          "display: flex; justify-content: space-between; flex-wrap: wrap;",
-                      },
-                      [
-                        createElement("h3", {}, "Password"),
-                        createElement("button", {}, "Reset Password", {
-                          type: "click",
-                          event: () => {
-                            window.location.pathname = "/resetpassword.html";
-                          },
-                        }),
-                      ]
-                    ),
-                  ]
-                ),
-                createElement("hr"),
-                createElement(
-                  "h2",
-                  { style: "text-decoration: underline;" },
-                  "Subscriptions"
-                ),
-                createElement("br"),
-                createElement(
-                  "div",
-                  { style: "text-align: center" },
-                  "Coming Soon!"
-                ),
+                this.renderUsernameOrEditUsername(),
               ]
+            ),
+            createElement("br"),
+            createElement("button", { style: "margin-left: 10px;" }, "Logout", {
+              type: "click",
+              event: () => {
+                window.location.pathname = "/logout";
+              },
+            }),
+            createElement("hr"),
+            createElement(
+              "h2",
+              { style: "text-decoration: underline;" },
+              "Subscriptions"
+            ),
+            createElement("br"),
+            createElement(
+              "div",
+              { style: "text-align: center" },
+              "Coming Soon!"
             ),
           ]
         ),

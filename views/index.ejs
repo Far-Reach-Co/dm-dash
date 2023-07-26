@@ -7,43 +7,11 @@
     <title>Far Reach Co.</title>
     <link rel="stylesheet" href="./style.css" />
     <link rel="stylesheet" href="./landing.css" />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_16.ico"
-      sizes="16x16"
-    />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_32.ico"
-      sizes="32x32"
-    />
-    <link
-      rel="icon"
-      type="image/x-icon"
-      href="/assets/favicons/peli_favicon_96.ico"
-      sizes="96x96"
-    />
-    <script src="/lib/AccountManager.js" defer type="module"></script>
+    <%- include('./partials/icons') %>
     <script src="/lib/MobileNavHandler.js" defer></script>
   </head>
   <body>
-    <div id="nav-links-container-mobile"></div>
-
-    <nav>
-      <a style="display: flex; align-items: center" href="/index.html">
-        <img height="35px" src="/assets/frlogo.webp" alt="" />
-      </a>
-      <img
-        src="/assets/hamburger.svg"
-        height="32"
-        width="32"
-        id="nav-ham"
-        alt=""
-      />
-      <div id="nav-links-container" style="display: flex"></div>
-    </nav>
+    <%- include('./partials/nav') %>
     <section class="first">
       <div id="city-img">
         <img id="main-logo" src="/assets/landing/mainlogo.webp" alt="" />
@@ -57,7 +25,7 @@
       </p>
       <img
         id="peli-signup"
-        onclick="window.location = '/register.html'"
+        onclick="window.location = '/register'"
         src="/assets/landing/peli_signup.webp"
         alt=""
       />
@@ -118,22 +86,6 @@
       <img id="lg-map-img" src="/assets/landing/large_map_bg.webp" alt="" />
       <div></div>
     </section>
-    <footer>
-      <h1>Let's stay connected!</h1>
-      <br />
-      <h2>Support</h2>
-      <a href="mailto:farreachco@gmail.com">FarReachCo@gmail.com</a>
-      <br />
-      <div style="display: flex; align-items: center; justify-content: center">
-        <img
-          style="margin-right: var(--main-distance)"
-          src="/assets/discord_icon.webp"
-          width="30px"
-          height="30px"
-        />
-        <h2>Join our Discord</h2>
-      </div>
-      <a href="https://discord.gg/Yzw3xZysxe">https://discord.gg/Yzw3xZysxe</a>
-    </footer>
+    <%- include('./partials/footer') %>
   </body>
 </html>

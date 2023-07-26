@@ -22,74 +22,58 @@ const io = new Server(server);
 const cors = require("cors");
 var path = require("path");
 const bodyParser = require("body-parser");
-const routes = require("./dist/api/routes.js");
+const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
+
+const apiRoutes = require("./dist/api/routes.js");
+const routes = require("./dist/routes.js");
 const { verifyUserByToken } = require("./dist/api/controllers/users.js");
 const {
   userJoin,
   userLeave,
   getCampaignUsers,
 } = require("./dist/lib/socketUsers.js");
-
-/***************************** SETUP AND UTILS ***************************/
-async function getUserByToken(token) {
-  try {
-    const userData = await verifyUserByToken(token);
-
-    if (!userData) return null;
-
-    const data = userData.rows[0];
-
-    return data;
-  } catch (err) {
-    console.error(err);
-    return null;
-  }
-}
+const { pool } = require("./dist/api/dbconfig.js");
 
 //Set CORS
 // app.use(cors())
 
+// Set view engine to EJS
+app.set("view engine", "ejs");
+
 // fixing "413 Request Entity Too Large" errors
-app.use(express.json({ limit: "10mb", extended: true }));
+app.use(bodyParser.json({ limit: "10mb", extended: true }));
 app.use(
-  express.urlencoded({ limit: "10mb", extended: true, parameterLimit: 50000 })
+  bodyParser.urlencoded({
+    limit: "10mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
 );
 
 // Static
 app.use(express.static("public"));
 
-// Body Parse
-app.use(bodyParser.json());
-
 // MIDDLEWARE
-app.use(async (req, res, next) => {
-  const pathName = req.url;
-  const subApiPath1 = pathName.split("/")[2];
-
-  // check for token
-  if (req.headers["x-access-token"]) {
-    let token = req.headers["x-access-token"];
-    token = token.split(" ")[1];
-    // set token or user on request
-    if (subApiPath1 === "verify_jwt") {
-      req.token = token;
-    } else {
-      const user = await getUserByToken(token);
-      req.user = user;
-      if (user) {
-        // handle requests that require user
-        // TODO: handle security for different groups
-        // switch (subApiPath1) {
-        //   case "user":
-        // }
-      } else return res.json({ status: 401, message: "Missing Credentials" });
-    }
-  }
-  next();
-});
+app.use(
+  session({
+    store: new pgSession({
+      pool, // pg pool
+      tableName: "session",
+    }),
+    secret: process.env.SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
+  })
+);
 
 // Routes
-app.use("/api", routes);
+app.use("/api", apiRoutes);
+app.use("/", routes);
 
 //Error
 app.use((error, req, res, next) => {

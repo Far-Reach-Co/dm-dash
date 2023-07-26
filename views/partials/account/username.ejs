@@ -1,0 +1,17 @@
+<div
+  style="display: flex; justify-content: space-between; flex-wrap: wrap"
+  id="username-area"
+>
+  <h3>Username</h3>
+  <div style="display: flex; align-items: center">
+    <a
+      class="small-clickable"
+      style="margin-right: 5px"
+      hx-get="/update_username"
+      hx-swap="outerHTML"
+      hx-target="#username-area"
+      >Edit</a
+    >
+    <div id="username-display"><%= user.username %></div>
+  </div>
+</div>

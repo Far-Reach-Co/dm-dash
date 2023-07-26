@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Account</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <script src="/lib/htmx.min.js"></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container">
+      <div class="component"">
+        <h2>General Info</h2>
+        <br>
+        <div>
+          <%- include('./partials/account/email') %>
+          <br>
+          <%- include('./partials/account/username') %>
+        </div>
+        <button class="btn-red" style="margin-top: 30px;" onclick="window.location.pathnamem = '/logout'">Logout</button>
+        <hr>
+        <h2>Subscriptions</h2>
+      </div>
+    </div>
+    <%- include('./partials/footer') %>
+  </body>
+</html>

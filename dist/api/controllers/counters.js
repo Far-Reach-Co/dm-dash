@@ -67,7 +67,9 @@ function getCounters(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, counters_1.getCountersQuery)(req.user.id, req.params.project_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, counters_1.getCountersQuery)(req.session.user, req.params.project_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);

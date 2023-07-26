@@ -46,7 +46,7 @@ async function registerUserQuery({email , username, password}: {email: string, u
   return await db.query<UserModel>(query)
 }
 
-async function editUserQuery(id: string, data: any) {
+async function editUserQuery(id: string | number, data: any) {
   let edits = ``
   let values = []
   let iterator = 1

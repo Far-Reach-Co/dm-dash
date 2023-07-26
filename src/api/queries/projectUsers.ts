@@ -20,7 +20,7 @@ async function addProjectUserQuery(data: {project_id: string, user_id: string, i
   return await db.query<ProjectUserModel>(query)
 }
 
-async function getProjectUsersQuery(userId: string) {
+async function getProjectUsersQuery(userId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where user_id = $1`,
     values: [userId]

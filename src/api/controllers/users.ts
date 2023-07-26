@@ -12,9 +12,19 @@ import {
   editUserPasswordQuery,
 } from "../queries/users";
 import { addProjectQuery } from "../queries/projects";
-import { addTableViewQuery } from "../queries/tableViews.js";
+import {
+  addTableViewQuery,
+  addTableViewByUserQuery,
+} from "../queries/tableViews.js";
 
-const validLoginLength = "30d";
+// I had to put this somewhere
+declare module "express-session" {
+  export interface SessionData {
+    user: string | number;
+  }
+}
+
+const validLoginLength = "1d";
 
 function generateAccessToken(id: string | number, expires: string) {
   return sign({ id }, process.env.SECRET_KEY as string, { expiresIn: expires });
@@ -24,7 +34,7 @@ function sendResetEmail(user: { email: string }, token: string) {
   mail.sendMessage({
     user: user,
     title: "Reset Password",
-    message: `Visit the following link to reset your password: <a href="https://farreachco.com/resetpassword.html?token=${token}">Reset Password</a>`,
+    message: `Visit the following link to reset your password: <a href="https://farreachco.com/resetpassword?token=${token}">Reset Password</a>`,
   });
 }
 interface UserPayload {
@@ -107,12 +117,13 @@ async function registerUser(
       title: "First Project",
       user_id: data.id,
     });
+    // create two tables, one for a project/wyrld another for just the user
     await addTableViewQuery({ project_id: projectData.rows[0].id });
+    await addTableViewByUserQuery({ user_id: data.id });
 
     // login
-    const token = generateAccessToken(data.id, validLoginLength);
-
-    res.status(201).send({ token: token });
+    req.session.user = data.id;
+    res.status(201).send({ message: "Successful registration" });
     // send welcome email
     mail.sendMessage({
       user: data,
@@ -153,8 +164,9 @@ async function loginUser(
     if (user) {
       const validPassword = await compare(password, user.password);
       if (validPassword) {
-        const token = generateAccessToken(user.id, validLoginLength);
-        res.send({ token: token });
+        req.session.user = user.id;
+
+        res.status(200).send({ message: "Successful Login" });
       } else return res.status(400).json({ message: "Invalid Password" });
     }
   } catch (err) {
@@ -163,24 +175,23 @@ async function loginUser(
 }
 
 async function verifyJwt(req: Request, res: Response, next: NextFunction) {
-  try {
-    const token = req.token ? req.token : null;
-    if (token) {
-      const userData = await verifyUserByToken(token);
-
-      if (!userData)
-        return res.status(400).json({ message: "Can't find user by token" });
-
-      res.send(userData.rows[0]);
-    } else return res.status(400).json({ message: "No token sent in headers" });
-  } catch (err) {
-    return next(err);
-  }
+  // try {
+  //   const token = req.token ? req.token : null;
+  //   if (token) {
+  //     const userData = await verifyUserByToken(token);
+  //     if (!userData)
+  //       return res.status(400).json({ message: "Can't find user by token" });
+  //     res.send(userData.rows[0]);
+  //   } else return res.status(400).json({ message: "No token sent in headers" });
+  // } catch (err) {
+  //   return next(err);
+  // }
 }
 
 async function editUser(req: Request, res: Response, next: NextFunction) {
   try {
-    const userEditData = await editUserQuery(req.user.id, req.body);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const userEditData = await editUserQuery(req.session.user, req.body);
     res.send(userEditData.rows[0]);
   } catch (err) {
     return next(err);
@@ -250,10 +261,25 @@ async function requestResetEmail(
   }
 }
 
+async function getUserBySession(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.session.user) throw new Error("User is not logge din");
+    const { rows } = await getUserByIdQuery(req.session.user);
+    res.send(rows[0]);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 export {
   verifyUserByToken,
   getAllUsers,
   getUserById,
+  getUserBySession,
   registerUser,
   loginUser,
   verifyJwt,

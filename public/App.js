@@ -1,5 +1,4 @@
 import createElement from "./lib/createElement.js";
-import accountManager from "./lib/AccountManager.js"; // dont remove
 import ProjectsView from "./views/Projects.js";
 import ClocksView from "./views/Clocks.js";
 import CalendarsView from "./views/Calendars.js";
