@@ -5,6 +5,7 @@ import {
   getPlayerUsersByPlayerQuery,
   removePlayerUserQuery,
   editPlayerUserQuery,
+  removePlayerUsersByPlayerQuery,
 } from "../queries/playerUsers.js";
 import { UserModel, getUserByIdQuery } from "../queries/users.js";
 import { Request, Response, NextFunction } from "express";
@@ -102,6 +103,20 @@ async function removePlayerUserByUserAndPlayer(
   }
 }
 
+async function removePlayerUsersByPlayer(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    await removePlayerUsersByPlayerQuery(req.params.player_id);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function editPlayerUser(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await editPlayerUserQuery(req.params.id, req.body);
@@ -117,5 +132,6 @@ export {
   getPlayerUsersByPlayer,
   removePlayerUser,
   removePlayerUserByUserAndPlayer,
+  removePlayerUsersByPlayer,
   editPlayerUser,
 };

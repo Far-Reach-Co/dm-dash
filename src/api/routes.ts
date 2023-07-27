@@ -198,6 +198,7 @@ import {
   getPlayerUsersByPlayer,
   removePlayerUser,
   removePlayerUserByUserAndPlayer,
+  removePlayerUsersByPlayer,
 } from "./controllers/playerUsers.js";
 const upload = multer({ dest: "file_uploads/" });
 
@@ -261,6 +262,10 @@ router.post("/edit_player_user/:id", editPlayerUser);
 router.delete(
   "/remove_player_user_by_user_and_player/:player_id",
   removePlayerUserByUserAndPlayer
+);
+router.delete(
+  "/remove_player_users_by_player/:player_id",
+  removePlayerUsersByPlayer
 );
 
 // player invites

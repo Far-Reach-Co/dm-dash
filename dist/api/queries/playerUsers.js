@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.getPlayerUserByUserAndPlayerQuery = exports.editPlayerUserQuery = exports.removePlayerUserQuery = exports.getPlayerUsersByPlayerQuery = exports.getPlayerUsersQuery = exports.getPlayerUserQuery = exports.addPlayerUserQuery = void 0;
+exports.removePlayerUsersByPlayerQuery = exports.getPlayerUserByUserAndPlayerQuery = exports.editPlayerUserQuery = exports.removePlayerUserQuery = exports.getPlayerUsersByPlayerQuery = exports.getPlayerUsersQuery = exports.getPlayerUserQuery = exports.addPlayerUserQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function addPlayerUserQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
@@ -126,6 +126,23 @@ function getPlayerUserQuery(id) {
     });
 }
 exports.getPlayerUserQuery = getPlayerUserQuery;
+function removePlayerUsersByPlayerQuery(playerId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "delete from public.\"PlayerUser\" where player_id = $1",
+                        values: [playerId]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.removePlayerUsersByPlayerQuery = removePlayerUsersByPlayerQuery;
 function removePlayerUserQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

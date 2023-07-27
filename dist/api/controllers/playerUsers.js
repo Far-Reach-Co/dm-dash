@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editPlayerUser = exports.removePlayerUserByUserAndPlayer = exports.removePlayerUser = exports.getPlayerUsersByPlayer = exports.getPlayerUserByUserAndPlayer = exports.addPlayerUser = void 0;
+exports.editPlayerUser = exports.removePlayerUsersByPlayer = exports.removePlayerUserByUserAndPlayer = exports.removePlayerUser = exports.getPlayerUsersByPlayer = exports.getPlayerUserByUserAndPlayer = exports.addPlayerUser = void 0;
 var playerUsers_js_1 = require("../queries/playerUsers.js");
 var users_js_1 = require("../queries/users.js");
 function addPlayerUser(req, res, next) {
@@ -179,9 +179,33 @@ function removePlayerUserByUserAndPlayer(req, res, next) {
     });
 }
 exports.removePlayerUserByUserAndPlayer = removePlayerUserByUserAndPlayer;
+function removePlayerUsersByPlayer(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var err_6;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, playerUsers_js_1.removePlayerUsersByPlayerQuery)(req.params.player_id)];
+                case 1:
+                    _a.sent();
+                    res.status(204).send();
+                    return [3, 3];
+                case 2:
+                    err_6 = _a.sent();
+                    next(err_6);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.removePlayerUsersByPlayer = removePlayerUsersByPlayer;
 function editPlayerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_6;
+        var data, err_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -192,8 +216,8 @@ function editPlayerUser(req, res, next) {
                     res.status(200).send(data.rows[0]);
                     return [3, 3];
                 case 2:
-                    err_6 = _a.sent();
-                    next(err_6);
+                    err_7 = _a.sent();
+                    next(err_7);
                     return [3, 3];
                 case 3: return [2];
             }

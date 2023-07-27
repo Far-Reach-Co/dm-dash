@@ -58,6 +58,26 @@ export default class SheetSettings {
           { class: "hint" },
           "*Create an invite link to allow other users to view and edit your character sheet."
         ),
+        createElement("br"),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("button", { class: "btn-red" }, "Revoke Access", {
+              type: "click",
+              event: () => {
+                deleteThing(
+                  `/api/remove_player_users_by_player/${this.generalData.id}`
+                );
+              },
+            }),
+            createElement(
+              "div",
+              { class: "hint" },
+              "*Revoke all permissions to independant users from invites"
+            ),
+          ]
+        ),
       ];
     } else {
       const inviteLink = `${window.location.origin}/5eplayer?id=${this.generalData.id}&invite=${playerInvite.uuid}`;
@@ -104,11 +124,31 @@ export default class SheetSettings {
               createElement(
                 "div",
                 { class: "hint" },
-                "*Invite will no longer be used to gain access to this sheet."
+                "*Invite will no longer be used to gain access to this sheet"
               ),
             ]
           ),
         ]),
+        createElement("br"),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("button", { class: "btn-red" }, "Revoke Access", {
+              type: "click",
+              event: () => {
+                deleteThing(
+                  `/api/remove_player_users_by_player/${this.generalData.id}`
+                );
+              },
+            }),
+            createElement(
+              "div",
+              { class: "hint" },
+              "*Revoke all permissions to independant users from invites"
+            ),
+          ]
+        ),
       ];
     }
   };
@@ -216,7 +256,7 @@ export default class SheetSettings {
       createElement(
         "div",
         { class: "hint" },
-        "*Connect your player character sheet to allow the Dms in your wyrld to view and edit."
+        "*Connect your player character sheet to allow the Dms in your wyrld to view and edit"
       ),
       createElement("br"),
       createElement("h3", {}, "Current Wyrlds"),
@@ -231,12 +271,12 @@ export default class SheetSettings {
       createElement(
         "div",
         { class: "hint" },
-        "*Choose from the list of your created/joined wyrlds to connect your player sheet to."
+        "*Choose from the list of your created/joined wyrlds to connect your player sheet to"
       ),
       createElement("br"),
       createElement(
         "form",
-        {},
+        { class: "flex-row" },
         [
           await projectSelect(),
           createElement(
@@ -255,6 +295,7 @@ export default class SheetSettings {
           event: async (e) => {
             e.preventDefault();
             await this.addConnection(e);
+            this.render();
           },
         }
       ),

@@ -37,26 +37,28 @@
           >+ New Sheet</a
         >
         <hr />
-        <h3>My Sheets</h3>
+        <h3>Created</h3>
         <% if (sheets.length === 0) { %>
         <small class="ms-2">No sheets yet...</small>
         <% } else { %> <% sheets.forEach(function(sheet) { %>
         <div
           class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
           onclick="handleSheetClick('<%= sheet.id %>')"
+          title="Open character sheet in new tab"
         >
           <div class="dash-list-title mb-3"><%= sheet.name %></div>
           <a>↗</a>
         </div>
         <% }); %> <% } %>
         <br />
-        <h3>Shared Sheets</h3>
+        <h3>Shared With You</h3>
         <% if (sharedSheets.length === 0) { %>
-        <small class="ms-2">No sheets yet...</small>
+        <small class="ms-2">No shared sheets yet...</small>
         <% } else { %> <% sharedSheets.forEach(function(sheet) { %>
         <div
           class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
           onclick="handleSheetClick('<%= sheet.id %>')"
+          title="Open character sheet in new tab"
         >
           <div class="dash-list-title mb-3"><%= sheet.name %></div>
           <a>↗</a>

@@ -51,6 +51,15 @@ async function getPlayerUserQuery(id: string) {
   return await db.query<PlayerUserModel>(query)
 }
 
+async function removePlayerUsersByPlayerQuery(playerId: string | number) {
+  const query = {
+    text: /*sql*/ `delete from public."PlayerUser" where player_id = $1`,
+    values: [playerId]
+  }
+
+  return await db.query<PlayerUserModel>(query)
+}
+
 async function removePlayerUserQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."PlayerUser" where id = $1`,
@@ -89,5 +98,6 @@ export {
   getPlayerUsersByPlayerQuery,
   removePlayerUserQuery,
   editPlayerUserQuery,
-  getPlayerUserByUserAndPlayerQuery
+  getPlayerUserByUserAndPlayerQuery,
+  removePlayerUsersByPlayerQuery
 }

@@ -63,6 +63,7 @@ router.post("/add_player_user", playerUsers_js_1.addPlayerUser);
 router["delete"]("/remove_player_user/:id", playerUsers_js_1.removePlayerUser);
 router.post("/edit_player_user/:id", playerUsers_js_1.editPlayerUser);
 router["delete"]("/remove_player_user_by_user_and_player/:player_id", playerUsers_js_1.removePlayerUserByUserAndPlayer);
+router["delete"]("/remove_player_users_by_player/:player_id", playerUsers_js_1.removePlayerUsersByPlayer);
 router.get("/get_player_invite_by_uuid/:uuid", playerInvites_js_1.getPlayerInviteByUUID);
 router.get("/get_player_invite_by_player/:player_id", playerInvites_js_1.getPlayerInviteByPlayer);
 router.post("/add_player_invite", playerInvites_js_1.addPlayerInvite);
