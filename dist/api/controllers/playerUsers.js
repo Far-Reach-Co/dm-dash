@@ -36,55 +36,47 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableView = exports.removeTableView = exports.getTableView = exports.getTableViews = exports.addTableView = void 0;
-var tableViews_js_1 = require("../queries/tableViews.js");
-var enums_js_1 = require("../../lib/enums.js");
+exports.editPlayerUser = exports.removePlayerUserByUserAndPlayer = exports.removePlayerUser = exports.getPlayerUsersByPlayer = exports.getPlayerUserByUserAndPlayer = exports.addPlayerUser = void 0;
+var playerUsers_js_1 = require("../queries/playerUsers.js");
 var users_js_1 = require("../queries/users.js");
-function addTableView(req, res, next) {
+function addPlayerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewsData, rows, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.body.project_id)];
-                case 1:
-                    tableViewsData = _a.sent();
-                    if (!(tableViewsData.rows.length >= 5)) return [3, 3];
+                    _a.trys.push([0, 2, , 3]);
                     if (!req.session.user)
                         throw new Error("User is not logged in");
-                    return [4, (0, users_js_1.getUserByIdQuery)(req.session.user)];
-                case 2:
-                    rows = (_a.sent()).rows;
-                    if (!rows[0].is_pro)
-                        throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    _a.label = 3;
-                case 3: return [4, (0, tableViews_js_1.addTableViewQuery)(req.body)];
-                case 4:
+                    req.body.user_id = req.session.user;
+                    return [4, (0, playerUsers_js_1.addPlayerUserQuery)(req.body)];
+                case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 6];
-                case 5:
+                    return [3, 3];
+                case 2:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
 }
-exports.addTableView = addTableView;
-function getTableViews(req, res, next) {
+exports.addPlayerUser = addPlayerUser;
+function getPlayerUserByUserAndPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.params.project_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, playerUsers_js_1.getPlayerUserByUserAndPlayerQuery)(req.session.user, req.params.player_id)];
                 case 1:
                     data = _a.sent();
-                    res.send(data.rows);
+                    res.status(200).json(data.rows[0]);
                     return [3, 3];
                 case 2:
                     err_2 = _a.sent();
@@ -95,38 +87,57 @@ function getTableViews(req, res, next) {
         });
     });
 }
-exports.getTableViews = getTableViews;
-function getTableView(req, res, next) {
+exports.getPlayerUserByUserAndPlayer = getPlayerUserByUserAndPlayer;
+function getPlayerUsersByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewData, tableView, err_3;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var PlayerUsersData, usersList, _i, _a, PlayerUser, userData, user, err_3;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.getTableViewQuery)(req.params.id)];
+                    _b.trys.push([0, 6, , 7]);
+                    return [4, (0, playerUsers_js_1.getPlayerUsersByPlayerQuery)(req.params.player_id)];
                 case 1:
-                    tableViewData = _a.sent();
-                    tableView = tableViewData.rows[0];
-                    res.send(tableView);
-                    return [3, 3];
+                    PlayerUsersData = _b.sent();
+                    usersList = [];
+                    _i = 0, _a = PlayerUsersData.rows;
+                    _b.label = 2;
                 case 2:
-                    err_3 = _a.sent();
+                    if (!(_i < _a.length)) return [3, 5];
+                    PlayerUser = _a[_i];
+                    return [4, (0, users_js_1.getUserByIdQuery)(PlayerUser.user_id)];
+                case 3:
+                    userData = _b.sent();
+                    user = userData.rows[0];
+                    user.player_user_id =
+                        PlayerUser.id;
+                    user.is_editor =
+                        PlayerUser.is_editor;
+                    usersList.push(user);
+                    _b.label = 4;
+                case 4:
+                    _i++;
+                    return [3, 2];
+                case 5:
+                    res.status(200).json(usersList);
+                    return [3, 7];
+                case 6:
+                    err_3 = _b.sent();
                     next(err_3);
-                    return [3, 3];
-                case 3: return [2];
+                    return [3, 7];
+                case 7: return [2];
             }
         });
     });
 }
-exports.getTableView = getTableView;
-function removeTableView(req, res, next) {
+exports.getPlayerUsersByPlayer = getPlayerUsersByPlayer;
+function removePlayerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.removeTableViewQuery)(req.params.id)];
+                    return [4, (0, playerUsers_js_1.removePlayerUserQuery)(req.params.id)];
                 case 1:
                     _a.sent();
                     res.status(204).send();
@@ -140,26 +151,53 @@ function removeTableView(req, res, next) {
         });
     });
 }
-exports.removeTableView = removeTableView;
-function editTableView(req, res, next) {
+exports.removePlayerUser = removePlayerUser;
+function removePlayerUserByUserAndPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_5;
+        var playerUserData, err_5;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 3, , 4]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, playerUsers_js_1.getPlayerUserByUserAndPlayerQuery)(req.session.user, req.params.player_id)];
+                case 1:
+                    playerUserData = _a.sent();
+                    return [4, (0, playerUsers_js_1.removePlayerUserQuery)(playerUserData.rows[0].id)];
+                case 2:
+                    _a.sent();
+                    res.status(204).send();
+                    return [3, 4];
+                case 3:
+                    err_5 = _a.sent();
+                    next(err_5);
+                    return [3, 4];
+                case 4: return [2];
+            }
+        });
+    });
+}
+exports.removePlayerUserByUserAndPlayer = removePlayerUserByUserAndPlayer;
+function editPlayerUser(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var data, err_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.editTableViewQuery)(req.params.id, req.body)];
+                    return [4, (0, playerUsers_js_1.editPlayerUserQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
                     return [3, 3];
                 case 2:
-                    err_5 = _a.sent();
-                    next(err_5);
+                    err_6 = _a.sent();
+                    next(err_6);
                     return [3, 3];
                 case 3: return [2];
             }
         });
     });
 }
-exports.editTableView = editTableView;
+exports.editPlayerUser = editPlayerUser;

@@ -36,55 +36,46 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableView = exports.removeTableView = exports.getTableView = exports.getTableViews = exports.addTableView = void 0;
-var tableViews_js_1 = require("../queries/tableViews.js");
-var enums_js_1 = require("../../lib/enums.js");
-var users_js_1 = require("../queries/users.js");
-function addTableView(req, res, next) {
+exports.removePlayerInvite = exports.addPlayerInvite = exports.getPlayerInviteByPlayer = exports.getPlayerInviteByUUID = void 0;
+var playerInvites_js_1 = require("../queries/playerInvites.js");
+var uuid_1 = require("uuid");
+function addPlayerInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewsData, rows, data, err_1;
+        var uuid, data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 5, , 6]);
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.body.project_id)];
+                    uuid = (0, uuid_1.v4)();
+                    req.body.uuid = uuid;
+                    _a.label = 1;
                 case 1:
-                    tableViewsData = _a.sent();
-                    if (!(tableViewsData.rows.length >= 5)) return [3, 3];
-                    if (!req.session.user)
-                        throw new Error("User is not logged in");
-                    return [4, (0, users_js_1.getUserByIdQuery)(req.session.user)];
+                    _a.trys.push([1, 3, , 4]);
+                    return [4, (0, playerInvites_js_1.addPlayerInviteQuery)(req.body)];
                 case 2:
-                    rows = (_a.sent()).rows;
-                    if (!rows[0].is_pro)
-                        throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    _a.label = 3;
-                case 3: return [4, (0, tableViews_js_1.addTableViewQuery)(req.body)];
-                case 4:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 6];
-                case 5:
+                    return [3, 4];
+                case 3:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 6];
-                case 6: return [2];
+                    return [3, 4];
+                case 4: return [2];
             }
         });
     });
 }
-exports.addTableView = addTableView;
-function getTableViews(req, res, next) {
+exports.addPlayerInvite = addPlayerInvite;
+function getPlayerInviteByUUID(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.params.project_id)];
+                    return [4, (0, playerInvites_js_1.getPlayerInviteByUUIDQuery)(req.params.uuid)];
                 case 1:
                     data = _a.sent();
-                    res.send(data.rows);
+                    res.send(data.rows[0]);
                     return [3, 3];
                 case 2:
                     err_2 = _a.sent();
@@ -95,19 +86,18 @@ function getTableViews(req, res, next) {
         });
     });
 }
-exports.getTableViews = getTableViews;
-function getTableView(req, res, next) {
+exports.getPlayerInviteByUUID = getPlayerInviteByUUID;
+function getPlayerInviteByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewData, tableView, err_3;
+        var data, err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.getTableViewQuery)(req.params.id)];
+                    return [4, (0, playerInvites_js_1.getPlayerInviteByPlayerQuery)(req.params.player_id)];
                 case 1:
-                    tableViewData = _a.sent();
-                    tableView = tableViewData.rows[0];
-                    res.send(tableView);
+                    data = _a.sent();
+                    res.send(data.rows[0]);
                     return [3, 3];
                 case 2:
                     err_3 = _a.sent();
@@ -118,15 +108,15 @@ function getTableView(req, res, next) {
         });
     });
 }
-exports.getTableView = getTableView;
-function removeTableView(req, res, next) {
+exports.getPlayerInviteByPlayer = getPlayerInviteByPlayer;
+function removePlayerInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.removeTableViewQuery)(req.params.id)];
+                    return [4, (0, playerInvites_js_1.removePlayerInviteQuery)(req.params.id)];
                 case 1:
                     _a.sent();
                     res.status(204).send();
@@ -140,26 +130,4 @@ function removeTableView(req, res, next) {
         });
     });
 }
-exports.removeTableView = removeTableView;
-function editTableView(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var data, err_5;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.editTableViewQuery)(req.params.id, req.body)];
-                case 1:
-                    data = _a.sent();
-                    res.status(200).send(data.rows[0]);
-                    return [3, 3];
-                case 2:
-                    err_5 = _a.sent();
-                    next(err_5);
-                    return [3, 3];
-                case 3: return [2];
-            }
-        });
-    });
-}
-exports.editTableView = editTableView;
+exports.removePlayerInvite = removePlayerInvite;

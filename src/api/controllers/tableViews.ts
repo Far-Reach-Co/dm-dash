@@ -14,7 +14,7 @@ async function addTableView(req: Request, res: Response, next: NextFunction) {
     // check if user is pro
     const tableViewsData = await getTableViewsQuery(req.body.project_id);
     // limit to two campaigns
-    if (tableViewsData.rows.length >= 2) {
+    if (tableViewsData.rows.length >= 5) {
       if (!req.session.user) throw new Error("User is not logged in");
       const { rows } = await getUserByIdQuery(req.session.user);
       if (!rows[0].is_pro)

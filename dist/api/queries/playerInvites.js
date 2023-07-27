@@ -36,18 +36,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUser = exports.getTableViewQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
+exports.removePlayerInviteQuery = exports.getPlayerInviteByPlayerQuery = exports.getPlayerInviteByUUIDQuery = exports.getPlayerInviteQuery = exports.addPlayerInviteQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
-function addTableViewQuery(data) {
+function addPlayerInviteQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"TableView\" (project_id) values($1) returning *",
+                        text: "insert into public.\"PlayerInvite\" (uuid, player_id) values($1,$2) returning *",
                         values: [
-                            data.project_id,
+                            data.uuid,
+                            data.player_id
                         ]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -56,34 +57,15 @@ function addTableViewQuery(data) {
         });
     });
 }
-exports.addTableViewQuery = addTableViewQuery;
-function addTableViewByUserQuery(data) {
+exports.addPlayerInviteQuery = addPlayerInviteQuery;
+function getPlayerInviteQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"TableView\" (user_id) values($1) returning *",
-                        values: [
-                            data.user_id,
-                        ]
-                    };
-                    return [4, dbconfig_1["default"].query(query)];
-                case 1: return [2, _a.sent()];
-            }
-        });
-    });
-}
-exports.addTableViewByUserQuery = addTableViewByUserQuery;
-function getTableViewQuery(id) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = {
-                        text: "select * from public.\"TableView\" where id = $1",
+                        text: "select * from public.\"PlayerInvite\" where id = $1",
                         values: [id]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -92,16 +74,16 @@ function getTableViewQuery(id) {
         });
     });
 }
-exports.getTableViewQuery = getTableViewQuery;
-function getTableViewsQuery(projectId) {
+exports.getPlayerInviteQuery = getPlayerInviteQuery;
+function getPlayerInviteByPlayerQuery(playerId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"TableView\" where project_id = $1",
-                        values: [projectId]
+                        text: "select * from public.\"PlayerInvite\" where player_id = $1",
+                        values: [playerId]
                     };
                     return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
@@ -109,16 +91,16 @@ function getTableViewsQuery(projectId) {
         });
     });
 }
-exports.getTableViewsQuery = getTableViewsQuery;
-function getTableViewsByUser(userId) {
+exports.getPlayerInviteByPlayerQuery = getPlayerInviteByPlayerQuery;
+function getPlayerInviteByUUIDQuery(uuid) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"TableView\" where user_id = $1",
-                        values: [userId]
+                        text: "select * from public.\"PlayerInvite\" where uuid = $1",
+                        values: [uuid]
                     };
                     return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
@@ -126,15 +108,15 @@ function getTableViewsByUser(userId) {
         });
     });
 }
-exports.getTableViewsByUser = getTableViewsByUser;
-function removeTableViewQuery(id) {
+exports.getPlayerInviteByUUIDQuery = getPlayerInviteByUUIDQuery;
+function removePlayerInviteQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "delete from public.\"TableView\" where id = $1",
+                        text: "delete from public.\"PlayerInvite\" where id = $1",
                         values: [id]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -143,32 +125,4 @@ function removeTableViewQuery(id) {
         });
     });
 }
-exports.removeTableViewQuery = removeTableViewQuery;
-function editTableViewQuery(id, data) {
-    return __awaiter(this, void 0, void 0, function () {
-        var edits, values, iterator, _i, _a, _b, key, value, query;
-        return __generator(this, function (_c) {
-            switch (_c.label) {
-                case 0:
-                    edits = "";
-                    values = [];
-                    iterator = 1;
-                    for (_i = 0, _a = Object.entries(data); _i < _a.length; _i++) {
-                        _b = _a[_i], key = _b[0], value = _b[1];
-                        edits += "".concat(key, " = $").concat(iterator, ", ");
-                        values.push(value);
-                        iterator++;
-                    }
-                    edits = edits.slice(0, -2);
-                    values.push(id);
-                    query = {
-                        text: "update public.\"TableView\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
-                        values: values
-                    };
-                    return [4, dbconfig_1["default"].query(query)];
-                case 1: return [2, _c.sent()];
-            }
-        });
-    });
-}
-exports.editTableViewQuery = editTableViewQuery;
+exports.removePlayerInviteQuery = removePlayerInviteQuery;

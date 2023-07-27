@@ -185,6 +185,20 @@ import {
   addTableView,
   getTableView,
 } from "./controllers/tableViews.js";
+import {
+  addPlayerInvite,
+  getPlayerInviteByPlayer,
+  getPlayerInviteByUUID,
+  removePlayerInvite,
+} from "./controllers/playerInvites.js";
+import {
+  addPlayerUser,
+  editPlayerUser,
+  getPlayerUserByUserAndPlayer,
+  getPlayerUsersByPlayer,
+  removePlayerUser,
+  removePlayerUserByUserAndPlayer,
+} from "./controllers/playerUsers.js";
 const upload = multer({ dest: "file_uploads/" });
 
 var router = Router();
@@ -234,6 +248,26 @@ router.get(
 router.post("/add_project_user", addProjectUser);
 router.delete("/remove_project_user/:id", removeProjectUser);
 router.post("/edit_project_user/:id", editProjectUser);
+
+// player users
+router.get(
+  "/get_player_user_by_user_and_player/:player_id",
+  getPlayerUserByUserAndPlayer
+);
+router.get("/get_player_users_by_player/:player_id", getPlayerUsersByPlayer);
+router.post("/add_player_user", addPlayerUser);
+router.delete("/remove_player_user/:id", removePlayerUser);
+router.post("/edit_player_user/:id", editPlayerUser);
+router.delete(
+  "/remove_player_user_by_user_and_player/:player_id",
+  removePlayerUserByUserAndPlayer
+);
+
+// player invites
+router.get("/get_player_invite_by_uuid/:uuid", getPlayerInviteByUUID);
+router.get("/get_player_invite_by_player/:player_id", getPlayerInviteByPlayer);
+router.post("/add_player_invite", addPlayerInvite);
+router.delete("/remove_player_invite/:id", removePlayerInvite);
 
 // project invites
 router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);

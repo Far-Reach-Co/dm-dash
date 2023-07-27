@@ -52,9 +52,17 @@ async function add5eCharGeneralQuery(data: {
   return await db.query<DndFiveEGeneralModel>(query)
 }
 
-async function get5eCharGeneralQuery(id: string) {
+async function get5eCharGeneralQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_general" where id = $1`,
+    values: [id]
+  }
+  return await db.query<DndFiveEGeneralModel>(query)
+}
+
+async function get5eCharGeneralUserIdQuery(id: string) {
+  const query = {
+    text: /*sql*/ `select user_id from public."dnd_5e_character_general" where id = $1`,
     values: [id]
   }
   return await db.query<DndFiveEGeneralModel>(query)
@@ -100,6 +108,7 @@ async function edit5eCharGeneralQuery(id: string, data: any) {
 
 export {
   add5eCharGeneralQuery,
+  get5eCharGeneralUserIdQuery,
   get5eCharsGeneralByUserQuery,
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,

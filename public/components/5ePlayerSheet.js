@@ -7,32 +7,20 @@ import EquipmentComponent from "../lib/EquipmentComponent.js";
 import FeatComponent from "../lib/FeatComponent.js";
 import SpellsComponent from "../lib/SpellsComponent.js";
 import calculateColorMod from "../lib/calculateColorMod.js";
+import SheetSettings from "../lib/SheetSettings.js";
 
 export default class FiveEPlayerSheet {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.navigate = props.navigate;
-    this.domComponent.className = "standard-view";
-    if (window.innerWidth > 500)
-      this.domComponent.style =
-        "align-items: center; overflow-x: auto; max-width: 100%";
-    else {
-      this.domComponent.style = this.domComponent.style =
-        "overflow-x: auto; max-width: 100%;";
-    }
     this.generalData = props.params.content;
     // general, background, etc
     this.mainView = "general";
 
-    // styling fix for mobile
-    const smallDevice = window.matchMedia("(min-width: 500px)");
-    smallDevice.addEventListener("change", (e) => {
-      if (e.matches) {
-        this.domComponent.style =
-          "align-items: center; overflow-x: auto; max-width: 100%";
-      } else {
-        this.domComponent.style = "overflow-x: auto; max-width: 100%;";
-      }
+    // settings view
+    this.sheetSettings = new SheetSettings({
+      domComponent: createElement("div"),
+      generalData: this.generalData,
     });
 
     this.render();
@@ -1739,6 +1727,23 @@ export default class FiveEPlayerSheet {
             },
           }
         ),
+        createElement(
+          "a",
+          {
+            class:
+              this.mainView === "settings"
+                ? "cp-nav-item-active"
+                : "cp-nav-item",
+          },
+          "Settings",
+          {
+            type: "click",
+            event: () => {
+              this.mainView = "settings";
+              this.render();
+            },
+          }
+        ),
       ])
     );
 
@@ -1752,6 +1757,10 @@ export default class FiveEPlayerSheet {
 
     if (this.mainView === "spells") {
       return this.renderSpellsView();
+    }
+
+    if (this.mainView === "settings") {
+      return this.domComponent.append(this.sheetSettings.domComponent);
     }
   };
 }

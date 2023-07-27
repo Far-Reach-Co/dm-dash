@@ -9,31 +9,65 @@
     <script src="/lib/MobileNavHandler.js" defer></script>
     <%- include('./partials/icons') %>
   </head>
-  <style>
-    .dash-section {
-      padding: var(--main-distance);
-      width: 100%;
-      height: 300px;
-      overflow-y: scroll;
-      border-bottom: 1px solid var(--main-gray);
-      background-color: var(--blue3);
-    }
-  </style>
   <body>
     <%- include('./partials/nav') %>
-    <div class="dash-section">
-      <h1>Character Sheets</h1>
-      <div>feafe</div>
-      <div>feafe</div>
-      <div>feafe</div>
-      <div>feafe</div>
-      <div>feafe</div>
-    </div>
-    <div class="dash-section">
-      <h1>Tables</h1>
-    </div>
-    <div class="dash-section">
-      <h1>Wyrlds</h1>
+    <div class="d-flex h-100">
+      <div class="d-flex flex-column flex-wrap p-3 w-50 h-100">
+        <h2>Tables</h2>
+        <small>Live virtual tables</small>
+        <br />
+        <a href="/new_table" title="Create a new virtual table">+ New Table</a>
+        <hr />
+        <% if (tables.length === 0) { %>
+        <small class="ms-2">No tables yet...</small>
+        <% } else { %> <% tables.forEach(function(table) { %>
+        <div
+          class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+        >
+          <div class="dash-list-title mb-3"><%= table.title %></div>
+          <a>↗</a>
+        </div>
+        <% }); %> <% } %>
+      </div>
+      <div class="d-flex flex-column flex-wrap d-wrap p-3 w-50 h-100">
+        <h2>Player Character Sheets</h2>
+        <small>We currently offer Dungeons and Dragons 5e sheets</small>
+        <br />
+        <a href="/new_sheet" title="Create a new player character sheet"
+          >+ New Sheet</a
+        >
+        <hr />
+        <h3>My Sheets</h3>
+        <% if (sheets.length === 0) { %>
+        <small class="ms-2">No sheets yet...</small>
+        <% } else { %> <% sheets.forEach(function(sheet) { %>
+        <div
+          class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+          onclick="handleSheetClick('<%= sheet.id %>')"
+        >
+          <div class="dash-list-title mb-3"><%= sheet.name %></div>
+          <a>↗</a>
+        </div>
+        <% }); %> <% } %>
+        <br />
+        <h3>Shared Sheets</h3>
+        <% if (sharedSheets.length === 0) { %>
+        <small class="ms-2">No sheets yet...</small>
+        <% } else { %> <% sharedSheets.forEach(function(sheet) { %>
+        <div
+          class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+          onclick="handleSheetClick('<%= sheet.id %>')"
+        >
+          <div class="dash-list-title mb-3"><%= sheet.name %></div>
+          <a>↗</a>
+        </div>
+        <% }); %> <% } %>
+      </div>
     </div>
   </body>
+  <script>
+    function handleSheetClick(id) {
+      window.open(`/5eplayer?id=${id}`, "_blank").focus();
+    }
+  </script>
 </html>

@@ -55,6 +55,14 @@ import {
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
 import { getUserByIdQuery } from "../queries/users";
+import {
+  getPlayerUsersByPlayerQuery,
+  removePlayerUserQuery,
+} from "../queries/playerUsers";
+import {
+  getPlayerInviteByPlayerQuery,
+  removePlayerInviteQuery,
+} from "../queries/playerInvites";
 
 async function add5eChar(req: Request, res: Response, next: NextFunction) {
   try {
@@ -75,7 +83,9 @@ async function add5eChar(req: Request, res: Response, next: NextFunction) {
     await add5eCharBackQuery({ general_id: general.id });
     await add5eCharSpellSlotInfoQuery({ general_id: general.id });
     // HTMX redirect
-    res.set("HX-Redirect", "/5eplayer").send("Form submission was successful.");
+    res
+      .set("HX-Redirect", `/5eplayer?id=${general.id}`)
+      .send("Form submission was successful.");
   } catch (err) {
     next(err);
   }
@@ -192,6 +202,14 @@ async function remove5eChar(req: Request, res: Response, next: NextFunction) {
     const projectPlayerData = await getProjectPlayersByPlayerQuery(general.id);
     projectPlayerData.rows.forEach(async (projectPlayer) => {
       await removeProjectPlayerQuery(projectPlayer.id);
+    });
+    const playerUserData = await getPlayerUsersByPlayerQuery(general.id);
+    playerUserData.rows.forEach(async (playerUser) => {
+      await removePlayerUserQuery(playerUser.id);
+    });
+    const playerInviteData = await getPlayerInviteByPlayerQuery(general.id);
+    playerInviteData.rows.forEach(async (playerInvite) => {
+      await removePlayerInviteQuery(playerInvite.id);
     });
 
     res.status(204).send();

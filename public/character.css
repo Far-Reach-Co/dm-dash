@@ -29,7 +29,6 @@
   /* border: 1px solid var(--blue); */
   color: var(--main-white);
   width: auto;
-  background-color: var(--blue3);
   border-radius: var(--border-radius);
   border-width: 0;
 }
@@ -38,7 +37,6 @@
   /* border: 1px solid var(--blue); */
   color: var(--main-white);
   max-width: 60px;
-  background-color: var(--blue3);
   border-radius: var(--border-radius);
   border-width: 0;
 }
@@ -183,6 +181,7 @@
   margin: 5px;
   border: 1px solid var(--blue);
   cursor: pointer;
+  background-color: var(--main-dark);
   border-radius: var(--border-radius);
 }
 

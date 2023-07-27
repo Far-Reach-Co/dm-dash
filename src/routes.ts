@@ -1,7 +1,16 @@
 import { Router } from "express";
 import { Request, Response, NextFunction } from "express";
 import { editUserQuery, getUserByIdQuery } from "./api/queries/users";
-import { get5eCharsGeneralByUserQuery } from "./api/queries/5eCharGeneral";
+import {
+  get5eCharGeneralQuery,
+  get5eCharGeneralUserIdQuery,
+  get5eCharsGeneralByUserQuery,
+} from "./api/queries/5eCharGeneral";
+import { getTableViewsByUser } from "./api/queries/tableViews";
+import {
+  getPlayerUserByUserAndPlayerQuery,
+  getPlayerUsersQuery,
+} from "./api/queries/playerUsers";
 
 var router = Router();
 
@@ -97,35 +106,62 @@ router.get("/dashboard", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-router.get("/dashnew", (req: Request, res: Response, next: NextFunction) => {
-  try {
-    //
-    res.render("dashnew", { auth: req.session.user });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.get("/5eplayer", (req: Request, res: Response, next: NextFunction) => {
-  try {
-    //
-    res.render("5eplayer", { auth: req.session.user });
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.get(
-  "/sheets",
+  "/5eplayer",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get all character sheets by user
       if (!req.session.user) throw new Error("User is not logged in");
-      const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
+      if (!req.query.id) throw new Error("Missing player ID in query");
+      const playerSheetid = req.query.id as string;
+      const playerSheetUserIdData = await get5eCharGeneralUserIdQuery(
+        playerSheetid
+      );
+      const playerSheetUserId = playerSheetUserIdData.rows[0].user_id;
+      // check if user created character sheet or if is a playerUser (add by invite)
+      if (playerSheetUserId != req.session.user) {
+        const playerUserData = await getPlayerUserByUserAndPlayerQuery(
+          req.session.user,
+          playerSheetid
+        );
+        if (!playerUserData.rows.length) {
+          const invite = req.query.invite as string;
+          if (!invite) {
+            return res.render("forbidden", { auth: req.session.user });
+          }
+        }
+      }
+      //
+      res.render("5eplayer", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
-      res.render("sheets", {
+router.get(
+  "/dashnew",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) throw new Error("User is not logged in");
+      // get table views by user
+      const tableData = await getTableViewsByUser(req.session.user);
+      // get all character sheets by user
+      const charData = await get5eCharsGeneralByUserQuery(req.session.user);
+      // get shared character sheets by playerUser
+      const sharedCharData = [];
+      const playerUsersData = await getPlayerUsersQuery(req.session.user);
+      if (playerUsersData.rows.length) {
+        for (const playerUser of playerUsersData.rows) {
+          const puCharData = await get5eCharGeneralQuery(playerUser.player_id);
+          sharedCharData.push(puCharData.rows[0]);
+        }
+      }
+
+      res.render("dashnew", {
         auth: req.session.user,
-        sheets: generalsData.rows,
+        tables: tableData.rows,
+        sheets: charData.rows,
+        sharedSheets: sharedCharData,
       });
     } catch (err) {
       next(err);
@@ -188,6 +224,15 @@ router.get("/logout", (req: Request, res: Response, next: NextFunction) => {
     }
     res.redirect("/");
   });
+});
+
+router.get("/forbidden", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //
+    res.render("forbidden", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
 });
 
 router.use((req: Request, res: Response, next: NextFunction) => {

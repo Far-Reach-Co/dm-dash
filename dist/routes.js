@@ -39,6 +39,8 @@ exports.__esModule = true;
 var express_1 = require("express");
 var users_1 = require("./api/queries/users");
 var _5eCharGeneral_1 = require("./api/queries/5eCharGeneral");
+var tableViews_1 = require("./api/queries/tableViews");
+var playerUsers_1 = require("./api/queries/playerUsers");
 var router = (0, express_1.Router)();
 router.get("/", function (req, res, next) {
     try {
@@ -125,43 +127,88 @@ router.get("/dashboard", function (req, res, next) {
         next(err);
     }
 });
-router.get("/dashnew", function (req, res, next) {
-    try {
-        res.render("dashnew", { auth: req.session.user });
-    }
-    catch (err) {
-        next(err);
-    }
-});
-router.get("/5eplayer", function (req, res, next) {
-    try {
-        res.render("5eplayer", { auth: req.session.user });
-    }
-    catch (err) {
-        next(err);
-    }
-});
-router.get("/sheets", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var generalsData, err_2;
+router.get("/5eplayer", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var playerSheetid, playerSheetUserIdData, playerSheetUserId, playerUserData, invite, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
+                _a.trys.push([0, 4, , 5]);
                 if (!req.session.user)
                     throw new Error("User is not logged in");
-                return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
+                if (!req.query.id)
+                    throw new Error("Missing player ID in query");
+                playerSheetid = req.query.id;
+                return [4, (0, _5eCharGeneral_1.get5eCharGeneralUserIdQuery)(playerSheetid)];
             case 1:
-                generalsData = _a.sent();
-                res.render("sheets", {
-                    auth: req.session.user,
-                    sheets: generalsData.rows
-                });
-                return [3, 3];
+                playerSheetUserIdData = _a.sent();
+                playerSheetUserId = playerSheetUserIdData.rows[0].user_id;
+                if (!(playerSheetUserId != req.session.user)) return [3, 3];
+                return [4, (0, playerUsers_1.getPlayerUserByUserAndPlayerQuery)(req.session.user, playerSheetid)];
             case 2:
+                playerUserData = _a.sent();
+                if (!playerUserData.rows.length) {
+                    invite = req.query.invite;
+                    if (!invite) {
+                        return [2, res.render("forbidden", { auth: req.session.user })];
+                    }
+                }
+                _a.label = 3;
+            case 3:
+                res.render("5eplayer", { auth: req.session.user });
+                return [3, 5];
+            case 4:
                 err_2 = _a.sent();
                 next(err_2);
-                return [3, 3];
-            case 3: return [2];
+                return [3, 5];
+            case 5: return [2];
+        }
+    });
+}); });
+router.get("/dashnew", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var tableData, charData, sharedCharData, playerUsersData, _i, _a, playerUser, puCharData, err_3;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 8, , 9]);
+                if (!req.session.user)
+                    throw new Error("User is not logged in");
+                return [4, (0, tableViews_1.getTableViewsByUser)(req.session.user)];
+            case 1:
+                tableData = _b.sent();
+                return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
+            case 2:
+                charData = _b.sent();
+                sharedCharData = [];
+                return [4, (0, playerUsers_1.getPlayerUsersQuery)(req.session.user)];
+            case 3:
+                playerUsersData = _b.sent();
+                if (!playerUsersData.rows.length) return [3, 7];
+                _i = 0, _a = playerUsersData.rows;
+                _b.label = 4;
+            case 4:
+                if (!(_i < _a.length)) return [3, 7];
+                playerUser = _a[_i];
+                return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(playerUser.player_id)];
+            case 5:
+                puCharData = _b.sent();
+                sharedCharData.push(puCharData.rows[0]);
+                _b.label = 6;
+            case 6:
+                _i++;
+                return [3, 4];
+            case 7:
+                res.render("dashnew", {
+                    auth: req.session.user,
+                    tables: tableData.rows,
+                    sheets: charData.rows,
+                    sharedSheets: sharedCharData
+                });
+                return [3, 9];
+            case 8:
+                err_3 = _b.sent();
+                next(err_3);
+                return [3, 9];
+            case 9: return [2];
         }
     });
 }); });
@@ -182,7 +229,7 @@ router.get("/vtt", function (req, res, next) {
     }
 });
 router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_3;
+    var err_4;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -197,15 +244,15 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_3 = _a.sent();
-                next(err_3);
+                err_4 = _a.sent();
+                next(err_4);
                 return [3, 3];
             case 3: return [2];
         }
     });
 }); });
 router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_4;
+    var err_5;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -220,8 +267,8 @@ router.post("/update_email", function (req, res, next) { return __awaiter(void 0
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_4 = _a.sent();
-                next(err_4);
+                err_5 = _a.sent();
+                next(err_5);
                 return [3, 3];
             case 3: return [2];
         }
@@ -234,6 +281,14 @@ router.get("/logout", function (req, res, next) {
         }
         res.redirect("/");
     });
+});
+router.get("/forbidden", function (req, res, next) {
+    try {
+        res.render("forbidden", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
 });
 router.use(function (req, res, next) {
     res.status(404).render("404", { auth: req.session.user });

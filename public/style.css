@@ -55,7 +55,7 @@
   --light-gray: rgb(174, 173, 173);
   --blue: rgb(70, 89, 110);
   --blue2: rgb(107, 129, 154);
-  --blue3: #1f2631;
+  --blue3: #1f2431;
   --blue4: rgb(43, 64, 83);
   --blue5: rgb(39, 50, 67);
   --blue6: rgb(125, 174, 237);
@@ -361,7 +361,6 @@ input {
 input[type="number"] {
   width: 100px;
   color: var(--main-white);
-  background-color: var(--blue3);
 }
 
 input[type="file"] {
@@ -434,7 +433,7 @@ textarea {
   border: none;
   outline: none;
   color: var(--main-white);
-  background-color: var(--blue3);
+  background-color: var(--main-dark);
   display: inline-block;
   font-size: inherit;
   /* font-family: inherit; */
@@ -605,21 +604,17 @@ footer {
   color: var(--link-blue);
 }
 
-.toast {
+.toast-custom {
   z-index: 4;
   position: absolute;
   left: 50%;
   top: 10%;
-  align-self: center;
   width: fit-content;
   height: fit-content;
-  color: inherit;
+  color: var(--main-white);
   background-color: var(--green2);
   padding: 3px 6px;
-  font: inherit;
-  color: var(--main-white);
   font-size: 18px;
-  text-shadow: inherit;
   opacity: 0.9;
   cursor: pointer;
   /* transition: 1s; */
@@ -636,6 +631,19 @@ footer {
 
 .component {
   background-color: var(--blue3);
+}
+
+.dash-list-title-container {
+  cursor: pointer;
+}
+
+.dash-list-title-container:hover .dash-list-title {
+  text-decoration: underline;
+}
+
+.dash-list-title-container:hover a {
+  text-decoration: none;
+  color: var(--green);
 }
 
 /* modal */

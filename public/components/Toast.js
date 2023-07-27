@@ -4,7 +4,7 @@ class Toast {
   constructor() {
     this.isVisible = false;
     this.message = "";
-    this.domComponent = document.getElementById("toast");
+    this.domComponent = document.getElementById("toast-custom");
     if (!this.domComponent) return;
     this.domComponent.style.visibility = "hidden";
 
@@ -46,11 +46,15 @@ class Toast {
 
     if (this.isError)
       return this.domComponent.append(
-        createElement("div", { class: "toast toast-error" }, this.message)
+        createElement(
+          "div",
+          { class: "toast-custom toast-error" },
+          this.message
+        )
       );
     else
       return this.domComponent.append(
-        createElement("div", { class: "toast" }, this.message)
+        createElement("div", { class: "toast-custom" }, this.message)
       );
   };
 }

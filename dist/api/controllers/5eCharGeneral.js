@@ -49,6 +49,8 @@ var _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 var projectPlayers_1 = require("../queries/projectPlayers");
 var enums_js_1 = require("../../lib/enums.js");
 var users_1 = require("../queries/users");
+var playerUsers_1 = require("../queries/playerUsers");
+var playerInvites_1 = require("../queries/playerInvites");
 function add5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var generalsData, rows, generalData, general, err_1;
@@ -83,7 +85,9 @@ function add5eChar(req, res, next) {
                     return [4, (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id })];
                 case 7:
                     _a.sent();
-                    res.set("HX-Redirect", "/5eplayer").send("Form submission was successful.");
+                    res
+                        .set("HX-Redirect", "/5eplayer?id=".concat(general.id))
+                        .send("Form submission was successful.");
                     return [3, 9];
                 case 8:
                     err_1 = _a.sent();
@@ -186,12 +190,12 @@ function get5eCharGeneral(req, res, next) {
 exports.get5eCharGeneral = get5eCharGeneral;
 function remove5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var generalData, general, proData, pro, backData, back, spellSlotsData, spellSlots, attacksData, equipmentData, featsData, spellsData, otherProLangsData, projectPlayerData, err_4;
+        var generalData, general, proData, pro, backData, back, spellSlotsData, spellSlots, attacksData, equipmentData, featsData, spellsData, otherProLangsData, projectPlayerData, playerUserData, playerInviteData, err_4;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 15, , 16]);
+                    _a.trys.push([0, 17, , 18]);
                     return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(req.params.id)];
                 case 1:
                     generalData = _a.sent();
@@ -298,13 +302,39 @@ function remove5eChar(req, res, next) {
                             }
                         });
                     }); });
-                    res.status(204).send();
-                    return [3, 16];
+                    return [4, (0, playerUsers_1.getPlayerUsersByPlayerQuery)(general.id)];
                 case 15:
+                    playerUserData = _a.sent();
+                    playerUserData.rows.forEach(function (playerUser) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4, (0, playerUsers_1.removePlayerUserQuery)(playerUser.id)];
+                                case 1:
+                                    _a.sent();
+                                    return [2];
+                            }
+                        });
+                    }); });
+                    return [4, (0, playerInvites_1.getPlayerInviteByPlayerQuery)(general.id)];
+                case 16:
+                    playerInviteData = _a.sent();
+                    playerInviteData.rows.forEach(function (playerInvite) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4, (0, playerInvites_1.removePlayerInviteQuery)(playerInvite.id)];
+                                case 1:
+                                    _a.sent();
+                                    return [2];
+                            }
+                        });
+                    }); });
+                    res.status(204).send();
+                    return [3, 18];
+                case 17:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 16];
-                case 16: return [2];
+                    return [3, 18];
+                case 18: return [2];
             }
         });
     });

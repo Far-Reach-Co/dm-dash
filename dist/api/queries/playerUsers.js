@@ -36,36 +36,18 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUser = exports.getTableViewQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
+exports.getPlayerUserByUserAndPlayerQuery = exports.editPlayerUserQuery = exports.removePlayerUserQuery = exports.getPlayerUsersByPlayerQuery = exports.getPlayerUsersQuery = exports.getPlayerUserQuery = exports.addPlayerUserQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
-function addTableViewQuery(data) {
+function addPlayerUserQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"TableView\" (project_id) values($1) returning *",
+                        text: "insert into public.\"PlayerUser\" (player_id, user_id) values($1,$2) returning *",
                         values: [
-                            data.project_id,
-                        ]
-                    };
-                    return [4, dbconfig_1["default"].query(query)];
-                case 1: return [2, _a.sent()];
-            }
-        });
-    });
-}
-exports.addTableViewQuery = addTableViewQuery;
-function addTableViewByUserQuery(data) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = {
-                        text: "insert into public.\"TableView\" (user_id) values($1) returning *",
-                        values: [
+                            data.player_id,
                             data.user_id,
                         ]
                     };
@@ -75,49 +57,15 @@ function addTableViewByUserQuery(data) {
         });
     });
 }
-exports.addTableViewByUserQuery = addTableViewByUserQuery;
-function getTableViewQuery(id) {
+exports.addPlayerUserQuery = addPlayerUserQuery;
+function getPlayerUsersQuery(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"TableView\" where id = $1",
-                        values: [id]
-                    };
-                    return [4, dbconfig_1["default"].query(query)];
-                case 1: return [2, _a.sent()];
-            }
-        });
-    });
-}
-exports.getTableViewQuery = getTableViewQuery;
-function getTableViewsQuery(projectId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = {
-                        text: "select * from public.\"TableView\" where project_id = $1",
-                        values: [projectId]
-                    };
-                    return [4, dbconfig_1["default"].query(query)];
-                case 1: return [2, _a.sent()];
-            }
-        });
-    });
-}
-exports.getTableViewsQuery = getTableViewsQuery;
-function getTableViewsByUser(userId) {
-    return __awaiter(this, void 0, void 0, function () {
-        var query;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    query = {
-                        text: "select * from public.\"TableView\" where user_id = $1",
+                        text: "select * from public.\"PlayerUser\" where user_id = $1",
                         values: [userId]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -126,15 +74,49 @@ function getTableViewsByUser(userId) {
         });
     });
 }
-exports.getTableViewsByUser = getTableViewsByUser;
-function removeTableViewQuery(id) {
+exports.getPlayerUsersQuery = getPlayerUsersQuery;
+function getPlayerUserByUserAndPlayerQuery(userId, playerId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "delete from public.\"TableView\" where id = $1",
+                        text: "select * from public.\"PlayerUser\" where user_id = $1 and player_id = $2",
+                        values: [userId, playerId]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.getPlayerUserByUserAndPlayerQuery = getPlayerUserByUserAndPlayerQuery;
+function getPlayerUsersByPlayerQuery(playerId) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "select * from public.\"PlayerUser\" where player_id = $1",
+                        values: [playerId]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.getPlayerUsersByPlayerQuery = getPlayerUsersByPlayerQuery;
+function getPlayerUserQuery(id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "select * from public.\"PlayerUser\" where id = $1",
                         values: [id]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -143,8 +125,25 @@ function removeTableViewQuery(id) {
         });
     });
 }
-exports.removeTableViewQuery = removeTableViewQuery;
-function editTableViewQuery(id, data) {
+exports.getPlayerUserQuery = getPlayerUserQuery;
+function removePlayerUserQuery(id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "delete from public.\"PlayerUser\" where id = $1",
+                        values: [id]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.removePlayerUserQuery = removePlayerUserQuery;
+function editPlayerUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
         return __generator(this, function (_c) {
@@ -162,7 +161,7 @@ function editTableViewQuery(id, data) {
                     edits = edits.slice(0, -2);
                     values.push(id);
                     query = {
-                        text: "update public.\"TableView\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
+                        text: "update public.\"PlayerUser\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -171,4 +170,4 @@ function editTableViewQuery(id, data) {
         });
     });
 }
-exports.editTableViewQuery = editTableViewQuery;
+exports.editPlayerUserQuery = editPlayerUserQuery;

@@ -8,26 +8,21 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/character.css" />
     <%- include('./partials/icons') %>
+    <script>
+      const USERID = "<%= auth %>";
+    </script>
     <script src="/lib/MobileNavHandler.js" defer></script>
     <script src="/dist/bundleInitSheet.js" defer type="module"></script>
   </head>
   <body>
     <%- include('./partials/nav') %>
-    <div class="dashboard-container">
+    <div class="container-fluid p-3">
       <div id="app">
         <!-- Initial spinner -->
         <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>
       </div>
       <!-- Toast -->
-      <div id="toast"></div>
-      <!-- The Modal -->
-      <div id="modal" class="modal">
-        <!-- Modal content -->
-        <div class="modal-container">
-          <div id="close-modal" class="close-modal">&times;</div>
-          <div id="modal-content" class="modal-content"></div>
-        </div>
-      </div>
+      <div id="toast-custom">afeafeafea</div>
     </div>
   </body>
 </html>

@@ -135,12 +135,12 @@
           const hasJoinedProject = await getProjectUser(project.id);
           if (hasJoinedProject) {
             alert("You already have this project...");
-            return (window.location.pathname = "/dashboard");
+            return (window.location.pathname = "/dashnew");
           }
           // check if user has this project
           if (project.user_id === user.id) {
             alert("You already have this project...");
-            return (window.location.pathname = "/dashboard");
+            return (window.location.pathname = "/dashnew");
           }
           const inviteDiv = document.getElementById("invite-div");
           const button = document.createElement("button");
@@ -161,7 +161,7 @@
               button.innerText = "Return To Dashboard";
               button.addEventListener(
                 "click",
-                () => (window.location.pathname = "/dashboard")
+                () => (window.location.pathname = "/dashnew")
               );
               inviteDiv.append(message, document.createElement("br"), button);
             }
