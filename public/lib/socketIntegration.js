@@ -15,6 +15,19 @@ class SocketIntegration {
       console.log("User Joined:\n", message);
     });
 
+    // TABLE CHANGE
+    this.socket.on("table-change", (newTableUUID) => {
+      const searchParams = new URLSearchParams(window.location.search);
+      searchParams.set("uuid", newTableUUID);
+      const newSearchParamsString = searchParams.toString();
+
+      const newUrl = window.location.pathname + "?" + newSearchParamsString;
+      window.history.replaceState(null, null, newUrl);
+
+      // Reload the page
+      window.location.reload();
+    });
+    // ERROR
     this.socket.on("connect_error", (error) => {
       console.log(error);
       if (window.confirm("There was a connection error, refresh the page?")) {
@@ -192,6 +205,13 @@ class SocketIntegration {
     this.socket.emit("table-joined", {
       username: this.user.username,
       table: `table-${this.tableId}`,
+    });
+  };
+
+  tableChanged = (newTableUUID) => {
+    this.socket.emit("table-changed", {
+      table: `table-${this.tableId}`,
+      newTableUUID,
     });
   };
 

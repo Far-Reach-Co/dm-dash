@@ -172,7 +172,7 @@ router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0,
                 _b.trys.push([0, 8, , 9]);
                 if (!req.session.user)
                     throw new Error("User is not logged in");
-                return [4, (0, tableViews_1.getTableViewsByUser)(req.session.user)];
+                return [4, (0, tableViews_1.getTableViewsByUserQuery)(req.session.user)];
             case 1:
                 tableData = _b.sent();
                 return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];

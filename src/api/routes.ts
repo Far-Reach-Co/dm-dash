@@ -182,13 +182,14 @@ import {
   addTableImageByUser,
 } from "./controllers/tableImages.js";
 import {
-  getTableViews,
+  getTableViewsByProject,
   removeTableView,
   editTableView,
   addTableView,
   getTableView,
   addTableViewByUser,
   getTableViewByUUID,
+  getTableViewsByUser,
 } from "./controllers/tableViews.js";
 import {
   addPlayerInvite,
@@ -229,7 +230,8 @@ router.delete(
 );
 
 // table views
-router.get("/get_table_views/:project_id", getTableViews);
+router.get("/get_table_views_by_project/:project_id", getTableViewsByProject);
+router.get("/get_table_views_by_user", getTableViewsByUser);
 router.get("/get_table_view/:id", getTableView);
 router.get("/get_table_view_by_uuid/:uuid", getTableViewByUUID);
 router.post("/add_table_view", addTableView);

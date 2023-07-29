@@ -54,7 +54,7 @@ async function getTableViewsQuery(projectId: string) {
   return await db.query<TableViewModel>(query)
 }
 
-async function getTableViewsByUser(userId: string | number) {
+async function getTableViewsByUserQuery(userId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."TableView" where user_id = $1`,
     values: [userId]
@@ -98,7 +98,7 @@ export {
   getTableViewsQuery,
   getTableViewByUUIDQuery,
   getTableViewQuery,
-  getTableViewsByUser,
+  getTableViewsByUserQuery,
   removeTableViewQuery,
   editTableViewQuery,
   addTableViewByUserQuery

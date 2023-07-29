@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUser = exports.getTableViewQuery = exports.getTableViewByUUIDQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
+exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUserQuery = exports.getTableViewQuery = exports.getTableViewByUUIDQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function addTableViewQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
@@ -128,7 +128,7 @@ function getTableViewsQuery(projectId) {
     });
 }
 exports.getTableViewsQuery = getTableViewsQuery;
-function getTableViewsByUser(userId) {
+function getTableViewsByUserQuery(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
@@ -144,7 +144,7 @@ function getTableViewsByUser(userId) {
         });
     });
 }
-exports.getTableViewsByUser = getTableViewsByUser;
+exports.getTableViewsByUserQuery = getTableViewsByUserQuery;
 function removeTableViewQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

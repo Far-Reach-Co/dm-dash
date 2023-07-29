@@ -4,6 +4,10 @@ import {
   fallbackCopyTextToClipboard,
   copyTextToClipboard,
 } from "../lib/clipboard.js";
+import modal from "./modal.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
+import tableSelect from "../lib/tableSelect.js";
+import socketIntegration from "../lib/socketIntegration.js";
 
 export default class TableSidebar {
   constructor(props) {
@@ -73,7 +77,173 @@ export default class TableSidebar {
         class: "sidebar-container",
       },
       [
-        createElement("div", { class: "sidebar-header" }, this.tableView.title),
+        createElement(
+          "div",
+          {
+            class:
+              "d-flex align-items-center justify-content-between px-4 py-2",
+          },
+          [
+            createElement(
+              "div",
+              { id: "table-display-title" },
+              this.tableView.title
+            ),
+            createElement(
+              "img",
+              {
+                class: "icon gear",
+                src: "/assets/gears.svg",
+                title: "Open Table Settings",
+              },
+              null,
+              {
+                type: "click",
+                event: async () => {
+                  modal.show(
+                    createElement("div", { class: "help-content" }, [
+                      createElement("h1", {}, "Table Settings"),
+                      createElement("hr"),
+                      createElement("h2", {}, "Change Table"),
+                      createElement(
+                        "small",
+                        {},
+                        "This will move everyone viewing this table to another table"
+                      ),
+                      createElement(
+                        "form",
+                        {},
+                        [
+                          await tableSelect(),
+                          createElement("Button", { class: "ms-2" }, "Go"),
+                        ],
+                        {
+                          type: "submit",
+                          event: (e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.target);
+                            const formProps = Object.fromEntries(formData);
+                            const tableUUID = formProps.table_uuid;
+                            if (tableUUID != 0) {
+                              // push all viewers
+                              socketIntegration.tableChanged(tableUUID);
+                              // push current user
+                              const searchParams = new URLSearchParams(
+                                window.location.search
+                              );
+                              searchParams.set("uuid", tableUUID);
+                              const newSearchParamsString =
+                                searchParams.toString();
+
+                              const newUrl =
+                                window.location.pathname +
+                                "?" +
+                                newSearchParamsString;
+
+                              window.history.replaceState(null, null, newUrl);
+
+                              // Reload the page
+                              window.location.reload();
+                            }
+                          },
+                        }
+                      ),
+                      createElement("hr"),
+                      createElement("h2", {}, "Details"),
+                      createElement("div", {}, [
+                        createElement(
+                          "form",
+                          {},
+                          [
+                            createElement(
+                              "label",
+                              {
+                                for: "title",
+                                class: "me-1",
+                              },
+                              "Edit Title"
+                            ),
+                            createElement("input", {
+                              value: this.tableView.title,
+                              name: "title",
+                              id: "title",
+                              required: true,
+                            }),
+                            createElement("br"),
+                            createElement(
+                              "button",
+                              { class: "new-btn me-1" },
+                              "Save"
+                            ),
+                            createElement("small", {
+                              class: "success-message",
+                              id: "title-update-success",
+                            }),
+                          ],
+                          {
+                            type: "submit",
+                            event: (e) => {
+                              e.preventDefault();
+                              const formData = new FormData(e.target);
+                              const formProps = Object.fromEntries(formData);
+                              const res = postThing(
+                                `/api/edit_table_view/${this.tableView.id}`,
+                                {
+                                  title: formProps.title,
+                                }
+                              );
+                              if (res) {
+                                // update success message
+                                const titleUpdateMessageElem =
+                                  document.querySelector(
+                                    "#title-update-success"
+                                  );
+                                titleUpdateMessageElem.innerText = "Saved!";
+                                // remove after 3 seconds
+                                setTimeout(() => {
+                                  titleUpdateMessageElem.innerText = "";
+                                }, 3000); // 10seconds
+                                // update table title on sidebar
+                                document.querySelector(
+                                  "#table-display-title"
+                                ).innerText = formProps.title;
+                                // update local tableState just in case
+                                this.tableView.title = formProps.title;
+                              }
+                            },
+                          }
+                        ),
+                        createElement("hr"),
+                        createElement(
+                          "button",
+                          { class: "btn-red" },
+                          "Delete Table",
+                          {
+                            type: "click",
+                            event: (e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (
+                                window.confirm(
+                                  `Are you sure you want to delete ${this.tableView.title}`
+                                )
+                              ) {
+                                deleteThing(
+                                  `/api/remove_table_view/${this.tableView.id}`
+                                );
+                                window.location.pathname = "/dash";
+                              }
+                            },
+                          }
+                        ),
+                      ]),
+                    ])
+                  );
+                },
+              }
+            ),
+          ]
+        ),
         createElement("button", {}, "Copy Share Link", {
           type: "click",
           event: () => {

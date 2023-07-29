@@ -6,7 +6,7 @@ import {
   get5eCharGeneralUserIdQuery,
   get5eCharsGeneralByUserQuery,
 } from "./api/queries/5eCharGeneral";
-import { getTableViewsByUser } from "./api/queries/tableViews";
+import { getTableViewsByUserQuery } from "./api/queries/tableViews";
 import {
   getPlayerUserByUserAndPlayerQuery,
   getPlayerUsersQuery,
@@ -142,7 +142,7 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
     // get table views by user
-    const tableData = await getTableViewsByUser(req.session.user);
+    const tableData = await getTableViewsByUserQuery(req.session.user);
     // get all character sheets by user
     const charData = await get5eCharsGeneralByUserQuery(req.session.user);
     // get shared character sheets by playerUser

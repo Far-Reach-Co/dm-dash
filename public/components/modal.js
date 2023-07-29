@@ -1,13 +1,13 @@
 class Modal {
   constructor() {
-    this.domComponent = document.getElementById("modal");
-    this.domContent = document.getElementById("modal-content");
-    this.closeButton = document.getElementById("close-modal");
+    this.domComponent = document.getElementById("modal-custom");
+    this.domContent = document.getElementById("modal-custom-content");
+    this.closeButton = document.getElementById("close-custom-modal");
 
     if (this.closeButton) {
       this.closeButton.addEventListener("click", this.hide);
       document.addEventListener("click", (e) => {
-        if (e.target.id === "modal") {
+        if (e.target.id === "modal-custom") {
           this.hide();
         }
       });

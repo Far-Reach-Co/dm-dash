@@ -6,6 +6,7 @@ import {
   addTableViewQuery,
   addTableViewByUserQuery,
   getTableViewByUUIDQuery,
+  getTableViewsByUserQuery,
 } from "../queries/tableViews.js";
 import { Request, Response, NextFunction } from "express";
 import { userSubscriptionStatus } from "../../lib/enums.js";
@@ -54,9 +55,28 @@ async function addTableViewByUser(
   }
 }
 
-async function getTableViews(req: Request, res: Response, next: NextFunction) {
+async function getTableViewsByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await getTableViewsQuery(req.params.project_id);
+
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getTableViewsByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    const data = await getTableViewsByUserQuery(req.session.user);
 
     res.send(data.rows);
   } catch (err) {
@@ -115,7 +135,8 @@ async function editTableView(req: Request, res: Response, next: NextFunction) {
 export {
   addTableView,
   addTableViewByUser,
-  getTableViews,
+  getTableViewsByUser,
+  getTableViewsByProject,
   getTableViewByUUID,
   getTableView,
   removeTableView,

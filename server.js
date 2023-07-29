@@ -115,6 +115,10 @@ io.on("connection", (socket) => {
   socket.on("grid-changed", ({ table, gridState }) => {
     socket.broadcast.to(table).emit("grid-change", gridState);
   });
+  // table change
+  socket.on("table-changed", ({ table, newTableUUID }) => {
+    socket.broadcast.to(table).emit("table-change", newTableUUID);
+  });
   // update images
   socket.on("image-added", ({ table, image }) => {
     socket.broadcast.to(table).emit("image-add", image);

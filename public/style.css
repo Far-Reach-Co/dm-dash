@@ -57,10 +57,10 @@
   --blue2: rgb(107, 129, 154);
   --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
-  --blue5: rgb(42, 54, 71);
+  --blue5: rgb(47, 62, 84);
   --blue6: rgb(125, 174, 237);
   --link-blue: rgb(155, 178, 205);
-  --purple: rgb(52, 51, 80);
+  --purple: rgb(73, 42, 87);
   --pink: rgb(221, 196, 248);
   --green: rgb(161, 184, 134);
   --green2: rgb(49, 74, 36);
@@ -68,9 +68,9 @@
   --orange2: rgb(224, 164, 116);
   --orange3: rgb(242, 216, 186);
   --orange4: rgb(213, 189, 161);
-  --red1: rgb(225, 75, 75);
-  --red2: rgb(120, 46, 46);
-  --red3: rgb(245, 123, 123);
+  --red1: rgb(206, 101, 101);
+  --red2: rgb(120, 51, 51);
+  --red3: rgb(241, 143, 143);
   --border-radius: 4px;
   --main-distance: 10px;
   --nav-height: 35px;
@@ -139,7 +139,7 @@ br {
 
 hr {
   /* border: 0; */
-  border: 0.5px solid var(--blue);
+  border: 0.5px solid var(--blue2);
   height: 1px;
   width: 100%;
   margin-top: var(--main-distance);
@@ -295,7 +295,7 @@ button {
 }
 
 button:hover {
-  background: linear-gradient(var(--blue2) 10%, var(--purple) 90%);
+  background: linear-gradient(var(--blue2) 10%, var(--blue5) 90%);
 }
 
 .label-btn {
@@ -322,7 +322,7 @@ button:hover {
 }
 
 .btn-red:hover {
-  background: linear-gradient(var(--red2) 10%, var(--purple) 90%);
+  background: linear-gradient(var(--red1) 10%, var(--purple) 90%);
 }
 
 form {
@@ -629,6 +629,10 @@ footer {
   height: 30px;
 }
 
+.gear:hover {
+  opacity: 0.7;
+}
+
 .component {
   background-color: var(--blue3);
 }
@@ -648,7 +652,10 @@ footer {
 
 /* modal */
 /* The Modal (background) */
-.modal {
+.modal-custom {
+  /* unset everything from bootstrap */
+  all: unset;
+
   visibility: hidden;
   /* Hidden by default */
   position: fixed;
@@ -674,14 +681,14 @@ footer {
 }
 
 /* Modal Content/Box */
-.modal-container {
+.modal-custom-container {
   width: fit-content;
   /* Could be more or less, depending on screen size */
   display: flex;
   flex-direction: column;
 }
 
-.modal-content {
+.modal-custom-content {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -690,14 +697,14 @@ footer {
 }
 
 /* The Close Button */
-.close-modal {
+.close-custom-modal {
   cursor: pointer;
   color: var(--main-white);
   align-self: flex-end;
   font-size: 30px;
 }
 
-.modal-image {
+.modal-custom-image {
   max-width: 100%;
   max-height: 100%;
 }
