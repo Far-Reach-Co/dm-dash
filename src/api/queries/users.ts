@@ -8,6 +8,7 @@ export interface UserModel {
   name: string,
   is_pro: boolean,
   password: string
+  used_data_in_bytes: number
 }
 
 async function getUserByIdQuery(id: string | number) {

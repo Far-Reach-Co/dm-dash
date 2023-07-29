@@ -27,11 +27,10 @@ const pgSession = require("connect-pg-simple")(session);
 
 const apiRoutes = require("./dist/api/routes.js");
 const routes = require("./dist/routes.js");
-const { verifyUserByToken } = require("./dist/api/controllers/users.js");
 const {
   userJoin,
   userLeave,
-  getCampaignUsers,
+  getTableUsers,
 } = require("./dist/lib/socketUsers.js");
 const { pool } = require("./dist/api/dbconfig.js");
 
@@ -91,20 +90,20 @@ app.use((error, req, res, next) => {
 /***************************** SOCKETS ***************************/
 io.on("connection", (socket) => {
   // testing
-  socket.on("campaign-joined", ({ campaign, username }) => {
+  socket.on("table-joined", ({ table, username }) => {
     try {
       console.log("************** SOCKETTTTTT ***********************\n");
-      console.log(campaign, username, "\n");
+      console.log(table, username, "\n");
       console.log("************** SOCKETTTTTT ***********************\n");
 
-      const user = userJoin(socket.id, username, campaign);
-      socket.join(campaign);
+      const user = userJoin(socket.id, username, table);
+      socket.join(table);
 
       // broadcast when a user connects
-      io.to(campaign).emit("campaign-join", `Hello ${username}`);
+      io.to(table).emit("table-join", `Hello ${username}`);
 
       // send users list
-      io.to(user.campaign).emit("current-users", getCampaignUsers(campaign));
+      io.to(user.table).emit("current-users", getTableUsers(table));
     } catch (err) {
       console.log("SOCKET ERROR", err);
     }
@@ -113,28 +112,28 @@ io.on("connection", (socket) => {
   // ************************* VTT *************************
 
   // grid
-  socket.on("grid-changed", ({ campaign, gridState }) => {
-    socket.broadcast.to(campaign).emit("grid-change", gridState);
+  socket.on("grid-changed", ({ table, gridState }) => {
+    socket.broadcast.to(table).emit("grid-change", gridState);
   });
   // update images
-  socket.on("image-added", ({ campaign, image }) => {
-    socket.broadcast.to(campaign).emit("image-add", image);
+  socket.on("image-added", ({ table, image }) => {
+    socket.broadcast.to(table).emit("image-add", image);
   });
 
-  socket.on("image-removed", ({ campaign, id }) => {
-    socket.broadcast.to(campaign).emit("image-remove", id);
+  socket.on("image-removed", ({ table, id }) => {
+    socket.broadcast.to(table).emit("image-remove", id);
   });
 
-  socket.on("image-moved", ({ campaign, image }) => {
-    socket.broadcast.to(campaign).emit("image-move", image);
+  socket.on("image-moved", ({ table, image }) => {
+    socket.broadcast.to(table).emit("image-move", image);
   });
 
-  socket.on("object-moved-up", ({ campaign, object }) => {
-    socket.broadcast.to(campaign).emit("object-move-up", object);
+  socket.on("object-moved-up", ({ table, object }) => {
+    socket.broadcast.to(table).emit("object-move-up", object);
   });
 
-  socket.on("object-changed-layer", ({ campaign, object }) => {
-    socket.broadcast.to(campaign).emit("object-change-layer", object);
+  socket.on("object-changed-layer", ({ table, object }) => {
+    socket.broadcast.to(table).emit("object-change-layer", object);
   });
 
   // when a user disconnects
@@ -143,10 +142,7 @@ io.on("connection", (socket) => {
 
     if (user) {
       // send users list
-      io.to(user.campaign).emit(
-        "current-users",
-        getCampaignUsers(user.campaign)
-      );
+      io.to(user.table).emit("current-users", getTableUsers(user.table));
     }
   });
 });

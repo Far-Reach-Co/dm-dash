@@ -101,10 +101,12 @@ import {
 } from "./controllers/projectUsers.js";
 import {
   getSignedUrlForDownload,
-  uploadToAws,
-  removeImage,
   editImage,
   getImage,
+  removeImageByTableUser,
+  removeImageByProject,
+  newImageForProject,
+  newImageForUser,
 } from "./controllers/s3.js";
 // for uploading files
 import multer = require("multer");
@@ -173,10 +175,11 @@ import {
   getProjectPlayersByPlayer,
 } from "./controllers/projectPlayers.js";
 import {
-  getTableImages,
-  addTableImage,
   removeTableImage,
   editTableImage,
+  getTableImagesByTableUser,
+  addTableImageByProject,
+  addTableImageByUser,
 } from "./controllers/tableImages.js";
 import {
   getTableViews,
@@ -184,6 +187,8 @@ import {
   editTableView,
   addTableView,
   getTableView,
+  addTableViewByUser,
+  getTableViewByUUID,
 } from "./controllers/tableViews.js";
 import {
   addPlayerInvite,
@@ -207,20 +212,39 @@ var router = Router();
 // s3
 router.get("/get_image/:id", getImage);
 router.post("/signed_URL_download", getSignedUrlForDownload);
-router.post("/file_upload", upload.single("file"), uploadToAws);
+router.post(
+  "/new_image_for_project",
+  upload.single("file"),
+  newImageForProject
+);
+router.post("/new_image_for_user", upload.single("file"), newImageForUser);
 router.post("/edit_image/:id", editImage);
-router.delete("/remove_image/:project_id/:image_id", removeImage);
+router.delete(
+  "/remove_image_by_table_user/:image_id/:table_id",
+  removeImageByTableUser
+);
+router.delete(
+  "/remove_user_image_by_project/:image_id/:project_id",
+  removeImageByProject
+);
 
 // table views
 router.get("/get_table_views/:project_id", getTableViews);
 router.get("/get_table_view/:id", getTableView);
+router.get("/get_table_view_by_uuid/:uuid", getTableViewByUUID);
 router.post("/add_table_view", addTableView);
+router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view/:id", editTableView);
 
 // table images
-router.get("/get_table_images/:project_id", getTableImages);
-router.post("/add_table_image", addTableImage);
+// router.get("/get_table_images_by_project/:project_id", getTableImages);
+router.get(
+  "/get_table_images_by_table_user/:table_id",
+  getTableImagesByTableUser
+);
+router.post("/add_table_image_by_project", addTableImageByProject);
+router.post("/add_table_image_by_user", addTableImageByUser);
 router.delete("/remove_table_image/:id", removeTableImage);
 router.post("/edit_table_image/:id", editTableImage);
 

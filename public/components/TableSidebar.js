@@ -1,10 +1,15 @@
 import createElement from "../lib/createElement.js";
 import TableSidebarComponent from "../lib/TableSidebarComponent.js";
+import {
+  fallbackCopyTextToClipboard,
+  copyTextToClipboard,
+} from "../lib/clipboard.js";
 
 export default class TableSidebar {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "sidebar";
+    this.tableView = props.tableView;
     this.isVisible = false;
     this.navigate = props.navigate;
 
@@ -13,6 +18,7 @@ export default class TableSidebar {
       domComponent: createElement("div", {
         style: "display: flex; flex-direction: column;",
       }),
+      tableView: this.tableView,
     });
 
     // setup online users component
@@ -67,7 +73,14 @@ export default class TableSidebar {
         class: "sidebar-container",
       },
       [
-        createElement("div", { class: "sidebar-header" }, "Images"),
+        createElement("div", { class: "sidebar-header" }, this.tableView.title),
+        createElement("button", {}, "Copy Share Link", {
+          type: "click",
+          event: () => {
+            copyTextToClipboard(window.location);
+          },
+        }),
+        createElement("br"),
         this.tableSidebarComponent.domComponent,
         createElement("div", { class: "sidebar-header" }, "Online Users"),
         this.onlineUsersComponent.domComponent,

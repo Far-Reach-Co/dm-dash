@@ -45,14 +45,14 @@ import {
   removeNoteQuery,
 } from "../queries/notes.js";
 import { getImageQuery, removeImageQuery } from "../queries/images.js";
-import { removeFile } from "./s3.js";
+import { removeImage } from "./s3.js";
 import {
   addTableViewQuery,
   getTableViewsQuery,
   removeTableViewQuery,
 } from "../queries/tableViews.js";
 import {
-  getTableImagesQuery,
+  getTableImagesByProjectQuery,
   removeTableImageQuery,
 } from "../queries/tableImages.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
@@ -183,7 +183,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (location.image_id) {
         const imageData = await getImageQuery(location.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
     });
@@ -198,7 +198,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (character.image_id) {
         const imageData = await getImageQuery(character.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
     });
@@ -232,7 +232,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (item.image_id) {
         const imageData = await getImageQuery(item.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
     });
@@ -247,7 +247,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (lore.image_id) {
         const imageData = await getImageQuery(lore.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
       const relationsData = await getLoreRelationsQuery(lore.id);
@@ -273,11 +273,11 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       await removeProjectUserQuery(user.id);
     });
     // table images
-    const tableImages = await getTableImagesQuery(req.params.id);
+    const tableImages = await getTableImagesByProjectQuery(req.params.id);
     tableImages.rows.forEach(async (tableImage) => {
       const imageData = await getImageQuery(tableImage.image_id);
       const image = imageData.rows[0];
-      await removeFile("wyrld/images", image);
+      await removeImage("wyrld/images", image);
       await removeTableImageQuery(tableImage.id);
     });
     // table views

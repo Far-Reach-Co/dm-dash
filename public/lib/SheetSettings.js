@@ -22,7 +22,6 @@ export default class SheetSettings {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
             player_id: this.generalData.id,
@@ -232,7 +231,7 @@ export default class SheetSettings {
                 await deleteThing(
                   `/api/remove_player_user_by_user_and_player${this.generalData.id}`
                 );
-                window.location.pathname = "/dashnew";
+                window.location.pathname = "/dash";
               }
             },
           }),
@@ -313,7 +312,7 @@ export default class SheetSettings {
             await deleteThing(
               `/api/remove_5e_character/${this.generalData.id}`
             );
-            window.location.pathname = "/dashnew";
+            window.location.pathname = "/dash";
           }
         },
       })

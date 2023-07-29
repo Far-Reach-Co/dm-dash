@@ -5,7 +5,7 @@ import loreTypeSelect from "../lib/loreTypeSelect.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
-import { uploadImage } from "../lib/imageUtils.js";
+import { uploadProjectImage } from "../lib/imageUtils.js";
 import RichText from "../lib/RichText.js";
 
 export default class LoresView {
@@ -77,7 +77,7 @@ export default class LoresView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.imageId

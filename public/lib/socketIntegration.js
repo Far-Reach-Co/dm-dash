@@ -2,7 +2,7 @@ class SocketIntegration {
   constructor() {
     this.socket = io(window.location.origin);
 
-    this.campaignId = null;
+    this.tableId = null;
     this.user = null;
     this.sidebar = null;
     this.topLayer = null;
@@ -11,7 +11,7 @@ class SocketIntegration {
   // Listeners
   setupListeners = (canvasLayer) => {
     // USER JOIN
-    this.socket.on("campain-join", (message) => {
+    this.socket.on("table-join", (message) => {
       console.log("User Joined:\n", message);
     });
 
@@ -189,16 +189,16 @@ class SocketIntegration {
   };
 
   socketJoined = () => {
-    this.socket.emit("campaign-joined", {
+    this.socket.emit("table-joined", {
       username: this.user.username,
-      campaign: `campaign-${this.campaignId}`,
+      table: `table-${this.tableId}`,
     });
   };
 
   // GRID
   gridChange = (gridState) => {
     this.socket.emit("grid-changed", {
-      campaign: `campaign-${this.campaignId}`,
+      table: `table-${this.tableId}`,
       gridState,
     });
   };
@@ -206,35 +206,35 @@ class SocketIntegration {
   // OBJECTS
   imageAdded = (image) => {
     this.socket.emit("image-added", {
-      campaign: `campaign-${this.campaignId}`,
+      table: `table-${this.tableId}`,
       image,
     });
   };
 
   imageRemoved = (id) => {
     this.socket.emit("image-removed", {
-      campaign: `campaign-${this.campaignId}`,
+      table: `table-${this.tableId}`,
       id,
     });
   };
 
   imageMoved = (image) => {
     this.socket.emit("image-moved", {
-      campaign: `campaign-${this.campaignId}`,
+      table: `table-${this.tableId}`,
       image,
     });
   };
 
   objectMoveUp = (object) => {
     this.socket.emit("object-moved-up", {
-      campaign: `campaign-${this.campaignId}`,
+      table: `table-${this.tableId}`,
       object,
     });
   };
 
   objectChangeLayer = (object) => {
     this.socket.emit("object-changed-layer", {
-      campaign: `campaign-${this.campaignId}`,
+      table: `table-${this.tableId}`,
       object,
     });
   };

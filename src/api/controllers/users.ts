@@ -119,7 +119,7 @@ async function registerUser(
     });
     // create two tables, one for a project/wyrld another for just the user
     await addTableViewQuery({ project_id: projectData.rows[0].id });
-    await addTableViewByUserQuery({ user_id: data.id });
+    await addTableViewByUserQuery({ user_id: data.id, title: "First Table" });
 
     // login
     req.session.user = data.id;

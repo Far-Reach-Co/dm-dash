@@ -2,7 +2,7 @@ import createElement from "../lib/createElement.js";
 import state from "../lib/state.js";
 import Location from "../components/Location.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
-import { uploadImage } from "../lib/imageUtils.js";
+import { uploadProjectImage } from "../lib/imageUtils.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import searchElement from "../lib/searchElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
@@ -79,7 +79,7 @@ export default class LocationsView {
     // if there is an image
     if (formProps.image) {
       // upload to bucket
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.imageId

@@ -1,4 +1,3 @@
-import state from "../lib/state.js";
 import createElement from "../lib/createElement.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import { Hamburger } from "../components/Hamburger.js";
@@ -10,7 +9,6 @@ import TopLayer from "../lib/TopLayer.js";
 class Table {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "app";
     this.params = props.params;
 
     this.canvasLayer = null;
@@ -22,16 +20,13 @@ class Table {
 
   init = async () => {
     // get table views
-    this.projectId = localStorage.getItem("current-table-project-id");
-    this.campaignId = localStorage.getItem("current-campaign-id");
-
-    const project = await getThings(`/api/get_project/${this.projectId}`);
-    state.currentProject = project;
-
-    const tableView = await getThings(`/api/get_table_view/${this.campaignId}`);
+    const searchParams = new URLSearchParams(window.location.search);
+    const tableId = searchParams.get("uuid");
+    const tableView = await getThings(`/api/get_table_view_by_uuid/${tableId}`);
     // sidebar and hamburger inst
-    this.instantiateSidebar();
+    this.instantiateSidebar(tableView);
     this.instantiateHamburger();
+
     // create canvas elem and append
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.canvasLayer = new CanvasLayer({
@@ -42,10 +37,11 @@ class Table {
     this.topLayer = new TopLayer({
       domComponent: createElement("div"),
       canvasLayer: this.canvasLayer,
+      tableView,
     });
     // provide top layer to socket int
     // provide socket necessary variables
-    socketIntegration.campaignId = this.campaignId;
+    socketIntegration.tableId = tableId;
     socketIntegration.user = await getThings("/api/get_user");
     socketIntegration.sidebar = this.sidebar;
     socketIntegration.topLayer = this.topLayer;
@@ -57,12 +53,13 @@ class Table {
     this.render();
     await this.canvasLayer.init();
     this.topLayer.render();
-    this.renderSidebarAndHamburger();
+    if (USERID == tableView.user_id) this.renderSidebarAndHamburger();
   };
 
-  instantiateSidebar = () => {
+  instantiateSidebar = (tableView) => {
     const sidebar = new TableSidebar({
       domComponent: createElement("div", {}),
+      tableView,
     });
     this.sidebar = sidebar;
   };

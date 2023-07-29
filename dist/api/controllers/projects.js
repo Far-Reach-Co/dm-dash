@@ -274,7 +274,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -304,7 +304,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -377,7 +377,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -408,7 +408,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -471,7 +471,7 @@ function removeProject(req, res, next) {
                             }
                         });
                     }); });
-                    return [4, (0, tableImages_js_1.getTableImagesQuery)(req.params.id)];
+                    return [4, (0, tableImages_js_1.getTableImagesByProjectQuery)(req.params.id)];
                 case 13:
                     tableImages = _a.sent();
                     tableImages.rows.forEach(function (tableImage) { return __awaiter(_this, void 0, void 0, function () {
@@ -482,7 +482,7 @@ function removeProject(req, res, next) {
                                 case 1:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 2:
                                     _a.sent();
                                     return [4, (0, tableImages_js_1.removeTableImageQuery)(tableImage.id)];

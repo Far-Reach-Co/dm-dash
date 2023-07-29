@@ -10,7 +10,7 @@ export default function renderTierLimitWarning(message) {
       createElement("br"),
       createElement("div", {}, "Thank you."),
       createElement("br"),
-      createElement("small", {}, "-- the Far Reach Co. staff"),
+      createElement("small", {}, "-- FRC Staff"),
     ])
   );
 }

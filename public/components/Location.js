@@ -1,7 +1,7 @@
 import createElement from "../lib/createElement.js";
 import {
   getPresignedForImageDownload,
-  uploadImage,
+  uploadProjectImage,
 } from "../lib/imageUtils.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
@@ -61,7 +61,7 @@ export default class Location {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.imageId

@@ -4,7 +4,7 @@ import listItemTitle from "../lib/listItemTitle.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import {
   getPresignedForImageDownload,
-  uploadImage,
+  uploadProjectImage,
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
@@ -58,7 +58,7 @@ export default class Character {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.imageId

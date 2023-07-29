@@ -28,9 +28,10 @@
     async function verifyToken() {
       if (token) {
         try {
-          const res = await fetch(`${window.location.origin}/api/verify_jwt`, {
-            headers: { "x-access-token": `Bearer ${token}` },
-          });
+          const res = await fetch(
+            `${window.location.origin}/api/verify_jwt`,
+            {}
+          );
           const resData = await res.json();
           if (!res.status === 200) {
             throw new Error();
@@ -52,9 +53,7 @@
       try {
         const res = await fetch(
           `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`,
-          {
-            headers: { "x-access-token": `Bearer ${token}` },
-          }
+          {}
         );
         const data = await res.json();
         if (res.status === 200) {
@@ -69,9 +68,7 @@
       try {
         const res = await fetch(
           `${window.location.origin}/api/get_project/${id}`,
-          {
-            headers: { "x-access-token": `Bearer ${token}` },
-          }
+          {}
         );
         const data = await res.json();
         if (res.status === 200) {
@@ -90,7 +87,6 @@
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "x-access-token": `Bearer ${token}`,
             },
             body: JSON.stringify({
               project_id: projectInvite.project_id,
@@ -110,9 +106,7 @@
       try {
         const res = await fetch(
           `${window.location.origin}/api/get_project_user_by_user_and_project/${projectId}`,
-          {
-            headers: { "x-access-token": `Bearer ${token}` },
-          }
+          {}
         );
         const data = await res.json();
         if (res.status === 200) {
@@ -135,12 +129,12 @@
           const hasJoinedProject = await getProjectUser(project.id);
           if (hasJoinedProject) {
             alert("You already have this project...");
-            return (window.location.pathname = "/dashnew");
+            return (window.location.pathname = "/dash");
           }
           // check if user has this project
           if (project.user_id === user.id) {
             alert("You already have this project...");
-            return (window.location.pathname = "/dashnew");
+            return (window.location.pathname = "/dash");
           }
           const inviteDiv = document.getElementById("invite-div");
           const button = document.createElement("button");
@@ -161,7 +155,7 @@
               button.innerText = "Return To Dashboard";
               button.addEventListener(
                 "click",
-                () => (window.location.pathname = "/dashnew")
+                () => (window.location.pathname = "/dash")
               );
               inviteDiv.append(message, document.createElement("br"), button);
             }

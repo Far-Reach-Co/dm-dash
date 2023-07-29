@@ -4,7 +4,7 @@ import locationSelect from "../lib/locationSelect.js";
 import locationTypeSelect from "../lib/locationTypeSelect.js";
 import {
   getPresignedForImageDownload,
-  uploadImage,
+  uploadProjectImage,
 } from "../lib/imageUtils.js";
 import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
@@ -383,7 +383,7 @@ export default class SingleLocationView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.location.image_id

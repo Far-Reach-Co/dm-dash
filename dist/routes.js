@@ -164,7 +164,7 @@ router.get("/5eplayer", function (req, res, next) { return __awaiter(void 0, voi
         }
     });
 }); });
-router.get("/dashnew", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var tableData, charData, sharedCharData, playerUsersData, _i, _a, playerUser, puCharData, err_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -197,7 +197,7 @@ router.get("/dashnew", function (req, res, next) { return __awaiter(void 0, void
                 _i++;
                 return [3, 4];
             case 7:
-                res.render("dashnew", {
+                res.render("dash", {
                     auth: req.session.user,
                     tables: tableData.rows,
                     sheets: charData.rows,
@@ -212,7 +212,7 @@ router.get("/dashnew", function (req, res, next) { return __awaiter(void 0, void
         }
     });
 }); });
-router.get("/new_sheet", function (req, res, next) {
+router.get("/newsheet", function (req, res, next) {
     try {
         res.render("newsheet", { auth: req.session.user });
     }
@@ -220,9 +220,22 @@ router.get("/new_sheet", function (req, res, next) {
         next(err);
     }
 });
+router.get("/newtable", function (req, res, next) {
+    try {
+        res.render("newtable", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/vtt", function (req, res, next) {
     try {
-        res.render("vtt", { auth: req.session.user });
+        if (!req.session.user) {
+            res.render("forbidden", { auth: req.session.user });
+        }
+        else {
+            res.render("vtt", { auth: req.session.user });
+        }
     }
     catch (err) {
         next(err);

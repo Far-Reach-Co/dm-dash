@@ -3,7 +3,7 @@ import createElement from "../lib/createElement.js";
 import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
 import {
   getPresignedForImageDownload,
-  uploadImage,
+  uploadProjectImage,
 } from "../lib/imageUtils.js";
 import loreTypeSelect from "../lib/loreTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
@@ -56,7 +56,7 @@ export default class Lore {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.imageId

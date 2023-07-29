@@ -333,6 +333,7 @@ form {
   margin-right: 2px;
   border: 2px solid var(--blue);
   border-radius: var(--border-radius);
+  background-color: var(--main-dark);
   cursor: pointer;
 }
 

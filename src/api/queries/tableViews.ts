@@ -19,11 +19,12 @@ async function addTableViewQuery(data: {project_id: string | number}) {
   return await db.query<TableViewModel>(query)
 }
 
-async function addTableViewByUserQuery(data: {user_id: string | number}) {
+async function addTableViewByUserQuery(data: {user_id: string | number, title: string}) {
   const query = {
-    text: /*sql*/ `insert into public."TableView" (user_id) values($1) returning *`,
+    text: /*sql*/ `insert into public."TableView" (user_id, title) values($1,$2) returning *`,
     values: [
       data.user_id,
+      data.title
     ]
   }
   return await db.query<TableViewModel>(query)
@@ -33,6 +34,14 @@ async function getTableViewQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."TableView" where id = $1`,
     values: [id]
+  }
+  return await db.query<TableViewModel>(query)
+}
+
+async function getTableViewByUUIDQuery(uuid: string) {
+  const query = {
+    text: /*sql*/ `select * from public."TableView" where uuid = $1`,
+    values: [uuid]
   }
   return await db.query<TableViewModel>(query)
 }
@@ -87,6 +96,7 @@ async function editTableViewQuery(id: string, data: any) {
 export {
   addTableViewQuery,
   getTableViewsQuery,
+  getTableViewByUUIDQuery,
   getTableViewQuery,
   getTableViewsByUser,
   removeTableViewQuery,

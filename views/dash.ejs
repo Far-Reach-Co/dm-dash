@@ -14,15 +14,20 @@
     <div class="d-flex h-100">
       <div class="d-flex flex-column flex-wrap p-3 w-50 h-100">
         <h2>Tables</h2>
-        <small>Live virtual tables</small>
+        <small
+          >Real-time virtual tables with images and drawing.<br />Invite others
+          to join your table by sharing the link.</small
+        >
         <br />
-        <a href="/new_table" title="Create a new virtual table">+ New Table</a>
+        <a href="/newtable" title="Create a new virtual table">+ New Table</a>
         <hr />
         <% if (tables.length === 0) { %>
         <small class="ms-2">No tables yet...</small>
         <% } else { %> <% tables.forEach(function(table) { %>
         <div
           class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+          onclick="handleTableClick('<%= table.uuid %>')"
+          title="Open table in new tab"
         >
           <div class="dash-list-title mb-3"><%= table.title %></div>
           <a>↗</a>
@@ -31,9 +36,13 @@
       </div>
       <div class="d-flex flex-column flex-wrap d-wrap p-3 w-50 h-100">
         <h2>Player Character Sheets</h2>
-        <small>We currently offer Dungeons and Dragons 5e sheets</small>
+        <small
+          >We currently offer Dungeons and Dragons 5e sheets.<br />You can
+          invite others to view/edit your character sheet from the settings
+          tab.</small
+        >
         <br />
-        <a href="/new_sheet" title="Create a new player character sheet"
+        <a href="/newsheet" title="Create a new player character sheet"
           >+ New Sheet</a
         >
         <hr />
@@ -70,6 +79,9 @@
   <script>
     function handleSheetClick(id) {
       window.open(`/5eplayer?id=${id}`, "_blank").focus();
+    }
+    function handleTableClick(uuid) {
+      window.open(`/vtt?uuid=${uuid}`, "_blank").focus();
     }
   </script>
 </html>

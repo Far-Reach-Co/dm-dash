@@ -55,13 +55,13 @@
   --light-gray: rgb(174, 173, 173);
   --blue: rgb(70, 89, 110);
   --blue2: rgb(107, 129, 154);
-  --blue3: #1f2431;
+  --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
-  --blue5: rgb(39, 50, 67);
+  --blue5: rgb(42, 54, 71);
   --blue6: rgb(125, 174, 237);
   --link-blue: rgb(155, 178, 205);
   --purple: rgb(52, 51, 80);
-  --pink: rgb(233, 212, 255);
+  --pink: rgb(221, 196, 248);
   --green: rgb(161, 184, 134);
   --green2: rgb(49, 74, 36);
   --orange: rgb(165, 79, 4);
@@ -458,11 +458,11 @@ footer {
 }
 
 .sidebar {
+  top: 0px;
   right: 0px;
   z-index: 2;
   width: 200px;
-  height: calc(100% - var(--nav-height));
-  /* based on nav height */
+  height: 100%;
   position: absolute;
   background: transparent;
 }
@@ -522,14 +522,14 @@ footer {
 .close-sidebar {
   position: absolute;
   top: 0px;
+  left: -11px;
   margin-right: 3px;
   margin-top: 3px;
   cursor: pointer;
 }
 
 .hamburger {
-  top: var(--nav-height);
-  /* from nav height */
+  top: 0;
   right: 5px;
   z-index: 3;
   position: absolute;

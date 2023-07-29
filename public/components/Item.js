@@ -3,7 +3,7 @@ import createElement from "../lib/createElement.js";
 import { renderImageSmallOrPlaceholder } from "../lib/imageRenderUtils.js";
 import {
   getPresignedForImageDownload,
-  uploadImage,
+  uploadProjectImage,
 } from "../lib/imageUtils.js";
 import itemTypeSelect from "../lib/itemTypeSelect.js";
 import listItemTitle from "../lib/listItemTitle.js";
@@ -58,7 +58,7 @@ export default class Item {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.imageId

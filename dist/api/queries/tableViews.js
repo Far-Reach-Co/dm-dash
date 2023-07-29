@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUser = exports.getTableViewQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
+exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUser = exports.getTableViewQuery = exports.getTableViewByUUIDQuery = exports.getTableViewsQuery = exports.addTableViewQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function addTableViewQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
@@ -64,9 +64,10 @@ function addTableViewByUserQuery(data) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"TableView\" (user_id) values($1) returning *",
+                        text: "insert into public.\"TableView\" (user_id, title) values($1,$2) returning *",
                         values: [
                             data.user_id,
+                            data.title
                         ]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -93,6 +94,23 @@ function getTableViewQuery(id) {
     });
 }
 exports.getTableViewQuery = getTableViewQuery;
+function getTableViewByUUIDQuery(uuid) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "select * from public.\"TableView\" where uuid = $1",
+                        values: [uuid]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.getTableViewByUUIDQuery = getTableViewByUUIDQuery;
 function getTableViewsQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

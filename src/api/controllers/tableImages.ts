@@ -1,24 +1,50 @@
 import {
-  addTableImageQuery,
-  getTableImagesQuery,
+  addTableImageByUserQuery,
+  addTableImageByProjectQuery,
   getTableImageQuery,
   removeTableImageQuery,
   editTableImageQuery,
+  getTableImagesByUserQuery,
 } from "../queries/tableImages";
 import { Request, Response, NextFunction } from "express";
+import { getTableViewQuery } from "../queries/tableViews";
 
-async function addTableImage(req: Request, res: Response, next: NextFunction) {
+async function addTableImageByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await addTableImageQuery(req.body);
+    const data = await addTableImageByProjectQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);
   }
 }
 
-async function getTableImages(req: Request, res: Response, next: NextFunction) {
+async function addTableImageByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await getTableImagesQuery(req.params.project_id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    req.body.user_id = req.session.user;
+    const data = await addTableImageByUserQuery(req.body);
+    res.status(201).json(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getTableImagesByTableUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const tableData = await getTableViewQuery(req.params.table_id);
+    const data = await getTableImagesByUserQuery(tableData.rows[0].user_id);
 
     res.send(data.rows);
   } catch (err) {
@@ -48,4 +74,10 @@ async function editTableImage(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export { getTableImages, addTableImage, removeTableImage, editTableImage };
+export {
+  getTableImagesByTableUser,
+  addTableImageByUser,
+  addTableImageByProject,
+  removeTableImage,
+  editTableImage,
+};

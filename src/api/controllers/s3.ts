@@ -11,7 +11,8 @@ import { getProjectQuery, editProjectQuery } from "../queries/projects";
 import { Request, Response, NextFunction } from "express";
 import { getMetadata, resizeImage } from "../../lib/imageProcessing.js";
 import { splitAtIndex } from "../../lib/utils.js";
-import { getUserByIdQuery } from "../queries/users.js";
+import { editUserQuery, getUserByIdQuery } from "../queries/users.js";
+import { getTableViewQuery } from "../queries/tableViews.js";
 
 config.update({
   signatureVersion: "v4",
@@ -78,90 +79,124 @@ async function getSignedUrlForDownload(
 //   }
 // }
 
-interface UploadToAwsRequestObject extends Request {
+interface NewImageForProjectRequestObject extends Request {
   body: {
     bucket_name: string;
     folder_name: string;
     project_id: number;
-    current_file_id: number;
+    current_file_id?: number;
     make_image_small: boolean;
   };
 }
 
-async function uploadToAws(
-  req: UploadToAwsRequestObject,
-  res: Response,
-  next: NextFunction
-) {
-  // check if no file
-  if (!req.file) return next();
-
+function computeAwsImageParamsFromRequest(req: Request, filePath: string) {
+  if (!req.file) throw new Error("Missing file");
   const name = req.file.originalname;
   var ind2 = name.lastIndexOf(".");
   const type = splitAtIndex(name, ind2);
   const imageRef = req.file.filename + type[1];
 
-  let fileSize = req.file.size;
-
-  const fileName = req.file.filename;
-  let filePath = `file_uploads/${fileName}`;
-
-  let image = null;
-
-  const params = {
+  return {
     Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
     Key: imageRef,
     Body: readFileSync(filePath),
   };
+}
+
+async function checkUserProLimitReached(
+  sessionUser: string | number | undefined
+) {
+  if (!sessionUser) throw new Error("User is not logged in");
+  const userData = await getUserByIdQuery(sessionUser);
+  const user = userData.rows[0];
+  const userDataCount = user.used_data_in_bytes;
+  const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
+  if (userDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
+    if (!user.is_pro)
+      throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+  }
+}
+
+async function checkProjectProLimitReached(projectId: number | undefined) {
+  if (!projectId) throw new Error("Missing project ID");
+  const projectData = await getProjectQuery(projectId);
+  const project = projectData.rows[0];
+  const projectDataCount = project.used_data_in_bytes;
+  const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
+  if (projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
+    const userData = await getUserByIdQuery(project.user_id);
+    const projectUser = userData.rows[0];
+    if (!projectUser.is_pro)
+      throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+  }
+}
+
+async function makeImageSmall(filePath: string) {
+  const smallImageWidth: number = 100;
+  const imageMetadata = await getMetadata(filePath);
+  if (
+    imageMetadata &&
+    imageMetadata.height &&
+    imageMetadata.width &&
+    imageMetadata.width > smallImageWidth
+  ) {
+    const aspectRatio = imageMetadata.width / imageMetadata.height;
+    const newFilePathFromResizedImage = await resizeImage(
+      filePath,
+      smallImageWidth,
+      smallImageWidth / aspectRatio
+    );
+    // on success
+    // remove previous file
+    unlinkSync(filePath);
+    // return new file location
+    return newFilePathFromResizedImage;
+  } else return null;
+}
+
+async function newImageForProject(
+  req: NewImageForProjectRequestObject,
+  res: Response,
+  next: NextFunction
+) {
+  // error if no file
+  if (!req.file) return next();
+  // setup
+  let filePath = `file_uploads/${req.file.filename}`;
+  let image = null;
 
   try {
-    // check if pro // yes this is in a code block
-    {
-      const projectData = await getProjectQuery(req.body.project_id);
-      const project = projectData.rows[0];
-      const projectDataCount = project.used_data_in_bytes;
+    // check project data usage and pro account status
+    await checkProjectProLimitReached(req.body.project_id);
 
-      if (projectDataCount >= 104857600) {
-        // 100 MB
-        if (!req.session.user) throw new Error("User is not logged in");
-        const { rows } = await getUserByIdQuery(req.session.user);
-        if (!rows[0].is_pro)
-          throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-      }
-    }
+    const params = computeAwsImageParamsFromRequest(req, filePath);
+    let fileSize = req.file.size;
 
-    // adjust image
+    // adjust image size
     if (req.body.make_image_small) {
-      const smallImageWidth: number = 100;
-
-      const imageMetadata = await getMetadata(filePath);
-      if (
-        imageMetadata &&
-        imageMetadata.height &&
-        imageMetadata.width &&
-        imageMetadata.width > smallImageWidth
-      ) {
-        const aspectRatio = imageMetadata.width / imageMetadata.height;
-        const newFilePathFromResizedImage = await resizeImage(
-          filePath,
-          smallImageWidth,
-          smallImageWidth / aspectRatio
-        );
-        // remove old file
-        if (newFilePathFromResizedImage) {
-          // on success
-          unlinkSync(filePath);
-          // set new file path to resized image
-          filePath = newFilePathFromResizedImage;
-          // update params for aws upload
-          params.Body = readFileSync(newFilePathFromResizedImage);
-          const stats = statSync(newFilePathFromResizedImage);
-          const fileSizeInBytes = stats.size;
-          fileSize = fileSizeInBytes;
-        }
+      const newFilePathFromResizedImage = await makeImageSmall(filePath);
+      // if we have a new file
+      if (newFilePathFromResizedImage) {
+        // set new file path to resized image
+        filePath = newFilePathFromResizedImage;
+        // update params for aws upload
+        params.Body = readFileSync(newFilePathFromResizedImage);
+        // update file size
+        const stats = statSync(newFilePathFromResizedImage);
+        const fileSizeInBytes = stats.size;
+        fileSize = fileSizeInBytes;
       }
     }
 
+    // save image in db
+    const imageData = await addImageQuery({
+      original_name: req.file.originalname,
+      size: fileSize,
+      file_name: params.Key,
+    });
+    image = imageData.rows[0];
+
+    // make an upload to s3 bucket
     await new Promise((resolve, reject) => {
       s3.upload(params, (err: any, data: { Location: unknown }) => {
         if (err) {
@@ -170,51 +205,134 @@ async function uploadToAws(
         resolve(data.Location);
       });
     });
-
-    const imageData = await addImageQuery({
-      original_name: req.file.originalname,
-      size: fileSize,
-      file_name: imageRef,
-    });
-    image = imageData.rows[0];
     // send back to client
     res.send(image);
   } catch (err) {
-    console.log(err);
     // delete file in storage
     unlinkSync(filePath);
+    return next(err);
+  }
+  // continue
+
+  // delete file in storage
+  unlinkSync(filePath);
+
+  try {
+    // prepare to update project data usage
+    let dataUsageCount = 0;
+    dataUsageCount += image.size;
+    // if current file, remove current file (which is being replaced with the new file) from the bucket
+    if (req.body.current_file_id) {
+      const oldImageData = await getImageQuery(req.body.current_file_id);
+      const oldImage = oldImageData.rows[0];
+
+      await removeImage(
+        `${req.body.bucket_name}/${req.body.folder_name}`,
+        oldImage
+      );
+      await removeImageQuery(req.body.current_file_id);
+
+      dataUsageCount -= oldImage.size;
+    }
+    // update project data usage
+    const projectData = await getProjectQuery(req.body.project_id);
+    const project = projectData.rows[0];
+    const newCalculatedData = project.used_data_in_bytes + dataUsageCount;
+    await editProjectQuery(project.id, {
+      used_data_in_bytes: newCalculatedData,
+    });
+  } catch (err) {
+    console.log(err);
     next(err);
   }
+}
 
-  if (image) {
-    try {
-      // delete file in storage
-      unlinkSync(filePath);
+interface NewImageForUserRequestObject extends Request {
+  body: {
+    bucket_name: string;
+    folder_name: string;
+    make_image_small: boolean;
+  };
+}
 
-      // prepare to update project data usage
-      let dataUsageCount = 0;
-      dataUsageCount += image.size;
-      // remove current file in bucket if there is one
-      if (req.body.current_file_id) {
-        const oldImageData = await getImageQuery(req.body.current_file_id);
-        const oldImage = oldImageData.rows[0];
+async function newImageForUser(
+  req: NewImageForUserRequestObject,
+  res: Response,
+  next: NextFunction
+) {
+  // error if no file
+  if (!req.file) return next();
+  // setup
+  let filePath = `file_uploads/${req.file.filename}`;
+  let image = null;
 
-        await removeFile(params.Bucket, oldImage);
-        await removeImageQuery(req.body.current_file_id);
+  try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    // check project data usage and pro account status
+    await checkUserProLimitReached(req.session.user);
 
-        dataUsageCount -= oldImage.size;
+    const params = computeAwsImageParamsFromRequest(req, filePath);
+    let fileSize = req.file.size;
+
+    // adjust image size
+    if (req.body.make_image_small) {
+      const newFilePathFromResizedImage = await makeImageSmall(filePath);
+      // if we have a new file
+      if (newFilePathFromResizedImage) {
+        // set new file path to resized image
+        filePath = newFilePathFromResizedImage;
+        // update params for aws upload
+        params.Body = readFileSync(newFilePathFromResizedImage);
+        // update file size
+        const stats = statSync(newFilePathFromResizedImage);
+        const fileSizeInBytes = stats.size;
+        fileSize = fileSizeInBytes;
       }
-      // update project data usage
-      const projectData = await getProjectQuery(req.body.project_id);
-      const project = projectData.rows[0];
-      const newCalculatedData = project.used_data_in_bytes + dataUsageCount;
-      await editProjectQuery(project.id, {
-        used_data_in_bytes: newCalculatedData,
-      });
-    } catch (err) {
-      console.log(err);
-      next(err);
     }
+
+    // save image in db
+    const imageData = await addImageQuery({
+      original_name: req.file.originalname,
+      size: fileSize,
+      file_name: params.Key,
+    });
+    image = imageData.rows[0];
+
+    // make an upload to s3 bucket
+    await new Promise((resolve, reject) => {
+      s3.upload(params, (err: any, data: { Location: unknown }) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(data.Location);
+      });
+    });
+    // send back to client
+    res.send(image);
+  } catch (err) {
+    // delete file in storage
+    unlinkSync(filePath);
+    return next(err);
+  }
+  // continue
+
+  // delete file in storage
+  unlinkSync(filePath);
+
+  try {
+    // prepare to update project data usage
+    let dataUsageCount = 0;
+    dataUsageCount += image.size;
+    // update project data usage
+    const userData = await getUserByIdQuery(req.session.user);
+    const user = userData.rows[0];
+    const newCalculatedData = user.used_data_in_bytes + dataUsageCount;
+    await editUserQuery(user.id, {
+      used_data_in_bytes: newCalculatedData,
+    });
+  } catch (err) {
+    console.log(err);
+    next(err);
   }
 }
 
@@ -228,13 +346,17 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function removeImage(req: Request, res: Response, next: NextFunction) {
+async function removeImageByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     // remove current file
     const imageData = await getImageQuery(req.params.image_id);
     const image = imageData.rows[0];
 
-    await removeFile("wyrld/images", image);
+    await removeImage("wyrld/images", image);
     await removeImageQuery(req.params.image_id);
 
     // update project data usage
@@ -251,7 +373,38 @@ async function removeImage(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function removeFile(bucket: string, image: { file_name: string }) {
+async function removeImageByTableUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    // remove current file
+    const imageData = await getImageQuery(req.params.image_id);
+    const image = imageData.rows[0];
+
+    await removeImage("wyrld/images", image);
+    await removeImageQuery(req.params.image_id);
+
+    // get table
+    const tableData = await getTableViewQuery(req.params.table_id);
+    const table = tableData.rows[0];
+
+    // update user data usage
+    const userData = await getUserByIdQuery(table.user_id);
+    const user = userData.rows[0];
+    const newCalculatedData = user.used_data_in_bytes - image.size;
+    await editUserQuery(user.id, {
+      used_data_in_bytes: newCalculatedData,
+    });
+    res.status(204).send();
+  } catch (err) {
+    console.log(err);
+    next(err);
+  }
+}
+
+async function removeImage(bucket: string, image: { file_name: string }) {
   try {
     const params = {
       Bucket: bucket,
@@ -284,8 +437,9 @@ export {
   getSignedUrlForDownload,
   getImage,
   editImage,
-  // getSignedUrlForUpload,
-  uploadToAws,
-  removeFile,
+  newImageForProject,
+  newImageForUser,
   removeImage,
+  removeImageByProject,
+  removeImageByTableUser,
 };

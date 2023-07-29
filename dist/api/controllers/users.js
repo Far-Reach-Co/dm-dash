@@ -147,7 +147,7 @@ function registerUser(req, res, next) {
                     return [4, (0, tableViews_js_1.addTableViewQuery)({ project_id: projectData.rows[0].id })];
                 case 5:
                     _b.sent();
-                    return [4, (0, tableViews_js_1.addTableViewByUserQuery)({ user_id: data.id })];
+                    return [4, (0, tableViews_js_1.addTableViewByUserQuery)({ user_id: data.id, title: "First Table" })];
                 case 6:
                     _b.sent();
                     req.session.user = data.id;

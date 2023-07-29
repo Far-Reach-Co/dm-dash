@@ -66,7 +66,6 @@ export default class Project {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
             project_id: this.id,

@@ -1,6 +1,5 @@
-import { getPresignedForImageDownload, uploadImage } from "./imageUtils.js";
+import { getPresignedForImageDownload, uploadUserImage } from "./imageUtils.js";
 import createElement from "./createElement.js";
-import state from "./state.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
 import imageFollowingCursor from "./imageFollowingCursor.js";
@@ -10,6 +9,7 @@ export default class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar-images";
+    this.tableView = props.tableView;
 
     this.currentMouseDownImage = null;
 
@@ -61,7 +61,9 @@ export default class TableSidebarComponent {
       window.confirm(`Are you sure you want to delete ${image.original_name}`)
     ) {
       // remove image in db
-      deleteThing(`/api/remove_image/${state.currentProject.id}/${image.id}`);
+      deleteThing(
+        `/api//remove_image_by_table_user/${image.id}/${this.tableView.id}`
+      );
       // remove table image in db
       deleteThing(`/api/remove_table_image/${tableImage.id}`);
       // remove elem in sidebar
@@ -105,9 +107,13 @@ export default class TableSidebarComponent {
 
   renderCurrentImages = async () => {
     const tableImages = await getThings(
-      `/api/get_table_images/${state.currentProject.id}`
+      `/api/get_table_images_by_table_user/${this.tableView.id}`
     );
-    if (!tableImages.length) return [createElement("small", {}, "None...")];
+    if (!tableImages.length) {
+      // remove temp loading spinner
+      this.tempLoadingSpinner.remove();
+      return [createElement("small", {}, "None...")];
+    }
 
     let imageElems = [];
     await Promise.all(
@@ -177,16 +183,10 @@ export default class TableSidebarComponent {
     if (file) {
       try {
         this.toggleImageLoading();
-        const newImage = await uploadImage(
-          file,
-          state.currentProject.id,
-          null,
-          this.makeImageSmall
-        );
+        const newImage = await uploadUserImage(file, this.makeImageSmall);
         if (newImage) {
           // add new table image
-          await postThing(`/api/add_table_image`, {
-            project_id: state.currentProject.id,
+          await postThing(`/api/add_table_image_by_user`, {
             image_id: newImage.id,
           });
           // re render
@@ -234,11 +234,10 @@ export default class TableSidebarComponent {
 
     this.domComponent.append(
       createElement(
-        "button",
+        "a",
         {
-          for: "image",
-          class: "",
           title: "Upload image to be used on virtual table",
+          style: "margin-left: 10px",
         },
         "+ Image",
         {
@@ -303,7 +302,7 @@ export default class TableSidebarComponent {
         }
       ),
       createElement("br"),
-      createElement("input", { placeHolder: "Search" }, null, {
+      createElement("input", { placeHolder: "Search Images" }, null, {
         type: "input",
         event: (e) => {
           e.preventDefault();

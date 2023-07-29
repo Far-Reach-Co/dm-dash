@@ -36,9 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableImageQuery = exports.removeTableImageQuery = exports.getTableImageQuery = exports.getTableImagesQuery = exports.addTableImageQuery = void 0;
+exports.editTableImageQuery = exports.removeTableImageQuery = exports.getTableImageQuery = exports.getTableImagesByUserQuery = exports.getTableImagesByProjectQuery = exports.addTableImageByUserQuery = exports.addTableImageByProjectQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
-function addTableImageQuery(data) {
+function addTableImageByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
@@ -57,7 +57,27 @@ function addTableImageQuery(data) {
         });
     });
 }
-exports.addTableImageQuery = addTableImageQuery;
+exports.addTableImageByProjectQuery = addTableImageByProjectQuery;
+function addTableImageByUserQuery(data) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "insert into public.\"TableImage\" (user_id, image_id) values($1,$2) returning *",
+                        values: [
+                            data.user_id,
+                            data.image_id,
+                        ]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.addTableImageByUserQuery = addTableImageByUserQuery;
 function getTableImageQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
@@ -75,7 +95,7 @@ function getTableImageQuery(id) {
     });
 }
 exports.getTableImageQuery = getTableImageQuery;
-function getTableImagesQuery(project_id) {
+function getTableImagesByProjectQuery(project_id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
@@ -91,7 +111,24 @@ function getTableImagesQuery(project_id) {
         });
     });
 }
-exports.getTableImagesQuery = getTableImagesQuery;
+exports.getTableImagesByProjectQuery = getTableImagesByProjectQuery;
+function getTableImagesByUserQuery(user_id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "select * from public.\"TableImage\" where user_id = $1",
+                        values: [user_id]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.getTableImagesByUserQuery = getTableImagesByUserQuery;
 function removeTableImageQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

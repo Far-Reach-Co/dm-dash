@@ -5,7 +5,7 @@ import { renderImageLarge } from "../lib/imageRenderUtils.js";
 import state from "../lib/state.js";
 import {
   getPresignedForImageDownload,
-  uploadImage,
+  uploadProjectImage,
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { tipBox } from "../lib/tipBox.js";
@@ -136,7 +136,7 @@ export default class LandingView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         state.currentProject.imageId

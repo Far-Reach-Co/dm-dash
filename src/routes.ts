@@ -138,38 +138,35 @@ router.get(
   }
 );
 
-router.get(
-  "/dashnew",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.session.user) throw new Error("User is not logged in");
-      // get table views by user
-      const tableData = await getTableViewsByUser(req.session.user);
-      // get all character sheets by user
-      const charData = await get5eCharsGeneralByUserQuery(req.session.user);
-      // get shared character sheets by playerUser
-      const sharedCharData = [];
-      const playerUsersData = await getPlayerUsersQuery(req.session.user);
-      if (playerUsersData.rows.length) {
-        for (const playerUser of playerUsersData.rows) {
-          const puCharData = await get5eCharGeneralQuery(playerUser.player_id);
-          sharedCharData.push(puCharData.rows[0]);
-        }
+router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    // get table views by user
+    const tableData = await getTableViewsByUser(req.session.user);
+    // get all character sheets by user
+    const charData = await get5eCharsGeneralByUserQuery(req.session.user);
+    // get shared character sheets by playerUser
+    const sharedCharData = [];
+    const playerUsersData = await getPlayerUsersQuery(req.session.user);
+    if (playerUsersData.rows.length) {
+      for (const playerUser of playerUsersData.rows) {
+        const puCharData = await get5eCharGeneralQuery(playerUser.player_id);
+        sharedCharData.push(puCharData.rows[0]);
       }
-
-      res.render("dashnew", {
-        auth: req.session.user,
-        tables: tableData.rows,
-        sheets: charData.rows,
-        sharedSheets: sharedCharData,
-      });
-    } catch (err) {
-      next(err);
     }
-  }
-);
 
-router.get("/new_sheet", (req: Request, res: Response, next: NextFunction) => {
+    res.render("dash", {
+      auth: req.session.user,
+      tables: tableData.rows,
+      sheets: charData.rows,
+      sharedSheets: sharedCharData,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/newsheet", (req: Request, res: Response, next: NextFunction) => {
   try {
     //
     res.render("newsheet", { auth: req.session.user });
@@ -178,10 +175,23 @@ router.get("/new_sheet", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get("/newtable", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //
+    res.render("newtable", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/vtt", (req: Request, res: Response, next: NextFunction) => {
   try {
     //
-    res.render("vtt", { auth: req.session.user });
+    if (!req.session.user) {
+      res.render("forbidden", { auth: req.session.user });
+    } else {
+      res.render("vtt", { auth: req.session.user });
+    }
   } catch (err) {
     next(err);
   }

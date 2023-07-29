@@ -36,16 +36,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableImage = exports.removeTableImage = exports.addTableImage = exports.getTableImages = void 0;
+exports.editTableImage = exports.removeTableImage = exports.addTableImageByProject = exports.addTableImageByUser = exports.getTableImagesByTableUser = void 0;
 var tableImages_1 = require("../queries/tableImages");
-function addTableImage(req, res, next) {
+var tableViews_1 = require("../queries/tableViews");
+function addTableImageByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableImages_1.addTableImageQuery)(req.body)];
+                    return [4, (0, tableImages_1.addTableImageByProjectQuery)(req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
@@ -59,18 +60,21 @@ function addTableImage(req, res, next) {
         });
     });
 }
-exports.addTableImage = addTableImage;
-function getTableImages(req, res, next) {
+exports.addTableImageByProject = addTableImageByProject;
+function addTableImageByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableImages_1.getTableImagesQuery)(req.params.project_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    req.body.user_id = req.session.user;
+                    return [4, (0, tableImages_1.addTableImageByUserQuery)(req.body)];
                 case 1:
                     data = _a.sent();
-                    res.send(data.rows);
+                    res.status(201).json(data.rows[0]);
                     return [3, 3];
                 case 2:
                     err_2 = _a.sent();
@@ -81,10 +85,35 @@ function getTableImages(req, res, next) {
         });
     });
 }
-exports.getTableImages = getTableImages;
+exports.addTableImageByUser = addTableImageByUser;
+function getTableImagesByTableUser(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tableData, data, err_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 3, , 4]);
+                    return [4, (0, tableViews_1.getTableViewQuery)(req.params.table_id)];
+                case 1:
+                    tableData = _a.sent();
+                    return [4, (0, tableImages_1.getTableImagesByUserQuery)(tableData.rows[0].user_id)];
+                case 2:
+                    data = _a.sent();
+                    res.send(data.rows);
+                    return [3, 4];
+                case 3:
+                    err_3 = _a.sent();
+                    next(err_3);
+                    return [3, 4];
+                case 4: return [2];
+            }
+        });
+    });
+}
+exports.getTableImagesByTableUser = getTableImagesByTableUser;
 function removeTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var err_3;
+        var err_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -95,8 +124,8 @@ function removeTableImage(req, res, next) {
                     res.status(204).send();
                     return [3, 3];
                 case 2:
-                    err_3 = _a.sent();
-                    next(err_3);
+                    err_4 = _a.sent();
+                    next(err_4);
                     return [3, 3];
                 case 3: return [2];
             }
@@ -106,7 +135,7 @@ function removeTableImage(req, res, next) {
 exports.removeTableImage = removeTableImage;
 function editTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_4;
+        var data, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -117,8 +146,8 @@ function editTableImage(req, res, next) {
                     res.status(200).send(data.rows[0]);
                     return [3, 3];
                 case 2:
-                    err_4 = _a.sent();
-                    next(err_4);
+                    err_5 = _a.sent();
+                    next(err_5);
                     return [3, 3];
                 case 3: return [2];
             }

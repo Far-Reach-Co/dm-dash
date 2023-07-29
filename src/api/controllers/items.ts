@@ -14,7 +14,7 @@ import { getLocationQuery } from "../queries/locations.js";
 import { getCharacterQuery } from "../queries/characters.js";
 import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
 
-import { removeFile } from "./s3.js";
+import { removeImage } from "./s3.js";
 import { removeImageQuery, getImageQuery } from "../queries/images.js";
 import { addEventQuery } from "../queries/events.js";
 import { Request, Response, NextFunction } from "express";
@@ -138,7 +138,7 @@ async function removeItem(req: Request, res: Response, next: NextFunction) {
     if (item.image_id) {
       const imageData = await getImageQuery(item.image_id);
       const image = imageData.rows[0];
-      await removeFile("wyrld/images", image);
+      await removeImage("wyrld/images", image);
       await removeImageQuery(image.id);
       // update project data usage
       const newCalculatedData = project.used_data_in_bytes - image.size;

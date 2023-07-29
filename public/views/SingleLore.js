@@ -5,7 +5,7 @@ import { deleteThing, getThings, postThing } from "../lib/apiUtils.js";
 import NoteManager from "./NoteManager.js";
 import {
   getPresignedForImageDownload,
-  uploadImage,
+  uploadProjectImage,
 } from "../lib/imageUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import { renderImageLarge } from "../lib/imageRenderUtils.js";
@@ -226,7 +226,7 @@ export default class SingleLoreView {
     if (formProps.image) {
       // upload to bucket
       this.toggleUploadingImage();
-      const newImage = await uploadImage(
+      const newImage = await uploadProjectImage(
         formProps.image,
         state.currentProject.id,
         this.lore.image_id
