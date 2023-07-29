@@ -45,7 +45,7 @@ class SocketIntegration {
     this.socket.on("image-add", (newImg) => {
       // console.log("New socket image", newImg);
       // Path drawing
-      if ((newImg.type = "path")) {
+      if (!newImg.src) {
         const newPath = new fabric.Path(newImg.path);
         newPath.set({
           id: newImg.id,
