@@ -68,13 +68,13 @@ async function add5eChar(req: Request, res: Response, next: NextFunction) {
   try {
     // check if user is pro
     if (!req.session.user) throw new Error("User is not logged in");
-    const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
-    // limit to three projects
-    if (generalsData.rows.length >= 5) {
-      const { rows } = await getUserByIdQuery(req.session.user);
-      if (!rows[0].is_pro)
-        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    }
+    // const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
+    // // limit to three projects
+    // if (generalsData.rows.length >= 5) {
+    //   const { rows } = await getUserByIdQuery(req.session.user);
+    //   if (!rows[0].is_pro)
+    //     throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+    // }
 
     req.body.user_id = req.session.user;
     const generalData = await add5eCharGeneralQuery(req.body);

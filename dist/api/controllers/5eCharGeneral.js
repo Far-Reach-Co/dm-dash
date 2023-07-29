@@ -47,53 +47,40 @@ var _5eCharFeats_1 = require("../queries/5eCharFeats");
 var _5eCharSpells_1 = require("../queries/5eCharSpells");
 var _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 var projectPlayers_1 = require("../queries/projectPlayers");
-var enums_js_1 = require("../../lib/enums.js");
-var users_1 = require("../queries/users");
 var playerUsers_1 = require("../queries/playerUsers");
 var playerInvites_1 = require("../queries/playerInvites");
 function add5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var generalsData, rows, generalData, general, err_1;
+        var generalData, general, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 8, , 9]);
+                    _a.trys.push([0, 5, , 6]);
                     if (!req.session.user)
                         throw new Error("User is not logged in");
-                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
-                case 1:
-                    generalsData = _a.sent();
-                    if (!(generalsData.rows.length >= 5)) return [3, 3];
-                    return [4, (0, users_1.getUserByIdQuery)(req.session.user)];
-                case 2:
-                    rows = (_a.sent()).rows;
-                    if (!rows[0].is_pro)
-                        throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    _a.label = 3;
-                case 3:
                     req.body.user_id = req.session.user;
                     return [4, (0, _5eCharGeneral_1.add5eCharGeneralQuery)(req.body)];
-                case 4:
+                case 1:
                     generalData = _a.sent();
                     general = generalData.rows[0];
                     return [4, (0, _5eCharPro_1.add5eCharProQuery)({ general_id: general.id })];
-                case 5:
+                case 2:
                     _a.sent();
                     return [4, (0, _5eCharBack_1.add5eCharBackQuery)({ general_id: general.id })];
-                case 6:
+                case 3:
                     _a.sent();
                     return [4, (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id })];
-                case 7:
+                case 4:
                     _a.sent();
                     res
                         .set("HX-Redirect", "/5eplayer?id=".concat(general.id))
                         .send("Form submission was successful.");
-                    return [3, 9];
-                case 8:
+                    return [3, 6];
+                case 5:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 9];
-                case 9: return [2];
+                    return [3, 6];
+                case 6: return [2];
             }
         });
     });
