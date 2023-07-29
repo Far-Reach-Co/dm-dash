@@ -289,7 +289,7 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
     // check if table belongs to project
     const table = tableData.rows[0];
     if (!table.project_id) {
-      return res.render("vtt", { auth: req.session.user });
+      return res.render("vtt", { auth: req.session.user, projectAuth: false });
     }
 
     // if table does not exist

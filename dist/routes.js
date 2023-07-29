@@ -351,7 +351,7 @@ router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, 
                 }
                 table = tableData.rows[0];
                 if (!table.project_id) {
-                    return [2, res.render("vtt", { auth: req.session.user })];
+                    return [2, res.render("vtt", { auth: req.session.user, projectAuth: false })];
                 }
                 return [4, (0, projects_1.getProjectQuery)(table.project_id)];
             case 2:
