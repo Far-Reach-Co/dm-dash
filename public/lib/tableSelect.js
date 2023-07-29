@@ -3,7 +3,14 @@ import { getThings } from "./apiUtils.js";
 
 export default async function tableSelect() {
   async function renderTableSelectOptions() {
-    let tables = await getThings(`/api/get_table_views_by_user`);
+    const searchParams = new URLSearchParams(window.location.search);
+    const projectId = searchParams.get("project");
+    let tables = [];
+    if (projectId) {
+      tables = await getThings(`/api/get_table_views_by_project/${projectId}`);
+    } else {
+      tables = await getThings(`/api/get_table_views_by_user`);
+    }
 
     const tableElemList = [];
 

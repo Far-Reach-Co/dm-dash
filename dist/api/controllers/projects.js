@@ -492,7 +492,7 @@ function removeProject(req, res, next) {
                             }
                         });
                     }); });
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.params.id)];
+                    return [4, (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.id)];
                 case 14:
                     tableViews = _a.sent();
                     tableViews.rows.forEach(function (tableView) { return __awaiter(_this, void 0, void 0, function () {

@@ -1,5 +1,5 @@
 import {
-  getTableViewsQuery,
+  getTableViewsByProjectQuery,
   getTableViewQuery,
   removeTableViewQuery,
   editTableViewQuery,
@@ -14,16 +14,6 @@ import { getUserByIdQuery } from "../queries/users.js";
 
 async function addTableView(req: Request, res: Response, next: NextFunction) {
   try {
-    // check if user is pro
-    // const tableViewsData = await getTableViewsQuery(req.body.project_id);
-    // limit to two campaigns
-    // if (tableViewsData.rows.length >= 5) {
-    //   if (!req.session.user) throw new Error("User is not logged in");
-    //   const { rows } = await getUserByIdQuery(req.session.user);
-    //   if (!rows[0].is_pro)
-    //     throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    // }
-
     const data = await addTableViewQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -37,15 +27,6 @@ async function addTableViewByUser(
   next: NextFunction
 ) {
   try {
-    // check if user is pro
-    // const tableViewsData = await getTableViewsQuery(req.body.project_id);
-    // limit to two campaigns
-    // if (tableViewsData.rows.length >= 5) {
-    //   if (!req.session.user) throw new Error("User is not logged in");
-    //   const { rows } = await getUserByIdQuery(req.session.user);
-    //   if (!rows[0].is_pro)
-    //     throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    // }
     if (!req.session.user) throw new Error("User is not logged in");
     req.body.user_id = req.session.user;
     await addTableViewByUserQuery(req.body);
@@ -61,7 +42,7 @@ async function getTableViewsByProject(
   next: NextFunction
 ) {
   try {
-    const data = await getTableViewsQuery(req.params.project_id);
+    const data = await getTableViewsByProjectQuery(req.params.project_id);
 
     res.send(data.rows);
   } catch (err) {

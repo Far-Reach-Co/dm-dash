@@ -5,6 +5,7 @@ import {
   removeTableImageQuery,
   editTableImageQuery,
   getTableImagesByUserQuery,
+  getTableImagesByProjectQuery,
 } from "../queries/tableImages";
 import { Request, Response, NextFunction } from "express";
 import { getTableViewQuery } from "../queries/tableViews";
@@ -52,6 +53,23 @@ async function getTableImagesByTableUser(
   }
 }
 
+async function getTableImagesByTableProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const tableData = await getTableViewQuery(req.params.table_id);
+    const data = await getTableImagesByProjectQuery(
+      tableData.rows[0].project_id
+    );
+
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function removeTableImage(
   req: Request,
   res: Response,
@@ -76,6 +94,7 @@ async function editTableImage(req: Request, res: Response, next: NextFunction) {
 
 export {
   getTableImagesByTableUser,
+  getTableImagesByTableProject,
   addTableImageByUser,
   addTableImageByProject,
   removeTableImage,

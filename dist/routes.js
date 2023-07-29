@@ -41,6 +41,10 @@ var users_1 = require("./api/queries/users");
 var _5eCharGeneral_1 = require("./api/queries/5eCharGeneral");
 var tableViews_1 = require("./api/queries/tableViews");
 var playerUsers_1 = require("./api/queries/playerUsers");
+var projects_1 = require("./api/queries/projects");
+var projectUsers_1 = require("./api/queries/projectUsers");
+var projectPlayers_1 = require("./api/queries/projectPlayers");
+var playerInvites_1 = require("./api/queries/playerInvites");
 var router = (0, express_1.Router)();
 router.get("/", function (req, res, next) {
     try {
@@ -52,7 +56,12 @@ router.get("/", function (req, res, next) {
 });
 router.get("/index", function (req, res, next) {
     try {
-        res.render("index", { auth: req.session.user });
+        if (req.session.user) {
+            res.redirect("/dash");
+        }
+        else {
+            res.render("index", { auth: req.session.user });
+        }
     }
     catch (err) {
         next(err);
@@ -105,7 +114,7 @@ router.get("/account", function (req, res, next) { return __awaiter(void 0, void
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 if (!req.session.user)
-                    throw new Error("User is not logged in");
+                    return [2, res.redirect("/login")];
                 return [4, (0, users_1.getUserByIdQuery)(req.session.user)];
             case 1:
                 rows = (_a.sent()).rows;
@@ -128,39 +137,73 @@ router.get("/dashboard", function (req, res, next) {
     }
 });
 router.get("/5eplayer", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var playerSheetid, playerSheetUserIdData, playerSheetUserId, playerUserData, invite, err_2;
+    var playerSheetid, playerSheetUserIdData, playerSheetUserId, playerUserData, invite, inviteData, projectId, projectData, project, projectUserData, projectUser, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 4, , 5]);
+                _a.trys.push([0, 13, , 14]);
                 if (!req.session.user)
-                    throw new Error("User is not logged in");
+                    return [2, res.redirect("/login")];
                 if (!req.query.id)
-                    throw new Error("Missing player ID in query");
+                    return [2, res.redirect("/dash")];
                 playerSheetid = req.query.id;
                 return [4, (0, _5eCharGeneral_1.get5eCharGeneralUserIdQuery)(playerSheetid)];
             case 1:
                 playerSheetUserIdData = _a.sent();
                 playerSheetUserId = playerSheetUserIdData.rows[0].user_id;
-                if (!(playerSheetUserId != req.session.user)) return [3, 3];
+                if (!(playerSheetUserId != req.session.user)) return [3, 11];
                 return [4, (0, playerUsers_1.getPlayerUserByUserAndPlayerQuery)(req.session.user, playerSheetid)];
             case 2:
                 playerUserData = _a.sent();
-                if (!playerUserData.rows.length) {
-                    invite = req.query.invite;
-                    if (!invite) {
-                        return [2, res.render("forbidden", { auth: req.session.user })];
-                    }
+                if (!!playerUserData.rows.length) return [3, 9];
+                if (!!req.query.project) return [3, 4];
+                invite = req.query.invite;
+                if (!invite) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
                 }
-                _a.label = 3;
+                return [4, (0, playerInvites_1.getPlayerInviteByUUIDQuery)(invite)];
             case 3:
-                res.render("5eplayer", { auth: req.session.user });
-                return [3, 5];
+                inviteData = _a.sent();
+                if (!inviteData.rows.length) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                }
+                else {
+                    return [2, res.render("5eplayer", { auth: req.session.user })];
+                }
+                _a.label = 4;
             case 4:
+                projectId = req.query.project;
+                return [4, (0, projects_1.getProjectQuery)(projectId)];
+            case 5:
+                projectData = _a.sent();
+                if (!projectData.rows.length)
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                project = projectData.rows[0];
+                if (!(req.session.user != project.user_id)) return [3, 7];
+                return [4, (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId)];
+            case 6:
+                projectUserData = _a.sent();
+                if (!projectUserData.rows.length)
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                projectUser = projectUserData.rows[0];
+                if (!projectUser.is_editor) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                }
+                else {
+                    return [2, res.render("5eplayer", { auth: req.session.user })];
+                }
+                return [3, 8];
+            case 7: return [2, res.render("5eplayer", { auth: req.session.user })];
+            case 8: return [3, 10];
+            case 9: return [2, res.render("5eplayer", { auth: req.session.user })];
+            case 10: return [3, 12];
+            case 11: return [2, res.render("5eplayer", { auth: req.session.user })];
+            case 12: return [3, 14];
+            case 13:
                 err_2 = _a.sent();
                 next(err_2);
-                return [3, 5];
-            case 5: return [2];
+                return [3, 14];
+            case 14: return [2];
         }
     });
 }); });
@@ -171,7 +214,7 @@ router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0,
             case 0:
                 _b.trys.push([0, 8, , 9]);
                 if (!req.session.user)
-                    throw new Error("User is not logged in");
+                    return [2, res.redirect("/login")];
                 return [4, (0, tableViews_1.getTableViewsByUserQuery)(req.session.user)];
             case 1:
                 tableData = _b.sent();
@@ -212,8 +255,69 @@ router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0,
         }
     });
 }); });
+router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var projectId, projectData, project, projectUserData, tableData, players, projectPlayers, _i, _a, player, charData, err_4;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 10, , 11]);
+                if (!req.session.user)
+                    return [2, res.redirect("/login")];
+                if (!req.query.id)
+                    return [2, res.redirect("/dash")];
+                projectId = req.query.id;
+                return [4, (0, projects_1.getProjectQuery)(projectId)];
+            case 1:
+                projectData = _b.sent();
+                project = projectData.rows[0];
+                if (!(req.session.user != project.user_id)) return [3, 3];
+                return [4, (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId)];
+            case 2:
+                projectUserData = _b.sent();
+                if (!projectUserData.rows.length) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                }
+                _b.label = 3;
+            case 3: return [4, (0, tableViews_1.getTableViewsByProjectQuery)(projectId)];
+            case 4:
+                tableData = _b.sent();
+                players = [];
+                return [4, (0, projectPlayers_1.getProjectPlayersByProjectQuery)(projectId)];
+            case 5:
+                projectPlayers = _b.sent();
+                _i = 0, _a = projectPlayers.rows;
+                _b.label = 6;
+            case 6:
+                if (!(_i < _a.length)) return [3, 9];
+                player = _a[_i];
+                return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(player.player_id)];
+            case 7:
+                charData = _b.sent();
+                players.push(charData.rows[0]);
+                _b.label = 8;
+            case 8:
+                _i++;
+                return [3, 6];
+            case 9:
+                res.render("wyrld", {
+                    auth: req.session.user,
+                    project: project,
+                    tables: tableData.rows,
+                    sheets: players
+                });
+                return [3, 11];
+            case 10:
+                err_4 = _b.sent();
+                next(err_4);
+                return [3, 11];
+            case 11: return [2];
+        }
+    });
+}); });
 router.get("/newsheet", function (req, res, next) {
     try {
+        if (!req.session.user)
+            return res.redirect("/forbidden");
         res.render("newsheet", { auth: req.session.user });
     }
     catch (err) {
@@ -222,33 +326,73 @@ router.get("/newsheet", function (req, res, next) {
 });
 router.get("/newtable", function (req, res, next) {
     try {
+        if (!req.session.user)
+            return res.redirect("/forbidden");
         res.render("newtable", { auth: req.session.user });
     }
     catch (err) {
         next(err);
     }
 });
-router.get("/vtt", function (req, res, next) {
-    try {
-        if (!req.session.user) {
-            res.render("forbidden", { auth: req.session.user });
+router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 4, , 5]);
+                if (!req.query.uuid)
+                    return [2, res.render("404", { auth: req.session.user })];
+                uuid = req.query.uuid;
+                return [4, (0, tableViews_1.getTableViewByUUIDQuery)(uuid)];
+            case 1:
+                tableData = _a.sent();
+                if (!tableData.rows.length) {
+                    return [2, res.render("404", { auth: req.session.user })];
+                }
+                table = tableData.rows[0];
+                if (!table.project_id) {
+                    return [2, res.render("vtt", { auth: req.session.user })];
+                }
+                return [4, (0, projects_1.getProjectQuery)(table.project_id)];
+            case 2:
+                projectData = _a.sent();
+                if (!projectData.rows.length) {
+                    return [2, res.render("404", { auth: req.session.user })];
+                }
+                project = projectData.rows[0];
+                if (!req.session.user) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                }
+                if (project.user_id == req.session.user) {
+                    return [2, res.render("vtt", { auth: req.session.user, projectAuth: true })];
+                }
+                return [4, (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id)];
+            case 3:
+                projectUserData = _a.sent();
+                if (!projectUserData.rows.length) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                }
+                projectUser = projectUserData.rows[0];
+                return [2, res.render("vtt", {
+                        auth: req.session.user,
+                        projectAuth: projectUser.is_editor
+                    })];
+            case 4:
+                err_5 = _a.sent();
+                next(err_5);
+                return [3, 5];
+            case 5: return [2];
         }
-        else {
-            res.render("vtt", { auth: req.session.user });
-        }
-    }
-    catch (err) {
-        next(err);
-    }
-});
+    });
+}); });
 router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_4;
+    var err_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 if (!req.session.user)
-                    throw new Error("User is not logged in");
+                    return [2, res.redirect("/forbidden")];
                 return [4, (0, users_1.editUserQuery)(req.session.user, {
                         username: req.body.username
                     })];
@@ -257,21 +401,21 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_4 = _a.sent();
-                next(err_4);
+                err_6 = _a.sent();
+                next(err_6);
                 return [3, 3];
             case 3: return [2];
         }
     });
 }); });
 router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_5;
+    var err_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 if (!req.session.user)
-                    throw new Error("User is not logged in");
+                    return [2, res.redirect("/forbidden")];
                 return [4, (0, users_1.editUserQuery)(req.session.user, {
                         email: req.body.email
                     })];
@@ -280,8 +424,8 @@ router.post("/update_email", function (req, res, next) { return __awaiter(void 0
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_5 = _a.sent();
-                next(err_5);
+                err_7 = _a.sent();
+                next(err_7);
                 return [3, 3];
             case 3: return [2];
         }

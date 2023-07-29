@@ -64,7 +64,7 @@ export default class TopLayer {
   };
 
   renderLayersElem = () => {
-    if (USERID != this.tableView.user_id) {
+    if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
       return createElement("div", { style: "display: none;" });
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
@@ -86,7 +86,7 @@ export default class TopLayer {
   };
 
   renderGridControlElem = () => {
-    if (USERID != this.tableView.user_id) {
+    if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
       return createElement("div", { style: "display: none;" });
     } else {
       return createElement("div", { class: "table-config grid-control-elem" }, [

@@ -39,7 +39,7 @@ router.post("/new_image_for_project", upload.single("file"), s3_js_1.newImageFor
 router.post("/new_image_for_user", upload.single("file"), s3_js_1.newImageForUser);
 router.post("/edit_image/:id", s3_js_1.editImage);
 router["delete"]("/remove_image_by_table_user/:image_id/:table_id", s3_js_1.removeImageByTableUser);
-router["delete"]("/remove_user_image_by_project/:image_id/:project_id", s3_js_1.removeImageByProject);
+router["delete"]("/remove_image_by_project/:image_id/:project_id", s3_js_1.removeImageByProject);
 router.get("/get_table_views_by_project/:project_id", tableViews_js_1.getTableViewsByProject);
 router.get("/get_table_views_by_user", tableViews_js_1.getTableViewsByUser);
 router.get("/get_table_view/:id", tableViews_js_1.getTableView);
@@ -48,6 +48,7 @@ router.post("/add_table_view", tableViews_js_1.addTableView);
 router.post("/add_table_view_by_user", tableViews_js_1.addTableViewByUser);
 router["delete"]("/remove_table_view/:id", tableViews_js_1.removeTableView);
 router.post("/edit_table_view/:id", tableViews_js_1.editTableView);
+router.get("/get_table_images_by_table_project/:table_id", tableImages_js_1.getTableImagesByTableProject);
 router.get("/get_table_images_by_table_user/:table_id", tableImages_js_1.getTableImagesByTableUser);
 router.post("/add_table_image_by_project", tableImages_js_1.addTableImageByProject);
 router.post("/add_table_image_by_user", tableImages_js_1.addTableImageByUser);

@@ -6,11 +6,19 @@ import {
   get5eCharGeneralUserIdQuery,
   get5eCharsGeneralByUserQuery,
 } from "./api/queries/5eCharGeneral";
-import { getTableViewsByUserQuery } from "./api/queries/tableViews";
+import {
+  getTableViewByUUIDQuery,
+  getTableViewsByProjectQuery,
+  getTableViewsByUserQuery,
+} from "./api/queries/tableViews";
 import {
   getPlayerUserByUserAndPlayerQuery,
   getPlayerUsersQuery,
 } from "./api/queries/playerUsers";
+import { getProjectQuery } from "./api/queries/projects";
+import { getProjectUserByUserAndProjectQuery } from "./api/queries/projectUsers";
+import { getProjectPlayersByProjectQuery } from "./api/queries/projectPlayers";
+import { getPlayerInviteByUUIDQuery } from "./api/queries/playerInvites";
 
 var router = Router();
 
@@ -26,7 +34,11 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => {
 router.get("/index", (req: Request, res: Response, next: NextFunction) => {
   try {
     //
-    res.render("index", { auth: req.session.user });
+    if (req.session.user) {
+      res.redirect("/dash");
+    } else {
+      res.render("index", { auth: req.session.user });
+    }
   } catch (err) {
     next(err);
   }
@@ -88,7 +100,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       //
-      if (!req.session.user) throw new Error("User is not logged in");
+      if (!req.session.user) return res.redirect("/login");
       const { rows } = await getUserByIdQuery(req.session.user);
       res.render("account", { auth: req.session.user, user: rows[0] });
     } catch (err) {
@@ -110,28 +122,62 @@ router.get(
   "/5eplayer",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.session.user) throw new Error("User is not logged in");
-      if (!req.query.id) throw new Error("Missing player ID in query");
+      if (!req.session.user) return res.redirect("/login");
+      if (!req.query.id) return res.redirect("/dash");
       const playerSheetid = req.query.id as string;
       const playerSheetUserIdData = await get5eCharGeneralUserIdQuery(
         playerSheetid
       );
       const playerSheetUserId = playerSheetUserIdData.rows[0].user_id;
-      // check if user created character sheet or if is a playerUser (add by invite)
+      // if not owner
       if (playerSheetUserId != req.session.user) {
+        // check if is a playerUser (added by invite)
         const playerUserData = await getPlayerUserByUserAndPlayerQuery(
           req.session.user,
           playerSheetid
         );
         if (!playerUserData.rows.length) {
-          const invite = req.query.invite as string;
-          if (!invite) {
-            return res.render("forbidden", { auth: req.session.user });
+          // check if projectUser is manager or owner
+          if (!req.query.project) {
+            // check if there is no valid invite
+            const invite = req.query.invite as string;
+            if (!invite) {
+              return res.render("forbidden", { auth: req.session.user });
+            }
+            const inviteData = await getPlayerInviteByUUIDQuery(invite);
+            if (!inviteData.rows.length) {
+              return res.render("forbidden", { auth: req.session.user });
+            } else {
+              return res.render("5eplayer", { auth: req.session.user });
+            }
           }
+          const projectId = req.query.project as string;
+          const projectData = await getProjectQuery(projectId);
+          if (!projectData.rows.length)
+            return res.render("forbidden", { auth: req.session.user });
+          const project = projectData.rows[0];
+          if (req.session.user != project.user_id) {
+            const projectUserData = await getProjectUserByUserAndProjectQuery(
+              req.session.user,
+              projectId
+            );
+            if (!projectUserData.rows.length)
+              return res.render("forbidden", { auth: req.session.user });
+            const projectUser = projectUserData.rows[0];
+            if (!projectUser.is_editor) {
+              return res.render("forbidden", { auth: req.session.user });
+            } else {
+              return res.render("5eplayer", { auth: req.session.user });
+            }
+          } else {
+            return res.render("5eplayer", { auth: req.session.user });
+          }
+        } else {
+          return res.render("5eplayer", { auth: req.session.user });
         }
+      } else {
+        return res.render("5eplayer", { auth: req.session.user });
       }
-      //
-      res.render("5eplayer", { auth: req.session.user });
     } catch (err) {
       next(err);
     }
@@ -140,7 +186,7 @@ router.get(
 
 router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    if (!req.session.user) return res.redirect("/login");
     // get table views by user
     const tableData = await getTableViewsByUserQuery(req.session.user);
     // get all character sheets by user
@@ -166,9 +212,54 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get(
+  "/wyrld",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("/login");
+      // get project id
+      if (!req.query.id) return res.redirect("/dash");
+      const projectId = req.query.id as string;
+      const projectData = await getProjectQuery(projectId);
+      const project = projectData.rows[0];
+      // authorize
+      if (req.session.user != project.user_id) {
+        // if user is not owner, check if user is projectUser
+        const projectUserData = await getProjectUserByUserAndProjectQuery(
+          req.session.user,
+          projectId
+        );
+        if (!projectUserData.rows.length) {
+          // send to forbidden
+          return res.render("forbidden", { auth: req.session.user });
+        }
+      }
+
+      // get table views by project
+      const tableData = await getTableViewsByProjectQuery(projectId);
+      // get all character sheets by project
+      const players = [];
+      const projectPlayers = await getProjectPlayersByProjectQuery(projectId);
+      for (var player of projectPlayers.rows) {
+        const charData = await get5eCharGeneralQuery(player.player_id);
+        players.push(charData.rows[0]);
+      }
+
+      res.render("wyrld", {
+        auth: req.session.user,
+        project: project,
+        tables: tableData.rows,
+        sheets: players,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 router.get("/newsheet", (req: Request, res: Response, next: NextFunction) => {
   try {
-    //
+    if (!req.session.user) return res.redirect("/forbidden");
     res.render("newsheet", { auth: req.session.user });
   } catch (err) {
     next(err);
@@ -177,21 +268,61 @@ router.get("/newsheet", (req: Request, res: Response, next: NextFunction) => {
 
 router.get("/newtable", (req: Request, res: Response, next: NextFunction) => {
   try {
-    //
+    if (!req.session.user) return res.redirect("/forbidden");
     res.render("newtable", { auth: req.session.user });
   } catch (err) {
     next(err);
   }
 });
 
-router.get("/vtt", (req: Request, res: Response, next: NextFunction) => {
+router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    //
-    if (!req.session.user) {
-      res.render("forbidden", { auth: req.session.user });
-    } else {
-      res.render("vtt", { auth: req.session.user });
+    if (!req.query.uuid) return res.render("404", { auth: req.session.user });
+    const uuid = req.query.uuid as string;
+    const tableData = await getTableViewByUUIDQuery(uuid);
+
+    // if not table
+    if (!tableData.rows.length) {
+      return res.render("404", { auth: req.session.user });
     }
+
+    // check if table belongs to project
+    const table = tableData.rows[0];
+    if (!table.project_id) {
+      return res.render("vtt", { auth: req.session.user });
+    }
+
+    // if table does not exist
+    const projectData = await getProjectQuery(table.project_id);
+    if (!projectData.rows.length) {
+      return res.render("404", { auth: req.session.user });
+    }
+
+    // check if there is a user with an account logged in
+    const project = projectData.rows[0];
+    if (!req.session.user) {
+      return res.render("forbidden", { auth: req.session.user });
+    }
+
+    // if user is owner
+    if (project.user_id == req.session.user) {
+      return res.render("vtt", { auth: req.session.user, projectAuth: true });
+    }
+
+    // check if user is a projectUser
+    const projectUserData = await getProjectUserByUserAndProjectQuery(
+      req.session.user,
+      project.id
+    );
+    if (!projectUserData.rows.length) {
+      // send to forbidden
+      return res.render("forbidden", { auth: req.session.user });
+    }
+    const projectUser = projectUserData.rows[0];
+    return res.render("vtt", {
+      auth: req.session.user,
+      projectAuth: projectUser.is_editor,
+    });
   } catch (err) {
     next(err);
   }
@@ -201,7 +332,7 @@ router.post(
   "/update_username",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.session.user) throw new Error("User is not logged in");
+      if (!req.session.user) return res.redirect("/forbidden");
       await editUserQuery(req.session.user, {
         username: req.body.username,
       });
@@ -216,7 +347,7 @@ router.post(
   "/update_email",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.session.user) throw new Error("User is not logged in");
+      if (!req.session.user) return res.redirect("/forbidden");
       await editUserQuery(req.session.user, {
         email: req.body.email,
       });

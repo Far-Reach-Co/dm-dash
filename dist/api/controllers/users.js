@@ -314,7 +314,7 @@ function getUserBySession(req, res, next) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     if (!req.session.user)
-                        throw new Error("User is not logge din");
+                        throw new Error("User is not logged in");
                     return [4, (0, users_1.getUserByIdQuery)(req.session.user)];
                 case 1:
                     rows = (_a.sent()).rows;

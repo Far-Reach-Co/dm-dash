@@ -36,7 +36,7 @@ async function getTableImageQuery(id: string) {
   return await db.query<TableImageModel>(query)
 }
 
-async function getTableImagesByProjectQuery(project_id: string) {
+async function getTableImagesByProjectQuery(project_id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."TableImage" where project_id = $1`,
     values: [project_id]

@@ -267,7 +267,7 @@ async function getUserBySession(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logge din");
+    if (!req.session.user) throw new Error("User is not logged in");
     const { rows } = await getUserByIdQuery(req.session.user);
     res.send(rows[0]);
   } catch (err) {

@@ -22,6 +22,7 @@ class Table {
     // get table views
     const searchParams = new URLSearchParams(window.location.search);
     const tableId = searchParams.get("uuid");
+
     const tableView = await getThings(`/api/get_table_view_by_uuid/${tableId}`);
     // sidebar and hamburger inst
     this.instantiateSidebar(tableView);
@@ -42,9 +43,15 @@ class Table {
     // provide top layer to socket int
     // provide socket necessary variables
     socketIntegration.tableId = tableId;
-    socketIntegration.user = await getThings("/api/get_user");
     socketIntegration.sidebar = this.sidebar;
     socketIntegration.topLayer = this.topLayer;
+    // handle user or anonymous
+    let user = await getThings("/api/get_user");
+    if (!user) {
+      const randomNumber = Math.floor(100000 + Math.random() * 900000); // random six digit number
+      user = { username: `user-${randomNumber}` };
+    }
+    socketIntegration.user = user;
     // setup socket listeners after canvas instantiation
     socketIntegration.setupListeners(this.canvasLayer);
     socketIntegration.socketJoined();
@@ -53,7 +60,10 @@ class Table {
     this.render();
     await this.canvasLayer.init();
     this.topLayer.render();
-    if (USERID == tableView.user_id) this.renderSidebarAndHamburger();
+
+    // only render the sidebar for owner or managers
+    if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
+      this.renderSidebarAndHamburger();
   };
 
   instantiateSidebar = (tableView) => {

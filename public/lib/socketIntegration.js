@@ -58,7 +58,7 @@ class SocketIntegration {
     this.socket.on("image-add", (newImg) => {
       // console.log("New socket image", newImg);
       // Path drawing
-      if ((newImg.type = "path")) {
+      if (!newImg.src) {
         const newPath = new fabric.Path(newImg.path);
         newPath.set({
           id: newImg.id,
@@ -70,8 +70,9 @@ class SocketIntegration {
         });
         return canvasLayer.canvas.add(newPath);
       }
+
       // uploaded images
-      fabric.Image.fromURL(newImg.src, function (img) {
+      fabric.Image.fromURL(newImg.src, (img) => {
         // reconstruct new image
         for (const [key, value] of Object.entries(newImg)) {
           img[key] = value;

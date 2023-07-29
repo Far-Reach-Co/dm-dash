@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Wyrlds</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="d-flex flex-column h-100">
+      <div class="p-3">
+        <h1><%= project.title %></h1>
+        <!-- <br /> -->
+        <!-- <small><%= project.description %></small> -->
+      </div>
+      <div class="d-flex h-100">
+        <div class="d-flex flex-column flex-wrap p-3 w-50 h-100">
+          <h2>Wyrld Tables</h2>
+          <small>These tables are shared by the members of your wyrld.</small>
+          <br />
+          <!-- <a href="/newtable" title="Create a new virtual table">+ New Wyrld Table</a> -->
+          <hr />
+          <% if (tables.length === 0) { %>
+          <small class="ms-2">No tables yet...</small>
+          <% } else { %> <% tables.forEach(function(table) { %>
+          <div
+            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+            onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')"
+            title="Open table in new tab"
+          >
+            <div class="dash-list-title mb-3"><%= table.title %></div>
+            <a>↗</a>
+          </div>
+          <% }); %> <% } %>
+        </div>
+        <div class="d-flex flex-column flex-wrap d-wrap p-3 w-50 h-100">
+          <h2>Player Character Sheets</h2>
+          <small
+            >We currently offer Dungeons and Dragons 5e sheets.<br />Only the
+            creator of the sheet and the wyrld managers are allowed to view
+            these sheets.</small
+          >
+          <br />
+          <!-- <a href="/newsheet" title="Create a new player character sheet"
+            >+ New Sheet</a
+          > -->
+          <hr />
+          <% if (sheets.length === 0) { %>
+          <small class="ms-2">No sheets yet...</small>
+          <% } else { %> <% sheets.forEach(function(sheet) { %>
+          <div
+            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+            onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')"
+            title="Open character sheet in new tab"
+          >
+            <div class="dash-list-title mb-3"><%= sheet.name %></div>
+            <a>↗</a>
+          </div>
+          <% }); %> <% } %>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    function handleSheetClick(id, projectID) {
+      window.open(`/5eplayer?id=${id}&project=${projectID}`, "_blank").focus();
+    }
+    function handleTableClick(uuid, projectID) {
+      window.open(`/vtt?uuid=${uuid}&project=${projectID}`, "_blank").focus();
+    }
+  </script>
+</html>

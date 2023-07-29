@@ -1672,6 +1672,28 @@ export default class FiveEPlayerSheet {
     this.domComponent.append(this.spellsComponent.domComponent);
   };
 
+  renderSettingsOrNot = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const project = searchParams.get("project");
+    if (!project || USERID == this.generalData.user_id) {
+      return createElement(
+        "a",
+        {
+          class:
+            this.mainView === "settings" ? "cp-nav-item-active" : "cp-nav-item",
+        },
+        "Settings",
+        {
+          type: "click",
+          event: () => {
+            this.mainView = "settings";
+            this.render();
+          },
+        }
+      );
+    } else return createElement("div", { style: "display: none;" });
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -1727,23 +1749,7 @@ export default class FiveEPlayerSheet {
             },
           }
         ),
-        createElement(
-          "a",
-          {
-            class:
-              this.mainView === "settings"
-                ? "cp-nav-item-active"
-                : "cp-nav-item",
-          },
-          "Settings",
-          {
-            type: "click",
-            event: () => {
-              this.mainView = "settings";
-              this.render();
-            },
-          }
-        ),
+        this.renderSettingsOrNot(),
       ])
     );
 

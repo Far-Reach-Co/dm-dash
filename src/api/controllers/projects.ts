@@ -48,7 +48,7 @@ import { getImageQuery, removeImageQuery } from "../queries/images.js";
 import { removeImage } from "./s3.js";
 import {
   addTableViewQuery,
-  getTableViewsQuery,
+  getTableViewsByProjectQuery,
   removeTableViewQuery,
 } from "../queries/tableViews.js";
 import {
@@ -281,7 +281,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       await removeTableImageQuery(tableImage.id);
     });
     // table views
-    const tableViews = await getTableViewsQuery(req.params.id);
+    const tableViews = await getTableViewsByProjectQuery(req.params.id);
     tableViews.rows.forEach(async (tableView) => {
       await removeTableViewQuery(tableView.id);
     });

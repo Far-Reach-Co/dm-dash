@@ -180,6 +180,7 @@ import {
   getTableImagesByTableUser,
   addTableImageByProject,
   addTableImageByUser,
+  getTableImagesByTableProject,
 } from "./controllers/tableImages.js";
 import {
   getTableViewsByProject,
@@ -225,7 +226,7 @@ router.delete(
   removeImageByTableUser
 );
 router.delete(
-  "/remove_user_image_by_project/:image_id/:project_id",
+  "/remove_image_by_project/:image_id/:project_id",
   removeImageByProject
 );
 
@@ -240,7 +241,10 @@ router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view/:id", editTableView);
 
 // table images
-// router.get("/get_table_images_by_project/:project_id", getTableImages);
+router.get(
+  "/get_table_images_by_table_project/:table_id",
+  getTableImagesByTableProject
+);
 router.get(
   "/get_table_images_by_table_user/:table_id",
   getTableImagesByTableUser

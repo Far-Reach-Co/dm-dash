@@ -10,14 +10,14 @@ export default class TableSidebarComponent {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar-images";
     this.tableView = props.tableView;
-
+    // project
+    const searchParams = new URLSearchParams(window.location.search);
+    this.projectId = searchParams.get("project");
+    // utilities
     this.currentMouseDownImage = null;
-
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
-
     this.makeImageSmall = false;
-
     this.tableImageSearchQuery = null;
   }
 
@@ -61,9 +61,16 @@ export default class TableSidebarComponent {
       window.confirm(`Are you sure you want to delete ${image.original_name}`)
     ) {
       // remove image in db
-      deleteThing(
-        `/api//remove_image_by_table_user/${image.id}/${this.tableView.id}`
-      );
+      if (this.projectId) {
+        deleteThing(
+          `/api/remove_image_by_project/${image.id}/${this.projectId}`
+        );
+      } else {
+        deleteThing(
+          `/api/remove_image_by_table_user/${image.id}/${this.tableView.id}`
+        );
+      }
+
       // remove table image in db
       deleteThing(`/api/remove_table_image/${tableImage.id}`);
       // remove elem in sidebar
@@ -83,16 +90,11 @@ export default class TableSidebarComponent {
 
     imageElems = imageElems.filter((elem) => {
       if (this.tableImageSearchQuery && this.tableImageSearchQuery !== "") {
-        console.log(
-          this.tableImageSearchQuery,
-          elem.children[0].children[0].value
-        );
         return elem.children[0].children[0].value
           .toLowerCase()
           .includes(this.tableImageSearchQuery.toLowerCase());
       } else return elem;
     });
-    console.log(imageElems);
 
     imageElems = imageElems.sort((a, b) => {
       if (
@@ -106,9 +108,17 @@ export default class TableSidebarComponent {
   };
 
   renderCurrentImages = async () => {
-    const tableImages = await getThings(
-      `/api/get_table_images_by_table_user/${this.tableView.id}`
-    );
+    // get images for project or for user
+    let tableImages = [];
+    if (this.projectId) {
+      tableImages = await getThings(
+        `/api/get_table_images_by_table_project/${this.tableView.id}`
+      );
+    } else {
+      tableImages = await getThings(
+        `/api/get_table_images_by_table_user/${this.tableView.id}`
+      );
+    }
     if (!tableImages.length) {
       // remove temp loading spinner
       this.tempLoadingSpinner.remove();
@@ -139,7 +149,6 @@ export default class TableSidebarComponent {
                   {
                     type: "focusout",
                     event: (e) => {
-                      console.log(e.target.value);
                       postThing(`/api/edit_image/${image.id}`, {
                         original_name: e.target.value,
                       });
@@ -186,10 +195,16 @@ export default class TableSidebarComponent {
         const newImage = await uploadUserImage(file, this.makeImageSmall);
         if (newImage) {
           // add new table image
-          await postThing(`/api/add_table_image_by_user`, {
-            image_id: newImage.id,
-          });
-          // re render
+          if (this.projectId) {
+            await postThing(`/api/add_table_image_by_project`, {
+              project_id: this.projectId,
+              image_id: newImage.id,
+            });
+          } else {
+            await postThing(`/api/add_table_image_by_user`, {
+              image_id: newImage.id,
+            });
+          }
         }
         this.toggleImageLoading();
       } catch (err) {
@@ -203,7 +218,6 @@ export default class TableSidebarComponent {
     imageContainer.innerHTML = "";
     const elems = this.renderImageElems();
     for (var elem of elems) {
-      console.log(elem);
       imageContainer.appendChild(elem);
     }
   };

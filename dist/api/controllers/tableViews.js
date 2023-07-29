@@ -92,7 +92,7 @@ function getTableViewsByProject(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.params.project_id)];
+                    return [4, (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.project_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
