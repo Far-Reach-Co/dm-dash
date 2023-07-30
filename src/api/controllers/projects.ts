@@ -47,7 +47,7 @@ import {
 import { getImageQuery, removeImageQuery } from "../queries/images.js";
 import { removeImage } from "./s3.js";
 import {
-  addTableViewQuery,
+  addTableViewByProjectQuery,
   getTableViewsByProjectQuery,
   removeTableViewQuery,
 } from "../queries/tableViews.js";
@@ -64,19 +64,16 @@ async function addProject(req: Request, res: Response, next: NextFunction) {
     // check if user is pro
     if (!req.session.user) throw new Error("User is not logged in");
 
-    const projectsData = await getProjectsQuery(req.session.user);
-    // limit to three projects
-    if (projectsData.rows.length >= 3) {
-      const { rows } = await getUserByIdQuery(req.session.user);
-      if (!rows[0].is_pro)
-        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    }
-
     req.body.user_id = req.session.user;
     const data = await addProjectQuery(req.body);
     // add first project table view
-    await addTableViewQuery({ project_id: data.rows[0].id });
-    res.status(201).json(data.rows[0]);
+    await addTableViewByProjectQuery({
+      project_id: data.rows[0].id,
+      title: "First Wyrld Table",
+    });
+    res
+      .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)
+      .send("Form submission was successful.");
   } catch (err) {
     next(err);
   }

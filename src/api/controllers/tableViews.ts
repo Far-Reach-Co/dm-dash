@@ -3,7 +3,7 @@ import {
   getTableViewQuery,
   removeTableViewQuery,
   editTableViewQuery,
-  addTableViewQuery,
+  addTableViewByProjectQuery,
   addTableViewByUserQuery,
   getTableViewByUUIDQuery,
   getTableViewsByUserQuery,
@@ -12,10 +12,21 @@ import { Request, Response, NextFunction } from "express";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { getUserByIdQuery } from "../queries/users.js";
 
-async function addTableView(req: Request, res: Response, next: NextFunction) {
+async function addTableViewByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await addTableViewQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    if (!req.session.user) throw new Error("User is not logged in");
+
+    await addTableViewByProjectQuery({
+      title: req.body.title,
+      project_id: req.params.project_id,
+    });
+    res
+      .set("HX-Redirect", `/wyrld?id=${req.params.project_id}`)
+      .send("Form submission was successful.");
   } catch (err) {
     next(err);
   }
@@ -114,7 +125,7 @@ async function editTableView(req: Request, res: Response, next: NextFunction) {
 }
 
 export {
-  addTableView,
+  addTableViewByProject,
   addTableViewByUser,
   getTableViewsByUser,
   getTableViewsByProject,

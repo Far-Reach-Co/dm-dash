@@ -186,11 +186,11 @@ import {
   getTableViewsByProject,
   removeTableView,
   editTableView,
-  addTableView,
   getTableView,
   addTableViewByUser,
   getTableViewByUUID,
   getTableViewsByUser,
+  addTableViewByProject,
 } from "./controllers/tableViews.js";
 import {
   addPlayerInvite,
@@ -235,7 +235,7 @@ router.get("/get_table_views_by_project/:project_id", getTableViewsByProject);
 router.get("/get_table_views_by_user", getTableViewsByUser);
 router.get("/get_table_view/:id", getTableView);
 router.get("/get_table_view_by_uuid/:uuid", getTableViewByUUID);
-router.post("/add_table_view", addTableView);
+router.post("/add_table_view_by_project/:project_id", addTableViewByProject);
 router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view/:id", editTableView);

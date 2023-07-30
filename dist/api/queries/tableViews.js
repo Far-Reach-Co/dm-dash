@@ -36,18 +36,19 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUserQuery = exports.getTableViewQuery = exports.getTableViewByUUIDQuery = exports.getTableViewsByProjectQuery = exports.addTableViewQuery = void 0;
+exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUserQuery = exports.getTableViewQuery = exports.getTableViewByUUIDQuery = exports.getTableViewsByProjectQuery = exports.addTableViewByProjectQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
-function addTableViewQuery(data) {
+function addTableViewByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"TableView\" (project_id) values($1) returning *",
+                        text: "insert into public.\"TableView\" (project_id, title) values($1,$2) returning *",
                         values: [
                             data.project_id,
+                            data.title
                         ]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -56,7 +57,7 @@ function addTableViewQuery(data) {
         });
     });
 }
-exports.addTableViewQuery = addTableViewQuery;
+exports.addTableViewByProjectQuery = addTableViewByProjectQuery;
 function addTableViewByUserQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

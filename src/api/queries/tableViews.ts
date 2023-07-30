@@ -9,11 +9,12 @@ interface TableViewModel {
   title: string
 }
 
-async function addTableViewQuery(data: {project_id: string | number}) {
+async function addTableViewByProjectQuery(data: {project_id: string | number, title: string}) {
   const query = {
-    text: /*sql*/ `insert into public."TableView" (project_id) values($1) returning *`,
+    text: /*sql*/ `insert into public."TableView" (project_id, title) values($1,$2) returning *`,
     values: [
       data.project_id,
+      data.title
     ]
   }
   return await db.query<TableViewModel>(query)
@@ -94,7 +95,7 @@ async function editTableViewQuery(id: string, data: any) {
 }
 
 export {
-  addTableViewQuery,
+  addTableViewByProjectQuery,
   getTableViewsByProjectQuery,
   getTableViewByUUIDQuery,
   getTableViewQuery,

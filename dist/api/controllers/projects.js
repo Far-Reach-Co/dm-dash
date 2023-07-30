@@ -56,42 +56,34 @@ var images_js_1 = require("../queries/images.js");
 var s3_js_1 = require("./s3.js");
 var tableViews_js_1 = require("../queries/tableViews.js");
 var tableImages_js_1 = require("../queries/tableImages.js");
-var enums_js_1 = require("../../lib/enums.js");
-var users_js_1 = require("../queries/users.js");
 function addProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectsData, rows, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
+                    _a.trys.push([0, 3, , 4]);
                     if (!req.session.user)
                         throw new Error("User is not logged in");
-                    return [4, (0, projects_js_1.getProjectsQuery)(req.session.user)];
-                case 1:
-                    projectsData = _a.sent();
-                    if (!(projectsData.rows.length >= 3)) return [3, 3];
-                    return [4, (0, users_js_1.getUserByIdQuery)(req.session.user)];
-                case 2:
-                    rows = (_a.sent()).rows;
-                    if (!rows[0].is_pro)
-                        throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    _a.label = 3;
-                case 3:
                     req.body.user_id = req.session.user;
                     return [4, (0, projects_js_1.addProjectQuery)(req.body)];
-                case 4:
+                case 1:
                     data = _a.sent();
-                    return [4, (0, tableViews_js_1.addTableViewQuery)({ project_id: data.rows[0].id })];
-                case 5:
+                    return [4, (0, tableViews_js_1.addTableViewByProjectQuery)({
+                            project_id: data.rows[0].id,
+                            title: "First Wyrld Table"
+                        })];
+                case 2:
                     _a.sent();
-                    res.status(201).json(data.rows[0]);
-                    return [3, 7];
-                case 6:
+                    res
+                        .set("HX-Redirect", "/wyrld?id=".concat(data.rows[0].id))
+                        .send("Form submission was successful.");
+                    return [3, 4];
+                case 3:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 4];
+                case 4: return [2];
             }
         });
     });

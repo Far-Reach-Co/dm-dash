@@ -208,55 +208,77 @@ router.get("/5eplayer", function (req, res, next) { return __awaiter(void 0, voi
     });
 }); });
 router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var tableData, charData, sharedCharData, playerUsersData, _i, _a, playerUser, puCharData, err_3;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
+    var tableData, charData, sharedCharData, playerUsersData, _i, _a, playerUser, puCharData, projectData, sharedProjectList, projectUserData, _b, _c, projectUser, sharedProjectData, err_3;
+    return __generator(this, function (_d) {
+        switch (_d.label) {
             case 0:
-                _b.trys.push([0, 8, , 9]);
+                _d.trys.push([0, 14, , 15]);
                 if (!req.session.user)
                     return [2, res.redirect("/login")];
                 return [4, (0, tableViews_1.getTableViewsByUserQuery)(req.session.user)];
             case 1:
-                tableData = _b.sent();
+                tableData = _d.sent();
                 return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
             case 2:
-                charData = _b.sent();
+                charData = _d.sent();
                 sharedCharData = [];
                 return [4, (0, playerUsers_1.getPlayerUsersQuery)(req.session.user)];
             case 3:
-                playerUsersData = _b.sent();
+                playerUsersData = _d.sent();
                 if (!playerUsersData.rows.length) return [3, 7];
                 _i = 0, _a = playerUsersData.rows;
-                _b.label = 4;
+                _d.label = 4;
             case 4:
                 if (!(_i < _a.length)) return [3, 7];
                 playerUser = _a[_i];
                 return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(playerUser.player_id)];
             case 5:
-                puCharData = _b.sent();
+                puCharData = _d.sent();
                 sharedCharData.push(puCharData.rows[0]);
-                _b.label = 6;
+                _d.label = 6;
             case 6:
                 _i++;
                 return [3, 4];
-            case 7:
+            case 7: return [4, (0, projects_1.getProjectsQuery)(req.session.user)];
+            case 8:
+                projectData = _d.sent();
+                sharedProjectList = [];
+                return [4, (0, projectUsers_1.getProjectUsersQuery)(req.session.user)];
+            case 9:
+                projectUserData = _d.sent();
+                _b = 0, _c = projectUserData.rows;
+                _d.label = 10;
+            case 10:
+                if (!(_b < _c.length)) return [3, 13];
+                projectUser = _c[_b];
+                return [4, (0, projects_1.getProjectQuery)(projectUser.project_id)];
+            case 11:
+                sharedProjectData = _d.sent();
+                sharedProjectList.push(sharedProjectData.rows[0]);
+                _d.label = 12;
+            case 12:
+                _b++;
+                return [3, 10];
+            case 13:
                 res.render("dash", {
                     auth: req.session.user,
                     tables: tableData.rows,
                     sheets: charData.rows,
-                    sharedSheets: sharedCharData
+                    sharedSheets: sharedCharData,
+                    projects: projectData.rows,
+                    sharedProjects: sharedProjectList
                 });
-                return [3, 9];
-            case 8:
-                err_3 = _b.sent();
+                return [3, 15];
+            case 14:
+                err_3 = _d.sent();
                 next(err_3);
-                return [3, 9];
-            case 9: return [2];
+                return [3, 15];
+            case 15: return [2];
         }
     });
 }); });
 router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var projectId, projectData, project, projectUserData, tableData, players, projectPlayers, _i, _a, player, charData, err_4;
+    var projectId, projectData, project, projectAuth, projectUserData, projectUser, tableData, players, projectPlayers, _i, _a, player, charData, err_4;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -270,6 +292,7 @@ router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0
             case 1:
                 projectData = _b.sent();
                 project = projectData.rows[0];
+                projectAuth = true;
                 if (!(req.session.user != project.user_id)) return [3, 3];
                 return [4, (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId)];
             case 2:
@@ -277,6 +300,8 @@ router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0
                 if (!projectUserData.rows.length) {
                     return [2, res.render("forbidden", { auth: req.session.user })];
                 }
+                projectUser = projectUserData.rows[0];
+                projectAuth = projectUser.is_editor;
                 _b.label = 3;
             case 3: return [4, (0, tableViews_1.getTableViewsByProjectQuery)(projectId)];
             case 4:
@@ -301,6 +326,7 @@ router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0
             case 9:
                 res.render("wyrld", {
                     auth: req.session.user,
+                    projectAuth: projectAuth,
                     project: project,
                     tables: tableData.rows,
                     sheets: players
@@ -334,8 +360,68 @@ router.get("/newtable", function (req, res, next) {
         next(err);
     }
 });
+router.get("/newwyrldtable", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var projectId, projectData, project, projectUserData, projectUser, err_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 5, , 6]);
+                if (!req.session.user)
+                    return [2, res.redirect("/forbidden")];
+                if (!req.query.id)
+                    return [2, res.redirect("/dash")];
+                projectId = req.query.id;
+                return [4, (0, projects_1.getProjectQuery)(projectId)];
+            case 1:
+                projectData = _a.sent();
+                project = projectData.rows[0];
+                if (!(req.session.user != project.user_id)) return [3, 3];
+                return [4, (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId)];
+            case 2:
+                projectUserData = _a.sent();
+                if (!projectUserData.rows.length) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                }
+                else {
+                    projectUser = projectUserData.rows[0];
+                    if (!projectUser.is_editor) {
+                        return [2, res.render("forbidden", { auth: req.session.user })];
+                    }
+                    else {
+                        res.render("newwyrldtable", {
+                            auth: req.session.user,
+                            projectId: project.id
+                        });
+                    }
+                }
+                return [3, 4];
+            case 3:
+                res.render("newwyrldtable", {
+                    auth: req.session.user,
+                    projectId: project.id
+                });
+                _a.label = 4;
+            case 4: return [3, 6];
+            case 5:
+                err_5 = _a.sent();
+                next(err_5);
+                return [3, 6];
+            case 6: return [2];
+        }
+    });
+}); });
+router.get("/newwyrld", function (req, res, next) {
+    try {
+        if (!req.session.user)
+            return res.redirect("/forbidden");
+        res.render("newwyrld", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_5;
+    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -378,15 +464,15 @@ router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, 
                         projectAuth: projectUser.is_editor
                     })];
             case 4:
-                err_5 = _a.sent();
-                next(err_5);
+                err_6 = _a.sent();
+                next(err_6);
                 return [3, 5];
             case 5: return [2];
         }
     });
 }); });
 router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_6;
+    var err_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -401,15 +487,15 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_6 = _a.sent();
-                next(err_6);
+                err_7 = _a.sent();
+                next(err_7);
                 return [3, 3];
             case 3: return [2];
         }
     });
 }); });
 router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_7;
+    var err_8;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -424,8 +510,8 @@ router.post("/update_email", function (req, res, next) { return __awaiter(void 0
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_7 = _a.sent();
-                next(err_7);
+                err_8 = _a.sent();
+                next(err_8);
                 return [3, 3];
             case 3: return [2];
         }

@@ -44,7 +44,7 @@ router.get("/get_table_views_by_project/:project_id", tableViews_js_1.getTableVi
 router.get("/get_table_views_by_user", tableViews_js_1.getTableViewsByUser);
 router.get("/get_table_view/:id", tableViews_js_1.getTableView);
 router.get("/get_table_view_by_uuid/:uuid", tableViews_js_1.getTableViewByUUID);
-router.post("/add_table_view", tableViews_js_1.addTableView);
+router.post("/add_table_view_by_project/:project_id", tableViews_js_1.addTableViewByProject);
 router.post("/add_table_view_by_user", tableViews_js_1.addTableViewByUser);
 router["delete"]("/remove_table_view/:id", tableViews_js_1.removeTableView);
 router.post("/edit_table_view/:id", tableViews_js_1.editTableView);

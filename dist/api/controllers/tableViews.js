@@ -36,19 +36,26 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableView = exports.removeTableView = exports.getTableView = exports.getTableViewByUUID = exports.getTableViewsByProject = exports.getTableViewsByUser = exports.addTableViewByUser = exports.addTableView = void 0;
+exports.editTableView = exports.removeTableView = exports.getTableView = exports.getTableViewByUUID = exports.getTableViewsByProject = exports.getTableViewsByUser = exports.addTableViewByUser = exports.addTableViewByProject = void 0;
 var tableViews_js_1 = require("../queries/tableViews.js");
-function addTableView(req, res, next) {
+function addTableViewByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_1;
+        var err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.addTableViewQuery)(req.body)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, tableViews_js_1.addTableViewByProjectQuery)({
+                            title: req.body.title,
+                            project_id: req.params.project_id
+                        })];
                 case 1:
-                    data = _a.sent();
-                    res.status(201).json(data.rows[0]);
+                    _a.sent();
+                    res
+                        .set("HX-Redirect", "/wyrld?id=".concat(req.params.project_id))
+                        .send("Form submission was successful.");
                     return [3, 3];
                 case 2:
                     err_1 = _a.sent();
@@ -59,7 +66,7 @@ function addTableView(req, res, next) {
         });
     });
 }
-exports.addTableView = addTableView;
+exports.addTableViewByProject = addTableViewByProject;
 function addTableViewByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var err_2;

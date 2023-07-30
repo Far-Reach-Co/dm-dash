@@ -13,7 +13,7 @@ import {
 } from "../queries/users";
 import { addProjectQuery } from "../queries/projects";
 import {
-  addTableViewQuery,
+  addTableViewByProjectQuery,
   addTableViewByUserQuery,
 } from "../queries/tableViews.js";
 
@@ -118,7 +118,10 @@ async function registerUser(
       user_id: data.id,
     });
     // create two tables, one for a project/wyrld another for just the user
-    await addTableViewQuery({ project_id: projectData.rows[0].id });
+    await addTableViewByProjectQuery({
+      project_id: projectData.rows[0].id,
+      title: "First Wyrld Table",
+    });
     await addTableViewByUserQuery({ user_id: data.id, title: "First Table" });
 
     // login

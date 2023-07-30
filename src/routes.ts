@@ -15,8 +15,11 @@ import {
   getPlayerUserByUserAndPlayerQuery,
   getPlayerUsersQuery,
 } from "./api/queries/playerUsers";
-import { getProjectQuery } from "./api/queries/projects";
-import { getProjectUserByUserAndProjectQuery } from "./api/queries/projectUsers";
+import { getProjectQuery, getProjectsQuery } from "./api/queries/projects";
+import {
+  getProjectUserByUserAndProjectQuery,
+  getProjectUsersQuery,
+} from "./api/queries/projectUsers";
 import { getProjectPlayersByProjectQuery } from "./api/queries/projectPlayers";
 import { getPlayerInviteByUUIDQuery } from "./api/queries/playerInvites";
 
@@ -201,11 +204,23 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
       }
     }
 
+    // created wyrlds
+    const projectData = await getProjectsQuery(req.session.user);
+    // join wyrlds
+    const sharedProjectList = [];
+    const projectUserData = await getProjectUsersQuery(req.session.user);
+    for (const projectUser of projectUserData.rows) {
+      const sharedProjectData = await getProjectQuery(projectUser.project_id);
+      sharedProjectList.push(sharedProjectData.rows[0]);
+    }
+
     res.render("dash", {
       auth: req.session.user,
       tables: tableData.rows,
       sheets: charData.rows,
       sharedSheets: sharedCharData,
+      projects: projectData.rows,
+      sharedProjects: sharedProjectList,
     });
   } catch (err) {
     next(err);
@@ -222,6 +237,8 @@ router.get(
       const projectId = req.query.id as string;
       const projectData = await getProjectQuery(projectId);
       const project = projectData.rows[0];
+
+      let projectAuth = true;
       // authorize
       if (req.session.user != project.user_id) {
         // if user is not owner, check if user is projectUser
@@ -233,6 +250,9 @@ router.get(
           // send to forbidden
           return res.render("forbidden", { auth: req.session.user });
         }
+        // update projectAuth for managers
+        const projectUser = projectUserData.rows[0];
+        projectAuth = projectUser.is_editor;
       }
 
       // get table views by project
@@ -247,6 +267,7 @@ router.get(
 
       res.render("wyrld", {
         auth: req.session.user,
+        projectAuth,
         project: project,
         tables: tableData.rows,
         sheets: players,
@@ -270,6 +291,58 @@ router.get("/newtable", (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.session.user) return res.redirect("/forbidden");
     res.render("newtable", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get(
+  "/newwyrldtable",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("/forbidden");
+      // get project id
+      if (!req.query.id) return res.redirect("/dash");
+      const projectId = req.query.id as string;
+      const projectData = await getProjectQuery(projectId);
+      const project = projectData.rows[0];
+      // authorize
+      if (req.session.user != project.user_id) {
+        // if user is not owner, check if user is projectUser
+        const projectUserData = await getProjectUserByUserAndProjectQuery(
+          req.session.user,
+          projectId
+        );
+        if (!projectUserData.rows.length) {
+          // send to forbidden
+          return res.render("forbidden", { auth: req.session.user });
+        } else {
+          const projectUser = projectUserData.rows[0];
+          if (!projectUser.is_editor) {
+            return res.render("forbidden", { auth: req.session.user });
+          } else {
+            res.render("newwyrldtable", {
+              auth: req.session.user,
+              projectId: project.id,
+            });
+          }
+        }
+      } else {
+        res.render("newwyrldtable", {
+          auth: req.session.user,
+          projectId: project.id,
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get("/newwyrld", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.session.user) return res.redirect("/forbidden");
+    res.render("newwyrld", { auth: req.session.user });
   } catch (err) {
     next(err);
   }
