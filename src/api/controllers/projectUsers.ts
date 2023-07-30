@@ -1,3 +1,4 @@
+import { getProjectInviteQuery } from "../queries/projectInvites.js";
 import {
   addProjectUserQuery,
   getProjectUserQuery,
@@ -6,14 +7,36 @@ import {
   removeProjectUserQuery,
   editProjectUserQuery,
 } from "../queries/projectUsers.js";
+import { getProjectQuery } from "../queries/projects.js";
 import { UserModel, getUserByIdQuery } from "../queries/users.js";
 import { Request, Response, NextFunction } from "express";
 
-async function addProjectUser(req: Request, res: Response, next: NextFunction) {
+async function addProjectUserByInvite(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
+
+    const inviteId = req.body.invite_id;
+    const inviteData = await getProjectInviteQuery(inviteId);
+    const invite = inviteData.rows[0];
+    const projectData = await getProjectQuery(invite.project_id);
+    const project = projectData.rows[0];
+    if (project.user_id == req.session.user)
+      throw new Error("You already own this wyrld");
+    const projectUserData = await getProjectUserByUserAndProjectQuery(
+      req.session.user,
+      project.id
+    );
+    if (projectUserData.rows.length)
+      throw new Error("You are already a member of this wyrld");
+
     req.body.is_editor = false;
     req.body.user_id = req.session.user;
+    req.body.project_id = project.id;
+
     const data = await addProjectUserQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -98,7 +121,7 @@ async function editProjectUser(
 }
 
 export {
-  addProjectUser,
+  addProjectUserByInvite,
   getProjectUserByUserAndProject,
   getProjectUsersByProject,
   removeProjectUser,

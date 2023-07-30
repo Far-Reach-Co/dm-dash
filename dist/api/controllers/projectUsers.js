@@ -36,35 +36,54 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editProjectUser = exports.removeProjectUser = exports.getProjectUsersByProject = exports.getProjectUserByUserAndProject = exports.addProjectUser = void 0;
+exports.editProjectUser = exports.removeProjectUser = exports.getProjectUsersByProject = exports.getProjectUserByUserAndProject = exports.addProjectUserByInvite = void 0;
+var projectInvites_js_1 = require("../queries/projectInvites.js");
 var projectUsers_js_1 = require("../queries/projectUsers.js");
+var projects_js_1 = require("../queries/projects.js");
 var users_js_1 = require("../queries/users.js");
-function addProjectUser(req, res, next) {
+function addProjectUserByInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_1;
+        var inviteId, inviteData, invite, projectData, project, projectUserData, data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _a.trys.push([0, 5, , 6]);
                     if (!req.session.user)
                         throw new Error("User is not logged in");
+                    inviteId = req.body.invite_id;
+                    return [4, (0, projectInvites_js_1.getProjectInviteQuery)(inviteId)];
+                case 1:
+                    inviteData = _a.sent();
+                    invite = inviteData.rows[0];
+                    return [4, (0, projects_js_1.getProjectQuery)(invite.project_id)];
+                case 2:
+                    projectData = _a.sent();
+                    project = projectData.rows[0];
+                    if (project.user_id == req.session.user)
+                        throw new Error("You already own this wyrld");
+                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id)];
+                case 3:
+                    projectUserData = _a.sent();
+                    if (projectUserData.rows.length)
+                        throw new Error("You are already a member of this wyrld");
                     req.body.is_editor = false;
                     req.body.user_id = req.session.user;
+                    req.body.project_id = project.id;
                     return [4, (0, projectUsers_js_1.addProjectUserQuery)(req.body)];
-                case 1:
+                case 4:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 3];
-                case 2:
+                    return [3, 6];
+                case 5:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 3];
-                case 3: return [2];
+                    return [3, 6];
+                case 6: return [2];
             }
         });
     });
 }
-exports.addProjectUser = addProjectUser;
+exports.addProjectUserByInvite = addProjectUserByInvite;
 function getProjectUserByUserAndProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_2;

@@ -24,6 +24,7 @@ export function fallbackCopyTextToClipboard(text) {
 
   document.body.removeChild(textArea);
 }
+window.copyTextToClipboard = fallbackCopyTextToClipboard;
 
 export function copyTextToClipboard(text) {
   if (!navigator.clipboard) {
@@ -40,3 +41,4 @@ export function copyTextToClipboard(text) {
     }
   );
 }
+window.copyTextToClipboard = copyTextToClipboard;

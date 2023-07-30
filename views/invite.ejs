@@ -23,33 +23,32 @@
     <%- include('./partials/footer') %>
   </body>
   <script>
-    const token = localStorage.getItem("token");
-
-    async function verifyToken() {
-      if (token) {
-        try {
-          const res = await fetch(
-            `${window.location.origin}/api/verify_jwt`,
-            {}
-          );
-          const resData = await res.json();
-          if (!res.status === 200) {
-            throw new Error();
-          } else return resData;
-        } catch (err) {
-          // console.log(err);
-          window.location.pathname = "/login";
-        }
-      } else {
-        alert("You aren't logged in. Please login or register first.");
-        window.location.pathname = "/login";
+    async function createNewProjectUser(projectInvite) {
+      try {
+        const res = await fetch(
+          `${window.location.origin}/api/add_project_user_by_invite`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              invite_id: projectInvite.id,
+            }),
+          }
+        );
+        const data = await res.json();
+        console.log(data);
+        if (res.status === 201) {
+          return data;
+        } else throw data.error;
+      } catch (err) {
+        console.log(err);
+        throw err;
       }
     }
 
-    async function getProjectInvite() {
-      var searchParams = new URLSearchParams(window.location.search);
-      var inviteUUID = searchParams.get("invite");
-
+    async function getProjectInvite(inviteUUID) {
       try {
         const res = await fetch(
           `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`,
@@ -58,114 +57,41 @@
         const data = await res.json();
         if (res.status === 200) {
           return data;
-        } else throw new Error();
+        } else throw data.error;
       } catch (err) {
         console.log(err);
-      }
-    }
-
-    async function getProject(id) {
-      try {
-        const res = await fetch(
-          `${window.location.origin}/api/get_project/${id}`,
-          {}
-        );
-        const data = await res.json();
-        if (res.status === 200) {
-          return data;
-        } else throw new Error();
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    async function createNewProjectUser(user, projectInvite) {
-      try {
-        const res = await fetch(
-          `${window.location.origin}/api/add_project_user`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              project_id: projectInvite.project_id,
-            }),
-          }
-        );
-        const data = await res.json();
-        if (res.status === 201) {
-          return data;
-        } else throw new Error();
-      } catch (err) {
-        console.log(err);
-      }
-    }
-
-    async function getProjectUser(projectId) {
-      try {
-        const res = await fetch(
-          `${window.location.origin}/api/get_project_user_by_user_and_project/${projectId}`,
-          {}
-        );
-        const data = await res.json();
-        if (res.status === 200) {
-          return data;
-        } else throw new Error();
-      } catch (err) {
-        console.log(err);
-        return null;
+        throw err;
       }
     }
 
     void (async function init() {
+      var searchParams = new URLSearchParams(window.location.search);
+      var inviteUUID = searchParams.get("invite");
+      if (!inviteUUID) {
+        window.alert("Missing invite uuid");
+        return (window.location.href = "/");
+      }
       // get the invite
-      const projectInvite = await getProjectInvite();
-      if (projectInvite) {
-        // get the project name
-        const project = await getProject(projectInvite.project_id);
-        if (project) {
-          // check if user already has this project
-          const hasJoinedProject = await getProjectUser(project.id);
-          if (hasJoinedProject) {
-            alert("You already have this project...");
-            return (window.location.pathname = "/dash");
-          }
-          // check if user has this project
-          if (project.user_id === user.id) {
-            alert("You already have this project...");
-            return (window.location.pathname = "/dash");
-          }
-          const inviteDiv = document.getElementById("invite-div");
-          const button = document.createElement("button");
-          button.innerText = `Accept Invite for "${project.title}"`;
-          button.addEventListener("click", async () => {
-            console.log(projectInvite);
-            console.log(projectInvite.project_id, "project id by invite");
-            const newProjectUser = await createNewProjectUser(
-              user,
-              projectInvite
-            );
-            if (newProjectUser) {
-              inviteDiv.innerHTML = "";
+      try {
+        const projectInvite = await getProjectInvite(inviteUUID);
+        const inviteDiv = document.getElementById("invite-div");
 
-              const message = document.createElement("div");
-              message.innerText = `Success! You have just joined ${project.title}!`;
-              const button = document.createElement("button");
-              button.innerText = "Return To Dashboard";
-              button.addEventListener(
-                "click",
-                () => (window.location.pathname = "/dash")
-              );
-              inviteDiv.append(message, document.createElement("br"), button);
-            }
-          });
+        const newProjectUser = await createNewProjectUser(projectInvite);
+        inviteDiv.innerHTML = "";
 
-          inviteDiv.innerHTML = "";
-          inviteDiv.append(button);
-        }
-      } else {
-        alert("Sorry, we weren't able to find your invite!");
+        const message = document.createElement("div");
+        message.innerText = `Success!`;
+
+        const button = document.createElement("button");
+        button.innerText = "Return To Dashboard";
+        button.addEventListener(
+          "click",
+          () => (window.location.pathname = "/dash")
+        );
+        inviteDiv.append(message, document.createElement("br"), button);
+      } catch (err) {
+        window.alert(err.message);
+        return (window.location.href = "/");
       }
     })();
   </script>

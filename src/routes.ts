@@ -22,6 +22,7 @@ import {
 } from "./api/queries/projectUsers";
 import { getProjectPlayersByProjectQuery } from "./api/queries/projectPlayers";
 import { getPlayerInviteByUUIDQuery } from "./api/queries/playerInvites";
+import { getProjectInviteByProjectQuery } from "./api/queries/projectInvites";
 
 var router = Router();
 
@@ -91,7 +92,9 @@ router.get(
 
 router.get("/invite", (req: Request, res: Response, next: NextFunction) => {
   try {
-    //
+    if (!req.session.user) {
+      return res.redirect("forbidden");
+    }
     res.render("invite", { auth: req.session.user });
   } catch (err) {
     next(err);
@@ -271,6 +274,47 @@ router.get(
         project: project,
         tables: tableData.rows,
         sheets: players,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/wyrldsettings",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("/forbidden");
+      // get project id
+      if (!req.query.id) return res.redirect("/dash");
+      const projectId = req.query.id as string;
+      const projectData = await getProjectQuery(projectId);
+      const project = projectData.rows[0];
+      // if not owner of wyrld
+      if (project.user_id != req.session.user) {
+        return res.redirect("/forbidden");
+      }
+
+      const projectInviteData = await getProjectInviteByProjectQuery(
+        project.id
+      );
+      // invite
+      let inviteLink = null;
+      let inviteId = null;
+      if (projectInviteData.rows.length) {
+        const invite = projectInviteData.rows[0];
+        inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${
+          invite.uuid
+        }`;
+        inviteId = invite.id;
+      }
+
+      return res.render("wyrldsettings", {
+        auth: req.session.user,
+        inviteLink,
+        inviteId,
+        projectId: project.id,
       });
     } catch (err) {
       next(err);

@@ -102,13 +102,22 @@
         <% if (projects.length === 0) { %>
         <small class="ms-2">No Wyrlds yet...</small>
         <% } else { %> <% projects.forEach(function(project) { %>
-        <div
-          class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-          onclick="handleWyrldClick('<%= project.id %>')"
-          title="Open wyrld dashboard"
-        >
-          <div class="dash-list-title mb-3"><%= project.title %></div>
-          <a>→</a>
+        <div class="d-flex">
+          <div
+            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+            onclick="handleWyrldClick('<%= project.id %>')"
+            title="Open wyrld dashboard"
+          >
+            <div class="dash-list-title mb-3"><%= project.title %></div>
+            <a>→</a>
+          </div>
+          <img
+            class="icon gear ms-4"
+            src="/assets/gears.svg"
+            alt=""
+            title="Open wyrld settings"
+            onclick="handleWyrldSettingsClick('<%= project.id %>')"
+          />
         </div>
         <% }); %> <% } %>
         <h3>Shared</h3>
@@ -136,6 +145,9 @@
     }
     function handleWyrldClick(id) {
       window.location.href = `/wyrld?id=${id}`;
+    }
+    function handleWyrldSettingsClick(id) {
+      window.location.href = `/wyrldsettings?id=${id}`;
     }
   </script>
 </html>

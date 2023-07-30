@@ -45,6 +45,7 @@ var projects_1 = require("./api/queries/projects");
 var projectUsers_1 = require("./api/queries/projectUsers");
 var projectPlayers_1 = require("./api/queries/projectPlayers");
 var playerInvites_1 = require("./api/queries/playerInvites");
+var projectInvites_1 = require("./api/queries/projectInvites");
 var router = (0, express_1.Router)();
 router.get("/", function (req, res, next) {
     try {
@@ -101,6 +102,9 @@ router.get("/resetpassword", function (req, res, next) {
 });
 router.get("/invite", function (req, res, next) {
     try {
+        if (!req.session.user) {
+            return res.redirect("forbidden");
+        }
         res.render("invite", { auth: req.session.user });
     }
     catch (err) {
@@ -340,6 +344,48 @@ router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0
         }
     });
 }); });
+router.get("/wyrldsettings", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var projectId, projectData, project, projectInviteData, inviteLink, inviteId, invite, err_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 3, , 4]);
+                if (!req.session.user)
+                    return [2, res.redirect("/forbidden")];
+                if (!req.query.id)
+                    return [2, res.redirect("/dash")];
+                projectId = req.query.id;
+                return [4, (0, projects_1.getProjectQuery)(projectId)];
+            case 1:
+                projectData = _a.sent();
+                project = projectData.rows[0];
+                if (project.user_id != req.session.user) {
+                    return [2, res.redirect("/forbidden")];
+                }
+                return [4, (0, projectInvites_1.getProjectInviteByProjectQuery)(project.id)];
+            case 2:
+                projectInviteData = _a.sent();
+                inviteLink = null;
+                inviteId = null;
+                if (projectInviteData.rows.length) {
+                    invite = projectInviteData.rows[0];
+                    inviteLink = "".concat(req.protocol, "://").concat(req.get("host"), "/invite?invite=").concat(invite.uuid);
+                    inviteId = invite.id;
+                }
+                return [2, res.render("wyrldsettings", {
+                        auth: req.session.user,
+                        inviteLink: inviteLink,
+                        inviteId: inviteId,
+                        projectId: project.id
+                    })];
+            case 3:
+                err_5 = _a.sent();
+                next(err_5);
+                return [3, 4];
+            case 4: return [2];
+        }
+    });
+}); });
 router.get("/newsheet", function (req, res, next) {
     try {
         if (!req.session.user)
@@ -361,7 +407,7 @@ router.get("/newtable", function (req, res, next) {
     }
 });
 router.get("/newwyrldtable", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var projectId, projectData, project, projectUserData, projectUser, err_5;
+    var projectId, projectData, project, projectUserData, projectUser, err_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -403,8 +449,8 @@ router.get("/newwyrldtable", function (req, res, next) { return __awaiter(void 0
                 _a.label = 4;
             case 4: return [3, 6];
             case 5:
-                err_5 = _a.sent();
-                next(err_5);
+                err_6 = _a.sent();
+                next(err_6);
                 return [3, 6];
             case 6: return [2];
         }
@@ -421,7 +467,7 @@ router.get("/newwyrld", function (req, res, next) {
     }
 });
 router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_6;
+    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -464,15 +510,15 @@ router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, 
                         projectAuth: projectUser.is_editor
                     })];
             case 4:
-                err_6 = _a.sent();
-                next(err_6);
+                err_7 = _a.sent();
+                next(err_7);
                 return [3, 5];
             case 5: return [2];
         }
     });
 }); });
 router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_7;
+    var err_8;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -487,15 +533,15 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_7 = _a.sent();
-                next(err_7);
+                err_8 = _a.sent();
+                next(err_8);
                 return [3, 3];
             case 3: return [2];
         }
     });
 }); });
 router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_8;
+    var err_9;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -510,8 +556,8 @@ router.post("/update_email", function (req, res, next) { return __awaiter(void 0
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_8 = _a.sent();
-                next(err_8);
+                err_9 = _a.sent();
+                next(err_9);
                 return [3, 3];
             case 3: return [2];
         }

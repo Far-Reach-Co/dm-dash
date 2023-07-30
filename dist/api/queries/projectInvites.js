@@ -116,7 +116,7 @@ function removeProjectInviteQuery(id) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "delete from public.\"ProjectInvite\" where id = $1",
+                        text: "delete from public.\"ProjectInvite\" where id = $1 returning *",
                         values: [id]
                     };
                     return [4, dbconfig_1["default"].query(query)];

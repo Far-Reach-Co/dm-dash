@@ -43,7 +43,7 @@ async function getProjectInviteByUUIDQuery(uuid: string) {
 
 async function removeProjectInviteQuery(id: string) {
   const query = {
-    text: /*sql*/ `delete from public."ProjectInvite" where id = $1`,
+    text: /*sql*/ `delete from public."ProjectInvite" where id = $1 returning *`,
     values: [id]
   }
 

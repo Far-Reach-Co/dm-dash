@@ -95,9 +95,9 @@ import {
 import {
   getProjectUserByUserAndProject,
   getProjectUsersByProject,
-  addProjectUser,
   removeProjectUser,
   editProjectUser,
+  addProjectUserByInvite,
 } from "./controllers/projectUsers.js";
 import {
   getSignedUrlForDownload,
@@ -276,7 +276,7 @@ router.get(
   "/get_project_users_by_project/:project_id",
   getProjectUsersByProject
 );
-router.post("/add_project_user", addProjectUser);
+router.post("/add_project_user_by_invite", addProjectUserByInvite);
 router.delete("/remove_project_user/:id", removeProjectUser);
 router.post("/edit_project_user/:id", editProjectUser);
 

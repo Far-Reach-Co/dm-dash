@@ -61,7 +61,7 @@ router["delete"]("/remove_project_player/:id", projectPlayers_js_1.removeProject
 router.post("/edit_project_player/:id", projectPlayers_js_1.editProjectPlayer);
 router.get("/get_project_user_by_user_and_project/:project_id", projectUsers_js_1.getProjectUserByUserAndProject);
 router.get("/get_project_users_by_project/:project_id", projectUsers_js_1.getProjectUsersByProject);
-router.post("/add_project_user", projectUsers_js_1.addProjectUser);
+router.post("/add_project_user_by_invite", projectUsers_js_1.addProjectUserByInvite);
 router["delete"]("/remove_project_user/:id", projectUsers_js_1.removeProjectUser);
 router.post("/edit_project_user/:id", projectUsers_js_1.editProjectUser);
 router.get("/get_player_user_by_user_and_player/:player_id", playerUsers_js_1.getPlayerUserByUserAndPlayer);
