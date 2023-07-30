@@ -17,12 +17,16 @@ import {
 } from "./api/queries/playerUsers";
 import { getProjectQuery, getProjectsQuery } from "./api/queries/projects";
 import {
+  addProjectUserQuery,
   getProjectUserByUserAndProjectQuery,
   getProjectUsersQuery,
 } from "./api/queries/projectUsers";
 import { getProjectPlayersByProjectQuery } from "./api/queries/projectPlayers";
 import { getPlayerInviteByUUIDQuery } from "./api/queries/playerInvites";
-import { getProjectInviteByProjectQuery } from "./api/queries/projectInvites";
+import {
+  getProjectInviteByProjectQuery,
+  getProjectInviteByUUIDQuery,
+} from "./api/queries/projectInvites";
 
 var router = Router();
 
@@ -90,16 +94,80 @@ router.get(
   }
 );
 
-router.get("/invite", (req: Request, res: Response, next: NextFunction) => {
-  try {
-    if (!req.session.user) {
-      return res.redirect("forbidden");
+router.get(
+  "/invite",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("forbidden");
+      // if no invite uuid in params
+      if (!req.query.invite)
+        return res.render("invite", {
+          auth: req.session.user,
+          error: "Can't find invite",
+        });
+      // if no invite
+      const inviteUUID = req.query.invite as string;
+      const inviteData = await getProjectInviteByUUIDQuery(inviteUUID);
+      if (!inviteData.rows.length)
+        return res.render("invite", {
+          auth: req.session.user,
+          error: "Can't find invite",
+        });
+      // if no project
+      const invite = inviteData.rows[0];
+      const projectData = await getProjectQuery(invite.project_id);
+      if (!projectData.rows.length)
+        return res.render("invite", {
+          auth: req.session.user,
+          error: "Can't find the wyrld related to this invite",
+        });
+      // if are the owner/creator
+      const project = projectData.rows[0];
+      if (project.user_id == req.session.user)
+        return res.render("invite", {
+          auth: req.session.user,
+          error: "You already own this wyrld",
+        });
+      // if already a member
+      const projectUserData = await getProjectUserByUserAndProjectQuery(
+        req.session.user,
+        project.id
+      );
+      if (projectUserData.rows.length)
+        return res.render("invite", {
+          auth: req.session.user,
+          error: "You already joined this wyrld",
+        });
+
+      // safe
+      await addProjectUserQuery({
+        project_id: invite.project_id,
+        user_id: req.session.user,
+        is_editor: false,
+      });
+
+      // get table views by project
+      const tableData = await getTableViewsByProjectQuery(project.id);
+      // get all character sheets by project
+      const players = [];
+      const projectPlayers = await getProjectPlayersByProjectQuery(project.id);
+      for (var player of projectPlayers.rows) {
+        const charData = await get5eCharGeneralQuery(player.player_id);
+        players.push(charData.rows[0]);
+      }
+
+      res.render("wyrld", {
+        auth: req.session.user,
+        projectAuth: false,
+        project: project,
+        tables: tableData.rows,
+        sheets: players,
+      });
+    } catch (err) {
+      next(err);
     }
-    res.render("invite", { auth: req.session.user });
-  } catch (err) {
-    next(err);
   }
-});
+);
 
 router.get(
   "/account",

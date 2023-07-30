@@ -100,19 +100,97 @@ router.get("/resetpassword", function (req, res, next) {
         next(err);
     }
 });
-router.get("/invite", function (req, res, next) {
-    try {
-        if (!req.session.user) {
-            return res.redirect("forbidden");
+router.get("/invite", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var inviteUUID, inviteData, invite, projectData, project, projectUserData, tableData, players, projectPlayers, _i, _a, player, charData, err_1;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 11, , 12]);
+                if (!req.session.user)
+                    return [2, res.redirect("forbidden")];
+                if (!req.query.invite)
+                    return [2, res.render("invite", {
+                            auth: req.session.user,
+                            error: "Can't find invite"
+                        })];
+                inviteUUID = req.query.invite;
+                return [4, (0, projectInvites_1.getProjectInviteByUUIDQuery)(inviteUUID)];
+            case 1:
+                inviteData = _b.sent();
+                if (!inviteData.rows.length)
+                    return [2, res.render("invite", {
+                            auth: req.session.user,
+                            error: "Can't find invite"
+                        })];
+                invite = inviteData.rows[0];
+                return [4, (0, projects_1.getProjectQuery)(invite.project_id)];
+            case 2:
+                projectData = _b.sent();
+                if (!projectData.rows.length)
+                    return [2, res.render("invite", {
+                            auth: req.session.user,
+                            error: "Can't find the wyrld related to this invite"
+                        })];
+                project = projectData.rows[0];
+                if (project.user_id == req.session.user)
+                    return [2, res.render("invite", {
+                            auth: req.session.user,
+                            error: "You already own this wyrld"
+                        })];
+                return [4, (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id)];
+            case 3:
+                projectUserData = _b.sent();
+                if (projectUserData.rows.length)
+                    return [2, res.render("invite", {
+                            auth: req.session.user,
+                            error: "You already joined this wyrld"
+                        })];
+                return [4, (0, projectUsers_1.addProjectUserQuery)({
+                        project_id: invite.project_id,
+                        user_id: req.session.user,
+                        is_editor: false
+                    })];
+            case 4:
+                _b.sent();
+                return [4, (0, tableViews_1.getTableViewsByProjectQuery)(project.id)];
+            case 5:
+                tableData = _b.sent();
+                players = [];
+                return [4, (0, projectPlayers_1.getProjectPlayersByProjectQuery)(project.id)];
+            case 6:
+                projectPlayers = _b.sent();
+                _i = 0, _a = projectPlayers.rows;
+                _b.label = 7;
+            case 7:
+                if (!(_i < _a.length)) return [3, 10];
+                player = _a[_i];
+                return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(player.player_id)];
+            case 8:
+                charData = _b.sent();
+                players.push(charData.rows[0]);
+                _b.label = 9;
+            case 9:
+                _i++;
+                return [3, 7];
+            case 10:
+                res.render("wyrld", {
+                    auth: req.session.user,
+                    projectAuth: false,
+                    project: project,
+                    tables: tableData.rows,
+                    sheets: players
+                });
+                return [3, 12];
+            case 11:
+                err_1 = _b.sent();
+                next(err_1);
+                return [3, 12];
+            case 12: return [2];
         }
-        res.render("invite", { auth: req.session.user });
-    }
-    catch (err) {
-        next(err);
-    }
-});
+    });
+}); });
 router.get("/account", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var rows, err_1;
+    var rows, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -125,8 +203,8 @@ router.get("/account", function (req, res, next) { return __awaiter(void 0, void
                 res.render("account", { auth: req.session.user, user: rows[0] });
                 return [3, 3];
             case 2:
-                err_1 = _a.sent();
-                next(err_1);
+                err_2 = _a.sent();
+                next(err_2);
                 return [3, 3];
             case 3: return [2];
         }
@@ -141,7 +219,7 @@ router.get("/dashboard", function (req, res, next) {
     }
 });
 router.get("/5eplayer", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var playerSheetid, playerSheetUserIdData, playerSheetUserId, playerUserData, invite, inviteData, projectId, projectData, project, projectUserData, projectUser, err_2;
+    var playerSheetid, playerSheetUserIdData, playerSheetUserId, playerUserData, invite, inviteData, projectId, projectData, project, projectUserData, projectUser, err_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -204,15 +282,15 @@ router.get("/5eplayer", function (req, res, next) { return __awaiter(void 0, voi
             case 11: return [2, res.render("5eplayer", { auth: req.session.user })];
             case 12: return [3, 14];
             case 13:
-                err_2 = _a.sent();
-                next(err_2);
+                err_3 = _a.sent();
+                next(err_3);
                 return [3, 14];
             case 14: return [2];
         }
     });
 }); });
 router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var tableData, charData, sharedCharData, playerUsersData, _i, _a, playerUser, puCharData, projectData, sharedProjectList, projectUserData, _b, _c, projectUser, sharedProjectData, err_3;
+    var tableData, charData, sharedCharData, playerUsersData, _i, _a, playerUser, puCharData, projectData, sharedProjectList, projectUserData, _b, _c, projectUser, sharedProjectData, err_4;
     return __generator(this, function (_d) {
         switch (_d.label) {
             case 0:
@@ -274,15 +352,15 @@ router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0,
                 });
                 return [3, 15];
             case 14:
-                err_3 = _d.sent();
-                next(err_3);
+                err_4 = _d.sent();
+                next(err_4);
                 return [3, 15];
             case 15: return [2];
         }
     });
 }); });
 router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var projectId, projectData, project, projectAuth, projectUserData, projectUser, tableData, players, projectPlayers, _i, _a, player, charData, err_4;
+    var projectId, projectData, project, projectAuth, projectUserData, projectUser, tableData, players, projectPlayers, _i, _a, player, charData, err_5;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -337,15 +415,15 @@ router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0
                 });
                 return [3, 11];
             case 10:
-                err_4 = _b.sent();
-                next(err_4);
+                err_5 = _b.sent();
+                next(err_5);
                 return [3, 11];
             case 11: return [2];
         }
     });
 }); });
 router.get("/wyrldsettings", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var projectId, projectData, project, projectInviteData, inviteLink, inviteId, invite, err_5;
+    var projectId, projectData, project, projectInviteData, inviteLink, inviteId, invite, err_6;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -379,8 +457,8 @@ router.get("/wyrldsettings", function (req, res, next) { return __awaiter(void 0
                         projectId: project.id
                     })];
             case 3:
-                err_5 = _a.sent();
-                next(err_5);
+                err_6 = _a.sent();
+                next(err_6);
                 return [3, 4];
             case 4: return [2];
         }
@@ -407,7 +485,7 @@ router.get("/newtable", function (req, res, next) {
     }
 });
 router.get("/newwyrldtable", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var projectId, projectData, project, projectUserData, projectUser, err_6;
+    var projectId, projectData, project, projectUserData, projectUser, err_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -449,8 +527,8 @@ router.get("/newwyrldtable", function (req, res, next) { return __awaiter(void 0
                 _a.label = 4;
             case 4: return [3, 6];
             case 5:
-                err_6 = _a.sent();
-                next(err_6);
+                err_7 = _a.sent();
+                next(err_7);
                 return [3, 6];
             case 6: return [2];
         }
@@ -467,7 +545,7 @@ router.get("/newwyrld", function (req, res, next) {
     }
 });
 router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_7;
+    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_8;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -510,15 +588,15 @@ router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, 
                         projectAuth: projectUser.is_editor
                     })];
             case 4:
-                err_7 = _a.sent();
-                next(err_7);
+                err_8 = _a.sent();
+                next(err_8);
                 return [3, 5];
             case 5: return [2];
         }
     });
 }); });
 router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_8;
+    var err_9;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -533,15 +611,15 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_8 = _a.sent();
-                next(err_8);
+                err_9 = _a.sent();
+                next(err_9);
                 return [3, 3];
             case 3: return [2];
         }
     });
 }); });
 router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_9;
+    var err_10;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -556,8 +634,8 @@ router.post("/update_email", function (req, res, next) { return __awaiter(void 0
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_9 = _a.sent();
-                next(err_9);
+                err_10 = _a.sent();
+                next(err_10);
                 return [3, 3];
             case 3: return [2];
         }

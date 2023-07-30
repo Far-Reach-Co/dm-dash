@@ -4,95 +4,19 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co.</title>
+    <title>Far Reach Co. Wyrld Invite</title>
     <link rel="stylesheet" href="/style.css" />
     <script src="/lib/MobileNavHandler.js" defer></script>
     <%- include('./partials/icons') %>
   </head>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container">
-      <div class="invite">
-        <h1>Get ready to enjoy your new project!</h1>
-        <br />
-        <br />
-        <br />
-        <div id="invite-div">Please wait while we find your invitation...</div>
-      </div>
+    <div class="container-fluid p-3">
+      <h1>Wyrld Invite</h1>
+      <% if (error) { %>
+      <div style="color: var(--red1)">ERROR: <%= error %></div>
+      <% } %>
     </div>
     <%- include('./partials/footer') %>
   </body>
-  <script>
-    async function createNewProjectUser(projectInvite) {
-      try {
-        const res = await fetch(
-          `${window.location.origin}/api/add_project_user_by_invite`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              invite_id: projectInvite.id,
-            }),
-          }
-        );
-        const data = await res.json();
-        console.log(data);
-        if (res.status === 201) {
-          return data;
-        } else throw data.error;
-      } catch (err) {
-        console.log(err);
-        throw err;
-      }
-    }
-
-    async function getProjectInvite(inviteUUID) {
-      try {
-        const res = await fetch(
-          `${window.location.origin}/api/get_project_invite_by_uuid/${inviteUUID}`,
-          {}
-        );
-        const data = await res.json();
-        if (res.status === 200) {
-          return data;
-        } else throw data.error;
-      } catch (err) {
-        console.log(err);
-        throw err;
-      }
-    }
-
-    void (async function init() {
-      var searchParams = new URLSearchParams(window.location.search);
-      var inviteUUID = searchParams.get("invite");
-      if (!inviteUUID) {
-        window.alert("Missing invite uuid");
-        return (window.location.href = "/");
-      }
-      // get the invite
-      try {
-        const projectInvite = await getProjectInvite(inviteUUID);
-        const inviteDiv = document.getElementById("invite-div");
-
-        const newProjectUser = await createNewProjectUser(projectInvite);
-        inviteDiv.innerHTML = "";
-
-        const message = document.createElement("div");
-        message.innerText = `Success!`;
-
-        const button = document.createElement("button");
-        button.innerText = "Return To Dashboard";
-        button.addEventListener(
-          "click",
-          () => (window.location.pathname = "/dash")
-        );
-        inviteDiv.append(message, document.createElement("br"), button);
-      } catch (err) {
-        window.alert(err.message);
-        return (window.location.href = "/");
-      }
-    })();
-  </script>
 </html>

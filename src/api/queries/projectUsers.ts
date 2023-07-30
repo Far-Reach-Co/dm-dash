@@ -8,7 +8,7 @@ interface ProjectUserModel {
   date_joined: string
 }
 
-async function addProjectUserQuery(data: {project_id: string, user_id: string, is_editor: boolean}) {
+async function addProjectUserQuery(data: {project_id: string | number, user_id: string | number, is_editor: boolean}) {
   const query = {
     text: /*sql*/ `insert into public."ProjectUser" (project_id, user_id, is_editor) values($1,$2,$3) returning *`,
     values: [
