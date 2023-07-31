@@ -139,7 +139,7 @@ function registerUser(req, res, next) {
                     userData = _b.sent();
                     data = userData.rows[0];
                     return [4, (0, projects_1.addProjectQuery)({
-                            title: "First Project",
+                            title: "First Wyrld",
                             user_id: data.id
                         })];
                 case 4:

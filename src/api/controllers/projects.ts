@@ -283,7 +283,8 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       await removeTableViewQuery(tableView.id);
     });
 
-    res.status(204).send();
+    res.setHeader("HX-Redirect", "/dash");
+    res.send();
   } catch (err) {
     next(err);
   }

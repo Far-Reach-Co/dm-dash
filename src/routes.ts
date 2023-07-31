@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { Request, Response, NextFunction } from "express";
-import { editUserQuery, getUserByIdQuery } from "./api/queries/users";
+import {
+  UserModel,
+  editUserQuery,
+  getUserByIdQuery,
+} from "./api/queries/users";
 import {
   get5eCharGeneralQuery,
   get5eCharGeneralUserIdQuery,
@@ -19,6 +23,7 @@ import { getProjectQuery, getProjectsQuery } from "./api/queries/projects";
 import {
   addProjectUserQuery,
   getProjectUserByUserAndProjectQuery,
+  getProjectUsersByProjectQuery,
   getProjectUsersQuery,
 } from "./api/queries/projectUsers";
 import { getProjectPlayersByProjectQuery } from "./api/queries/projectPlayers";
@@ -349,6 +354,11 @@ router.get(
   }
 );
 
+interface GetProjectUsersByProjectReturnUserModel extends UserModel {
+  project_user_id: number;
+  is_editor: boolean;
+}
+
 router.get(
   "/wyrldsettings",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -378,11 +388,57 @@ router.get(
         inviteId = invite.id;
       }
 
+      // project users
+      const projectUsersData = await getProjectUsersByProjectQuery(project.id);
+
+      const usersList = [];
+
+      for (const projectUser of projectUsersData.rows) {
+        const userData = await getUserByIdQuery(projectUser.user_id);
+        const user = userData.rows[0];
+        (user as GetProjectUsersByProjectReturnUserModel).project_user_id =
+          projectUser.id;
+        (user as GetProjectUsersByProjectReturnUserModel).is_editor =
+          projectUser.is_editor;
+        usersList.push(user);
+      }
+
       return res.render("wyrldsettings", {
         auth: req.session.user,
         inviteLink,
         inviteId,
         projectId: project.id,
+        users: usersList,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/sharedwyrldsettings",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("/forbidden");
+      // get project id
+      if (!req.query.id) return res.redirect("/dash");
+      const projectId = req.query.id as string;
+      const projectData = await getProjectQuery(projectId);
+      const project = projectData.rows[0];
+
+      // project users
+      const projectUserData = await getProjectUserByUserAndProjectQuery(
+        req.session.user,
+        project.id
+      );
+      if (!projectUserData.rows.length) return res.redirect("/forbidden");
+
+      const projectUser = projectUserData.rows[0];
+
+      return res.render("sharedwyrldsettings", {
+        auth: req.session.user,
+        projectUserId: projectUser.id,
       });
     } catch (err) {
       next(err);

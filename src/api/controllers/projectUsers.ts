@@ -113,6 +113,10 @@ async function editProjectUser(
   next: NextFunction
 ) {
   try {
+    // handle boolean from checkbox
+    let is_editor = req.body.is_editor === "on";
+    req.body.is_editor = is_editor;
+
     const data = await editProjectUserQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

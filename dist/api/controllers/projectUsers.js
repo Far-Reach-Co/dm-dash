@@ -174,11 +174,13 @@ function removeProjectUser(req, res, next) {
 exports.removeProjectUser = removeProjectUser;
 function editProjectUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_5;
+        var is_editor, data, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    is_editor = req.body.is_editor === "on";
+                    req.body.is_editor = is_editor;
                     return [4, (0, projectUsers_js_1.editProjectUserQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();

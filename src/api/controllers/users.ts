@@ -114,7 +114,7 @@ async function registerUser(
 
     // create first project for user
     const projectData = await addProjectQuery({
-      title: "First Project",
+      title: "First Wyrld",
       user_id: data.id,
     });
     // create two tables, one for a project/wyrld another for just the user

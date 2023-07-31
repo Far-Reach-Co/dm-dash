@@ -6,6 +6,7 @@ src/lib/db_backups/*
 # This is redundant, but just in case
 .sql
 
+#ejs
 
 # Here onward is copied from gitignore
 

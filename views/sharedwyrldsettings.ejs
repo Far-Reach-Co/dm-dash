@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Wyrld Settings</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container-fluid p-3">
+      <h1>Shared Wyrld Settings</h1>
+      <br />
+      <small>Manage important settings for your wyrld.</small>
+      <hr />
+      <button
+        class="btn-red"
+        onclick="removeProjectUser('<%= projectUserId %>')"
+      >
+        Leave Wyrld
+      </button>
+    </div>
+    <%- include('./partials/footer') %>
+    <script>
+      async function removeProjectUser(id) {
+        if (window.confirm("Are you sure you want to leave?")) {
+          await fetch(
+            `${window.location.origin}/api/remove_project_user/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+          window.location.href = "/dash";
+        }
+      }
+    </script>
+  </body>
+</html>

@@ -497,7 +497,8 @@ function removeProject(req, res, next) {
                             }
                         });
                     }); });
-                    res.status(204).send();
+                    res.setHeader("HX-Redirect", "/dash");
+                    res.send();
                     return [3, 16];
                 case 15:
                     err_4 = _a.sent();

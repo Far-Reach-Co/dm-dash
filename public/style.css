@@ -325,6 +325,16 @@ button:hover {
   background: linear-gradient(var(--red1) 10%, var(--purple) 90%);
 }
 
+.red-x {
+  color: var(--red1);
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.red-x:hover {
+  opacity: .7;
+}
+
 form {
   padding: var(--main-distance)
 }
@@ -392,6 +402,10 @@ input[type="number"]::-webkit-outer-spin-button {
   appearance: none;
   margin: 0;
   padding-right: 5px;
+}
+
+input[type="checkbox"] {
+  width: 20px;
 }
 
 [contentEditable="true"]:empty:not(:focus)::before {
