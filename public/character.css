@@ -47,11 +47,11 @@ form {
 }
 
 .input-small {
-  font-size: small;
+  font-size: 16px;
 }
 
 .select-option-small {
-  font-size: small;
+  font-size: 16px;
 }
 
 .cp-input-no-border {
@@ -89,7 +89,6 @@ form {
 }
 
 .cp-input-regular {
-  font-size: 1rem;
   width: fit-content;
   max-width: 130px;
   border-width: 0;

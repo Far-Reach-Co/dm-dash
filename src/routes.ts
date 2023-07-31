@@ -407,7 +407,7 @@ router.get(
         auth: req.session.user,
         inviteLink,
         inviteId,
-        projectId: project.id,
+        project,
         users: usersList,
       });
     } catch (err) {
@@ -439,6 +439,7 @@ router.get(
       return res.render("sharedwyrldsettings", {
         auth: req.session.user,
         projectUserId: projectUser.id,
+        project,
       });
     } catch (err) {
       next(err);

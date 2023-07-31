@@ -476,7 +476,7 @@ router.get("/wyrldsettings", function (req, res, next) { return __awaiter(void 0
                     auth: req.session.user,
                     inviteLink: inviteLink,
                     inviteId: inviteId,
-                    projectId: project.id,
+                    project: project,
                     users: usersList
                 })];
             case 8:
@@ -510,7 +510,8 @@ router.get("/sharedwyrldsettings", function (req, res, next) { return __awaiter(
                 projectUser = projectUserData.rows[0];
                 return [2, res.render("sharedwyrldsettings", {
                         auth: req.session.user,
-                        projectUserId: projectUser.id
+                        projectUserId: projectUser.id,
+                        project: project
                     })];
             case 3:
                 err_7 = _a.sent();

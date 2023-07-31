@@ -161,8 +161,7 @@ export default class TableSidebarComponent {
             createElement(
               "div",
               {
-                style:
-                  "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                class: "red-x",
                 title: "Remove image",
               },
               "ⓧ",

@@ -14,13 +14,19 @@
   <body>
     <%- include('./partials/nav') %>
     <div class="container-fluid p-3">
-      <h1>Wyrld Settings</h1>
-      <small>Manage important settings and invited users for your wyrld.</small>
+      <div>
+        <h1>Wyrld Settings</h1>
+        <small
+          >Manage important settings and invited users for your wyrld.</small
+        >
+      </div>
+      <h2 style="color: var(--green)"><%= project.title %></h2>
       <hr />
       <h2>Share Invite Link</h2>
       <% if (inviteLink) { %> <%- include('./partials/wyrld_settings/invite') %>
       <% } else { %> <%- include('./partials/wyrld_settings/invitebutton') %> <%
-      } %><br />
+      } %>
+      <hr />
       <h2>Manage Users</h2>
       <div>
         <small
@@ -34,7 +40,9 @@
         </div>
         <br />
         <% if (users.length === 0) { %>
-        <small class="ms-2">No users have joined this wyrld yet...</small>
+        <small class="ms-2"
+          >No users have joined <%= project.title %> yet...</small
+        >
         <% } else { %> <% users.forEach(function(user) { %>
         <div class="mb-2 d-flex justify-content-between w-25">
           <div class="d-flex align-items-center">
@@ -55,9 +63,9 @@
       <hr />
       <button
         class="btn-red"
-        hx-delete="/api/remove_project/<%= projectId %>"
+        hx-delete="/api/remove_project/<%= project.id %>"
         hx-swap="none"
-        hx-confirm="Are you sure you want to delete this wyrld?"
+        hx-confirm="Are you sure you want to delete <%= project.title %>?"
       >
         Delete Wyrld
       </button>

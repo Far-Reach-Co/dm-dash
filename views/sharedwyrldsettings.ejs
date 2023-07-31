@@ -12,10 +12,12 @@
   <body>
     <%- include('./partials/nav') %>
     <div class="container-fluid p-3">
-      <h1>Shared Wyrld Settings</h1>
+      <div>
+        <h1>Wyrld Settings</h1>
+        <small>Manage important settings for your wyrld.</small>
+      </div>
+      <h2 style="color: var(--green)"><%= project.title %></h2>
       <br />
-      <small>Manage important settings for your wyrld.</small>
-      <hr />
       <button
         class="btn-red"
         onclick="removeProjectUser('<%= projectUserId %>')"
@@ -26,7 +28,9 @@
     <%- include('./partials/footer') %>
     <script>
       async function removeProjectUser(id) {
-        if (window.confirm("Are you sure you want to leave?")) {
+        if (
+          window.confirm("Are you sure you want to leave <%= project.title %>?")
+        ) {
           await fetch(
             `${window.location.origin}/api/remove_project_user/${id}`,
             {
