@@ -253,31 +253,31 @@ router.get(
 router.post("/add_table_image_by_project", addTableImageByProject);
 router.post("/add_table_image_by_user", addTableImageByUser);
 router.delete("/remove_table_image/:id", removeTableImage);
-router.post("/edit_table_image/:id", editTableImage);
+// router.post("/edit_table_image/:id", editTableImage);
 
 // project players
-router.get(
-  "/get_project_players_by_project/:project_id",
-  getProjectPlayersByProject
-);
+// router.get(
+//   "/get_project_players_by_project/:project_id",
+//   getProjectPlayersByProject
+// );
 router.get(
   "/get_project_players_by_player/:player_id",
   getProjectPlayersByPlayer
 );
 router.post("/add_project_player", addProjectPlayer);
 router.delete("/remove_project_player/:id", removeProjectPlayer);
-router.post("/edit_project_player/:id", editProjectPlayer);
+// router.post("/edit_project_player/:id", editProjectPlayer);
 
 // project users
-router.get(
-  "/get_project_user_by_user_and_project/:project_id",
-  getProjectUserByUserAndProject
-);
-router.get(
-  "/get_project_users_by_project/:project_id",
-  getProjectUsersByProject
-);
-router.post("/add_project_user_by_invite", addProjectUserByInvite);
+// router.get(
+//   "/get_project_user_by_user_and_project/:project_id",
+//   getProjectUserByUserAndProject
+// );
+// router.get(
+//   "/get_project_users_by_project/:project_id",
+//   getProjectUsersByProject
+// );
+// router.post("/add_project_user_by_invite", addProjectUserByInvite);
 router.delete("/remove_project_user/:id", removeProjectUser);
 router.post("/edit_project_user/:id", editProjectUser);
 
@@ -286,10 +286,10 @@ router.get(
   "/get_player_user_by_user_and_player/:player_id",
   getPlayerUserByUserAndPlayer
 );
-router.get("/get_player_users_by_player/:player_id", getPlayerUsersByPlayer);
+// router.get("/get_player_users_by_player/:player_id", getPlayerUsersByPlayer);
 router.post("/add_player_user", addPlayerUser);
 router.delete("/remove_player_user/:id", removePlayerUser);
-router.post("/edit_player_user/:id", editPlayerUser);
+// router.post("/edit_player_user/:id", editPlayerUser);
 router.delete(
   "/remove_player_user_by_user_and_player/:player_id",
   removePlayerUserByUserAndPlayer
@@ -306,7 +306,7 @@ router.post("/add_player_invite", addPlayerInvite);
 router.delete("/remove_player_invite/:id", removePlayerInvite);
 
 // project invites
-router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
+// router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
 router.post("/add_project_invite", addProjectInvite);
 router.delete("/remove_project_invite/:id", removeProjectInvite);
 
@@ -505,10 +505,10 @@ router.post("/edit_project/:id", editProject);
 // Auth and Users
 // router.get("/users", getAllUsers);
 router.get("/get_user", getUserBySession);
-router.get("/get_user_by_id/:id", getUserById); // needs security
+// router.get("/get_user_by_id/:id", getUserById); // needs security
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.get("/verify_jwt", verifyJwt);
+// router.get("/verify_jwt", verifyJwt);
 router.post("/request_reset_email", requestResetEmail);
 
 // sub heading user

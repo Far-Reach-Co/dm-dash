@@ -12,6 +12,8 @@ import SheetSettings from "../lib/SheetSettings.js";
 export default class FiveEPlayerSheet {
   constructor(props) {
     this.domComponent = props.domComponent;
+    this.domComponent.className =
+      "d-flex flex-column align-items-center justify-content-center";
     this.navigate = props.navigate;
     this.generalData = props.params.content;
     // general, background, etc
