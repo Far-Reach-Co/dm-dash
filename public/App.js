@@ -1,7 +1,7 @@
 import createElement from "./lib/createElement.js";
 import ProjectsView from "./views/Projects.js";
 import ClocksView from "./views/Clocks.js";
-import CalendarsView from "./views/Calendars.js";
+// import CalendarsView from "./views/Calendars.js";
 import Sidebar from "./components/Sidebar.js";
 import LocationsView from "./views/Locations.js";
 import SingleLocationView from "./views/SingleLocation.js";
@@ -249,15 +249,15 @@ class App {
     new SingleLoreView({ domComponent: element, navigate, params });
   };
 
-  renderCalendersView = () => {
-    if (this.views.calendars) {
-      return this.domComponent.appendChild(this.views.calendars.domComponent);
-    }
-    const element = createElement("div");
-    this.domComponent.appendChild(element);
-    const view = new CalendarsView({ domComponent: element });
-    this.views.calendars = view;
-  };
+  // renderCalendersView = () => {
+  //   if (this.views.calendars) {
+  //     return this.domComponent.appendChild(this.views.calendars.domComponent);
+  //   }
+  //   const element = createElement("div");
+  //   this.domComponent.appendChild(element);
+  //   const view = new CalendarsView({ domComponent: element });
+  //   this.views.calendars = view;
+  // };
 
   renderClocksView = () => {
     if (this.views.clocks) {
@@ -384,8 +384,8 @@ class App {
         return this.renderNotesView();
       case "events":
         return this.renderEventsView();
-      case "calendars":
-        return this.renderCalendersView();
+      // case "calendars":
+      //   return this.renderCalendersView();
       case "locations":
         return this.renderLocationsView({ navigate: this.navigate.navigate });
       case "single-location":
