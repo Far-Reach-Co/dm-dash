@@ -10,10 +10,7 @@
     <%- include('./partials/icons') %>
     <script>
       const USERID = "<%= auth %>";
-      let IS_MANAGER_OR_OWNER = "<%= projectAuth %>";
-      if (IS_MANAGER_OR_OWNER == "true") {
-        IS_MANAGER_OR_OWNER = true;
-      } else IS_MANAGER_OR_OWNER = false;
+      const IS_MANAGER_OR_OWNER = <%= projectAuth %>;
     </script>
     <script src="/lib/uuid.min.js"></script>
     <script src="/lib/fabric.min.js"></script>

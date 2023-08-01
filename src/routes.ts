@@ -32,6 +32,9 @@ import {
   getProjectInviteByProjectQuery,
   getProjectInviteByUUIDQuery,
 } from "./api/queries/projectInvites";
+import { CalendarModel, getCalendarsQuery } from "./api/queries/calendars";
+import { MonthModel, getMonthsQuery } from "./api/queries/months";
+import { DayModel, getDaysQuery } from "./api/queries/days";
 
 var router = Router();
 
@@ -341,12 +344,16 @@ router.get(
         players.push(charData.rows[0]);
       }
 
+      // calendars
+      const calendars = await getCalendarsQuery(projectId);
+
       res.render("wyrld", {
         auth: req.session.user,
         projectAuth,
         project: project,
         tables: tableData.rows,
         sheets: players,
+        calendars: calendars.rows,
       });
     } catch (err) {
       next(err);
@@ -498,6 +505,49 @@ router.get(
         }
       } else {
         res.render("newwyrldtable", {
+          auth: req.session.user,
+          projectId: project.id,
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/newwyrldcalendar",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("/forbidden");
+      // get project id
+      if (!req.query.id) return res.redirect("/dash");
+      const projectId = req.query.id as string;
+      const projectData = await getProjectQuery(projectId);
+      const project = projectData.rows[0];
+      // authorize
+      if (req.session.user != project.user_id) {
+        // if user is not owner, check if user is projectUser
+        const projectUserData = await getProjectUserByUserAndProjectQuery(
+          req.session.user,
+          projectId
+        );
+        if (!projectUserData.rows.length) {
+          // send to forbidden
+          return res.render("forbidden", { auth: req.session.user });
+        } else {
+          const projectUser = projectUserData.rows[0];
+          if (!projectUser.is_editor) {
+            return res.render("forbidden", { auth: req.session.user });
+          } else {
+            res.render("newwyrldcalendar", {
+              auth: req.session.user,
+              projectId: project.id,
+            });
+          }
+        }
+      } else {
+        res.render("newwyrldcalendar", {
           auth: req.session.user,
           projectId: project.id,
         });

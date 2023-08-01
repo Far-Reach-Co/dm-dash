@@ -27,3 +27,4 @@ class Modal {
 
 const modal = new Modal();
 export default modal;
+window.modal = modal;

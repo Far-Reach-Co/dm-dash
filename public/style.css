@@ -280,6 +280,18 @@ button:hover {
   background: linear-gradient(var(--red1) 10%, var(--purple) 90%);
 }
 
+.edit-btn {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--link-blue);
+  margin-left: 5px;
+}
+
+.edit-btn:hover {
+  color: var(--green);
+}
+
 .red-x {
   color: var(--red1);
   cursor: pointer;
@@ -533,6 +545,12 @@ footer {
 .move-btn {
   padding: 5px;
   font-size: small;
+}
+
+.calendar {
+  background-color: var(--blue3);
+  border: 1px solid var(--main-gray);
+  border-radius: var(--border-radius);
 }
 
 .calendar-container {

@@ -1,18 +1,18 @@
 import createElement from "../lib/createElement.js";
-import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import modal from "./modal.js";
 
 export default class Calendar {
   constructor(props) {
     // domcomp
     this.domComponent = props.domComponent;
-    this.domComponent.className = "component";
-    this.parentComponentRender = props.parentComponentRender;
+
     // values
     this.id = props.id;
     this.projectId = props.projectId;
+    this.projectAuth = props.projectAuth;
     this.year = props.year;
     this.currentMonthId = props.currentMonthId;
     this.currentDay = props.currentDay;
@@ -21,7 +21,7 @@ export default class Calendar {
     this.daysOfTheWeek = props.daysOfTheWeek;
     // render views
     this.edit = false;
-    this.open = false;
+    this.open = true;
     this.loading = false;
     // open navigation views
     this.monthBeingViewed = this.calculateCurrentMonth();
@@ -104,6 +104,11 @@ export default class Calendar {
     this.title = formProps.title;
     this.year = formProps.year;
     await postThing(`/api/edit_calendar/${this.id}`, formProps);
+    // update wyrlds calendar list UI
+    const elem = document.querySelector("#calendar-title");
+    if (elem) {
+      elem.innerText = formProps.title;
+    }
   };
 
   newMonth = async () => {
@@ -165,7 +170,7 @@ export default class Calendar {
 
   handleDayClicked = async (dayNumber) => {
     // dont let non-editors use this
-    if (state.currentProject.isEditor === false) return;
+    if (!this.projectAuth) return;
 
     dayNumber = parseInt(dayNumber);
     // updated UI
@@ -487,6 +492,7 @@ export default class Calendar {
         deleteThing(`/api/remove_calendar/${this.id}`);
         this.toggleEdit();
         this.domComponent.remove();
+        modal.hide();
       }
     });
 
@@ -564,12 +570,9 @@ export default class Calendar {
         "div",
         {
           class: `calendar-box ${
-            state.currentProject.isEditor === false
-              ? "non-clickable-day"
-              : "clickable-day"
+            !this.projectAuth ? "non-clickable-day" : "clickable-day"
           }`,
-          title:
-            state.currentProject.isEditor === false ? "" : "Set to current day",
+          title: !this.projectAuth ? "" : "Set to current day",
         },
         dayNumber,
         { type: "click", event: () => this.handleDayClicked(elem.innerHTML) }
@@ -588,19 +591,28 @@ export default class Calendar {
       this.render();
     });
 
-    this.domComponent.append(title, monthYear);
+    this.domComponent.append(
+      createElement("div", { class: "d-flex justify-content-between" }, [
+        await listItemTitle(
+          createElement("h1", { style: "color: var(--green)" }, this.title),
+          this.toggleEdit,
+          this.projectAuth
+        ),
+        createElement("img", {
+          src: "/assets/calendar.svg",
+          width: 30,
+          height: 30,
+        }),
+      ]),
+      monthYear
+    );
     if (previousMonth) {
       this.domComponent.append(arrowButtonLeft);
     }
     if (nextMonth) {
       this.domComponent.append(arrowButtonRight);
     }
-    this.domComponent.append(
-      createElement("br"),
-      calendarContainer,
-      createElement("br"),
-      closeButton
-    );
+    this.domComponent.append(createElement("br"), calendarContainer);
   };
 
   render = async () => {
@@ -610,34 +622,10 @@ export default class Calendar {
     if (this.edit) {
       return this.renderEdit();
     }
-    // open
-    if (this.open) {
-      return this.renderOpen();
-    }
 
-    this.domComponent.append(
-      createElement("div", { class: "component-title" }, [
-        await listItemTitle(this.title, this.toggleEdit),
-        createElement("img", {
-          src: "/assets/calendar.svg",
-          width: 30,
-          height: 30,
-        }),
-      ]),
-      createElement(
-        "div",
-        { class: "current-date" },
-        `${this.calculateCurrentDayOfTheWeek()}, ${this.currentDay} of ${
-          this.calculateCurrentMonth().title
-        } in the year ${this.year}`
-      ),
-      createElement("button", { title: "Open detail view" }, "Open", {
-        type: "click",
-        event: () => {
-          this.open = true;
-          this.render();
-        },
-      })
-    );
+    // open
+    return this.renderOpen();
   };
 }
+
+window.Calendar = Calendar;

@@ -46,6 +46,7 @@ var projectUsers_1 = require("./api/queries/projectUsers");
 var projectPlayers_1 = require("./api/queries/projectPlayers");
 var playerInvites_1 = require("./api/queries/playerInvites");
 var projectInvites_1 = require("./api/queries/projectInvites");
+var calendars_1 = require("./api/queries/calendars");
 var router = (0, express_1.Router)();
 router.get("/", function (req, res, next) {
     try {
@@ -360,11 +361,11 @@ router.get("/dash", function (req, res, next) { return __awaiter(void 0, void 0,
     });
 }); });
 router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var projectId, projectData, project, projectAuth, projectUserData, projectUser, tableData, players, projectPlayers, _i, _a, player, charData, err_5;
+    var projectId, projectData, project, projectAuth, projectUserData, projectUser, tableData, players, projectPlayers, _i, _a, player, charData, calendars, err_5;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 10, , 11]);
+                _b.trys.push([0, 11, , 12]);
                 if (!req.session.user)
                     return [2, res.redirect("/login")];
                 if (!req.query.id)
@@ -405,20 +406,23 @@ router.get("/wyrld", function (req, res, next) { return __awaiter(void 0, void 0
             case 8:
                 _i++;
                 return [3, 6];
-            case 9:
+            case 9: return [4, (0, calendars_1.getCalendarsQuery)(projectId)];
+            case 10:
+                calendars = _b.sent();
                 res.render("wyrld", {
                     auth: req.session.user,
                     projectAuth: projectAuth,
                     project: project,
                     tables: tableData.rows,
-                    sheets: players
+                    sheets: players,
+                    calendars: calendars.rows
                 });
-                return [3, 11];
-            case 10:
+                return [3, 12];
+            case 11:
                 err_5 = _b.sent();
                 next(err_5);
-                return [3, 11];
-            case 11: return [2];
+                return [3, 12];
+            case 12: return [2];
         }
     });
 }); });
@@ -591,6 +595,56 @@ router.get("/newwyrldtable", function (req, res, next) { return __awaiter(void 0
         }
     });
 }); });
+router.get("/newwyrldcalendar", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+    var projectId, projectData, project, projectUserData, projectUser, err_9;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 5, , 6]);
+                if (!req.session.user)
+                    return [2, res.redirect("/forbidden")];
+                if (!req.query.id)
+                    return [2, res.redirect("/dash")];
+                projectId = req.query.id;
+                return [4, (0, projects_1.getProjectQuery)(projectId)];
+            case 1:
+                projectData = _a.sent();
+                project = projectData.rows[0];
+                if (!(req.session.user != project.user_id)) return [3, 3];
+                return [4, (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId)];
+            case 2:
+                projectUserData = _a.sent();
+                if (!projectUserData.rows.length) {
+                    return [2, res.render("forbidden", { auth: req.session.user })];
+                }
+                else {
+                    projectUser = projectUserData.rows[0];
+                    if (!projectUser.is_editor) {
+                        return [2, res.render("forbidden", { auth: req.session.user })];
+                    }
+                    else {
+                        res.render("newwyrldcalendar", {
+                            auth: req.session.user,
+                            projectId: project.id
+                        });
+                    }
+                }
+                return [3, 4];
+            case 3:
+                res.render("newwyrldcalendar", {
+                    auth: req.session.user,
+                    projectId: project.id
+                });
+                _a.label = 4;
+            case 4: return [3, 6];
+            case 5:
+                err_9 = _a.sent();
+                next(err_9);
+                return [3, 6];
+            case 6: return [2];
+        }
+    });
+}); });
 router.get("/newwyrld", function (req, res, next) {
     try {
         if (!req.session.user)
@@ -602,7 +656,7 @@ router.get("/newwyrld", function (req, res, next) {
     }
 });
 router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_9;
+    var uuid, tableData, table, projectData, project, projectUserData, projectUser, err_10;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -645,15 +699,15 @@ router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, 
                         projectAuth: projectUser.is_editor
                     })];
             case 4:
-                err_9 = _a.sent();
-                next(err_9);
+                err_10 = _a.sent();
+                next(err_10);
                 return [3, 5];
             case 5: return [2];
         }
     });
 }); });
 router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_10;
+    var err_11;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -668,15 +722,15 @@ router.post("/update_username", function (req, res, next) { return __awaiter(voi
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_10 = _a.sent();
-                next(err_10);
+                err_11 = _a.sent();
+                next(err_11);
                 return [3, 3];
             case 3: return [2];
         }
     });
 }); });
 router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_11;
+    var err_12;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -691,8 +745,8 @@ router.post("/update_email", function (req, res, next) { return __awaiter(void 0
                 res.send("Saved!");
                 return [3, 3];
             case 2:
-                err_11 = _a.sent();
-                next(err_11);
+                err_12 = _a.sent();
+                next(err_12);
                 return [3, 3];
             case 3: return [2];
         }

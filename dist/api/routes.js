@@ -106,6 +106,7 @@ router.post("/add_day", days_js_1.addDay);
 router["delete"]("/remove_day/:id", days_js_1.removeDay);
 router.post("/edit_day/:id", days_js_1.editDay);
 router.get("/get_calendars/:project_id", calendars_js_1.getCalendars);
+router.get("/get_calendar/:id", calendars_js_1.getCalendar);
 router.post("/add_calendar", calendars_js_1.addCalendar);
 router["delete"]("/remove_calendar/:id", calendars_js_1.removeCalendar);
 router.post("/edit_calendar/:id", calendars_js_1.editCalendar);

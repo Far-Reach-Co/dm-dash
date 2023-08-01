@@ -7,8 +7,15 @@
     <title>Far Reach Co. | Wyrlds</title>
     <link rel="stylesheet" href="/style.css" />
     <script src="/lib/MobileNavHandler.js" defer></script>
+    <script type="module" src="/components/calendar.js" defer></script>
+    <script src="/components/modal.js" type="module"></script>
     <%- include('./partials/icons') %>
   </head>
+  <style>
+    button {
+      margin: 5px;
+    }
+  </style>
   <body>
     <%- include('./partials/nav') %>
     <div class="d-flex flex-column h-100">
@@ -77,15 +84,85 @@
           </div>
           <% }); %> <% } %>
         </div>
+        <div
+          class="d-flex flex-column p-3"
+          style="width: 33.33%; min-width: 300px"
+        >
+          <h2>Calendars</h2>
+          <small>Custom calendars to keep track of time in your wyrld.</small>
+          <br />
+          <% if (projectAuth) { %>
+          <a
+            href="/newwyrldcalendar?id=<%= project.id %>"
+            title="Create a new calendar"
+            >+ New Calendar</a
+          >
+
+          <% } %>
+          <hr />
+          <% if (calendars.length === 0) { %>
+          <small class="ms-2">No calendars yet...</small>
+          <% } else { %> <% calendars.forEach(function(calendar) { %>
+          <div
+            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
+            onclick="openCalendar('<%= calendar.id %>')"
+            title="Open calendar"
+          >
+            <div class="dash-list-title mb-3" id="calendar-title">
+              <%= calendar.title %>
+            </div>
+            <a class="ms-1"><small>View</small></a>
+          </div>
+          <% }); %> <% } %>
+        </div>
+      </div>
+    </div>
+    <!-- Toast -->
+    <div id="toast-custom"></div>
+    <!-- The Modal -->
+    <div id="modal-custom" class="modal-custom">
+      <!-- Modal content -->
+      <div class="modal-custom-container">
+        <div id="close-custom-modal" class="close-custom-modal">&times;</div>
+        <div id="modal-custom-content" class="modal-custom-content"></div>
       </div>
     </div>
   </body>
   <script>
+
     function handleSheetClick(id, projectID) {
       window.open(`/5eplayer?id=${id}&project=${projectID}`, "_blank").focus();
     }
     function handleTableClick(uuid, projectID) {
       window.open(`/vtt?uuid=${uuid}&project=${projectID}`, "_blank").focus();
+    }
+
+    const projectAuth = <%= projectAuth %>;
+
+    async function openCalendar(id) {
+      const res = await fetch(`${window.location.origin}/api/get_calendar/${id}`)
+      if (res.status === 200) {
+        const calendar = await res.json();
+        if (calendar) {
+          const elem = document.createElement("div");
+          elem.className = "p-3 calendar";
+
+          new Calendar({
+            domComponent: elem,
+            projectAuth,
+            id: calendar.id,
+            projectId: calendar.project_id,
+            year: calendar.year,
+            currentMonthId: calendar.current_month_id,
+            currentDay: calendar.current_day,
+            title: calendar.title,
+            months: calendar.months,
+            daysOfTheWeek: calendar.days_of_the_week
+          })
+          // show in modal
+          modal.show(elem)
+        }
+      }
     }
   </script>
 </html>

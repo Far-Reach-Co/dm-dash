@@ -1,16 +1,12 @@
 import createElement from "../lib/createElement.js";
-import Calendar from "../components/Calendar.js";
-import state from "../lib/state.js";
-import { getThings, deleteThing, postThing } from "../lib/apiUtils.js";
+import { deleteThing, postThing } from "../lib/apiUtils.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 
-export default class CalendarView {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "standard-view";
+export default class CreateCalendar {
+  constructor() {
+    this.domComponent = document.querySelector("#create-calendar");
 
     // creation vars
-    this.creatingNewCalendar = false;
     this.creatingNewMonths = false;
     this.months = [];
     this.creatingNewDaysInWeek = false;
@@ -20,21 +16,15 @@ export default class CalendarView {
     this.daysCreated = [];
     this.loading = false;
 
+    const searchParams = new URLSearchParams(window.location.search);
+    this.projectId = searchParams.get("id");
+
     this.render();
   }
 
   toggleLoading = () => {
     this.loading = !this.loading;
     this.render();
-  };
-
-  resetCalendarCreation = () => {
-    this.creatingNewCalendar = false;
-    this.creatingNewMonths = false;
-    this.creatingNewDaysInWeek = false;
-    this.calendarBeingCreated = null;
-    this.monthsCreated = [];
-    this.daysCreated = [];
   };
 
   updateCalendarCurrentMonth = async (monthId) => {
@@ -46,9 +36,8 @@ export default class CalendarView {
   newCalendar = async (e) => {
     const formData = new FormData(e.target);
     const formProps = Object.fromEntries(formData);
-    const projectId = state.currentProject.id;
     const resData = await postThing("/api/add_calendar", {
-      project_id: projectId,
+      project_id: this.projectId,
       title: formProps.title.trim(),
       year: parseInt(formProps.year),
     });
@@ -182,10 +171,8 @@ export default class CalendarView {
     completeButton.addEventListener("click", async () => {
       if (!this.daysOfTheWeek.length)
         return alert("Please create at least one day");
-      this.toggleLoading();
-      this.resetCalendarCreation();
-      await this.updateDays();
-      this.toggleLoading();
+
+      window.location.href = `/wyrld?id=${this.projectId}`;
     });
 
     // append
@@ -366,7 +353,6 @@ export default class CalendarView {
 
   renderNewCalendar = async () => {
     this.domComponent.append(
-      createElement("div", { class: "component-title" }, "Create new calendar"),
       createElement(
         "small",
         { style: "max-width: 600px;" },
@@ -402,7 +388,6 @@ export default class CalendarView {
           type: "submit",
           event: async (e) => {
             e.preventDefault();
-            this.creatingNewCalendar = false;
             this.toggleLoading();
             const newCal = await this.newCalendar(e);
             if (newCal) {
@@ -412,67 +397,8 @@ export default class CalendarView {
             this.toggleLoading();
           },
         }
-      ),
-      createElement("br"),
-      createElement("button", { class: "btn-red" }, "Cancel", {
-        type: "click",
-        event: () => {
-          this.creatingNewCalendar = false;
-          this.render();
-        },
-      })
+      )
     );
-  };
-
-  renderCalendarElems = async () => {
-    const calendarData = await getThings(
-      `/api/get_calendars/${state.currentProject.id}`
-    );
-
-    const calendarElems = [];
-    calendarData.forEach((calendar) => {
-      // create element
-      const calendarComponentElement = createElement("div", {
-        id: `calendar-component-${calendar.id}`,
-      });
-      // append
-      calendarElems.push(calendarComponentElement);
-
-      new Calendar({
-        domComponent: calendarComponentElement,
-        parentComponentRender: this.render,
-        id: calendar.id,
-        projectId: calendar.project_id,
-        title: calendar.title,
-        year: calendar.year,
-        currentMonthId: calendar.current_month_id,
-        currentDay: calendar.current_day,
-        months: calendar.months,
-        daysOfTheWeek: calendar.days_of_the_week,
-      });
-    });
-
-    if (calendarElems.length) {
-      return calendarElems;
-    } else return [createElement("div", {}, "None...")];
-  };
-
-  renderAddButtonOrNull = () => {
-    if (state.currentProject.isEditor === false) {
-      return createElement("div", { style: "visibility: hidden;" });
-    } else
-      return createElement(
-        "button",
-        { class: "new-btn", title: "Create new calendar" },
-        "+ Calendar",
-        {
-          type: "click",
-          event: () => {
-            this.creatingNewCalendar = true;
-            this.render();
-          },
-        }
-      );
   };
 
   render = async () => {
@@ -483,10 +409,6 @@ export default class CalendarView {
       return this.domComponent.append(renderLoadingWithMessage("Loading..."));
     }
 
-    if (this.creatingNewCalendar) {
-      return this.renderNewCalendar();
-    }
-
     if (this.creatingNewMonths) {
       return this.renderNewMonths();
     }
@@ -495,11 +417,8 @@ export default class CalendarView {
       return this.renderNewDaysInWeek();
     }
 
-    // append
-    this.domComponent.append(
-      this.renderAddButtonOrNull(),
-      createElement("hr"),
-      ...(await this.renderCalendarElems())
-    );
+    return this.renderNewCalendar();
   };
 }
+
+window.CreateCalendar = CreateCalendar;

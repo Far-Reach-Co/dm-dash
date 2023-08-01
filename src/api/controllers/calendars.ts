@@ -47,6 +47,23 @@ async function getCalendars(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function getCalendar(req: Request, res: Response, next: NextFunction) {
+  try {
+    const calendarData = await getCalendarQuery(req.params.id);
+    const calendar = calendarData.rows[0];
+
+    const months = await getMonthsQuery(calendar.id);
+    (calendar as GetCalendarDataReturnModel).months = months.rows;
+
+    const days = await getDaysQuery(calendar.id);
+    (calendar as GetCalendarDataReturnModel).days_of_the_week = days.rows;
+
+    res.send(calendar);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function removeCalendar(req: Request, res: Response, next: NextFunction) {
   try {
     await removeCalendarQuery(req.params.id);
@@ -75,4 +92,4 @@ async function editCalendar(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-export { getCalendars, addCalendar, removeCalendar, editCalendar };
+export { getCalendars, getCalendar, addCalendar, removeCalendar, editCalendar };

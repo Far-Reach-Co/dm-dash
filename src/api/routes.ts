@@ -28,6 +28,7 @@ import {
   addCalendar,
   removeCalendar,
   editCalendar,
+  getCalendar,
 } from "./controllers/calendars.js";
 import {
   getMonths,
@@ -483,6 +484,7 @@ router.post("/edit_day/:id", editDay);
 
 // calendars
 router.get("/get_calendars/:project_id", getCalendars);
+router.get("/get_calendar/:id", getCalendar);
 router.post("/add_calendar", addCalendar);
 router.delete("/remove_calendar/:id", removeCalendar);
 router.post("/edit_calendar/:id", editCalendar);
