@@ -199,6 +199,9 @@ function editCalendar(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (!req.body.title) {
+                        delete req.body.title;
+                    }
                     return [4, (0, calendars_js_1.editCalendarQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();

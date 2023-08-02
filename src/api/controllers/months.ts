@@ -36,6 +36,9 @@ async function removeMonth(req: Request, res: Response, next: NextFunction) {
 
 async function editMonth(req: Request, res: Response, next: NextFunction) {
   try {
+    if (!req.body.title) {
+      delete req.body.title;
+    }
     const data = await editMonthQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

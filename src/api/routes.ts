@@ -210,7 +210,7 @@ import {
   removePlayerUserByUserAndPlayer,
   removePlayerUsersByPlayer,
 } from "./controllers/playerUsers.js";
-import { body, validationResult } from "express-validator";
+import { body } from "express-validator";
 import validator from "validator";
 const upload = multer({ dest: "file_uploads/" });
 

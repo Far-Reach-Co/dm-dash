@@ -111,6 +111,9 @@ function editDay(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (!req.body.title) {
+                        delete req.body.title;
+                    }
                     return [4, (0, days_1.editDayQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
