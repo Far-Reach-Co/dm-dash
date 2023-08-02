@@ -89,10 +89,11 @@ export default class Calendar {
   };
 
   calculateCurrentMonth = () => {
-    if (!this.months.length) return { title: "unknown-month" };
     return this.months.filter((month) => {
-      if (this.currentMonthId) return month.id === this.currentMonthId;
-      else return month.index === 1;
+      if (this.currentMonthId) {
+        if (month.id === this.currentMonthId) return month;
+      }
+      return month.index === 1;
     })[0];
   };
 
