@@ -55,8 +55,8 @@
             </div>
           </div>
           <input type="checkbox" name="is_editor"
-          hx-post="/api/edit_project_user/<%= user.project_user_id %>" <%=
-          user.is_editor ? 'checked' : '' %> />
+          hx-post="/api/edit_project_user_is_editor/<%= user.project_user_id %>"
+          <%= user.is_editor ? 'checked' : '' %> />
         </div>
         <% }); %> <% } %>
       </div>

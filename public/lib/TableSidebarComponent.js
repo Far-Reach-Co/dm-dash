@@ -149,7 +149,7 @@ export default class TableSidebarComponent {
                   {
                     type: "focusout",
                     event: (e) => {
-                      postThing(`/api/edit_image/${image.id}`, {
+                      postThing(`/api/edit_image_name/${image.id}`, {
                         original_name: e.target.value,
                       });
                     },

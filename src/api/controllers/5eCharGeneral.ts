@@ -56,6 +56,7 @@ import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
 import { getUserByIdQuery } from "../queries/users";
 import {
+  getPlayerUserByUserAndPlayerQuery,
   getPlayerUsersByPlayerQuery,
   removePlayerUserQuery,
 } from "../queries/playerUsers";
@@ -66,15 +67,7 @@ import {
 
 async function add5eChar(req: Request, res: Response, next: NextFunction) {
   try {
-    // check if user is pro
     if (!req.session.user) throw new Error("User is not logged in");
-    // const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
-    // // limit to three projects
-    // if (generalsData.rows.length >= 5) {
-    //   const { rows } = await getUserByIdQuery(req.session.user);
-    //   if (!rows[0].is_pro)
-    //     throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    // }
 
     req.body.user_id = req.session.user;
     const generalData = await add5eCharGeneralQuery(req.body);
@@ -163,6 +156,11 @@ async function remove5eChar(req: Request, res: Response, next: NextFunction) {
     const generalData = await get5eCharGeneralQuery(req.params.id);
     const general = generalData.rows[0];
 
+    // check if owner
+    if (!req.session.user) throw new Error("User is not logged in");
+    if (req.session.user != general.user_id)
+      throw new Error("User does not own this property");
+
     const proData = await get5eCharProByGeneralQuery(general.id);
     const pro = proData.rows[0];
     const backData = await get5eCharBackByGeneralQuery(general.id);
@@ -224,8 +222,33 @@ async function edit5eCharGeneral(
   next: NextFunction
 ) {
   try {
-    const data = await edit5eCharGeneralQuery(req.params.id, req.body);
-    res.status(200).send(data.rows[0]);
+    // get the resource
+    // const generalData = await get5eCharGeneralQuery(req.params.id);
+    // const general = generalData.rows[0];
+
+    // // check if auth
+    // if (!req.session.user) throw new Error("User is not logged in");
+    // if (req.session.user != general.user_id) {
+    //   // check playerUser
+    //   const playerUserData = await getPlayerUserByUserAndPlayerQuery(
+    //     req.session.user,
+    //     req.params.id
+    //   );
+    //   if (!playerUserData.rows.length) {
+    //     throw new Error("User does not have permission to this property");
+    //   }
+    // }
+
+    // If the "id" field is found, throw an error
+    if (req.body.hasOwnProperty("id")) {
+      throw new Error('Request body cannot contain the "id" field');
+    }
+    if (req.body.hasOwnProperty("user_id")) {
+      throw new Error('Request body cannot contain the "user_id" field');
+    }
+
+    const editData = await edit5eCharGeneralQuery(req.params.id, req.body);
+    res.status(200).send(editData.rows[0]);
   } catch (err) {
     next(err);
   }
@@ -233,6 +256,35 @@ async function edit5eCharGeneral(
 
 async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
   try {
+    // get the resource
+    // const charProData = await get5eCharProQuery(req.params.id);
+    // const charPro = charProData.rows[0];
+
+    // // get the resource
+    // const generalData = await get5eCharGeneralQuery(charPro.general_id);
+    // const general = generalData.rows[0];
+
+    // // check if auth
+    // if (!req.session.user) throw new Error("User is not logged in");
+    // if (req.session.user != general.user_id) {
+    //   // check playerUser
+    //   const playerUserData = await getPlayerUserByUserAndPlayerQuery(
+    //     req.session.user,
+    //     req.params.id
+    //   );
+    //   if (!playerUserData.rows.length) {
+    //     throw new Error("User does not have permission to this property");
+    //   }
+    // }
+
+    // If the "id" field is found, throw an error
+    if (req.body.hasOwnProperty("id")) {
+      throw new Error('Request body cannot contain the "id" field');
+    }
+    if (req.body.hasOwnProperty("general_id")) {
+      throw new Error('Request body cannot contain the "general_id" field');
+    }
+
     const data = await edit5eCharProQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
@@ -242,6 +294,13 @@ async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
 
 async function edit5eCharBack(req: Request, res: Response, next: NextFunction) {
   try {
+    // If the "id" field is found, throw an error
+    if (req.body.hasOwnProperty("id")) {
+      throw new Error('Request body cannot contain the "id" field');
+    }
+    if (req.body.hasOwnProperty("general_id")) {
+      throw new Error('Request body cannot contain the "general_id" field');
+    }
     const data = await edit5eCharBackQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

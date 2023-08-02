@@ -21,6 +21,7 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const cors = require("cors");
 var path = require("path");
+const requestIp = require("request-ip");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
@@ -53,7 +54,26 @@ app.use(
 // Static
 app.use(express.static("public"));
 
-// MIDDLEWARE
+// check IP, only allow my origins to access /api
+app.use((req, res, next) => {
+  if (req.url.includes("/api")) {
+    const clientIp = requestIp.getClientIp(req);
+    const authorizedIps = [
+      "::1",
+      "::ffff:127.0.0.1",
+      "::ffff:192.168.100.244",
+      "::ffff:165.227.88.65",
+    ];
+
+    if (authorizedIps.includes(clientIp)) {
+      next(); // If the IP is in the list, proceed to the next middleware
+    } else {
+      res.status(403).send("Unauthorized IP"); // If the IP is not in the list, reject the request
+    }
+  } else next();
+});
+
+// sessions
 app.use(
   session({
     store: new pgSession({
@@ -71,14 +91,19 @@ app.use(
 );
 
 // Routes
+// private
 app.use("/api", apiRoutes);
+// public
 app.use("/", routes);
 
 //Error
 app.use((error, req, res, next) => {
   console.error(error);
   // code for unique constraint on user registration email
-  if (error.code == 23505) error.status = 400;
+  if (error.code == 23505) {
+    error.status = 400;
+    error.message = "This email has already been registered";
+  }
   res.status(error.status || 500);
   res.json({
     error: {
@@ -92,10 +117,6 @@ io.on("connection", (socket) => {
   // testing
   socket.on("table-joined", ({ table, username }) => {
     try {
-      console.log("************** SOCKETTTTTT ***********************\n");
-      console.log(table, username, "\n");
-      console.log("************** SOCKETTTTTT ***********************\n");
-
       const user = userJoin(socket.id, username, table);
       socket.join(table);
 
@@ -108,9 +129,6 @@ io.on("connection", (socket) => {
       console.log("SOCKET ERROR", err);
     }
   });
-
-  // ************************* VTT *************************
-
   // grid
   socket.on("grid-changed", ({ table, gridState }) => {
     socket.broadcast.to(table).emit("grid-change", gridState);
@@ -139,7 +157,6 @@ io.on("connection", (socket) => {
   socket.on("object-changed-layer", ({ table, object }) => {
     socket.broadcast.to(table).emit("object-change-layer", object);
   });
-
   // when a user disconnects
   socket.on("disconnect", () => {
     const user = userLeave(socket.id);

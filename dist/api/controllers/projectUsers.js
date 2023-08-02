@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editProjectUser = exports.removeProjectUser = exports.getProjectUsersByProject = exports.getProjectUserByUserAndProject = exports.addProjectUserByInvite = void 0;
+exports.editProjectUserIsEditor = exports.removeProjectUser = exports.getProjectUsersByProject = exports.getProjectUserByUserAndProject = exports.addProjectUserByInvite = void 0;
 var projectInvites_js_1 = require("../queries/projectInvites.js");
 var projectUsers_js_1 = require("../queries/projectUsers.js");
 var projects_js_1 = require("../queries/projects.js");
@@ -172,7 +172,7 @@ function removeProjectUser(req, res, next) {
     });
 }
 exports.removeProjectUser = removeProjectUser;
-function editProjectUser(req, res, next) {
+function editProjectUserIsEditor(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var is_editor, data, err_5;
         return __generator(this, function (_a) {
@@ -180,8 +180,7 @@ function editProjectUser(req, res, next) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     is_editor = req.body.is_editor === "on";
-                    req.body.is_editor = is_editor;
-                    return [4, (0, projectUsers_js_1.editProjectUserQuery)(req.params.id, req.body)];
+                    return [4, (0, projectUsers_js_1.editProjectUserQuery)(req.params.id, { is_editor: is_editor })];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -195,4 +194,4 @@ function editProjectUser(req, res, next) {
         });
     });
 }
-exports.editProjectUser = editProjectUser;
+exports.editProjectUserIsEditor = editProjectUserIsEditor;

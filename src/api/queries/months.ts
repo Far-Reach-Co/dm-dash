@@ -9,10 +9,10 @@ export interface MonthModel {
 }
 
 async function addMonthQuery(data: {
-  calendar_id: string,
-  index: string,
+  calendar_id: string | number,
+  index: number,
   title: string,
-  number_of_days: string
+  number_of_days: number
 }) {
   const query = {
     text: /*sql*/ `insert into public."Month" (calendar_id, index, title, number_of_days) values($1,$2,$3,$4) returning *`,

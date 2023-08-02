@@ -187,7 +187,7 @@ export default class TableSidebar {
                               const formData = new FormData(e.target);
                               const formProps = Object.fromEntries(formData);
                               const res = postThing(
-                                `/api/edit_table_view/${this.tableView.id}`,
+                                `/api/edit_table_view_title/${this.tableView.id}`,
                                 {
                                   title: formProps.title,
                                 }

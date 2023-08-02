@@ -18,10 +18,11 @@ import {
   registerUser,
   loginUser,
   verifyJwt,
-  editUser,
   resetPassword,
   requestResetEmail,
   getUserBySession,
+  editEmail,
+  editUsername,
 } from "./controllers/users.js";
 import {
   getCalendars,
@@ -97,17 +98,17 @@ import {
   getProjectUserByUserAndProject,
   getProjectUsersByProject,
   removeProjectUser,
-  editProjectUser,
   addProjectUserByInvite,
+  editProjectUserIsEditor,
 } from "./controllers/projectUsers.js";
 import {
   getSignedUrlForDownload,
-  editImage,
   getImage,
   removeImageByTableUser,
   removeImageByProject,
   newImageForProject,
   newImageForUser,
+  editImageName,
 } from "./controllers/s3.js";
 // for uploading files
 import multer = require("multer");
@@ -186,12 +187,13 @@ import {
 import {
   getTableViewsByProject,
   removeTableView,
-  editTableView,
   getTableView,
   addTableViewByUser,
   getTableViewByUUID,
   getTableViewsByUser,
   addTableViewByProject,
+  editTableViewData,
+  editTableViewTitle,
 } from "./controllers/tableViews.js";
 import {
   addPlayerInvite,
@@ -208,6 +210,8 @@ import {
   removePlayerUserByUserAndPlayer,
   removePlayerUsersByPlayer,
 } from "./controllers/playerUsers.js";
+import { body, validationResult } from "express-validator";
+import validator from "validator";
 const upload = multer({ dest: "file_uploads/" });
 
 var router = Router();
@@ -221,7 +225,11 @@ router.post(
   newImageForProject
 );
 router.post("/new_image_for_user", upload.single("file"), newImageForUser);
-router.post("/edit_image/:id", editImage);
+router.post(
+  "/edit_image_name/:id",
+  body("original_name").trim().escape(),
+  editImageName
+);
 router.delete(
   "/remove_image_by_table_user/:image_id/:table_id",
   removeImageByTableUser
@@ -239,7 +247,12 @@ router.get("/get_table_view_by_uuid/:uuid", getTableViewByUUID);
 router.post("/add_table_view_by_project/:project_id", addTableViewByProject);
 router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
-router.post("/edit_table_view/:id", editTableView);
+router.post("/edit_table_view_data/:id", editTableViewData);
+router.post(
+  "/edit_table_view_title/:id",
+  body("title").trim().escape(),
+  editTableViewTitle
+);
 
 // table images
 router.get(
@@ -279,7 +292,7 @@ router.delete("/remove_project_player/:id", removeProjectPlayer);
 // );
 // router.post("/add_project_user_by_invite", addProjectUserByInvite);
 router.delete("/remove_project_user/:id", removeProjectUser);
-router.post("/edit_project_user/:id", editProjectUser);
+router.post("/edit_project_user_is_editor/:id", editProjectUserIsEditor);
 
 // player users
 router.get(
@@ -313,9 +326,20 @@ router.delete("/remove_project_invite/:id", removeProjectInvite);
 // 5e characters general, proficiencies, background, spell slots
 router.get("/get_5e_characters_by_user", get5eCharsByUser);
 router.get("/get_5e_character_general/:id", get5eCharGeneral);
-router.post("/add_5e_character", add5eChar);
+router.post("/add_5e_character", body("name").trim().escape(), add5eChar);
 router.delete("/remove_5e_character/:id", remove5eChar);
-router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
+router.post(
+  "/edit_5e_character_general/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  edit5eCharGeneral
+);
 router.post("/edit_5e_character_proficiencies/:id", edit5eCharPro);
 router.post("/edit_5e_character_background/:id", edit5eCharBack);
 router.post("/edit_5e_character_spell_slots/:id", edit5eCharSpellSlotInfo);
@@ -472,22 +496,22 @@ router.post("/edit_5e_character_other_pro_lang/:id", edit5eCharOtherProLang);
 
 // months
 router.get("/get_months/:calendar_id", getMonths);
-router.post("/add_month", addMonth);
+router.post("/add_month", body("title").trim().escape(), addMonth);
 router.delete("/remove_month/:id", removeMonth);
-router.post("/edit_month/:id", editMonth);
+router.post("/edit_month/:id", body("title").trim().escape(), editMonth);
 
 // days
 router.get("/get_days/:calendar_id", getDays);
-router.post("/add_day", addDay);
+router.post("/add_day", body("title").trim().escape(), addDay);
 router.delete("/remove_day/:id", removeDay);
-router.post("/edit_day/:id", editDay);
+router.post("/edit_day/:id", body("title").trim().escape(), editDay);
 
 // calendars
 router.get("/get_calendars/:project_id", getCalendars);
 router.get("/get_calendar/:id", getCalendar);
-router.post("/add_calendar", addCalendar);
+router.post("/add_calendar", body("title").trim().escape(), addCalendar);
 router.delete("/remove_calendar/:id", removeCalendar);
-router.post("/edit_calendar/:id", editCalendar);
+router.post("/edit_calendar/:id", body("title").trim().escape(), editCalendar);
 
 // clocks
 // router.get("/get_clocks/:project_id", getClocks);
@@ -498,21 +522,34 @@ router.post("/edit_calendar/:id", editCalendar);
 // projects
 router.get("/get_project/:id", getProject);
 router.get("/get_projects", getProjects);
-router.post("/add_project", addProject);
+router.post("/add_project", body("title").trim().escape(), addProject);
 router.delete("/remove_project/:id", removeProject);
-router.post("/edit_project/:id", editProject);
+router.post("/edit_project/:id", body("title").trim().escape(), editProject);
 
 // Auth and Users
 // router.get("/users", getAllUsers);
 router.get("/get_user", getUserBySession);
 // router.get("/get_user_by_id/:id", getUserById); // needs security
-router.post("/register", registerUser);
+router.post(
+  "/register",
+  body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
+  body("username").trim().escape(),
+  registerUser
+);
 router.post("/login", loginUser);
 // router.get("/verify_jwt", verifyJwt);
 router.post("/request_reset_email", requestResetEmail);
 
 // sub heading user
-router.post("/user/edit_user", editUser);
+// router.post("/user/edit_user", editUser);
 router.post("/user/reset_password", resetPassword);
+
+router.post("/update_username", body("username").trim().escape(), editUsername);
+
+router.post(
+  "/update_email",
+  body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
+  editEmail
+);
 
 module.exports = router;

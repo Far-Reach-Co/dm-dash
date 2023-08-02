@@ -105,7 +105,7 @@ export default class Calendar {
     this.year = formProps.year;
     await postThing(`/api/edit_calendar/${this.id}`, formProps);
     // update wyrlds calendar list UI
-    const elem = document.querySelector("#calendar-title");
+    const elem = document.querySelector(`#calendar-title-${this.id}`);
     if (elem) {
       elem.innerText = formProps.title;
     }

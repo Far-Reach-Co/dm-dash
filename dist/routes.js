@@ -706,52 +706,6 @@ router.get("/vtt", function (req, res, next) { return __awaiter(void 0, void 0, 
         }
     });
 }); });
-router.post("/update_username", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_11;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                if (!req.session.user)
-                    return [2, res.redirect("/forbidden")];
-                return [4, (0, users_1.editUserQuery)(req.session.user, {
-                        username: req.body.username
-                    })];
-            case 1:
-                _a.sent();
-                res.send("Saved!");
-                return [3, 3];
-            case 2:
-                err_11 = _a.sent();
-                next(err_11);
-                return [3, 3];
-            case 3: return [2];
-        }
-    });
-}); });
-router.post("/update_email", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var err_12;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                if (!req.session.user)
-                    return [2, res.redirect("/forbidden")];
-                return [4, (0, users_1.editUserQuery)(req.session.user, {
-                        email: req.body.email
-                    })];
-            case 1:
-                _a.sent();
-                res.send("Saved!");
-                return [3, 3];
-            case 2:
-                err_12 = _a.sent();
-                next(err_12);
-                return [3, 3];
-            case 3: return [2];
-        }
-    });
-}); });
 router.get("/logout", function (req, res, next) {
     req.session.destroy(function (err) {
         if (err) {

@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.removeImageByTableUser = exports.removeImageByProject = exports.removeImage = exports.newImageForUser = exports.newImageForProject = exports.editImage = exports.getImage = exports.getSignedUrlForDownload = void 0;
+exports.removeImageByTableUser = exports.removeImageByProject = exports.removeImage = exports.newImageForUser = exports.newImageForProject = exports.editImageName = exports.getImage = exports.getSignedUrlForDownload = void 0;
 var aws_sdk_1 = require("aws-sdk");
 var fs_1 = require("fs");
 var enums_js_1 = require("../../lib/enums.js");
@@ -46,6 +46,7 @@ var imageProcessing_js_1 = require("../../lib/imageProcessing.js");
 var utils_js_1 = require("../../lib/utils.js");
 var users_js_1 = require("../queries/users.js");
 var tableViews_js_1 = require("../queries/tableViews.js");
+var projectUsers_js_1 = require("../queries/projectUsers.js");
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -101,7 +102,7 @@ function computeAwsImageParamsFromRequest(req, filePath) {
         Body: (0, fs_1.readFileSync)(filePath)
     };
 }
-function checkUserProLimitReached(sessionUser) {
+function checkUserProLimitReachedAndAuth(sessionUser) {
     return __awaiter(this, void 0, void 0, function () {
         var userData, user, userDataCount, ONE_HUNDRED_MEGABYTES_IN_BYTES;
         return __generator(this, function (_a) {
@@ -124,29 +125,39 @@ function checkUserProLimitReached(sessionUser) {
         });
     });
 }
-function checkProjectProLimitReached(projectId) {
+function checkProjectProLimitReachedAndAuth(projectId, sessionUser) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectDataCount, ONE_HUNDRED_MEGABYTES_IN_BYTES, userData, projectUser;
+        var projectData, project, projectUserData, projectDataCount, ONE_HUNDRED_MEGABYTES_IN_BYTES, userData, projectUser;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
+                    if (!sessionUser)
+                        throw new Error("User is not logged in");
                     if (!projectId)
                         throw new Error("Missing project ID");
                     return [4, (0, projects_1.getProjectQuery)(projectId)];
                 case 1:
                     projectData = _a.sent();
                     project = projectData.rows[0];
+                    if (!(sessionUser != project.user_id)) return [3, 3];
+                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(sessionUser, projectId)];
+                case 2:
+                    projectUserData = _a.sent();
+                    if (!projectUserData.rows.length)
+                        throw new Error("Not authorized to update this resource");
+                    _a.label = 3;
+                case 3:
                     projectDataCount = project.used_data_in_bytes;
                     ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
-                    if (!(projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES)) return [3, 3];
+                    if (!(projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES)) return [3, 5];
                     return [4, (0, users_js_1.getUserByIdQuery)(project.user_id)];
-                case 2:
+                case 4:
                     userData = _a.sent();
                     projectUser = userData.rows[0];
                     if (!projectUser.is_pro)
                         throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    _a.label = 3;
-                case 3: return [2];
+                    _a.label = 5;
+                case 5: return [2];
             }
         });
     });
@@ -189,7 +200,7 @@ function newImageForProject(req, res, next) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 7, , 8]);
-                    return [4, checkProjectProLimitReached(req.body.project_id)];
+                    return [4, checkProjectProLimitReachedAndAuth(req.body.project_id, req.session.user)];
                 case 2:
                     _a.sent();
                     params_2 = computeAwsImageParamsFromRequest(req, filePath);
@@ -287,7 +298,7 @@ function newImageForUser(req, res, next) {
                     _a.trys.push([1, 7, , 8]);
                     if (!req.session.user)
                         throw new Error("User is not logged in");
-                    return [4, checkUserProLimitReached(req.session.user)];
+                    return [4, checkUserProLimitReachedAndAuth(req.session.user)];
                 case 2:
                     _a.sent();
                     params_3 = computeAwsImageParamsFromRequest(req, filePath);
@@ -496,14 +507,16 @@ function removeImage(bucket, image) {
     });
 }
 exports.removeImage = removeImage;
-function editImage(req, res, next) {
+function editImageName(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
         var data, err_10;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, images_1.editImageQuery)(req.params.id, req.body)];
+                    return [4, (0, images_1.editImageQuery)(req.params.id, {
+                            original_name: req.body.original_name
+                        })];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
@@ -517,4 +530,4 @@ function editImage(req, res, next) {
         });
     });
 }
-exports.editImage = editImage;
+exports.editImageName = editImageName;

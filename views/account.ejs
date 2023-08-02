@@ -16,7 +16,7 @@
     <div class="container-fluid p-3">
       <h2>Account Details</h2>
       <div id="email-area">
-        <form hx-post="/update_email" hx-target="#email-update-success">
+        <form hx-post="/api/update_email" hx-target="#email-update-success">
           <label for="email">Edit Email</label>
           <input
             type="email"
@@ -32,7 +32,10 @@
       </div>
       <br />
       <div id="username-area">
-        <form hx-post="/update_username" hx-target="#username-update-success">
+        <form
+          hx-post="/api/update_username"
+          hx-target="#username-update-success"
+        >
           <label for="username">Edit Username</label>
           <input
             type="username"

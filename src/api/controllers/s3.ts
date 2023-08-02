@@ -13,6 +13,7 @@ import { getMetadata, resizeImage } from "../../lib/imageProcessing.js";
 import { splitAtIndex } from "../../lib/utils.js";
 import { editUserQuery, getUserByIdQuery } from "../queries/users.js";
 import { getTableViewQuery } from "../queries/tableViews.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 
 config.update({
   signatureVersion: "v4",
@@ -23,8 +24,16 @@ config.update({
 
 const s3 = new S3();
 
+interface GetSignedUrlRequestObject {
+  body: {
+    image_id: string | number;
+    folder_name: string;
+    bucket_name: string;
+  };
+}
+
 async function getSignedUrlForDownload(
-  req: Request,
+  req: GetSignedUrlRequestObject,
   res: Response,
   next: NextFunction
 ) {
@@ -103,7 +112,7 @@ function computeAwsImageParamsFromRequest(req: Request, filePath: string) {
   };
 }
 
-async function checkUserProLimitReached(
+async function checkUserProLimitReachedAndAuth(
   sessionUser: string | number | undefined
 ) {
   if (!sessionUser) throw new Error("User is not logged in");
@@ -117,10 +126,25 @@ async function checkUserProLimitReached(
   }
 }
 
-async function checkProjectProLimitReached(projectId: number | undefined) {
+async function checkProjectProLimitReachedAndAuth(
+  projectId: number | undefined,
+  sessionUser: string | number | undefined
+) {
+  if (!sessionUser) throw new Error("User is not logged in");
   if (!projectId) throw new Error("Missing project ID");
+
   const projectData = await getProjectQuery(projectId);
   const project = projectData.rows[0];
+  // auth
+  if (sessionUser != project.user_id) {
+    const projectUserData = await getProjectUserByUserAndProjectQuery(
+      sessionUser,
+      projectId
+    );
+    if (!projectUserData.rows.length)
+      throw new Error("Not authorized to update this resource");
+  }
+
   const projectDataCount = project.used_data_in_bytes;
   const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
   if (projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
@@ -167,7 +191,10 @@ async function newImageForProject(
 
   try {
     // check project data usage and pro account status
-    await checkProjectProLimitReached(req.body.project_id);
+    await checkProjectProLimitReachedAndAuth(
+      req.body.project_id,
+      req.session.user
+    );
 
     const params = computeAwsImageParamsFromRequest(req, filePath);
     let fileSize = req.file.size;
@@ -269,7 +296,7 @@ async function newImageForUser(
   try {
     if (!req.session.user) throw new Error("User is not logged in");
     // check project data usage and pro account status
-    await checkUserProLimitReached(req.session.user);
+    await checkUserProLimitReachedAndAuth(req.session.user);
 
     const params = computeAwsImageParamsFromRequest(req, filePath);
     let fileSize = req.file.size;
@@ -424,9 +451,11 @@ async function removeImage(bucket: string, image: { file_name: string }) {
   }
 }
 
-async function editImage(req: Request, res: Response, next: NextFunction) {
+async function editImageName(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await editImageQuery(req.params.id, req.body);
+    const data = await editImageQuery(req.params.id, {
+      original_name: req.body.original_name,
+    });
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -436,7 +465,7 @@ async function editImage(req: Request, res: Response, next: NextFunction) {
 export {
   getSignedUrlForDownload,
   getImage,
-  editImage,
+  editImageName,
   newImageForProject,
   newImageForUser,
   removeImage,

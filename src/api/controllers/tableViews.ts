@@ -115,9 +115,30 @@ async function removeTableView(
   }
 }
 
-async function editTableView(req: Request, res: Response, next: NextFunction) {
+async function editTableViewData(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await editTableViewQuery(req.params.id, req.body);
+    const data = await editTableViewQuery(req.params.id, {
+      data: req.body.data,
+    });
+    res.status(200).send(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function editTableViewTitle(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = await editTableViewQuery(req.params.id, {
+      title: req.body.title,
+    });
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -132,5 +153,6 @@ export {
   getTableViewByUUID,
   getTableView,
   removeTableView,
-  editTableView,
+  editTableViewData,
+  editTableViewTitle,
 };

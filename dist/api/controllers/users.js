@@ -36,13 +36,14 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.requestResetEmail = exports.resetPassword = exports.editUser = exports.verifyJwt = exports.loginUser = exports.registerUser = exports.getUserBySession = exports.getUserById = exports.getAllUsers = exports.verifyUserByToken = void 0;
+exports.requestResetEmail = exports.resetPassword = exports.editUsername = exports.editEmail = exports.verifyJwt = exports.loginUser = exports.registerUser = exports.getUserBySession = exports.getUserById = exports.getAllUsers = exports.verifyUserByToken = void 0;
 var bcrypt_1 = require("bcrypt");
 var jsonwebtoken_1 = require("jsonwebtoken");
 var index_js_1 = require("../smtp/index.js");
 var users_1 = require("../queries/users");
 var projects_1 = require("../queries/projects");
 var tableViews_js_1 = require("../queries/tableViews.js");
+var express_validator_1 = require("express-validator");
 var validLoginLength = "1d";
 function generateAccessToken(id, expires) {
     return (0, jsonwebtoken_1.sign)({ id: id }, process.env.SECRET_KEY, { expiresIn: expires });
@@ -118,12 +119,16 @@ function getUserById(req, res, next) {
 exports.getUserById = getUserById;
 function registerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var _a, email, username, password, salt, hashedPassword, userData, data, projectData, err_3;
+        var _a, email, username, password, errors, salt, hashedPassword, userData, data, projectData, err_3;
         return __generator(this, function (_b) {
             switch (_b.label) {
                 case 0:
                     _b.trys.push([0, 7, , 8]);
                     _a = req.body, email = _a.email, username = _a.username, password = _a.password;
+                    errors = (0, express_validator_1.validationResult)(req);
+                    if (errors.mapped().email) {
+                        throw { status: 400, message: errors.mapped().email.msg };
+                    }
                     return [4, (0, bcrypt_1.genSalt)(10)];
                 case 1:
                     salt = _b.sent();
@@ -219,32 +224,65 @@ function verifyJwt(req, res, next) {
     });
 }
 exports.verifyJwt = verifyJwt;
-function editUser(req, res, next) {
+function editUsername(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var userEditData, err_5;
+        var err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     if (!req.session.user)
                         throw new Error("User is not logged in");
-                    return [4, (0, users_1.editUserQuery)(req.session.user, req.body)];
+                    return [4, (0, users_1.editUserQuery)(req.session.user, {
+                            username: req.body.username
+                        })];
                 case 1:
-                    userEditData = _a.sent();
-                    res.send(userEditData.rows[0]);
+                    _a.sent();
+                    res.send("Saved!");
                     return [3, 3];
                 case 2:
                     err_5 = _a.sent();
-                    return [2, next(err_5)];
+                    next(err_5);
+                    return [3, 3];
                 case 3: return [2];
             }
         });
     });
 }
-exports.editUser = editUser;
+exports.editUsername = editUsername;
+function editEmail(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var errors, err_6;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    errors = (0, express_validator_1.validationResult)(req);
+                    if (errors.mapped().email) {
+                        throw { status: 400, message: errors.mapped().email.msg };
+                    }
+                    return [4, (0, users_1.editUserQuery)(req.session.user, {
+                            email: req.body.email
+                        })];
+                case 1:
+                    _a.sent();
+                    res.send("Saved!");
+                    return [3, 3];
+                case 2:
+                    err_6 = _a.sent();
+                    next(err_6);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.editEmail = editEmail;
 function resetPassword(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var token, password, userData, salt, hashedPassword, user, err_6;
+        var token, password, userData, salt, hashedPassword, user, err_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -273,8 +311,8 @@ function resetPassword(req, res, next) {
                     _a.label = 6;
                 case 6: return [3, 8];
                 case 7:
-                    err_6 = _a.sent();
-                    return [2, next(err_6)];
+                    err_7 = _a.sent();
+                    return [2, next(err_7)];
                 case 8: return [2];
             }
         });
@@ -283,7 +321,7 @@ function resetPassword(req, res, next) {
 exports.resetPassword = resetPassword;
 function requestResetEmail(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var userData, user, token, err_7;
+        var userData, user, token, err_8;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -301,8 +339,8 @@ function requestResetEmail(req, res, next) {
                         return [2, res.status(400).json({ message: "No user found by this email" })];
                     return [3, 3];
                 case 2:
-                    err_7 = _a.sent();
-                    return [2, next(err_7)];
+                    err_8 = _a.sent();
+                    return [2, next(err_8)];
                 case 3: return [2];
             }
         });
@@ -311,7 +349,7 @@ function requestResetEmail(req, res, next) {
 exports.requestResetEmail = requestResetEmail;
 function getUserBySession(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var rows, err_8;
+        var rows, err_9;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -324,8 +362,8 @@ function getUserBySession(req, res, next) {
                     res.send(rows[0]);
                     return [3, 3];
                 case 2:
-                    err_8 = _a.sent();
-                    return [2, next(err_8)];
+                    err_9 = _a.sent();
+                    return [2, next(err_9)];
                 case 3: return [2];
             }
         });

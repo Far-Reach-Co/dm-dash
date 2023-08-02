@@ -71,7 +71,7 @@
           // else push to account page
           window.location.pathname = "/dash";
         } else if (res.status === 400) {
-          alert("Email has already been registered");
+          alert(resData.error.message);
         } else {
           throw resData.error;
         }

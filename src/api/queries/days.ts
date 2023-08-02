@@ -8,8 +8,8 @@ export interface DayModel {
 }
 
 async function addDayQuery(data: {
-  calendar_id: string,
-  index: string,
+  calendar_id: string | number,
+  index: number,
   title: string
 }) {
   const query = {

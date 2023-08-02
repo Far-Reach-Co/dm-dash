@@ -187,6 +187,10 @@ function remove5eChar(req, res, next) {
                 case 1:
                     generalData = _a.sent();
                     general = generalData.rows[0];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    if (req.session.user != general.user_id)
+                        throw new Error("User does not own this property");
                     return [4, (0, _5eCharPro_1.get5eCharProByGeneralQuery)(general.id)];
                 case 2:
                     proData = _a.sent();
@@ -329,15 +333,21 @@ function remove5eChar(req, res, next) {
 exports.remove5eChar = remove5eChar;
 function edit5eCharGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_5;
+        var editData, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (req.body.hasOwnProperty("id")) {
+                        throw new Error('Request body cannot contain the "id" field');
+                    }
+                    if (req.body.hasOwnProperty("user_id")) {
+                        throw new Error('Request body cannot contain the "user_id" field');
+                    }
                     return [4, (0, _5eCharGeneral_1.edit5eCharGeneralQuery)(req.params.id, req.body)];
                 case 1:
-                    data = _a.sent();
-                    res.status(200).send(data.rows[0]);
+                    editData = _a.sent();
+                    res.status(200).send(editData.rows[0]);
                     return [3, 3];
                 case 2:
                     err_5 = _a.sent();
@@ -356,6 +366,12 @@ function edit5eCharPro(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (req.body.hasOwnProperty("id")) {
+                        throw new Error('Request body cannot contain the "id" field');
+                    }
+                    if (req.body.hasOwnProperty("general_id")) {
+                        throw new Error('Request body cannot contain the "general_id" field');
+                    }
                     return [4, (0, _5eCharPro_1.edit5eCharProQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
@@ -378,6 +394,12 @@ function edit5eCharBack(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (req.body.hasOwnProperty("id")) {
+                        throw new Error('Request body cannot contain the "id" field');
+                    }
+                    if (req.body.hasOwnProperty("general_id")) {
+                        throw new Error('Request body cannot contain the "general_id" field');
+                    }
                     return [4, (0, _5eCharBack_1.edit5eCharBackQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();

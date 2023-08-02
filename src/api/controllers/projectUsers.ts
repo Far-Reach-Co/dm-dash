@@ -107,7 +107,7 @@ async function removeProjectUser(
   }
 }
 
-async function editProjectUser(
+async function editProjectUserIsEditor(
   req: Request,
   res: Response,
   next: NextFunction
@@ -115,9 +115,8 @@ async function editProjectUser(
   try {
     // handle boolean from checkbox
     let is_editor = req.body.is_editor === "on";
-    req.body.is_editor = is_editor;
 
-    const data = await editProjectUserQuery(req.params.id, req.body);
+    const data = await editProjectUserQuery(req.params.id, { is_editor });
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -129,5 +128,5 @@ export {
   getProjectUserByUserAndProject,
   getProjectUsersByProject,
   removeProjectUser,
-  editProjectUser,
+  editProjectUserIsEditor,
 };

@@ -1,10 +1,6 @@
 import { Router } from "express";
 import { Request, Response, NextFunction } from "express";
-import {
-  UserModel,
-  editUserQuery,
-  getUserByIdQuery,
-} from "./api/queries/users";
+import { UserModel, getUserByIdQuery } from "./api/queries/users";
 import {
   get5eCharGeneralQuery,
   get5eCharGeneralUserIdQuery,
@@ -32,9 +28,7 @@ import {
   getProjectInviteByProjectQuery,
   getProjectInviteByUUIDQuery,
 } from "./api/queries/projectInvites";
-import { CalendarModel, getCalendarsQuery } from "./api/queries/calendars";
-import { MonthModel, getMonthsQuery } from "./api/queries/months";
-import { DayModel, getDaysQuery } from "./api/queries/days";
+import { getCalendarsQuery } from "./api/queries/calendars";
 
 var router = Router();
 
@@ -619,36 +613,6 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
     next(err);
   }
 });
-
-router.post(
-  "/update_username",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.session.user) return res.redirect("/forbidden");
-      await editUserQuery(req.session.user, {
-        username: req.body.username,
-      });
-      res.send("Saved!");
-    } catch (err) {
-      next(err);
-    }
-  }
-);
-
-router.post(
-  "/update_email",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.session.user) return res.redirect("/forbidden");
-      await editUserQuery(req.session.user, {
-        email: req.body.email,
-      });
-      res.send("Saved!");
-    } catch (err) {
-      next(err);
-    }
-  }
-);
 
 router.get("/logout", (req: Request, res: Response, next: NextFunction) => {
   req.session.destroy((err) => {
