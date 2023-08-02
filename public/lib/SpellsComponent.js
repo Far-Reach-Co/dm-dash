@@ -554,7 +554,7 @@ class SingleSpell {
 
     if (this.isCantrip) {
       return this.domComponent.append(
-        createElement("h2", {}, "Cantrips"),
+        createElement("div", { class: "special-font" }, "Cantrips"),
         this.renderHideFeatButton(),
         createElement("hr"),
         ...this.renderSpells(),
@@ -574,7 +574,7 @@ class SingleSpell {
     }
 
     this.domComponent.append(
-      createElement("h2", {}, this.spellSlot.title),
+      createElement("div", { class: "special-font" }, this.spellSlot.title),
       createElement("div", { class: "cp-content-container-center" }, [
         createElement(
           "div",

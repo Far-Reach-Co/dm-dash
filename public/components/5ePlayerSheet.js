@@ -526,6 +526,11 @@ export default class FiveEPlayerSheet {
         },
         [
           createElement("div", { class: "cp-info-container-column" }, [
+            createElement(
+              "div",
+              { class: "special-font", style: "align-self: center;" },
+              "General Info"
+            ),
             createElement("div", { class: "cp-content-container" }, [
               createElement("small", {}, "Character Name"),
               createElement(
@@ -910,7 +915,7 @@ export default class FiveEPlayerSheet {
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { style: "align-self: center;" },
+                { class: "special-font", style: "align-self: center;" },
                 "Saving Throws"
               ),
               ...this.renderSavingThrows(),
@@ -1067,7 +1072,7 @@ export default class FiveEPlayerSheet {
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { style: "align-self: center;" },
+                { class: "special-font", style: "align-self: center;" },
                 "Death Saves"
               ),
               createElement("div", { style: "display: flex;" }, [
@@ -1194,10 +1199,180 @@ export default class FiveEPlayerSheet {
             this.equipmentComponent.domComponent,
           ]
         ),
-        createElement("div", { class: "cp-info-container-column" }, [
-          createElement("div", { style: "align-self: center;" }, "Skills"),
-          ...this.renderSkills(),
-        ]),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("div", { class: "cp-info-container-column" }, [
+              createElement(
+                "div",
+                { class: "special-font", style: "align-self: center;" },
+                "Skills"
+              ),
+              ...this.renderSkills(),
+            ]),
+            createElement("div", { class: "cp-info-container-column" }, [
+              createElement(
+                "div",
+                { class: "special-font", style: "align-self: center;" },
+                "Currency"
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Copper"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "copper",
+                      type: "number",
+                      value: this.generalData.copper
+                        ? this.generalData.copper
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Silver"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "silver",
+                      type: "number",
+                      value: this.generalData.silver
+                        ? this.generalData.silver
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Electrum"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "electrum",
+                      type: "number",
+                      value: this.generalData.electrum
+                        ? this.generalData.electrum
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Gold"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "gold",
+                      type: "number",
+                      value: this.generalData.gold ? this.generalData.gold : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Platinum"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "platinum",
+                      type: "number",
+                      value: this.generalData.platinum
+                        ? this.generalData.platinum
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+            ]),
+          ]
+        ),
         createElement(
           "div",
           { style: "display: flex; flex-direction: column;" },

@@ -8,6 +8,11 @@
   src: url("./assets/fonts/YoungSerif/fonts/edited/YoungSerif-Light1.woff2");
 }
 
+@font-face {
+  font-family: Brookshire;
+  src: url("./assets/fonts/Brookshire/Brookshire.otf") format("opentype");
+}
+
 :root {
   --main-white: rgb(209, 209, 209);
   --main-dark: rgb(27, 32, 38);
@@ -114,16 +119,19 @@ hr {
 }
 
 h1 {
+  font-family: YoungSerif;
   font-size: 1.3rem;
   display: inline-block;
 }
 
 h2 {
+  font-family: YoungSerif;
   color: var(--orange3);
   font-size: 1.2rem;
 }
 
 h3 {
+  font-family: YoungSerif;
   color: var(--orange2);
   font-size: 1.1rem;
 }

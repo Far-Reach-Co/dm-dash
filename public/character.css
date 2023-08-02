@@ -3,6 +3,11 @@ form {
   flex-direction: column;
 }
 
+.special-font {
+  font-size: 1.2rem;
+  font-family: Brookshire;
+}
+
 .cp-nav {
   display: flex;
   flex-direction: row;

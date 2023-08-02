@@ -141,7 +141,7 @@ export default class OtherProLangComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { style: "align-self: center;" },
+        { class: "special-font", style: "align-self: center;" },
         "Other Proficiencies & Languages"
       ),
       createElement("br"),

@@ -182,7 +182,7 @@ export default class FeatComponent {
             "display: flex; flex: 1; align-items: center; justify-content: center; position: relative; margin-bottom: var(--main-distance);",
         },
         [
-          createElement("div", { style: "" }, "Feats and Traits"),
+          createElement("div", { class: "special-font" }, "Feats and Traits"),
           createElement(
             "div",
             {
