@@ -116,7 +116,7 @@ class SocketIntegration {
     this.socket.on("image-move", (image) => {
       // console.log("Move socket image", image);
       canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id && object.id === image.id) {
+        if (object.id) {
           for (var [key, value] of Object.entries(image)) {
             object[key] = value;
           }

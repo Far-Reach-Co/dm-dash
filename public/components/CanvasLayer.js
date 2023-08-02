@@ -204,6 +204,7 @@ export default class CanvasLayer {
     this.canvas.on("path:created", (opt) => {
       const id = uuidv4();
       opt.path.set("id", id);
+      opt.path.set("layer", this.currentLayer);
       socketIntegration.imageAdded(opt.path);
     });
 

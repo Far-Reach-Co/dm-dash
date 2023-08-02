@@ -165,6 +165,7 @@ export default class TopLayer {
                       type: "color",
                       id: "colorpicker",
                       name: "colorpicker",
+                      value: this.canvasLayer.canvas.freeDrawingBrush.color,
                     },
                     null,
                     {
@@ -191,7 +192,7 @@ export default class TopLayer {
                       style: "width: 30px; height: 25px;",
                       type: "number",
                       id: "linewidth",
-                      value: "1",
+                      value: this.canvasLayer.canvas.freeDrawingBrush.width,
                       name: "linewidth",
                     },
                     null,
