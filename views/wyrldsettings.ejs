@@ -78,12 +78,9 @@
         if (window.confirm("Are you sure you want to delete this user?")) {
           const elem = event.target.parentNode.parentNode;
           elem.remove();
-          await fetch(
-            `${window.location.origin}/api/remove_project_user/${id}`,
-            {
-              method: "DELETE",
-            }
-          );
+          await fetch(`/api/remove_project_user/${id}`, {
+            method: "DELETE",
+          });
         }
       }
     </script>

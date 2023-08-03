@@ -3,7 +3,7 @@ import renderTierLimitWarning from "./renderTierLimitWarning.js";
 
 async function getThings(endpoint) {
   try {
-    const res = await fetch(window.location.origin + endpoint, {});
+    const res = await fetch(endpoint, {});
     const data = await res.json();
     if (res.status === 200) {
       return data;
@@ -16,7 +16,7 @@ async function getThings(endpoint) {
 
 async function deleteThing(endpoint) {
   try {
-    const res = await fetch(window.location.origin + endpoint, {
+    const res = await fetch(endpoint, {
       method: "DELETE",
     });
     if (res.status === 204) {
@@ -32,7 +32,7 @@ async function deleteThing(endpoint) {
 
 async function postThing(endpoint, body) {
   try {
-    const res = await fetch(window.location.origin + endpoint, {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
