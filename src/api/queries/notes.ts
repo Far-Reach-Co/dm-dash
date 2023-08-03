@@ -55,7 +55,7 @@ async function getAllNotesByProjectQuery(projectId: string) {
   return await db.query<NoteModel>(query)
 }
 
-async function getNotesQuery(userId: string, projectId: string, limit: string, offset: string, keyword: string) {
+async function getNotesQuery(userId: string | number, projectId: string, limit: string, offset: string, keyword: string) {
   let query;
   if(!keyword) {
     query = {
@@ -71,7 +71,7 @@ async function getNotesQuery(userId: string, projectId: string, limit: string, o
   return await db.query<NoteModel>(query)
 }
 
-async function getNotesByLocationQuery(userId: string, locationId: string) {
+async function getNotesByLocationQuery(userId: string | number, locationId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and location_id = $1 order by date_created desc`,
     values: [locationId, userId]
@@ -79,7 +79,7 @@ async function getNotesByLocationQuery(userId: string, locationId: string) {
   return await db.query<NoteModel>(query)
 }
 
-async function getNotesByCharacterQuery(userId: string, characterId: string) {
+async function getNotesByCharacterQuery(userId: string | number, characterId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and character_id = $1 order by date_created desc`,
     values: [characterId, userId]
@@ -87,7 +87,7 @@ async function getNotesByCharacterQuery(userId: string, characterId: string) {
   return await db.query<NoteModel>(query)
 }
 
-async function getNotesByItemQuery(userId: string, itemId: string) {
+async function getNotesByItemQuery(userId: string | number, itemId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and item_id = $1 order by date_created desc`,
     values: [itemId, userId]
@@ -95,7 +95,7 @@ async function getNotesByItemQuery(userId: string, itemId: string) {
   return await db.query<NoteModel>(query)
 }
 
-async function getNotesByLoreQuery(userId: string, loreId: string) {
+async function getNotesByLoreQuery(userId: string | number, loreId: string) {
   const query = {
     text: /*sql*/ `select * from public."Note" where user_id = $2 and lore_id = $1 order by date_created desc`,
     values: [loreId, userId]

@@ -6,11 +6,22 @@ interface TableImageModel {
   image_id: number
 }
 
-async function addTableImageQuery(data: {project_id: string, image_id: string}) {
+async function addTableImageByProjectQuery(data: {project_id: string, image_id: string}) {
   const query = {
     text: /*sql*/ `insert into public."TableImage" (project_id, image_id) values($1,$2) returning *`,
     values: [
       data.project_id,
+      data.image_id,
+    ]
+  }
+  return await db.query<TableImageModel>(query)
+}
+
+async function addTableImageByUserQuery(data: {user_id: string, image_id: string}) {
+  const query = {
+    text: /*sql*/ `insert into public."TableImage" (user_id, image_id) values($1,$2) returning *`,
+    values: [
+      data.user_id,
       data.image_id,
     ]
   }
@@ -25,10 +36,18 @@ async function getTableImageQuery(id: string) {
   return await db.query<TableImageModel>(query)
 }
 
-async function getTableImagesQuery(project_id: string) {
+async function getTableImagesByProjectQuery(project_id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."TableImage" where project_id = $1`,
     values: [project_id]
+  }
+  return await db.query<TableImageModel>(query)
+}
+
+async function getTableImagesByUserQuery(user_id: string | number) {
+  const query = {
+    text: /*sql*/ `select * from public."TableImage" where user_id = $1`,
+    values: [user_id]
   }
   return await db.query<TableImageModel>(query)
 }
@@ -65,8 +84,10 @@ async function editTableImageQuery(id: string, data: any) {
 }
 
 export {
-  addTableImageQuery,
-  getTableImagesQuery,
+  addTableImageByProjectQuery,
+  addTableImageByUserQuery,
+  getTableImagesByProjectQuery,
+  getTableImagesByUserQuery,
   getTableImageQuery,
   removeTableImageQuery,
   editTableImageQuery

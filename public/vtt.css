@@ -17,7 +17,7 @@
   justify-content: space-evenly;
   border-radius: var(--border-radius);
   z-index: 4;
-  background-color: var(--blue4);
+  background-color: var(--blue5);
 }
 
 .layers-elem {
@@ -28,7 +28,7 @@
 .info-elem {
   top: var(--main-distance);
   left: var(--main-distance);
-  padding-left: 8px;
+  padding-left: 6px;
   align-items: center;
   justify-content: center;
   height: 30px;
@@ -58,14 +58,8 @@
 
 .help-content {
   padding: var(--main-distance);
-  width: 75%;
-  height: 100%;
-  position: inherit;
   border-radius: var(--border-radius);
-  z-index: 4;
-  background-color: var(--blue4);
-  display: flex;
-  flex-direction: column;
+  background-color: var(--blue5);
   overflow-y: auto;
 }
 
@@ -110,6 +104,10 @@
   font-size: small;
   border: none;
   background-color: inherit;
+}
+
+.image-name:hover {
+  border: 1px solid var(--main-gray);
 }
 
 .image-name:focus {

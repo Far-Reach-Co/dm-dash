@@ -45,34 +45,35 @@ import {
   removeNoteQuery,
 } from "../queries/notes.js";
 import { getImageQuery, removeImageQuery } from "../queries/images.js";
-import { removeFile } from "./s3.js";
+import { removeImage } from "./s3.js";
 import {
-  addTableViewQuery,
-  getTableViewsQuery,
+  addTableViewByProjectQuery,
+  getTableViewsByProjectQuery,
   removeTableViewQuery,
 } from "../queries/tableViews.js";
 import {
-  getTableImagesQuery,
+  getTableImagesByProjectQuery,
   removeTableImageQuery,
 } from "../queries/tableImages.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
+import { getUserByIdQuery } from "../queries/users.js";
 
 async function addProject(req: Request, res: Response, next: NextFunction) {
   try {
     // check if user is pro
-    const projectsData = await getProjectsQuery(req.user.id);
-    // limit to three projects
-    if (projectsData.rows.length >= 3) {
-      if (!req.user.is_pro)
-        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    }
+    if (!req.session.user) throw new Error("User is not logged in");
 
-    req.body.user_id = req.user.id;
+    req.body.user_id = req.session.user;
     const data = await addProjectQuery(req.body);
     // add first project table view
-    await addTableViewQuery({ project_id: data.rows[0].id });
-    res.status(201).json(data.rows[0]);
+    await addTableViewByProjectQuery({
+      project_id: data.rows[0].id,
+      title: "First Wyrld Table",
+    });
+    res
+      .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)
+      .send("Form submission was successful.");
   } catch (err) {
     next(err);
   }
@@ -90,8 +91,9 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
   try {
     const projectData = await getProjectQuery(req.params.id);
     const project = projectData.rows[0];
+    if (!req.session.user) throw new Error("User is not logged in");
     const projectUsersData = await getProjectUserByUserAndProjectQuery(
-      req.user.id,
+      req.session.user,
       project.id
     );
     if (projectUsersData.rows.length) {
@@ -110,9 +112,10 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
 
 async function getProjects(req: Request, res: Response, next: NextFunction) {
   try {
-    const projectsData = await getProjectsQuery(req.user.id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const projectsData = await getProjectsQuery(req.session.user);
     // get joined projects
-    const projectUserData = await getProjectUsersQuery(req.user.id);
+    const projectUserData = await getProjectUsersQuery(req.session.user);
     if (
       projectUserData &&
       projectUserData.rows &&
@@ -177,7 +180,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (location.image_id) {
         const imageData = await getImageQuery(location.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
     });
@@ -192,7 +195,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (character.image_id) {
         const imageData = await getImageQuery(character.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
     });
@@ -226,7 +229,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (item.image_id) {
         const imageData = await getImageQuery(item.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
     });
@@ -241,7 +244,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       if (lore.image_id) {
         const imageData = await getImageQuery(lore.image_id);
         const image = imageData.rows[0];
-        await removeFile("wyrld/images", image);
+        await removeImage("wyrld/images", image);
         await removeImageQuery(image.id);
       }
       const relationsData = await getLoreRelationsQuery(lore.id);
@@ -267,20 +270,21 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
       await removeProjectUserQuery(user.id);
     });
     // table images
-    const tableImages = await getTableImagesQuery(req.params.id);
+    const tableImages = await getTableImagesByProjectQuery(req.params.id);
     tableImages.rows.forEach(async (tableImage) => {
       const imageData = await getImageQuery(tableImage.image_id);
       const image = imageData.rows[0];
-      await removeFile("wyrld/images", image);
+      await removeImage("wyrld/images", image);
       await removeTableImageQuery(tableImage.id);
     });
     // table views
-    const tableViews = await getTableViewsQuery(req.params.id);
+    const tableViews = await getTableViewsByProjectQuery(req.params.id);
     tableViews.rows.forEach(async (tableView) => {
       await removeTableViewQuery(tableView.id);
     });
 
-    res.status(204).send();
+    res.setHeader("HX-Redirect", "/dash");
+    res.send();
   } catch (err) {
     next(err);
   }

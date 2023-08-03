@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Table</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./vtt.css" />
+    <%- include('./partials/icons') %>
+    <script>
+      const USERID = "<%= auth %>";
+      const IS_MANAGER_OR_OWNER = <%= projectAuth %>;
+    </script>
+    <script src="/lib/uuid.min.js"></script>
+    <script src="/lib/fabric.min.js"></script>
+    <script src="/lib/socket.min.js"></script>
+    <script type="module" src="/dist/bundleTable.js" defer></script>
+  </head>
+  <body>
+    <!-- <%- include('./partials/nav') %> -->
+    <div>
+      <div id="app">
+        <!-- Initial spinner -->
+        <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>
+      </div>
+      <!-- Toast -->
+      <div id="toast-custom"></div>
+      <!-- The Modal -->
+      <div id="modal-custom" class="modal-custom">
+        <!-- Modal content -->
+        <div class="modal-custom-container">
+          <div id="close-custom-modal" class="close-custom-modal">&times;</div>
+          <div id="modal-custom-content" class="modal-custom-content"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

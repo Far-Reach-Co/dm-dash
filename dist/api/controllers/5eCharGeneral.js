@@ -47,42 +47,40 @@ var _5eCharFeats_1 = require("../queries/5eCharFeats");
 var _5eCharSpells_1 = require("../queries/5eCharSpells");
 var _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 var projectPlayers_1 = require("../queries/projectPlayers");
-var enums_js_1 = require("../../lib/enums.js");
+var playerUsers_1 = require("../queries/playerUsers");
+var playerInvites_1 = require("../queries/playerInvites");
 function add5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var generalsData, generalData, general, err_1;
+        var generalData, general, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 6, , 7]);
-                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.user.id)];
-                case 1:
-                    generalsData = _a.sent();
-                    if (generalsData.rows.length >= 5) {
-                        if (!req.user.is_pro)
-                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    }
-                    req.body.user_id = req.user.id;
+                    _a.trys.push([0, 5, , 6]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    req.body.user_id = req.session.user;
                     return [4, (0, _5eCharGeneral_1.add5eCharGeneralQuery)(req.body)];
-                case 2:
+                case 1:
                     generalData = _a.sent();
                     general = generalData.rows[0];
                     return [4, (0, _5eCharPro_1.add5eCharProQuery)({ general_id: general.id })];
-                case 3:
+                case 2:
                     _a.sent();
                     return [4, (0, _5eCharBack_1.add5eCharBackQuery)({ general_id: general.id })];
-                case 4:
+                case 3:
                     _a.sent();
                     return [4, (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id })];
-                case 5:
+                case 4:
                     _a.sent();
-                    res.status(201).json(general);
-                    return [3, 7];
-                case 6:
+                    res
+                        .set("HX-Redirect", "/5eplayer?id=".concat(general.id))
+                        .send("Form submission was successful.");
+                    return [3, 6];
+                case 5:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 7];
-                case 7: return [2];
+                    return [3, 6];
+                case 6: return [2];
             }
         });
     });
@@ -95,7 +93,9 @@ function get5eCharsByUser(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 8, , 9]);
-                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.user.id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user)];
                 case 1:
                     generalsData = _a.sent();
                     generals = generalsData.rows;
@@ -177,16 +177,20 @@ function get5eCharGeneral(req, res, next) {
 exports.get5eCharGeneral = get5eCharGeneral;
 function remove5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var generalData, general, proData, pro, backData, back, spellSlotsData, spellSlots, attacksData, equipmentData, featsData, spellsData, otherProLangsData, projectPlayerData, err_4;
+        var generalData, general, proData, pro, backData, back, spellSlotsData, spellSlots, attacksData, equipmentData, featsData, spellsData, otherProLangsData, projectPlayerData, playerUserData, playerInviteData, err_4;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 15, , 16]);
+                    _a.trys.push([0, 17, , 18]);
                     return [4, (0, _5eCharGeneral_1.get5eCharGeneralQuery)(req.params.id)];
                 case 1:
                     generalData = _a.sent();
                     general = generalData.rows[0];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    if (req.session.user != general.user_id)
+                        throw new Error("User does not own this property");
                     return [4, (0, _5eCharPro_1.get5eCharProByGeneralQuery)(general.id)];
                 case 2:
                     proData = _a.sent();
@@ -289,13 +293,39 @@ function remove5eChar(req, res, next) {
                             }
                         });
                     }); });
-                    res.status(204).send();
-                    return [3, 16];
+                    return [4, (0, playerUsers_1.getPlayerUsersByPlayerQuery)(general.id)];
                 case 15:
+                    playerUserData = _a.sent();
+                    playerUserData.rows.forEach(function (playerUser) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4, (0, playerUsers_1.removePlayerUserQuery)(playerUser.id)];
+                                case 1:
+                                    _a.sent();
+                                    return [2];
+                            }
+                        });
+                    }); });
+                    return [4, (0, playerInvites_1.getPlayerInviteByPlayerQuery)(general.id)];
+                case 16:
+                    playerInviteData = _a.sent();
+                    playerInviteData.rows.forEach(function (playerInvite) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4, (0, playerInvites_1.removePlayerInviteQuery)(playerInvite.id)];
+                                case 1:
+                                    _a.sent();
+                                    return [2];
+                            }
+                        });
+                    }); });
+                    res.status(204).send();
+                    return [3, 18];
+                case 17:
                     err_4 = _a.sent();
                     next(err_4);
-                    return [3, 16];
-                case 16: return [2];
+                    return [3, 18];
+                case 18: return [2];
             }
         });
     });
@@ -303,15 +333,21 @@ function remove5eChar(req, res, next) {
 exports.remove5eChar = remove5eChar;
 function edit5eCharGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_5;
+        var editData, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (req.body.hasOwnProperty("id")) {
+                        throw new Error('Request body cannot contain the "id" field');
+                    }
+                    if (req.body.hasOwnProperty("user_id")) {
+                        throw new Error('Request body cannot contain the "user_id" field');
+                    }
                     return [4, (0, _5eCharGeneral_1.edit5eCharGeneralQuery)(req.params.id, req.body)];
                 case 1:
-                    data = _a.sent();
-                    res.status(200).send(data.rows[0]);
+                    editData = _a.sent();
+                    res.status(200).send(editData.rows[0]);
                     return [3, 3];
                 case 2:
                     err_5 = _a.sent();
@@ -330,6 +366,12 @@ function edit5eCharPro(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (req.body.hasOwnProperty("id")) {
+                        throw new Error('Request body cannot contain the "id" field');
+                    }
+                    if (req.body.hasOwnProperty("general_id")) {
+                        throw new Error('Request body cannot contain the "general_id" field');
+                    }
                     return [4, (0, _5eCharPro_1.edit5eCharProQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
@@ -352,6 +394,12 @@ function edit5eCharBack(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (req.body.hasOwnProperty("id")) {
+                        throw new Error('Request body cannot contain the "id" field');
+                    }
+                    if (req.body.hasOwnProperty("general_id")) {
+                        throw new Error('Request body cannot contain the "general_id" field');
+                    }
                     return [4, (0, _5eCharBack_1.edit5eCharBackQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();

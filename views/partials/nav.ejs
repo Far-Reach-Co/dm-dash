@@ -1,0 +1,24 @@
+<div id="nav-links-container-mobile">
+  <% if (typeof auth !== 'undefined') { %>
+  <a class="top-nav-btn" href="/dash">Dashboard</a>
+  <a class="top-nav-btn" href="/account">Account</a>
+  <% } else { %>
+  <a class="top-nav-btn" href="/login">Login</a>
+  <a class="top-nav-btn" href="/register">Register</a>
+  <% } %>
+</div>
+<nav>
+  <a style="display: flex; align-items: center" href="/index">
+    <img height="35px" src="/assets/frlogo.webp" alt="" />
+  </a>
+  <img src="/assets/hamburger.svg" height="32" width="32" id="nav-ham" alt="" />
+  <div id="nav-links-container" style="display: flex">
+    <% if (typeof auth !== 'undefined') { %>
+    <a class="top-nav-btn" href="/dash">Dashboard</a>
+    <a class="top-nav-btn" href="/account">Account</a>
+    <% } else { %>
+    <a class="top-nav-btn" href="/login">Login</a>
+    <a class="top-nav-btn" href="/register">Register</a>
+    <% } %>
+  </div>
+</nav>

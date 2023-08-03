@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editCalendar = exports.removeCalendar = exports.addCalendar = exports.getCalendars = void 0;
+exports.editCalendar = exports.removeCalendar = exports.addCalendar = exports.getCalendar = exports.getCalendars = void 0;
 var calendars_js_1 = require("../queries/calendars.js");
 var months_js_1 = require("../queries/months.js");
 var days_js_1 = require("../queries/days.js");
@@ -112,9 +112,40 @@ function getCalendars(req, res, next) {
     });
 }
 exports.getCalendars = getCalendars;
+function getCalendar(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var calendarData, calendar, months, days, err_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 4, , 5]);
+                    return [4, (0, calendars_js_1.getCalendarQuery)(req.params.id)];
+                case 1:
+                    calendarData = _a.sent();
+                    calendar = calendarData.rows[0];
+                    return [4, (0, months_js_1.getMonthsQuery)(calendar.id)];
+                case 2:
+                    months = _a.sent();
+                    calendar.months = months.rows;
+                    return [4, (0, days_js_1.getDaysQuery)(calendar.id)];
+                case 3:
+                    days = _a.sent();
+                    calendar.days_of_the_week = days.rows;
+                    res.send(calendar);
+                    return [3, 5];
+                case 4:
+                    err_3 = _a.sent();
+                    next(err_3);
+                    return [3, 5];
+                case 5: return [2];
+            }
+        });
+    });
+}
+exports.getCalendar = getCalendar;
 function removeCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var monthsData, daysData, err_3;
+        var monthsData, daysData, err_4;
         var _this = this;
         return __generator(this, function (_a) {
             switch (_a.label) {
@@ -152,8 +183,8 @@ function removeCalendar(req, res, next) {
                     res.status(204).send();
                     return [3, 5];
                 case 4:
-                    err_3 = _a.sent();
-                    next(err_3);
+                    err_4 = _a.sent();
+                    next(err_4);
                     return [3, 5];
                 case 5: return [2];
             }
@@ -163,19 +194,22 @@ function removeCalendar(req, res, next) {
 exports.removeCalendar = removeCalendar;
 function editCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_4;
+        var data, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (!req.body.title) {
+                        delete req.body.title;
+                    }
                     return [4, (0, calendars_js_1.editCalendarQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
                     return [3, 3];
                 case 2:
-                    err_4 = _a.sent();
-                    next(err_4);
+                    err_5 = _a.sent();
+                    next(err_5);
                     return [3, 3];
                 case 3: return [2];
             }

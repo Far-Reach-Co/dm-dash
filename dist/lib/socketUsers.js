@@ -1,9 +1,9 @@
 "use strict";
 exports.__esModule = true;
-exports.getCampaignUsers = exports.userLeave = exports.getCurrentUser = exports.userJoin = void 0;
+exports.getTableUsers = exports.userLeave = exports.getCurrentUser = exports.userJoin = void 0;
 var users = [];
-function userJoin(id, username, campaign) {
-    var user = { id: id, username: username, campaign: campaign };
+function userJoin(id, username, table) {
+    var user = { id: id, username: username, table: table };
     users.push(user);
     return user;
 }
@@ -21,7 +21,7 @@ function userLeave(id) {
         return null;
 }
 exports.userLeave = userLeave;
-function getCampaignUsers(campaign) {
-    return users.filter(function (user) { return user.campaign === campaign; });
+function getTableUsers(table) {
+    return users.filter(function (user) { return user.table === table; });
 }
-exports.getCampaignUsers = getCampaignUsers;
+exports.getTableUsers = getTableUsers;

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. Wyrld Invite</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container-fluid p-3">
+      <h1>Wyrld Invite</h1>
+      <% if (error) { %>
+      <div style="color: var(--red1)">ERROR: <%= error %></div>
+      <% } %>
+    </div>
+    <%- include('./partials/footer') %>
+  </body>
+</html>

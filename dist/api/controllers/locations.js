@@ -236,7 +236,7 @@ function removeLocation(req, res, next) {
                 case 5:
                     imageData = _a.sent();
                     image = imageData.rows[0];
-                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                 case 6:
                     _a.sent();
                     return [4, (0, images_js_1.removeImageQuery)(image.id)];

@@ -1,0 +1,12 @@
+<div id="invite-elem">
+  <small>Create a new invite link.</small>
+  <br />
+  <button
+    hx-post="/api/add_project_invite"
+    hx-vals='{"project_id": <%= projectId %>}'
+    hx-swap="outerHTML"
+    hx-target="#invite-elem"
+  >
+    + Invite Link
+  </button>
+</div>

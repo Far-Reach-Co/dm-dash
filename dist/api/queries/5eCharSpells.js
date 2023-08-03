@@ -84,7 +84,7 @@ function get5eCharSpellsByTypeQuery(generalId, type) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"dnd_5e_character_spell\" where general_id = $1 and type = $2 order by LOWER(title)",
+                        text: "select * from public.\"dnd_5e_character_spell\" where general_id = $1 and type = $2",
                         values: [generalId, type]
                     };
                     return [4, dbconfig_1["default"].query(query)];

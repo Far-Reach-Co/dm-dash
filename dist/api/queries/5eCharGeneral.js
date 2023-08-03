@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.edit5eCharGeneralQuery = exports.remove5eCharGeneralQuery = exports.get5eCharGeneralQuery = exports.get5eCharsGeneralByUserQuery = exports.add5eCharGeneralQuery = void 0;
+exports.edit5eCharGeneralQuery = exports.remove5eCharGeneralQuery = exports.get5eCharGeneralQuery = exports.get5eCharsGeneralByUserQuery = exports.get5eCharGeneralUserIdQuery = exports.add5eCharGeneralQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function add5eCharGeneralQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
@@ -75,6 +75,23 @@ function get5eCharGeneralQuery(id) {
     });
 }
 exports.get5eCharGeneralQuery = get5eCharGeneralQuery;
+function get5eCharGeneralUserIdQuery(id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    query = {
+                        text: "select user_id from public.\"dnd_5e_character_general\" where id = $1",
+                        values: [id]
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.get5eCharGeneralUserIdQuery = get5eCharGeneralUserIdQuery;
 function get5eCharsGeneralByUserQuery(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

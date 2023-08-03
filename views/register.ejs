@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Register</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container-fluid p-3">
+      <h2>Register</h2>
+      <form id="register-form" class="auth-container">
+        <label for="email">Email</label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="name@whatever.com"
+          required
+        />
+        <br />
+        <label for="username">Username</label>
+        <input name="username" id="username" placeholder="user_name" required />
+        <br />
+        <label for="email">Password</label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          placeholder="password"
+          required
+        />
+        <br />
+        <button type="submit">Register</button>
+        <br />
+        <small>Already have an account?</small>
+        <a onclick=" window.location.pathname = '/login' "
+          ><small>Login</small></a
+        >
+      </form>
+    </div>
+    <%- include('./partials/footer') %>
+  </body>
+  <script>
+    document
+      .getElementById("register-form")
+      .addEventListener("submit", register);
+    async function register(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const formProps = Object.fromEntries(formData);
+      try {
+        const res = await fetch(`${window.location.origin}/api/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formProps),
+        });
+        const resData = await res.json();
+        if (res.status === 201) {
+          if (resData.message) console.log(resData.message);
+          // if invite UUID in params push to invite page
+          var searchParams = new URLSearchParams(window.location.search);
+          var inviteUUID = searchParams.get("invite");
+          if (inviteUUID) {
+            return (window.location.pathname = "/invite");
+          }
+          // else push to account page
+          window.location.pathname = "/dash";
+        } else if (res.status === 400) {
+          alert(resData.error.message);
+        } else {
+          throw resData.error;
+        }
+      } catch (err) {
+        alert("Failed to register");
+        console.log(err);
+      }
+    }
+  </script>
+</html>

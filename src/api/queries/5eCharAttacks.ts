@@ -45,7 +45,7 @@ async function get5eCharAttackQuery(id: string) {
 
 async function get5eCharAttacksByGeneralQuery(generalId: string | number) {
   const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_attack" where general_id = $1 order by LOWER(title)`,
+    text: /*sql*/ `select * from public."dnd_5e_character_attack" where general_id = $1`,
     values: [generalId]
   }
   return await db.query<DndFiveEAttackModel>(query)

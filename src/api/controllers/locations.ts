@@ -12,7 +12,7 @@ import {
 } from "../queries/locations.js";
 import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
 import { Request, Response, NextFunction } from "express";
-import { removeFile } from "./s3.js";
+import { removeImage } from "./s3.js";
 
 async function addLocation(req: Request, res: Response, next: NextFunction) {
   try {
@@ -127,7 +127,7 @@ async function removeLocation(req: Request, res: Response, next: NextFunction) {
     if (location.image_id) {
       const imageData = await getImageQuery(location.image_id);
       const image = imageData.rows[0];
-      await removeFile("wyrld/images", image);
+      await removeImage("wyrld/images", image);
       await removeImageQuery(image.id);
       // update project data usage
       const newCalculatedData = project.used_data_in_bytes - image.size;

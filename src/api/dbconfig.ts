@@ -9,7 +9,7 @@ var credentials = {
   port: 5432,
 };
 
-var pool = new Pool(credentials);
+export var pool = new Pool(credentials);
 
 async function query<T extends QueryResultRow>(
   queryObject: { text: string; values?: any[] },

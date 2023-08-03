@@ -13,6 +13,8 @@ import { Request, Response, NextFunction } from "express";
 
 async function addNote(req: Request, res: Response, next: NextFunction) {
   try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    req.body.user_id = req.session.user;
     const data = await addNoteQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -22,8 +24,9 @@ async function addNote(req: Request, res: Response, next: NextFunction) {
 
 async function getNotes(req: Request, res: Response, next: NextFunction) {
   try {
+    if (!req.session.user) throw new Error("User is not logged in");
     const data = await getNotesQuery(
-      req.user.id,
+      req.session.user,
       req.params.project_id,
       req.params.limit,
       req.params.offset,
@@ -42,8 +45,9 @@ async function getNotesByLocation(
   next: NextFunction
 ) {
   try {
+    if (!req.session.user) throw new Error("User is not logged in");
     const data = await getNotesByLocationQuery(
-      req.user.id,
+      req.session.user,
       req.params.location_id
     );
 
@@ -59,8 +63,9 @@ async function getNotesByCharacter(
   next: NextFunction
 ) {
   try {
+    if (!req.session.user) throw new Error("User is not logged in");
     const data = await getNotesByCharacterQuery(
-      req.user.id,
+      req.session.user,
       req.params.character_id
     );
 
@@ -72,7 +77,11 @@ async function getNotesByCharacter(
 
 async function getNotesByItem(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await getNotesByItemQuery(req.user.id, req.params.item_id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const data = await getNotesByItemQuery(
+      req.session.user,
+      req.params.item_id
+    );
 
     res.send(data.rows);
   } catch (err) {
@@ -82,7 +91,11 @@ async function getNotesByItem(req: Request, res: Response, next: NextFunction) {
 
 async function getNotesByLore(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await getNotesByLoreQuery(req.user.id, req.params.lore_id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const data = await getNotesByLoreQuery(
+      req.session.user,
+      req.params.lore_id
+    );
 
     res.send(data.rows);
   } catch (err) {

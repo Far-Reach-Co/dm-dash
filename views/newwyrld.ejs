@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Create Wyrld</title>
+    <link rel="stylesheet" href="/style.css" />
+    <%- include('./partials/icons') %>
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <script src="/lib/htmx.min.js"></script>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container-fluid p-3">
+      <h2>Create Wyrld</h2>
+      <form hx-post="/api/add_project">
+        <label for="title">Title</label>
+        <input
+          id="title"
+          name="title"
+          placeholder="Wyrld Title"
+          required="true,"
+        />
+        <br />
+        <button type="submit">Create</button>
+      </form>
+    </div>
+  </body>
+</html>

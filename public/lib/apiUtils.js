@@ -3,11 +3,7 @@ import renderTierLimitWarning from "./renderTierLimitWarning.js";
 
 async function getThings(endpoint) {
   try {
-    const res = await fetch(window.location.origin + endpoint, {
-      headers: {
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-      },
-    });
+    const res = await fetch(window.location.origin + endpoint, {});
     const data = await res.json();
     if (res.status === 200) {
       return data;
@@ -22,9 +18,6 @@ async function deleteThing(endpoint) {
   try {
     const res = await fetch(window.location.origin + endpoint, {
       method: "DELETE",
-      headers: {
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
-      },
     });
     if (res.status === 204) {
       toast.show("Removed");
@@ -43,7 +36,6 @@ async function postThing(endpoint, body) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-access-token": `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(body),
     });
@@ -53,7 +45,7 @@ async function postThing(endpoint, body) {
       return data;
     } else if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
       renderTierLimitWarning(
-        'Please subscribe to our "Pro" package to gain access. In order to continue providing our services we need your support <3. Please read about our available tiers <insert link here> and choose the best option for your future.'
+        'You have reached the image data limit for this project. Please subscribe to our "Pro" package to increase the limit.'
       );
     } else {
       let error = new Error();

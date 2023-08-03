@@ -1,6 +1,5 @@
-import { getPresignedForImageDownload, uploadImage } from "./imageUtils.js";
+import { getPresignedForImageDownload, uploadUserImage } from "./imageUtils.js";
 import createElement from "./createElement.js";
-import state from "./state.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
 import imageFollowingCursor from "./imageFollowingCursor.js";
@@ -10,14 +9,15 @@ export default class TableSidebarComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar-images";
-
+    this.tableView = props.tableView;
+    // project
+    const searchParams = new URLSearchParams(window.location.search);
+    this.projectId = searchParams.get("project");
+    // utilities
     this.currentMouseDownImage = null;
-
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
-
     this.makeImageSmall = false;
-
     this.tableImageSearchQuery = null;
   }
 
@@ -61,7 +61,16 @@ export default class TableSidebarComponent {
       window.confirm(`Are you sure you want to delete ${image.original_name}`)
     ) {
       // remove image in db
-      deleteThing(`/api/remove_image/${state.currentProject.id}/${image.id}`);
+      if (this.projectId) {
+        deleteThing(
+          `/api/remove_image_by_project/${image.id}/${this.projectId}`
+        );
+      } else {
+        deleteThing(
+          `/api/remove_image_by_table_user/${image.id}/${this.tableView.id}`
+        );
+      }
+
       // remove table image in db
       deleteThing(`/api/remove_table_image/${tableImage.id}`);
       // remove elem in sidebar
@@ -81,16 +90,11 @@ export default class TableSidebarComponent {
 
     imageElems = imageElems.filter((elem) => {
       if (this.tableImageSearchQuery && this.tableImageSearchQuery !== "") {
-        console.log(
-          this.tableImageSearchQuery,
-          elem.children[0].children[0].value
-        );
         return elem.children[0].children[0].value
           .toLowerCase()
           .includes(this.tableImageSearchQuery.toLowerCase());
       } else return elem;
     });
-    console.log(imageElems);
 
     imageElems = imageElems.sort((a, b) => {
       if (
@@ -104,10 +108,22 @@ export default class TableSidebarComponent {
   };
 
   renderCurrentImages = async () => {
-    const tableImages = await getThings(
-      `/api/get_table_images/${state.currentProject.id}`
-    );
-    if (!tableImages.length) return [createElement("small", {}, "None...")];
+    // get images for project or for user
+    let tableImages = [];
+    if (this.projectId) {
+      tableImages = await getThings(
+        `/api/get_table_images_by_table_project/${this.tableView.id}`
+      );
+    } else {
+      tableImages = await getThings(
+        `/api/get_table_images_by_table_user/${this.tableView.id}`
+      );
+    }
+    if (!tableImages.length) {
+      // remove temp loading spinner
+      this.tempLoadingSpinner.remove();
+      return [createElement("small", {}, "None...")];
+    }
 
     let imageElems = [];
     await Promise.all(
@@ -133,8 +149,7 @@ export default class TableSidebarComponent {
                   {
                     type: "focusout",
                     event: (e) => {
-                      console.log(e.target.value);
-                      postThing(`/api/edit_image/${image.id}`, {
+                      postThing(`/api/edit_image_name/${image.id}`, {
                         original_name: e.target.value,
                       });
                     },
@@ -146,9 +161,8 @@ export default class TableSidebarComponent {
             createElement(
               "div",
               {
-                style:
-                  "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
-                title: "Remove image from wyrld asset library",
+                class: "red-x",
+                title: "Remove image",
               },
               "ⓧ",
               {
@@ -177,19 +191,19 @@ export default class TableSidebarComponent {
     if (file) {
       try {
         this.toggleImageLoading();
-        const newImage = await uploadImage(
-          file,
-          state.currentProject.id,
-          null,
-          this.makeImageSmall
-        );
+        const newImage = await uploadUserImage(file, this.makeImageSmall);
         if (newImage) {
           // add new table image
-          await postThing(`/api/add_table_image`, {
-            project_id: state.currentProject.id,
-            image_id: newImage.id,
-          });
-          // re render
+          if (this.projectId) {
+            await postThing(`/api/add_table_image_by_project`, {
+              project_id: this.projectId,
+              image_id: newImage.id,
+            });
+          } else {
+            await postThing(`/api/add_table_image_by_user`, {
+              image_id: newImage.id,
+            });
+          }
         }
         this.toggleImageLoading();
       } catch (err) {
@@ -203,7 +217,6 @@ export default class TableSidebarComponent {
     imageContainer.innerHTML = "";
     const elems = this.renderImageElems();
     for (var elem of elems) {
-      console.log(elem);
       imageContainer.appendChild(elem);
     }
   };
@@ -234,11 +247,10 @@ export default class TableSidebarComponent {
 
     this.domComponent.append(
       createElement(
-        "button",
+        "a",
         {
-          for: "image",
-          class: "",
           title: "Upload image to be used on virtual table",
+          style: "margin-left: 10px",
         },
         "+ Image",
         {
@@ -303,7 +315,7 @@ export default class TableSidebarComponent {
         }
       ),
       createElement("br"),
-      createElement("input", { placeHolder: "Search" }, null, {
+      createElement("input", { placeHolder: "Search Images" }, null, {
         type: "input",
         event: (e) => {
           e.preventDefault();

@@ -36,6 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+exports.pool = void 0;
 var pg_1 = require("pg");
 var credentials = {
     user: process.env.PG_USER,
@@ -44,7 +45,7 @@ var credentials = {
     password: process.env.PG_PW,
     port: 5432
 };
-var pool = new pg_1.Pool(credentials);
+exports.pool = new pg_1.Pool(credentials);
 function query(queryObject, params) {
     return __awaiter(this, void 0, void 0, function () {
         var start, res, duration;
@@ -52,7 +53,7 @@ function query(queryObject, params) {
             switch (_a.label) {
                 case 0:
                     start = Date.now();
-                    return [4, pool.query(queryObject, params)];
+                    return [4, exports.pool.query(queryObject, params)];
                 case 1:
                     res = _a.sent();
                     duration = Date.now() - start;

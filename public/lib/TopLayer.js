@@ -1,18 +1,14 @@
 import modal from "../components/modal.js";
-import state from "../lib/state.js";
 import createElement from "../lib/createElement.js";
 
 export default class TopLayer {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.canvasLayer = props.canvasLayer;
+    this.tableView = props.tableView;
   }
 
   handleChangeCanvasLayer = () => {
-    const gridObjectIndex = this.canvasLayer.canvas
-      .getObjects()
-      .indexOf(this.canvasLayer.oGridGroup);
-
     if (this.canvasLayer.currentLayer === "Map") {
       this.canvasLayer.currentLayer = "Object";
       this.canvasLayer.canvas.getObjects().forEach((object, index) => {
@@ -68,7 +64,7 @@ export default class TopLayer {
   };
 
   renderLayersElem = () => {
-    if (state.currentProject.is_editor === false) {
+    if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
       return createElement("div", { style: "display: none;" });
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
@@ -90,7 +86,7 @@ export default class TopLayer {
   };
 
   renderGridControlElem = () => {
-    if (state.currentProject.is_editor === false) {
+    if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
       return createElement("div", { style: "display: none;" });
     } else {
       return createElement("div", { class: "table-config grid-control-elem" }, [
@@ -169,6 +165,7 @@ export default class TopLayer {
                       type: "color",
                       id: "colorpicker",
                       name: "colorpicker",
+                      value: this.canvasLayer.canvas.freeDrawingBrush.color,
                     },
                     null,
                     {
@@ -195,7 +192,7 @@ export default class TopLayer {
                       style: "width: 30px; height: 25px;",
                       type: "number",
                       id: "linewidth",
-                      value: "1",
+                      value: this.canvasLayer.canvas.freeDrawingBrush.width,
                       name: "linewidth",
                     },
                     null,

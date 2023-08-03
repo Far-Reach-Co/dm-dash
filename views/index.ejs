@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co.</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./landing.css" />
+    <%- include('./partials/icons') %>
+    <script src="/lib/MobileNavHandler.js" defer></script>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <section class="first">
+      <div id="city-img">
+        <img id="main-logo" src="/assets/landing/mainlogo.webp" alt="" />
+      </div>
+      <p>
+        Wanting a fun way to unleash your creativity with friends? Far Reach Co.
+        offers an engaging, collaborative, roleplaying experience suitable for
+        all ages. Assemble your group to conquer fearsome beasts, embark on
+        thrilling adventures, and weave fantastical tales brimming with
+        excitement and imagination.
+      </p>
+      <img
+        id="peli-signup"
+        onclick="window.location = '/register'"
+        src="/assets/landing/peli_signup.webp"
+        alt=""
+      />
+    </section>
+    <section class="second">
+      <div
+        style="
+          width: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <img id="scroll-img" src="/assets/landing/scroll_dice.webp" alt="" />
+      </div>
+      <div
+        style="
+          min-width: 300px;
+          width: 50%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <h1>Our Personal Quest</h1>
+        <br />
+        <p>
+          We do whatever it takes to ensure you have more of what you want by
+          keeping things, fast, fun, and intuitive! Players can jump into their
+          games in 3 simple clicks. Our hope, our goal, is to create an
+          environment and community of creators that can run games with old
+          friends and find new friends through innovations that we can not wait
+          to share with you!
+        </p>
+      </div>
+    </section>
+    <section class="third">
+      <div id="sm-map-img">
+        <div
+          style="
+            padding-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          "
+        >
+          <img id="scroll-svg" src="/assets/landing/scroll.svg" alt="" />
+          <h1>Virtual Table Top</h1>
+          <p>
+            Create an adventure for you, your old friends, or even some new ones
+            by using our brand-new virtual tabletop tool to keep everything
+            organized and accessible at the click of a button for you and your
+            players!
+          </p>
+        </div>
+      </div>
+      <img id="lg-map-img" src="/assets/landing/large_map_bg.webp" alt="" />
+      <div></div>
+    </section>
+    <%- include('./partials/footer') %>
+  </body>
+</html>

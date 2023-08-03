@@ -114,19 +114,13 @@ export default class SpellsComponent {
     });
 
     this.domComponent.append(
-      createElement(
-        "div",
-        {
-          style: "display: flex; flex-direction: column; align-items: center;",
-        },
-        [
-          spellInfoComponent.domComponent,
-          createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
-            this.renderCantrip(),
-            ...this.renderSpellSlotsElems(),
-          ]),
-        ]
-      )
+      createElement("div", {}, [
+        spellInfoComponent.domComponent,
+        createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+          this.renderCantrip(),
+          ...this.renderSpellSlotsElems(),
+        ]),
+      ])
     );
   };
 }
@@ -560,7 +554,7 @@ class SingleSpell {
 
     if (this.isCantrip) {
       return this.domComponent.append(
-        createElement("h2", {}, "Cantrips"),
+        createElement("div", { class: "special-font" }, "Cantrips"),
         this.renderHideFeatButton(),
         createElement("hr"),
         ...this.renderSpells(),
@@ -580,7 +574,7 @@ class SingleSpell {
     }
 
     this.domComponent.append(
-      createElement("h2", {}, this.spellSlot.title),
+      createElement("div", { class: "special-font" }, this.spellSlot.title),
       createElement("div", { class: "cp-content-container-center" }, [
         createElement(
           "div",

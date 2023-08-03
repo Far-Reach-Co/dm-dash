@@ -34,7 +34,7 @@ async function getCounterQuery(id: string) {
   return await db.query<CounterModel>(query)
 }
 
-async function getCountersQuery(userId: string, projectId: string) {
+async function getCountersQuery(userId: string | number, projectId: string) {
   const query = {
     text: /*sql*/ `select * from public."Counter" where user_id = $1 and project_id = $2 order by title asc`,
     values: [userId, projectId]

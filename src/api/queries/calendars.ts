@@ -10,9 +10,9 @@ export interface CalendarModel {
 }
 
 async function addCalendarQuery(data: {
-  project_id: string,
+  project_id: string | number,
   title: string,
-  year: string
+  year: number
 }) {
   const query = {
     text: /*sql*/ `insert into public."Calendar" (project_id, title, year) values($1,$2,$3) returning *`,

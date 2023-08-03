@@ -1,7 +1,6 @@
 import imageFollowingCursor from "../lib/imageFollowingCursor.js";
 import { getPresignedForImageDownload } from "../lib/imageUtils.js";
 import socketIntegration from "../lib/socketIntegration.js";
-import state from "../lib/state.js";
 
 export default class CanvasLayer {
   constructor(props) {
@@ -9,6 +8,7 @@ export default class CanvasLayer {
     this.currentTableView = props.tableView;
     this.currentLayer = "Object";
     this.snapToGrid = true;
+    this.tableView = props.tableView;
 
     // table sidebar component
     this.tableSidebarComponent = props.tableSidebarComponent;
@@ -204,6 +204,7 @@ export default class CanvasLayer {
     this.canvas.on("path:created", (opt) => {
       const id = uuidv4();
       opt.path.set("id", id);
+      opt.path.set("layer", this.currentLayer);
       socketIntegration.imageAdded(opt.path);
     });
 
@@ -217,7 +218,7 @@ export default class CanvasLayer {
       // move active objects to other layer
       if (e.ctrlKey) {
         // only allow gm to do this
-        if (state.currentProject.is_editor === false) return;
+        if (USERID != this.tableView.user_id) return;
 
         const activeObjects = this.canvas.getActiveObjects();
         for (var object of activeObjects) {
@@ -374,12 +375,11 @@ export default class CanvasLayer {
     try {
       const res = await fetch(
         window.location.origin +
-          `/api/edit_table_view/${this.currentTableView.id}`,
+          `/api/edit_table_view_data/${this.currentTableView.id}`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-access-token": `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({ data: jsonCanvas }),
         }

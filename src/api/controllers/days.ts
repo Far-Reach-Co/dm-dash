@@ -36,6 +36,9 @@ async function removeDay(req: Request, res: Response, next: NextFunction) {
 
 async function editDay(req: Request, res: Response, next: NextFunction) {
   try {
+    if (!req.body.title) {
+      delete req.body.title;
+    }
     const data = await editDayQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

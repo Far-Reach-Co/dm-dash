@@ -7,32 +7,22 @@ import EquipmentComponent from "../lib/EquipmentComponent.js";
 import FeatComponent from "../lib/FeatComponent.js";
 import SpellsComponent from "../lib/SpellsComponent.js";
 import calculateColorMod from "../lib/calculateColorMod.js";
+import SheetSettings from "../lib/SheetSettings.js";
 
 export default class FiveEPlayerSheet {
   constructor(props) {
     this.domComponent = props.domComponent;
+    this.domComponent.className =
+      "d-flex flex-column align-items-center justify-content-center";
     this.navigate = props.navigate;
-    this.domComponent.className = "standard-view";
-    if (window.innerWidth > 500)
-      this.domComponent.style =
-        "align-items: center; overflow-x: auto; max-width: 100%";
-    else {
-      this.domComponent.style = this.domComponent.style =
-        "overflow-x: auto; max-width: 100%;";
-    }
     this.generalData = props.params.content;
     // general, background, etc
     this.mainView = "general";
 
-    // styling fix for mobile
-    const smallDevice = window.matchMedia("(min-width: 500px)");
-    smallDevice.addEventListener("change", (e) => {
-      if (e.matches) {
-        this.domComponent.style =
-          "align-items: center; overflow-x: auto; max-width: 100%";
-      } else {
-        this.domComponent.style = "overflow-x: auto; max-width: 100%;";
-      }
+    // settings view
+    this.sheetSettings = new SheetSettings({
+      domComponent: createElement("div"),
+      generalData: this.generalData,
     });
 
     this.render();
@@ -536,6 +526,11 @@ export default class FiveEPlayerSheet {
         },
         [
           createElement("div", { class: "cp-info-container-column" }, [
+            createElement(
+              "div",
+              { class: "special-font", style: "align-self: center;" },
+              "General Info"
+            ),
             createElement("div", { class: "cp-content-container" }, [
               createElement("small", {}, "Character Name"),
               createElement(
@@ -920,7 +915,7 @@ export default class FiveEPlayerSheet {
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { style: "align-self: center;" },
+                { class: "special-font", style: "align-self: center;" },
                 "Saving Throws"
               ),
               ...this.renderSavingThrows(),
@@ -1077,7 +1072,7 @@ export default class FiveEPlayerSheet {
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { style: "align-self: center;" },
+                { class: "special-font", style: "align-self: center;" },
                 "Death Saves"
               ),
               createElement("div", { style: "display: flex;" }, [
@@ -1204,10 +1199,180 @@ export default class FiveEPlayerSheet {
             this.equipmentComponent.domComponent,
           ]
         ),
-        createElement("div", { class: "cp-info-container-column" }, [
-          createElement("div", { style: "align-self: center;" }, "Skills"),
-          ...this.renderSkills(),
-        ]),
+        createElement(
+          "div",
+          { style: "display: flex; flex-direction: column;" },
+          [
+            createElement("div", { class: "cp-info-container-column" }, [
+              createElement(
+                "div",
+                { class: "special-font", style: "align-self: center;" },
+                "Skills"
+              ),
+              ...this.renderSkills(),
+            ]),
+            createElement("div", { class: "cp-info-container-column" }, [
+              createElement(
+                "div",
+                { class: "special-font", style: "align-self: center;" },
+                "Currency"
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Copper"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "copper",
+                      type: "number",
+                      value: this.generalData.copper
+                        ? this.generalData.copper
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Silver"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "silver",
+                      type: "number",
+                      value: this.generalData.silver
+                        ? this.generalData.silver
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Electrum"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "electrum",
+                      type: "number",
+                      value: this.generalData.electrum
+                        ? this.generalData.electrum
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Gold"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "gold",
+                      type: "number",
+                      value: this.generalData.gold ? this.generalData.gold : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+              createElement(
+                "div",
+                {
+                  style:
+                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                },
+                [
+                  createElement("small", {}, "Platinum"),
+                  createElement(
+                    "input",
+                    {
+                      class: "cp-input-gen-short",
+                      name: "platinum",
+                      type: "number",
+                      value: this.generalData.platinum
+                        ? this.generalData.platinum
+                        : 0,
+                    },
+                    null,
+                    {
+                      type: "focusout",
+                      event: (e) => {
+                        this.updateGeneralValue(
+                          e.target.name,
+                          e.target.valueAsNumber
+                        );
+                      },
+                    }
+                  ),
+                ]
+              ),
+            ]),
+          ]
+        ),
         createElement(
           "div",
           { style: "display: flex; flex-direction: column;" },
@@ -1684,6 +1849,28 @@ export default class FiveEPlayerSheet {
     this.domComponent.append(this.spellsComponent.domComponent);
   };
 
+  renderSettingsOrNot = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const project = searchParams.get("project");
+    if (!project || USERID == this.generalData.user_id) {
+      return createElement(
+        "a",
+        {
+          class:
+            this.mainView === "settings" ? "cp-nav-item-active" : "cp-nav-item",
+        },
+        "Settings",
+        {
+          type: "click",
+          event: () => {
+            this.mainView = "settings";
+            this.render();
+          },
+        }
+      );
+    } else return createElement("div", { style: "display: none;" });
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -1739,6 +1926,7 @@ export default class FiveEPlayerSheet {
             },
           }
         ),
+        this.renderSettingsOrNot(),
       ])
     );
 
@@ -1752,6 +1940,10 @@ export default class FiveEPlayerSheet {
 
     if (this.mainView === "spells") {
       return this.renderSpellsView();
+    }
+
+    if (this.mainView === "settings") {
+      return this.domComponent.append(this.sheetSettings.domComponent);
     }
   };
 }

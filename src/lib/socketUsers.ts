@@ -3,12 +3,12 @@ const users: User[] = [];
 type User = {
   id: string;
   username: string;
-  campaign: string;
+  table: string;
 };
 
 // join user to chat
-function userJoin(id: string, username: string, campaign: string) {
-  const user: User = { id, username, campaign };
+function userJoin(id: string, username: string, table: string) {
+  const user: User = { id, username, table };
   users.push(user);
 
   return user;
@@ -28,9 +28,9 @@ function userLeave(id: string) {
   } else return null;
 }
 
-// get campaign users
-function getCampaignUsers(campaign: string) {
-  return users.filter((user) => user.campaign === campaign);
+// get table users
+function getTableUsers(table: string) {
+  return users.filter((user) => user.table === table);
 }
 
-export { userJoin, getCurrentUser, userLeave, getCampaignUsers };
+export { userJoin, getCurrentUser, userLeave, getTableUsers };

@@ -111,6 +111,12 @@ function edit5eCharEquipment(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (req.body.hasOwnProperty("id")) {
+                        throw new Error('Request body cannot contain the "id" field');
+                    }
+                    if (req.body.hasOwnProperty("general_id")) {
+                        throw new Error('Request body cannot contain the "general_id" field');
+                    }
                     return [4, (0, _5eCharEquipment_1.edit5eCharEquipmentQuery)(req.params.id, req.body)];
                 case 1:
                     data = _a.sent();

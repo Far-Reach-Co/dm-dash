@@ -36,49 +36,51 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableView = exports.removeTableView = exports.getTableView = exports.getTableViews = exports.addTableView = void 0;
+exports.editTableViewTitle = exports.editTableViewData = exports.removeTableView = exports.getTableView = exports.getTableViewByUUID = exports.getTableViewsByProject = exports.getTableViewsByUser = exports.addTableViewByUser = exports.addTableViewByProject = void 0;
 var tableViews_js_1 = require("../queries/tableViews.js");
-var enums_js_1 = require("../../lib/enums.js");
-function addTableView(req, res, next) {
+function addTableViewByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewsData, data, err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.body.project_id)];
-                case 1:
-                    tableViewsData = _a.sent();
-                    if (tableViewsData.rows.length >= 2) {
-                        if (!req.user.is_pro)
-                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    }
-                    return [4, (0, tableViews_js_1.addTableViewQuery)(req.body)];
-                case 2:
-                    data = _a.sent();
-                    res.status(201).json(data.rows[0]);
-                    return [3, 4];
-                case 3:
-                    err_1 = _a.sent();
-                    next(err_1);
-                    return [3, 4];
-                case 4: return [2];
-            }
-        });
-    });
-}
-exports.addTableView = addTableView;
-function getTableViews(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var data, err_2;
+        var err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.params.project_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, tableViews_js_1.addTableViewByProjectQuery)({
+                            title: req.body.title,
+                            project_id: req.params.project_id
+                        })];
                 case 1:
-                    data = _a.sent();
-                    res.send(data.rows);
+                    _a.sent();
+                    res
+                        .set("HX-Redirect", "/wyrld?id=".concat(req.params.project_id))
+                        .send("Form submission was successful.");
+                    return [3, 3];
+                case 2:
+                    err_1 = _a.sent();
+                    next(err_1);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.addTableViewByProject = addTableViewByProject;
+function addTableViewByUser(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var err_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    req.body.user_id = req.session.user;
+                    return [4, (0, tableViews_js_1.addTableViewByUserQuery)(req.body)];
+                case 1:
+                    _a.sent();
+                    res.set("HX-Redirect", "/dash").send("Form submission was successful.");
                     return [3, 3];
                 case 2:
                     err_2 = _a.sent();
@@ -89,10 +91,56 @@ function getTableViews(req, res, next) {
         });
     });
 }
-exports.getTableViews = getTableViews;
+exports.addTableViewByUser = addTableViewByUser;
+function getTableViewsByProject(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var data, err_3;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.project_id)];
+                case 1:
+                    data = _a.sent();
+                    res.send(data.rows);
+                    return [3, 3];
+                case 2:
+                    err_3 = _a.sent();
+                    next(err_3);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.getTableViewsByProject = getTableViewsByProject;
+function getTableViewsByUser(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var data, err_4;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, tableViews_js_1.getTableViewsByUserQuery)(req.session.user)];
+                case 1:
+                    data = _a.sent();
+                    res.send(data.rows);
+                    return [3, 3];
+                case 2:
+                    err_4 = _a.sent();
+                    next(err_4);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.getTableViewsByUser = getTableViewsByUser;
 function getTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var tableViewData, tableView, err_3;
+        var tableViewData, tableView, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -104,8 +152,8 @@ function getTableView(req, res, next) {
                     res.send(tableView);
                     return [3, 3];
                 case 2:
-                    err_3 = _a.sent();
-                    next(err_3);
+                    err_5 = _a.sent();
+                    next(err_5);
                     return [3, 3];
                 case 3: return [2];
             }
@@ -113,9 +161,32 @@ function getTableView(req, res, next) {
     });
 }
 exports.getTableView = getTableView;
+function getTableViewByUUID(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var tableViewData, tableView, err_6;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, tableViews_js_1.getTableViewByUUIDQuery)(req.params.uuid)];
+                case 1:
+                    tableViewData = _a.sent();
+                    tableView = tableViewData.rows[0];
+                    res.send(tableView);
+                    return [3, 3];
+                case 2:
+                    err_6 = _a.sent();
+                    next(err_6);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.getTableViewByUUID = getTableViewByUUID;
 function removeTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var err_4;
+        var err_7;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -126,8 +197,8 @@ function removeTableView(req, res, next) {
                     res.status(204).send();
                     return [3, 3];
                 case 2:
-                    err_4 = _a.sent();
-                    next(err_4);
+                    err_7 = _a.sent();
+                    next(err_7);
                     return [3, 3];
                 case 3: return [2];
             }
@@ -135,25 +206,51 @@ function removeTableView(req, res, next) {
     });
 }
 exports.removeTableView = removeTableView;
-function editTableView(req, res, next) {
+function editTableViewData(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_5;
+        var data, err_8;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, tableViews_js_1.editTableViewQuery)(req.params.id, req.body)];
+                    return [4, (0, tableViews_js_1.editTableViewQuery)(req.params.id, {
+                            data: req.body.data
+                        })];
                 case 1:
                     data = _a.sent();
                     res.status(200).send(data.rows[0]);
                     return [3, 3];
                 case 2:
-                    err_5 = _a.sent();
-                    next(err_5);
+                    err_8 = _a.sent();
+                    next(err_8);
                     return [3, 3];
                 case 3: return [2];
             }
         });
     });
 }
-exports.editTableView = editTableView;
+exports.editTableViewData = editTableViewData;
+function editTableViewTitle(req, res, next) {
+    return __awaiter(this, void 0, void 0, function () {
+        var data, err_9;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    _a.trys.push([0, 2, , 3]);
+                    return [4, (0, tableViews_js_1.editTableViewQuery)(req.params.id, {
+                            title: req.body.title
+                        })];
+                case 1:
+                    data = _a.sent();
+                    res.status(200).send(data.rows[0]);
+                    return [3, 3];
+                case 2:
+                    err_9 = _a.sent();
+                    next(err_9);
+                    return [3, 3];
+                case 3: return [2];
+            }
+        });
+    });
+}
+exports.editTableViewTitle = editTableViewTitle;

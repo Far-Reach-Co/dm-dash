@@ -1,0 +1,22 @@
+<div id="invite-elem">
+  <small class="mb-3"><%= inviteLink %></small>
+  <div class="d-flex">
+    <button onclick="copyTextToClipboard('<%= inviteLink %>')">
+      Copy Link
+    </button>
+    <div class="d-flex flex-column">
+      <button
+        class="btn-red ms-2"
+        hx-delete="/api/remove_project_invite/<%= inviteId %>"
+        hx-confirm="Are you sure you want to delete the invite link?"
+        hx-target="#invite-elem"
+        hx-swap="outerHTML"
+      >
+        Delete Link
+      </button>
+      <div class="hint ms-2">
+        *It will no longer be used to gain access to this wyrld.
+      </div>
+    </div>
+  </div>
+</div>

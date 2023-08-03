@@ -9,7 +9,7 @@ import {
   editLoreQuery,
 } from "../queries/lores.js";
 import { getProjectQuery, editProjectQuery } from "../queries/projects.js";
-import { removeFile } from "./s3.js";
+import { removeImage } from "./s3.js";
 import { removeImageQuery, getImageQuery } from "../queries/images.js";
 import { Request, Response, NextFunction } from "express";
 
@@ -105,7 +105,7 @@ async function removeLore(req: Request, res: Response, next: NextFunction) {
     if (Lore.image_id) {
       const imageData = await getImageQuery(Lore.image_id);
       const image = imageData.rows[0];
-      await removeFile("wyrld/images", image);
+      await removeImage("wyrld/images", image);
       await removeImageQuery(image.id);
       // update project data usage
       const newCalculatedData = project.used_data_in_bytes - image.size;

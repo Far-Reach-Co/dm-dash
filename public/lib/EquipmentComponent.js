@@ -234,7 +234,11 @@ export default class EquipmentComponent {
     this.equipmentData = equipmentsData;
 
     this.domComponent.append(
-      createElement("div", { style: "align-self: center;" }, "Equipment"),
+      createElement(
+        "div",
+        { class: "special-font", style: "align-self: center;" },
+        "Equipment"
+      ),
       createElement("br"),
       createElement(
         "div",

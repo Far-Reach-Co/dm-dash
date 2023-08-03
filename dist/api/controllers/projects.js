@@ -56,35 +56,34 @@ var images_js_1 = require("../queries/images.js");
 var s3_js_1 = require("./s3.js");
 var tableViews_js_1 = require("../queries/tableViews.js");
 var tableImages_js_1 = require("../queries/tableImages.js");
-var enums_js_1 = require("../../lib/enums.js");
 function addProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var projectsData, data, err_1;
+        var data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 4, , 5]);
-                    return [4, (0, projects_js_1.getProjectsQuery)(req.user.id)];
-                case 1:
-                    projectsData = _a.sent();
-                    if (projectsData.rows.length >= 3) {
-                        if (!req.user.is_pro)
-                            throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
-                    }
-                    req.body.user_id = req.user.id;
+                    _a.trys.push([0, 3, , 4]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    req.body.user_id = req.session.user;
                     return [4, (0, projects_js_1.addProjectQuery)(req.body)];
-                case 2:
+                case 1:
                     data = _a.sent();
-                    return [4, (0, tableViews_js_1.addTableViewQuery)({ project_id: data.rows[0].id })];
-                case 3:
+                    return [4, (0, tableViews_js_1.addTableViewByProjectQuery)({
+                            project_id: data.rows[0].id,
+                            title: "First Wyrld Table"
+                        })];
+                case 2:
                     _a.sent();
-                    res.status(201).json(data.rows[0]);
-                    return [3, 5];
-                case 4:
+                    res
+                        .set("HX-Redirect", "/wyrld?id=".concat(data.rows[0].id))
+                        .send("Form submission was successful.");
+                    return [3, 4];
+                case 3:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 5];
-                case 5: return [2];
+                    return [3, 4];
+                case 4: return [2];
             }
         });
     });
@@ -101,7 +100,9 @@ function getProject(req, res, next) {
                 case 1:
                     projectData = _a.sent();
                     project = projectData.rows[0];
-                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.user.id, project.id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id)];
                 case 2:
                     projectUsersData = _a.sent();
                     if (projectUsersData.rows.length) {
@@ -131,10 +132,12 @@ function getProjects(req, res, next) {
             switch (_d.label) {
                 case 0:
                     _d.trys.push([0, 11, , 12]);
-                    return [4, (0, projects_js_1.getProjectsQuery)(req.user.id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, projects_js_1.getProjectsQuery)(req.session.user)];
                 case 1:
                     projectsData = _d.sent();
-                    return [4, (0, projectUsers_js_1.getProjectUsersQuery)(req.user.id)];
+                    return [4, (0, projectUsers_js_1.getProjectUsersQuery)(req.session.user)];
                 case 2:
                     projectUserData = _d.sent();
                     if (!(projectUserData &&
@@ -263,7 +266,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -293,7 +296,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -366,7 +369,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -397,7 +400,7 @@ function removeProject(req, res, next) {
                                 case 2:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 3:
                                     _a.sent();
                                     return [4, (0, images_js_1.removeImageQuery)(image.id)];
@@ -460,7 +463,7 @@ function removeProject(req, res, next) {
                             }
                         });
                     }); });
-                    return [4, (0, tableImages_js_1.getTableImagesQuery)(req.params.id)];
+                    return [4, (0, tableImages_js_1.getTableImagesByProjectQuery)(req.params.id)];
                 case 13:
                     tableImages = _a.sent();
                     tableImages.rows.forEach(function (tableImage) { return __awaiter(_this, void 0, void 0, function () {
@@ -471,7 +474,7 @@ function removeProject(req, res, next) {
                                 case 1:
                                     imageData = _a.sent();
                                     image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                                 case 2:
                                     _a.sent();
                                     return [4, (0, tableImages_js_1.removeTableImageQuery)(tableImage.id)];
@@ -481,7 +484,7 @@ function removeProject(req, res, next) {
                             }
                         });
                     }); });
-                    return [4, (0, tableViews_js_1.getTableViewsQuery)(req.params.id)];
+                    return [4, (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.id)];
                 case 14:
                     tableViews = _a.sent();
                     tableViews.rows.forEach(function (tableView) { return __awaiter(_this, void 0, void 0, function () {
@@ -494,7 +497,8 @@ function removeProject(req, res, next) {
                             }
                         });
                     }); });
-                    res.status(204).send();
+                    res.setHeader("HX-Redirect", "/dash");
+                    res.send();
                     return [3, 16];
                 case 15:
                     err_4 = _a.sent();

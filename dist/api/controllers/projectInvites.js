@@ -41,7 +41,7 @@ var projectInvites_js_1 = require("../queries/projectInvites.js");
 var uuid_1 = require("uuid");
 function addProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var uuid, data, err_1;
+        var uuid, data, invite, inviteLink, inviteId, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -53,7 +53,14 @@ function addProjectInvite(req, res, next) {
                     return [4, (0, projectInvites_js_1.addProjectInviteQuery)(req.body)];
                 case 2:
                     data = _a.sent();
-                    res.status(201).json(data.rows[0]);
+                    invite = data.rows[0];
+                    inviteLink = "".concat(req.protocol, "://").concat(req.get("host"), "/invite?invite=").concat(invite.uuid);
+                    inviteId = invite.id;
+                    res.render("partials/wyrld_settings/invite", {
+                        inviteLink: inviteLink,
+                        inviteId: inviteId,
+                        projectId: req.body.project_id
+                    });
                     return [3, 4];
                 case 3:
                     err_1 = _a.sent();
@@ -89,15 +96,17 @@ function getProjectInviteByUUID(req, res, next) {
 exports.getProjectInviteByUUID = getProjectInviteByUUID;
 function removeProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var err_3;
+        var data, err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
                     return [4, (0, projectInvites_js_1.removeProjectInviteQuery)(req.params.id)];
                 case 1:
-                    _a.sent();
-                    res.status(204).send();
+                    data = _a.sent();
+                    res.render("partials/wyrld_settings/invitebutton", {
+                        projectId: data.rows[0].project_id
+                    });
                     return [3, 3];
                 case 2:
                     err_3 = _a.sent();

@@ -1,33 +1,74 @@
 import {
-  getTableViewsQuery,
+  getTableViewsByProjectQuery,
   getTableViewQuery,
   removeTableViewQuery,
   editTableViewQuery,
-  addTableViewQuery,
+  addTableViewByProjectQuery,
+  addTableViewByUserQuery,
+  getTableViewByUUIDQuery,
+  getTableViewsByUserQuery,
 } from "../queries/tableViews.js";
 import { Request, Response, NextFunction } from "express";
 import { userSubscriptionStatus } from "../../lib/enums.js";
+import { getUserByIdQuery } from "../queries/users.js";
 
-async function addTableView(req: Request, res: Response, next: NextFunction) {
+async function addTableViewByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    // check if user is pro
-    const tableViewsData = await getTableViewsQuery(req.body.project_id);
-    // limit to two campaigns
-    if (tableViewsData.rows.length >= 2) {
-      if (!req.user.is_pro)
-        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    }
+    if (!req.session.user) throw new Error("User is not logged in");
 
-    const data = await addTableViewQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    await addTableViewByProjectQuery({
+      title: req.body.title,
+      project_id: req.params.project_id,
+    });
+    res
+      .set("HX-Redirect", `/wyrld?id=${req.params.project_id}`)
+      .send("Form submission was successful.");
   } catch (err) {
     next(err);
   }
 }
 
-async function getTableViews(req: Request, res: Response, next: NextFunction) {
+async function addTableViewByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await getTableViewsQuery(req.params.project_id);
+    if (!req.session.user) throw new Error("User is not logged in");
+    req.body.user_id = req.session.user;
+    await addTableViewByUserQuery(req.body);
+    res.set("HX-Redirect", `/dash`).send("Form submission was successful.");
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getTableViewsByProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = await getTableViewsByProjectQuery(req.params.project_id);
+
+    res.send(data.rows);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getTableViewsByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    const data = await getTableViewsByUserQuery(req.session.user);
 
     res.send(data.rows);
   } catch (err) {
@@ -38,6 +79,21 @@ async function getTableViews(req: Request, res: Response, next: NextFunction) {
 async function getTableView(req: Request, res: Response, next: NextFunction) {
   try {
     const tableViewData = await getTableViewQuery(req.params.id);
+    const tableView = tableViewData.rows[0];
+
+    res.send(tableView);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getTableViewByUUID(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const tableViewData = await getTableViewByUUIDQuery(req.params.uuid);
     const tableView = tableViewData.rows[0];
 
     res.send(tableView);
@@ -59,9 +115,30 @@ async function removeTableView(
   }
 }
 
-async function editTableView(req: Request, res: Response, next: NextFunction) {
+async function editTableViewData(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await editTableViewQuery(req.params.id, req.body);
+    const data = await editTableViewQuery(req.params.id, {
+      data: req.body.data,
+    });
+    res.status(200).send(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function editTableViewTitle(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const data = await editTableViewQuery(req.params.id, {
+      title: req.body.title,
+    });
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -69,9 +146,13 @@ async function editTableView(req: Request, res: Response, next: NextFunction) {
 }
 
 export {
-  addTableView,
-  getTableViews,
+  addTableViewByProject,
+  addTableViewByUser,
+  getTableViewsByUser,
+  getTableViewsByProject,
+  getTableViewByUUID,
   getTableView,
   removeTableView,
-  editTableView,
+  editTableViewData,
+  editTableViewTitle,
 };

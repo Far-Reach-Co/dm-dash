@@ -224,7 +224,7 @@ function removeCharacter(req, res, next) {
                 case 4:
                     imageData = _a.sent();
                     image = imageData.rows[0];
-                    return [4, (0, s3_js_1.removeFile)("wyrld/images", image)];
+                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
                 case 5:
                     _a.sent();
                     return [4, (0, images_js_1.removeImageQuery)(image.id)];

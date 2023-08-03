@@ -55,6 +55,13 @@ async function edit5eCharOtherProLang(
   next: NextFunction
 ) {
   try {
+    // If the "id" field is found, throw an error
+    if (req.body.hasOwnProperty("id")) {
+      throw new Error('Request body cannot contain the "id" field');
+    }
+    if (req.body.hasOwnProperty("general_id")) {
+      throw new Error('Request body cannot contain the "general_id" field');
+    }
     const data = await edit5eCharOtherProLangQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {

@@ -17,7 +17,16 @@ async function addProjectInvite(
 
   try {
     const data = await addProjectInviteQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    const invite = data.rows[0];
+    const inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${
+      invite.uuid
+    }`;
+    const inviteId = invite.id;
+    res.render("partials/wyrld_settings/invite", {
+      inviteLink,
+      inviteId,
+      projectId: req.body.project_id,
+    });
   } catch (err) {
     next(err);
   }
@@ -42,8 +51,10 @@ async function removeProjectInvite(
   next: NextFunction
 ) {
   try {
-    await removeProjectInviteQuery(req.params.id);
-    res.status(204).send();
+    const data = await removeProjectInviteQuery(req.params.id);
+    res.render("partials/wyrld_settings/invitebutton", {
+      projectId: data.rows[0].project_id,
+    });
   } catch (err) {
     next(err);
   }

@@ -45,6 +45,9 @@ function addNote(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    req.body.user_id = req.session.user;
                     return [4, (0, notes_js_1.addNoteQuery)(req.body)];
                 case 1:
                     data = _a.sent();
@@ -67,7 +70,9 @@ function getNotes(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, notes_js_1.getNotesQuery)(req.user.id, req.params.project_id, req.params.limit, req.params.offset, req.params.keyword)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, notes_js_1.getNotesQuery)(req.session.user, req.params.project_id, req.params.limit, req.params.offset, req.params.keyword)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -89,7 +94,9 @@ function getNotesByLocation(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, notes_js_1.getNotesByLocationQuery)(req.user.id, req.params.location_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, notes_js_1.getNotesByLocationQuery)(req.session.user, req.params.location_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -111,7 +118,9 @@ function getNotesByCharacter(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, notes_js_1.getNotesByCharacterQuery)(req.user.id, req.params.character_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, notes_js_1.getNotesByCharacterQuery)(req.session.user, req.params.character_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -133,7 +142,9 @@ function getNotesByItem(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, notes_js_1.getNotesByItemQuery)(req.user.id, req.params.item_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, notes_js_1.getNotesByItemQuery)(req.session.user, req.params.item_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);
@@ -155,7 +166,9 @@ function getNotesByLore(req, res, next) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    return [4, (0, notes_js_1.getNotesByLoreQuery)(req.user.id, req.params.lore_id)];
+                    if (!req.session.user)
+                        throw new Error("User is not logged in");
+                    return [4, (0, notes_js_1.getNotesByLoreQuery)(req.session.user, req.params.lore_id)];
                 case 1:
                     data = _a.sent();
                     res.send(data.rows);

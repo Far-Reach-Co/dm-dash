@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Wyrld Settings</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/clipboard.js" type="module" defer></script>
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <script src="/lib/htmx.min.js"></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container-fluid p-3">
+      <div>
+        <h1>Wyrld Settings</h1>
+        <small
+          >Manage important settings and invited users for your wyrld.</small
+        >
+      </div>
+      <h2 style="color: var(--green)"><%= project.title %></h2>
+      <hr />
+      <h2>Share Invite Link</h2>
+      <% if (inviteLink) { %> <%- include('./partials/wyrld_settings/invite') %>
+      <% } else { %> <%- include('./partials/wyrld_settings/invitebutton') %> <%
+      } %>
+      <hr />
+      <h2>Manage Users</h2>
+      <div>
+        <small
+          >Give an invited user access to edit the resources in the wyrld by
+          making them a manager.</small
+        >
+        <br />
+        <div class="d-flex justify-content-between w-25">
+          <small style="text-decoration: underline">Username</small>
+          <small style="text-decoration: underline">Manager</small>
+        </div>
+        <br />
+        <% if (users.length === 0) { %>
+        <small class="ms-2"
+          >No users have joined <%= project.title %> yet...</small
+        >
+        <% } else { %> <% users.forEach(function(user) { %>
+        <div class="mb-2 d-flex justify-content-between w-25">
+          <div class="d-flex align-items-center">
+            <div><%= user.username %></div>
+            <div
+              class="red-x ms-4"
+              onclick="removeProjectUser(event, '<%= user.project_user_id %>')"
+            >
+              ⓧ
+            </div>
+          </div>
+          <input type="checkbox" name="is_editor"
+          hx-post="/api/edit_project_user_is_editor/<%= user.project_user_id %>"
+          <%= user.is_editor ? 'checked' : '' %> />
+        </div>
+        <% }); %> <% } %>
+      </div>
+      <hr />
+      <button
+        class="btn-red"
+        hx-delete="/api/remove_project/<%= project.id %>"
+        hx-swap="none"
+        hx-confirm="Are you sure you want to delete <%= project.title %>?"
+      >
+        Delete Wyrld
+      </button>
+    </div>
+    <!-- Toast -->
+    <div id="toast-custom"></div>
+    <%- include('./partials/footer') %>
+    <script>
+      async function removeProjectUser(event, id) {
+        if (window.confirm("Are you sure you want to delete this user?")) {
+          const elem = event.target.parentNode.parentNode;
+          elem.remove();
+          await fetch(
+            `${window.location.origin}/api/remove_project_user/${id}`,
+            {
+              method: "DELETE",
+            }
+          );
+        }
+      }
+    </script>
+  </body>
+</html>

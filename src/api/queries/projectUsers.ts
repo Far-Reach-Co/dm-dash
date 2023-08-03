@@ -8,7 +8,7 @@ interface ProjectUserModel {
   date_joined: string
 }
 
-async function addProjectUserQuery(data: {project_id: string, user_id: string, is_editor: boolean}) {
+async function addProjectUserQuery(data: {project_id: string | number, user_id: string | number, is_editor: boolean}) {
   const query = {
     text: /*sql*/ `insert into public."ProjectUser" (project_id, user_id, is_editor) values($1,$2,$3) returning *`,
     values: [
@@ -20,7 +20,7 @@ async function addProjectUserQuery(data: {project_id: string, user_id: string, i
   return await db.query<ProjectUserModel>(query)
 }
 
-async function getProjectUsersQuery(userId: string) {
+async function getProjectUsersQuery(userId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where user_id = $1`,
     values: [userId]
@@ -36,7 +36,7 @@ async function getProjectUserByUserAndProjectQuery(userId: string | number, proj
   return await db.query<ProjectUserModel>(query)
 }
 
-async function getProjectUsersByProjectQuery(projectId: string) {
+async function getProjectUsersByProjectQuery(projectId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectUser" where project_id = $1`,
     values: [projectId]

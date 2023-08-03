@@ -1,7 +1,5 @@
-import state from "../lib/state.js";
 import createElement from "../lib/createElement.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
-import accountManager from "../lib/AccountManager.js"; // dont remove
 import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/TableSidebar.js";
 import CanvasLayer from "../components/CanvasLayer.js";
@@ -11,7 +9,6 @@ import TopLayer from "../lib/TopLayer.js";
 class Table {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "app";
     this.params = props.params;
 
     this.canvasLayer = null;
@@ -23,16 +20,14 @@ class Table {
 
   init = async () => {
     // get table views
-    this.projectId = localStorage.getItem("current-table-project-id");
-    this.campaignId = localStorage.getItem("current-campaign-id");
+    const searchParams = new URLSearchParams(window.location.search);
+    const tableId = searchParams.get("uuid");
 
-    const project = await getThings(`/api/get_project/${this.projectId}`);
-    state.currentProject = project;
-
-    const tableView = await getThings(`/api/get_table_view/${this.campaignId}`);
+    const tableView = await getThings(`/api/get_table_view_by_uuid/${tableId}`);
     // sidebar and hamburger inst
-    this.instantiateSidebar();
+    this.instantiateSidebar(tableView);
     this.instantiateHamburger();
+
     // create canvas elem and append
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.canvasLayer = new CanvasLayer({
@@ -43,13 +38,20 @@ class Table {
     this.topLayer = new TopLayer({
       domComponent: createElement("div"),
       canvasLayer: this.canvasLayer,
+      tableView,
     });
     // provide top layer to socket int
     // provide socket necessary variables
-    socketIntegration.campaignId = this.campaignId;
-    socketIntegration.user = state.user;
+    socketIntegration.tableId = tableId;
     socketIntegration.sidebar = this.sidebar;
     socketIntegration.topLayer = this.topLayer;
+    // handle user or anonymous
+    let user = await getThings("/api/get_user");
+    if (!user) {
+      const randomNumber = Math.floor(100000 + Math.random() * 900000); // random six digit number
+      user = { username: `user-${randomNumber}` };
+    }
+    socketIntegration.user = user;
     // setup socket listeners after canvas instantiation
     socketIntegration.setupListeners(this.canvasLayer);
     socketIntegration.socketJoined();
@@ -58,12 +60,16 @@ class Table {
     this.render();
     await this.canvasLayer.init();
     this.topLayer.render();
-    this.renderSidebarAndHamburger();
+
+    // only render the sidebar for owner or managers
+    if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
+      this.renderSidebarAndHamburger();
   };
 
-  instantiateSidebar = () => {
+  instantiateSidebar = (tableView) => {
     const sidebar = new TableSidebar({
       domComponent: createElement("div", {}),
+      tableView,
     });
     this.sidebar = sidebar;
   };

@@ -255,7 +255,7 @@ export default class AttackComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { style: "align-self: center;" },
+        { class: "special-font", style: "align-self: center;" },
         "Attacks and Spellcasting"
       ),
       createElement("br"),

@@ -1,8 +1,7 @@
-import state from "./state.js";
 import createElement from "./createElement.js";
 
-export default function hidableEditLink(toggleEdit) {
-  if (state.currentProject.isEditor === false) {
+export default function hidableEditLink(toggleEdit, auth) {
+  if (!auth) {
     return createElement("div", { style: "visibility: hidden;" });
   } else {
     return createElement(
