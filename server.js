@@ -63,7 +63,8 @@ app.use((req, res, next) => {
       "::1",
       "::ffff:127.0.0.1",
       "::ffff:192.168.100.244",
-      "::ffff:165.227.88.65",
+      // "::ffff:165.227.88.65",
+      "::ffff:151.19.232.105",
     ];
 
     if (authorizedIps.includes(clientIp)) {
