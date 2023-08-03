@@ -14,7 +14,7 @@ export default class CanvasLayer {
     this.tableSidebarComponent = props.tableSidebarComponent;
 
     // grid
-    this.grid = 50;
+    this.grid = 100;
     this.unitScale = 10;
     this.canvasWidth = 250 * this.unitScale;
     this.canvasHeight = 250 * this.unitScale;
