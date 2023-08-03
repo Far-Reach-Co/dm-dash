@@ -447,18 +447,20 @@ export default class CanvasLayer {
 
     for (var i = 0; i < this.canvasWidth / this.grid; i++) {
       const lineh = new fabric.Line(
-        [i * this.grid, 0, i * this.grid, this.canvasHeight],
+        [i * this.grid + 0.5, 0, i * this.grid + 0.5, this.canvasHeight],
         {
           type: "line",
+          strokeWidth: 1,
           stroke: "#ccc",
           selectable: false,
         }
       );
       gridLineList.push(lineh);
       const linew = new fabric.Line(
-        [0, i * this.grid, this.canvasWidth, i * this.grid],
+        [0, i * this.grid + 0.5, this.canvasWidth, i * this.grid + 0.5],
         {
           type: "line",
+          strokeWidth: 1,
           stroke: "#ccc",
           selectable: false,
         }
