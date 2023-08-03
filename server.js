@@ -58,6 +58,7 @@ app.use(express.static("public"));
 app.use((req, res, next) => {
   if (req.url.includes("/api")) {
     const clientIp = requestIp.getClientIp(req);
+    console.log("***********************************", clientIp);
     const authorizedIps = [
       "::1",
       "::ffff:127.0.0.1",
