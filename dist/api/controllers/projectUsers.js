@@ -160,7 +160,7 @@ function removeProjectUser(req, res, next) {
                     return [4, (0, projectUsers_js_1.removeProjectUserQuery)(req.params.id)];
                 case 1:
                     _a.sent();
-                    res.status(204).send();
+                    res.status(200).send();
                     return [3, 3];
                 case 2:
                     err_4 = _a.sent();
