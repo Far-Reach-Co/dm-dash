@@ -101,7 +101,7 @@ async function removeProjectUser(
 ) {
   try {
     await removeProjectUserQuery(req.params.id);
-    res.status(204).send();
+    res.status(200).send();
   } catch (err) {
     next(err);
   }

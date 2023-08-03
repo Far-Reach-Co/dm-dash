@@ -158,13 +158,7 @@ router.get(
         players.push(charData.rows[0]);
       }
 
-      res.render("wyrld", {
-        auth: req.session.user,
-        projectAuth: false,
-        project: project,
-        tables: tableData.rows,
-        sheets: players,
-      });
+      res.redirect("wyrld");
     } catch (err) {
       next(err);
     }

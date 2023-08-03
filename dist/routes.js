@@ -174,13 +174,7 @@ router.get("/invite", function (req, res, next) { return __awaiter(void 0, void 
                 _i++;
                 return [3, 7];
             case 10:
-                res.render("wyrld", {
-                    auth: req.session.user,
-                    projectAuth: false,
-                    project: project,
-                    tables: tableData.rows,
-                    sheets: players
-                });
+                res.redirect("wyrld");
                 return [3, 12];
             case 11:
                 err_1 = _b.sent();
