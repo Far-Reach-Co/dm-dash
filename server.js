@@ -56,23 +56,22 @@ app.use(express.static("public"));
 
 // check IP, only allow my origins to access /api
 app.use((req, res, next) => {
-  if (req.url.includes("/api")) {
-    const clientIp = requestIp.getClientIp(req);
-    console.log("***********************************", clientIp);
-    const authorizedIps = [
-      "::1",
-      "::ffff:127.0.0.1",
-      "::ffff:192.168.100.244",
-      // "::ffff:165.227.88.65",
-      "::ffff:151.19.232.105",
-    ];
-
-    if (authorizedIps.includes(clientIp)) {
-      next(); // If the IP is in the list, proceed to the next middleware
-    } else {
-      res.status(403).send("Unauthorized IP"); // If the IP is not in the list, reject the request
-    }
-  } else next();
+  // if (req.url.includes("/api")) {
+  //   const clientIp = requestIp.getClientIp(req);
+  //   console.log("***********************************", clientIp);
+  //   const authorizedIps = [
+  //     "::1",
+  //     "::ffff:127.0.0.1",
+  //     "::ffff:192.168.100.244",
+  //     // "::ffff:165.227.88.65",
+  //     "::ffff:151.19.232.105",
+  //   ];
+  //   if (authorizedIps.includes(clientIp)) {
+  //     next(); // If the IP is in the list, proceed to the next middleware
+  //   } else {
+  //     res.status(403).send("Unauthorized IP"); // If the IP is not in the list, reject the request
+  //   }
+  // } else next();
 });
 
 // sessions
