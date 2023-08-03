@@ -16,18 +16,15 @@ export default class SheetSettings {
 
   addInviteLink = async () => {
     try {
-      const res = await fetch(
-        `${window.location.origin}/api/add_player_invite`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            player_id: this.generalData.id,
-          }),
-        }
-      );
+      const res = await fetch(`/api/add_player_invite`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          player_id: this.generalData.id,
+        }),
+      });
       if (res.status === 201) {
         this.render();
       } else throw new Error();
@@ -79,7 +76,7 @@ export default class SheetSettings {
         ),
       ];
     } else {
-      const inviteLink = `${window.location.origin}/5eplayer?id=${this.generalData.id}&invite=${playerInvite.uuid}`;
+      const inviteLink = `/5eplayer?id=${this.generalData.id}&invite=${playerInvite.uuid}`;
 
       const inviteLinkButton = createElement(
         "button",

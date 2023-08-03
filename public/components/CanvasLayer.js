@@ -374,8 +374,7 @@ export default class CanvasLayer {
     const jsonCanvas = this.canvas.toJSON();
     try {
       const res = await fetch(
-        window.location.origin +
-          `/api/edit_table_view_data/${this.currentTableView.id}`,
+        `/api/edit_table_view_data/${this.currentTableView.id}`,
         {
           method: "POST",
           headers: {

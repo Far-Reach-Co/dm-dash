@@ -151,7 +151,7 @@
     const projectAuth = <%= projectAuth %>;
 
     async function openCalendar(id) {
-      const res = await fetch(`${window.location.origin}/api/get_calendar/${id}`)
+      const res = await fetch(`/api/get_calendar/${id}`)
       if (res.status === 200) {
         const calendar = await res.json();
         if (calendar) {
