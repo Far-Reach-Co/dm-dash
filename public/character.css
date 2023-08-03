@@ -347,6 +347,6 @@ form {
   margin-right: 2px;
   border: 2px solid var(--blue);
   border-radius: var(--border-radius);
-  background-color: var(--blue6);
+  background-color: var(--red1);
   cursor: pointer;
 }
