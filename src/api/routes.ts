@@ -340,34 +340,133 @@ router.post(
   }),
   edit5eCharGeneral
 );
-router.post("/edit_5e_character_proficiencies/:id", edit5eCharPro);
-router.post("/edit_5e_character_background/:id", edit5eCharBack);
-router.post("/edit_5e_character_spell_slots/:id", edit5eCharSpellSlotInfo);
+router.post(
+  "/edit_5e_character_proficiencies/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  edit5eCharPro
+);
+router.post(
+  "/edit_5e_character_background/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  edit5eCharBack
+);
+router.post(
+  "/edit_5e_character_spell_slots/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  edit5eCharSpellSlotInfo
+);
 
 // 5e characters attacks
 router.get("/get_5e_character_attacks/:general_id", get5eCharAttacksByGeneral);
-router.post("/add_5e_character_attack", add5eCharAttack);
+router.post(
+  "/add_5e_character_attack",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  add5eCharAttack
+);
 router.delete("/remove_5e_character_attack/:id", remove5eCharAttack);
-router.post("/edit_5e_character_attack/:id", edit5eCharAttack);
+router.post(
+  "/edit_5e_character_attack/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  edit5eCharAttack
+);
 
 // 5e characters spells
 router.get("/get_5e_character_spells/:general_id/:type", get5eCharSpellsByType);
 router.post("/add_5e_character_spell", add5eCharSpell);
-router.delete("/remove_5e_character_spell/:id", remove5eCharSpell);
+router.delete(
+  "/remove_5e_character_spell/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  remove5eCharSpell
+);
 router.post("/edit_5e_character_spell/:id", edit5eCharSpell);
 
 // 5e characters feats/traits
 router.get("/get_5e_character_feats/:general_id", get5eCharFeatsByGeneral);
-router.post("/add_5e_character_feat", add5eCharFeat);
+router.post(
+  "/add_5e_character_feat",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  add5eCharFeat
+);
 router.delete("/remove_5e_character_feat/:id", remove5eCharFeat);
-router.post("/edit_5e_character_feat/:id", edit5eCharFeat);
+router.post(
+  "/edit_5e_character_feat/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  edit5eCharFeat
+);
 
 // 5e characters equipments
 router.get(
   "/get_5e_character_equipments/:general_id",
   get5eCharEquipmentsByGeneral
 );
-router.post("/add_5e_character_equipment", add5eCharEquipment);
+router.post(
+  "/add_5e_character_equipment",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  add5eCharEquipment
+);
 router.delete("/remove_5e_character_equipment/:id", remove5eCharEquipment);
 router.post("/edit_5e_character_equipment/:id", edit5eCharEquipment);
 
@@ -381,7 +480,18 @@ router.delete(
   "/remove_5e_character_other_pro_lang/:id",
   remove5eCharOtherProLang
 );
-router.post("/edit_5e_character_other_pro_lang/:id", edit5eCharOtherProLang);
+router.post(
+  "/edit_5e_character_other_pro_lang/:id",
+  body("userInput").customSanitizer((value) => {
+    if (typeof value === "string") {
+      // If the value is a string, trim it and then escape it
+      return validator.escape(value.trim());
+    }
+    // If the value is not a string, return it as is
+    return value;
+  }),
+  edit5eCharOtherProLang
+);
 
 // events
 // router.get("/get_events/:project_id/:limit/:offset", getEvents);
