@@ -155,7 +155,7 @@ form {
   /* flex-wrap: wrap; */
   /* align-items: center; */
   justify-content: center;
-  min-width: 300px;
+  min-width: 280px;
   /* max-width: 500px; */
   height: fit-content;
   /* border: 2px solid var(--blue); */
