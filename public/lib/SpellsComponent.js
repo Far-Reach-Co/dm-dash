@@ -362,6 +362,9 @@ class SingleSpell {
                 postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                   casting_time: e.target.value,
                 });
+                // update UI
+                this.spells[this.spells.indexOf(spell)].casting_time =
+                  e.target.value;
               },
             }
           ),
@@ -383,6 +386,9 @@ class SingleSpell {
                 postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                   duration: e.target.value,
                 });
+                // update UI
+                this.spells[this.spells.indexOf(spell)].duration =
+                  e.target.value;
               },
             }
           ),
@@ -404,6 +410,8 @@ class SingleSpell {
                 postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                   range: e.target.value,
                 });
+                // update UI
+                this.spells[this.spells.indexOf(spell)].range = e.target.value;
               },
             }
           ),
@@ -425,6 +433,9 @@ class SingleSpell {
                 postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                   damage_type: e.target.value,
                 });
+                // update UI
+                this.spells[this.spells.indexOf(spell)].damage_type =
+                  e.target.value;
               },
             }
           ),
@@ -446,6 +457,9 @@ class SingleSpell {
                 postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                   components: e.target.value,
                 });
+                // update UI
+                this.spells[this.spells.indexOf(spell)].components =
+                  e.target.value;
               },
             }
           ),
@@ -466,6 +480,9 @@ class SingleSpell {
               postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                 description: e.target.value,
               });
+              // update UI
+              this.spells[this.spells.indexOf(spell)].description =
+                e.target.value;
             },
           }
         ),
@@ -502,6 +519,9 @@ class SingleSpell {
                   postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                     title: e.target.value,
                   });
+                  // update UI
+                  this.spells[this.spells.indexOf(spell)].title =
+                    e.target.value;
                 },
               }
             ),
