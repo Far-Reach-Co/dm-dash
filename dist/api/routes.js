@@ -73,29 +73,79 @@ router.post("/edit_5e_character_general/:id", (0, express_validator_1.body)("use
     }
     return value;
 }), _5eCharGeneral_js_1.edit5eCharGeneral);
-router.post("/edit_5e_character_proficiencies/:id", _5eCharGeneral_js_1.edit5eCharPro);
-router.post("/edit_5e_character_background/:id", _5eCharGeneral_js_1.edit5eCharBack);
-router.post("/edit_5e_character_spell_slots/:id", _5eCharSpellSlots_js_1.edit5eCharSpellSlotInfo);
+router.post("/edit_5e_character_proficiencies/:id", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharGeneral_js_1.edit5eCharPro);
+router.post("/edit_5e_character_background/:id", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharGeneral_js_1.edit5eCharBack);
+router.post("/edit_5e_character_spell_slots/:id", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharSpellSlots_js_1.edit5eCharSpellSlotInfo);
 router.get("/get_5e_character_attacks/:general_id", _5eCharAttacks_js_1.get5eCharAttacksByGeneral);
-router.post("/add_5e_character_attack", _5eCharAttacks_js_1.add5eCharAttack);
+router.post("/add_5e_character_attack", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharAttacks_js_1.add5eCharAttack);
 router["delete"]("/remove_5e_character_attack/:id", _5eCharAttacks_js_1.remove5eCharAttack);
-router.post("/edit_5e_character_attack/:id", _5eCharAttacks_js_1.edit5eCharAttack);
+router.post("/edit_5e_character_attack/:id", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharAttacks_js_1.edit5eCharAttack);
 router.get("/get_5e_character_spells/:general_id/:type", _5eCharSpells_js_1.get5eCharSpellsByType);
 router.post("/add_5e_character_spell", _5eCharSpells_js_1.add5eCharSpell);
-router["delete"]("/remove_5e_character_spell/:id", _5eCharSpells_js_1.remove5eCharSpell);
+router["delete"]("/remove_5e_character_spell/:id", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharSpells_js_1.remove5eCharSpell);
 router.post("/edit_5e_character_spell/:id", _5eCharSpells_js_1.edit5eCharSpell);
 router.get("/get_5e_character_feats/:general_id", _5eCharFeats_js_1.get5eCharFeatsByGeneral);
-router.post("/add_5e_character_feat", _5eCharFeats_js_1.add5eCharFeat);
+router.post("/add_5e_character_feat", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharFeats_js_1.add5eCharFeat);
 router["delete"]("/remove_5e_character_feat/:id", _5eCharFeats_js_1.remove5eCharFeat);
-router.post("/edit_5e_character_feat/:id", _5eCharFeats_js_1.edit5eCharFeat);
+router.post("/edit_5e_character_feat/:id", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharFeats_js_1.edit5eCharFeat);
 router.get("/get_5e_character_equipments/:general_id", _5eCharEquipment_js_1.get5eCharEquipmentsByGeneral);
-router.post("/add_5e_character_equipment", _5eCharEquipment_js_1.add5eCharEquipment);
+router.post("/add_5e_character_equipment", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharEquipment_js_1.add5eCharEquipment);
 router["delete"]("/remove_5e_character_equipment/:id", _5eCharEquipment_js_1.remove5eCharEquipment);
 router.post("/edit_5e_character_equipment/:id", _5eCharEquipment_js_1.edit5eCharEquipment);
 router.get("/get_5e_character_other_pro_langs/:general_id", _5eCharOtherProLang_js_1.get5eCharOtherProLangsByGeneral);
 router.post("/add_5e_character_other_pro_lang", _5eCharOtherProLang_js_1.add5eCharOtherProLang);
 router["delete"]("/remove_5e_character_other_pro_lang/:id", _5eCharOtherProLang_js_1.remove5eCharOtherProLang);
-router.post("/edit_5e_character_other_pro_lang/:id", _5eCharOtherProLang_js_1.edit5eCharOtherProLang);
+router.post("/edit_5e_character_other_pro_lang/:id", (0, express_validator_1.body)("userInput").customSanitizer(function (value) {
+    if (typeof value === "string") {
+        return validator_1["default"].escape(value.trim());
+    }
+    return value;
+}), _5eCharOtherProLang_js_1.edit5eCharOtherProLang);
 router.get("/get_months/:calendar_id", months_js_1.getMonths);
 router.post("/add_month", (0, express_validator_1.body)("title").trim().escape(), months_js_1.addMonth);
 router["delete"]("/remove_month/:id", months_js_1.removeMonth);
