@@ -14,7 +14,7 @@
 }
 
 :root {
-  --main-white: rgb(209, 209, 209);
+  --main-white: rgb(187, 187, 187);
   --main-dark: rgb(27, 32, 38);
   --main-gray: rgb(103, 101, 101);
   --light-gray: rgb(174, 173, 173);
@@ -27,11 +27,11 @@
   --link-blue: rgb(155, 178, 205);
   --purple: rgb(73, 42, 87);
   --pink: rgb(221, 196, 248);
-  --green: rgb(161, 184, 134);
+  --green: rgb(161, 190, 128);
   --green2: rgb(49, 74, 36);
   --orange: rgb(165, 79, 4);
-  --orange2: rgb(224, 164, 116);
-  --orange3: rgb(242, 216, 186);
+  --orange2: rgb(209, 158, 116);
+  --orange3: rgb(208, 184, 158);
   --orange4: rgb(213, 189, 161);
   --red1: rgb(206, 101, 101);
   --red2: rgb(120, 51, 51);
