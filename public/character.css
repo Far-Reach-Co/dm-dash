@@ -200,7 +200,7 @@ form {
   margin: 5px;
   border: 1px solid var(--blue);
   cursor: pointer;
-  background-color: var(--blue6);
+  background-color: var(--green);
   border-radius: var(--border-radius);
 }
 
