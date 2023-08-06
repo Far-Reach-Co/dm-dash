@@ -218,12 +218,12 @@ export default class CanvasLayer {
       // move active objects to other layer
       if (e.ctrlKey) {
         // only allow gm to do this
-        if (USERID != this.tableView.user_id) return;
-
-        const activeObjects = this.canvas.getActiveObjects();
-        for (var object of activeObjects) {
-          this.moveObjectToOtherLayer(object);
-        }
+        if (USERID == this.tableView.user_id || IS_MANAGER_OR_OWNER) {
+          const activeObjects = this.canvas.getActiveObjects();
+          for (var object of activeObjects) {
+            this.moveObjectToOtherLayer(object);
+          }
+        } else return;
       }
     });
     document.addEventListener("keyup", (e) => {
