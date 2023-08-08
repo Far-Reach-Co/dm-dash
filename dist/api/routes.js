@@ -23,14 +23,16 @@ var tableViews_js_1 = require("./controllers/tableViews.js");
 var playerInvites_js_1 = require("./controllers/playerInvites.js");
 var playerUsers_js_1 = require("./controllers/playerUsers.js");
 var express_validator_1 = require("express-validator");
-var validator_1 = require("validator");
+var sanitizeHtml = require("sanitize-html");
 var upload = multer({ dest: "file_uploads/" });
 var router = (0, express_1.Router)();
 router.get("/get_image/:id", s3_js_1.getImage);
 router.post("/signed_URL_download", s3_js_1.getSignedUrlForDownload);
 router.post("/new_image_for_project", upload.single("file"), s3_js_1.newImageForProject);
 router.post("/new_image_for_user", upload.single("file"), s3_js_1.newImageForUser);
-router.post("/edit_image_name/:id", (0, express_validator_1.body)("original_name").trim().escape(), s3_js_1.editImageName);
+router.post("/edit_image_name/:id", (0, express_validator_1.body)("original_name")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), s3_js_1.editImageName);
 router["delete"]("/remove_image_by_table_user/:image_id/:table_id", s3_js_1.removeImageByTableUser);
 router["delete"]("/remove_image_by_project/:image_id/:project_id", s3_js_1.removeImageByProject);
 router.get("/get_table_views_by_project/:project_id", tableViews_js_1.getTableViewsByProject);
@@ -41,7 +43,9 @@ router.post("/add_table_view_by_project/:project_id", tableViews_js_1.addTableVi
 router.post("/add_table_view_by_user", tableViews_js_1.addTableViewByUser);
 router["delete"]("/remove_table_view/:id", tableViews_js_1.removeTableView);
 router.post("/edit_table_view_data/:id", tableViews_js_1.editTableViewData);
-router.post("/edit_table_view_title/:id", (0, express_validator_1.body)("title").trim().escape(), tableViews_js_1.editTableViewTitle);
+router.post("/edit_table_view_title/:id", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), tableViews_js_1.editTableViewTitle);
 router.get("/get_table_images_by_table_project/:table_id", tableImages_js_1.getTableImagesByTableProject);
 router.get("/get_table_images_by_table_user/:table_id", tableImages_js_1.getTableImagesByTableUser);
 router.post("/add_table_image_by_project", tableImages_js_1.addTableImageByProject);
@@ -65,13 +69,15 @@ router.post("/add_project_invite", projectInvites_js_1.addProjectInvite);
 router["delete"]("/remove_project_invite/:id", projectInvites_js_1.removeProjectInvite);
 router.get("/get_5e_characters_by_user", _5eCharGeneral_js_1.get5eCharsByUser);
 router.get("/get_5e_character_general/:id", _5eCharGeneral_js_1.get5eCharGeneral);
-router.post("/add_5e_character", (0, express_validator_1.body)("name").trim().escape(), _5eCharGeneral_js_1.add5eChar);
+router.post("/add_5e_character", (0, express_validator_1.body)("name")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), _5eCharGeneral_js_1.add5eChar);
 router["delete"]("/remove_5e_character/:id", _5eCharGeneral_js_1.remove5eChar);
 router.post("/edit_5e_character_general/:id", (0, express_validator_1.body)().customSanitizer(function (value) {
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -81,7 +87,7 @@ router.post("/edit_5e_character_proficiencies/:id", (0, express_validator_1.body
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -91,7 +97,7 @@ router.post("/edit_5e_character_background/:id", (0, express_validator_1.body)()
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -101,7 +107,7 @@ router.post("/edit_5e_character_spell_slots/:id", (0, express_validator_1.body)(
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -112,7 +118,7 @@ router.post("/add_5e_character_attack", (0, express_validator_1.body)().customSa
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -123,7 +129,7 @@ router.post("/edit_5e_character_attack/:id", (0, express_validator_1.body)().cus
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -135,7 +141,7 @@ router["delete"]("/remove_5e_character_spell/:id", (0, express_validator_1.body)
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -147,7 +153,7 @@ router.post("/add_5e_character_feat", (0, express_validator_1.body)().customSani
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -158,7 +164,7 @@ router.post("/edit_5e_character_feat/:id", (0, express_validator_1.body)().custo
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -169,7 +175,7 @@ router.post("/add_5e_character_equipment", (0, express_validator_1.body)().custo
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
@@ -184,35 +190,55 @@ router.post("/edit_5e_character_other_pro_lang/:id", (0, express_validator_1.bod
     if (typeof value === "object" && value !== null) {
         for (var key in value) {
             if (typeof value[key] === "string") {
-                value[key] = validator_1["default"].escape(value[key].trim());
+                value[key] = sanitizeHtml(value[key].trim());
             }
         }
     }
     return value;
 }), _5eCharOtherProLang_js_1.edit5eCharOtherProLang);
 router.get("/get_months/:calendar_id", months_js_1.getMonths);
-router.post("/add_month", (0, express_validator_1.body)("title").trim().escape(), months_js_1.addMonth);
+router.post("/add_month", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), months_js_1.addMonth);
 router["delete"]("/remove_month/:id", months_js_1.removeMonth);
-router.post("/edit_month/:id", (0, express_validator_1.body)("title").trim().escape(), months_js_1.editMonth);
+router.post("/edit_month/:id", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), months_js_1.editMonth);
 router.get("/get_days/:calendar_id", days_js_1.getDays);
-router.post("/add_day", (0, express_validator_1.body)("title").trim().escape(), days_js_1.addDay);
+router.post("/add_day", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), days_js_1.addDay);
 router["delete"]("/remove_day/:id", days_js_1.removeDay);
-router.post("/edit_day/:id", (0, express_validator_1.body)("title").trim().escape(), days_js_1.editDay);
+router.post("/edit_day/:id", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), days_js_1.editDay);
 router.get("/get_calendars/:project_id", calendars_js_1.getCalendars);
 router.get("/get_calendar/:id", calendars_js_1.getCalendar);
-router.post("/add_calendar", (0, express_validator_1.body)("title").trim().escape(), calendars_js_1.addCalendar);
+router.post("/add_calendar", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), calendars_js_1.addCalendar);
 router["delete"]("/remove_calendar/:id", calendars_js_1.removeCalendar);
-router.post("/edit_calendar/:id", (0, express_validator_1.body)("title").trim().escape(), calendars_js_1.editCalendar);
+router.post("/edit_calendar/:id", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), calendars_js_1.editCalendar);
 router.get("/get_project/:id", projects_js_1.getProject);
 router.get("/get_projects", projects_js_1.getProjects);
-router.post("/add_project", (0, express_validator_1.body)("title").trim().escape(), projects_js_1.addProject);
+router.post("/add_project", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), projects_js_1.addProject);
 router["delete"]("/remove_project/:id", projects_js_1.removeProject);
-router.post("/edit_project/:id", (0, express_validator_1.body)("title").trim().escape(), projects_js_1.editProject);
+router.post("/edit_project/:id", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), projects_js_1.editProject);
 router.get("/get_user", users_js_1.getUserBySession);
-router.post("/register", (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), (0, express_validator_1.body)("username").trim().escape(), users_js_1.registerUser);
+router.post("/register", (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), (0, express_validator_1.body)("username")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), users_js_1.registerUser);
 router.post("/login", users_js_1.loginUser);
 router.post("/request_reset_email", users_js_1.requestResetEmail);
 router.post("/user/reset_password", users_js_1.resetPassword);
-router.post("/update_username", (0, express_validator_1.body)("username").trim().escape(), users_js_1.editUsername);
+router.post("/update_username", (0, express_validator_1.body)("username")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), users_js_1.editUsername);
 router.post("/update_email", (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.editEmail);
 module.exports = router;
