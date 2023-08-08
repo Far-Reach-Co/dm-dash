@@ -330,48 +330,60 @@ router.post("/add_5e_character", body("name").trim().escape(), add5eChar);
 router.delete("/remove_5e_character/:id", remove5eChar);
 router.post(
   "/edit_5e_character_general/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   edit5eCharGeneral
 );
 router.post(
   "/edit_5e_character_proficiencies/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   edit5eCharPro
 );
 router.post(
   "/edit_5e_character_background/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   edit5eCharBack
 );
 router.post(
   "/edit_5e_character_spell_slots/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   edit5eCharSpellSlotInfo
@@ -381,12 +393,15 @@ router.post(
 router.get("/get_5e_character_attacks/:general_id", get5eCharAttacksByGeneral);
 router.post(
   "/add_5e_character_attack",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   add5eCharAttack
@@ -394,12 +409,15 @@ router.post(
 router.delete("/remove_5e_character_attack/:id", remove5eCharAttack);
 router.post(
   "/edit_5e_character_attack/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   edit5eCharAttack
@@ -410,12 +428,15 @@ router.get("/get_5e_character_spells/:general_id/:type", get5eCharSpellsByType);
 router.post("/add_5e_character_spell", add5eCharSpell);
 router.delete(
   "/remove_5e_character_spell/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   remove5eCharSpell
@@ -426,12 +447,15 @@ router.post("/edit_5e_character_spell/:id", edit5eCharSpell);
 router.get("/get_5e_character_feats/:general_id", get5eCharFeatsByGeneral);
 router.post(
   "/add_5e_character_feat",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   add5eCharFeat
@@ -439,12 +463,15 @@ router.post(
 router.delete("/remove_5e_character_feat/:id", remove5eCharFeat);
 router.post(
   "/edit_5e_character_feat/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   edit5eCharFeat
@@ -457,12 +484,15 @@ router.get(
 );
 router.post(
   "/add_5e_character_equipment",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   add5eCharEquipment
@@ -482,12 +512,15 @@ router.delete(
 );
 router.post(
   "/edit_5e_character_other_pro_lang/:id",
-  body("userInput").customSanitizer((value) => {
-    if (typeof value === "string") {
-      // If the value is a string, trim it and then escape it
-      return validator.escape(value.trim());
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = validator.escape(value[key].trim());
+        }
+      }
     }
-    // If the value is not a string, return it as is
     return value;
   }),
   edit5eCharOtherProLang
