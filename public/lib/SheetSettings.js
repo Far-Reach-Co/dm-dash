@@ -76,7 +76,7 @@ export default class SheetSettings {
         ),
       ];
     } else {
-      const inviteLink = `/5eplayer?id=${this.generalData.id}&invite=${playerInvite.uuid}`;
+      const inviteLink = `${window.location.origin}/5eplayer?id=${this.generalData.id}&invite=${playerInvite.uuid}`;
 
       const inviteLinkButton = createElement(
         "button",
