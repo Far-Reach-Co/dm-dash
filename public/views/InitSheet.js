@@ -12,30 +12,36 @@ class InitSheet {
   init = async () => {
     const searchParams = new URLSearchParams(window.location.search);
     const id = searchParams.get("id");
-    const invite = searchParams.get("invite");
-    if (invite) {
-      const inviteValid = await getThings(
-        `/api/get_player_invite_by_uuid/${invite}`
-      );
-      if (inviteValid) {
-        const playerUser = await getThings(
-          `/api/get_player_user_by_user_and_player/${id}`
+    // get player sheet data
+    const generalData = await getThings(`/api/get_5e_character_general/${id}`);
+    // handle invite
+    // don't allow owner to become a playerUser of their own sheet
+    if (USERID != generalData.user_id) {
+      const invite = searchParams.get("invite");
+      if (invite) {
+        const inviteValid = await getThings(
+          `/api/get_player_invite_by_uuid/${invite}`
         );
-        if (!playerUser) {
-          await postThing("/api/add_player_user", { player_id: id });
+        if (inviteValid) {
+          // check if user is already a playerUser
+          const playerUser = await getThings(
+            `/api/get_player_user_by_user_and_player/${id}`
+          );
+          if (!playerUser) {
+            await postThing("/api/add_player_user", { player_id: id });
+          }
+          // clean params
+          searchParams.delete("invite");
+          const newRelativePathQuery =
+            window.location.pathname + "?" + searchParams.toString();
+          history.replaceState(null, "", newRelativePathQuery);
+        } else {
+          window.alert("Invalid invite link");
+          window.location.pathname = "/";
         }
-        // clean params
-        searchParams.delete("invite");
-        const newRelativePathQuery =
-          window.location.pathname + "?" + searchParams.toString();
-        history.replaceState(null, "", newRelativePathQuery);
-      } else {
-        window.alert("Invalid invite link");
-        window.location.pathname = "/";
       }
     }
 
-    const generalData = await getThings(`/api/get_5e_character_general/${id}`);
     new FiveEPlayerSheet({
       domComponent: this.elem,
       params: { content: generalData },
