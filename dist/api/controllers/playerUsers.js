@@ -37,28 +37,35 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.editPlayerUser = exports.removePlayerUsersByPlayer = exports.removePlayerUserByUserAndPlayer = exports.removePlayerUser = exports.getPlayerUsersByPlayer = exports.getPlayerUserByUserAndPlayer = exports.addPlayerUser = void 0;
+var _5eCharGeneral_js_1 = require("../queries/5eCharGeneral.js");
 var playerUsers_js_1 = require("../queries/playerUsers.js");
 var users_js_1 = require("../queries/users.js");
 function addPlayerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var data, err_1;
+        var charData, data, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
+                    _a.trys.push([0, 3, , 4]);
                     if (!req.session.user)
                         throw new Error("User is not logged in");
                     req.body.user_id = req.session.user;
-                    return [4, (0, playerUsers_js_1.addPlayerUserQuery)(req.body)];
+                    return [4, (0, _5eCharGeneral_js_1.get5eCharGeneralQuery)(req.body.player_id)];
                 case 1:
+                    charData = _a.sent();
+                    if (charData.rows[0].user_id == req.session.user) {
+                        throw { message: "User is owner" };
+                    }
+                    return [4, (0, playerUsers_js_1.addPlayerUserQuery)(req.body)];
+                case 2:
                     data = _a.sent();
                     res.status(201).json(data.rows[0]);
-                    return [3, 3];
-                case 2:
+                    return [3, 4];
+                case 3:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 3];
-                case 3: return [2];
+                    return [3, 4];
+                case 4: return [2];
             }
         });
     });
