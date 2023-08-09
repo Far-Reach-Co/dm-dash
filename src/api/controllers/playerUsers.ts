@@ -1,3 +1,4 @@
+import { get5eCharGeneralQuery } from "../queries/5eCharGeneral.js";
 import {
   addPlayerUserQuery,
   getPlayerUserQuery,
@@ -15,6 +16,12 @@ async function addPlayerUser(req: Request, res: Response, next: NextFunction) {
     if (!req.session.user) throw new Error("User is not logged in");
 
     req.body.user_id = req.session.user;
+    // check to make sure this user isn't the owner already
+    const charData = await get5eCharGeneralQuery(req.body.player_id);
+    if (charData.rows[0].user_id == req.session.user) {
+      throw { message: "User is owner" };
+    }
+
     const data = await addPlayerUserQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
