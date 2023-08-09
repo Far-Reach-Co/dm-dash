@@ -100,7 +100,7 @@ function getProjectUsersByProjectQuery(projectId) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"ProjectUser\" where project_id = $1",
+                        text: "select * from public.\"ProjectUser\" where project_id = $1 order by id",
                         values: [projectId]
                     };
                     return [4, dbconfig_1["default"].query(query)];

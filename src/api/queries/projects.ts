@@ -40,7 +40,7 @@ async function removeProjectQuery(id: string) {
 
 async function getProjectsQuery(userId: string | number) {
   const query = {
-    text: /*sql*/ `select * from public."Project" where user_id = $1 order by title asc`,
+    text: /*sql*/ `select * from public."Project" where user_id = $1 order by id`,
     values: [userId]
   }
   return await db.query<ProjectModel>(query)

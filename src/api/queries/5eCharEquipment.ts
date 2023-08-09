@@ -39,7 +39,7 @@ async function get5eCharEquipmentQuery(id: string) {
 
 async function get5eCharEquipmentsByGeneralQuery(generalId: string | number) {
   const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_equipment" where general_id = $1`,
+    text: /*sql*/ `select * from public."dnd_5e_character_equipment" where general_id = $1 order by id`,
     values: [generalId]
   }
   return await db.query<DndFiveEEquipmentModel>(query)
