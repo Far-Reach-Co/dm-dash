@@ -31,7 +31,7 @@ async function get5eCharOtherProLangQuery(id: string) {
 
 async function get5eCharOtherProLangsByGeneralQuery(generalId: string | number) {
   const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where general_id = $1`,
+    text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where general_id = $1 order by id`,
     values: [generalId]
   }
   return await db.query<DndFiveEOtherProLangModel>(query)

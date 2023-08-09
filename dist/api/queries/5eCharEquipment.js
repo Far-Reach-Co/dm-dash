@@ -85,7 +85,7 @@ function get5eCharEquipmentsByGeneralQuery(generalId) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"dnd_5e_character_equipment\" where general_id = $1",
+                        text: "select * from public.\"dnd_5e_character_equipment\" where general_id = $1 order by id",
                         values: [generalId]
                     };
                     return [4, dbconfig_1["default"].query(query)];

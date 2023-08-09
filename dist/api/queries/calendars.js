@@ -83,7 +83,7 @@ function getCalendarsQuery(projectId) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"Calendar\" where project_id = $1 order by title asc",
+                        text: "select * from public.\"Calendar\" where project_id = $1 order by id",
                         values: [projectId]
                     };
                     return [4, dbconfig_1["default"].query(query)];

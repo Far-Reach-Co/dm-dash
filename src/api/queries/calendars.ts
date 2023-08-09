@@ -35,7 +35,7 @@ async function getCalendarQuery(id: string) {
 
 async function getCalendarsQuery(projectId: string) {
   const query = {
-    text: /*sql*/ `select * from public."Calendar" where project_id = $1 order by title asc`,
+    text: /*sql*/ `select * from public."Calendar" where project_id = $1 order by id`,
     values: [projectId]
   }
   return await db.query<CalendarModel>(query)
