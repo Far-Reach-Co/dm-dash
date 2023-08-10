@@ -205,6 +205,11 @@ export default class CanvasLayer {
       const id = uuidv4();
       opt.path.set("id", id);
       opt.path.set("layer", this.currentLayer);
+
+      opt.path.on("selected", (options) => {
+        this.moveObjectUp(options.target);
+      });
+
       socketIntegration.imageAdded(opt.path);
     });
 
