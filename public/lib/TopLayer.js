@@ -229,29 +229,41 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
-              ),
-              createElement("br"),
-              createElement("b", {}, "Control (⌃)"),
-              createElement(
-                "small",
-                {},
-                "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
+                "Hold key to enable drag-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
               ),
               createElement("br"),
               createElement("b", {}, "Shift"),
+              createElement("br"),
               createElement(
                 "small",
                 {},
-                "Hold key and click multiple objects to select multiple objects."
+                "Hold key and click objects to select multiple."
               ),
               createElement("br"),
               createElement("b", {}, "Delete/Backspace"),
+              createElement("br"),
               createElement(
                 "small",
                 {},
-                "While object is selected, press key to remove object from table."
+                "While object(s) are selected, press delete key to remove object(s) from table."
               ),
+              createElement("br"),
+              createElement("b", {}, "Control (⌃) + m"),
+              createElement("br"),
+              createElement(
+                "small",
+                {},
+                "*GM only* While object(s) are selected, pressing ctrl + m will change the layer that the object(s) are currently on."
+              ),
+              createElement("br"),
+              createElement("b", {}, "Control (⌃) + d"),
+              createElement("br"),
+              createElement(
+                "small",
+                {},
+                "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original."
+              ),
+              createElement("br"),
             ])
           );
         },

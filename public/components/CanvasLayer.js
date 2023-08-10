@@ -221,7 +221,7 @@ export default class CanvasLayer {
         this.canvas.setCursor("crosshair");
       }
       // move active objects to other layer
-      if (e.ctrlKey) {
+      if (e.ctrlKey && e.key == "m") {
         // only allow gm to do this
         if (USERID == this.tableView.user_id || IS_MANAGER_OR_OWNER) {
           const activeObjects = this.canvas.getActiveObjects();
@@ -229,6 +229,33 @@ export default class CanvasLayer {
             this.moveObjectToOtherLayer(object);
           }
         } else return;
+      }
+      // duplicate
+      if (e.ctrlKey && e.key == "d") {
+        const activeObjects = this.canvas.getActiveObjects();
+        for (var object of activeObjects) {
+          object.clone((clone) => {
+            // new id
+            const id = uuidv4();
+            clone.set("id", id);
+            // place close to original
+            if (object.group) {
+              let absoluteLeft =
+                object.left + object.group.left + object.group.width / 2;
+              let absoluteTop =
+                object.top + object.group.top + object.group.height / 2;
+              clone.set("left", absoluteLeft + 50);
+              clone.set("top", absoluteTop + 50);
+            } else {
+              clone.set("left", object.left + 50);
+              clone.set("top", object.top + 50);
+            }
+            // add to canvas
+            this.canvas.add(clone);
+            // send to socket
+            socketIntegration.imageAdded(clone);
+          });
+        }
       }
     });
     document.addEventListener("keyup", (e) => {
