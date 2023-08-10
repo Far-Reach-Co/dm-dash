@@ -36,20 +36,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editTableImageQuery = exports.removeTableImageQuery = exports.getTableImageQuery = exports.getTableImagesByFolderQuery = exports.getTableImagesByUserQuery = exports.getTableImagesByProjectQuery = exports.addTableImageByUserQuery = exports.addTableImageByProjectQuery = void 0;
+exports.editTableFolderQuery = exports.removeTableFolderQuery = exports.getTableFolderQuery = exports.getTableFoldersByParentQuery = exports.getTableFoldersByUserQuery = exports.getTableFoldersByProjectQuery = exports.addTableFolderByUserQuery = exports.addTableFolderByProjectQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
-function addTableImageByProjectQuery(data) {
+function addTableFolderByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"TableImage\" (project_id, image_id, folder_id) values($1,$2,$3) returning *",
+                        text: "insert into public.\"TableFolder\" (project_id, title, is_sub, parent_folder_id) values($1,$2,$3,$4) returning *",
                         values: [
                             data.project_id,
-                            data.image_id,
-                            data.folder_id
+                            data.title,
+                            data.is_sub,
+                            data.parent_folder_id
                         ]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -58,19 +59,20 @@ function addTableImageByProjectQuery(data) {
         });
     });
 }
-exports.addTableImageByProjectQuery = addTableImageByProjectQuery;
-function addTableImageByUserQuery(data) {
+exports.addTableFolderByProjectQuery = addTableFolderByProjectQuery;
+function addTableFolderByUserQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "insert into public.\"TableImage\" (user_id, image_id, folder_id) values($1,$2,$3) returning *",
+                        text: "insert into public.\"TableFolder\" (user_id, title, is_sub, parent_folder_id) values($1,$2,$3,$4) returning *",
                         values: [
                             data.user_id,
-                            data.image_id,
-                            data.folder_id
+                            data.title,
+                            data.is_sub,
+                            data.parent_folder_id
                         ]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -79,15 +81,15 @@ function addTableImageByUserQuery(data) {
         });
     });
 }
-exports.addTableImageByUserQuery = addTableImageByUserQuery;
-function getTableImageQuery(id) {
+exports.addTableFolderByUserQuery = addTableFolderByUserQuery;
+function getTableFolderQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"TableImage\" where id = $1",
+                        text: "select * from public.\"TableFolder\" where id = $1",
                         values: [id]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -96,16 +98,16 @@ function getTableImageQuery(id) {
         });
     });
 }
-exports.getTableImageQuery = getTableImageQuery;
-function getTableImagesByFolderQuery(folder_id) {
+exports.getTableFolderQuery = getTableFolderQuery;
+function getTableFoldersByUserQuery(userId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"TableImage\" where folder_id = $1",
-                        values: [folder_id]
+                        text: "select * from public.\"TableFolder\" where user_id = $1 order by id",
+                        values: [userId]
                     };
                     return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
@@ -113,16 +115,16 @@ function getTableImagesByFolderQuery(folder_id) {
         });
     });
 }
-exports.getTableImagesByFolderQuery = getTableImagesByFolderQuery;
-function getTableImagesByProjectQuery(project_id) {
+exports.getTableFoldersByUserQuery = getTableFoldersByUserQuery;
+function getTableFoldersByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"TableImage\" where project_id = $1",
-                        values: [project_id]
+                        text: "select * from public.\"TableFolder\" where project_id = $1 order by id",
+                        values: [projectId]
                     };
                     return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
@@ -130,16 +132,16 @@ function getTableImagesByProjectQuery(project_id) {
         });
     });
 }
-exports.getTableImagesByProjectQuery = getTableImagesByProjectQuery;
-function getTableImagesByUserQuery(user_id) {
+exports.getTableFoldersByProjectQuery = getTableFoldersByProjectQuery;
+function getTableFoldersByParentQuery(parentFolderId) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "select * from public.\"TableImage\" where user_id = $1",
-                        values: [user_id]
+                        text: "select * from public.\"TableFolder\" where parent_folder_id = $1 order by id",
+                        values: [parentFolderId]
                     };
                     return [4, dbconfig_1["default"].query(query)];
                 case 1: return [2, _a.sent()];
@@ -147,15 +149,15 @@ function getTableImagesByUserQuery(user_id) {
         });
     });
 }
-exports.getTableImagesByUserQuery = getTableImagesByUserQuery;
-function removeTableImageQuery(id) {
+exports.getTableFoldersByParentQuery = getTableFoldersByParentQuery;
+function removeTableFolderQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     query = {
-                        text: "delete from public.\"TableImage\" where id = $1",
+                        text: "delete from public.\"TableFolder\" where id = $1",
                         values: [id]
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -164,8 +166,8 @@ function removeTableImageQuery(id) {
         });
     });
 }
-exports.removeTableImageQuery = removeTableImageQuery;
-function editTableImageQuery(id, data) {
+exports.removeTableFolderQuery = removeTableFolderQuery;
+function editTableFolderQuery(id, data) {
     return __awaiter(this, void 0, void 0, function () {
         var edits, values, iterator, _i, _a, _b, key, value, query;
         return __generator(this, function (_c) {
@@ -183,7 +185,7 @@ function editTableImageQuery(id, data) {
                     edits = edits.slice(0, -2);
                     values.push(id);
                     query = {
-                        text: "update public.\"TableImage\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
+                        text: "update public.\"TableFolder\" set ".concat(edits, " where id = $").concat(iterator, " returning *"),
                         values: values
                     };
                     return [4, dbconfig_1["default"].query(query)];
@@ -192,4 +194,4 @@ function editTableImageQuery(id, data) {
         });
     });
 }
-exports.editTableImageQuery = editTableImageQuery;
+exports.editTableFolderQuery = editTableFolderQuery;

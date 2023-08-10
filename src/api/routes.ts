@@ -212,6 +212,14 @@ import {
 } from "./controllers/playerUsers.js";
 import { body } from "express-validator";
 import validator from "validator";
+import {
+  addTableFolderByProject,
+  addTableFolderByUser,
+  editTableFolderTitle,
+  getTableFoldersByProject,
+  getTableFoldersByUser,
+  removeTableFolder,
+} from "./controllers/tableFolders.js";
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 
@@ -240,6 +248,35 @@ router.delete(
 router.delete(
   "/remove_image_by_project/:image_id/:project_id",
   removeImageByProject
+);
+
+// table folders
+router.post(
+  "/add_table_folder_by_user",
+  body("title")
+    .trim()
+    .customSanitizer((val) => sanitizeHtml(val)),
+  addTableFolderByUser
+);
+router.post(
+  "/add_table_folder_by_project",
+  body("title")
+    .trim()
+    .customSanitizer((val) => sanitizeHtml(val)),
+  addTableFolderByProject
+);
+router.get("/get_table_folders_by_user", getTableFoldersByUser);
+router.get(
+  "/get_table_folders_by_project/:project_id",
+  getTableFoldersByProject
+);
+router.delete("/remove_table_folder/:id", removeTableFolder);
+router.post(
+  "/edit_table_folder_title/:id",
+  body("title")
+    .trim()
+    .customSanitizer((val) => sanitizeHtml(val)),
+  editTableFolderTitle
 );
 
 // table views

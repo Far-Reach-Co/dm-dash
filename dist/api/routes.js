@@ -23,6 +23,7 @@ var tableViews_js_1 = require("./controllers/tableViews.js");
 var playerInvites_js_1 = require("./controllers/playerInvites.js");
 var playerUsers_js_1 = require("./controllers/playerUsers.js");
 var express_validator_1 = require("express-validator");
+var tableFolders_js_1 = require("./controllers/tableFolders.js");
 var sanitizeHtml = require("sanitize-html");
 var upload = multer({ dest: "file_uploads/" });
 var router = (0, express_1.Router)();
@@ -35,6 +36,18 @@ router.post("/edit_image_name/:id", (0, express_validator_1.body)("original_name
     .customSanitizer(function (val) { return sanitizeHtml(val); }), s3_js_1.editImageName);
 router["delete"]("/remove_image_by_table_user/:image_id/:table_id", s3_js_1.removeImageByTableUser);
 router["delete"]("/remove_image_by_project/:image_id/:project_id", s3_js_1.removeImageByProject);
+router.post("/add_table_folder_by_user", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), tableFolders_js_1.addTableFolderByUser);
+router.post("/add_table_folder_by_project", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), tableFolders_js_1.addTableFolderByProject);
+router.get("/get_table_folders_by_user", tableFolders_js_1.getTableFoldersByUser);
+router.get("/get_table_folders_by_project/:project_id", tableFolders_js_1.getTableFoldersByProject);
+router["delete"]("/remove_table_folder/:id", tableFolders_js_1.removeTableFolder);
+router.post("/edit_table_folder_title/:id", (0, express_validator_1.body)("title")
+    .trim()
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), tableFolders_js_1.editTableFolderTitle);
 router.get("/get_table_views_by_project/:project_id", tableViews_js_1.getTableViewsByProject);
 router.get("/get_table_views_by_user", tableViews_js_1.getTableViewsByUser);
 router.get("/get_table_view/:id", tableViews_js_1.getTableView);

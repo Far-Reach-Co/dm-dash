@@ -32,7 +32,7 @@ class Table {
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
     this.canvasLayer = new CanvasLayer({
       tableView,
-      tableSidebarComponent: this.sidebar.tableSidebarComponent,
+      tableSidebarImageComponent: this.sidebar.tableSidebarImageComponent,
     });
     // setup top layer
     this.topLayer = new TopLayer({
