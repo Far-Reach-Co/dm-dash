@@ -63,23 +63,31 @@
   overflow-y: auto;
 }
 
-.table-sidebar-images {
-  border-bottom: 1px solid var(--main-gray);
-  overflow-y: auto;
-  height: 500px;
+.help-content h1 {
+  display: block;
+}
+
+.table-sidebar-image-component {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+  overflow: auto;
 }
 
 #image-following-cursor {
+  max-height: 200px;
+  max-width: 200px;
   position: absolute;
   pointer-events: none;
   opacity: 0.6;
 }
 
 .online-users-container {
+  display: flex;
+  flex-direction: column;
   padding: 5px;
-  border-bottom: 1px solid var(--main-gray);
   overflow-y: auto;
-  flex: 1;
+  height: 100px;
 }
 
 .online-indicator {
@@ -125,4 +133,29 @@
 
 .sidebar-image-container:hover {
   border: 1px solid var(--main-white)
+}
+
+.table-sidebar-folder-component {
+  padding: 5px;
+  width: 100%;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--main-dark);
+  border-bottom: 1px solid var(--main-gray);
+  border-top: 1px solid var(--main-gray);
+}
+
+.folder-item {
+  width: 100%;
+}
+
+.folder-item:hover {
+  background-color: var(--blue3);
+  cursor: pointer;
+}
+
+.folder-item-selected {
+  background-color: var(--blue3);
+  color: var(--green);
 }

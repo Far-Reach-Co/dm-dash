@@ -1,15 +1,15 @@
-import { getPresignedForImageDownload, uploadUserImage } from "./imageUtils.js";
+import { getPresignedForImageDownload } from "./imageUtils.js";
 import createElement from "./createElement.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
 import imageFollowingCursor from "./imageFollowingCursor.js";
-import modal from "../components/modal.js";
 
-export default class TableSidebarComponent {
+export default class TableSidebarImageComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.className = "table-sidebar-images";
+    this.domComponent.className = "table-sidebar-image-component";
     this.tableView = props.tableView;
+    this.getCurrentFolder = props.getCurrentFolder;
     // project
     const searchParams = new URLSearchParams(window.location.search);
     this.projectId = searchParams.get("project");
@@ -17,7 +17,6 @@ export default class TableSidebarComponent {
     this.currentMouseDownImage = null;
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
-    this.makeImageSmall = false;
     this.tableImageSearchQuery = null;
   }
 
@@ -38,9 +37,8 @@ export default class TableSidebarComponent {
         },
         createElement("img", {
           src: imageSource.url,
-          width: "38px",
           height: "38px",
-          style: "pointer-events: none;",
+          style: "pointer-events: none; max-width: 38px",
         }),
         {
           type: "mousedown",
@@ -86,25 +84,44 @@ export default class TableSidebarComponent {
   };
 
   renderImageElems = () => {
-    let imageElems = this.originalImageElems;
-
+    // copy so as not to use state
+    let currentImageData = this.imageDataAndElems;
+    // filter based on current folder view
+    const currentFolder = this.getCurrentFolder();
+    currentImageData = currentImageData.filter((obj) => {
+      if (currentFolder) {
+        if (
+          obj.tableData.folder_id &&
+          obj.tableData.folder_id == currentFolder.id
+        ) {
+          return obj;
+        }
+      } else {
+        if (!obj.tableData.folder_id) return obj;
+      }
+    });
+    // extract just the elems
+    let imageElems = currentImageData.map((image) => {
+      return image.elem;
+    });
+    // filter by search query
     imageElems = imageElems.filter((elem) => {
       if (this.tableImageSearchQuery && this.tableImageSearchQuery !== "") {
-        return elem.children[0].children[0].value
+        return elem.children[0].children[1].value
           .toLowerCase()
           .includes(this.tableImageSearchQuery.toLowerCase());
       } else return elem;
     });
-
+    // sort alpha
     imageElems = imageElems.sort((a, b) => {
       if (
-        a.children[0].children[0].value.toLowerCase() <
-        b.children[0].children[0].value.toLowerCase()
+        a.children[0].children[1].value.toLowerCase() <
+        b.children[0].children[1].value.toLowerCase()
       )
         return -1;
     });
     if (imageElems.length) return imageElems;
-    else return [createElement("small", {}, "None...")];
+    else return [createElement("small", {}, "No images in this folder yet...")];
   };
 
   renderCurrentImages = async () => {
@@ -119,13 +136,15 @@ export default class TableSidebarComponent {
         `/api/get_table_images_by_table_user/${this.tableView.id}`
       );
     }
+
+    // if none
     if (!tableImages.length) {
       // remove temp loading spinner
       this.tempLoadingSpinner.remove();
       return [createElement("small", {}, "None...")];
     }
-
-    let imageElems = [];
+    // render all
+    let imageList = [];
     await Promise.all(
       tableImages.map(async (tableImage) => {
         const image = await getThings(`/api/get_image/${tableImage.image_id}`);
@@ -138,6 +157,7 @@ export default class TableSidebarComponent {
                   "display: flex; align-items: center; flex: 1; cursor: pointer;",
               },
               [
+                await this.renderImage(image),
                 createElement(
                   "input",
                   {
@@ -155,7 +175,6 @@ export default class TableSidebarComponent {
                     },
                   }
                 ),
-                await this.renderImage(image),
               ]
             ),
             createElement(
@@ -173,7 +192,7 @@ export default class TableSidebarComponent {
               }
             ),
           ]);
-          imageElems.push(elem);
+          imageList.push({ elem, tableData: tableImage, imageData: image });
         }
       })
     );
@@ -181,43 +200,16 @@ export default class TableSidebarComponent {
     this.tempLoadingSpinner.remove();
 
     // create a state of the image elems
-    this.originalImageElems = imageElems;
+    this.imageDataAndElems = imageList;
 
     return this.renderImageElems();
   };
 
-  addImageToSidebar = async (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        this.toggleImageLoading();
-        const newImage = await uploadUserImage(file, this.makeImageSmall);
-        if (newImage) {
-          // add new table image
-          if (this.projectId) {
-            await postThing(`/api/add_table_image_by_project`, {
-              project_id: this.projectId,
-              image_id: newImage.id,
-            });
-          } else {
-            await postThing(`/api/add_table_image_by_user`, {
-              image_id: newImage.id,
-            });
-          }
-        }
-        this.toggleImageLoading();
-      } catch (err) {
-        this.toggleImageLoading();
-      }
-    }
-  };
-
   updateImagesList = () => {
-    const imageContainer = document.getElementById("table-sidebar-images");
-    imageContainer.innerHTML = "";
+    this.imagesListContainer.innerHTML = "";
     const elems = this.renderImageElems();
     for (var elem of elems) {
-      imageContainer.appendChild(elem);
+      this.imagesListContainer.appendChild(elem);
     }
   };
 
@@ -232,100 +224,32 @@ export default class TableSidebarComponent {
     this.tempLoadingSpinner = renderLoadingWithMessage("");
     this.domComponent.append(this.tempLoadingSpinner);
 
-    const smallImageCheckboxComponent = createElement(
-      "input",
-      { type: "checkbox" },
-      null,
-      {
-        type: "change",
-        event: (e) => {
-          this.makeImageSmall = e.target.value;
-        },
-      }
+    // create and save imagesListContainer
+    this.imagesListContainer = createElement(
+      "div",
+      { id: "table-sidebar-images", style: "padding: 3px;" },
+      [...(await this.renderCurrentImages())]
     );
-    smallImageCheckboxComponent.checked = this.makeImageSmall;
 
     this.domComponent.append(
       createElement(
-        "a",
+        "input",
         {
-          title: "Upload image to be used on virtual table",
-          style: "margin-left: 10px",
+          placeHolder: "Search Images",
+          style:
+            "padding: 10px; border-left-width: 0px; border-right-width: 0px",
         },
-        "+ Image",
+        null,
         {
-          type: "click",
+          type: "input",
           event: (e) => {
-            modal.show(
-              createElement(
-                "div",
-                { class: "help-content", style: "min-width: 250px;" },
-                [
-                  createElement("h1", {}, "Add new Image"),
-                  createElement("br"),
-                  createElement("h2", {}, "Options:"),
-                  createElement(
-                    "div",
-                    {
-                      style:
-                        "display: flex; align-items: center; justify-content: center;",
-                      title:
-                        "If image width is larger than 100px this resizes the image width to 100px while maintaining the aspect ratio. It also will prevent long loading time as the image size will be reduced.",
-                    },
-                    [
-                      createElement(
-                        "small",
-                        { style: "margin-right: var(--main-distance)" },
-                        "Make image small (100px): "
-                      ),
-                      smallImageCheckboxComponent,
-                    ]
-                  ),
-                  createElement("br"),
-                  createElement(
-                    "input",
-                    {
-                      id: "image",
-                      name: "image",
-                      type: "file",
-                      accept: "image/*",
-                      style: "display: none",
-                    },
-                    null,
-                    {
-                      type: "change",
-                      event: async (e) => {
-                        await this.addImageToSidebar(e);
-                      },
-                    }
-                  ),
-                  createElement(
-                    "label",
-                    {
-                      for: "image",
-                      class: "label-btn",
-                      title: "Upload image to be used on virtual table",
-                    },
-                    "Choose Image"
-                  ),
-                ]
-              )
-            );
+            e.preventDefault();
+            this.tableImageSearchQuery = e.target.value;
+            this.updateImagesList();
           },
         }
       ),
-      createElement("br"),
-      createElement("input", { placeHolder: "Search Images" }, null, {
-        type: "input",
-        event: (e) => {
-          e.preventDefault();
-          this.tableImageSearchQuery = e.target.value;
-          this.updateImagesList();
-        },
-      }),
-      createElement("div", { id: "table-sidebar-images" }, [
-        ...(await this.renderCurrentImages()),
-      ])
+      this.imagesListContainer
     );
   };
 }

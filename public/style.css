@@ -504,7 +504,8 @@ footer {
   justify-content: center;
   width: 100%;
   padding: var(--main-distance);
-  border-bottom: 0.5px solid var(--main-gray);
+  border-top: 1px solid var(--main-gray);
+  border-bottom: 1px solid var(--main-gray);
 }
 
 .close-sidebar {

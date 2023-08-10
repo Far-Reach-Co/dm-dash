@@ -11,7 +11,7 @@ export default class CanvasLayer {
     this.tableView = props.tableView;
 
     // table sidebar component
-    this.tableSidebarComponent = props.tableSidebarComponent;
+    this.tableSidebarImageComponent = props.tableSidebarImageComponent;
 
     // grid
     this.grid = 100;
@@ -313,7 +313,7 @@ export default class CanvasLayer {
       if (imageFollowingCursor.isOnPage) {
         if (e.target.nodeName === "CANVAS")
           this.addImageToTable(
-            this.tableSidebarComponent.currentMouseDownImage
+            this.tableSidebarImageComponent.currentMouseDownImage
           );
       }
       imageFollowingCursor.remove();
