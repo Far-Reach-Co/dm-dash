@@ -232,14 +232,8 @@ export default class TopLayer {
                 "Hold key to enable multi-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
               ),
               createElement("br"),
-              createElement("b", {}, "Control (⌃)"),
-              createElement(
-                "small",
-                {},
-                "*GM only* While an object is selected, pressing control will change the layer that the object is currently on."
-              ),
-              createElement("br"),
               createElement("b", {}, "Shift"),
+              createElement("br"),
               createElement(
                 "small",
                 {},
@@ -247,11 +241,29 @@ export default class TopLayer {
               ),
               createElement("br"),
               createElement("b", {}, "Delete/Backspace"),
+              createElement("br"),
               createElement(
                 "small",
                 {},
                 "While object is selected, press key to remove object from table."
               ),
+              createElement("br"),
+              createElement("b", {}, "Control (⌃) + m"),
+              createElement("br"),
+              createElement(
+                "small",
+                {},
+                "*GM only* While an object is selected, pressing ctrl + m will change the layer that the object is currently on."
+              ),
+              createElement("br"),
+              createElement("b", {}, "Control (⌃) + d"),
+              createElement("br"),
+              createElement(
+                "small",
+                {},
+                "While an object is selected, pressing ctrl + d will duplicate the object and place it on the table close to the original."
+              ),
+              createElement("br"),
             ])
           );
         },
