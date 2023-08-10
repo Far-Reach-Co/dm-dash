@@ -84,7 +84,6 @@ export default class TableSidebarFolderComponent {
         const parentFolder = this.folders.filter(
           (folder) => folder.id == this.currentFolder.parent_folder_id
         )[0];
-        console.log(parentFolder);
         const parentFolderIndex = this.folders.indexOf(parentFolder);
         return createElement(
           "a",

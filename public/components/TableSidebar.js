@@ -263,9 +263,11 @@ export default class TableSidebar {
             modal.hide();
             // show folder loading
             this.tableSidebarFolderComponent.toggleFolderLoading();
+
+            let newFolder = null;
             try {
               if (this.projectId) {
-                const newFolder = await postThing(
+                newFolder = await postThing(
                   "/api/add_table_folder_by_project",
                   {
                     title: formProps.title,
@@ -274,28 +276,17 @@ export default class TableSidebar {
                     parent_folder_id: parentFolderId,
                   }
                 );
-                // on success clean folders so render gets fresh data
-                this.tableSidebarFolderComponent.clearFolders();
-                // set current folder as new folder
-                this.tableSidebarFolderComponent.currentFolder = newFolder;
               } else {
-                const newFolder = await postThing(
-                  "/api/add_table_folder_by_user",
-                  {
-                    title: formProps.title,
-                    is_sub: isSub,
-                    parent_folder_id: parentFolderId,
-                  }
-                );
-                // on success clean folders so render gets fresh data
-                this.tableSidebarFolderComponent.clearFolders();
-                // set current folder as new folder
-                this.tableSidebarFolderComponent.currentFolder = newFolder;
+                newFolder = await postThing("/api/add_table_folder_by_user", {
+                  title: formProps.title,
+                  is_sub: isSub,
+                  parent_folder_id: parentFolderId,
+                });
               }
+              // on success clean folders so render gets fresh data
+              this.tableSidebarFolderComponent.clearFolders();
               // stop loading
               this.tableSidebarFolderComponent.toggleFolderLoading();
-              // refresh images
-              this.tableSidebarImageComponent.updateImagesList();
             } catch (err) {
               console.log(err);
               this.tableSidebarFolderComponent.toggleFolderLoading();
