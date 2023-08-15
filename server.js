@@ -25,7 +25,6 @@ const requestIp = require("request-ip");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
-const csrf = require("csurf");
 
 const apiRoutes = require("./dist/api/routes.js");
 const routes = require("./dist/routes.js");
@@ -75,8 +74,6 @@ app.use(express.static("public"));
 // } else next();
 // });
 
-// csrf init
-const csrfMiddleware = csrf();
 // allow first proxy if there is one
 app.set("trust proxy", 1);
 // sessions
@@ -98,9 +95,6 @@ app.use(
     },
   })
 );
-
-//csrf use
-app.use(csrfMiddleware);
 
 // Routes
 // private

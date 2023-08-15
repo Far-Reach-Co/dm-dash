@@ -26,6 +26,8 @@ var express_validator_1 = require("express-validator");
 var tableFolders_js_1 = require("./controllers/tableFolders.js");
 var sanitizeHtml = require("sanitize-html");
 var upload = multer({ dest: "file_uploads/" });
+var csrf = require("csurf");
+var csrfMiddleware = csrf();
 var router = (0, express_1.Router)();
 router.get("/get_image/:id", s3_js_1.getImage);
 router.post("/signed_URL_download", s3_js_1.getSignedUrlForDownload);
@@ -244,14 +246,14 @@ router.post("/edit_project/:id", (0, express_validator_1.body)("title")
     .trim()
     .customSanitizer(function (val) { return sanitizeHtml(val); }), projects_js_1.editProject);
 router.get("/get_user", users_js_1.getUserBySession);
-router.post("/register", (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), (0, express_validator_1.body)("username")
+router.post("/register", csrfMiddleware, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), (0, express_validator_1.body)("username")
     .trim()
     .customSanitizer(function (val) { return sanitizeHtml(val); }), users_js_1.registerUser);
-router.post("/login", users_js_1.loginUser);
-router.post("/request_reset_email", users_js_1.requestResetEmail);
-router.post("/user/reset_password", users_js_1.resetPassword);
-router.post("/update_username", (0, express_validator_1.body)("username")
+router.post("/login", csrfMiddleware, users_js_1.loginUser);
+router.post("/request_reset_email", csrfMiddleware, users_js_1.requestResetEmail);
+router.post("/user/reset_password", csrfMiddleware, users_js_1.resetPassword);
+router.post("/update_username", csrfMiddleware, (0, express_validator_1.body)("username")
     .trim()
     .customSanitizer(function (val) { return sanitizeHtml(val); }), users_js_1.editUsername);
-router.post("/update_email", (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.editEmail);
+router.post("/update_email", csrfMiddleware, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.editEmail);
 module.exports = router;

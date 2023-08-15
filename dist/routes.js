@@ -47,6 +47,8 @@ var projectPlayers_1 = require("./api/queries/projectPlayers");
 var playerInvites_1 = require("./api/queries/playerInvites");
 var projectInvites_1 = require("./api/queries/projectInvites");
 var calendars_1 = require("./api/queries/calendars");
+var csrf = require("csurf");
+var csrfMiddleware = csrf();
 var router = (0, express_1.Router)();
 router.get("/", function (req, res, next) {
     try {
@@ -69,7 +71,7 @@ router.get("/index", function (req, res, next) {
         next(err);
     }
 });
-router.get("/login", function (req, res, next) {
+router.get("/login", csrfMiddleware, function (req, res, next) {
     try {
         var csrfToken = req.csrfToken();
         res.render("login", { auth: req.session.user, csrfToken: csrfToken });
@@ -78,7 +80,7 @@ router.get("/login", function (req, res, next) {
         next(err);
     }
 });
-router.get("/register", function (req, res, next) {
+router.get("/register", csrfMiddleware, function (req, res, next) {
     try {
         var csrfToken = req.csrfToken();
         res.render("register", { auth: req.session.user, csrfToken: csrfToken });
@@ -87,7 +89,7 @@ router.get("/register", function (req, res, next) {
         next(err);
     }
 });
-router.get("/forgotpassword", function (req, res, next) {
+router.get("/forgotpassword", csrfMiddleware, function (req, res, next) {
     try {
         var csrfToken = req.csrfToken();
         res.render("forgotpassword", { auth: req.session.user, csrfToken: csrfToken });
@@ -96,7 +98,7 @@ router.get("/forgotpassword", function (req, res, next) {
         next(err);
     }
 });
-router.get("/resetpassword", function (req, res, next) {
+router.get("/resetpassword", csrfMiddleware, function (req, res, next) {
     try {
         var csrfToken = req.csrfToken();
         res.render("resetpassword", { auth: req.session.user, csrfToken: csrfToken });
@@ -188,7 +190,7 @@ router.get("/invite", function (req, res, next) { return __awaiter(void 0, void 
         }
     });
 }); });
-router.get("/account", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
+router.get("/account", csrfMiddleware, function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
     var csrfToken, rows, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
