@@ -44,7 +44,6 @@ var users_1 = require("../queries/users");
 var projects_1 = require("../queries/projects");
 var tableViews_js_1 = require("../queries/tableViews.js");
 var express_validator_1 = require("express-validator");
-var validLoginLength = "1d";
 function generateAccessToken(id, expires) {
     return (0, jsonwebtoken_1.sign)({ id: id }, process.env.SECRET_KEY, { expiresIn: expires });
 }

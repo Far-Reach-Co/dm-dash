@@ -25,8 +25,6 @@ declare module "express-session" {
   }
 }
 
-const validLoginLength = "1d";
-
 function generateAccessToken(id: string | number, expires: string) {
   return sign({ id }, process.env.SECRET_KEY as string, { expiresIn: expires });
 }
@@ -89,6 +87,7 @@ async function getUserById(
 
 interface RegisterUserRequestObject extends Request {
   body: {
+    _csrf: string;
     email: string;
     username: string;
     password: string;
@@ -147,6 +146,7 @@ async function registerUser(
 
 interface LoginUserRequestObject extends Request {
   body: {
+    _csrf: string;
     email: string;
     password: string;
   };
@@ -200,6 +200,7 @@ async function verifyJwt(req: Request, res: Response, next: NextFunction) {
 
 interface EditUsernameRequestObject extends Request {
   body: {
+    _csrf: string;
     username: string;
   };
 }
@@ -222,6 +223,7 @@ async function editUsername(
 
 interface EditEmailRequestObject extends Request {
   body: {
+    _csrf: string;
     email: string;
   };
 }
@@ -249,6 +251,7 @@ async function editEmail(
 
 interface ResetPasswordRequestObject extends Request {
   body: {
+    _csrf: string;
     token: string;
     password: string;
   };
@@ -283,6 +286,7 @@ async function resetPassword(
 
 interface RequestResetEmailRequestObject extends Request {
   body: {
+    _csrf: string;
     email: string;
   };
 }

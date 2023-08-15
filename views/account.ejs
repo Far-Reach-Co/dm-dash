@@ -17,6 +17,7 @@
       <h2>Account Details</h2>
       <div id="email-area">
         <form hx-post="/api/update_email" hx-target="#email-update-success">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <label for="email">Edit Email</label>
           <input
             type="email"
@@ -36,6 +37,7 @@
           hx-post="/api/update_username"
           hx-target="#username-update-success"
         >
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
           <label for="username">Edit Username</label>
           <input
             type="username"

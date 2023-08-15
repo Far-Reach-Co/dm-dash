@@ -57,7 +57,8 @@ router.get("/index", (req: Request, res: Response, next: NextFunction) => {
 router.get("/login", (req: Request, res: Response, next: NextFunction) => {
   try {
     //
-    res.render("login", { auth: req.session.user });
+    const csrfToken = req.csrfToken();
+    res.render("login", { auth: req.session.user, csrfToken });
   } catch (err) {
     next(err);
   }
@@ -66,7 +67,8 @@ router.get("/login", (req: Request, res: Response, next: NextFunction) => {
 router.get("/register", (req: Request, res: Response, next: NextFunction) => {
   try {
     //
-    res.render("register", { auth: req.session.user });
+    const csrfToken = req.csrfToken();
+    res.render("register", { auth: req.session.user, csrfToken });
   } catch (err) {
     next(err);
   }
@@ -77,7 +79,8 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => {
     try {
       //
-      res.render("forgotpassword", { auth: req.session.user });
+      const csrfToken = req.csrfToken();
+      res.render("forgotpassword", { auth: req.session.user, csrfToken });
     } catch (err) {
       next(err);
     }
@@ -89,7 +92,8 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => {
     try {
       //
-      res.render("resetpassword", { auth: req.session.user });
+      const csrfToken = req.csrfToken();
+      res.render("resetpassword", { auth: req.session.user, csrfToken });
     } catch (err) {
       next(err);
     }
@@ -171,8 +175,13 @@ router.get(
     try {
       //
       if (!req.session.user) return res.redirect("/login");
+      const csrfToken = req.csrfToken();
       const { rows } = await getUserByIdQuery(req.session.user);
-      res.render("account", { auth: req.session.user, user: rows[0] });
+      res.render("account", {
+        auth: req.session.user,
+        user: rows[0],
+        csrfToken,
+      });
     } catch (err) {
       next(err);
     }
