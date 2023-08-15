@@ -30,6 +30,11 @@ import {
 } from "./api/queries/projectInvites";
 import { getCalendarsQuery } from "./api/queries/calendars";
 
+// init csrf
+const csrf = require("csurf");
+//csrf use
+const csrfMiddleware = csrf();
+
 var router = Router();
 
 router.get("/", (req: Request, res: Response, next: NextFunction) => {
@@ -54,28 +59,37 @@ router.get("/index", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-router.get("/login", (req: Request, res: Response, next: NextFunction) => {
-  try {
-    //
-    const csrfToken = req.csrfToken();
-    res.render("login", { auth: req.session.user, csrfToken });
-  } catch (err) {
-    next(err);
+router.get(
+  "/login",
+  csrfMiddleware,
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      //
+      const csrfToken = req.csrfToken();
+      res.render("login", { auth: req.session.user, csrfToken });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
-router.get("/register", (req: Request, res: Response, next: NextFunction) => {
-  try {
-    //
-    const csrfToken = req.csrfToken();
-    res.render("register", { auth: req.session.user, csrfToken });
-  } catch (err) {
-    next(err);
+router.get(
+  "/register",
+  csrfMiddleware,
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      //
+      const csrfToken = req.csrfToken();
+      res.render("register", { auth: req.session.user, csrfToken });
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 
 router.get(
   "/forgotpassword",
+  csrfMiddleware,
   (req: Request, res: Response, next: NextFunction) => {
     try {
       //
@@ -89,6 +103,7 @@ router.get(
 
 router.get(
   "/resetpassword",
+  csrfMiddleware,
   (req: Request, res: Response, next: NextFunction) => {
     try {
       //
@@ -171,6 +186,7 @@ router.get(
 
 router.get(
   "/account",
+  csrfMiddleware,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       //

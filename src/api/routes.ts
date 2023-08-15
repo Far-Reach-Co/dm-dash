@@ -223,6 +223,11 @@ import {
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 
+// init csrf
+const csrf = require("csurf");
+//csrf use
+const csrfMiddleware = csrf();
+
 var router = Router();
 
 // s3
@@ -771,22 +776,24 @@ router.get("/get_user", getUserBySession);
 // router.get("/get_user_by_id/:id", getUserById); // needs security
 router.post(
   "/register",
+  csrfMiddleware,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
   body("username")
     .trim()
     .customSanitizer((val) => sanitizeHtml(val)),
   registerUser
 );
-router.post("/login", loginUser);
+router.post("/login", csrfMiddleware, loginUser);
 // router.get("/verify_jwt", verifyJwt);
-router.post("/request_reset_email", requestResetEmail);
+router.post("/request_reset_email", csrfMiddleware, requestResetEmail);
 
 // sub heading user
 // router.post("/user/edit_user", editUser);
-router.post("/user/reset_password", resetPassword);
+router.post("/user/reset_password", csrfMiddleware, resetPassword);
 
 router.post(
   "/update_username",
+  csrfMiddleware,
   body("username")
     .trim()
     .customSanitizer((val) => sanitizeHtml(val)),
@@ -795,6 +802,7 @@ router.post(
 
 router.post(
   "/update_email",
+  csrfMiddleware,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
   editEmail
 );
