@@ -71,7 +71,8 @@ router.get("/index", function (req, res, next) {
 });
 router.get("/login", function (req, res, next) {
     try {
-        res.render("login", { auth: req.session.user });
+        var csrfToken = req.csrfToken();
+        res.render("login", { auth: req.session.user, csrfToken: csrfToken });
     }
     catch (err) {
         next(err);
@@ -79,7 +80,8 @@ router.get("/login", function (req, res, next) {
 });
 router.get("/register", function (req, res, next) {
     try {
-        res.render("register", { auth: req.session.user });
+        var csrfToken = req.csrfToken();
+        res.render("register", { auth: req.session.user, csrfToken: csrfToken });
     }
     catch (err) {
         next(err);
@@ -87,7 +89,8 @@ router.get("/register", function (req, res, next) {
 });
 router.get("/forgotpassword", function (req, res, next) {
     try {
-        res.render("forgotpassword", { auth: req.session.user });
+        var csrfToken = req.csrfToken();
+        res.render("forgotpassword", { auth: req.session.user, csrfToken: csrfToken });
     }
     catch (err) {
         next(err);
@@ -95,7 +98,8 @@ router.get("/forgotpassword", function (req, res, next) {
 });
 router.get("/resetpassword", function (req, res, next) {
     try {
-        res.render("resetpassword", { auth: req.session.user });
+        var csrfToken = req.csrfToken();
+        res.render("resetpassword", { auth: req.session.user, csrfToken: csrfToken });
     }
     catch (err) {
         next(err);
@@ -185,17 +189,22 @@ router.get("/invite", function (req, res, next) { return __awaiter(void 0, void 
     });
 }); });
 router.get("/account", function (req, res, next) { return __awaiter(void 0, void 0, void 0, function () {
-    var rows, err_2;
+    var csrfToken, rows, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
                 _a.trys.push([0, 2, , 3]);
                 if (!req.session.user)
                     return [2, res.redirect("/login")];
+                csrfToken = req.csrfToken();
                 return [4, (0, users_1.getUserByIdQuery)(req.session.user)];
             case 1:
                 rows = (_a.sent()).rows;
-                res.render("account", { auth: req.session.user, user: rows[0] });
+                res.render("account", {
+                    auth: req.session.user,
+                    user: rows[0],
+                    csrfToken: csrfToken
+                });
                 return [3, 3];
             case 2:
                 err_2 = _a.sent();

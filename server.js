@@ -25,6 +25,7 @@ const requestIp = require("request-ip");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
+const csrf = require("csurf");
 
 const apiRoutes = require("./dist/api/routes.js");
 const routes = require("./dist/routes.js");
@@ -74,6 +75,10 @@ app.use(express.static("public"));
 // } else next();
 // });
 
+// csrf init
+const csrfMiddleware = csrf();
+// allow first proxy if there is one
+app.set("trust proxy", 1);
 // sessions
 app.use(
   session({
@@ -82,15 +87,20 @@ app.use(
       tableName: "session",
     }),
     secret: process.env.SECRET_KEY,
+    name: "frcsession",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       sameSite: "lax",
+      secure: process.env.SERVER_ENV === "prod" ? true : false,
     },
   })
 );
+
+//csrf use
+app.use(csrfMiddleware);
 
 // Routes
 // private
@@ -101,6 +111,11 @@ app.use("/", routes);
 //Error
 app.use((error, req, res, next) => {
   console.error(error);
+  if (error.code === "EBADCSRFTOKEN") {
+    // CSRF token validation failed
+    error.status = 403;
+    error.message = "Form has expired or was tampered with.";
+  }
   // code for unique constraint on user registration email
   if (error.code == 23505) {
     error.status = 400;
