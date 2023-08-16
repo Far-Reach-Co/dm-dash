@@ -20,7 +20,19 @@
           >Manage important settings and invited users for your wyrld.</small
         >
       </div>
-      <h2 style="color: var(--green)"><%= project.title %></h2>
+      <h2>Edit Title</h2>
+      <form hx-post="/api/edit_project_title/<%= project.id %>" hx-target="#title-update-success">
+        <label for="title">Title</label>
+        <input
+          id="title"
+          name="title"
+          placeholder="Wyrld Title"
+          value="<%= project.title %>"
+          required="true,"
+        />
+        <br />
+        <button type="submit">Save</button>
+        <small class="success-message" id="title-update-success"></small>
       <hr />
       <h2>Share Invite Link</h2>
       <% if (inviteLink) { %> <%- include('./partials/wyrld_settings/invite') %>
@@ -80,4 +92,24 @@
     <div id="toast-custom"></div>
     <%- include('./partials/footer') %>
   </body>
+  <script>
+    // reset success messages
+    document.body.addEventListener("htmx:afterOnLoad", function (event) {
+      setTimeout(function () {
+        const titleUpdateMessage = document.querySelector(
+          "#title-update-success"
+        );
+        if (titleUpdateMessage) {
+          titleUpdateMessage.innerText = "";
+        }
+      }, 3000); // 10seconds
+    });
+
+    // handle htmx:responseError event
+    document.body.addEventListener("htmx:responseError", function (event) {
+      // event.detail contains details about the htmx request
+      var errorText = JSON.parse(event.detail.xhr.responseText).error.message; // get the response text
+      window.alert(`Server Error: ${errorText}`);
+    });
+  </script>
 </html>

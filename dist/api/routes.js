@@ -70,8 +70,6 @@ router["delete"]("/remove_table_image/:id", tableImages_js_1.removeTableImage);
 router.get("/get_project_players_by_player/:player_id", projectPlayers_js_1.getProjectPlayersByPlayer);
 router.post("/add_project_player", projectPlayers_js_1.addProjectPlayer);
 router["delete"]("/remove_project_player/:id", projectPlayers_js_1.removeProjectPlayer);
-router["delete"]("/remove_project_user/:id", projectUsers_js_1.removeProjectUser);
-router.post("/edit_project_user_is_editor/:id", projectUsers_js_1.editProjectUserIsEditor);
 router.get("/get_player_user_by_user_and_player/:player_id", playerUsers_js_1.getPlayerUserByUserAndPlayer);
 router.post("/add_player_user", playerUsers_js_1.addPlayerUser);
 router["delete"]("/remove_player_user/:id", playerUsers_js_1.removePlayerUser);
@@ -81,8 +79,6 @@ router.get("/get_player_invite_by_uuid/:uuid", playerInvites_js_1.getPlayerInvit
 router.get("/get_player_invite_by_player/:player_id", playerInvites_js_1.getPlayerInviteByPlayer);
 router.post("/add_player_invite", playerInvites_js_1.addPlayerInvite);
 router["delete"]("/remove_player_invite/:id", playerInvites_js_1.removePlayerInvite);
-router.post("/add_project_invite", projectInvites_js_1.addProjectInvite);
-router["delete"]("/remove_project_invite/:id", projectInvites_js_1.removeProjectInvite);
 router.get("/get_5e_characters_by_user", _5eCharGeneral_js_1.get5eCharsByUser);
 router.get("/get_5e_character_general/:id", _5eCharGeneral_js_1.get5eCharGeneral);
 router.post("/add_5e_character", (0, express_validator_1.body)("name")
@@ -237,15 +233,19 @@ router["delete"]("/remove_calendar/:id", calendars_js_1.removeCalendar);
 router.post("/edit_calendar/:id", (0, express_validator_1.body)("title")
     .trim()
     .customSanitizer(function (val) { return sanitizeHtml(val); }), calendars_js_1.editCalendar);
+router["delete"]("/remove_project_user/:id", projectUsers_js_1.removeProjectUser);
+router.post("/edit_project_user_is_editor/:id", projectUsers_js_1.editProjectUserIsEditor);
+router.post("/add_project_invite", projectInvites_js_1.addProjectInvite);
+router["delete"]("/remove_project_invite/:id", projectInvites_js_1.removeProjectInvite);
 router.get("/get_project/:id", projects_js_1.getProject);
 router.get("/get_projects", projects_js_1.getProjects);
 router.post("/add_project", (0, express_validator_1.body)("title")
     .trim()
     .customSanitizer(function (val) { return sanitizeHtml(val); }), projects_js_1.addProject);
 router["delete"]("/remove_project/:id", projects_js_1.removeProject);
-router.post("/edit_project/:id", (0, express_validator_1.body)("title")
+router.post("/edit_project_title/:id", (0, express_validator_1.body)("title")
     .trim()
-    .customSanitizer(function (val) { return sanitizeHtml(val); }), projects_js_1.editProject);
+    .customSanitizer(function (val) { return sanitizeHtml(val); }), projects_js_1.editProjectTitle);
 var registerLimiter = (0, express_rate_limit_1.rateLimit)({
     windowMs: 60 * 60 * 1000,
     max: 5,
