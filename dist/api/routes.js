@@ -24,6 +24,7 @@ var playerInvites_js_1 = require("./controllers/playerInvites.js");
 var playerUsers_js_1 = require("./controllers/playerUsers.js");
 var express_validator_1 = require("express-validator");
 var tableFolders_js_1 = require("./controllers/tableFolders.js");
+var express_rate_limit_1 = require("express-rate-limit");
 var sanitizeHtml = require("sanitize-html");
 var upload = multer({ dest: "file_uploads/" });
 var csrf = require("csurf");
@@ -245,12 +246,39 @@ router["delete"]("/remove_project/:id", projects_js_1.removeProject);
 router.post("/edit_project/:id", (0, express_validator_1.body)("title")
     .trim()
     .customSanitizer(function (val) { return sanitizeHtml(val); }), projects_js_1.editProject);
+var registerLimiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: {
+        message: "Too many accounts created from this IP, please try again after an hour"
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+var loginLimiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 60 * 60 * 1000,
+    max: 10,
+    message: {
+        message: "Too many login attempts from this IP, please try again after an hour"
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+var requestResetLimiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 60 * 60 * 1000,
+    max: 5,
+    message: {
+        message: "Too many reset requests from this IP, please try again after an hour"
+    },
+    standardHeaders: true,
+    legacyHeaders: false
+});
 router.get("/get_user", users_js_1.getUserBySession);
-router.post("/register", csrfMiddleware, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), (0, express_validator_1.body)("username")
+router.post("/register", csrfMiddleware, registerLimiter, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), (0, express_validator_1.body)("username")
     .trim()
     .customSanitizer(function (val) { return sanitizeHtml(val); }), users_js_1.registerUser);
-router.post("/login", csrfMiddleware, users_js_1.loginUser);
-router.post("/request_reset_email", csrfMiddleware, users_js_1.requestResetEmail);
+router.post("/login", csrfMiddleware, loginLimiter, users_js_1.loginUser);
+router.post("/request_reset_email", csrfMiddleware, requestResetLimiter, users_js_1.requestResetEmail);
 router.post("/user/reset_password", csrfMiddleware, users_js_1.resetPassword);
 router.post("/update_username", csrfMiddleware, (0, express_validator_1.body)("username")
     .trim()

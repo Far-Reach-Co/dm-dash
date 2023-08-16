@@ -220,11 +220,11 @@ import {
   getTableFoldersByUser,
   removeTableFolder,
 } from "./controllers/tableFolders.js";
+import { rateLimit } from "express-rate-limit";
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
-
-// init csrf
 const csrf = require("csurf");
+
 //csrf use
 const csrfMiddleware = csrf();
 
@@ -771,21 +771,61 @@ router.post(
 );
 
 // Auth and Users
+// setup rate limiters
+const registerLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // Limit each IP to 5 create account requests per `window` (here, per hour)
+  message: {
+    message:
+      "Too many accounts created from this IP, please try again after an hour",
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+const loginLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // Limit each IP to 5 create account requests per `window` (here, per hour)
+  message: {
+    message:
+      "Too many login attempts from this IP, please try again after an hour",
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
+const requestResetLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5, // Limit each IP to 5 create account requests per `window` (here, per hour)
+  message: {
+    message:
+      "Too many reset requests from this IP, please try again after an hour",
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+
 // router.get("/users", getAllUsers);
 router.get("/get_user", getUserBySession);
 // router.get("/get_user_by_id/:id", getUserById); // needs security
 router.post(
   "/register",
   csrfMiddleware,
+  registerLimiter,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
   body("username")
     .trim()
     .customSanitizer((val) => sanitizeHtml(val)),
   registerUser
 );
-router.post("/login", csrfMiddleware, loginUser);
+router.post("/login", csrfMiddleware, loginLimiter, loginUser);
 // router.get("/verify_jwt", verifyJwt);
-router.post("/request_reset_email", csrfMiddleware, requestResetEmail);
+router.post(
+  "/request_reset_email",
+  csrfMiddleware,
+  requestResetLimiter,
+  requestResetEmail
+);
 
 // sub heading user
 // router.post("/user/edit_user", editUser);

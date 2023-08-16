@@ -75,6 +75,8 @@
           alert(resData.error.message);
         } else if (res.status === 403) {
           alert(resData.error.message);
+        } else if (res.status === 429) {
+          alert(resData.message);
         } else {
           throw resData.error;
         }
