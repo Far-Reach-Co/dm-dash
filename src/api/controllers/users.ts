@@ -276,7 +276,7 @@ async function resetPassword(
         hashedPassword
       );
       res.send({
-        message: `Reset password success for user: ${user.rows[0].id}`,
+        message: `Reset password success for user: ${user.rows[0].username}`,
       });
     } else res.status(400).json({ message: "Invalid Token" });
   } catch (err) {

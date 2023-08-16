@@ -302,7 +302,7 @@ function resetPassword(req, res, next) {
                 case 4:
                     user = _a.sent();
                     res.send({
-                        message: "Reset password success for user: ".concat(user.rows[0].id)
+                        message: "Reset password success for user: ".concat(user.rows[0].username)
                     });
                     return [3, 6];
                 case 5:

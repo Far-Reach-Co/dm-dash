@@ -486,7 +486,8 @@ router.get("/wyrldsettings", function (req, res, next) { return __awaiter(void 0
                     inviteLink: inviteLink,
                     inviteId: inviteId,
                     project: project,
-                    users: usersList
+                    users: usersList,
+                    projectId: project.id
                 })];
             case 8:
                 err_6 = _b.sent();

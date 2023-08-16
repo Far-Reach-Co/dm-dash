@@ -1,23 +1,14 @@
 import { Router } from "express";
-// import {
-//   getClocks,
-//   addClock,
-//   removeClock,
-//   editClock,
-// } from "./controllers/clocks.js";
 import {
   getProject,
   getProjects,
   addProject,
   removeProject,
-  editProject,
+  editProjectTitle,
 } from "./controllers/projects.js";
 import {
-  getAllUsers,
-  getUserById,
   registerUser,
   loginUser,
-  verifyJwt,
   resetPassword,
   requestResetEmail,
   getUserBySession,
@@ -38,67 +29,12 @@ import {
   editMonth,
 } from "./controllers/months.js";
 import { getDays, addDay, removeDay, editDay } from "./controllers/days.js";
-// import {
-//   getLocation,
-//   getLocations,
-//   getSubLocations,
-//   addLocation,
-//   removeLocation,
-//   editLocation,
-// } from "./controllers/locations.js";
-// import {
-//   getNotes,
-//   addNote,
-//   getNotesByLocation,
-//   getNotesByCharacter,
-//   removeNote,
-//   editNote,
-//   getNotesByItem,
-//   getNotesByLore,
-// } from "./controllers/notes.js";
-// import {
-//   getEvents,
-//   addEvent,
-//   getEventsByLocation,
-//   getEventsByCharacter,
-//   removeEvent,
-//   editEvent,
-//   getEventsByItem,
-//   getEventsByLore,
-// } from "./controllers/events.js";
-// import {
-//   getCounters,
-//   addCounter,
-//   removeCounter,
-//   editCounter,
-// } from "./controllers/counters.js";
-// import {
-//   getCharacter,
-//   getCharacters,
-//   getCharactersByLocation,
-//   addCharacter,
-//   removeCharacter,
-//   editCharacter,
-// } from "./controllers/characters.js";
-// import {
-//   getItem,
-//   getItems,
-//   getItemsByLocation,
-//   getItemsByCharacter,
-//   addItem,
-//   removeItem,
-//   editItem,
-// } from "./controllers/items.js";
 import {
-  getProjectInviteByUUID,
   addProjectInvite,
   removeProjectInvite,
 } from "./controllers/projectInvites.js";
 import {
-  getProjectUserByUserAndProject,
-  getProjectUsersByProject,
   removeProjectUser,
-  addProjectUserByInvite,
   editProjectUserIsEditor,
 } from "./controllers/projectUsers.js";
 import {
@@ -112,23 +48,6 @@ import {
 } from "./controllers/s3.js";
 // for uploading files
 import multer = require("multer");
-// import {
-//   getLore,
-//   getLores,
-//   addLore,
-//   removeLore,
-//   editLore,
-// } from "./controllers/lores.js";
-// import {
-//   getLoreRelation,
-//   getLoreRelationsByLore,
-//   getLoreRelationsByLocation,
-//   getLoreRelationsByCharacter,
-//   getLoreRelationsByItem,
-//   addLoreRelation,
-//   removeLoreRelation,
-//   editLoreRelation,
-// } from "./controllers/loreRelations.js";
 import {
   get5eCharsByUser,
   add5eChar,
@@ -170,10 +89,8 @@ import {
   edit5eCharSpell,
 } from "./controllers/5eCharSpells.js";
 import {
-  getProjectPlayersByProject,
   addProjectPlayer,
   removeProjectPlayer,
-  editProjectPlayer,
   getProjectPlayersByPlayer,
 } from "./controllers/projectPlayers.js";
 import {
@@ -203,15 +120,12 @@ import {
 } from "./controllers/playerInvites.js";
 import {
   addPlayerUser,
-  editPlayerUser,
   getPlayerUserByUserAndPlayer,
-  getPlayerUsersByPlayer,
   removePlayerUser,
   removePlayerUserByUserAndPlayer,
   removePlayerUsersByPlayer,
 } from "./controllers/playerUsers.js";
 import { body } from "express-validator";
-import validator from "validator";
 import {
   addTableFolderByProject,
   addTableFolderByUser,
@@ -313,43 +227,22 @@ router.get(
 router.post("/add_table_image_by_project", addTableImageByProject);
 router.post("/add_table_image_by_user", addTableImageByUser);
 router.delete("/remove_table_image/:id", removeTableImage);
-// router.post("/edit_table_image/:id", editTableImage);
 
 // project players
-// router.get(
-//   "/get_project_players_by_project/:project_id",
-//   getProjectPlayersByProject
-// );
 router.get(
   "/get_project_players_by_player/:player_id",
   getProjectPlayersByPlayer
 );
 router.post("/add_project_player", addProjectPlayer);
 router.delete("/remove_project_player/:id", removeProjectPlayer);
-// router.post("/edit_project_player/:id", editProjectPlayer);
-
-// project users
-// router.get(
-//   "/get_project_user_by_user_and_project/:project_id",
-//   getProjectUserByUserAndProject
-// );
-// router.get(
-//   "/get_project_users_by_project/:project_id",
-//   getProjectUsersByProject
-// );
-// router.post("/add_project_user_by_invite", addProjectUserByInvite);
-router.delete("/remove_project_user/:id", removeProjectUser);
-router.post("/edit_project_user_is_editor/:id", editProjectUserIsEditor);
 
 // player users
 router.get(
   "/get_player_user_by_user_and_player/:player_id",
   getPlayerUserByUserAndPlayer
 );
-// router.get("/get_player_users_by_player/:player_id", getPlayerUsersByPlayer);
 router.post("/add_player_user", addPlayerUser);
 router.delete("/remove_player_user/:id", removePlayerUser);
-// router.post("/edit_player_user/:id", editPlayerUser);
 router.delete(
   "/remove_player_user_by_user_and_player/:player_id",
   removePlayerUserByUserAndPlayer
@@ -364,11 +257,6 @@ router.get("/get_player_invite_by_uuid/:uuid", getPlayerInviteByUUID);
 router.get("/get_player_invite_by_player/:player_id", getPlayerInviteByPlayer);
 router.post("/add_player_invite", addPlayerInvite);
 router.delete("/remove_player_invite/:id", removePlayerInvite);
-
-// project invites
-// router.get("/get_project_invite_by_uuid/:uuid", getProjectInviteByUUID);
-router.post("/add_project_invite", addProjectInvite);
-router.delete("/remove_project_invite/:id", removeProjectInvite);
 
 // 5e characters general, proficiencies, background, spell slots
 router.get("/get_5e_characters_by_user", get5eCharsByUser);
@@ -579,117 +467,6 @@ router.post(
   edit5eCharOtherProLang
 );
 
-// events
-// router.get("/get_events/:project_id/:limit/:offset", getEvents);
-// router.get("/get_events_by_location/:location_id", getEventsByLocation);
-// router.get("/get_events_by_character/:character_id", getEventsByCharacter);
-// router.get("/get_events_by_item/:item_id", getEventsByItem);
-// router.get("/get_events_by_lore/:lore_id", getEventsByLore);
-// router.post("/add_event", addEvent);
-// router.delete("/remove_event/:id", removeEvent);
-// router.post("/edit_event/:id", editEvent);
-
-// notes
-// router.get("/get_notes/:project_id/:limit/:offset", getNotes);
-// router.get("/get_notes/:project_id/:limit/:offset/:keyword", getNotes);
-// router.get("/get_notes_by_location/:location_id", getNotesByLocation);
-// router.get("/get_notes_by_character/:character_id", getNotesByCharacter);
-// router.get("/get_notes_by_item/:item_id", getNotesByItem);
-// router.get("/get_notes_by_lore/:lore_id", getNotesByLore);
-// router.post("/add_note", addNote);
-// router.delete("/remove_note/:id", removeNote);
-// router.post("/edit_note/:id", editNote);
-
-// lore relations
-// router.get("/get_lore_relation/:id", getLoreRelation);
-// router.get("/get_lore_relations_by_lore/:type/:id", getLoreRelationsByLore);
-// router.get(
-//   "/get_lore_relations_by_location/:location_id",
-//   getLoreRelationsByLocation
-// );
-// router.get(
-//   "/get_lore_relations_by_character/:character_id",
-//   getLoreRelationsByCharacter
-// );
-// router.get("/get_lore_relations_by_item/:item_id", getLoreRelationsByItem);
-// router.post("/add_lore_relation", addLoreRelation);
-// router.delete("/remove_lore_relation/:id", removeLoreRelation);
-// router.post("/edit_lore_relation/:id", editLoreRelation);
-
-// lores
-// router.get("/get_lore/:id", getLore);
-// router.get("/get_lores/:project_id/:limit/:offset", getLores);
-// router.get("/get_lores_filter/:project_id/:limit/:offset/:filter", getLores);
-// router.get("/get_lores_keyword/:project_id/:limit/:offset/:keyword", getLores);
-// router.get(
-//   "/get_lores_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
-//   getLores
-// );
-// router.post("/add_lore", addLore);
-// router.delete("/remove_lore/:id", removeLore);
-// router.post("/edit_lore/:id", editLore);
-
-// items
-// router.get("/get_item/:id", getItem);
-// router.get("/get_items/:project_id/:limit/:offset", getItems);
-// router.get("/get_items_filter/:project_id/:limit/:offset/:filter", getItems);
-// router.get("/get_items_keyword/:project_id/:limit/:offset/:keyword", getItems);
-// router.get(
-//   "/get_items_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
-//   getItems
-// );
-// router.get("/get_items_by_location/:location_id", getItemsByLocation);
-// router.get("/get_items_by_character/:character_id", getItemsByCharacter);
-// router.post("/add_item", addItem);
-// router.delete("/remove_item/:id", removeItem);
-// router.post("/edit_item/:id", editItem);
-
-// // characters
-// router.get("/get_character/:id", getCharacter);
-// router.get("/get_characters/:project_id/:limit/:offset", getCharacters);
-// router.get(
-//   "/get_characters_filter/:project_id/:limit/:offset/:filter",
-//   getCharacters
-// );
-// router.get(
-//   "/get_characters_keyword/:project_id/:limit/:offset/:keyword",
-//   getCharacters
-// );
-// router.get(
-//   "/get_characters_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
-//   getCharacters
-// );
-// router.get("/get_characters_by_location/:location_id", getCharactersByLocation);
-// router.post("/add_character", addCharacter);
-// router.delete("/remove_character/:id", removeCharacter);
-// router.post("/edit_character/:id", editCharacter);
-
-// locations
-// router.get("/get_location/:id", getLocation);
-// router.get("/get_locations/:project_id/:limit/:offset", getLocations);
-// router.get(
-//   "/get_locations_filter/:project_id/:limit/:offset/:filter",
-//   getLocations
-// );
-// router.get(
-//   "/get_locations_keyword/:project_id/:limit/:offset/:keyword",
-//   getLocations
-// );
-// router.get(
-//   "/get_locations_filter_keyword/:project_id/:limit/:offset/:filter/:keyword",
-//   getLocations
-// );
-// router.get("/get_sublocations/:parent_location_id", getSubLocations);
-// router.post("/add_location", addLocation);
-// router.delete("/remove_location/:id", removeLocation);
-// router.post("/edit_location/:id", editLocation);
-
-// counters
-// router.get("/get_counters/:project_id", getCounters);
-// router.post("/add_counter", addCounter);
-// router.delete("/remove_counter/:id", removeCounter);
-// router.post("/edit_counter/:id", editCounter);
-
 // months
 router.get("/get_months/:calendar_id", getMonths);
 router.post(
@@ -745,11 +522,13 @@ router.post(
   editCalendar
 );
 
-// clocks
-// router.get("/get_clocks/:project_id", getClocks);
-// router.post("/add_clock", addClock);
-// router.delete("/remove_clock/:id", removeClock);
-// router.post("/edit_clock/:id", editClock);
+// project users
+router.delete("/remove_project_user/:id", removeProjectUser);
+router.post("/edit_project_user_is_editor/:id", editProjectUserIsEditor);
+
+// project invites
+router.post("/add_project_invite", addProjectInvite);
+router.delete("/remove_project_invite/:id", removeProjectInvite);
 
 // projects
 router.get("/get_project/:id", getProject);
@@ -763,51 +542,49 @@ router.post(
 );
 router.delete("/remove_project/:id", removeProject);
 router.post(
-  "/edit_project/:id",
+  "/edit_project_title/:id",
   body("title")
     .trim()
     .customSanitizer((val) => sanitizeHtml(val)),
-  editProject
+  editProjectTitle
 );
 
 // Auth and Users
 // setup rate limiters
 const registerLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 create account requests per `window` (here, per hour)
+  max: 5,
   message: {
     message:
       "Too many accounts created from this IP, please try again after an hour",
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 const loginLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Limit each IP to 5 create account requests per `window` (here, per hour)
+  max: 10,
   message: {
     message:
       "Too many login attempts from this IP, please try again after an hour",
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 const requestResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: 5, // Limit each IP to 5 create account requests per `window` (here, per hour)
+  max: 5,
   message: {
     message:
       "Too many reset requests from this IP, please try again after an hour",
   },
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
-// router.get("/users", getAllUsers);
 router.get("/get_user", getUserBySession);
-// router.get("/get_user_by_id/:id", getUserById); // needs security
 router.post(
   "/register",
   csrfMiddleware,
@@ -819,18 +596,13 @@ router.post(
   registerUser
 );
 router.post("/login", csrfMiddleware, loginLimiter, loginUser);
-// router.get("/verify_jwt", verifyJwt);
 router.post(
   "/request_reset_email",
   csrfMiddleware,
   requestResetLimiter,
   requestResetEmail
 );
-
-// sub heading user
-// router.post("/user/edit_user", editUser);
 router.post("/user/reset_password", csrfMiddleware, resetPassword);
-
 router.post(
   "/update_username",
   csrfMiddleware,
@@ -839,7 +611,6 @@ router.post(
     .customSanitizer((val) => sanitizeHtml(val)),
   editUsername
 );
-
 router.post(
   "/update_email",
   csrfMiddleware,

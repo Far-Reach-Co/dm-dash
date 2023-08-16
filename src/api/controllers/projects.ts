@@ -20,31 +20,7 @@ import {
 import { getCalendarQuery, removeCalendarQuery } from "../queries/calendars.js";
 import { getMonthsQuery, removeMonthQuery } from "../queries/months.js";
 import { getDaysQuery, removeDayQuery } from "../queries/days.js";
-import {
-  getLocationsQuery,
-  removeLocationQuery,
-} from "../queries/locations.js";
-import {
-  getCharactersQuery,
-  removeCharacterQuery,
-} from "../queries/characters.js";
-import { getClocksQuery, removeClockQuery } from "../queries/clocks.js";
-import {
-  removeCounterQuery,
-  getAllCountersByProjectQuery,
-} from "../queries/counters.js";
-import { getEventsQuery, removeEventQuery } from "../queries/events.js";
-import { getItemsQuery, removeItemQuery } from "../queries/items.js";
-import { getLoresQuery, removeLoreQuery } from "../queries/lores.js";
-import {
-  removeLoreRelationQuery,
-  getLoreRelationsQuery,
-} from "../queries/loreRelations.js";
-import {
-  getAllNotesByProjectQuery,
-  removeNoteQuery,
-} from "../queries/notes.js";
-import { getImageQuery, removeImageQuery } from "../queries/images.js";
+import { getImageQuery } from "../queries/images.js";
 import { removeImage } from "./s3.js";
 import {
   addTableViewByProjectQuery,
@@ -55,9 +31,11 @@ import {
   getTableImagesByProjectQuery,
   removeTableImageQuery,
 } from "../queries/tableImages.js";
-import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
-import { getUserByIdQuery } from "../queries/users.js";
+import {
+  getProjectPlayersByProjectQuery,
+  removeProjectPlayerQuery,
+} from "../queries/projectPlayers.js";
 
 async function addProject(req: Request, res: Response, next: NextFunction) {
   try {
@@ -152,6 +130,12 @@ async function getProjects(req: Request, res: Response, next: NextFunction) {
 
 async function removeProject(req: Request, res: Response, next: NextFunction) {
   try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    const projectData = await getProjectQuery(req.params.id);
+    const project = projectData.rows[0];
+    if (req.session.user != project.user_id)
+      throw new Error("User is not owner");
+
     // remove project
     await removeProjectQuery(req.params.id);
     // remove all project data
@@ -169,94 +153,6 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
         await removeDayQuery(day.id);
       });
     });
-    // locations
-    const locationsData = await getLocationsQuery({
-      projectId: req.params.id,
-      limit: 10000,
-      offset: 0,
-    });
-    locationsData.rows.forEach(async (location) => {
-      await removeLocationQuery(location.id);
-      if (location.image_id) {
-        const imageData = await getImageQuery(location.image_id);
-        const image = imageData.rows[0];
-        await removeImage("wyrld/images", image);
-        await removeImageQuery(image.id);
-      }
-    });
-    // characters
-    const charactersData = await getCharactersQuery({
-      projectId: req.params.id,
-      limit: 10000,
-      offset: 0,
-    });
-    charactersData.rows.forEach(async (character) => {
-      await removeCharacterQuery(character.id);
-      if (character.image_id) {
-        const imageData = await getImageQuery(character.image_id);
-        const image = imageData.rows[0];
-        await removeImage("wyrld/images", image);
-        await removeImageQuery(image.id);
-      }
-    });
-    // clocks
-    const clocksData = await getClocksQuery(req.params.id);
-    clocksData.rows.forEach(async (clock: { id: any }) => {
-      await removeClockQuery(clock.id);
-    });
-    // counters
-    const countersData = await getAllCountersByProjectQuery(req.params.id);
-    countersData.rows.forEach(async (counter: { id: any }) => {
-      await removeCounterQuery(counter.id);
-    });
-    // events
-    const eventsData = await getEventsQuery({
-      projectId: req.params.id,
-      limit: 1000000,
-      offset: 0,
-    });
-    eventsData.rows.forEach(async (event: { id: any }) => {
-      await removeEventQuery(event.id);
-    });
-    // items
-    const itemsData = await getItemsQuery({
-      projectId: req.params.id,
-      limit: 10000,
-      offset: 0,
-    });
-    itemsData.rows.forEach(async (item) => {
-      await removeItemQuery(item.id);
-      if (item.image_id) {
-        const imageData = await getImageQuery(item.image_id);
-        const image = imageData.rows[0];
-        await removeImage("wyrld/images", image);
-        await removeImageQuery(image.id);
-      }
-    });
-    // lore
-    const loreData = await getLoresQuery({
-      projectId: req.params.id,
-      limit: 10000,
-      offset: 0,
-    });
-    loreData.rows.forEach(async (lore) => {
-      await removeLoreQuery(lore.id);
-      if (lore.image_id) {
-        const imageData = await getImageQuery(lore.image_id);
-        const image = imageData.rows[0];
-        await removeImage("wyrld/images", image);
-        await removeImageQuery(image.id);
-      }
-      const relationsData = await getLoreRelationsQuery(lore.id);
-      relationsData.rows.forEach(async (relation: { id: any }) => {
-        await removeLoreRelationQuery(relation.id);
-      });
-    });
-    // notes
-    const notesData = await getAllNotesByProjectQuery(req.params.id);
-    notesData.rows.forEach(async (note: { id: any }) => {
-      await removeNoteQuery(note.id);
-    });
     // project invites
     const projectInvitesData = await getProjectInviteByProjectQuery(
       req.params.id
@@ -268,6 +164,13 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
     const projectUsersData = await getProjectUsersByProjectQuery(req.params.id);
     projectUsersData.rows.forEach(async (user: { id: any }) => {
       await removeProjectUserQuery(user.id);
+    });
+    // project players
+    const projectPlayersData = await getProjectPlayersByProjectQuery(
+      req.params.id
+    );
+    projectPlayersData.rows.forEach(async (player: { id: any }) => {
+      await removeProjectPlayerQuery(player.id);
     });
     // table images
     const tableImages = await getTableImagesByProjectQuery(req.params.id);
@@ -290,13 +193,25 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function editProject(req: Request, res: Response, next: NextFunction) {
+async function editProjectTitle(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await editProjectQuery(req.params.id, req.body);
-    res.status(200).send(data.rows[0]);
+    if (!req.session.user) throw new Error("User is not logged in");
+    const projectData = await getProjectQuery(req.params.id);
+    const project = projectData.rows[0];
+    if (req.session.user != project.user_id)
+      throw new Error("User is not owner");
+
+    await editProjectQuery(req.params.id, {
+      title: req.body.title,
+    });
+    res.send("Saved");
   } catch (err) {
     next(err);
   }
 }
 
-export { getProjects, getProject, addProject, removeProject, editProject };
+export { getProjects, getProject, addProject, removeProject, editProjectTitle };

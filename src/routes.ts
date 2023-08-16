@@ -429,6 +429,7 @@ router.get(
         inviteId,
         project,
         users: usersList,
+        projectId: project.id,
       });
     } catch (err) {
       next(err);
