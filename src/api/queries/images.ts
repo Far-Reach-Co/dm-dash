@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface ImageModal {
+export interface ImageModal {
   id: number,
   original_name: string,
   size: number,
@@ -28,6 +28,16 @@ async function getImageQuery(id: string | number) {
     text: /*sql*/ `select * from public."Image" where id = $1`,
     values: [id]
   }
+  return await db.query<ImageModal>(query)
+}
+
+async function getImagesQuery(ids: (string | number)[]) {
+  const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
+
+  const query = {
+    text: /*sql*/ `SELECT * FROM public."Image" WHERE id IN (${placeholders})`,
+    values: ids,
+  };
   return await db.query<ImageModal>(query)
 }
 
@@ -65,6 +75,7 @@ async function editImageQuery(id: string, data: any) {
 export {
   addImageQuery,
   getImageQuery,
+  getImagesQuery,
   removeImageQuery,
   editImageQuery
 }

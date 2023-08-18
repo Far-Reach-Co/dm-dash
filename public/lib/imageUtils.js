@@ -1,9 +1,9 @@
 import renderTierLimitWarning from "./renderTierLimitWarning.js";
 import toast from "../components/Toast.js";
 
-export async function getPresignedForImageDownload(imageId) {
+export async function getPresignedUrlsForImages(imageIds) {
   try {
-    const res = await fetch(`${window.origin}/api/signed_URL_download`, {
+    const res = await fetch(`${window.origin}/api/signed_URL_download_multi`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -11,7 +11,7 @@ export async function getPresignedForImageDownload(imageId) {
       body: JSON.stringify({
         bucket_name: "wyrld",
         folder_name: "images",
-        image_id: imageId,
+        image_ids: imageIds,
       }),
     });
     const data = await res.json();
