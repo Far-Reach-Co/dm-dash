@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.removeImageByTableUser = exports.removeImageByProject = exports.removeImage = exports.newImageForUser = exports.newImageForProject = exports.editImageName = exports.getImage = exports.getSignedUrlForDownload = void 0;
+exports.removeImageByTableUser = exports.removeImageByProject = exports.removeImage = exports.newImageForUser = exports.newImageForProject = exports.editImageName = exports.getImage = exports.getSignedUrlsForDownloads = void 0;
 var aws_sdk_1 = require("aws-sdk");
 var fs_1 = require("fs");
 var enums_js_1 = require("../../lib/enums.js");
@@ -56,44 +56,48 @@ aws_sdk_1.config.update({
     region: "us-east-1"
 });
 var s3 = new aws_sdk_1.S3();
-function getSignedUrlForDownload(req, res, next) {
+function getSignedUrlsForDownloads(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var imageData, objectName, cloudFrontUrl, privateKeyPath, privateKey, cloudFrontKeyId, signingParams, signer, url, err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
+        var imageDataList, urls, _i, _a, imageData, objectName, cloudFrontUrl, privateKeyPath, privateKey, cloudFrontKeyId, signingParams, signer, err_1;
+        return __generator(this, function (_b) {
+            switch (_b.label) {
                 case 0:
-                    _a.trys.push([0, 2, , 3]);
-                    return [4, (0, images_1.getImageQuery)(req.body.image_id)];
+                    _b.trys.push([0, 2, , 3]);
+                    if (!req.body.image_ids.length)
+                        return [2, res.send([])];
+                    return [4, (0, images_1.getImagesQuery)(req.body.image_ids)];
                 case 1:
-                    imageData = _a.sent();
-                    objectName = imageData.rows[0].file_name;
-                    cloudFrontUrl = "https://".concat(process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN, "/").concat(req.body.folder_name, "/").concat(objectName);
-                    privateKeyPath = path.join(__dirname, "..", "..", "..", "private_frc_cloudfront_key.pem");
-                    privateKey = fs.readFileSync(privateKeyPath, "utf8");
-                    cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
-                    signingParams = {
-                        url: cloudFrontUrl,
-                        expires: Math.floor((new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000),
-                        privateKey: privateKey,
-                        keyPairId: cloudFrontKeyId
-                    };
-                    signer = new aws_sdk_1.CloudFront.Signer(signingParams.keyPairId, signingParams.privateKey);
-                    url = signer.getSignedUrl({
-                        url: signingParams.url,
-                        expires: signingParams.expires
-                    });
-                    res.send({ url: url });
-                    return [3, 3];
+                    imageDataList = _b.sent();
+                    urls = {};
+                    for (_i = 0, _a = imageDataList.rows; _i < _a.length; _i++) {
+                        imageData = _a[_i];
+                        objectName = imageData.file_name;
+                        cloudFrontUrl = "https://".concat(process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN, "/").concat(req.body.folder_name, "/").concat(objectName);
+                        privateKeyPath = path.join(__dirname, "..", "..", "..", "private_frc_cloudfront_key.pem");
+                        privateKey = fs.readFileSync(privateKeyPath, "utf8");
+                        cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
+                        signingParams = {
+                            url: cloudFrontUrl,
+                            expires: Math.floor((new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000),
+                            privateKey: privateKey,
+                            keyPairId: cloudFrontKeyId
+                        };
+                        signer = new aws_sdk_1.CloudFront.Signer(signingParams.keyPairId, signingParams.privateKey);
+                        urls[imageData.id] = signer.getSignedUrl({
+                            url: signingParams.url,
+                            expires: signingParams.expires
+                        });
+                    }
+                    return [2, res.send({ urls: urls })];
                 case 2:
-                    err_1 = _a.sent();
-                    next(err_1);
-                    return [3, 3];
+                    err_1 = _b.sent();
+                    return [2, next(err_1)];
                 case 3: return [2];
             }
         });
     });
 }
-exports.getSignedUrlForDownload = getSignedUrlForDownload;
+exports.getSignedUrlsForDownloads = getSignedUrlsForDownloads;
 function computeAwsImageParamsFromRequest(req, filePath) {
     if (!req.file)
         throw new Error("Missing file");
@@ -375,7 +379,7 @@ function newImageForUser(req, res, next) {
 exports.newImageForUser = newImageForUser;
 function getImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var imageData, err_6;
+        var imageData, image, objectName, cloudFrontUrl, privateKeyPath, privateKey, cloudFrontKeyId, signingParams, signer, url, err_6;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -383,7 +387,25 @@ function getImage(req, res, next) {
                     return [4, (0, images_1.getImageQuery)(req.params.id)];
                 case 1:
                     imageData = _a.sent();
-                    res.send(imageData.rows[0]);
+                    image = imageData.rows[0];
+                    objectName = image.file_name;
+                    cloudFrontUrl = "https://".concat(process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN, "/images/").concat(objectName);
+                    privateKeyPath = path.join(__dirname, "..", "..", "..", "private_frc_cloudfront_key.pem");
+                    privateKey = fs.readFileSync(privateKeyPath, "utf8");
+                    cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
+                    signingParams = {
+                        url: cloudFrontUrl,
+                        expires: Math.floor((new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000),
+                        privateKey: privateKey,
+                        keyPairId: cloudFrontKeyId
+                    };
+                    signer = new aws_sdk_1.CloudFront.Signer(signingParams.keyPairId, signingParams.privateKey);
+                    url = signer.getSignedUrl({
+                        url: signingParams.url,
+                        expires: signingParams.expires
+                    });
+                    image.src = url;
+                    res.send(image);
                     return [3, 3];
                 case 2:
                     err_6 = _a.sent();

@@ -31,7 +31,7 @@ var csrf = require("csurf");
 var csrfMiddleware = csrf();
 var router = (0, express_1.Router)();
 router.get("/get_image/:id", s3_js_1.getImage);
-router.post("/signed_URL_download", s3_js_1.getSignedUrlForDownload);
+router.post("/signed_URL_download_multi", s3_js_1.getSignedUrlsForDownloads);
 router.post("/new_image_for_project", upload.single("file"), s3_js_1.newImageForProject);
 router.post("/new_image_for_user", upload.single("file"), s3_js_1.newImageForUser);
 router.post("/edit_image_name/:id", (0, express_validator_1.body)("original_name")

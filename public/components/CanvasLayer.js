@@ -1,5 +1,5 @@
 import imageFollowingCursor from "../lib/imageFollowingCursor.js";
-import { getPresignedForImageDownload } from "../lib/imageUtils.js";
+import { getPresignedUrlsForImages } from "../lib/imageUtils.js";
 import socketIntegration from "../lib/socketIntegration.js";
 
 export default class CanvasLayer {
@@ -68,20 +68,20 @@ export default class CanvasLayer {
         this.renderGridObjects();
       } else {
         // update image links
-        const imageSrcList = {};
-        for (var object of this.currentTableView.data.objects) {
-          // if (object.type === "group") return object;
+        const imageIds = [
+          ...new Set(
+            this.currentTableView.data.objects
+              .filter((object) => Boolean(object.imageId))
+              .map((object) => object.imageId)
+          ),
+        ];
+        const presignedUrls = await getPresignedUrlsForImages(imageIds);
+        for (let object of this.currentTableView.data.objects) {
           if (object.imageId) {
-            if (imageSrcList[object.imageId]) {
-              object.src = imageSrcList[object.imageId];
+            if (presignedUrls.urls[object.imageId]) {
+              object.src = presignedUrls.urls[object.imageId];
             } else {
-              const presigned = await getPresignedForImageDownload(
-                object.imageId
-              );
-              if (presigned) {
-                object.src = presigned.url;
-                imageSrcList[object.imageId] = object.src;
-              } else delete this.currentTableView.data.objects[object];
+              delete this.currentTableView.data.objects[object];
             }
           }
         }
@@ -324,10 +324,9 @@ export default class CanvasLayer {
   };
 
   addImageToTable = async (image) => {
-    const imageSource = await getPresignedForImageDownload(image.id);
-    if (imageSource) {
+    if (image.src) {
       // create new object
-      fabric.Image.fromURL(imageSource.url, (newImg) => {
+      fabric.Image.fromURL(image.src, (newImg) => {
         // CREATE ************************
         const id = uuidv4();
         newImg.set("id", id);

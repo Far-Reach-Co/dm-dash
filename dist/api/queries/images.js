@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.editImageQuery = exports.removeImageQuery = exports.getImageQuery = exports.addImageQuery = void 0;
+exports.editImageQuery = exports.removeImageQuery = exports.getImagesQuery = exports.getImageQuery = exports.addImageQuery = void 0;
 var dbconfig_1 = require("../dbconfig");
 function addImageQuery(data) {
     return __awaiter(this, void 0, void 0, function () {
@@ -76,6 +76,24 @@ function getImageQuery(id) {
     });
 }
 exports.getImageQuery = getImageQuery;
+function getImagesQuery(ids) {
+    return __awaiter(this, void 0, void 0, function () {
+        var placeholders, query;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    placeholders = ids.map(function (_, index) { return "$".concat(index + 1); }).join(',');
+                    query = {
+                        text: "SELECT * FROM public.\"Image\" WHERE id IN (".concat(placeholders, ")"),
+                        values: ids
+                    };
+                    return [4, dbconfig_1["default"].query(query)];
+                case 1: return [2, _a.sent()];
+            }
+        });
+    });
+}
+exports.getImagesQuery = getImagesQuery;
 function removeImageQuery(id) {
     return __awaiter(this, void 0, void 0, function () {
         var query;

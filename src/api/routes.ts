@@ -38,13 +38,13 @@ import {
   editProjectUserIsEditor,
 } from "./controllers/projectUsers.js";
 import {
-  getSignedUrlForDownload,
   getImage,
   removeImageByTableUser,
   removeImageByProject,
   newImageForProject,
   newImageForUser,
   editImageName,
+  getSignedUrlsForDownloads,
 } from "./controllers/s3.js";
 // for uploading files
 import multer = require("multer");
@@ -146,7 +146,7 @@ var router = Router();
 
 // s3
 router.get("/get_image/:id", getImage);
-router.post("/signed_URL_download", getSignedUrlForDownload);
+router.post("/signed_URL_download_multi", getSignedUrlsForDownloads);
 router.post(
   "/new_image_for_project",
   upload.single("file"),

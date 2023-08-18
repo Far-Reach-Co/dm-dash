@@ -5,7 +5,9 @@ import {
   addImageQuery,
   editImageQuery,
   getImageQuery,
+  getImagesQuery,
   removeImageQuery,
+  ImageModal,
 } from "../queries/images";
 import { getProjectQuery, editProjectQuery } from "../queries/projects";
 import { Request, Response, NextFunction } from "express";
@@ -25,57 +27,62 @@ config.update({
 });
 
 const s3 = new S3();
-
-interface GetSignedUrlRequestObject {
+interface GetSignedUrlsRequestObject {
   body: {
-    image_id: string | number;
+    image_ids: (string | number)[];
     folder_name: string;
     bucket_name: string; // this is no longer being used. update the frontend to not send it
   };
 }
 
-async function getSignedUrlForDownload(
-  req: GetSignedUrlRequestObject,
+async function getSignedUrlsForDownloads(
+  req: GetSignedUrlsRequestObject, // note that the request object type will change
   res: Response,
   next: NextFunction
 ) {
   try {
-    const imageData = await getImageQuery(req.body.image_id);
-    const objectName = imageData.rows[0].file_name;
+    if (!req.body.image_ids.length) return res.send([]);
+    const imageDataList = await getImagesQuery(req.body.image_ids); // adjusted function to fetch multiple rows
 
-    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/${req.body.folder_name}/${objectName}`;
-    // CloudFront signing parameters
-    const privateKeyPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "private_frc_cloudfront_key.pem"
-    );
-    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
-    const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
+    const urls: { [key: string]: string } = {};
 
-    const signingParams = {
-      url: cloudFrontUrl,
-      expires: Math.floor(
-        (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
-      ), // 3 days from now
-      privateKey: privateKey,
-      keyPairId: cloudFrontKeyId,
-    };
+    for (const imageData of imageDataList.rows) {
+      const objectName = imageData.file_name;
+      const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/${req.body.folder_name}/${objectName}`;
 
-    const signer = new CloudFront.Signer(
-      signingParams.keyPairId,
-      signingParams.privateKey
-    );
-    const url = signer.getSignedUrl({
-      url: signingParams.url,
-      expires: signingParams.expires,
-    });
+      const privateKeyPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "private_frc_cloudfront_key.pem"
+      );
+      const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+      const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
 
-    res.send({ url });
+      const signingParams = {
+        url: cloudFrontUrl,
+        expires: Math.floor(
+          (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
+        ), // 3 days from now
+        privateKey: privateKey,
+        keyPairId: cloudFrontKeyId,
+      };
+
+      const signer = new CloudFront.Signer(
+        signingParams.keyPairId,
+        signingParams.privateKey
+      );
+
+      urls[imageData.id] = signer.getSignedUrl({
+        url: signingParams.url,
+        expires: signingParams.expires,
+      });
+    }
+
+    return res.send({ urls });
   } catch (err) {
-    next(err);
+    return next(err);
   }
 }
 
@@ -385,10 +392,49 @@ async function newImageForUser(
   }
 }
 
+interface imageExtendedWithSrc extends ImageModal {
+  src: string;
+}
+
 async function getImage(req: Request, res: Response, next: NextFunction) {
   try {
     const imageData = await getImageQuery(req.params.id);
-    res.send(imageData.rows[0]);
+    const image = imageData.rows[0] as imageExtendedWithSrc;
+    // append src url from signed url
+    const objectName = image.file_name;
+
+    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${objectName}`;
+    // CloudFront signing parameters
+    const privateKeyPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "private_frc_cloudfront_key.pem"
+    );
+    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+    const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
+
+    const signingParams = {
+      url: cloudFrontUrl,
+      expires: Math.floor(
+        (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
+      ), // 3 days from now
+      privateKey: privateKey,
+      keyPairId: cloudFrontKeyId,
+    };
+
+    const signer = new CloudFront.Signer(
+      signingParams.keyPairId,
+      signingParams.privateKey
+    );
+    const url = signer.getSignedUrl({
+      url: signingParams.url,
+      expires: signingParams.expires,
+    });
+
+    image.src = url;
+    res.send(image);
   } catch (err) {
     console.log(err);
     next(err);
@@ -485,7 +531,7 @@ async function editImageName(req: Request, res: Response, next: NextFunction) {
 }
 
 export {
-  getSignedUrlForDownload,
+  getSignedUrlsForDownloads,
   getImage,
   editImageName,
   newImageForProject,

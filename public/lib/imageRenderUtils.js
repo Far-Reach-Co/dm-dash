@@ -1,6 +1,6 @@
 import modal from "../components/modal.js";
 import createElement from "./createElement.js";
-import { getPresignedForImageDownload } from "./imageUtils.js";
+// import { getPresignedForImageDownload } from "./imageUtils.js";
 
 async function handleImageClick(imageSource) {
   modal.show(
@@ -10,7 +10,7 @@ async function handleImageClick(imageSource) {
 
 export async function renderImageLarge(imageId) {
   if (imageId) {
-    const imageSource = await getPresignedForImageDownload(imageId);
+    const imageSource = await getPresignedForImageDownload(imageId); // deprecated
     if (imageSource) {
       return createElement(
         "img",
@@ -35,7 +35,7 @@ export async function renderImageSmallOrPlaceholder(
   placeholderImageLocation
 ) {
   if (imageId) {
-    const imageSource = await getPresignedForImageDownload(imageId);
+    const imageSource = await getPresignedForImageDownload(imageId); // deprecated
     if (imageSource) {
       return createElement("img", {
         src: imageSource.url,

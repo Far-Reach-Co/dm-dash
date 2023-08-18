@@ -1,4 +1,3 @@
-import { getPresignedForImageDownload } from "./imageUtils.js";
 import createElement from "./createElement.js";
 import { deleteThing, getThings, postThing } from "./apiUtils.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
@@ -26,9 +25,8 @@ export default class TableSidebarImageComponent {
   };
 
   renderImage = async (image) => {
-    const imageSource = await getPresignedForImageDownload(image.id);
-    if (imageSource) {
-      this.downloadedImageSourceList[image.id] = imageSource.url;
+    if (image.src) {
+      this.downloadedImageSourceList[image.id] = image.src;
       return createElement(
         "div",
         {
@@ -36,7 +34,7 @@ export default class TableSidebarImageComponent {
           title: "Click and drag image to the table",
         },
         createElement("img", {
-          src: imageSource.url,
+          src: image.src,
           height: "38px",
           style: "pointer-events: none; max-width: 38px",
         }),
