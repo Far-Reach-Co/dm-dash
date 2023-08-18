@@ -47,6 +47,8 @@ var utils_js_1 = require("../../lib/utils.js");
 var users_js_1 = require("../queries/users.js");
 var tableViews_js_1 = require("../queries/tableViews.js");
 var projectUsers_js_1 = require("../queries/projectUsers.js");
+var path = require("path");
+var fs = require("fs");
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -56,34 +58,37 @@ aws_sdk_1.config.update({
 var s3 = new aws_sdk_1.S3();
 function getSignedUrlForDownload(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var imageData, objectName, params_1, url, err_1;
+        var imageData, objectName, cloudFrontUrl, privateKeyPath, privateKey, cloudFrontKeyId, signingParams, signer, url, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    _a.trys.push([0, 3, , 4]);
+                    _a.trys.push([0, 2, , 3]);
                     return [4, (0, images_1.getImageQuery)(req.body.image_id)];
                 case 1:
                     imageData = _a.sent();
                     objectName = imageData.rows[0].file_name;
-                    params_1 = {
-                        Bucket: "".concat(req.body.bucket_name, "/").concat(req.body.folder_name),
-                        Key: objectName,
-                        Expires: 60 * 60 * 24 * 3
+                    cloudFrontUrl = "https://".concat(process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN, "/").concat(req.body.folder_name, "/").concat(objectName);
+                    privateKeyPath = path.join(__dirname, "..", "..", "..", "private_frc_cloudfront_key.pem");
+                    privateKey = fs.readFileSync(privateKeyPath, "utf8");
+                    cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
+                    signingParams = {
+                        url: cloudFrontUrl,
+                        expires: Math.floor((new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000),
+                        privateKey: privateKey,
+                        keyPairId: cloudFrontKeyId
                     };
-                    return [4, new Promise(function (resolve, reject) {
-                            s3.getSignedUrl("getObject", params_1, function (err, url) {
-                                err ? reject(err) : resolve(url);
-                            });
-                        })];
-                case 2:
-                    url = _a.sent();
+                    signer = new aws_sdk_1.CloudFront.Signer(signingParams.keyPairId, signingParams.privateKey);
+                    url = signer.getSignedUrl({
+                        url: signingParams.url,
+                        expires: signingParams.expires
+                    });
                     res.send({ url: url });
-                    return [3, 4];
-                case 3:
+                    return [3, 3];
+                case 2:
                     err_1 = _a.sent();
                     next(err_1);
-                    return [3, 4];
-                case 4: return [2];
+                    return [3, 3];
+                case 3: return [2];
             }
         });
     });
@@ -189,7 +194,7 @@ function makeImageSmall(filePath) {
 }
 function newImageForProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var filePath, image, params_2, fileSize, newFilePathFromResizedImage, stats, fileSizeInBytes, imageData, err_2, dataUsageCount, oldImageData, oldImage, projectData, project, newCalculatedData, err_3;
+        var filePath, image, params_1, fileSize, newFilePathFromResizedImage, stats, fileSizeInBytes, imageData, err_2, dataUsageCount, oldImageData, oldImage, projectData, project, newCalculatedData, err_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -203,7 +208,7 @@ function newImageForProject(req, res, next) {
                     return [4, checkProjectProLimitReachedAndAuth(req.body.project_id, req.session.user)];
                 case 2:
                     _a.sent();
-                    params_2 = computeAwsImageParamsFromRequest(req, filePath);
+                    params_1 = computeAwsImageParamsFromRequest(req, filePath);
                     fileSize = req.file.size;
                     if (!req.body.make_image_small) return [3, 4];
                     return [4, makeImageSmall(filePath)];
@@ -211,7 +216,7 @@ function newImageForProject(req, res, next) {
                     newFilePathFromResizedImage = _a.sent();
                     if (newFilePathFromResizedImage) {
                         filePath = newFilePathFromResizedImage;
-                        params_2.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
+                        params_1.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
                         stats = (0, fs_1.statSync)(newFilePathFromResizedImage);
                         fileSizeInBytes = stats.size;
                         fileSize = fileSizeInBytes;
@@ -220,13 +225,13 @@ function newImageForProject(req, res, next) {
                 case 4: return [4, (0, images_1.addImageQuery)({
                         original_name: req.file.originalname,
                         size: fileSize,
-                        file_name: params_2.Key
+                        file_name: params_1.Key
                     })];
                 case 5:
                     imageData = _a.sent();
                     image = imageData.rows[0];
                     return [4, new Promise(function (resolve, reject) {
-                            s3.upload(params_2, function (err, data) {
+                            s3.upload(params_1, function (err, data) {
                                 if (err) {
                                     reject(err);
                                 }
@@ -285,7 +290,7 @@ function newImageForProject(req, res, next) {
 exports.newImageForProject = newImageForProject;
 function newImageForUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function () {
-        var filePath, image, params_3, fileSize, newFilePathFromResizedImage, stats, fileSizeInBytes, imageData, err_4, dataUsageCount, userData, user, newCalculatedData, err_5;
+        var filePath, image, params_2, fileSize, newFilePathFromResizedImage, stats, fileSizeInBytes, imageData, err_4, dataUsageCount, userData, user, newCalculatedData, err_5;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -301,7 +306,7 @@ function newImageForUser(req, res, next) {
                     return [4, checkUserProLimitReachedAndAuth(req.session.user)];
                 case 2:
                     _a.sent();
-                    params_3 = computeAwsImageParamsFromRequest(req, filePath);
+                    params_2 = computeAwsImageParamsFromRequest(req, filePath);
                     fileSize = req.file.size;
                     if (!req.body.make_image_small) return [3, 4];
                     return [4, makeImageSmall(filePath)];
@@ -309,7 +314,7 @@ function newImageForUser(req, res, next) {
                     newFilePathFromResizedImage = _a.sent();
                     if (newFilePathFromResizedImage) {
                         filePath = newFilePathFromResizedImage;
-                        params_3.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
+                        params_2.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
                         stats = (0, fs_1.statSync)(newFilePathFromResizedImage);
                         fileSizeInBytes = stats.size;
                         fileSize = fileSizeInBytes;
@@ -318,13 +323,13 @@ function newImageForUser(req, res, next) {
                 case 4: return [4, (0, images_1.addImageQuery)({
                         original_name: req.file.originalname,
                         size: fileSize,
-                        file_name: params_3.Key
+                        file_name: params_2.Key
                     })];
                 case 5:
                     imageData = _a.sent();
                     image = imageData.rows[0];
                     return [4, new Promise(function (resolve, reject) {
-                            s3.upload(params_3, function (err, data) {
+                            s3.upload(params_2, function (err, data) {
                                 if (err) {
                                     reject(err);
                                 }
@@ -477,17 +482,17 @@ function removeImageByTableUser(req, res, next) {
 exports.removeImageByTableUser = removeImageByTableUser;
 function removeImage(bucket, image) {
     return __awaiter(this, void 0, void 0, function () {
-        var params_4, err_9;
+        var params_3, err_9;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 2, , 3]);
-                    params_4 = {
+                    params_3 = {
                         Bucket: bucket,
                         Key: image.file_name
                     };
                     return [4, new Promise(function (resolve, reject) {
-                            s3.deleteObject(params_4, function (err, data) {
+                            s3.deleteObject(params_3, function (err, data) {
                                 if (err) {
                                     reject(err);
                                 }

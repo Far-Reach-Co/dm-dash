@@ -2,6 +2,7 @@ DS_Store
 node_modules
 public/.well-known/acme-challenge/*
 
+private_frc_cloudfront_key.pem
 
 *.local
 

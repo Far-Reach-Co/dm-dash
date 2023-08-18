@@ -1,4 +1,4 @@
-import { S3, config } from "aws-sdk";
+import { S3, config, CloudFront } from "aws-sdk";
 import { readFileSync, statSync, unlinkSync } from "fs";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import {
@@ -14,6 +14,8 @@ import { splitAtIndex } from "../../lib/utils.js";
 import { editUserQuery, getUserByIdQuery } from "../queries/users.js";
 import { getTableViewQuery } from "../queries/tableViews.js";
 import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import path = require("path");
+import fs = require("fs");
 
 config.update({
   signatureVersion: "v4",
@@ -28,7 +30,7 @@ interface GetSignedUrlRequestObject {
   body: {
     image_id: string | number;
     folder_name: string;
-    bucket_name: string;
+    bucket_name: string; // this is no longer being used. update the frontend to not send it
   };
 }
 
@@ -40,17 +42,37 @@ async function getSignedUrlForDownload(
   try {
     const imageData = await getImageQuery(req.body.image_id);
     const objectName = imageData.rows[0].file_name;
-    const params = {
-      Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
-      Key: objectName,
-      Expires: 60 * 60 * 24 * 3,
+
+    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/${req.body.folder_name}/${objectName}`;
+    // CloudFront signing parameters
+    const privateKeyPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "private_frc_cloudfront_key.pem"
+    );
+    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+    const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
+
+    const signingParams = {
+      url: cloudFrontUrl,
+      expires: Math.floor(
+        (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
+      ), // 3 days from now
+      privateKey: privateKey,
+      keyPairId: cloudFrontKeyId,
     };
-    // if(req.body.download_name) params.ResponseContentDisposition = `filename="${req.body.download_name}"`
-    const url = await new Promise((resolve, reject) => {
-      s3.getSignedUrl("getObject", params, (err, url) => {
-        err ? reject(err) : resolve(url);
-      });
+
+    const signer = new CloudFront.Signer(
+      signingParams.keyPairId,
+      signingParams.privateKey
+    );
+    const url = signer.getSignedUrl({
+      url: signingParams.url,
+      expires: signingParams.expires,
     });
+
     res.send({ url });
   } catch (err) {
     next(err);
