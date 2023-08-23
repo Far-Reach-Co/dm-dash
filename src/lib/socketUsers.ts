@@ -1,4 +1,9 @@
-const users: User[] = [];
+import { createClient } from "redis";
+
+// Setup redis
+export const redisClient = createClient();
+redisClient.connect();
+redisClient.on("error", (err) => console.log("Redis Client Error", err));
 
 type User = {
   id: string;
@@ -6,31 +11,43 @@ type User = {
   table: string;
 };
 
-// join user to chat
-function userJoin(id: string, username: string, table: string) {
+async function userJoin(
+  id: string,
+  username: string,
+  table: string
+): Promise<User> {
   const user: User = { id, username, table };
-  users.push(user);
-
+  // Store user data in Redis
+  await redisClient.hSet("users", id, JSON.stringify(user));
   return user;
 }
 
-// get current user
-function getCurrentUser(id: string) {
-  return users.find((user) => user.id === id);
+async function getCurrentUser(id: string): Promise<User | null> {
+  const userStr = await redisClient.hGet("users", id);
+  if (!userStr) {
+    return null;
+  }
+  return JSON.parse(userStr) as User;
 }
 
-// user leaves chat
-function userLeave(id: string) {
-  const index = users.findIndex((user) => user.id === id);
+async function userLeave(id: string): Promise<User | null> {
+  const userStr = await redisClient.hGet("users", id);
+  if (!userStr) {
+    return null;
+  }
 
-  if (index !== -1) {
-    return users.splice(index, 1)[0];
-  } else return null;
+  // Remove the user
+  await redisClient.hDel("users", id);
+  return JSON.parse(userStr) as User;
 }
 
-// get table users
-function getTableUsers(table: string) {
-  return users.filter((user) => user.table === table);
+async function getTableUsers(table: string): Promise<User[]> {
+  const users = await redisClient.hGetAll("users");
+  if (!users) return [];
+
+  return Object.values(users)
+    .map((userStr) => JSON.parse(userStr) as User)
+    .filter((user) => user.table === table);
 }
 
-export { userJoin, getCurrentUser, userLeave, getTableUsers };
+export { userJoin, getCurrentUser, getTableUsers, userLeave };
