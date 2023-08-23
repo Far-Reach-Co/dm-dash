@@ -19,13 +19,14 @@ if (process.env.SERVER_ENV === "prod") {
 }
 const { Server } = require("socket.io");
 const io = new Server(server);
-const cors = require("cors");
-var path = require("path");
-const requestIp = require("request-ip");
+// const cors = require("cors");
+// var path = require("path");
+// const requestIp = require("request-ip");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
-
+const redisAdapter = require("socket.io-redis");
+io.adapter(redisAdapter({ host: "localhost", port: 6379 }));
 const apiRoutes = require("./dist/api/routes.js");
 const routes = require("./dist/routes.js");
 const {
@@ -126,16 +127,16 @@ app.use((error, req, res, next) => {
 /***************************** SOCKETS ***************************/
 io.on("connection", (socket) => {
   // testing
-  socket.on("table-joined", ({ table, username }) => {
+  socket.on("table-joined", async ({ table, username }) => {
     try {
-      const user = userJoin(socket.id, username, table);
+      const user = await userJoin(socket.id, username, table);
       socket.join(table);
 
       // broadcast when a user connects
       io.to(table).emit("table-join", `Hello ${username}`);
 
       // send users list
-      io.to(user.table).emit("current-users", getTableUsers(table));
+      io.to(user.table).emit("current-users", await getTableUsers(table));
     } catch (err) {
       console.log("SOCKET ERROR", err);
     }
@@ -169,12 +170,12 @@ io.on("connection", (socket) => {
     socket.broadcast.to(table).emit("object-change-layer", object);
   });
   // when a user disconnects
-  socket.on("disconnect", () => {
-    const user = userLeave(socket.id);
+  socket.on("disconnect", async () => {
+    const user = await userLeave(socket.id);
 
     if (user) {
       // send users list
-      io.to(user.table).emit("current-users", getTableUsers(user.table));
+      io.to(user.table).emit("current-users", await getTableUsers(user.table));
     }
   });
 });
