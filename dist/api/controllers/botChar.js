@@ -171,7 +171,7 @@ function handleGetGeneralInfoResponse(charGeneralId, res) {
             const spellInfo = spellInfoData.rows[0];
             let content = "";
             content += `**${charGeneral.name}**`;
-            content += `\n**Race:** ${charGeneral.name}`;
+            content += `\n**Race:** ${charGeneral.race}`;
             content += `\n**Class:** ${charGeneral.class}`;
             if (charGeneral.subclass)
                 content += `\n**Sub-Class:** ${charGeneral.subclass}`;
