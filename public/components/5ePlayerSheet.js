@@ -1031,20 +1031,14 @@ export default class FiveEPlayerSheet {
                   "input",
                   {
                     class: "cp-input-no-border cp-input-large",
-                    name: "other_resource_total",
-                    type: "number",
-                    value: this.generalData.other_resource_total
-                      ? this.generalData.other_resource_total
-                      : 0,
+                    name: "other_resource",
+                    value: this.generalData.other_resource,
                   },
                   null,
                   {
                     type: "focusout",
                     event: (e) => {
-                      this.updateGeneralValue(
-                        e.target.name,
-                        e.target.valueAsNumber
-                      );
+                      this.updateGeneralValue(e.target.name, e.target.value);
                     },
                   }
                 ),

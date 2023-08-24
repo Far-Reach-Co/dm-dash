@@ -134,7 +134,14 @@ import {
   getTableFoldersByUser,
   removeTableFolder,
 } from "./controllers/tableFolders.js";
+import { verifyKeyMiddleware } from "discord-interactions";
 import { rateLimit } from "express-rate-limit";
+import {
+  createCommands,
+  deleteCommand,
+  getCommands,
+  interactionsController,
+} from "./controllers/discordBot.js";
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 const csrf = require("csurf");
@@ -143,6 +150,12 @@ const csrf = require("csurf");
 const csrfMiddleware = csrf();
 
 var router = Router();
+
+// discord bot
+router.get("/bot/get_all_commands", getCommands);
+router.get("/bot/create_command", createCommands);
+router.get("/bot/delete_command/:id", deleteCommand);
+router.post("/bot/interactions", interactionsController);
 
 // s3
 router.get("/get_image/:id", getImage);

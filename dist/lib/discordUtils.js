@@ -9,26 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.pool = void 0;
-const pg_1 = require("pg");
-var credentials = {
-    user: process.env.PG_USER,
-    host: process.env.PG_HOST,
-    database: process.env.PG_DB,
-    password: process.env.PG_PW,
-    port: 5432,
-};
-exports.pool = new pg_1.Pool(credentials);
-function query(queryObject, params) {
+exports.DiscordRequest = void 0;
+const node_fetch_1 = require("node-fetch");
+function DiscordRequest(endpoint, options) {
     return __awaiter(this, void 0, void 0, function* () {
-        const start = Date.now();
-        const res = yield exports.pool.query(queryObject, params);
-        const duration = Date.now() - start;
-        console.log("executed query", { queryObject, duration, rows: res.rowCount });
-        return res;
+        const url = `https://discord.com/api/v10/${endpoint}`;
+        const processedBody = options.body ? JSON.stringify(options.body) : undefined;
+        const headers = Object.assign({ Authorization: `Bot ${process.env.DISCORD_TOKEN}`, "Content-Type": "application/json; charset=UTF-8", "User-Agent": "5e-bot (https://5ebot.com), 1.0.2)" }, options.headers);
+        const res = yield (0, node_fetch_1.default)(url, Object.assign(Object.assign({}, options), { body: processedBody, headers }));
+        if (!res.ok) {
+            const data = yield res.json();
+            throw new Error(JSON.stringify(data));
+        }
+        return yield res.json();
     });
 }
-const db = {
-    query,
-};
-exports.default = db;
+exports.DiscordRequest = DiscordRequest;
