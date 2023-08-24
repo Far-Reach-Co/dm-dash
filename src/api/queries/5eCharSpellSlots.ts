@@ -36,7 +36,7 @@ async function add5eCharSpellSlotInfoQuery(data: {
   return await db.query<DndFiveESpellSlotsModel>(query)
 }
 
-async function get5eCharSpellSlotInfoQuery(id: string) {
+async function get5eCharSpellSlotInfoQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where id = $1`,
     values: [id]

@@ -8,360 +8,174 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.editProjectTitle = exports.removeProject = exports.addProject = exports.getProject = exports.getProjects = void 0;
-var projects_js_1 = require("../queries/projects.js");
-var projectInvites_js_1 = require("../queries/projectInvites.js");
-var projectUsers_js_1 = require("../queries/projectUsers.js");
-var calendars_js_1 = require("../queries/calendars.js");
-var months_js_1 = require("../queries/months.js");
-var days_js_1 = require("../queries/days.js");
-var images_js_1 = require("../queries/images.js");
-var s3_js_1 = require("./s3.js");
-var tableViews_js_1 = require("../queries/tableViews.js");
-var tableImages_js_1 = require("../queries/tableImages.js");
-var projectPlayers_js_1 = require("../queries/projectPlayers.js");
+const projects_js_1 = require("../queries/projects.js");
+const projectInvites_js_1 = require("../queries/projectInvites.js");
+const projectUsers_js_1 = require("../queries/projectUsers.js");
+const calendars_js_1 = require("../queries/calendars.js");
+const months_js_1 = require("../queries/months.js");
+const days_js_1 = require("../queries/days.js");
+const images_js_1 = require("../queries/images.js");
+const s3_js_1 = require("./s3.js");
+const tableViews_js_1 = require("../queries/tableViews.js");
+const tableImages_js_1 = require("../queries/tableImages.js");
+const projectPlayers_js_1 = require("../queries/projectPlayers.js");
 function addProject(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var data, err_1;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    if (!req.session.user)
-                        throw new Error("User is not logged in");
-                    req.body.user_id = req.session.user;
-                    return [4, (0, projects_js_1.addProjectQuery)(req.body)];
-                case 1:
-                    data = _a.sent();
-                    return [4, (0, tableViews_js_1.addTableViewByProjectQuery)({
-                            project_id: data.rows[0].id,
-                            title: "First Wyrld Table"
-                        })];
-                case 2:
-                    _a.sent();
-                    res
-                        .set("HX-Redirect", "/wyrld?id=".concat(data.rows[0].id))
-                        .send("Form submission was successful.");
-                    return [3, 4];
-                case 3:
-                    err_1 = _a.sent();
-                    next(err_1);
-                    return [3, 4];
-                case 4: return [2];
-            }
-        });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            req.body.user_id = req.session.user;
+            const data = yield (0, projects_js_1.addProjectQuery)(req.body);
+            yield (0, tableViews_js_1.addTableViewByProjectQuery)({
+                project_id: data.rows[0].id,
+                title: "First Wyrld Table",
+            });
+            res
+                .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)
+                .send("Form submission was successful.");
+        }
+        catch (err) {
+            next(err);
+        }
     });
 }
 exports.addProject = addProject;
 function getProject(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, projectUsersData, projectUser, err_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    return [4, (0, projects_js_1.getProjectQuery)(req.params.id)];
-                case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (!req.session.user)
-                        throw new Error("User is not logged in");
-                    return [4, (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id)];
-                case 2:
-                    projectUsersData = _a.sent();
-                    if (projectUsersData.rows.length) {
-                        projectUser = projectUsersData.rows[0];
-                        project.was_joined = true;
-                        project.project_user_id = projectUser.id;
-                        project.date_joined =
-                            projectUser.date_joined;
-                        project.is_editor = projectUser.is_editor;
-                    }
-                    res.send(project);
-                    return [3, 4];
-                case 3:
-                    err_2 = _a.sent();
-                    next(err_2);
-                    return [3, 4];
-                case 4: return [2];
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.id);
+            const project = projectData.rows[0];
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const projectUsersData = yield (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id);
+            if (projectUsersData.rows.length) {
+                const projectUser = projectUsersData.rows[0];
+                project.was_joined = true;
+                project.project_user_id = projectUser.id;
+                project.date_joined =
+                    projectUser.date_joined;
+                project.is_editor = projectUser.is_editor;
             }
-        });
+            res.send(project);
+        }
+        catch (err) {
+            next(err);
+        }
     });
 }
 exports.getProject = getProject;
 function getProjects(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var projectsData, projectUserData, _i, _a, projectUser, projectData, project_1, _b, _c, project, projectInvites, err_3;
-        return __generator(this, function (_d) {
-            switch (_d.label) {
-                case 0:
-                    _d.trys.push([0, 11, , 12]);
-                    if (!req.session.user)
-                        throw new Error("User is not logged in");
-                    return [4, (0, projects_js_1.getProjectsQuery)(req.session.user)];
-                case 1:
-                    projectsData = _d.sent();
-                    return [4, (0, projectUsers_js_1.getProjectUsersQuery)(req.session.user)];
-                case 2:
-                    projectUserData = _d.sent();
-                    if (!(projectUserData &&
-                        projectUserData.rows &&
-                        projectUserData.rows.length)) return [3, 6];
-                    _i = 0, _a = projectUserData.rows;
-                    _d.label = 3;
-                case 3:
-                    if (!(_i < _a.length)) return [3, 6];
-                    projectUser = _a[_i];
-                    return [4, (0, projects_js_1.getProjectQuery)(projectUser.project_id)];
-                case 4:
-                    projectData = _d.sent();
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const projectsData = yield (0, projects_js_1.getProjectsQuery)(req.session.user);
+            const projectUserData = yield (0, projectUsers_js_1.getProjectUsersQuery)(req.session.user);
+            if (projectUserData &&
+                projectUserData.rows &&
+                projectUserData.rows.length) {
+                for (var projectUser of projectUserData.rows) {
+                    const projectData = yield (0, projects_js_1.getProjectQuery)(projectUser.project_id);
                     if (projectData && projectData.rows && projectData.rows.length) {
-                        project_1 = projectData.rows[0];
-                        project_1.was_joined = true;
-                        project_1.project_user_id =
+                        const project = projectData.rows[0];
+                        project.was_joined = true;
+                        project.project_user_id =
                             projectUser.id;
-                        project_1.date_joined =
+                        project.date_joined =
                             projectUser.date_joined;
-                        project_1.is_editor =
+                        project.is_editor =
                             projectUser.is_editor;
-                        projectsData.rows.push(project_1);
+                        projectsData.rows.push(project);
                     }
-                    _d.label = 5;
-                case 5:
-                    _i++;
-                    return [3, 3];
-                case 6:
-                    _b = 0, _c = projectsData.rows;
-                    _d.label = 7;
-                case 7:
-                    if (!(_b < _c.length)) return [3, 10];
-                    project = _c[_b];
-                    return [4, (0, projectInvites_js_1.getProjectInviteByProjectQuery)(project.id)];
-                case 8:
-                    projectInvites = _d.sent();
-                    if (projectInvites && projectInvites.rows && projectInvites.rows.length)
-                        project.project_invite =
-                            projectInvites.rows[0];
-                    _d.label = 9;
-                case 9:
-                    _b++;
-                    return [3, 7];
-                case 10:
-                    res.send(projectsData.rows);
-                    return [3, 12];
-                case 11:
-                    err_3 = _d.sent();
-                    next(err_3);
-                    return [3, 12];
-                case 12: return [2];
+                }
             }
-        });
+            for (var project of projectsData.rows) {
+                const projectInvites = yield (0, projectInvites_js_1.getProjectInviteByProjectQuery)(project.id);
+                if (projectInvites && projectInvites.rows && projectInvites.rows.length)
+                    project.project_invite =
+                        projectInvites.rows[0];
+            }
+            res.send(projectsData.rows);
+        }
+        catch (err) {
+            next(err);
+        }
     });
 }
 exports.getProjects = getProjects;
 function removeProject(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, calendarData, projectInvitesData, projectUsersData, projectPlayersData, tableImages, tableViews, err_4;
-        var _this = this;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 9, , 10]);
-                    if (!req.session.user)
-                        throw new Error("User is not logged in");
-                    return [4, (0, projects_js_1.getProjectQuery)(req.params.id)];
-                case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (req.session.user != project.user_id)
-                        throw new Error("User is not owner");
-                    return [4, (0, projects_js_1.removeProjectQuery)(req.params.id)];
-                case 2:
-                    _a.sent();
-                    return [4, (0, calendars_js_1.getCalendarQuery)(req.params.id)];
-                case 3:
-                    calendarData = _a.sent();
-                    calendarData.rows.forEach(function (calendar) { return __awaiter(_this, void 0, void 0, function () {
-                        var monthsData, daysData;
-                        var _this = this;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4, (0, calendars_js_1.removeCalendarQuery)(calendar.id)];
-                                case 1:
-                                    _a.sent();
-                                    return [4, (0, months_js_1.getMonthsQuery)(calendar.id)];
-                                case 2:
-                                    monthsData = _a.sent();
-                                    monthsData.rows.forEach(function (month) { return __awaiter(_this, void 0, void 0, function () {
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4, (0, months_js_1.removeMonthQuery)(month.id)];
-                                                case 1:
-                                                    _a.sent();
-                                                    return [2];
-                                            }
-                                        });
-                                    }); });
-                                    return [4, (0, days_js_1.getDaysQuery)(calendar.id)];
-                                case 3:
-                                    daysData = _a.sent();
-                                    daysData.rows.forEach(function (day) { return __awaiter(_this, void 0, void 0, function () {
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4, (0, days_js_1.removeDayQuery)(day.id)];
-                                                case 1:
-                                                    _a.sent();
-                                                    return [2];
-                                            }
-                                        });
-                                    }); });
-                                    return [2];
-                            }
-                        });
-                    }); });
-                    return [4, (0, projectInvites_js_1.getProjectInviteByProjectQuery)(req.params.id)];
-                case 4:
-                    projectInvitesData = _a.sent();
-                    projectInvitesData.rows.forEach(function (invite) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4, (0, projectInvites_js_1.removeProjectInviteQuery)(invite.id)];
-                                case 1:
-                                    _a.sent();
-                                    return [2];
-                            }
-                        });
-                    }); });
-                    return [4, (0, projectUsers_js_1.getProjectUsersByProjectQuery)(req.params.id)];
-                case 5:
-                    projectUsersData = _a.sent();
-                    projectUsersData.rows.forEach(function (user) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4, (0, projectUsers_js_1.removeProjectUserQuery)(user.id)];
-                                case 1:
-                                    _a.sent();
-                                    return [2];
-                            }
-                        });
-                    }); });
-                    return [4, (0, projectPlayers_js_1.getProjectPlayersByProjectQuery)(req.params.id)];
-                case 6:
-                    projectPlayersData = _a.sent();
-                    projectPlayersData.rows.forEach(function (player) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4, (0, projectPlayers_js_1.removeProjectPlayerQuery)(player.id)];
-                                case 1:
-                                    _a.sent();
-                                    return [2];
-                            }
-                        });
-                    }); });
-                    return [4, (0, tableImages_js_1.getTableImagesByProjectQuery)(req.params.id)];
-                case 7:
-                    tableImages = _a.sent();
-                    tableImages.rows.forEach(function (tableImage) { return __awaiter(_this, void 0, void 0, function () {
-                        var imageData, image;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4, (0, images_js_1.getImageQuery)(tableImage.image_id)];
-                                case 1:
-                                    imageData = _a.sent();
-                                    image = imageData.rows[0];
-                                    return [4, (0, s3_js_1.removeImage)("wyrld/images", image)];
-                                case 2:
-                                    _a.sent();
-                                    return [4, (0, tableImages_js_1.removeTableImageQuery)(tableImage.id)];
-                                case 3:
-                                    _a.sent();
-                                    return [2];
-                            }
-                        });
-                    }); });
-                    return [4, (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.id)];
-                case 8:
-                    tableViews = _a.sent();
-                    tableViews.rows.forEach(function (tableView) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4, (0, tableViews_js_1.removeTableViewQuery)(tableView.id)];
-                                case 1:
-                                    _a.sent();
-                                    return [2];
-                            }
-                        });
-                    }); });
-                    res.setHeader("HX-Redirect", "/dash");
-                    res.send();
-                    return [3, 10];
-                case 9:
-                    err_4 = _a.sent();
-                    next(err_4);
-                    return [3, 10];
-                case 10: return [2];
-            }
-        });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.id);
+            const project = projectData.rows[0];
+            if (req.session.user != project.user_id)
+                throw new Error("User is not owner");
+            yield (0, projects_js_1.removeProjectQuery)(req.params.id);
+            const calendarData = yield (0, calendars_js_1.getCalendarQuery)(req.params.id);
+            calendarData.rows.forEach((calendar) => __awaiter(this, void 0, void 0, function* () {
+                yield (0, calendars_js_1.removeCalendarQuery)(calendar.id);
+                const monthsData = yield (0, months_js_1.getMonthsQuery)(calendar.id);
+                monthsData.rows.forEach((month) => __awaiter(this, void 0, void 0, function* () {
+                    yield (0, months_js_1.removeMonthQuery)(month.id);
+                }));
+                const daysData = yield (0, days_js_1.getDaysQuery)(calendar.id);
+                daysData.rows.forEach((day) => __awaiter(this, void 0, void 0, function* () {
+                    yield (0, days_js_1.removeDayQuery)(day.id);
+                }));
+            }));
+            const projectInvitesData = yield (0, projectInvites_js_1.getProjectInviteByProjectQuery)(req.params.id);
+            projectInvitesData.rows.forEach((invite) => __awaiter(this, void 0, void 0, function* () {
+                yield (0, projectInvites_js_1.removeProjectInviteQuery)(invite.id);
+            }));
+            const projectUsersData = yield (0, projectUsers_js_1.getProjectUsersByProjectQuery)(req.params.id);
+            projectUsersData.rows.forEach((user) => __awaiter(this, void 0, void 0, function* () {
+                yield (0, projectUsers_js_1.removeProjectUserQuery)(user.id);
+            }));
+            const projectPlayersData = yield (0, projectPlayers_js_1.getProjectPlayersByProjectQuery)(req.params.id);
+            projectPlayersData.rows.forEach((player) => __awaiter(this, void 0, void 0, function* () {
+                yield (0, projectPlayers_js_1.removeProjectPlayerQuery)(player.id);
+            }));
+            const tableImages = yield (0, tableImages_js_1.getTableImagesByProjectQuery)(req.params.id);
+            tableImages.rows.forEach((tableImage) => __awaiter(this, void 0, void 0, function* () {
+                const imageData = yield (0, images_js_1.getImageQuery)(tableImage.image_id);
+                const image = imageData.rows[0];
+                yield (0, s3_js_1.removeImage)("wyrld/images", image);
+                yield (0, tableImages_js_1.removeTableImageQuery)(tableImage.id);
+            }));
+            const tableViews = yield (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.id);
+            tableViews.rows.forEach((tableView) => __awaiter(this, void 0, void 0, function* () {
+                yield (0, tableViews_js_1.removeTableViewQuery)(tableView.id);
+            }));
+            res.setHeader("HX-Redirect", "/dash");
+            res.send();
+        }
+        catch (err) {
+            next(err);
+        }
     });
 }
 exports.removeProject = removeProject;
 function editProjectTitle(req, res, next) {
-    return __awaiter(this, void 0, void 0, function () {
-        var projectData, project, err_5;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    if (!req.session.user)
-                        throw new Error("User is not logged in");
-                    return [4, (0, projects_js_1.getProjectQuery)(req.params.id)];
-                case 1:
-                    projectData = _a.sent();
-                    project = projectData.rows[0];
-                    if (req.session.user != project.user_id)
-                        throw new Error("User is not owner");
-                    return [4, (0, projects_js_1.editProjectQuery)(req.params.id, {
-                            title: req.body.title
-                        })];
-                case 2:
-                    _a.sent();
-                    res.send("Saved");
-                    return [3, 4];
-                case 3:
-                    err_5 = _a.sent();
-                    next(err_5);
-                    return [3, 4];
-                case 4: return [2];
-            }
-        });
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.id);
+            const project = projectData.rows[0];
+            if (req.session.user != project.user_id)
+                throw new Error("User is not owner");
+            yield (0, projects_js_1.editProjectQuery)(req.params.id, {
+                title: req.body.title,
+            });
+            res.send("Saved");
+        }
+        catch (err) {
+            next(err);
+        }
     });
 }
 exports.editProjectTitle = editProjectTitle;
