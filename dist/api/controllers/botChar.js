@@ -172,6 +172,7 @@ function handleGetBackgroundResponse(charGeneralId, res) {
         try {
             const backgroundData = yield (0, _5eCharBack_1.get5eCharBackByGeneralQuery)(charGeneralId);
             const background = backgroundData.rows[0];
+            let totalCharCount = 0;
             let content = "";
             content += `**Background:** ${background.background}`;
             content += `\n**Alignment:** ${background.alignment}`;
@@ -181,44 +182,55 @@ function handleGetBackgroundResponse(charGeneralId, res) {
             content += `\n**Hair:** ${background.hair}`;
             content += `\n**Height:** ${background.height}`;
             content += `\n**Weight:** ${background.weight}`;
+            totalCharCount += content.length;
+            const backgroundListItems = [
+                {
+                    title: "Personality Traits",
+                    description: background.personality_traits,
+                },
+                {
+                    title: "Ideals",
+                    description: background.ideals,
+                },
+                {
+                    title: "Bonds",
+                    description: background.ideals,
+                },
+                {
+                    title: "Flaws",
+                    description: background.ideals,
+                },
+                {
+                    title: "Appearance",
+                    description: background.appearance,
+                },
+                {
+                    title: "Backstory",
+                    description: background.backstory,
+                },
+                {
+                    title: "Allies & Organizations",
+                    description: background.allies_and_organizations,
+                },
+                {
+                    title: "Other Info",
+                    description: background.other_info,
+                },
+            ];
+            const embeds = [];
+            for (const item of backgroundListItems) {
+                totalCharCount += item.title.length;
+                totalCharCount += item.description.length;
+                if (totalCharCount > 6000 || embeds.length >= 10) {
+                    break;
+                }
+                embeds.push(item);
+            }
             return res.send({
                 type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
                     content,
-                    embeds: [
-                        {
-                            title: "Personality Traits",
-                            description: background.personality_traits,
-                        },
-                        {
-                            title: "Ideals",
-                            description: background.ideals,
-                        },
-                        {
-                            title: "Bonds",
-                            description: background.ideals,
-                        },
-                        {
-                            title: "Flaws",
-                            description: background.ideals,
-                        },
-                        {
-                            title: "Appearance",
-                            description: background.appearance,
-                        },
-                        {
-                            title: "Backstory",
-                            description: background.backstory,
-                        },
-                        {
-                            title: "Allies & Organizations",
-                            description: background.allies_and_organizations,
-                        },
-                        {
-                            title: "Other Info",
-                            description: background.other_info,
-                        },
-                    ],
+                    embeds,
                 },
             });
         }
@@ -231,9 +243,12 @@ function handleGetFeatsResponse(charGeneralId, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const featsData = yield (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(charGeneralId);
+            let totalCharCount = 0;
             const embeds = [];
             for (const feat of featsData.rows) {
-                if (embeds.length >= 10) {
+                totalCharCount += feat.title.length;
+                totalCharCount += feat.description.length;
+                if (totalCharCount > 6000 || embeds.length >= 10) {
                     break;
                 }
                 embeds.push({
@@ -639,11 +654,9 @@ function handleSpellsCommand(req, res) {
                     const spellInfoData = yield (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfosByGeneralQuery)(charGeneralId);
                     const spellInfo = spellInfoData.rows[0];
                     const spellsData = yield (0, _5eCharSpells_1.get5eCharSpellsByTypeQuery)(charGeneralId, (0, _5eCharUtils_1.getSpellQueryTitleByOption)(detailsOptionSelect));
+                    let totalCharCount = 0;
                     const embeds = [];
                     for (var spell of spellsData.rows) {
-                        if (embeds.length >= 10) {
-                            break;
-                        }
                         let description = "";
                         if (detailsOptionSelect !== "cantrips") {
                             description += `\n**Spell Slots:** ${(0, _5eCharUtils_1.getSpellSlotExpendedByOption)(detailsOptionSelect, spellInfo)} / ${(0, _5eCharUtils_1.getSpellSlotTotalByOption)(detailsOptionSelect, spellInfo)}`;
@@ -654,6 +667,11 @@ function handleSpellsCommand(req, res) {
                         description += `\n**Damage Type:** ${spell.damage_type}`;
                         description += `\n**Components:** ${spell.components}`;
                         description += `\n**Description:** ${spell.description}`;
+                        totalCharCount += spell.title.length;
+                        totalCharCount += description.length;
+                        if (totalCharCount > 6000 || embeds.length >= 10) {
+                            break;
+                        }
                         embeds.push({
                             title: spell.title,
                             description,
