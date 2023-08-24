@@ -260,8 +260,9 @@ async function handleGetBackgroundResponse(
     const embeds: any[] = [];
     for (const item of backgroundListItems) {
       // add to total char count for limit
-      if (item.title.length) totalCharCount += item.title.length;
-      if (item.description.length) totalCharCount += item.description.length;
+      if (item.title && item.title.length) totalCharCount += item.title.length;
+      if (item.description && item.description.length)
+        totalCharCount += item.description.length;
 
       if (totalCharCount > 6000 || embeds.length >= 10) {
         // discord limit for embeds
@@ -293,8 +294,9 @@ async function handleGetFeatsResponse(
     const embeds: any[] = [];
     for (const feat of featsData.rows) {
       // add to total char count for limit
-      if (feat.title.length) totalCharCount += feat.title.length;
-      if (feat.description.length) totalCharCount += feat.description.length;
+      if (feat.title && feat.title.length) totalCharCount += feat.title.length;
+      if (feat.description && feat.description.length)
+        totalCharCount += feat.description.length;
 
       if (totalCharCount > 6000 || embeds.length >= 10) {
         // discord limit for embeds
@@ -856,8 +858,10 @@ async function handleSpellsCommand(req: Request, res: Response) {
           description += `\n**Description:** ${spell.description}`;
 
           // add to total char count for limit
-          if (spell.title.length) totalCharCount += spell.title.length;
-          if (description.length) totalCharCount += description.length;
+          if (spell.title && spell.title.length)
+            totalCharCount += spell.title.length;
+          if (spell.description && spell.description.length)
+            totalCharCount += spell.description.length;
 
           if (totalCharCount > 6000 || embeds.length >= 10) {
             // discord limit
