@@ -233,10 +233,6 @@ function handleGetFeatsResponse(charGeneralId, res) {
             const featsData = yield (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(charGeneralId);
             const embeds = [];
             featsData.rows.forEach((feat) => {
-                if (!feat.title)
-                    return;
-                if (!feat.description)
-                    return;
                 embeds.push({
                     title: feat.title,
                     description: feat.description,
@@ -245,7 +241,7 @@ function handleGetFeatsResponse(charGeneralId, res) {
             return res.send({
                 type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    content: "**Attacks & Spellcasting**",
+                    content: "**Feats & Traits**",
                     embeds,
                 },
             });
