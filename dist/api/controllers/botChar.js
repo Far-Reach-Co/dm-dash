@@ -18,6 +18,13 @@ const playerInvites_1 = require("../queries/playerInvites");
 const _5eCharUtils_1 = require("../../lib/5eCharUtils");
 const _5eCharPro_1 = require("../queries/5eCharPro");
 const _5eCharSpellSlots_1 = require("../queries/5eCharSpellSlots");
+const _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
+const _5eCharEquipment_1 = require("../queries/5eCharEquipment");
+const _5eCharAttacks_1 = require("../queries/5eCharAttacks");
+const _5eCharFeats_1 = require("../queries/5eCharFeats");
+const _5eCharBack_1 = require("../queries/5eCharBack");
+const utils_1 = require("../../lib/utils");
+const _5eCharSpells_1 = require("../queries/5eCharSpells");
 function handleListCommand(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -160,6 +167,347 @@ function handleRemoveCommand(req, res) {
         }
     });
 }
+function handleGetBackgroundResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const backgroundData = yield (0, _5eCharBack_1.get5eCharBackByGeneralQuery)(charGeneralId);
+            const background = backgroundData.rows[0];
+            let content = "";
+            content += `**Background:** ${background.background}`;
+            content += `\n**Alignment:** ${background.alignment}`;
+            content += `\n**Age:** ${background.age}`;
+            content += `\n**Eyes:** ${background.eyes}`;
+            content += `\n**Skin:** ${background.skin}`;
+            content += `\n**Hair:** ${background.hair}`;
+            content += `\n**Height:** ${background.height}`;
+            content += `\n**Weight:** ${background.weight}`;
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                    embeds: [
+                        {
+                            title: "Personality Traits",
+                            description: background.personality_traits,
+                        },
+                        {
+                            title: "Ideals",
+                            description: background.ideals,
+                        },
+                        {
+                            title: "Bonds",
+                            description: background.ideals,
+                        },
+                        {
+                            title: "Flaws",
+                            description: background.ideals,
+                        },
+                        {
+                            title: "Appearance",
+                            description: background.appearance,
+                        },
+                        {
+                            title: "Backstory",
+                            description: background.backstory,
+                        },
+                        {
+                            title: "Allies & Organizations",
+                            description: background.allies_and_organizations,
+                        },
+                        {
+                            title: "Other Info",
+                            description: background.other_info,
+                        },
+                    ],
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetFeatsResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const featsData = yield (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(charGeneralId);
+            const embeds = [];
+            featsData.rows.forEach((feat) => {
+                if (!feat.title)
+                    return;
+                if (!feat.description)
+                    return;
+                embeds.push({
+                    title: feat.title,
+                    description: feat.description,
+                });
+            });
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content: "**Attacks & Spellcasting**",
+                    embeds,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetAttacksResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const attacksData = yield (0, _5eCharAttacks_1.get5eCharAttacksByGeneralQuery)(charGeneralId);
+            let content = "";
+            content += `**Attacks & Spellcasting**`;
+            attacksData.rows.forEach((attack) => {
+                if (!attack.title)
+                    return;
+                content += `\n**${attack.title}:** Range: ${attack.range ? attack.range : "None"}, Duration: ${attack.duration ? attack.duration : "None"}, Bonus: ${attack.bonus ? attack.bonus : "None"}, Damage/Type: ${attack.damage_type ? attack.damage_type : "None"}`;
+            });
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetCurrencyResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const charGeneralData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(charGeneralId);
+            const charGeneral = charGeneralData.rows[0];
+            let content = "";
+            content += `**Currency**`;
+            content += `\n**Copper:** ${charGeneral.copper}`;
+            content += `\n**Silver:** ${charGeneral.silver}`;
+            content += `\n**Electrum:** ${charGeneral.electrum}`;
+            content += `\n**Gold:** ${charGeneral.gold}`;
+            content += `\n**Platinum:** ${charGeneral.platinum}`;
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetEquipmentResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const equipmentData = yield (0, _5eCharEquipment_1.get5eCharEquipmentsByGeneralQuery)(charGeneralId);
+            let content = "";
+            content += `**Equipment**`;
+            equipmentData.rows.forEach((eq) => {
+                if (!eq.title)
+                    return;
+                content += `\n**${eq.title}:** Quantity: ${eq.quantity}, Weight: ${eq.weight}`;
+            });
+            content += `\n\n**TOTAL WEIGHT:** ${(0, _5eCharUtils_1.calculateTotalEquipmentWeight)(equipmentData.rows)}`;
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetDeathSavesResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const charGeneralData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(charGeneralId);
+            const charGeneral = charGeneralData.rows[0];
+            let content = "";
+            content += `**Death Saves**`;
+            content += `\n**Successes:** (${charGeneral.ds_success_1 ? "●" : "○"}) - (${charGeneral.ds_success_2 ? "●" : "○"}) - (${charGeneral.ds_success_3 ? "●" : "○"})`;
+            content += `\n**Failures:** (${charGeneral.ds_failure_1 ? "●" : "○"}) - (${charGeneral.ds_failure_2 ? "●" : "○"}) - (${charGeneral.ds_failure_3 ? "●" : "○"})`;
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetOtherProLangResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const otherProLangData = yield (0, _5eCharOtherProLang_1.get5eCharOtherProLangsByGeneralQuery)(charGeneralId);
+            let content = "";
+            content += `**Other Proficiencies & Languages**`;
+            otherProLangData.rows.forEach((op) => {
+                if (!op.type)
+                    return;
+                content += `\n**${op.type}:** ${op.proficiency}`;
+            });
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetSkillsResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const charGeneralData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(charGeneralId);
+            const charGeneral = charGeneralData.rows[0];
+            const proData = yield (0, _5eCharPro_1.get5eCharProByGeneralQuery)(charGeneralId);
+            const proficiencies = proData.rows[0];
+            let content = "";
+            content += `**Skills**`;
+            content += `\n(${proficiencies.acrobatics ? "●" : "○"}) ${proficiencies.acrobatics
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity)} **Acrobatics (dex)**`;
+            content += `\n(${proficiencies.animal_handling ? "●" : "○"}) ${proficiencies.animal_handling
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom)} **Animal Handling (wis)**`;
+            content += `\n(${proficiencies.arcana ? "●" : "○"}) ${proficiencies.arcana
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence)} **Arcana (int)**`;
+            content += `\n(${proficiencies.athletics ? "●" : "○"}) ${proficiencies.athletics
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.strength) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.strength)} **Athletics (str)**`;
+            content += `\n(${proficiencies.deception ? "●" : "○"}) ${proficiencies.deception
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma)} **Deception (cha)**`;
+            content += `\n(${proficiencies.history ? "●" : "○"}) ${proficiencies.history
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence)} **History (int)**`;
+            content += `\n(${proficiencies.insight ? "●" : "○"}) ${proficiencies.insight
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom)} **Insight (wis)**`;
+            content += `\n(${proficiencies.intimidation ? "●" : "○"}) ${proficiencies.intimidation
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma)} **Intimidation (cha)**`;
+            content += `\n(${proficiencies.investigation ? "●" : "○"}) ${proficiencies.investigation
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence)} **Investigation (int)**`;
+            content += `\n(${proficiencies.medicine ? "●" : "○"}) ${proficiencies.medicine
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom)} **nature (wis)**`;
+            content += `\n(${proficiencies.nature ? "●" : "○"}) ${proficiencies.nature
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence)} **Nature (int)**`;
+            content += `\n(${proficiencies.perception ? "●" : "○"}) ${proficiencies.perception
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom)} **Perception (wis)**`;
+            content += `\n(${proficiencies.performance ? "●" : "○"}) ${proficiencies.performance
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma)} **Performance (cha)**`;
+            content += `\n(${proficiencies.persuasion ? "●" : "○"}) ${proficiencies.persuasion
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma)} **Persuasion (cha)**`;
+            content += `\n(${proficiencies.religion ? "●" : "○"}) ${proficiencies.religion
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence)} **Religion (int)**`;
+            content += `\n(${proficiencies.sleight_of_hand ? "●" : "○"}) ${proficiencies.sleight_of_hand
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity)} **Sleight of Hand (dex)**`;
+            content += `\n(${proficiencies.stealth ? "●" : "○"}) ${proficiencies.stealth
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity)} **Stealth (dex)**`;
+            content += `\n(${proficiencies.survival ? "●" : "○"}) ${proficiencies.survival
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom)} **Survival (wis)**`;
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleGetSavingThrowsResponse(charGeneralId, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const charGeneralData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(charGeneralId);
+            const charGeneral = charGeneralData.rows[0];
+            const proData = yield (0, _5eCharPro_1.get5eCharProByGeneralQuery)(charGeneralId);
+            const proficiencies = proData.rows[0];
+            let content = "";
+            content += `**Saving Throws**`;
+            content += `\n**STR**(${proficiencies.sv_str ? "●" : "○"}) - ${proficiencies.sv_str
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.strength) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.strength)}`;
+            content += `\n**DEX**(${proficiencies.sv_dex ? "●" : "○"}) - ${proficiencies.sv_dex
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.dexterity)}`;
+            content += `\n**CON**(${proficiencies.sv_con ? "●" : "○"}) - ${proficiencies.sv_con
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.constitution) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.constitution)}`;
+            content += `\n**CON**(${proficiencies.sv_int ? "●" : "○"}) - ${proficiencies.sv_int
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.intelligence)}`;
+            content += `\n**CON**(${proficiencies.sv_wis ? "●" : "○"}) - ${proficiencies.sv_wis
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.wisdom)}`;
+            content += `\n**CON**(${proficiencies.sv_char ? "●" : "○"}) - ${proficiencies.sv_char
+                ? (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma) +
+                    (0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)
+                : (0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma)}`;
+            return res.send({
+                type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                data: {
+                    content,
+                },
+            });
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
 function handleGetGeneralInfoResponse(charGeneralId, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -232,9 +580,90 @@ function handleGetCommand(req, res) {
                     switch (detailsOptionSelect) {
                         case "general-info":
                             return handleGetGeneralInfoResponse(charGeneralId, res);
+                        case "saving-throws":
+                            return handleGetSavingThrowsResponse(charGeneralId, res);
+                        case "skills":
+                            return handleGetSkillsResponse(charGeneralId, res);
+                        case "other-proficiencies-and-languages":
+                            return handleGetOtherProLangResponse(charGeneralId, res);
+                        case "death-saves":
+                            return handleGetDeathSavesResponse(charGeneralId, res);
+                        case "equipment":
+                            return handleGetEquipmentResponse(charGeneralId, res);
+                        case "currency":
+                            return handleGetCurrencyResponse(charGeneralId, res);
+                        case "attacks-and-spellcasting":
+                            return handleGetAttacksResponse(charGeneralId, res);
+                        case "feats-and-traits":
+                            return handleGetFeatsResponse(charGeneralId, res);
+                        case "background":
+                            return handleGetBackgroundResponse(charGeneralId, res);
                         default:
                             throw { message: "Missing details option selection" };
                     }
+                }
+                else {
+                    return res.send({
+                        type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: "ERROR: This ID does not match any character sheet currently registered",
+                        },
+                    });
+                }
+            }
+            else {
+                return res.send({
+                    type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: "ERROR: You do not have any character sheets registered",
+                    },
+                });
+            }
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+function handleSpellsCommand(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const discordUserId = req.body.member.user.id;
+            const characterSheetIndex = req.body.data.options[0].options[0].value;
+            const detailsOptionSelect = req.body.data.options[0].options[1].value;
+            const redisData = yield socketUsers_1.redisClient.hGet("bot_character_sheets", discordUserId);
+            if (redisData) {
+                const jsonRedisData = JSON.parse(redisData);
+                const correctedIndex = parseInt(characterSheetIndex) - 1;
+                if (jsonRedisData[correctedIndex]) {
+                    const charGeneralId = jsonRedisData[correctedIndex];
+                    const spellInfoData = yield (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfosByGeneralQuery)(charGeneralId);
+                    const spellInfo = spellInfoData.rows[0];
+                    const spellsData = yield (0, _5eCharSpells_1.get5eCharSpellsByTypeQuery)(charGeneralId, (0, _5eCharUtils_1.getSpellQueryTitleByOption)(detailsOptionSelect));
+                    const embeds = [];
+                    spellsData.rows.forEach((spell) => {
+                        let description = "";
+                        if (detailsOptionSelect !== "cantrips") {
+                            description += `\n**Spell Slots:** ${(0, _5eCharUtils_1.getSpellSlotExpendedByOption)(detailsOptionSelect, spellInfo)} / ${(0, _5eCharUtils_1.getSpellSlotTotalByOption)(detailsOptionSelect, spellInfo)}`;
+                        }
+                        description += `\n**Casting Time:** ${spell.casting_time}`;
+                        description += `\n**Duration:** ${spell.duration}`;
+                        description += `\n**Range:** ${spell.range}`;
+                        description += `\n**Damage Type:** ${spell.damage_type}`;
+                        description += `\n**Components:** ${spell.components}`;
+                        description += `\n**Description:** ${spell.description}`;
+                        embeds.push({
+                            title: spell.title,
+                            description,
+                        });
+                    });
+                    return res.send({
+                        type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                        data: {
+                            content: `**${(0, utils_1.toTitleCase)(detailsOptionSelect.replace("-", " "))}**`,
+                            embeds,
+                        },
+                    });
                 }
                 else {
                     return res.send({
@@ -271,6 +700,8 @@ function characterSheetBotCommandResponse(req, res) {
                     return handleRemoveCommand(req, res);
                 case "get":
                     return handleGetCommand(req, res);
+                case "spells":
+                    return handleSpellsCommand(req, res);
                 default:
                     throw { message: "Missing sub-command name" };
             }

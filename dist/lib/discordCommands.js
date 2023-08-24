@@ -56,6 +56,10 @@ function discordCommands(slashCommandName) {
                                             value: "saving-throws",
                                         },
                                         {
+                                            name: "Skills",
+                                            value: "skills",
+                                        },
+                                        {
                                             name: "Other Proficiencies & Languages",
                                             value: "other-proficiencies-and-languages",
                                         },
@@ -86,6 +90,67 @@ function discordCommands(slashCommandName) {
                                         {
                                             name: "Spells",
                                             value: "spells",
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            name: "spells",
+                            description: "Show a list of spells from your character sheet",
+                            type: 1,
+                            options: [
+                                {
+                                    name: "id",
+                                    description: "Enter the ID of the character sheet you want to access",
+                                    type: 3,
+                                    required: true,
+                                },
+                                {
+                                    name: "type",
+                                    description: "Choose the type of spells",
+                                    type: 3,
+                                    required: true,
+                                    choices: [
+                                        {
+                                            name: "Cantrips",
+                                            value: "cantrips",
+                                        },
+                                        {
+                                            name: "First Level",
+                                            value: "first-level",
+                                        },
+                                        {
+                                            name: "Second Level",
+                                            value: "second-level",
+                                        },
+                                        {
+                                            name: "Third Level",
+                                            value: "third-level",
+                                        },
+                                        {
+                                            name: "Fourth Level",
+                                            value: "fourth-level",
+                                        },
+                                        {
+                                            name: "Fifth Level",
+                                            value: "fifth-level",
+                                        },
+                                        {
+                                            name: "Sixth Level",
+                                            value: "sixth-level",
+                                        },
+                                        {
+                                            name: "Seventh Level",
+                                            value: "seventh-level",
+                                        },
+                                        {
+                                            name: "Eighth Level",
+                                            value: "eighth-level",
+                                        },
+                                        {
+                                            name: "Nineth Level",
+                                            value: "nineth-level",
                                         },
                                     ],
                                 },
