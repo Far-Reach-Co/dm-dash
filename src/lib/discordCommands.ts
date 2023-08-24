@@ -76,10 +76,6 @@ export default async function discordCommands(slashCommandName: string) {
                     name: "Background",
                     value: "background",
                   },
-                  {
-                    name: "Spells",
-                    value: "spells",
-                  },
                 ],
               },
             ],
