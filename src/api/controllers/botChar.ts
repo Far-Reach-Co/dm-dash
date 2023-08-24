@@ -270,12 +270,16 @@ async function handleGetFeatsResponse(
     const featsData = await get5eCharFeatsByGeneralQuery(charGeneralId);
 
     const embeds: any[] = [];
-    featsData.rows.forEach((feat) => {
+    for (const feat of featsData.rows) {
+      if (embeds.length >= 10) {
+        // discord limit for embeds
+        break;
+      }
       embeds.push({
         title: feat.title,
         description: feat.description,
       });
-    });
+    }
 
     return res.send({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -809,7 +813,11 @@ async function handleSpellsCommand(req: Request, res: Response) {
         );
 
         const embeds: any[] = [];
-        spellsData.rows.forEach((spell) => {
+        for (var spell of spellsData.rows) {
+          if (embeds.length >= 10) {
+            // discord limit
+            break;
+          }
           let description = "";
           if (detailsOptionSelect !== "cantrips") {
             description += `\n**Spell Slots:** ${getSpellSlotExpendedByOption(
@@ -828,7 +836,7 @@ async function handleSpellsCommand(req: Request, res: Response) {
             title: spell.title,
             description,
           });
-        });
+        }
 
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
