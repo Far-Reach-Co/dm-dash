@@ -220,7 +220,7 @@ form {
   border: 2px solid var(--blue);
   border-radius: 20px;
   cursor: pointer;
-  background-color: var(--blue6);
+  background-color: var(--green);
 }
 
 .small-boolean-input-checked-red {

@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface DndFiveEEquipmentModel {
+export interface DndFiveEEquipmentModel {
   id: number,
   general_id: number,
   title: string,
