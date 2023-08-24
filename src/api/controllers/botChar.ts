@@ -43,9 +43,11 @@ async function handleListCommand(req: Request, res: Response) {
     if (redisData) {
       const jsonRedisData = JSON.parse(redisData);
       const characterSheetNamesData = await get5eCharNamesQuery(jsonRedisData);
-      const names = characterSheetNamesData.rows.map((row) => row.name);
-      const namesWithIndex = names.map((name, index) => {
+      const namesWithIndex = jsonRedisData.map((id: number, index: number) => {
         // IMPORTANT INDEX IS +1 SO NOT TO USE ZERO INDEX
+        const name = characterSheetNamesData.rows.filter(
+          (row) => row.id == id
+        )[0].name;
         return `ID: ${index + 1}        ${name};`;
       });
       const content = namesWithIndex.join("\n");
