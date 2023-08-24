@@ -155,7 +155,11 @@ var router = Router();
 router.get("/bot/get_all_commands", getCommands);
 router.get("/bot/create_command", createCommands);
 router.get("/bot/delete_command/:id", deleteCommand);
-router.post("/bot/interactions", interactionsController);
+router.post(
+  "/bot/interactions",
+  verifyKeyMiddleware(process.env.BOT_PUBLIC_KEY as string),
+  interactionsController
+);
 
 // s3
 router.get("/get_image/:id", getImage);
