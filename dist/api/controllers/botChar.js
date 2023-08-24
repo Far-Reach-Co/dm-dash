@@ -219,8 +219,10 @@ function handleGetBackgroundResponse(charGeneralId, res) {
             ];
             const embeds = [];
             for (const item of backgroundListItems) {
-                totalCharCount += item.title.length;
-                totalCharCount += item.description.length;
+                if (item.title.length)
+                    totalCharCount += item.title.length;
+                if (item.description.length)
+                    totalCharCount += item.description.length;
                 if (totalCharCount > 6000 || embeds.length >= 10) {
                     break;
                 }
@@ -246,8 +248,10 @@ function handleGetFeatsResponse(charGeneralId, res) {
             let totalCharCount = 0;
             const embeds = [];
             for (const feat of featsData.rows) {
-                totalCharCount += feat.title.length;
-                totalCharCount += feat.description.length;
+                if (feat.title.length)
+                    totalCharCount += feat.title.length;
+                if (feat.description.length)
+                    totalCharCount += feat.description.length;
                 if (totalCharCount > 6000 || embeds.length >= 10) {
                     break;
                 }
@@ -667,8 +671,10 @@ function handleSpellsCommand(req, res) {
                         description += `\n**Damage Type:** ${spell.damage_type}`;
                         description += `\n**Components:** ${spell.components}`;
                         description += `\n**Description:** ${spell.description}`;
-                        totalCharCount += spell.title.length;
-                        totalCharCount += description.length;
+                        if (spell.title.length)
+                            totalCharCount += spell.title.length;
+                        if (description.length)
+                            totalCharCount += description.length;
                         if (totalCharCount > 6000 || embeds.length >= 10) {
                             break;
                         }
