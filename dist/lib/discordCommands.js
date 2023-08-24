@@ -87,10 +87,6 @@ function discordCommands(slashCommandName) {
                                             name: "Background",
                                             value: "background",
                                         },
-                                        {
-                                            name: "Spells",
-                                            value: "spells",
-                                        },
                                     ],
                                 },
                             ],
