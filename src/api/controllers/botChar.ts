@@ -271,8 +271,6 @@ async function handleGetFeatsResponse(
 
     const embeds: any[] = [];
     featsData.rows.forEach((feat) => {
-      if (!feat.title) return;
-      if (!feat.description) return;
       embeds.push({
         title: feat.title,
         description: feat.description,
@@ -282,7 +280,7 @@ async function handleGetFeatsResponse(
     return res.send({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "**Attacks & Spellcasting**",
+        content: "**Feats & Traits**",
         embeds,
       },
     });
