@@ -79,7 +79,7 @@ async function get5eCharNamesQuery(ids: (string | number)[]) {
   const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
 
   const query = {
-    text: /*sql*/ `SELECT name FROM public."dnd_5e_character_general" WHERE id IN (${placeholders})`,
+    text: /*sql*/ `SELECT id, name FROM public."dnd_5e_character_general" WHERE id IN (${placeholders})`,
     values: ids,
   };
   return await db.query<DndFiveEGeneralModel>(query)

@@ -48,7 +48,7 @@ function get5eCharNamesQuery(ids) {
     return __awaiter(this, void 0, void 0, function* () {
         const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
         const query = {
-            text: `SELECT name FROM public."dnd_5e_character_general" WHERE id IN (${placeholders})`,
+            text: `SELECT id, name FROM public."dnd_5e_character_general" WHERE id IN (${placeholders})`,
             values: ids,
         };
         return yield dbconfig_1.default.query(query);

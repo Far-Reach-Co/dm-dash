@@ -33,8 +33,8 @@ function handleListCommand(req, res) {
             if (redisData) {
                 const jsonRedisData = JSON.parse(redisData);
                 const characterSheetNamesData = yield (0, _5eCharGeneral_1.get5eCharNamesQuery)(jsonRedisData);
-                const names = characterSheetNamesData.rows.map((row) => row.name);
-                const namesWithIndex = names.map((name, index) => {
+                const namesWithIndex = jsonRedisData.map((id, index) => {
+                    const name = characterSheetNamesData.rows.filter((row) => row.id == id)[0].name;
                     return `ID: ${index + 1}        ${name};`;
                 });
                 const content = namesWithIndex.join("\n");
