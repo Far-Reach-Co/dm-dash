@@ -599,6 +599,28 @@ footer {
   color: var(--link-blue);
 }
 
+.suggestions {
+  position: absolute;
+  top: 30px;
+  height: 200px;
+  width: 200px;
+  overflow-y: auto;
+  display: none;
+  z-index: 4;
+  opacity: 0.9;
+  border-radius: var(--border-radius);
+  background-color: var(--main-dark);
+}
+
+.suggestions-item {
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.suggestions-item:hover {
+  background-color: var(--blue3);
+}
+
 .toast-custom {
   z-index: 4;
   position: absolute;
