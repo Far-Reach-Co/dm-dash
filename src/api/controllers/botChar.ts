@@ -207,6 +207,8 @@ async function handleGetBackgroundResponse(
     const backgroundData = await get5eCharBackByGeneralQuery(charGeneralId);
     const background = backgroundData.rows[0];
 
+    let totalCharCount = 0;
+
     let content = "";
     content += `**Background:** ${background.background}`;
     content += `\n**Alignment:** ${background.alignment}`;
@@ -217,44 +219,63 @@ async function handleGetBackgroundResponse(
     content += `\n**Height:** ${background.height}`;
     content += `\n**Weight:** ${background.weight}`;
 
+    // update char count for limit
+    totalCharCount += content.length;
+
+    const backgroundListItems = [
+      {
+        title: "Personality Traits",
+        description: background.personality_traits,
+      },
+      {
+        title: "Ideals",
+        description: background.ideals,
+      },
+      {
+        title: "Bonds",
+        description: background.ideals,
+      },
+      {
+        title: "Flaws",
+        description: background.ideals,
+      },
+      {
+        title: "Appearance",
+        description: background.appearance,
+      },
+      {
+        title: "Backstory",
+        description: background.backstory,
+      },
+      {
+        title: "Allies & Organizations",
+        description: background.allies_and_organizations,
+      },
+      {
+        title: "Other Info",
+        description: background.other_info,
+      },
+    ];
+
+    const embeds: any[] = [];
+    for (const item of backgroundListItems) {
+      // add to total char count for limit
+      totalCharCount += item.title.length;
+      totalCharCount += item.description.length;
+
+      if (totalCharCount > 6000 || embeds.length >= 10) {
+        // discord limit for embeds
+        break;
+      }
+
+      embeds.push(item);
+    }
+
     return res.send({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
         content,
-        embeds: [
-          {
-            title: "Personality Traits",
-            description: background.personality_traits,
-          },
-          {
-            title: "Ideals",
-            description: background.ideals,
-          },
-          {
-            title: "Bonds",
-            description: background.ideals,
-          },
-          {
-            title: "Flaws",
-            description: background.ideals,
-          },
-          {
-            title: "Appearance",
-            description: background.appearance,
-          },
-          {
-            title: "Backstory",
-            description: background.backstory,
-          },
-          {
-            title: "Allies & Organizations",
-            description: background.allies_and_organizations,
-          },
-          {
-            title: "Other Info",
-            description: background.other_info,
-          },
-        ],
+        embeds,
       },
     });
   } catch (err) {
@@ -268,13 +289,18 @@ async function handleGetFeatsResponse(
 ) {
   try {
     const featsData = await get5eCharFeatsByGeneralQuery(charGeneralId);
-
+    let totalCharCount = 0;
     const embeds: any[] = [];
     for (const feat of featsData.rows) {
-      if (embeds.length >= 10) {
+      // add to total char count for limit
+      totalCharCount += feat.title.length;
+      totalCharCount += feat.description.length;
+
+      if (totalCharCount > 6000 || embeds.length >= 10) {
         // discord limit for embeds
         break;
       }
+
       embeds.push({
         title: feat.title,
         description: feat.description,
@@ -812,12 +838,9 @@ async function handleSpellsCommand(req: Request, res: Response) {
           getSpellQueryTitleByOption(detailsOptionSelect)
         );
 
+        let totalCharCount = 0;
         const embeds: any[] = [];
         for (var spell of spellsData.rows) {
-          if (embeds.length >= 10) {
-            // discord limit
-            break;
-          }
           let description = "";
           if (detailsOptionSelect !== "cantrips") {
             description += `\n**Spell Slots:** ${getSpellSlotExpendedByOption(
@@ -831,6 +854,15 @@ async function handleSpellsCommand(req: Request, res: Response) {
           description += `\n**Damage Type:** ${spell.damage_type}`;
           description += `\n**Components:** ${spell.components}`;
           description += `\n**Description:** ${spell.description}`;
+
+          // add to total char count for limit
+          totalCharCount += spell.title.length;
+          totalCharCount += description.length;
+
+          if (totalCharCount > 6000 || embeds.length >= 10) {
+            // discord limit
+            break;
+          }
 
           embeds.push({
             title: spell.title,
