@@ -264,6 +264,7 @@ class SingleSpell {
 
     // UI based state
     this.hidden = false;
+    this.newLoading = false;
 
     this.expendedElement = new ExpendedElement({
       domComponent: createElement("div"),
@@ -305,6 +306,11 @@ class SingleSpell {
     this.render();
   };
 
+  toggleLoadingNewSpell = () => {
+    this.newLoading = !this.newLoading;
+    this.render();
+  };
+
   renderHideFeatButton = () => {
     if (!this.hidden) {
       return createElement(
@@ -330,6 +336,8 @@ class SingleSpell {
   };
 
   newSpell = async (type) => {
+    this.toggleLoadingNewSpell();
+
     const res = await postThing("/api/add_5e_character_spell", {
       general_id: this.general_id,
       type,
@@ -338,8 +346,8 @@ class SingleSpell {
     });
     if (res) {
       this.spells.push(res);
-      this.render();
     }
+    this.toggleLoadingNewSpell();
   };
 
   renderSpellElemDescriptionsOrHidden = (spell) => {
@@ -571,6 +579,12 @@ class SingleSpell {
   render = async () => {
     this.domComponent.innerHTML = "";
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+
+    if (this.newLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Creating New Spell...")
+      );
+    }
 
     if (this.isCantrip) {
       return this.domComponent.append(
