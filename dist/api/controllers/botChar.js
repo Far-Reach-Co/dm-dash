@@ -232,12 +232,15 @@ function handleGetFeatsResponse(charGeneralId, res) {
         try {
             const featsData = yield (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(charGeneralId);
             const embeds = [];
-            featsData.rows.forEach((feat) => {
+            for (const feat of featsData.rows) {
+                if (embeds.length >= 10) {
+                    break;
+                }
                 embeds.push({
                     title: feat.title,
                     description: feat.description,
                 });
-            });
+            }
             return res.send({
                 type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
@@ -637,7 +640,10 @@ function handleSpellsCommand(req, res) {
                     const spellInfo = spellInfoData.rows[0];
                     const spellsData = yield (0, _5eCharSpells_1.get5eCharSpellsByTypeQuery)(charGeneralId, (0, _5eCharUtils_1.getSpellQueryTitleByOption)(detailsOptionSelect));
                     const embeds = [];
-                    spellsData.rows.forEach((spell) => {
+                    for (var spell of spellsData.rows) {
+                        if (embeds.length >= 10) {
+                            break;
+                        }
                         let description = "";
                         if (detailsOptionSelect !== "cantrips") {
                             description += `\n**Spell Slots:** ${(0, _5eCharUtils_1.getSpellSlotExpendedByOption)(detailsOptionSelect, spellInfo)} / ${(0, _5eCharUtils_1.getSpellSlotTotalByOption)(detailsOptionSelect, spellInfo)}`;
@@ -652,7 +658,7 @@ function handleSpellsCommand(req, res) {
                             title: spell.title,
                             description,
                         });
-                    });
+                    }
                     return res.send({
                         type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
