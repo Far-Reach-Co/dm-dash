@@ -343,11 +343,6 @@ input {
   /* font-family: inherit; */
 }
 
-input[type="number"] {
-  width: 100px;
-  color: var(--main-white);
-}
-
 input[type="file"] {
   all: unset;
 }
@@ -370,13 +365,21 @@ input[type="file"]::file-selector-button:hover {
   background: linear-gradient(var(--green) 10%, var(--green2) 90%);
 }
 
+input[type="number"] {
+  color: var(--main-white);
+}
+
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   margin: 0;
-  padding-right: 5px;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 input[type="checkbox"] {
