@@ -1,5 +1,5 @@
-import modal from "../components/modal.js";
-import createElement from "../lib/createElement.js";
+import modal from "../modal.js";
+import createElement from "../createElement.js";
 
 export default class TopLayer {
   constructor(props) {

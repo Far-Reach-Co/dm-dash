@@ -1,5 +1,5 @@
 import createElement from "./createElement.js";
-import modal from "../components/modal.js";
+import modal from "./modal.js";
 
 export default function renderTierLimitWarning(message) {
   modal.show(

@@ -1,5 +1,5 @@
-import createElement from "../lib/createElement.js";
-import { getThings } from "./apiUtils.js";
+import createElement from "../createElement.js";
+import { getThings } from "../../lib/apiUtils.js";
 
 export default async function tableSelect() {
   async function renderTableSelectOptions() {

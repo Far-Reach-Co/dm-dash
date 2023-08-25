@@ -1,4 +1,4 @@
-import modal from "../components/modal.js";
+import modal from "./modal.js";
 import createElement from "./createElement.js";
 // import { getPresignedForImageDownload } from "./imageUtils.js";
 

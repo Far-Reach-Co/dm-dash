@@ -1,15 +1,15 @@
-import createElement from "../lib/createElement.js";
-import TableSidebarImageComponent from "../lib/TableSidebarImageComponent.js";
+import createElement from "../createElement.js";
+import TableSidebarImageComponent from "./TableSidebarImageComponent.js";
 import {
   fallbackCopyTextToClipboard,
   copyTextToClipboard,
-} from "../lib/clipboard.js";
-import modal from "./modal.js";
-import { deleteThing, postThing } from "../lib/apiUtils.js";
-import tableSelect from "../lib/tableSelect.js";
-import socketIntegration from "../lib/socketIntegration.js";
-import { uploadUserImage } from "../lib/imageUtils.js";
-import TableSidebarFolderComponent from "../lib/TableSidebarFolderComponent.js";
+} from "../../lib/clipboard.js";
+import modal from "../modal.js";
+import { deleteThing, postThing } from "../../lib/apiUtils.js";
+import tableSelect from "./tableSelect.js";
+import socketIntegration from "./socketIntegration.js";
+import { uploadUserImage } from "../../lib/imageUtils.js";
+import TableSidebarFolderComponent from "./TableSidebarFolderComponent.js";
 
 export default class TableSidebar {
   constructor(props) {

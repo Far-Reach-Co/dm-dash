@@ -1,10 +1,10 @@
-import createElement from "../lib/createElement.js";
+import createElement from "../components/createElement.js";
 import { getThings, postThing } from "../lib/apiUtils.js";
 import { Hamburger } from "../components/Hamburger.js";
-import TableSidebar from "../components/TableSidebar.js";
-import CanvasLayer from "../components/CanvasLayer.js";
-import socketIntegration from "../lib/socketIntegration.js";
-import TopLayer from "../lib/TopLayer.js";
+import TableSidebar from "../components/table/TableSidebar.js";
+import CanvasLayer from "../components/table/CanvasLayer.js";
+import socketIntegration from "../components/table/socketIntegration.js";
+import TopLayer from "../components/table/TopLayer.js";
 
 class Table {
   constructor(props) {

@@ -1,6 +1,6 @@
-import { deleteThing, getThings, postThing } from "./apiUtils.js";
-import createElement from "./createElement.js";
-import renderLoadingWithMessage from "./loadingWithMessage.js";
+import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import createElement from "../createElement.js";
+import renderLoadingWithMessage from "../loadingWithMessage.js";
 
 export default class AttackComponent {
   constructor(props) {
@@ -11,7 +11,6 @@ export default class AttackComponent {
     this.general_id = props.general_id;
 
     this.newLoading = false;
-    this.creating = false;
 
     this.render();
   }
@@ -21,89 +20,16 @@ export default class AttackComponent {
     this.render();
   };
 
-  toggleCreating = () => {
-    this.creating = !this.creating;
-    this.render();
-  };
-
   newAttack = async (e) => {
+    e.preventDefault();
     this.toggleNewLoading();
-    const formData = new FormData(e.target);
-    const formProps = Object.fromEntries(formData);
-    formProps.general_id = this.general_id;
-    await postThing("/api/add_5e_character_attack", formProps);
-    this.toggleNewLoading();
-  };
 
-  renderCreatingAttack = async () => {
-    const titleOfForm = createElement(
-      "div",
-      { class: "component-title" },
-      "Create new attack"
-    );
-    const form = createElement("form", {}, [
-      createElement("label", { for: "title" }, "Name"),
-      createElement("input", {
-        id: "title",
-        name: "title",
-        placeholder: "Name",
-        required: true,
-      }),
-      createElement("label", { for: "range" }, "Range"),
-      createElement("input", {
-        id: "range",
-        name: "range",
-        placeholder: "Range",
-      }),
-      createElement("label", { for: "duration" }, "Duration"),
-      createElement("input", {
-        id: "duration",
-        name: "duration",
-        placeholder: "Range",
-      }),
-      createElement("label", { for: "bonus" }, "ATK Bonus"),
-      createElement("input", {
-        id: "bonus",
-        name: "bonus",
-        placeholder: "+6",
-      }),
-      createElement("label", { for: "damage_type" }, "Damage/Type"),
-      createElement("input", {
-        id: "damage_type",
-        name: "damage_type",
-        placeholder: "1d4+3 Piercing",
-      }),
-      // createElement("label", { for: "description" }, "Description"),
-      // createElement("textarea", {
-      //   id: "description",
-      //   name: "description",
-      // }),
-      createElement("br"),
-      createElement("br"),
-      createElement("button", { type: "submit" }, "Create"),
-    ]);
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      this.creating = false;
-      await this.newAttack(e);
+    await postThing("/api/add_5e_character_attack", {
+      general_id: this.general_id,
+      title: "New Attack/Spell",
     });
 
-    const cancelButton = createElement(
-      "button",
-      { class: "btn-red" },
-      "Cancel"
-    );
-    cancelButton.addEventListener("click", () => {
-      this.toggleCreating();
-    });
-
-    this.domComponent.append(
-      titleOfForm,
-      createElement("br"),
-      form,
-      createElement("br"),
-      cancelButton
-    );
+    this.toggleNewLoading();
   };
 
   renderAttacksElems = async () => {
@@ -248,10 +174,6 @@ export default class AttackComponent {
       return this.domComponent.append(renderLoadingWithMessage("Loading..."));
     }
 
-    if (this.creating) {
-      return this.renderCreatingAttack();
-    }
-
     this.domComponent.append(
       createElement(
         "div",
@@ -280,7 +202,7 @@ export default class AttackComponent {
         "+",
         {
           type: "click",
-          event: this.toggleCreating,
+          event: this.newAttack,
         }
       )
     );

@@ -1,13 +1,13 @@
-import createElement from "../lib/createElement.js";
-import { postThing } from "../lib/apiUtils.js";
-import HPComponent from "../lib/HPComponent.js";
-import OtherProLangComponent from "../lib/OtherProLangComponent.js";
-import AttackComponent from "../lib/AttackComponent.js";
-import EquipmentComponent from "../lib/EquipmentComponent.js";
-import FeatComponent from "../lib/FeatComponent.js";
-import SpellsComponent from "../lib/SpellsComponent.js";
-import calculateColorMod from "../lib/calculateColorMod.js";
-import SheetSettings from "../lib/SheetSettings.js";
+import createElement from "../../components/createElement.js";
+import { postThing } from "../../lib/apiUtils.js";
+import HPComponent from "./HPComponent.js";
+import OtherProLangComponent from "./OtherProLangComponent.js";
+import AttackComponent from "./AttackComponent.js";
+import EquipmentComponent from "./EquipmentComponent.js";
+import FeatComponent from "./FeatComponent.js";
+import SpellsComponent from "./SpellsComponent.js";
+import calculateColorMod from "./calculateColorMod.js";
+import SheetSettings from "./SheetSettings.js";
 
 export default class FiveEPlayerSheet {
   constructor(props) {
@@ -939,7 +939,7 @@ export default class FiveEPlayerSheet {
                         type: "number",
                         value: this.generalData.class_resource_total
                           ? this.generalData.class_resource_total
-                          : 0,
+                          : "0",
                       },
                       null,
                       {
@@ -962,7 +962,7 @@ export default class FiveEPlayerSheet {
                     type: "number",
                     value: this.generalData.class_resource
                       ? this.generalData.class_resource
-                      : 0,
+                      : "0",
                   },
                   null,
                   {
@@ -1012,7 +1012,7 @@ export default class FiveEPlayerSheet {
                         type: "number",
                         value: this.generalData.other_resource_total
                           ? this.generalData.other_resource_total
-                          : 0,
+                          : "0",
                       },
                       null,
                       {
@@ -1032,7 +1032,9 @@ export default class FiveEPlayerSheet {
                   {
                     class: "cp-input-no-border cp-input-large",
                     name: "other_resource",
-                    value: this.generalData.other_resource,
+                    value: this.generalData.other_resource
+                      ? this.generalData.other_resource
+                      : "0",
                   },
                   null,
                   {

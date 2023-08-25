@@ -1,5 +1,5 @@
 import toast from "../components/Toast.js";
-import renderTierLimitWarning from "./renderTierLimitWarning.js";
+import renderTierLimitWarning from "../components/renderTierLimitWarning.js";
 
 async function getThings(endpoint) {
   try {

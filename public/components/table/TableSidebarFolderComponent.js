@@ -1,6 +1,6 @@
-import createElement from "./createElement.js";
-import { deleteThing, getThings } from "./apiUtils.js";
-import renderLoadingWithMessage from "./loadingWithMessage.js";
+import createElement from "../createElement.js";
+import { deleteThing, getThings } from "../../lib/apiUtils.js";
+import renderLoadingWithMessage from "../loadingWithMessage.js";
 
 export default class TableSidebarFolderComponent {
   constructor(props) {

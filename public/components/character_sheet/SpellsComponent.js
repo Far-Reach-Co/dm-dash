@@ -1,6 +1,15 @@
-import { deleteThing, getThings, postThing } from "./apiUtils.js";
-import createElement from "./createElement.js";
-import renderLoadingWithMessage from "./loadingWithMessage.js";
+import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import createElement from "../createElement.js";
+import renderLoadingWithMessage from "../loadingWithMessage.js";
+import getDataByQuery from "../../lib/getDataByQuery.js";
+
+// load spells for suggestions on input
+let spellSuggestions = [];
+fetch("/lib/data/5e-srd-spells.json")
+  .then((res) => res.json())
+  .then((data) => {
+    spellSuggestions = data;
+  });
 
 export default class SpellsComponent {
   constructor(props) {
@@ -12,7 +21,6 @@ export default class SpellsComponent {
     this.calculateSpellAttackBonus = props.calculateSpellAttackBonus;
 
     this.newLoading = false;
-
     this.render();
   }
 
@@ -264,6 +272,7 @@ class SingleSpell {
 
     // UI based state
     this.hidden = false;
+    this.newLoading = false;
 
     this.expendedElement = new ExpendedElement({
       domComponent: createElement("div"),
@@ -305,7 +314,12 @@ class SingleSpell {
     this.render();
   };
 
-  renderHideFeatButton = () => {
+  toggleLoadingNewSpell = () => {
+    this.newLoading = !this.newLoading;
+    this.render();
+  };
+
+  renderHideSpellButton = () => {
     if (!this.hidden) {
       return createElement(
         "a",
@@ -330,6 +344,8 @@ class SingleSpell {
   };
 
   newSpell = async (type) => {
+    this.toggleLoadingNewSpell();
+
     const res = await postThing("/api/add_5e_character_spell", {
       general_id: this.general_id,
       type,
@@ -337,9 +353,188 @@ class SingleSpell {
       description: "Write spell details here...",
     });
     if (res) {
+      // update local state
       this.spells.push(res);
-      this.render();
     }
+    this.toggleLoadingNewSpell();
+  };
+
+  populateSpellInfoWithSuggestion = async (spell, item) => {
+    // show data inside inputs
+    const titleInput = document.getElementById(`spell-title-input-${spell.id}`);
+    const castingTimeInput = document.getElementById(
+      `spell-casting-time-input-${spell.id}`
+    );
+    const durationInput = document.getElementById(
+      `spell-duration-input-${spell.id}`
+    );
+    const rangeInput = document.getElementById(`spell-range-input-${spell.id}`);
+    const damageTypeInput = document.getElementById(
+      `spell-damage-type-input-${spell.id}`
+    );
+    const componentsInput = document.getElementById(
+      `spell-components-input-${spell.id}`
+    );
+    const descriptionInput = document.getElementById(
+      `spell-description-input-${spell.id}`
+    );
+    titleInput.value = item.name;
+    if (item.casting_time) castingTimeInput.value = item.casting_time;
+    if (item.duration) durationInput.value = item.duration;
+    if (item.range) rangeInput.value = item.range;
+    if (
+      item.damage &&
+      item.damage.damage_type &&
+      item.damage.damage_type.name
+    ) {
+      damageTypeInput.value = item.damage.damage_type.name;
+    } else damageTypeInput.value = "";
+    if (item.components) componentsInput.value = item.components;
+    if (item.desc) descriptionInput.value = item.desc.join("");
+  };
+
+  resetSpellInfoToCurrentValues = (spell) => {
+    const titleInput = document.getElementById(`spell-title-input-${spell.id}`);
+    const castingTimeInput = document.getElementById(
+      `spell-casting-time-input-${spell.id}`
+    );
+    const durationInput = document.getElementById(
+      `spell-duration-input-${spell.id}`
+    );
+    const rangeInput = document.getElementById(`spell-range-input-${spell.id}`);
+    const damageTypeInput = document.getElementById(
+      `spell-damage-type-input-${spell.id}`
+    );
+    const componentsInput = document.getElementById(
+      `spell-components-input-${spell.id}`
+    );
+    const descriptionInput = document.getElementById(
+      `spell-description-input-${spell.id}`
+    );
+    titleInput.value = spell.title;
+    if (spell.casting_time) castingTimeInput.value = spell.casting_time;
+    if (spell.duration) durationInput.value = spell.duration;
+    if (spell.range) rangeInput.value = spell.range;
+    if (spell.damage_type) damageTypeInput.value = spell.damage_type;
+    if (spell.components) componentsInput.value = spell.components;
+    if (spell.description) descriptionInput.value = spell.description;
+  };
+
+  saveAllSpellInfo = (spell) => {
+    // first save to local state
+    const titleInput = document.getElementById(`spell-title-input-${spell.id}`);
+    const castingTimeInput = document.getElementById(
+      `spell-casting-time-input-${spell.id}`
+    );
+    const durationInput = document.getElementById(
+      `spell-duration-input-${spell.id}`
+    );
+    const rangeInput = document.getElementById(`spell-range-input-${spell.id}`);
+    const damageTypeInput = document.getElementById(
+      `spell-damage-type-input-${spell.id}`
+    );
+    const componentsInput = document.getElementById(
+      `spell-components-input-${spell.id}`
+    );
+    const descriptionInput = document.getElementById(
+      `spell-description-input-${spell.id}`
+    );
+
+    this.spells[this.spells.indexOf(spell)].title = titleInput.value;
+    this.spells[this.spells.indexOf(spell)].casting_time =
+      castingTimeInput.value;
+    this.spells[this.spells.indexOf(spell)].duration = durationInput.value;
+    this.spells[this.spells.indexOf(spell)].range = rangeInput.value;
+    this.spells[this.spells.indexOf(spell)].damage_type = damageTypeInput.value;
+    this.spells[this.spells.indexOf(spell)].components =
+      componentsInput.components;
+    this.spells[this.spells.indexOf(spell)].description =
+      descriptionInput.value;
+
+    // then save to db
+    postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+      title: titleInput.value,
+      casting_time: castingTimeInput.value,
+      duration: durationInput.value,
+      range: rangeInput.value,
+      damage_type: damageTypeInput.value,
+      components: componentsInput.value,
+      description: descriptionInput.value,
+    });
+  };
+
+  resetAndHideSpellSuggestions(spell) {
+    const suggElem = document.getElementById(`suggestions-spells-${spell.id}`);
+    suggElem.innerHTML = "";
+    suggElem.appendChild(renderLoadingWithMessage());
+    suggElem.style.display = "none";
+  }
+
+  showSpellSuggestions = (e, spell) => {
+    const suggElem = document.getElementById(`suggestions-spells-${spell.id}`);
+    suggElem.style.display = "block";
+    // suggestion position relative the current component
+    // Get the bounding box of the target element
+    const rect = e.target.getBoundingClientRect();
+    // Set the position of the suggestion element
+    suggElem.style.top = rect.bottom + window.scrollY + "px"; // You can add an offset here
+    suggElem.style.left = rect.left + window.scrollX + "px"; // You can add an offset here
+
+    if (spellSuggestions.length) {
+      // clear
+      suggElem.innerHTML = "";
+      // get suggestions form data
+      const searchSuggestionsList = getDataByQuery(
+        spellSuggestions,
+        e.target.value
+      );
+      // populate list
+      for (const item of searchSuggestionsList) {
+        const elem = createElement(
+          "div",
+          { class: "suggestions-item" },
+          item.name,
+          [
+            {
+              type: "mouseover",
+              event: (e) => {
+                e.preventDefault();
+                this.populateSpellInfoWithSuggestion(spell, item);
+              },
+            },
+            {
+              type: "mousedown",
+              event: (e) => {
+                e.preventDefault();
+                this.populateSpellInfoWithSuggestion(spell, item);
+                // save spell info to local state and db
+                this.saveAllSpellInfo(spell);
+                // hide
+                this.resetAndHideSpellSuggestions(spell);
+              },
+            },
+          ]
+        );
+        suggElem.appendChild(elem);
+      }
+    }
+  };
+
+  renderSuggestionElem = (spell) => {
+    document.body.appendChild(
+      createElement(
+        "div",
+        { class: "suggestions", id: `suggestions-spells-${spell.id}` },
+        renderLoadingWithMessage(),
+        {
+          type: "mouseout",
+          event: (e) => {
+            e.preventDefault();
+            this.resetSpellInfoToCurrentValues(spell);
+          },
+        }
+      )
+    );
   };
 
   renderSpellElemDescriptionsOrHidden = (spell) => {
@@ -351,6 +546,7 @@ class SingleSpell {
             "input",
             {
               class: "cp-input-gen input-small",
+              id: `spell-casting-time-input-${spell.id}`,
               name: "casting_time",
               value: spell.casting_time ? spell.casting_time : "",
             },
@@ -375,6 +571,7 @@ class SingleSpell {
             "input",
             {
               class: "cp-input-gen input-small",
+              id: `spell-duration-input-${spell.id}`,
               name: "duration",
               value: spell.duration ? spell.duration : "",
             },
@@ -399,6 +596,7 @@ class SingleSpell {
             "input",
             {
               class: "cp-input-gen input-small",
+              id: `spell-range-input-${spell.id}`,
               name: "range",
               value: spell.range ? spell.range : "",
             },
@@ -422,6 +620,7 @@ class SingleSpell {
             "input",
             {
               class: "cp-input-gen input-small",
+              id: `spell-damage-type-input-${spell.id}`,
               name: "damage_type",
               value: spell.damage_type ? spell.damage_type : "",
             },
@@ -446,6 +645,7 @@ class SingleSpell {
             "input",
             {
               class: "cp-input-gen input-small",
+              id: `spell-components-input-${spell.id}`,
               name: "components",
               value: spell.components ? spell.components : "",
             },
@@ -469,6 +669,7 @@ class SingleSpell {
           "textarea",
           {
             class: "cp-input-gen input-small",
+            id: `spell-description-input-${spell.id}`,
             style: "height: 100px;",
             name: "description",
           },
@@ -491,6 +692,9 @@ class SingleSpell {
   };
 
   renderSpellElem = (spell) => {
+    // dynamically create suggestion divs on document body
+    this.renderSuggestionElem(spell);
+
     return createElement(
       "div",
       {
@@ -507,23 +711,40 @@ class SingleSpell {
               "input",
               {
                 class: "cp-input-gen",
-                style: "color: var(--orange2)",
+                id: `spell-title-input-${spell.id}`,
+                style: "color: var(--orange2);",
                 name: "title",
                 value: spell.title ? spell.title : "",
               },
               null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  e.preventDefault();
-                  postThing(`/api/edit_5e_character_spell/${spell.id}`, {
-                    title: e.target.value,
-                  });
-                  // update UI
-                  this.spells[this.spells.indexOf(spell)].title =
-                    e.target.value;
+              [
+                {
+                  type: "focusin",
+                  event: (e) => {
+                    e.preventDefault();
+                    this.showSpellSuggestions(e, spell);
+                  },
                 },
-              }
+                {
+                  type: "focusout",
+                  event: (e) => {
+                    e.preventDefault();
+                    // hide suggestions
+                    this.resetAndHideSpellSuggestions(spell);
+                    // send data
+                    postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+                      title: e.target.value,
+                    });
+                  },
+                },
+                {
+                  type: "input",
+                  event: (e) => {
+                    e.preventDefault();
+                    this.showSpellSuggestions(e, spell);
+                  },
+                },
+              ]
             ),
             createElement(
               "div",
@@ -572,10 +793,16 @@ class SingleSpell {
     this.domComponent.innerHTML = "";
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
+    if (this.newLoading) {
+      return this.domComponent.append(
+        renderLoadingWithMessage("Creating New Spell...")
+      );
+    }
+
     if (this.isCantrip) {
       return this.domComponent.append(
         createElement("div", { class: "special-font" }, "Cantrips"),
-        this.renderHideFeatButton(),
+        this.renderHideSpellButton(),
         createElement("hr"),
         ...this.renderSpells(),
         createElement(
@@ -655,7 +882,7 @@ class SingleSpell {
           this.expendedElement.domComponent
         ),
       ]),
-      this.renderHideFeatButton(),
+      this.renderHideSpellButton(),
       createElement("hr"),
       ...this.renderSpells(),
       createElement(

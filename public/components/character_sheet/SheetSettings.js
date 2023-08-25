@@ -1,10 +1,10 @@
-import createElement from "./createElement.js";
-import { deleteThing, getThings, postThing } from "./apiUtils.js";
-import projectSelect from "./projectSelect.js";
+import createElement from "../../components/createElement.js";
+import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import projectSelect from "../../components/projectSelect.js";
 import {
   fallbackCopyTextToClipboard,
   copyTextToClipboard,
-} from "../lib/clipboard.js";
+} from "../../lib/clipboard.js";
 
 export default class SheetSettings {
   constructor(props) {
