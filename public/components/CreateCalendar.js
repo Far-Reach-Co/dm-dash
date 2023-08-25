@@ -1,6 +1,6 @@
 import createElement from "./createElement.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
-import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import renderLoadingWithMessage from "./loadingWithMessage.js";
 
 export default class CreateCalendar {
   constructor() {

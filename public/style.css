@@ -15,16 +15,16 @@
 
 :root {
   --main-white: rgb(215, 215, 215);
-  --main-dark: rgb(27, 32, 38);
+  --main-dark: rgb(24, 32, 41);
   --main-gray: rgb(103, 101, 101);
   --light-gray: rgb(174, 173, 173);
-  --blue: rgb(72, 97, 125);
+  --blue: rgb(72, 99, 125);
   --blue2: rgb(107, 129, 154);
   --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
   --blue5: rgb(47, 62, 84);
   /* --blue6: rgb(125, 174, 237); */
-  --link-blue: rgb(155, 178, 205);
+  --link-blue: rgb(165, 197, 234);
   --purple: rgb(73, 42, 87);
   --pink: rgb(221, 196, 248);
   --green: rgb(161, 190, 128);
@@ -38,7 +38,6 @@
   --red3: rgb(241, 143, 143);
   --border-radius: 4px;
   --main-distance: 8px;
-  --nav-height: 35px;
 }
 
 * {
@@ -73,7 +72,7 @@ body {
   flex-direction: column;
   background-color: var(--main-dark);
   line-height: 1.4;
-  text-shadow: 0.5px 0.5px black;
+  /* text-shadow: 0.5px 0.5px black; */
   font-family: serif;
   font-size: 17px;
   color: var(--main-white);
@@ -139,13 +138,19 @@ h3 {
 nav {
   padding-left: var(--main-distance);
   padding-right: var(--main-distance);
-  height: var(--nav-height);
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: var(--blue);
-  border-bottom: 0.5px solid var(--main-gray);
+  /* background-color: var(--blue); */
   font-weight: bold;
+  position: absolute;
+  z-index: 4;
+  margin-top: 3px;
+}
+
+.container-fluid {
+  margin-top: 30px;
 }
 
 .title-anchor {
