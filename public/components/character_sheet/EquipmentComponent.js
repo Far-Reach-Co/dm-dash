@@ -20,18 +20,12 @@ export default class EquipmentComponent {
     this.general_id = props.general_id;
 
     this.newLoading = false;
-    this.creating = false;
 
     this.render();
   }
 
   toggleNewLoading = () => {
     this.newLoading = !this.newLoading;
-    this.render();
-  };
-
-  toggleCreating = () => {
-    this.creating = !this.creating;
     this.render();
   };
 

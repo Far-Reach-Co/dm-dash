@@ -26,7 +26,6 @@ export default class FeatComponent {
     this.general_id = props.general_id;
 
     this.newLoading = false;
-    this.creating = false;
 
     this.featComponents = [];
 
@@ -35,11 +34,6 @@ export default class FeatComponent {
 
   toggleNewLoading = () => {
     this.newLoading = !this.newLoading;
-    this.render();
-  };
-
-  toggleCreating = () => {
-    this.creating = !this.creating;
     this.render();
   };
 
