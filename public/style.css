@@ -19,12 +19,12 @@
   --main-gray: rgb(103, 101, 101);
   --light-gray: rgb(174, 173, 173);
   --blue: rgb(72, 99, 125);
-  --blue2: rgb(107, 129, 154);
+  --blue2: rgb(107, 131, 154);
   --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
-  --blue5: rgb(47, 62, 84);
+  --blue5: rgb(47, 64, 84);
   /* --blue6: rgb(125, 174, 237); */
-  --link-blue: rgb(165, 197, 234);
+  --link-blue: rgb(148, 178, 213);
   --purple: rgb(73, 42, 87);
   --pink: rgb(221, 196, 248);
   --green: rgb(161, 190, 128);
@@ -119,20 +119,20 @@ hr {
 
 h1 {
   font-family: YoungSerif;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   display: inline-block;
 }
 
 h2 {
   font-family: YoungSerif;
   color: var(--orange3);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
 }
 
 h3 {
   font-family: YoungSerif;
   color: var(--orange2);
-  font-size: 1.1rem;
+  font-size: 1.2rem;
 }
 
 nav {
