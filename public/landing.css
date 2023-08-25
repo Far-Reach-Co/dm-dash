@@ -4,22 +4,16 @@
   --bg-color-brown-dark: #171412;
 }
 
-body {
-  height: auto;
-  overflow: auto;
-}
-
 h1 {
-  font-size: 25;
+  font-size: 25px;
   text-align: center;
   color: var(--main-white);
 }
 
 p {
-  font-size: 1rem;
+  font-size: 1.3rem;
   text-align: center;
   max-width: 100%;
-  padding: 10px;
   width: 500px;
 }
 
@@ -27,14 +21,13 @@ section {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 }
 
 /* FIRST */
 
 .first {
-  height: calc(100% - var(--nav-height));
   background-color: var(--bg-color-blue-dark);
-  justify-content: space-between;
 }
 
 .first #city-img {
@@ -73,11 +66,8 @@ section {
   background-size: 65%;
   background-position: right;
   background-repeat: no-repeat;
-  display: flex;
   flex-direction: row;
   flex-wrap: wrap-reverse;
-  align-items: center;
-  justify-content: center;
 }
 
 .second #scroll-img {
@@ -86,11 +76,6 @@ section {
 
 .third {
   background-color: var(--bg-color-brown-dark);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
 .third #sm-map-img {
@@ -105,9 +90,8 @@ section {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  z-index: 4;
 }
-
-.third h1 {}
 
 .third p {
   width: fit-content;
@@ -124,4 +108,6 @@ section {
   height: auto;
 }
 
-*/
+.fourth {
+  background-color: var(--bg-color-blue-dark);
+}

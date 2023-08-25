@@ -1,7 +1,7 @@
 import createElement from "./createElement.js";
-import listItemTitle from "../lib/listItemTitle.js";
+import listItemTitle from "./listItemTitle.js";
 import { deleteThing, postThing } from "../lib/apiUtils.js";
-import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
+import renderLoadingWithMessage from "./loadingWithMessage.js";
 import modal from "./modal.js";
 
 export default class Calendar {
