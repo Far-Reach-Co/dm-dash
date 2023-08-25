@@ -1,6 +1,21 @@
 import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import getDataByQuery from "../../lib/getDataByQuery.js";
 import createElement from "../createElement.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
+
+// load features for suggestions on input
+let featSuggestions = [];
+fetch("/lib/data/5e-srd-features.json")
+  .then((res) => res.json())
+  .then((data) => {
+    featSuggestions = [...featSuggestions, ...data];
+  });
+// add traits
+fetch("/lib/data/5e-srd-traits.json")
+  .then((res) => res.json())
+  .then((data) => {
+    featSuggestions = [...featSuggestions, ...data];
+  });
 
 export default class FeatComponent {
   constructor(props) {
@@ -34,12 +49,15 @@ export default class FeatComponent {
   };
 
   newFeat = async (e) => {
+    e.preventDefault();
     this.toggleNewLoading();
-    const formData = new FormData(e.target);
-    const formProps = Object.fromEntries(formData);
-    if (formProps.type === "None") formProps.type = null;
-    formProps.general_id = this.general_id;
-    const featData = await postThing("/api/add_5e_character_feat", formProps);
+
+    const featData = await postThing("/api/add_5e_character_feat", {
+      general_id: this.general_id,
+      type: "Class",
+      title: "New Feat/Trait",
+      description: "Write description here...",
+    });
     if (featData) {
       const elem = createElement("div");
       const featComponent = new SingleFeatComponent({
@@ -55,67 +73,6 @@ export default class FeatComponent {
       this.featComponents.push(featComponent);
     }
     this.toggleNewLoading();
-  };
-
-  renderCreatingFeat = async () => {
-    const titleOfForm = createElement(
-      "div",
-      { class: "component-title" },
-      "Create new feat"
-    );
-    const form = createElement("form", {}, [
-      createElement("label", { for: "title" }, "Name"),
-      createElement("input", {
-        id: "title",
-        name: "title",
-        placeholder: "Name",
-        required: true,
-      }),
-      createElement("label", { for: "type" }, "Type"),
-      createElement(
-        "select",
-        {
-          class: "select-option-small",
-          id: "type",
-          name: "type",
-          style: "margin-right: var(--main-distance);",
-        },
-        [
-          createElement("option", { value: "None" }, "None"),
-          ...this.renderTypeSelectOptions(),
-        ]
-      ),
-      createElement("label", { for: "description" }, "Description"),
-      createElement("textarea", {
-        id: "description",
-        name: "description",
-      }),
-      createElement("br"),
-      createElement("br"),
-      createElement("button", { type: "submit" }, "Create"),
-    ]);
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      this.creating = false;
-      await this.newFeat(e);
-    });
-
-    const cancelButton = createElement(
-      "button",
-      { class: "btn-red" },
-      "Cancel"
-    );
-    cancelButton.addEventListener("click", () => {
-      this.toggleCreating();
-    });
-
-    this.domComponent.append(
-      titleOfForm,
-      createElement("br"),
-      form,
-      createElement("br"),
-      cancelButton
-    );
   };
 
   renderTypeSelectOptions = (currentType) => {
@@ -170,10 +127,6 @@ export default class FeatComponent {
       return this.domComponent.append(renderLoadingWithMessage("Loading..."));
     }
 
-    if (this.creating) {
-      return this.renderCreatingFeat();
-    }
-
     this.domComponent.append(
       createElement(
         "div",
@@ -224,7 +177,7 @@ export default class FeatComponent {
         "+",
         {
           type: "click",
-          event: this.toggleCreating,
+          event: this.newFeat,
         }
       )
     );
@@ -283,6 +236,7 @@ class SingleFeatComponent {
         "textarea",
         {
           class: "cp-input-gen input-small",
+          id: `feat-description-input-${this.id}`,
           name: "description",
         },
         this.description ? this.description : "",
@@ -299,6 +253,89 @@ class SingleFeatComponent {
     }
   };
 
+  saveAllFeatInfo = () => {
+    const titleInput = document.getElementById(`feat-title-input-${this.id}`);
+    const descriptionInput = document.getElementById(
+      `feat-description-input-${this.id}`
+    );
+    this.title = titleInput.value;
+    this.description = descriptionInput.value;
+    // save to db
+    postThing(`/api/edit_5e_character_feat/${this.id}`, {
+      title: titleInput.value,
+      description: descriptionInput.value,
+    });
+  };
+
+  populateFeatInfoWithSuggestion = (item) => {
+    const titleInput = document.getElementById(`feat-title-input-${this.id}`);
+    const descriptionInput = document.getElementById(
+      `feat-description-input-${this.id}`
+    );
+    titleInput.value = item.name;
+    descriptionInput.value = item.desc.join("");
+  };
+
+  resetFeatInfoToCurrentValues = () => {
+    const titleInput = document.getElementById(`feat-title-input-${this.id}`);
+    const descriptionInput = document.getElementById(
+      `feat-description-input-${this.id}`
+    );
+    titleInput.value = this.title;
+    descriptionInput.value = this.description;
+  };
+
+  resetAndHideFeatSuggestions() {
+    const suggElem = document.getElementById(`suggestions-${this.id}`);
+    suggElem.innerHTML = "";
+    suggElem.appendChild(renderLoadingWithMessage());
+    suggElem.style.display = "none";
+  }
+
+  showFeatSuggestions = (e) => {
+    const suggElem = document.getElementById(`suggestions-${this.id}`);
+    suggElem.style.display = "block";
+
+    if (featSuggestions.length) {
+      // clear
+      suggElem.innerHTML = "";
+      // get suggestions form data
+      const searchSuggestionsList = getDataByQuery(
+        featSuggestions,
+        e.target.value
+      );
+      // populate list
+      for (const item of searchSuggestionsList) {
+        const elem = createElement(
+          "div",
+          { class: "suggestions-item" },
+          item.name,
+          [
+            {
+              type: "mouseover",
+              event: (e) => {
+                e.preventDefault();
+                this.populateFeatInfoWithSuggestion(item);
+              },
+            },
+            {
+              type: "mousedown",
+              event: (e) => {
+                e.preventDefault();
+                this.populateFeatInfoWithSuggestion(item);
+                // save feat info to local state and db
+                this.saveAllFeatInfo();
+                // hide
+                this.resetAndHideFeatSuggestions();
+              },
+            },
+          ]
+        );
+        suggElem.appendChild(elem);
+      }
+    }
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
@@ -306,7 +343,7 @@ class SingleFeatComponent {
       createElement(
         "div",
         {
-          style: "display: flex; flex-direction: column;",
+          style: "display: flex; flex-direction: column; position: relative;",
         },
         [
           createElement(
@@ -327,20 +364,41 @@ class SingleFeatComponent {
                     "input",
                     {
                       class: "cp-input-gen",
+                      id: `feat-title-input-${this.id}`,
                       style: "color: var(--orange2)",
                       name: "title",
                       value: this.title ? this.title : "",
                     },
                     null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        e.preventDefault();
-                        postThing(`/api/edit_5e_character_feat/${this.id}`, {
-                          title: e.target.value,
-                        });
+
+                    [
+                      {
+                        type: "focusin",
+                        event: (e) => {
+                          e.preventDefault();
+                          this.showFeatSuggestions(e);
+                        },
                       },
-                    }
+                      {
+                        type: "focusout",
+                        event: (e) => {
+                          e.preventDefault();
+                          // hide suggestions
+                          this.resetAndHideFeatSuggestions();
+
+                          postThing(`/api/edit_5e_character_feat/${this.id}`, {
+                            title: e.target.value,
+                          });
+                        },
+                      },
+                      {
+                        type: "input",
+                        event: (e) => {
+                          e.preventDefault();
+                          this.showFeatSuggestions(e);
+                        },
+                      },
+                    ]
                   ),
                   createElement(
                     "div",
@@ -391,6 +449,18 @@ class SingleFeatComponent {
                 postThing(`/api/edit_5e_character_feat/${this.id}`, {
                   type: e.target.value,
                 });
+              },
+            }
+          ),
+          createElement(
+            "div",
+            { class: "suggestions", id: `suggestions-${this.id}` },
+            renderLoadingWithMessage(),
+            {
+              type: "mouseout",
+              event: (e) => {
+                e.preventDefault();
+                this.resetFeatInfoToCurrentValues();
               },
             }
           ),

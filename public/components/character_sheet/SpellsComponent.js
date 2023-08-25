@@ -470,7 +470,7 @@ class SingleSpell {
     suggElem.style.display = "none";
   }
 
-  showSpellSuggetions = (e, spell) => {
+  showSpellSuggestions = (e, spell) => {
     const suggElem = document.getElementById(`suggestions-${spell.id}`);
     suggElem.style.display = "block";
 
@@ -696,7 +696,7 @@ class SingleSpell {
                   type: "focusin",
                   event: (e) => {
                     e.preventDefault();
-                    this.showSpellSuggetions(e, spell);
+                    this.showSpellSuggestions(e, spell);
                   },
                 },
                 {
@@ -704,10 +704,7 @@ class SingleSpell {
                   event: (e) => {
                     e.preventDefault();
                     // hide suggestions
-                    const suggElem = document.getElementById(
-                      `suggestions-${spell.id}`
-                    );
-                    suggElem.style.display = "none";
+                    this.resetAndHideSpellSuggestions(spell);
                     // send data
                     postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                       title: e.target.value,
@@ -718,7 +715,7 @@ class SingleSpell {
                   type: "input",
                   event: (e) => {
                     e.preventDefault();
-                    this.showSpellSuggetions(e, spell);
+                    this.showSpellSuggestions(e, spell);
                   },
                 },
               ]
