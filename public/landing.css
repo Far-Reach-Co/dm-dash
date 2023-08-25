@@ -14,10 +14,11 @@ p {
   font-size: 1.3rem;
   text-align: center;
   max-width: 100%;
-  width: 500px;
+  width: 600px;
 }
 
 section {
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -59,7 +60,7 @@ section {
 /* SECOND */
 
 .second {
-  width: 100%;
+  height: 100%;
   padding-top: 8%;
   background-color: var(--bg-color-blue-light);
   background-image: url("/assets/landing/water_bg.webp");
@@ -70,12 +71,30 @@ section {
   flex-wrap: wrap-reverse;
 }
 
+.second-container-1 {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.second-container-2 {
+  min-width: 300px;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .second #scroll-img {
   width: 60%;
 }
 
 .third {
   background-color: var(--bg-color-brown-dark);
+  padding-top: 30px;
+  padding-bottom: 30px;
 }
 
 .third #sm-map-img {
@@ -93,13 +112,8 @@ section {
   z-index: 4;
 }
 
-.third p {
-  width: fit-content;
-  max-width: 500px;
-}
-
 #scroll-svg {
-  width: 17%;
+  width: 10%;
   height: auto;
 }
 
@@ -110,4 +124,26 @@ section {
 
 .fourth {
   background-color: var(--bg-color-blue-dark);
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.first-container-1 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#dice-svg {
+  width: 120px;
+  margin-bottom: 30px;
+}
+
+#character-img {
+  width: 40%;
+}
+
+.fourth p {
+  width: 300px;
 }
