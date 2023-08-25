@@ -1,5 +1,5 @@
 import calculateColorMod from "./calculateColorMod.js";
-import createElement from "./createElement.js";
+import createElement from "../../components/createElement.js";
 
 export default class HPComponent {
   constructor(props) {

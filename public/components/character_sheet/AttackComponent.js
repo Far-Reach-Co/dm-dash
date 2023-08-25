@@ -1,6 +1,6 @@
-import { deleteThing, getThings, postThing } from "./apiUtils.js";
-import createElement from "./createElement.js";
-import renderLoadingWithMessage from "./loadingWithMessage.js";
+import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import createElement from "../createElement.js";
+import renderLoadingWithMessage from "../loadingWithMessage.js";
 
 export default class AttackComponent {
   constructor(props) {

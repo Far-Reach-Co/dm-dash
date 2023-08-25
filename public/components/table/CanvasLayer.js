@@ -1,6 +1,6 @@
-import imageFollowingCursor from "../lib/imageFollowingCursor.js";
-import { getPresignedUrlsForImages } from "../lib/imageUtils.js";
-import socketIntegration from "../lib/socketIntegration.js";
+import imageFollowingCursor from "../imageFollowingCursor.js";
+import { getPresignedUrlsForImages } from "../../lib/imageUtils.js";
+import socketIntegration from "./socketIntegration.js";
 
 export default class CanvasLayer {
   constructor(props) {

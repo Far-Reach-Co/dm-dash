@@ -1,4 +1,4 @@
-import renderTierLimitWarning from "./renderTierLimitWarning.js";
+import renderTierLimitWarning from "../components/renderTierLimitWarning.js";
 import toast from "../components/Toast.js";
 
 export async function getPresignedUrlsForImages(imageIds) {

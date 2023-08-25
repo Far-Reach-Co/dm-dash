@@ -1,7 +1,7 @@
-import { deleteThing, getThings, postThing } from "./apiUtils.js";
-import createElement from "./createElement.js";
-import renderLoadingWithMessage from "./loadingWithMessage.js";
-import getDataByQuery from "./getDataByQuery.js";
+import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import createElement from "../createElement.js";
+import renderLoadingWithMessage from "../loadingWithMessage.js";
+import getDataByQuery from "../../lib/getDataByQuery.js";
 
 // load spells for suggestions on input
 let spellSuggestions = [];
@@ -320,7 +320,7 @@ class SingleSpell {
     this.render();
   };
 
-  renderHideFeatButton = () => {
+  renderHideSpellButton = () => {
     if (!this.hidden) {
       return createElement(
         "a",
@@ -354,9 +354,159 @@ class SingleSpell {
       description: "Write spell details here...",
     });
     if (res) {
+      // update local state
       this.spells.push(res);
     }
     this.toggleLoadingNewSpell();
+  };
+
+  populateSpellInfoWithSuggestion = async (spell, item) => {
+    // show data inside inputs
+    const titleInput = document.getElementById(`spell-title-input-${spell.id}`);
+    const castingTimeInput = document.getElementById(
+      `spell-casting-time-input-${spell.id}`
+    );
+    const durationInput = document.getElementById(
+      `spell-duration-input-${spell.id}`
+    );
+    const rangeInput = document.getElementById(`spell-range-input-${spell.id}`);
+    const damageTypeInput = document.getElementById(
+      `spell-damage-type-input-${spell.id}`
+    );
+    const componentsInput = document.getElementById(
+      `spell-components-input-${spell.id}`
+    );
+    const descriptionInput = document.getElementById(
+      `spell-description-input-${spell.id}`
+    );
+    titleInput.value = item.name;
+    if (item.casting_time) castingTimeInput.value = item.casting_time;
+    if (item.duration) durationInput.value = item.duration;
+    if (item.range) rangeInput.value = item.range;
+    if (item.damage_type) damageTypeInput.value = item.damage_type;
+    if (item.components) componentsInput.value = item.components;
+    if (item.desc) descriptionInput.value = item.desc.join("");
+  };
+
+  resetSpellInfoToCurrentValues = (spell) => {
+    const titleInput = document.getElementById(`spell-title-input-${spell.id}`);
+    const castingTimeInput = document.getElementById(
+      `spell-casting-time-input-${spell.id}`
+    );
+    const durationInput = document.getElementById(
+      `spell-duration-input-${spell.id}`
+    );
+    const rangeInput = document.getElementById(`spell-range-input-${spell.id}`);
+    const damageTypeInput = document.getElementById(
+      `spell-damage-type-input-${spell.id}`
+    );
+    const componentsInput = document.getElementById(
+      `spell-components-input-${spell.id}`
+    );
+    const descriptionInput = document.getElementById(
+      `spell-description-input-${spell.id}`
+    );
+    titleInput.value = spell.title;
+    if (spell.casting_time) castingTimeInput.value = spell.casting_time;
+    if (spell.duration) durationInput.value = spell.duration;
+    if (spell.range) rangeInput.value = spell.range;
+    if (spell.damage_type) damageTypeInput.value = spell.damage_type;
+    if (spell.components) componentsInput.value = spell.components;
+    if (spell.description) descriptionInput.value = spell.description;
+  };
+
+  saveAllSpellInfo = (spell) => {
+    // first save to local state
+    const titleInput = document.getElementById(`spell-title-input-${spell.id}`);
+    const castingTimeInput = document.getElementById(
+      `spell-casting-time-input-${spell.id}`
+    );
+    const durationInput = document.getElementById(
+      `spell-duration-input-${spell.id}`
+    );
+    const rangeInput = document.getElementById(`spell-range-input-${spell.id}`);
+    const damageTypeInput = document.getElementById(
+      `spell-damage-type-input-${spell.id}`
+    );
+    const componentsInput = document.getElementById(
+      `spell-components-input-${spell.id}`
+    );
+    const descriptionInput = document.getElementById(
+      `spell-description-input-${spell.id}`
+    );
+
+    this.spells[this.spells.indexOf(spell)].title = titleInput.value;
+    this.spells[this.spells.indexOf(spell)].casting_time =
+      castingTimeInput.value;
+    this.spells[this.spells.indexOf(spell)].duration = durationInput.value;
+    this.spells[this.spells.indexOf(spell)].range = rangeInput.value;
+    this.spells[this.spells.indexOf(spell)].damage_type = damageTypeInput.value;
+    this.spells[this.spells.indexOf(spell)].components =
+      componentsInput.components;
+    this.spells[this.spells.indexOf(spell)].description =
+      descriptionInput.value;
+
+    // then save to db
+    postThing(`/api/edit_5e_character_spell/${spell.id}`, {
+      title: titleInput.value,
+      casting_time: castingTimeInput.value,
+      duration: durationInput.value,
+      range: rangeInput.value,
+      damage_type: damageTypeInput.value,
+      components: componentsInput.value,
+      description: descriptionInput.value,
+    });
+  };
+
+  resetAndHideSpellSuggestions(spell) {
+    const suggElem = document.getElementById(`suggestions-${spell.id}`);
+    suggElem.innerHTML = "";
+    suggElem.appendChild(renderLoadingWithMessage());
+    suggElem.style.display = "none";
+  }
+
+  showSpellSuggetions = (e, spell) => {
+    const suggElem = document.getElementById(`suggestions-${spell.id}`);
+    suggElem.style.display = "block";
+
+    if (spellSuggestions.length) {
+      // clear
+      suggElem.innerHTML = "";
+      // get suggestions form data
+      const searchSuggestionsList = getDataByQuery(
+        spellSuggestions,
+        e.target.value
+      );
+      // populate list
+      for (const item of searchSuggestionsList) {
+        const elem = createElement(
+          "div",
+          { class: "suggestions-item" },
+          item.name,
+          [
+            {
+              type: "mouseover",
+              event: (e) => {
+                e.preventDefault();
+                this.populateSpellInfoWithSuggestion(spell, item);
+              },
+            },
+            {
+              type: "mousedown",
+              event: (e) => {
+                e.preventDefault();
+                this.populateSpellInfoWithSuggestion(spell, item);
+                // save spell info to local state and db
+                this.saveAllSpellInfo(spell);
+                // hide
+                this.resetAndHideSpellSuggestions(spell);
+              },
+            },
+          ]
+        );
+        suggElem.appendChild(elem);
+      }
+    }
   };
 
   renderSpellElemDescriptionsOrHidden = (spell) => {
@@ -541,10 +691,7 @@ class SingleSpell {
                   type: "focusin",
                   event: (e) => {
                     e.preventDefault();
-                    const suggElem = document.getElementById(
-                      `suggestions-${spell.id}`
-                    );
-                    suggElem.style.display = "block";
+                    this.showSpellSuggetions(e, spell);
                   },
                 },
                 {
@@ -560,88 +707,13 @@ class SingleSpell {
                     postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                       title: e.target.value,
                     });
-                    // update UI
-                    this.spells[this.spells.indexOf(spell)].title =
-                      e.target.value;
                   },
                 },
                 {
                   type: "input",
                   event: (e) => {
                     e.preventDefault();
-                    console.log(e.target.value);
-                    const suggElem = document.getElementById(
-                      `suggestions-${spell.id}`
-                    );
-                    if (spellSuggestions.length) {
-                      suggElem.innerHTML = "";
-                      const searchSuggestionsList = getDataByQuery(
-                        spellSuggestions,
-                        e.target.value
-                      );
-                      console.log(searchSuggestionsList);
-                      for (const item of searchSuggestionsList) {
-                        const elem = createElement(
-                          "div",
-                          { class: "suggestions-item" },
-                          item.name,
-                          [
-                            {
-                              type: "mouseover",
-                              event: (e) => {
-                                e.preventDefault();
-                                // show data inside inputs
-                                const titleInput = document.getElementById(
-                                  `spell-title-input-${spell.id}`
-                                );
-                                const castingTimeInput =
-                                  document.getElementById(
-                                    `spell-casting-time-input-${spell.id}`
-                                  );
-                                const durationInput = document.getElementById(
-                                  `spell-duration-input-${spell.id}`
-                                );
-                                const rangeInput = document.getElementById(
-                                  `spell-range-input-${spell.id}`
-                                );
-                                const damageTypeInput = document.getElementById(
-                                  `spell-damage-type-input-${spell.id}`
-                                );
-                                const componentsInput = document.getElementById(
-                                  `spell-components-input-${spell.id}`
-                                );
-                                const descriptionInput =
-                                  document.getElementById(
-                                    `spell-description-input-${spell.id}`
-                                  );
-                                titleInput.value = item.name;
-                                console.log(item.casting_time);
-                                if (item.casting_time)
-                                  castingTimeInput.value = item.casting_time;
-                                if (item.duration)
-                                  durationInput.value = item.duration;
-                                if (item.range) rangeInput.value = item.range;
-                                if (item.range) rangeInput.value = item.range;
-                                if (item.damage_type)
-                                  damageTypeInput.value = item.damage_type;
-                                if (item.components)
-                                  componentsInput.value = item.components;
-                                if (item.desc)
-                                  descriptionInput.innerText =
-                                    item.desc.join("");
-                              },
-                            },
-                            {
-                              type: "click",
-                              event: (e) => {
-                                e.preventDefault();
-                              },
-                            },
-                          ]
-                        );
-                        suggElem.appendChild(elem);
-                      }
-                    }
+                    this.showSpellSuggetions(e, spell);
                   },
                 },
               ]
@@ -678,7 +750,14 @@ class SingleSpell {
         createElement(
           "div",
           { class: "suggestions", id: `suggestions-${spell.id}` },
-          renderLoadingWithMessage()
+          renderLoadingWithMessage(),
+          {
+            type: "mouseout",
+            event: (e) => {
+              e.preventDefault();
+              this.resetSpellInfoToCurrentValues(spell);
+            },
+          }
         ),
         ...this.renderSpellElemDescriptionsOrHidden(spell),
         createElement("hr"),
@@ -707,7 +786,7 @@ class SingleSpell {
     if (this.isCantrip) {
       return this.domComponent.append(
         createElement("div", { class: "special-font" }, "Cantrips"),
-        this.renderHideFeatButton(),
+        this.renderHideSpellButton(),
         createElement("hr"),
         ...this.renderSpells(),
         createElement(
@@ -787,7 +866,7 @@ class SingleSpell {
           this.expendedElement.domComponent
         ),
       ]),
-      this.renderHideFeatButton(),
+      this.renderHideSpellButton(),
       createElement("hr"),
       ...this.renderSpells(),
       createElement(

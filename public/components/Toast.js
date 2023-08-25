@@ -1,4 +1,4 @@
-import createElement from "../lib/createElement.js";
+import createElement from "./createElement.js";
 
 class Toast {
   constructor() {

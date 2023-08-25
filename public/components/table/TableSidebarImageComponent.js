@@ -1,7 +1,7 @@
-import createElement from "./createElement.js";
-import { deleteThing, getThings, postThing } from "./apiUtils.js";
-import renderLoadingWithMessage from "./loadingWithMessage.js";
-import imageFollowingCursor from "./imageFollowingCursor.js";
+import createElement from "../createElement.js";
+import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import renderLoadingWithMessage from "../loadingWithMessage.js";
+import imageFollowingCursor from "../imageFollowingCursor.js";
 
 export default class TableSidebarImageComponent {
   constructor(props) {

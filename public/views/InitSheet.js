@@ -1,5 +1,5 @@
 import { getThings, postThing } from "../lib/apiUtils.js";
-import FiveEPlayerSheet from "../components/5ePlayerSheet.js";
+import FiveEPlayerSheet from "../components/character_sheet/5ePlayerSheet.js";
 
 class InitSheet {
   constructor() {
