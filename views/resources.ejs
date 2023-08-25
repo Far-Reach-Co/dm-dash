@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Resources</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <body>
+    <%- include('./partials/nav') %>
+    <div
+      class="container-fluid w-75 p-3 d-flex flex-column justify-content-center"
+    >
+      <div class="intro">
+        <h1 class="text-center">Resources</h1>
+        <p class="text-center">
+          Far Reach Co. offers a variety of content for role-playing games
+          beyond our online game-play tooling.
+        </p>
+      </div>
+      <article>
+        <h2>Aethrend</h2>
+        <p>
+          We are currently working on a D&D 5e campaign setting and will be
+          releasing that for sale here on our site. For now you can find our
+          pre-released free content to use in your games.
+        </p>
+        <a href="/preaethrend">Pre-Release Content</a>
+      </article>
+      <hr />
+      <article>
+        <h2>Discord 5e-Bot</h2>
+        <p>
+          We have developed a discord bot specifically for helping run smooth
+          games on discord. You can use the bot to roll dice, search for
+          Official D&D 5e resources with the SRD and handle inititative
+          tracking!
+        </p>
+        <a href="https://5ebot.com">5e-Bot Website</a>
+      </article>
+      <hr />
+    </div>
+    <%- include('./partials/footer') %>
+  </body>
+</html>

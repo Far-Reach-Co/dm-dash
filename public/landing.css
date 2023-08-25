@@ -1,7 +1,7 @@
 :root {
-  --bg-color-blue-dark: #0f2333;
-  --bg-color-blue-light: #314662;
-  --bg-color-brown-dark: #171412;
+  --bg-color-blue-dark: #192a39;
+  --bg-color-blue-light: rgb(43, 65, 83);
+  --bg-color-brown-dark: #0a141d;
 }
 
 h1 {

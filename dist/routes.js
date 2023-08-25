@@ -80,6 +80,22 @@ router.get("/resetpassword", csrfMiddleware, (req, res, next) => {
         next(err);
     }
 });
+router.get("/resources", (req, res, next) => {
+    try {
+        res.render("resources", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/preaethrend", (req, res, next) => {
+    try {
+        res.render("preaethrend", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/invite", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!req.session.user)

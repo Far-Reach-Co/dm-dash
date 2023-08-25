@@ -115,6 +115,27 @@ router.get(
   }
 );
 
+router.get("/resources", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    //
+    res.render("resources", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get(
+  "/preaethrend",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      //
+      res.render("preaethrend", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 router.get(
   "/invite",
   async (req: Request, res: Response, next: NextFunction) => {
