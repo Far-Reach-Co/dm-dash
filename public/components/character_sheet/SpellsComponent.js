@@ -9,7 +9,6 @@ fetch("/lib/data/5e-srd-spells.json")
   .then((res) => res.json())
   .then((data) => {
     spellSuggestions = data;
-    console.log(spellSuggestions);
   });
 
 export default class SpellsComponent {
@@ -383,7 +382,13 @@ class SingleSpell {
     if (item.casting_time) castingTimeInput.value = item.casting_time;
     if (item.duration) durationInput.value = item.duration;
     if (item.range) rangeInput.value = item.range;
-    if (item.damage_type) damageTypeInput.value = item.damage_type;
+    if (
+      item.damage &&
+      item.damage.damage_type &&
+      item.damage.damage_type.name
+    ) {
+      damageTypeInput.value = item.damage.damage_type.name;
+    } else damageTypeInput.value = "";
     if (item.components) componentsInput.value = item.components;
     if (item.desc) descriptionInput.value = item.desc.join("");
   };

@@ -939,7 +939,7 @@ export default class FiveEPlayerSheet {
                         type: "number",
                         value: this.generalData.class_resource_total
                           ? this.generalData.class_resource_total
-                          : 0,
+                          : "0",
                       },
                       null,
                       {
@@ -962,7 +962,7 @@ export default class FiveEPlayerSheet {
                     type: "number",
                     value: this.generalData.class_resource
                       ? this.generalData.class_resource
-                      : 0,
+                      : "0",
                   },
                   null,
                   {
@@ -1012,7 +1012,7 @@ export default class FiveEPlayerSheet {
                         type: "number",
                         value: this.generalData.other_resource_total
                           ? this.generalData.other_resource_total
-                          : 0,
+                          : "0",
                       },
                       null,
                       {
@@ -1032,7 +1032,9 @@ export default class FiveEPlayerSheet {
                   {
                     class: "cp-input-no-border cp-input-large",
                     name: "other_resource",
-                    value: this.generalData.other_resource,
+                    value: this.generalData.other_resource
+                      ? this.generalData.other_resource
+                      : "0",
                   },
                   null,
                   {
