@@ -464,15 +464,21 @@ class SingleSpell {
   };
 
   resetAndHideSpellSuggestions(spell) {
-    const suggElem = document.getElementById(`suggestions-${spell.id}`);
+    const suggElem = document.getElementById(`suggestions-spells-${spell.id}`);
     suggElem.innerHTML = "";
     suggElem.appendChild(renderLoadingWithMessage());
     suggElem.style.display = "none";
   }
 
   showSpellSuggestions = (e, spell) => {
-    const suggElem = document.getElementById(`suggestions-${spell.id}`);
+    const suggElem = document.getElementById(`suggestions-spells-${spell.id}`);
     suggElem.style.display = "block";
+    // suggestion position relative the current component
+    // Get the bounding box of the target element
+    const rect = e.target.getBoundingClientRect();
+    // Set the position of the suggestion element
+    suggElem.style.top = rect.bottom + window.scrollY + "px"; // You can add an offset here
+    suggElem.style.left = rect.left + window.scrollX + "px"; // You can add an offset here
 
     if (spellSuggestions.length) {
       // clear
@@ -512,6 +518,23 @@ class SingleSpell {
         suggElem.appendChild(elem);
       }
     }
+  };
+
+  renderSuggestionElem = (spell) => {
+    document.body.appendChild(
+      createElement(
+        "div",
+        { class: "suggestions", id: `suggestions-spells-${spell.id}` },
+        renderLoadingWithMessage(),
+        {
+          type: "mouseout",
+          event: (e) => {
+            e.preventDefault();
+            this.resetSpellInfoToCurrentValues(spell);
+          },
+        }
+      )
+    );
   };
 
   renderSpellElemDescriptionsOrHidden = (spell) => {
@@ -669,10 +692,13 @@ class SingleSpell {
   };
 
   renderSpellElem = (spell) => {
+    // dynamically create suggestion divs on document body
+    this.renderSuggestionElem(spell);
+
     return createElement(
       "div",
       {
-        style: "display: flex; flex-direction: column; position: relative;",
+        style: "display: flex; flex-direction: column;",
       },
       [
         createElement(
@@ -748,18 +774,6 @@ class SingleSpell {
               }
             ),
           ]
-        ),
-        createElement(
-          "div",
-          { class: "suggestions", id: `suggestions-${spell.id}` },
-          renderLoadingWithMessage(),
-          {
-            type: "mouseout",
-            event: (e) => {
-              e.preventDefault();
-              this.resetSpellInfoToCurrentValues(spell);
-            },
-          }
         ),
         ...this.renderSpellElemDescriptionsOrHidden(spell),
         createElement("hr"),

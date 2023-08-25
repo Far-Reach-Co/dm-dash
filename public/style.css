@@ -604,7 +604,6 @@ footer {
 
 .suggestions {
   position: absolute;
-  top: 30px;
   height: 200px;
   width: 200px;
   overflow-y: auto;

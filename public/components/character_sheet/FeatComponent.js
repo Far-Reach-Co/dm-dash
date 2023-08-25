@@ -286,15 +286,21 @@ class SingleFeatComponent {
   };
 
   resetAndHideFeatSuggestions() {
-    const suggElem = document.getElementById(`suggestions-${this.id}`);
+    const suggElem = document.getElementById(`suggestions-feats-${this.id}`);
     suggElem.innerHTML = "";
     suggElem.appendChild(renderLoadingWithMessage());
     suggElem.style.display = "none";
   }
 
   showFeatSuggestions = (e) => {
-    const suggElem = document.getElementById(`suggestions-${this.id}`);
+    const suggElem = document.getElementById(`suggestions-feats-${this.id}`);
     suggElem.style.display = "block";
+    // suggestion position relative the current component
+    // Get the bounding box of the target element
+    const rect = e.target.getBoundingClientRect();
+    // Set the position of the suggestion element
+    suggElem.style.top = rect.bottom + window.scrollY + "px"; // You can add an offset here
+    suggElem.style.left = rect.left + window.scrollX + "px"; // You can add an offset here
 
     if (featSuggestions.length) {
       // clear
@@ -336,8 +342,28 @@ class SingleFeatComponent {
     }
   };
 
+  renderSuggestionElem = () => {
+    document.body.appendChild(
+      createElement(
+        "div",
+        { class: "suggestions", id: `suggestions-feats-${this.id}` },
+        renderLoadingWithMessage(),
+        {
+          type: "mouseout",
+          event: (e) => {
+            e.preventDefault();
+            this.resetFeatInfoToCurrentValues();
+          },
+        }
+      )
+    );
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
+
+    // dynamically create suggestion divs on document body
+    this.renderSuggestionElem();
 
     this.domComponent.append(
       createElement(
@@ -449,18 +475,6 @@ class SingleFeatComponent {
                 postThing(`/api/edit_5e_character_feat/${this.id}`, {
                   type: e.target.value,
                 });
-              },
-            }
-          ),
-          createElement(
-            "div",
-            { class: "suggestions", id: `suggestions-${this.id}` },
-            renderLoadingWithMessage(),
-            {
-              type: "mouseout",
-              event: (e) => {
-                e.preventDefault();
-                this.resetFeatInfoToCurrentValues();
               },
             }
           ),
