@@ -2,9 +2,11 @@
 
 ## About:
 
-This contains the main website for Far Reach Co. which includes the dashboard view, the player character sheets (currently only DnD 5e) and the virtual table top.
+This contains the main website for Far Reach Co. which includes the dashboard view, the player character sheets, the virtual table top system and the Aether Bot
 
-The server is in express.js with socket.io. The database is postgres, backend is Typescript and the frontend is vanilla JS with ES modules bundled with rollup.
+The server is built with express and socket.io. It utilizes a postgres db and redis for certain features. Frontend is mostly ejs templates and has a couple vanilla javascript apps which are bundled with rollup. There is also some use of HTMX for forms.
+
+There are some core services being utilize including AWS S3 and Cloudfront. Stripe will be integrated soon. The discord bot relies on a package called discord-interactions.
 
 ## Setup:
 
