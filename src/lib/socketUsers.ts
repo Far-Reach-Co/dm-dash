@@ -5,6 +5,9 @@ export const redisClient = createClient();
 redisClient.connect();
 redisClient.on("error", (err) => console.log("Redis Client Error", err));
 
+// on startup clear users in case of shutdown connection failure to ensure no doubles
+redisClient.del("users");
+
 type User = {
   id: string;
   username: string;
