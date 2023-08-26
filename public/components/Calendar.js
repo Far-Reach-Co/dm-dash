@@ -363,10 +363,14 @@ export default class Calendar {
         }
         // append
         monthContainer.append(
-          indexLabel,
-          titleInput,
-          numOfDaysLabel,
-          numOfDaysInput,
+          createElement("div", { class: "input-container" }, [
+            indexLabel,
+            titleInput,
+          ]),
+          createElement("div", { class: "input-container" }, [
+            numOfDaysLabel,
+            numOfDaysInput,
+          ]),
           removeMonthBtn,
           moveBtnContainer
         );
@@ -394,28 +398,37 @@ export default class Calendar {
   };
 
   renderManageCalendar = () => {
-    const form = createElement("form", {}, [
-      createElement("label", { for: "title" }, "Calendar Title"),
-      createElement("input", {
-        id: "title",
-        value: this.title,
-        name: "title",
-      }),
-      createElement("label", { for: "year" }, "Current Year"),
-      createElement("input", {
-        id: "year",
-        name: "year",
-        type: "number",
-        step: "1",
-        min: "1",
-        value: this.year,
-      }),
-      createElement(
-        "button",
-        { type: "submit", style: "margin-top: var(--main-distance);" },
-        "Done"
-      ),
-    ]);
+    const form = createElement(
+      "form",
+      { class: "d-flex flex-row justify-content-evenly align-items-center" },
+      [
+        createElement("div", { class: "input-container" }, [
+          createElement("label", { for: "title" }, "Calendar Title"),
+
+          createElement("input", {
+            id: "title",
+            value: this.title,
+            name: "title",
+          }),
+        ]),
+        createElement("div", { class: "input-container" }, [
+          createElement("label", { for: "year" }, "Current Year"),
+          createElement("input", {
+            id: "year",
+            name: "year",
+            type: "number",
+            step: "1",
+            min: "1",
+            value: this.year,
+          }),
+        ]),
+        createElement(
+          "button",
+          { type: "submit", style: "margin-top: var(--main-distance);" },
+          "Done"
+        ),
+      ]
+    );
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       this.manageCalendar = false;

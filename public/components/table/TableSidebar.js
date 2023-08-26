@@ -229,20 +229,22 @@ export default class TableSidebar {
         "form",
         {},
         [
-          createElement(
-            "label",
-            {
-              for: "title",
-              class: "me-1",
-            },
-            "Title"
-          ),
-          createElement("input", {
-            placeholder: "New Folder",
-            name: "title",
-            id: "title",
-            required: true,
-          }),
+          createElement("div", { class: "input-container" }, [
+            createElement(
+              "label",
+              {
+                for: "title",
+                class: "me-1",
+              },
+              "Title"
+            ),
+            createElement("input", {
+              placeholder: "New Folder",
+              name: "title",
+              id: "title",
+              required: true,
+            }),
+          ]),
           createElement("br"),
           createElement("button", { class: "new-btn me-1" }, "Create"),
         ],
@@ -345,20 +347,22 @@ export default class TableSidebar {
           "form",
           {},
           [
-            createElement(
-              "label",
-              {
-                for: "title",
-                class: "me-1",
-              },
-              "Edit Title"
-            ),
-            createElement("input", {
-              value: this.tableView.title,
-              name: "title",
-              id: "title",
-              required: true,
-            }),
+            createElement("div", { class: "input-container" }, [
+              createElement(
+                "label",
+                {
+                  for: "title",
+                  class: "me-1",
+                },
+                "Edit Title"
+              ),
+              createElement("input", {
+                value: this.tableView.title,
+                name: "title",
+                id: "title",
+                required: true,
+              }),
+            ]),
             createElement("br"),
             createElement("button", { class: "new-btn me-1" }, "Save"),
             createElement("small", {

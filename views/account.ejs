@@ -13,49 +13,54 @@
   <style></style>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container-fluid p-3">
+    <div class="container-fluid info-container p-3">
       <h2>Account Details</h2>
-      <div id="email-area">
+      <div class="mb-3" id="email-area">
         <form hx-post="/api/update_email" hx-target="#email-update-success">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <label for="email">Edit Email</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value="<%= user.email %>"
-            required
-          />
-          <br />
-          <button type="submit">Save</button>
-          <small class="success-message" id="email-update-success"></small>
+          <fieldset>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="input-container">
+              <label for="email">Edit Email</label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value="<%= user.email %>"
+                required
+              />
+            </div>
+            <br />
+            <button type="submit">Save</button>
+            <small class="success-message" id="email-update-success"></small>
+          </fieldset>
         </form>
       </div>
-      <br />
-      <div id="username-area">
+      <div class="mb-3" id="username-area">
         <form
           hx-post="/api/update_username"
           hx-target="#username-update-success"
         >
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <label for="username">Edit Username</label>
-          <input
-            type="username"
-            id="username"
-            name="username"
-            value="<%= user.username %>"
-            required
-          />
-          <br />
-          <button type="submit">Save</button>
-          <small class="success-message" id="username-update-success"></small>
+          <fieldset>
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="input-container">
+              <label for="username">Edit Username</label>
+              <input
+                type="username"
+                id="username"
+                name="username"
+                value="<%= user.username %>"
+                required
+              />
+            </div>
+            <br />
+            <button type="submit">Save</button>
+            <small class="success-message" id="username-update-success"></small>
+          </fieldset>
         </form>
       </div>
       <br />
-      <button
-        class="btn-red m-2"
-        onclick="window.location.pathname = '/logout'"
-      >
+      <br />
+      <button class="btn-red" onclick="window.location.pathname = '/logout'">
         Logout
       </button>
       <hr />

@@ -57,9 +57,10 @@
 }
 
 .help-content {
+  min-width: 300px;
   padding: var(--main-distance);
   border-radius: var(--border-radius);
-  background-color: var(--blue5);
+  background-color: var(--main-dark);
   overflow-y: auto;
 }
 
