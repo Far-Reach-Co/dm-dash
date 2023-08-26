@@ -11,37 +11,44 @@
   </head>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container-fluid p-3">
-      <h2>Login</h2>
+    <div class="container-fluid info-container p-3">
       <form id="login-form">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <label for="email">Email</label>
-        <input
-          type="email"
-          name="email"
-          id="email"
-          placeholder="name@whatever.com"
-          required
-        />
-        <br />
-        <label for="email">Password</label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          placeholder="password"
-          required
-        />
-        <br />
-        <button type="submit">Login</button>
-        <br />
-        <small>Don't have an account?</small>
-        <a onclick=" window.location.pathname = '/register' "
-          ><small>Register</small></a
-        >
-        <small>Forgot your password?</small>
-        <a href="/forgotpassword"><small>Forgot Password</small></a>
+        <fieldset>
+          <legend>Login</legend>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="input-container">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="name@whatever.com"
+              required
+            />
+          </div>
+          <br />
+          <div class="input-container">
+            <label for="email">Password</label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="password"
+              required
+            />
+          </div>
+          <br />
+          <br />
+          <button type="submit">Login</button>
+        </fieldset>
       </form>
+      <br />
+      <small>Don't have an account?</small>
+      <a onclick=" window.location.pathname = '/register' "
+        ><small>Register</small></a
+      >
+      <small>Forgot your password?</small>
+      <a href="/forgotpassword"><small>Forgot Password</small></a>
     </div>
     <%- include('./partials/footer') %>
   </body>

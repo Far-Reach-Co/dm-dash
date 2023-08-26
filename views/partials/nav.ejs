@@ -9,7 +9,7 @@
   <% } %>
 </div>
 <nav>
-  <a style="display: flex; align-items: center" href="/index">
+  <a id="frlogo-container" class="d-flex align-items-center" href="/index">
     <img height="35px" src="/assets/frlogo.webp" alt="" />
   </a>
   <img src="/assets/hamburger.svg" height="32" width="32" id="nav-ham" alt="" />
@@ -24,3 +24,9 @@
     <% } %>
   </div>
 </nav>
+<script>
+  if (window.location.pathname == "/index" || window.location.pathname == "/") {
+    const elem = document.getElementById("frlogo-container");
+    document.getElementById("frlogo-container").remove();
+  }
+</script>

@@ -13,7 +13,7 @@
   </head>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container-fluid p-3">
+    <div class="container-fluid info-container p-3">
       <div>
         <h1>Wyrld Settings</h1>
         <small
@@ -22,17 +22,22 @@
       </div>
       <h2>Edit Title</h2>
       <form hx-post="/api/edit_project_title/<%= project.id %>" hx-target="#title-update-success">
-        <label for="title">Title</label>
-        <input
-          id="title"
-          name="title"
-          placeholder="Wyrld Title"
-          value="<%= project.title %>"
-          required="true,"
-        />
-        <br />
-        <button type="submit">Save</button>
-        <small class="success-message" id="title-update-success"></small>
+        <fieldset>
+          <div class="input-container">
+            <label for="title">Title</label>
+            <input
+              id="title"
+              name="title"
+              placeholder="Wyrld Title"
+              value="<%= project.title %>"
+              required="true,"
+            />
+          </div>
+          <br />
+          <br />
+          <button type="submit">Save</button>
+          <small class="success-message" id="title-update-success"></small>
+        </fieldset>
       <hr />
       <h2>Share Invite Link</h2>
       <% if (inviteLink) { %> <%- include('./partials/wyrld_settings/invite') %>
@@ -47,8 +52,8 @@
         >
         <br />
         <div class="d-flex justify-content-between w-25">
-          <small style="text-decoration: underline">Username</small>
-          <small style="text-decoration: underline">Manager</small>
+          <p style="text-decoration: underline">Username</p>
+          <p style="text-decoration: underline">Manager</p>
         </div>
         <br />
         <% if (users.length === 0) { %>

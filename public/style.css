@@ -14,7 +14,8 @@
 }
 
 :root {
-  --main-white: rgb(215, 215, 215);
+  --main-white: rgb(199, 199, 199);
+  --bright-white: rgb(225, 225, 225);
   --main-dark: rgb(24, 32, 41);
   --main-gray: rgb(103, 101, 101);
   --light-gray: rgb(174, 173, 173);
@@ -23,15 +24,15 @@
   --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
   --blue5: rgb(47, 64, 84);
-  /* --blue6: rgb(125, 174, 237); */
-  --link-blue: rgb(148, 178, 213);
+  --blue6: rgb(115, 163, 208);
+  --link-blue: rgb(156, 184, 215);
   --purple: rgb(73, 42, 87);
   --pink: rgb(221, 196, 248);
   --green: rgb(161, 190, 128);
   --green2: rgb(49, 74, 36);
   --orange: rgb(165, 79, 4);
   --orange2: rgb(209, 158, 116);
-  --orange3: rgb(208, 184, 158);
+  --orange3: rgb(222, 199, 174);
   --orange4: rgb(213, 189, 161);
   --red1: rgb(206, 101, 101);
   --red2: rgb(120, 51, 51);
@@ -121,6 +122,7 @@ h1 {
   font-family: YoungSerif;
   font-size: 1.5rem;
   display: inline-block;
+  color: var(--bright-white);
 }
 
 h2 {
@@ -151,6 +153,11 @@ nav {
 
 .container-fluid {
   margin-top: 30px;
+}
+
+.info-container {
+  width: 1000px;
+  max-width: 100%;
 }
 
 .title-anchor {
@@ -239,6 +246,7 @@ a:not([href]):not([class]) {
   color: var(--link-blue);
   cursor: pointer;
   text-decoration: none;
+  width: fit-content;
 }
 
 a:hover,
@@ -246,6 +254,7 @@ a small:hover,
 a:not([href]):hover,
 a:not([href]):not([class]):hover {
   color: var(--green);
+  text-decoration: underline;
 }
 
 button {
@@ -267,6 +276,7 @@ button:hover {
 }
 
 .label-btn {
+  all: unset;
   padding: 5px;
   text-align: center;
   height: fit-content;
@@ -315,24 +325,37 @@ button:hover {
   opacity: .7;
 }
 
-form {
-  padding: var(--main-distance)
+legend {
+  font-family: YoungSerif;
+  color: var(--bright-white);
 }
 
 label {
+  font-size: small;
+  font-weight: bold;
+  position: absolute;
+  top: -10;
+  left: 10px;
+  transform: translateY(-50%);
+  background: var(--main-dark);
   color: var(--orange2);
 }
 
+.input-container {
+  position: relative;
+  padding-top: 5px;
+  display: inline-block;
+}
+
 input {
+  float: right;
+  color: inherit;
+  font: inherit;
+  font-size: inherit;
+  padding: 5px;
   border: none;
   outline: none;
-  color: var(--main-white);
   background-color: var(--main-dark);
-  height: 30px;
-  display: inline-block;
-  padding-left: 5px;
-  font-size: inherit;
-  /* font-family: inherit; */
   border: 0.5px solid var(--main-gray);
 }
 
@@ -440,7 +463,8 @@ textarea {
 
 footer {
   width: 100vw;
-  min-height: 200px;
+  height: fit-content;
+  padding: 10px;
   margin-top: auto;
   background-color: var(--blue3);
   display: flex;
@@ -546,17 +570,19 @@ footer {
 .month-container {
   padding: 5px;
   margin-bottom: var(--main-distance);
-  border: 1px solid var(--main-gray);
-  background-color: var(--blue3);
-  align-self: flex-start;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
 }
 
 .day-container {
   padding: 5px;
   margin-bottom: var(--main-distance);
-  border: 1px solid var(--main-gray);
-  background-color: var(--blue3);
-  align-self: flex-start;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
 }
 
 .move-btn {
@@ -565,6 +591,9 @@ footer {
 }
 
 .calendar {
+  width: 800px;
+  overflow: auto;
+  max-width: 100%;
   background-color: var(--blue3);
   border: 1px solid var(--main-gray);
   border-radius: var(--border-radius);
@@ -572,7 +601,7 @@ footer {
 
 .calendar-container {
   max-width: 100%;
-  overflow-x: auto;
+  overflow: auto;
 }
 
 .calendar-box {
@@ -692,7 +721,6 @@ footer {
   /* Full width */
   height: 100%;
   /* Full height */
-  overflow: auto;
   /* Enable scroll if needed */
   background-color: rgb(0, 0, 0);
   /* Fallback color */
@@ -706,18 +734,21 @@ footer {
 
 /* Modal Content/Box */
 .modal-custom-container {
-  width: fit-content;
+  max-height: 100%;
+  max-width: 100%;
   /* Could be more or less, depending on screen size */
   display: flex;
   flex-direction: column;
 }
 
 .modal-custom-content {
+  max-height: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: 90vh;
+  overflow: auto;
 }
 
 /* The Close Button */

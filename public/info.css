@@ -6,7 +6,7 @@
 }
 
 p {
-  width: 75%;
+  width: 800px;
   max-width: 100%;
 }
 
@@ -19,4 +19,19 @@ article {
 
 img {
   max-width: 100%;
+}
+
+.indent {
+  margin-left: 20px;
+}
+
+
+
+.inline-div h1,
+h2,
+h3,
+h4,
+a,
+p {
+  display: inline-block;
 }

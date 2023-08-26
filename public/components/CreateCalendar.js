@@ -312,10 +312,14 @@ export default class CreateCalendar {
         }
         // append
         monthContainer.append(
-          indexLabel,
-          titleInput,
-          numOfDaysLabel,
-          numOfDaysInput,
+          createElement("div", { class: "input-container" }, [
+            indexLabel,
+            titleInput,
+          ]),
+          createElement("div", { class: "input-container" }, [
+            numOfDaysLabel,
+            numOfDaysInput,
+          ]),
           removeMonthBtn,
           moveBtnContainer
         );
@@ -363,24 +367,29 @@ export default class CreateCalendar {
         "form",
         {},
         [
-          createElement("label", { for: "title" }, "Title"),
-          createElement("input", {
-            id: "title",
-            name: "title",
-            placeholder: "Wyrld Calendar",
-            required: true,
-          }),
+          createElement("div", { class: "input-container" }, [
+            createElement("label", { for: "title" }, "Title"),
+            createElement("input", {
+              id: "title",
+              name: "title",
+              placeholder: "Wyrld Calendar",
+              required: true,
+            }),
+          ]),
           createElement("br"),
-          createElement("label", { for: "year" }, "Current Year"),
-          createElement("input", {
-            id: "year",
-            name: "year",
-            type: "number",
-            step: "1",
-            min: "1",
-            value: "1",
-            required: true,
-          }),
+          createElement("div", { class: "input-container" }, [
+            createElement("label", { for: "year" }, "Current Year"),
+            createElement("input", {
+              id: "year",
+              name: "year",
+              type: "number",
+              step: "1",
+              min: "1",
+              value: "1",
+              required: true,
+            }),
+          ]),
+          createElement("br"),
           createElement("br"),
           createElement("button", { type: "submit" }, "Next"),
         ],

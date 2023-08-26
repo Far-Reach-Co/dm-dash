@@ -1,6 +1,5 @@
-form {
-  display: flex;
-  flex-direction: column;
+input {
+  height: 35px;
 }
 
 .special-font {
@@ -18,10 +17,13 @@ form {
 }
 
 .cp-nav-item {
+  cursor: pointer;
+  color: var(--link-blue);
   border-bottom: 2px solid var(--blue5);
 }
 
 .cp-nav-item:hover {
+  text-decoration: none;
   border-bottom: 2px solid var(--main-gray);
   color: var(--orange3);
 }
@@ -155,7 +157,7 @@ form {
   /* flex-wrap: wrap; */
   /* align-items: center; */
   justify-content: center;
-  min-width: 280px;
+  min-width: 270px;
   /* max-width: 500px; */
   height: fit-content;
   /* border: 2px solid var(--blue); */

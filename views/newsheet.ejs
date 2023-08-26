@@ -12,18 +12,23 @@
   </head>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container-fluid p-3">
+    <div class="container-fluid info-container p-3">
       <h2>Create Character Sheet</h2>
       <form hx-post="/api/add_5e_character">
-        <label for="name">Name</label>
-        <input
-          id="name"
-          name="name"
-          placeholder="Character Name"
-          required="true,"
-        />
-        <br />
-        <button type="submit">Create</button>
+        <fieldset>
+          <div class="input-container">
+            <label for="name">Name</label>
+            <input
+              id="name"
+              name="name"
+              placeholder="Character Name"
+              required="true,"
+            />
+          </div>
+          <br />
+          <br />
+          <button type="submit">Create</button>
+        </fieldset>
       </form>
     </div>
   </body>

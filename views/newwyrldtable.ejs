@@ -12,18 +12,23 @@
   </head>
   <body>
     <%- include('./partials/nav') %>
-    <div class="container-fluid p-3">
-      <h2>Create Wyrld Table</h2>
+    <div class="container-fluid info-container p-3">
+      <h1>Create Wyrld Table</h1>
       <form hx-post="/api/add_table_view_by_project/<%= projectId %>">
-        <label for="title">Title</label>
-        <input
-          id="title"
-          name="title"
-          placeholder="Table Title"
-          required="true,"
-        />
-        <br />
-        <button type="submit">Create</button>
+        <fieldset>
+          <div class="input-container">
+            <label for="title">Title</label>
+            <input
+              id="title"
+              name="title"
+              placeholder="Table Title"
+              required="true,"
+            />
+          </div>
+          <br />
+          <br />
+          <button type="submit">Create</button>
+        </fieldset>
       </form>
     </div>
   </body>

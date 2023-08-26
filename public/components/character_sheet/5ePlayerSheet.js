@@ -1850,7 +1850,7 @@ export default class FiveEPlayerSheet {
     const project = searchParams.get("project");
     if (!project || USERID == this.generalData.user_id) {
       return createElement(
-        "a",
+        "div",
         {
           class:
             this.mainView === "settings" ? "cp-nav-item-active" : "cp-nav-item",
@@ -1874,7 +1874,7 @@ export default class FiveEPlayerSheet {
     this.domComponent.append(
       createElement("div", { class: "cp-nav" }, [
         createElement(
-          "a",
+          "div",
           {
             class:
               this.mainView === "general"
@@ -1891,7 +1891,7 @@ export default class FiveEPlayerSheet {
           }
         ),
         createElement(
-          "a",
+          "div",
           {
             class:
               this.mainView === "background"
@@ -1908,7 +1908,7 @@ export default class FiveEPlayerSheet {
           }
         ),
         createElement(
-          "a",
+          "div",
           {
             class:
               this.mainView === "spells" ? "cp-nav-item-active" : "cp-nav-item",
