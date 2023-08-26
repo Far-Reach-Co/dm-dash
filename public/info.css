@@ -28,10 +28,10 @@ img {
 
 
 .inline-div h1,
-h2,
-h3,
-h4,
-a,
-p {
+.inline-div h2,
+.inline-div h3,
+.inline-div h4,
+.inline-div a,
+.inline-div p {
   display: inline-block;
 }
