@@ -14,6 +14,7 @@ const redis_1 = require("redis");
 exports.redisClient = (0, redis_1.createClient)();
 exports.redisClient.connect();
 exports.redisClient.on("error", (err) => console.log("Redis Client Error", err));
+exports.redisClient.del("users");
 function userJoin(id, username, table) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = { id, username, table };
