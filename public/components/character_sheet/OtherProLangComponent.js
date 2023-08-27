@@ -148,11 +148,10 @@ export default class OtherProLangComponent {
       createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: space-between;",
+          style: "display: flex; align-items: center;",
         },
         [
-          createElement("small", {}, "Type"),
+          createElement("small", { style: "margin-right: 85px" }, "Type"),
           createElement("small", {}, "Proficiency"),
           createElement("small", {}, ""),
         ]

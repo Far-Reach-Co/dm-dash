@@ -358,7 +358,7 @@ export default class EquipmentComponent {
           style: "display: flex; align-items: center;",
         },
         [
-          createElement("small", { style: "margin-right: 135px;" }, "Name"),
+          createElement("small", { style: "margin-right: 140px;" }, "Name"),
           createElement("small", { style: "margin-right: 10px;" }, "Quantity"),
           createElement("small", {}, "Weight"),
         ]

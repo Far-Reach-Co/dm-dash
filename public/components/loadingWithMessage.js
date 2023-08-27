@@ -11,3 +11,5 @@ export default function renderLoadingWithMessage(message) {
     [createElement("h2", {}, message), renderSpinner()]
   );
 }
+
+window.renderLoadingWithMessage = renderLoadingWithMessage;
