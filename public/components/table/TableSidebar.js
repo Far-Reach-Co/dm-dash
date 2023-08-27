@@ -8,7 +8,7 @@ import modal from "../modal.js";
 import { deleteThing, postThing } from "../../lib/apiUtils.js";
 import tableSelect from "./tableSelect.js";
 import socketIntegration from "./socketIntegration.js";
-import { uploadUserImage } from "../../lib/imageUtils.js";
+import { uploadProjectImage, uploadUserImage } from "../../lib/imageUtils.js";
 import TableSidebarFolderComponent from "./TableSidebarFolderComponent.js";
 
 export default class TableSidebar {
@@ -86,7 +86,17 @@ export default class TableSidebar {
   };
 
   uploadTableImage = async (file) => {
-    const newImage = await uploadUserImage(file, this.makeImageSmall);
+    let newImage;
+    if (this.projectId) {
+      newImage = await uploadProjectImage(
+        file,
+        this.projectId,
+        this.makeImageSmall
+      );
+    } else {
+      newImage = await uploadUserImage(file, this.makeImageSmall);
+    }
+
     if (newImage) {
       // add new table image
       if (this.projectId) {

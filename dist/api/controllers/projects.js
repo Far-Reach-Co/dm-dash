@@ -21,11 +21,19 @@ const s3_js_1 = require("./s3.js");
 const tableViews_js_1 = require("../queries/tableViews.js");
 const tableImages_js_1 = require("../queries/tableImages.js");
 const projectPlayers_js_1 = require("../queries/projectPlayers.js");
+const users_js_1 = require("../queries/users.js");
+const enums_js_1 = require("../../lib/enums.js");
 function addProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
+            const projectsByUserData = yield (0, projects_js_1.getProjectsQuery)(req.session.user);
+            if (projectsByUserData.rows.length >= 2) {
+                const userData = yield (0, users_js_1.getUserByIdQuery)(req.session.user);
+                if (!userData.rows[0].is_pro)
+                    throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
+            }
             req.body.user_id = req.session.user;
             const data = yield (0, projects_js_1.addProjectQuery)(req.body);
             yield (0, tableViews_js_1.addTableViewByProjectQuery)({

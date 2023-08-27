@@ -1,13 +1,14 @@
 import db from "../dbconfig";
 
 export interface ProjectModel {
-  id: number,
-  title: string,
-  user_id: number,
-  date_created: string,
-  used_data_in_bytes: number,
-  description: string,
-  image_id: number
+  id: number;
+  title: string;
+  user_id: number;
+  date_created: string;
+  used_data_in_bytes: number;
+  description: string;
+  image_id: number;
+  is_pro: boolean;
 }
 
 async function addProjectQuery(data: {title: string, user_id: string | number}) {

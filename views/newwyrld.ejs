@@ -9,6 +9,7 @@
     <%- include('./partials/icons') %>
     <script src="/lib/MobileNavHandler.js" defer></script>
     <script src="/lib/htmx.min.js"></script>
+    <script src="/components/renderTierLimitWarning.js" type="module"></script>
   </head>
   <body>
     <%- include('./partials/nav') %>
@@ -31,5 +32,27 @@
         </fieldset>
       </form>
     </div>
+    <!-- Toast -->
+    <div id="toast-custom"></div>
+    <!-- The Modal -->
+    <div id="modal-custom" class="modal-custom">
+      <!-- Modal content -->
+      <div class="modal-custom-container">
+        <div id="close-custom-modal" class="close-custom-modal">&times;</div>
+        <div id="modal-custom-content" class="modal-custom-content"></div>
+      </div>
+    </div>
   </body>
+  <script>
+    // handle htmx:responseError event
+    document.body.addEventListener("htmx:responseError", function (event) {
+      // event.detail contains details about the htmx request
+      var errorText = JSON.parse(event.detail.xhr.responseText).error.message; // get the response text
+      if (errorText === "USER_IS_NOT_PRO") {
+        renderTierLimitWarning(
+          'You have reached the Wyrlds limit for this account. Please subscribe to our "Pro User" package to increase the limit.'
+        );
+      }
+    });
+  </script>
 </html>
