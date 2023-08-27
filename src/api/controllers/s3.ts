@@ -177,10 +177,9 @@ async function checkProjectProLimitReachedAndAuth(
   const projectDataCount = project.used_data_in_bytes;
   const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
   if (projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
-    const userData = await getUserByIdQuery(project.user_id);
-    const projectUser = userData.rows[0];
-    if (!projectUser.is_pro)
-      throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+    if (!project.is_pro) {
+      throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+    }
   }
 }
 
@@ -324,7 +323,7 @@ async function newImageForUser(
 
   try {
     if (!req.session.user) throw new Error("User is not logged in");
-    // check project data usage and pro account status
+    // check user data usage and pro account status
     await checkUserProLimitReachedAndAuth(req.session.user);
 
     const params = computeAwsImageParamsFromRequest(req, filePath);
@@ -376,10 +375,10 @@ async function newImageForUser(
   unlinkSync(filePath);
 
   try {
-    // prepare to update project data usage
+    // prepare to update user data usage
     let dataUsageCount = 0;
     dataUsageCount += image.size;
-    // update project data usage
+    // update user data usage
     const userData = await getUserByIdQuery(req.session.user);
     const user = userData.rows[0];
     const newCalculatedData = user.used_data_in_bytes + dataUsageCount;

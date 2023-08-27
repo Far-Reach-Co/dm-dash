@@ -6,7 +6,7 @@ export default function renderTierLimitWarning(message) {
     createElement("div", { class: "modal-pro-warning-container" }, [
       createElement("h2", {}, "Limited Feature"),
       createElement("hr", { style: "margin-top: 0px;" }),
-      createElement("div", {}, message),
+      createElement("div", { style: "max-width: 300px;" }, message),
       createElement("br"),
       createElement("div", {}, "Thank you."),
       createElement("br"),
@@ -14,3 +14,5 @@ export default function renderTierLimitWarning(message) {
     ])
   );
 }
+
+window.renderTierLimitWarning = renderTierLimitWarning;

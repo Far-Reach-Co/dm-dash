@@ -26,7 +26,6 @@ export async function getPresignedUrlsForImages(imageIds) {
 export async function uploadProjectImage(
   image,
   currentProjectId,
-  currentImageId,
   makeImageSmall
 ) {
   try {
@@ -35,7 +34,6 @@ export async function uploadProjectImage(
     formData.append("bucket_name", "wyrld");
     formData.append("folder_name", "images");
     formData.append("project_id", currentProjectId);
-    if (currentImageId) formData.append("current_file_id", currentImageId);
     if (makeImageSmall) formData.append("make_image_small", makeImageSmall);
 
     const res = await fetch(`${window.origin}/api/new_image_for_project`, {
@@ -44,10 +42,10 @@ export async function uploadProjectImage(
     });
     const data = await res.json();
 
-    // warn about data usage and pro subscription
-    if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
+    // warn about data usage for poject
+    if (res.status === 402 && data.error.message === "PROJECT_IS_NOT_PRO") {
       renderTierLimitWarning(
-        'You have reached the image data limit for this project. Please subscribe to our "Pro" package to increase the limit.'
+        'You have reached the image data limit for this project. Please subscribe to our "Pro Wyrld" package to increase the limit.'
       );
       return null;
     }
@@ -75,10 +73,10 @@ export async function uploadUserImage(image, makeImageSmall) {
     });
     const data = await res.json();
 
-    // warn about data usage and pro subscription
+    // warn about data usage for user
     if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
       renderTierLimitWarning(
-        'You have reached the image data limit for this account. Please subscribe to our "Pro" package to increase the limit.'
+        'You have reached the image data limit for this account. Please subscribe to our "Pro User" package to increase the limit.'
       );
       return null;
     }

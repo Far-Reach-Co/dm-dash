@@ -36,12 +36,20 @@ import {
   getProjectPlayersByProjectQuery,
   removeProjectPlayerQuery,
 } from "../queries/projectPlayers.js";
+import { getUserByIdQuery } from "../queries/users.js";
+import { userSubscriptionStatus } from "../../lib/enums.js";
 
 async function addProject(req: Request, res: Response, next: NextFunction) {
   try {
-    // check if user is pro
     if (!req.session.user) throw new Error("User is not logged in");
+    // check if user is pro, hard limit project creation to 2
+    const projectsByUserData = await getProjectsQuery(req.session.user);
 
+    if (projectsByUserData.rows.length >= 2) {
+      const userData = await getUserByIdQuery(req.session.user);
+      if (!userData.rows[0].is_pro)
+        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+    }
     req.body.user_id = req.session.user;
     const data = await addProjectQuery(req.body);
     // add first project table view

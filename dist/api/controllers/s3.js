@@ -105,10 +105,9 @@ function checkProjectProLimitReachedAndAuth(projectId, sessionUser) {
         const projectDataCount = project.used_data_in_bytes;
         const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
         if (projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
-            const userData = yield (0, users_js_1.getUserByIdQuery)(project.user_id);
-            const projectUser = userData.rows[0];
-            if (!projectUser.is_pro)
-                throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
+            if (!project.is_pro) {
+                throw { status: 402, message: enums_js_1.userSubscriptionStatus.projectIsNotPro };
+            }
         }
     });
 }
