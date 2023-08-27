@@ -9,6 +9,7 @@
     <script src="/lib/MobileNavHandler.js" defer></script>
     <script type="module" src="/components/Calendar.js" defer></script>
     <script src="/components/modal.js" type="module"></script>
+    <script type="module" src="/components/loadingWithMessage.js"></script>
     <%- include('./partials/icons') %>
   </head>
   <style>
@@ -151,6 +152,7 @@
     const projectAuth = <%= projectAuth %>;
 
     async function openCalendar(id) {
+      modal.show(renderLoadingWithMessage(""));
       const res = await fetch(`/api/get_calendar/${id}`)
       if (res.status === 200) {
         const calendar = await res.json();
@@ -173,7 +175,7 @@
           // show in modal
           modal.show(elem)
         }
-      }
+      } else modal.hide()
     }
   </script>
 </html>

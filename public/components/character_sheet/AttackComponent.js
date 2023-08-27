@@ -187,10 +187,10 @@ export default class AttackComponent {
           style: "display: flex; align-items: center;",
         },
         [
-          createElement("small", { style: "margin-right: 115px;" }, "Name"),
-          createElement("small", { style: "margin-right: 32px;" }, "Range"),
-          createElement("small", { style: "margin-right: 18px;" }, "Duration"),
-          createElement("small", { style: "margin-right: 30px;" }, "ATK Bonus"),
+          createElement("small", { style: "margin-right: 140px;" }, "Name"),
+          createElement("small", { style: "margin-right: 29px;" }, "Range"),
+          createElement("small", { style: "margin-right: 12px;" }, "Duration"),
+          createElement("small", { style: "margin-right: 16px;" }, "ATK Bonus"),
           createElement("small", {}, "Damage/Type"),
         ]
       ),
