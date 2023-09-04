@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.characterSheetBotCommandResponse = void 0;
+exports.characterSheetBotMessageResponse = exports.characterSheetBotCommandResponse = void 0;
 const discord_interactions_1 = require("discord-interactions");
 const socketUsers_1 = require("../../lib/socketUsers");
 const url_1 = require("url");
@@ -23,7 +23,6 @@ const _5eCharEquipment_1 = require("../queries/5eCharEquipment");
 const _5eCharAttacks_1 = require("../queries/5eCharAttacks");
 const _5eCharFeats_1 = require("../queries/5eCharFeats");
 const _5eCharBack_1 = require("../queries/5eCharBack");
-const utils_1 = require("../../lib/utils");
 const _5eCharSpells_1 = require("../queries/5eCharSpells");
 function handleListCommand(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -245,26 +244,37 @@ function handleGetFeatsResponse(charGeneralId, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const featsData = yield (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(charGeneralId);
-            let totalCharCount = 0;
-            const embeds = [];
-            for (const feat of featsData.rows) {
-                if (feat.title && feat.title.length)
-                    totalCharCount += feat.title.length;
-                if (feat.description && feat.description.length)
-                    totalCharCount += feat.description.length;
-                if (totalCharCount > 6000 || embeds.length >= 10) {
-                    break;
-                }
-                embeds.push({
-                    title: feat.title,
-                    description: feat.description,
+            if (featsData.rows.length === 0) {
+                return res.send({
+                    type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                    data: {
+                        content: "Can't find anything",
+                    },
+                });
+            }
+            const optionsList = [];
+            for (var feat of featsData.rows) {
+                optionsList.push({
+                    label: feat.title,
+                    value: feat.id,
                 });
             }
             return res.send({
                 type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                 data: {
-                    content: "**Feats & Traits**",
-                    embeds,
+                    content: "Select a feat/trait from the list",
+                    components: [
+                        {
+                            type: discord_interactions_1.MessageComponentTypes.ACTION_ROW,
+                            components: [
+                                {
+                                    type: discord_interactions_1.MessageComponentTypes.STRING_SELECT,
+                                    custom_id: "select_feat",
+                                    options: optionsList,
+                                },
+                            ],
+                        },
+                    ],
                 },
             });
         }
@@ -655,39 +665,38 @@ function handleSpellsCommand(req, res) {
                 const correctedIndex = parseInt(characterSheetIndex) - 1;
                 if (jsonRedisData[correctedIndex]) {
                     const charGeneralId = jsonRedisData[correctedIndex];
-                    const spellInfoData = yield (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfosByGeneralQuery)(charGeneralId);
-                    const spellInfo = spellInfoData.rows[0];
                     const spellsData = yield (0, _5eCharSpells_1.get5eCharSpellsByTypeQuery)(charGeneralId, (0, _5eCharUtils_1.getSpellQueryTitleByOption)(detailsOptionSelect));
-                    let totalCharCount = 0;
-                    const embeds = [];
+                    if (spellsData.rows.length === 0) {
+                        return res.send({
+                            type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+                            data: {
+                                content: "Can't find anything",
+                            },
+                        });
+                    }
+                    const optionsList = [];
                     for (var spell of spellsData.rows) {
-                        let description = "";
-                        if (detailsOptionSelect !== "cantrips") {
-                            description += `\n**Spell Slots:** ${(0, _5eCharUtils_1.getSpellSlotExpendedByOption)(detailsOptionSelect, spellInfo)} / ${(0, _5eCharUtils_1.getSpellSlotTotalByOption)(detailsOptionSelect, spellInfo)}`;
-                        }
-                        description += `\n**Casting Time:** ${spell.casting_time}`;
-                        description += `\n**Duration:** ${spell.duration}`;
-                        description += `\n**Range:** ${spell.range}`;
-                        description += `\n**Damage Type:** ${spell.damage_type}`;
-                        description += `\n**Components:** ${spell.components}`;
-                        description += `\n**Description:** ${spell.description}`;
-                        if (spell.title && spell.title.length)
-                            totalCharCount += spell.title.length;
-                        if (spell.description && spell.description.length)
-                            totalCharCount += spell.description.length;
-                        if (totalCharCount > 6000 || embeds.length >= 10) {
-                            break;
-                        }
-                        embeds.push({
-                            title: spell.title,
-                            description,
+                        optionsList.push({
+                            label: spell.title,
+                            value: spell.id,
                         });
                     }
                     return res.send({
                         type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
-                            content: `**${(0, utils_1.toTitleCase)(detailsOptionSelect.replace("-", " "))}**`,
-                            embeds,
+                            content: "Select a spell from the list",
+                            components: [
+                                {
+                                    type: discord_interactions_1.MessageComponentTypes.ACTION_ROW,
+                                    components: [
+                                        {
+                                            type: discord_interactions_1.MessageComponentTypes.STRING_SELECT,
+                                            custom_id: "select_spell",
+                                            options: optionsList,
+                                        },
+                                    ],
+                                },
+                            ],
                         },
                     });
                 }
@@ -738,3 +747,56 @@ function characterSheetBotCommandResponse(req, res) {
     });
 }
 exports.characterSheetBotCommandResponse = characterSheetBotCommandResponse;
+function handleSelectFeatResponse(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const featData = yield (0, _5eCharFeats_1.get5eCharFeatQuery)(req.body.data.values[0]);
+        const feat = featData.rows[0];
+        let content = "";
+        content += `**${feat.title}**`;
+        content += `\n**Type:** ${feat.type}\n`;
+        content += feat.description;
+        return res.send({
+            type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+                content,
+            },
+        });
+    });
+}
+function handleSelectSpellResponse(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const spellData = yield (0, _5eCharSpells_1.get5eCharSpellQuery)(req.body.data.values[0]);
+        const spell = spellData.rows[0];
+        let content = "";
+        content += `\n**Casting Time:** ${spell.casting_time}`;
+        content += `\n**Duration:** ${spell.duration}`;
+        content += `\n**Range:** ${spell.range}`;
+        content += `\n**Damage Type:** ${spell.damage_type}`;
+        content += `\n**Components:** ${spell.components}`;
+        content += `\n**Description:** ${spell.description}`;
+        return res.send({
+            type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+                content,
+            },
+        });
+    });
+}
+function characterSheetBotMessageResponse(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            switch (req.body.data.custom_id) {
+                case "select_feat":
+                    return handleSelectFeatResponse(req, res);
+                case "select_spell":
+                    return handleSelectSpellResponse(req, res);
+                default:
+                    throw { message: "Missing custom ID" };
+            }
+        }
+        catch (err) {
+            throw err;
+        }
+    });
+}
+exports.characterSheetBotMessageResponse = characterSheetBotMessageResponse;

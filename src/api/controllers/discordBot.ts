@@ -2,7 +2,10 @@ import { DiscordRequest } from "../../lib/discordUtils";
 import discordCommands from "../../lib/discordCommands";
 import { InteractionType, InteractionResponseType } from "discord-interactions";
 import { Request, Response, NextFunction } from "express";
-import { characterSheetBotCommandResponse } from "./botChar";
+import {
+  characterSheetBotCommandResponse,
+  characterSheetBotMessageResponse,
+} from "./botChar";
 
 const appId = process.env.BOT_APP_ID;
 const globalEndpoint = `applications/${appId}/commands`;
@@ -105,6 +108,10 @@ async function interactionsController(
         default:
           throw { message: "Missing command name" };
       }
+    }
+    // Handle message component responses
+    if (type === InteractionType.MESSAGE_COMPONENT) {
+      return characterSheetBotMessageResponse(req, res);
     } else return;
   } catch (err) {
     console.log(err);
