@@ -1,4 +1,7 @@
-import { InteractionResponseType } from "discord-interactions";
+import {
+  InteractionResponseType,
+  MessageComponentTypes,
+} from "discord-interactions";
 import { Request, Response } from "express";
 import { redisClient } from "../../lib/socketUsers";
 import { URL } from "url";
@@ -27,10 +30,16 @@ import {
 import { get5eCharOtherProLangsByGeneralQuery } from "../queries/5eCharOtherProLang";
 import { get5eCharEquipmentsByGeneralQuery } from "../queries/5eCharEquipment";
 import { get5eCharAttacksByGeneralQuery } from "../queries/5eCharAttacks";
-import { get5eCharFeatsByGeneralQuery } from "../queries/5eCharFeats";
+import {
+  get5eCharFeatQuery,
+  get5eCharFeatsByGeneralQuery,
+} from "../queries/5eCharFeats";
 import { get5eCharBackByGeneralQuery } from "../queries/5eCharBack";
 import { toTitleCase } from "../../lib/utils";
-import { get5eCharSpellsByTypeQuery } from "../queries/5eCharSpells";
+import {
+  get5eCharSpellQuery,
+  get5eCharSpellsByTypeQuery,
+} from "../queries/5eCharSpells";
 
 async function handleListCommand(req: Request, res: Response) {
   try {
@@ -292,30 +301,39 @@ async function handleGetFeatsResponse(
 ) {
   try {
     const featsData = await get5eCharFeatsByGeneralQuery(charGeneralId);
-    let totalCharCount = 0;
-    const embeds: any[] = [];
-    for (const feat of featsData.rows) {
-      // add to total char count for limit
-      if (feat.title && feat.title.length) totalCharCount += feat.title.length;
-      if (feat.description && feat.description.length)
-        totalCharCount += feat.description.length;
+    if (featsData.rows.length === 0) {
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          content: "Can't find anything",
+        },
+      });
+    }
 
-      if (totalCharCount > 6000 || embeds.length >= 10) {
-        // discord limit for embeds
-        break;
-      }
-
-      embeds.push({
-        title: feat.title,
-        description: feat.description,
+    const optionsList: { label: string; value: number }[] = [];
+    for (var feat of featsData.rows) {
+      optionsList.push({
+        label: feat.title,
+        value: feat.id,
       });
     }
 
     return res.send({
       type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
       data: {
-        content: "**Feats & Traits**",
-        embeds,
+        content: "Select a feat/trait from the list",
+        components: [
+          {
+            type: MessageComponentTypes.ACTION_ROW,
+            components: [
+              {
+                type: MessageComponentTypes.STRING_SELECT,
+                custom_id: "select_feat",
+                options: optionsList,
+              },
+            ],
+          },
+        ],
       },
     });
   } catch (err) {
@@ -833,56 +851,44 @@ async function handleSpellsCommand(req: Request, res: Response) {
       const correctedIndex = parseInt(characterSheetIndex) - 1;
       if (jsonRedisData[correctedIndex]) {
         const charGeneralId = jsonRedisData[correctedIndex];
-        const spellInfoData = await get5eCharSpellSlotInfosByGeneralQuery(
-          charGeneralId
-        );
-        const spellInfo = spellInfoData.rows[0];
         const spellsData = await get5eCharSpellsByTypeQuery(
           charGeneralId,
           getSpellQueryTitleByOption(detailsOptionSelect)
         );
 
-        let totalCharCount = 0;
-        const embeds: any[] = [];
+        if (spellsData.rows.length === 0) {
+          return res.send({
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: {
+              content: "Can't find anything",
+            },
+          });
+        }
+
+        const optionsList: { label: string; value: number }[] = [];
         for (var spell of spellsData.rows) {
-          let description = "";
-          if (detailsOptionSelect !== "cantrips") {
-            description += `\n**Spell Slots:** ${getSpellSlotExpendedByOption(
-              detailsOptionSelect,
-              spellInfo
-            )} / ${getSpellSlotTotalByOption(detailsOptionSelect, spellInfo)}`;
-          }
-          description += `\n**Casting Time:** ${spell.casting_time}`;
-          description += `\n**Duration:** ${spell.duration}`;
-          description += `\n**Range:** ${spell.range}`;
-          description += `\n**Damage Type:** ${spell.damage_type}`;
-          description += `\n**Components:** ${spell.components}`;
-          description += `\n**Description:** ${spell.description}`;
-
-          // add to total char count for limit
-          if (spell.title && spell.title.length)
-            totalCharCount += spell.title.length;
-          if (spell.description && spell.description.length)
-            totalCharCount += spell.description.length;
-
-          if (totalCharCount > 6000 || embeds.length >= 10) {
-            // discord limit
-            break;
-          }
-
-          embeds.push({
-            title: spell.title,
-            description,
+          optionsList.push({
+            label: spell.title,
+            value: spell.id,
           });
         }
 
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: `**${toTitleCase(
-              detailsOptionSelect.replace("-", " ")
-            )}**`,
-            embeds,
+            content: "Select a spell from the list",
+            components: [
+              {
+                type: MessageComponentTypes.ACTION_ROW,
+                components: [
+                  {
+                    type: MessageComponentTypes.STRING_SELECT,
+                    custom_id: "select_spell",
+                    options: optionsList,
+                  },
+                ],
+              },
+            ],
           },
         });
       } else {
@@ -928,4 +934,57 @@ async function characterSheetBotCommandResponse(req: Request, res: Response) {
   }
 }
 
-export { characterSheetBotCommandResponse };
+async function handleSelectFeatResponse(req: Request, res: Response) {
+  const featData = await get5eCharFeatQuery(req.body.data.values[0]);
+  const feat = featData.rows[0];
+
+  let content = "";
+  content += `**${feat.title}**`;
+  content += `\n**Type:** ${feat.type}\n`;
+  content += feat.description;
+
+  return res.send({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: {
+      content,
+    },
+  });
+}
+
+async function handleSelectSpellResponse(req: Request, res: Response) {
+  const spellData = await get5eCharSpellQuery(req.body.data.values[0]);
+  const spell = spellData.rows[0];
+
+  let content = "";
+
+  content += `\n**Casting Time:** ${spell.casting_time}`;
+  content += `\n**Duration:** ${spell.duration}`;
+  content += `\n**Range:** ${spell.range}`;
+  content += `\n**Damage Type:** ${spell.damage_type}`;
+  content += `\n**Components:** ${spell.components}`;
+  content += `\n**Description:** ${spell.description}`;
+
+  return res.send({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: {
+      content,
+    },
+  });
+}
+
+async function characterSheetBotMessageResponse(req: Request, res: Response) {
+  try {
+    switch (req.body.data.custom_id) {
+      case "select_feat":
+        return handleSelectFeatResponse(req, res);
+      case "select_spell":
+        return handleSelectSpellResponse(req, res);
+      default:
+        throw { message: "Missing custom ID" };
+    }
+  } catch (err) {
+    throw err;
+  }
+}
+
+export { characterSheetBotCommandResponse, characterSheetBotMessageResponse };

@@ -94,6 +94,9 @@ function interactionsController(req, res, next) {
                         throw { message: "Missing command name" };
                 }
             }
+            if (type === discord_interactions_1.InteractionType.MESSAGE_COMPONENT) {
+                return (0, botChar_1.characterSheetBotMessageResponse)(req, res);
+            }
             else
                 return;
         }
