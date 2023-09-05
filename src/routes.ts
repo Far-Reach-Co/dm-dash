@@ -137,6 +137,30 @@ router.get(
 );
 
 router.get(
+  "/privacy-policy",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      //
+      res.render("privacypolicy", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/terms-of-use",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      //
+      res.render("termsofuse", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
   "/invite",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
