@@ -162,8 +162,8 @@ export default async function discordCommands(slashCommandName: string) {
             type: 1,
             options: [
               {
-                name: "name",
-                description: "Type the name to remove from the tracker",
+                name: "id",
+                description: "The ID of the character sheet to be removed",
                 type: 3,
                 required: true,
               },
