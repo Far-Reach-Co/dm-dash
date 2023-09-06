@@ -175,13 +175,16 @@ async function handleRemoveCommand(req: Request, res: Response) {
     if (redisData) {
       const jsonRedisData = JSON.parse(redisData);
       const correctedIndex = parseInt(characterSheetIndex) - 1;
+
       if (jsonRedisData[correctedIndex]) {
-        const newData = jsonRedisData.splice(correctedIndex, 1);
+        jsonRedisData.splice(correctedIndex, 1);
+
         await redisClient.hSet(
           "bot_character_sheets",
           discordUserId,
-          JSON.stringify(newData)
+          JSON.stringify(jsonRedisData)
         );
+
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
@@ -736,20 +739,23 @@ async function handleGetGeneralInfoResponse(
       proficiencies.perception,
       charGeneral.level
     )}`;
-    content += `\n**Spell Save DC:** ${calculateSpellSaveDC(
-      getAbilityScoreFromSpellCastingAbilityOrNull(
-        spellInfo.spell_casting_ability,
-        charGeneral
-      ),
-      charGeneral.level
-    )}`;
-    content += `\n**Spell Attack Bonus:** ${calculateSpellAttackBonus(
-      getAbilityScoreFromSpellCastingAbilityOrNull(
-        spellInfo.spell_casting_ability,
-        charGeneral
-      ),
-      charGeneral.level
-    )}`;
+    if (spellInfo && spellInfo.spell_casting_ability) {
+      content += `\n**Spell Save DC:** ${calculateSpellSaveDC(
+        getAbilityScoreFromSpellCastingAbilityOrNull(
+          spellInfo.spell_casting_ability,
+          charGeneral
+        ),
+        charGeneral.level
+      )}`;
+
+      content += `\n**Spell Attack Bonus:** ${calculateSpellAttackBonus(
+        getAbilityScoreFromSpellCastingAbilityOrNull(
+          spellInfo.spell_casting_ability,
+          charGeneral
+        ),
+        charGeneral.level
+      )}`;
+    }
     if (
       charGeneral.class_resource &&
       charGeneral.class_resource_total &&

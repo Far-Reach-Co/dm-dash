@@ -161,6 +161,18 @@ router.get(
 );
 
 router.get(
+  "/aether-bot",
+  (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      //
+      res.render("aetherbot");
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
   "/invite",
   async (req: Request, res: Response, next: NextFunction) => {
     try {

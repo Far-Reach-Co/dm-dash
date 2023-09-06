@@ -134,8 +134,8 @@ function handleRemoveCommand(req, res) {
                 const jsonRedisData = JSON.parse(redisData);
                 const correctedIndex = parseInt(characterSheetIndex) - 1;
                 if (jsonRedisData[correctedIndex]) {
-                    const newData = jsonRedisData.splice(correctedIndex, 1);
-                    yield socketUsers_1.redisClient.hSet("bot_character_sheets", discordUserId, JSON.stringify(newData));
+                    jsonRedisData.splice(correctedIndex, 1);
+                    yield socketUsers_1.redisClient.hSet("bot_character_sheets", discordUserId, JSON.stringify(jsonRedisData));
                     return res.send({
                         type: discord_interactions_1.InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
                         data: {
@@ -569,8 +569,10 @@ function handleGetGeneralInfoResponse(charGeneralId, res) {
             content += `\n**CHA:** ${charGeneral.charisma} (${(0, _5eCharUtils_1.calculateAbilityScoreModifier)(charGeneral.charisma)})`;
             content += `\n**Proficiency Bonus:** ${(0, _5eCharUtils_1.calculateProBonus)(charGeneral.level)}`;
             content += `\n**Passive Perception:** ${(0, _5eCharUtils_1.calculatePassivePerception)(charGeneral.wisdom, charGeneral.wisdom_mod, proficiencies.perception, charGeneral.level)}`;
-            content += `\n**Spell Save DC:** ${(0, _5eCharUtils_1.calculateSpellSaveDC)((0, _5eCharUtils_1.getAbilityScoreFromSpellCastingAbilityOrNull)(spellInfo.spell_casting_ability, charGeneral), charGeneral.level)}`;
-            content += `\n**Spell Attack Bonus:** ${(0, _5eCharUtils_1.calculateSpellAttackBonus)((0, _5eCharUtils_1.getAbilityScoreFromSpellCastingAbilityOrNull)(spellInfo.spell_casting_ability, charGeneral), charGeneral.level)}`;
+            if (spellInfo && spellInfo.spell_casting_ability) {
+                content += `\n**Spell Save DC:** ${(0, _5eCharUtils_1.calculateSpellSaveDC)((0, _5eCharUtils_1.getAbilityScoreFromSpellCastingAbilityOrNull)(spellInfo.spell_casting_ability, charGeneral), charGeneral.level)}`;
+                content += `\n**Spell Attack Bonus:** ${(0, _5eCharUtils_1.calculateSpellAttackBonus)((0, _5eCharUtils_1.getAbilityScoreFromSpellCastingAbilityOrNull)(spellInfo.spell_casting_ability, charGeneral), charGeneral.level)}`;
+            }
             if (charGeneral.class_resource &&
                 charGeneral.class_resource_total &&
                 charGeneral.class_resource_title) {

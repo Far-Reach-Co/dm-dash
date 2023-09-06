@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aether FRC Discord Bot</title>
+    <meta name="description" content="The Official Far Reach Co. Discord Bot" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Aether FRC Discord Bot" />
+    <meta
+      property="og:description"
+      content="The Official Far Reach Co. Discord Bot"
+    />
+    <meta
+      property="og:image"
+      content="https://farreachco.com/assets/token_dragon_purple1.png"
+    />
+    <meta property="og:url" content="https://farreachco.com/aether-bot" />
+    <meta property="og:site_name" content="Aether FRC Discord Bot" />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="./assets/favicons/aetherfav.ico"
+      sizes="16x16"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="./assets/favicons/aetherfav.ico"
+      sizes="32x32"
+    />
+
+    <link rel="stylesheet" href="./aetherbot.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <img
+          src="./assets/token_dragon_purple1.png"
+          alt=""
+          width="100px"
+          height="100px"
+        />
+        <h1 style="margin-left: 10px; color: rgb(229, 201, 247)">Aether</h1>
+      </header>
+      <main>
+        <h3 class="tagline">The Official Far Reach Co. Discord Bot</h3>
+        <br />
+        <article>
+          <p class="indented">
+            This bot is designed to integrate with the FRC character sheet
+            system. It provides an interface to register your sheets and view
+            different resources from those sheets within a discord channel. We
+            intend to include more functionality to allow users to update
+            specific resources as needed, please stay up to date by joining us
+            on discord.
+          </p>
+        </article>
+        <br />
+        <div class="invite-btn-container">
+          <div class="invite-btn" onclick="handleInvite()">
+            <h3>Invite</h3>
+          </div>
+        </div>
+        <article>
+          <h2><u>Commands</u></h2>
+          <!-- /cs add -->
+          <h3>
+            <code
+              ><div class="command" id="command-csadd">
+                /cs add &lt;link&gt;
+              </div></code
+            >
+          </h3>
+          <div class="ml-p">
+            <div>
+              Adds a character sheet to the discord user's registry via an FRC
+              character sheet invite link.
+            </div>
+            <ul>
+              <li>
+                <code>[link]</code>: The invite link produced in the settings
+                section of a character sheet.
+              </li>
+            </ul>
+          </div>
+
+          <!-- /cs remove -->
+          <h3>
+            <code
+              ><div class="command" id="command-csremove">
+                /cs remove &lt;id&gt;
+              </div></code
+            >
+          </h3>
+          <div class="ml-p">
+            <div>
+              Removes an entry from the discord user's character sheet registry
+              by ID.
+            </div>
+            <ul>
+              <li>
+                <code>[id]</code>: The ID of the character sheet to be removed.
+              </li>
+            </ul>
+          </div>
+          <br />
+          <!-- /cs list -->
+          <h3>
+            <code><div class="command" id="command-cslist">/cs list</div></code>
+          </h3>
+          <div class="ml-p">
+            <div>
+              Displays the character sheet registry specific to the discord
+              user, including the ID's associated with each entry.
+            </div>
+          </div>
+          <br />
+          <h3>Output Format</h3>
+          <div class="ml-p">
+            <p><strong>Example:</strong></p>
+            <blockquote class="ml-p">
+              ID: 1 Tarkik the Wise;<br />
+              ID: 2 Selon of Sheldrein;<br />
+              ID: 3 Barn Forgoer;<br />
+            </blockquote>
+          </div>
+          <br />
+          <!-- /cs get -->
+          <h3>
+            <code
+              ><div class="command" id="command-csget">
+                /cs get &lt;id&gt; &lt;details&gt;
+              </div></code
+            >
+          </h3>
+          <div class="ml-p">
+            <div>Shows specific details of your character sheet.</div>
+            <ul>
+              <li>
+                <code>[id]</code>: The ID of the character sheet to access.
+              </li>
+              <li>
+                <code>[details]</code>: Choose the info you would like to view
+                (e.g., General Info, Skills).
+              </li>
+            </ul>
+          </div>
+          <br />
+          <!-- /cs spells -->
+          <h3>
+            <code
+              ><div class="command" id="command-csspells">
+                /cs spells &lt;id&gt; &lt;type&gt;
+              </div></code
+            >
+          </h3>
+          <div class="ml-p">
+            <div>Shows a list of spells from your character sheet.</div>
+            <ul>
+              <li>
+                <code>[id]</code>: The ID of the character sheet to access.
+              </li>
+              <li>
+                <code>[type]</code>: The type of spells to display (e.g.,
+                Cantrips, First Level).
+              </li>
+            </ul>
+          </div>
+        </article>
+      </main>
+    </div>
+  </body>
+  <script>
+    function handleInvite() {
+      window
+        .open(
+          "https://discord.com/api/oauth2/authorize?client_id=1143982439635628062&permissions=277025520640&scope=bot",
+          "_blank"
+        )
+        .focus();
+    }
+    // Event listener for tag hrefs
+    var tags = document.querySelectorAll(".command");
+    tags.forEach(function (tags) {
+      // add click listeneres for href
+      tags.addEventListener("click", function (e) {
+        if (e.target === tags) {
+          // Ensure we're clicking on the tags itself
+          location.hash = tags.getAttribute("id");
+          copyToClipboard(window.location.href);
+        }
+      });
+    });
+
+    // copy
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(
+        function () {
+          console.log("Copying to clipboard was successful!");
+        },
+        function (err) {
+          console.error("Could not copy text: ", err);
+        }
+      );
+    }
+  </script>
+</html>

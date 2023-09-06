@@ -33,8 +33,6 @@ const csrf = require("csurf");
 const csrfMiddleware = csrf();
 var router = (0, express_1.Router)();
 router.get("/bot/get_all_commands", discordBot_js_1.getCommands);
-router.get("/bot/create_command", discordBot_js_1.createCommands);
-router.get("/bot/delete_command/:id", discordBot_js_1.deleteCommand);
 router.post("/bot/interactions", (0, express_1.raw)({ type: "application/json" }), (0, discord_interactions_1.verifyKeyMiddleware)(process.env.BOT_PUBLIC_KEY), discordBot_js_1.interactionsController);
 router.get("/get_image/:id", s3_js_1.getImage);
 router.post("/signed_URL_download_multi", s3_js_1.getSignedUrlsForDownloads);

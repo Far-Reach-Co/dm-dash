@@ -112,6 +112,14 @@ router.get("/terms-of-use", (req, res, next) => {
         next(err);
     }
 });
+router.get("/aether-bot", (_req, res, next) => {
+    try {
+        res.render("aetherbot");
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/invite", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!req.session.user)
