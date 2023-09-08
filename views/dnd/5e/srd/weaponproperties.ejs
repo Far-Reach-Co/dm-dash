@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Weapon Properties | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Weapon Properties</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Weapon Properties</h2>
+      <ul>
+        <% data.forEach(function(prop){ %>
+        <li>
+          <a href="#<%= prop.index %>"><%= prop.name %></a>
+        </li>
+        <% }); %>
+      </ul>
+      <br />
+      <% data.forEach(function(prop){ %>
+      <div class="inline-div" id="<%= prop.index %>">
+        <h3><%= prop.name %></h3>
+      </div>
+      <div class="indent">
+        <% prop.desc.forEach((str, index) => { %>
+        <p><%= str %></p>
+        <% }) %>
+      </div>
+      <br />
+      <% }); %>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>

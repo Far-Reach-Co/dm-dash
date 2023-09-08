@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Alignments | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Alignments</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Alignments</h2>
+      <ul>
+        <% data.forEach(function(alignment){ %>
+        <li>
+          <a href="#<%= alignment.index %>"><%= alignment.name %></a>
+        </li>
+        <% }); %>
+      </ul>
+      <br />
+      <% data.forEach(function(alignment){ %>
+      <div class="inline-div" id="<%= alignment.index %>">
+        <h3><%= alignment.name %></h3>
+        <div style="color: var(--bright-white)">
+          [<%= alignment.abbreviation %>]
+        </div>
+      </div>
+      <div class="indent">
+        <p><%= alignment.desc %></p>
+        <br />
+      </div>
+      <br />
+      <% }); %>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>

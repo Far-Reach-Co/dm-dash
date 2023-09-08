@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Equipment | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Equipment</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Equipment</h2>
+      <h3>Categories</h3>
+      <ul>
+        <% categoryData.forEach((cat) => { %>
+        <li><a href="#<%= cat.index %>"><%= cat.name %></a></li>
+        <% }); %>
+      </ul>
+      <hr />
+      <% categoryData.forEach((cat) => { %>
+      <div id="<%= cat.index %>">
+        <h4><%= cat.name %></h4>
+        <ul>
+          <% cat.equipment.forEach((item) => { %>
+          <li><a href="#<%= item.index %>"><%= item.name %></a></li>
+          <% }); %>
+        </ul>
+      </div>
+      <% }); %>
+      <hr />
+      <!-- equipment -->
+      <% equipmentData.forEach((equip) => { %>
+      <div class="inline-div" id="<%= equip.index %>">
+        <h3><%= equip.name %></h3>
+        <small>
+          <% if (equip.category_range) { %> - <%= equip.category_range %> <% }%>
+          <% if (equip.armor_category) { %> - <%= equip.armor_category %> <% }%>
+          <% if (equip.gear_category) { %> - <%= equip.gear_category.name %> <%
+          }%>
+        </small>
+      </div>
+      <div class="indent">
+        <% if (equip.range) { %>
+        <div class="inline-div">
+          <h4>Range:</h4>
+          <p>
+            Normal: <%= equip.range.normal %>; Long: <%= equip.range.long %>
+          </p>
+        </div>
+        <% } %> <% if (equip.throw_range) { %>
+        <div class="inline-div">
+          <h4>Throw Range:</h4>
+          <p>
+            Normal: <%= equip.throw_rangenormal %>; Long: <%=
+            equip.throw_range.long %>
+          </p>
+        </div>
+        <% } %> <% if (equip.damage) { %>
+        <h4>Damage:</h4>
+        <div class="indent">
+          <div class="inline-div">
+            <h4>Dice:</h4>
+            <p><%= equip.damage.damage_dice %></p>
+          </div>
+          <div class="inline-div">
+            <h4>Type:</h4>
+            <a
+              href="/dnd/5e/srd/damage-types#<%= equip.damage.damage_type.index %>"
+              ><%= equip.damage.damage_type.name %></a
+            >
+          </div>
+        </div>
+        <% } %> <% if (equip.two_handed_damage) { %>
+        <h4>Two Handed Damage:</h4>
+        <div class="indent">
+          <div class="inline-div">
+            <h4>Dice:</h4>
+            <p><%= equip.two_handed_damage.damage_dice %></p>
+          </div>
+          <div class="inline-div">
+            <h4>Type:</h4>
+            <a
+              href="/dnd/5e/srd/damage-types#<%= equip.two_handed_damage.damage_type.index %>"
+              ><%= equip.two_handed_damage.damage_type.name %></a
+            >
+          </div>
+        </div>
+        <% } %> <% if (equip.armor_class) { %>
+        <h4>Armor Class:</h4>
+        <% Object.entries(equip.armor_class).forEach((x) => { %>
+        <div class="indent">
+          <p><%= x[0] %>: <%= x[1] %></p>
+        </div>
+        <% }) %> <% } %> <% if (equip.str_minimum) { %>
+        <div class="inline-div">
+          <h4>Strength Minimum:</h4>
+          <p><%= equip.str_minimum %></p>
+        </div>
+        <% } %> <% if (equip.stealth_disadvantage) { %>
+        <div class="inline-div">
+          <h4>Stealth Disadvantage:</h4>
+          <p><%= equip.stealth_disadvantage %></p>
+        </div>
+        <% } %>
+        <!--None specific -->
+        <% if (equip.cost) { %>
+        <div class="inline-div">
+          <h4>Cost:</h4>
+          <p><%= equip.cost.quantity %> <%= equip.cost.unit %></p>
+        </div>
+        <% } %> <% if (equip.weight) { %>
+        <div class="inline-div">
+          <h4>Weight:</h4>
+          <p><%= equip.weight %></p>
+        </div>
+        <% } %> <% if (equip.properties && equip.properties.length) { %>
+        <div class="inline-div">
+          <h4>Properties:</h4>
+          <% equip.properties.forEach(property => { %>
+          <a href="/dnd/5e/srd/weapon-properties#<%= property.index %>"
+            ><%= property.name %>
+          </a>
+          <% }) %>
+        </div>
+        <% } %> <% if (equip.desc) { %> <% equip.desc.forEach((str, index) => {
+        %>
+        <p><%= str %></p>
+        <% }) %> <% }%> <% if (equip.contents && equip.contents.length) { %>
+        <h4>Contents:</h4>
+        <ul>
+          <% equip.contents.forEach(obj => { %>
+          <li><a href="#<%= obj.item.index %>"><%= obj.item.name %></a></li>
+          <% }) %>
+        </ul>
+        <% }%>
+      </div>
+      <br />
+      <% }); %>
+      <!-- magic items -->
+      <% magicItemsData.forEach((mItem) => { %>
+      <div class="inline-div" id="<%= mItem.index %>">
+        <h3><%= mItem.name %></h3>
+        <small>- <%= mItem.equipment_category.name %></small>
+      </div>
+      <div class="indent">
+        <% mItem.desc.forEach((str, index) => { %>
+        <p><%= str %></p>
+        <% }) %>
+      </div>
+      <br />
+      <% }); %>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>

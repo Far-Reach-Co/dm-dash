@@ -96,6 +96,14 @@ router.get("/preaethrend", (req, res, next) => {
         next(err);
     }
 });
+router.get("/attributions", (req, res, next) => {
+    try {
+        res.render("attributions", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/privacy-policy", (req, res, next) => {
     try {
         res.render("privacypolicy", { auth: req.session.user });
@@ -554,8 +562,5 @@ router.get("/forbidden", (req, res, next) => {
     catch (err) {
         next(err);
     }
-});
-router.use((req, res, next) => {
-    res.status(404).render("404", { auth: req.session.user });
 });
 module.exports = router;

@@ -29,6 +29,7 @@ const redisAdapter = require("socket.io-redis");
 io.adapter(redisAdapter({ host: "localhost", port: 6379 }));
 const apiRoutes = require("./dist/api/routes.js");
 const routes = require("./dist/routes.js");
+const dndRoutes = require("./dist/dnd/routes.js");
 const {
   userJoin,
   userLeave,
@@ -102,6 +103,12 @@ app.use(
 app.use("/api", apiRoutes);
 // public
 app.use("/", routes);
+// dnd pages
+app.use("/dnd", dndRoutes);
+// not found
+app.use((req, res) => {
+  res.status(404).render("404", { auth: req.session.user });
+});
 
 //Error
 app.use((error, req, res, next) => {

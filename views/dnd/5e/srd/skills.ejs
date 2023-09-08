@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Skills | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Skills</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Skills</h2>
+      <ul>
+        <% data.forEach(function(skill){ %>
+        <li>
+          <a href="#<%= skill.index %>"><%= skill.name %></a>
+        </li>
+        <% }); %>
+      </ul>
+      <br />
+      <% data.forEach(function(skill){ %>
+      <div class="inline-div" id="<%= skill.index %>">
+        <h3><%= skill.name %></h3>
+        <div style="color: var(--bright-white)">
+          [<%= skill.ability_score.name %>]
+        </div>
+      </div>
+      <div class="indent">
+        <% skill.desc.forEach((str, index) => { %>
+        <p><%= str %></p>
+        <% }) %>
+      </div>
+      <br />
+      <% }); %>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>
