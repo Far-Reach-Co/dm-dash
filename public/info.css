@@ -24,6 +24,21 @@ img {
   text-indent: 20px;
 }
 
+.smindent {
+  text-indent: 10px;
+}
+
+.background-p {
+  background-color: var(--blue3);
+  padding: var(--main-distance);
+  max-width: 400px;
+  height: fit-content;
+}
+
+.background-p small {
+  display: block;
+}
+
 .inline-div {
   margin-bottom: var(--main-distance);
 }
@@ -45,7 +60,7 @@ img {
 }
 
 table {
-  width: 800px;
+  width: fit-content;
   max-width: 100%;
   border-collapse: collapse;
   font-size: small;
