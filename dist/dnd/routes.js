@@ -88,6 +88,66 @@ router.get("/5e/srd/classes", (req, res, next) => {
         next(err);
     }
 });
+router.get("/5e/srd/conditions", (req, res, next) => {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-conditions.json"), "utf8");
+        res.render("dnd/5e/srd/conditions", {
+            auth: req.session.user,
+            data: JSON.parse(data),
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/5e/srd/feats", (req, res, next) => {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-feats.json"), "utf8");
+        res.render("dnd/5e/srd/feats", {
+            auth: req.session.user,
+            data: JSON.parse(data),
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/5e/srd/features", (req, res, next) => {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-features.json"), "utf8");
+        res.render("dnd/5e/srd/features", {
+            auth: req.session.user,
+            data: JSON.parse(data),
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/5e/srd/languages", (req, res, next) => {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-languages.json"), "utf8");
+        res.render("dnd/5e/srd/languages", {
+            auth: req.session.user,
+            data: JSON.parse(data),
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/5e/srd/magic-schools", (req, res, next) => {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"), "utf8");
+        res.render("dnd/5e/srd/magicschools", {
+            auth: req.session.user,
+            data: JSON.parse(data),
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/5e/srd/weapon-properties", (req, res, next) => {
     try {
         const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-weapon-properties.json"), "utf8");

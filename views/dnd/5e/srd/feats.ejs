@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Feats | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Feats</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Feats</h2>
+      <ul>
+        <% data.forEach(function(feat){ %>
+        <li>
+          <a href="#<%= feat.index %>"><%= feat.name %></a>
+        </li>
+        <% }); %>
+      </ul>
+      <br />
+      <% data.forEach(function(feat){ %>
+      <div class="inline-div" id="<%= feat.index %>">
+        <h3><%= feat.name %></h3>
+      </div>
+      <div class="indent">
+        <h4>Prerequisites:</h4>
+        <div class="indent">
+          <% feat.prerequisites.forEach(pr => { %>
+          <p><b><%= pr.ability_score.name %>:</b> <%= pr.minimum_score %></p>
+          <% }) %>
+        </div>
+        <br />
+        <% feat.desc.forEach((str, index) => { %>
+        <p><%= str %></p>
+        <% }) %>
+        <br />
+      </div>
+      <br />
+      <% }); %>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>
