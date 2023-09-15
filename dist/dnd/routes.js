@@ -136,22 +136,24 @@ router.get("/5e/srd/languages", (req, res, next) => {
         next(err);
     }
 });
-router.get("/5e/srd/magic-schools", (req, res, next) => {
+router.get("/5e/srd/races", (req, res, next) => {
     try {
-        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"), "utf8");
-        res.render("dnd/5e/srd/magicschools", {
+        res.render("dnd/5e/srd/races", {
             auth: req.session.user,
-            data: JSON.parse(data),
         });
     }
     catch (err) {
         next(err);
     }
 });
-router.get("/5e/srd/races", (req, res, next) => {
+router.get("/5e/srd/spells", (req, res, next) => {
     try {
-        res.render("dnd/5e/srd/races", {
+        const spellsData = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"), "utf8");
+        const schoolsData = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"), "utf8");
+        res.render("dnd/5e/srd/spells", {
             auth: req.session.user,
+            spellsData: JSON.parse(spellsData),
+            schoolsData: JSON.parse(schoolsData),
         });
     }
     catch (err) {

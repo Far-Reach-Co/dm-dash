@@ -221,17 +221,11 @@ router.get(
 );
 
 router.get(
-  "/5e/srd/magic-schools",
+  "/5e/srd/races",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"),
-        "utf8"
-      );
-      res.render("dnd/5e/srd/magicschools", {
+      res.render("dnd/5e/srd/races", {
         auth: req.session.user,
-        data: JSON.parse(data),
       });
     } catch (err) {
       next(err);
@@ -240,11 +234,22 @@ router.get(
 );
 
 router.get(
-  "/5e/srd/races",
+  "/5e/srd/spells",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      res.render("dnd/5e/srd/races", {
+      // get json data
+      const spellsData = fs.readFileSync(
+        path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"),
+        "utf8"
+      );
+      const schoolsData = fs.readFileSync(
+        path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"),
+        "utf8"
+      );
+      res.render("dnd/5e/srd/spells", {
         auth: req.session.user,
+        spellsData: JSON.parse(spellsData),
+        schoolsData: JSON.parse(schoolsData),
       });
     } catch (err) {
       next(err);
