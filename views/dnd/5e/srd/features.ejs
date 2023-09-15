@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Features | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Features</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Features</h2>
+      <ul>
+        <% data.forEach(function(features){ %>
+        <li>
+          <a href="#<%= features.index %>"><%= features.name %></a>
+        </li>
+        <% }); %>
+      </ul>
+      <br />
+      <% data.forEach(function(feature){ %>
+      <div class="inline-div" id="<%= feature.index %>">
+        <h3><%= feature.name %></h3>
+      </div>
+      <div class="indent">
+        <div class="inline-div">
+          <h4>Class:</h4>
+          <p><%= feature.class.name %></p>
+        </div>
+        <% if (feature.subclass) { %>
+        <div class="inline-div">
+          <h4>Sub Class:</h4>
+          <p><%= feature.subclass.name %></p>
+        </div>
+        <% } %> <% feature.desc.forEach((str, index) => { %>
+        <p><%= str %></p>
+        <% }) %>
+        <br />
+      </div>
+      <br />
+      <% }); %>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Spells | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Spells</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Classes</h2>
+      <ul>
+        <li>
+          <a href="#bard-spell-list">Bard</a>
+        </li>
+        <li>
+          <a href="#cleric-spell-list">Cleric</a>
+        </li>
+        <li>
+          <a href="#druid-spell-list">Druid</a>
+        </li>
+        <li>
+          <a href="#paladin-spell-list">Paladin</a>
+        </li>
+        <li>
+          <a href="#ranger-spell-list">Ranger</a>
+        </li>
+        <li>
+          <a href="#sorcerer-spell-list">Sorcerer</a>
+        </li>
+        <li>
+          <a href="#warlock-spell-list">Warlock</a>
+        </li>
+        <li>
+          <a href="#wizard-spell-list">Wizard</a>
+        </li>
+      </ul>
+      <br />
+      <div id="magic-schools-list">
+        <h2>Magic Schools</h2>
+        <ul>
+          <% schoolsData.forEach(function(school){ %>
+          <li>
+            <a href="#<%= school.index %>"><%= school.name %></a>
+          </li>
+          <% }); %>
+        </ul>
+        <br />
+        <div id="bard-spell-list">
+          <h2>Bard Spell List</h2>
+          <ul>
+            <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+            "Bard")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+            <li>
+              <a href="#<%= spell.index %>"><%= spell.name %></a
+              ><small
+                >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level
+                <%= spell.level %> <% } %></small
+              >
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+      </div>
+      <br />
+      <div id="cleric-spell-list">
+        <h2>Cleric Spell List</h2>
+        <ul>
+          <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+          "Cleric")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+          <li>
+            <a href="#<%= spell.index %>"><%= spell.name %></a
+            ><small
+              >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %></small
+            >
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <br />
+      <div id="druid-spell-list">
+        <h2>Druid Spell List</h2>
+        <ul>
+          <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+          "Druid")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+          <li>
+            <a href="#<%= spell.index %>"><%= spell.name %></a
+            ><small
+              >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %></small
+            >
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <br />
+      <div id="paladin-spell-list">
+        <h2>Paladin Spell List</h2>
+        <ul>
+          <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+          "Paladin")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+          <li>
+            <a href="#<%= spell.index %>"><%= spell.name %></a
+            ><small
+              >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %></small
+            >
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <br />
+      <div id="ranger-spell-list">
+        <h2>Ranger Spell List</h2>
+        <ul>
+          <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+          "Ranger")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+          <li>
+            <a href="#<%= spell.index %>"><%= spell.name %></a
+            ><small
+              >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %></small
+            >
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <br />
+      <div id="sorcerer-spell-list">
+        <h2>Sorcerer Spell List</h2>
+        <ul>
+          <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+          "Sorcerer")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+          <li>
+            <a href="#<%= spell.index %>"><%= spell.name %></a
+            ><small
+              >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %></small
+            >
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <br />
+      <div id="warlock-spell-list">
+        <h2>Warlock Spell List</h2>
+        <ul>
+          <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+          "Warlock")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+          <li>
+            <a href="#<%= spell.index %>"><%= spell.name %></a
+            ><small
+              >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %></small
+            >
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <br />
+      <div id="wizard-spell-list">
+        <h2>Wizard Spell List</h2>
+        <ul>
+          <% spellsData.filter(spell => spell.classes.some(cl => cl.name ==
+          "Wizard")).sort((a, b) => a.level - b.level).forEach(spell => { %>
+          <li>
+            <a href="#<%= spell.index %>"><%= spell.name %></a
+            ><small
+              >- <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %></small
+            >
+          </li>
+          <% }) %>
+        </ul>
+      </div>
+      <hr />
+      <h1>Magic Schools</h1>
+      <% schoolsData.forEach(function(school){ %>
+      <div class="inline-div" id="<%= school.index %>">
+        <h2><%= school.name %></h2>
+      </div>
+      <div class="indent">
+        <p><%= school.desc %></p>
+        <br />
+        <h3>Spells List</h3>
+        <ul>
+          <% spellsData.filter(spell => spell.school.index ==
+          school.index).forEach(spell => { %>
+          <li><a href="#<%= spell.index %>"><%= spell.name %></a></li>
+          <% }) %>
+        </ul>
+      </div>
+      <br />
+      <% }); %>
+      <hr />
+      <h2>Spells</h2>
+      <div class="indent">
+        <% spellsData.forEach(spell => { %>
+        <div id="<%= spell.index %>">
+          <div class="inline-div">
+            <h3><%= spell.name %></h3>
+            <small>
+              -
+              <a href="#<%= spell.school.index %>"><%= spell.school.name %></a>
+              - <% if (spell.level == 0) { %> Cantrip <% } else { %> Level <%=
+              spell.level %> <% } %>
+            </small>
+          </div>
+          <div class="indent">
+            <div class="inline-div">
+              <h4>Casting Time:</h4>
+              <p><%= spell.casting_time %></p>
+            </div>
+            <div class="inline-div">
+              <h4>Duration:</h4>
+              <p><%= spell.duration %></p>
+            </div>
+            <div class="inline-div">
+              <h4>Range:</h4>
+              <p><%= spell.range %></p>
+            </div>
+            <% if (spell.ritual) { %>
+            <h4>Ritual</h4>
+            <% } %> <% if (spell.concentration) { %>
+            <h4>Concentration</h4>
+            <% } %> <% if (spell.damage && spell.damage.damage_type ) { %>
+            <div class="inline-div">
+              <h4>Damage Type:</h4>
+              <a
+                href="/dnd/5e/srd/damage-types#<%= spell.damage.damage_type.index %>"
+                ><%= spell.damage.damage_type.name %></a
+              >
+            </div>
+            <% } %> <% if (spell.components && spell.components.length ) { %>
+            <div class="inline-div">
+              <h4>Components:</h4>
+              <ul>
+                <% spell.components.forEach(c => { %>
+                <li><%= c %></li>
+                <% }) %>
+              </ul>
+            </div>
+            <% } %> <% if (spell.material ) { %>
+            <div class="inline-div">
+              <h4>Material:</h4>
+              <p><%= spell.material %></p>
+            </div>
+            <% } %>
+            <div class="inline-div"></div>
+            <% spell.desc.forEach((str, index) => { %> <% if (index > 0) { %>
+            <p class="pindent"><%= str %></p>
+            <% } else { %>
+            <p><%= str %></p>
+            <% } %> <% }) %> <% if (spell.higher_level &&
+            spell.higher_level.length) { %>
+            <div class="inline-div">
+              <h4>Higher-Level:</h4>
+              <% spell.higher_level.forEach((str, index) => { %>
+              <p><%= str %></p>
+              <% }) %>
+            </div>
+            <% } %>
+            <br />
+            <h4>Classes:</h4>
+            <div class="indent">
+              <% spell.classes.forEach(cl => { %>
+              <a href="#<%= cl.index %>-spell-list"><%= cl.name %></a>
+              <% }) %>
+            </div>
+            <br />
+          </div>
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>

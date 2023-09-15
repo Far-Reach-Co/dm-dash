@@ -14,7 +14,7 @@
 }
 
 :root {
-  --main-white: rgb(199, 199, 199);
+  --main-white: rgb(205, 205, 205);
   --bright-white: rgb(225, 225, 225);
   --main-dark: rgb(24, 32, 41);
   --main-gray: rgb(103, 101, 101);
@@ -24,8 +24,8 @@
   --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
   --blue5: rgb(47, 64, 84);
-  --blue6: rgb(115, 163, 208);
-  --link-blue: rgb(156, 184, 215);
+  --blue6: rgb(133, 176, 216);
+  --link-blue: rgb(158, 197, 235);
   --purple: rgb(73, 42, 87);
   --pink: rgb(221, 196, 248);
   --green: rgb(161, 190, 128);
@@ -46,8 +46,8 @@
   padding: 0;
   box-sizing: border-box;
   z-index: 3;
-  letter-spacing: 1.2px;
-
+  letter-spacing: 1.1px;
+  word-wrap: break-word;
   scrollbar-width: thin;
   scrollbar-color: var(--blue3) transparent;
 }
@@ -87,6 +87,27 @@ span {
 small {
   font-size: 13px;
   color: var(--orange4);
+}
+
+div {
+  color: var(--bright-white);
+}
+
+p,
+b,
+u {
+  max-width: 100%;
+  color: var(--main-white);
+  margin-bottom: var(--main-distance);
+}
+
+ul {
+  max-width: 100%;
+}
+
+li {
+  color: var(--main-white);
+  margin-right: 15px;
 }
 
 .success-message {
@@ -134,7 +155,14 @@ h2 {
 h3 {
   font-family: YoungSerif;
   color: var(--orange2);
-  font-size: 1.2rem;
+  font-size: 1.1rem;
+}
+
+h4 {
+  color: var(--bright-white);
+  font-size: 1.1rem;
+  font-weight: bold;
+  /* text-decoration: underline; */
 }
 
 nav {

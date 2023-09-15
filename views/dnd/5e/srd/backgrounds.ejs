@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>D&D | 5e | SRD | Backgrounds | Far Reach Co.</title>
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/info.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('../../../partials/icons') %>
+  </head>
+  <%- include('../../../partials/google') %>
+  <body>
+    <%- include('../../../partials/nav') %>
+    <div class="container-fluid p-3 info-container">
+      <%- include('../../../partials/dnd/srdintro') %>
+      <br />
+      <div class="inline-div">
+        <small>
+          <a href="/dnd/5e/srd/contents">Contents</a> ->
+          <div style="color: var(--green)">Backgrounds</div>
+        </small>
+      </div>
+      <hr />
+      <h2>Backgrounds</h2>
+      <ul>
+        <% data.forEach(function(background){ %>
+        <li>
+          <a href="#<%= background.index %>"><%= background.name %></a>
+        </li>
+        <% }); %>
+      </ul>
+      <br />
+      <% data.forEach(function(background){ %>
+      <div class="inline-div" id="<%= background.index %>">
+        <h3><%= background.name %></h3>
+      </div>
+      <p class="indent">
+        <% background.desc.forEach((str, index) => { %> <% if (index > 0) { %>
+          <p class="pindent"><%= str %></p>
+          <% } else { %>
+          <p><%= str %></p>
+          <% } %> <% }) %>
+      </p>
+      <br>
+      <div class="indent">
+        <h4>Starting Proficiencies</h4>
+        <div class="indent">
+          <% background.starting_proficiencies.forEach(function(prof){ %>
+            <% if (prof.index.split("-")[0] == "skill") { %>
+              <li>
+                <a href="/dnd/5e/srd/skills#<%= prof.index.split("-")[1] %>"><%= prof.name %></a>
+              </li>
+            <% }; %>
+          <% }); %>
+        </div>
+        <br />
+        <h4>Language Options</h4>
+        <div class="indent">
+          <p>- Choose <%= background.language_options.choose %> of any language</p>
+        </div>
+        <br />
+        <h4>Starting Equipment</h4>
+        <div class="indent">
+          <% background.starting_equipment.forEach(item => { %>
+            <p><a href="/dnd/5e/srd/equipment#<%= item.equipment.index %>"><%= item.equipment.name %></a> (<%= item.quantity %>)</p>
+          <% }) %>
+        </div>
+        <br>
+        <h4>Starting Equipment Options</h4>
+        <div class="indent">
+          <% background.starting_equipment_options.forEach(opt => { %>
+            <p>Choose <%= opt.choose %> from <a href="/dnd/5e/srd/equipment#<%= opt.from.equipment_category.index %>"><%= opt.from.equipment_category.name %></a></p>
+          <% }) %>
+        </div>
+        <br>
+        <h4>Feature</h4>
+        <div class="indent">
+          <p><b><%= background.feature.name %></b></p>
+          <% background.desc.forEach((str, index) => { %> <% if (index > 0) { %>
+            <p class="pindent"><%= str %></p>
+            <% } else { %>
+            <p><%= str %></p>
+            <% } %> <% }) %>
+        </div>
+        <br>
+        <h4>Personality Traits</h4>
+        <div class="indent">
+          <b>Choose <%= background.personality_traits.choose %> from</b>
+          <ul>
+            <% background.personality_traits.from.options.forEach(opt =>{ %>
+              <li><%= opt.string %></li>
+            <% }); %>
+          </ul>
+        </div>
+        <br>
+        <h4>Ideals</h4>
+        <div class="indent">
+          <p>Choose <%= background.ideals.choose %> from</p>
+          <ul>
+            <% background.ideals.from.options.forEach(opt =>{ %>
+              <li><%= opt.desc %></li>
+            <% }); %>
+          </ul>
+        </div>
+        <br>
+        <h4>Bonds</h4>
+        <div class="indent">
+          <p>Choose <%= background.bonds.choose %> from</p>
+          <ul>
+            <% background.bonds.from.options.forEach(opt =>{ %>
+              <li><%= opt.string %></li>
+            <% }); %>
+          </ul>
+        </div>
+        <br>
+        <h4>Flaws</h4>
+        <div class="indent">
+          <p>Choose <%= background.flaws.choose %> from</p>
+          <ul>
+            <% background.flaws.from.options.forEach(opt =>{ %>
+              <li><%= opt.string %></li>
+            <% }); %>
+          </ul>
+        </div>
+        <br>
+      </div>
+      <br />
+      <% }); %>
+    </div>
+    <%- include('../../../partials/footer') %>
+  </body>
+</html>

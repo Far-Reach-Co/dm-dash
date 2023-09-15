@@ -9,6 +9,7 @@
     "noImplicitReturns": true,
     "removeComments": true,
     "preserveConstEnums": true,
+    // "resolveJsonModule": true,
     // "outFile": "",
     // "rootDir": "src",
     "outDir": "dist"

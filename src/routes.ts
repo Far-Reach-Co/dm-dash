@@ -137,6 +137,18 @@ router.get(
 );
 
 router.get(
+  "/attributions",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      //
+      res.render("attributions", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
   "/privacy-policy",
   (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -707,10 +719,6 @@ router.get("/forbidden", (req: Request, res: Response, next: NextFunction) => {
   } catch (err) {
     next(err);
   }
-});
-
-router.use((req: Request, res: Response, next: NextFunction) => {
-  res.status(404).render("404", { auth: req.session.user });
 });
 
 module.exports = router;
