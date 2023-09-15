@@ -240,20 +240,11 @@ router.get(
 );
 
 router.get(
-  "/5e/srd/weapon-properties",
+  "/5e/srd/races",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/5e-srd-weapon-properties.json"
-        ),
-        "utf8"
-      );
-      res.render("dnd/5e/srd/weaponproperties", {
+      res.render("dnd/5e/srd/races", {
         auth: req.session.user,
-        data: JSON.parse(data),
       });
     } catch (err) {
       next(err);
@@ -271,6 +262,28 @@ router.get(
         "utf8"
       );
       res.render("dnd/5e/srd/skills", {
+        auth: req.session.user,
+        data: JSON.parse(data),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/5e/srd/weapon-properties",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // get json data
+      const data = fs.readFileSync(
+        path.join(
+          __dirname,
+          "../../public/lib/data/5e-srd-weapon-properties.json"
+        ),
+        "utf8"
+      );
+      res.render("dnd/5e/srd/weaponproperties", {
         auth: req.session.user,
         data: JSON.parse(data),
       });

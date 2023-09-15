@@ -148,12 +148,10 @@ router.get("/5e/srd/magic-schools", (req, res, next) => {
         next(err);
     }
 });
-router.get("/5e/srd/weapon-properties", (req, res, next) => {
+router.get("/5e/srd/races", (req, res, next) => {
     try {
-        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-weapon-properties.json"), "utf8");
-        res.render("dnd/5e/srd/weaponproperties", {
+        res.render("dnd/5e/srd/races", {
             auth: req.session.user,
-            data: JSON.parse(data),
         });
     }
     catch (err) {
@@ -164,6 +162,18 @@ router.get("/5e/srd/skills", (req, res, next) => {
     try {
         const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-skills.json"), "utf8");
         res.render("dnd/5e/srd/skills", {
+            auth: req.session.user,
+            data: JSON.parse(data),
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/5e/srd/weapon-properties", (req, res, next) => {
+    try {
+        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-weapon-properties.json"), "utf8");
+        res.render("dnd/5e/srd/weaponproperties", {
             auth: req.session.user,
             data: JSON.parse(data),
         });
