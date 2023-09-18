@@ -298,6 +298,17 @@ input {
   background-color: var(--blue3);
 }
 
+.cp-content-short-number {
+  width: 35px;
+  height: 25px;
+  color: var(--blue6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 30px;
+  background-color: var(--blue3);
+}
+
 .cp-content-container-long input[type="number"] {
   padding-left: 13px;
 }
@@ -323,7 +334,7 @@ input {
 .proficiency-item-radio {
   width: 25px;
   height: 25px;
-  margin-right: 30px;
+  margin-right: 20px;
   border: 2px solid var(--blue);
   border-radius: 30px;
   cursor: pointer;
@@ -332,7 +343,7 @@ input {
 .proficiency-item-radio-checked {
   width: 25px;
   height: 25px;
-  margin-right: 30px;
+  margin-right: 20px;
   border: 2px solid var(--blue);
   border-radius: 30px;
   background-color: var(--green);
