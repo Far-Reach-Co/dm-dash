@@ -8,6 +8,8 @@ import FeatComponent from "./FeatComponent.js";
 import SpellsComponent from "./SpellsComponent.js";
 import calculateColorMod from "./calculateColorMod.js";
 import SheetSettings from "./SheetSettings.js";
+import PassivePerceptionComponent from "./PassivePerceptionComponent.js";
+import SkillComponent from "./SkillComponent.js";
 
 export default class FiveEPlayerSheet {
   constructor(props) {
@@ -30,10 +32,6 @@ export default class FiveEPlayerSheet {
 
   updateGeneralValue = async (name, value) => {
     this.generalData[name] = value;
-    if (history.state && history.state.params && history.state.params.content) {
-      history.state.params.content[name] = value;
-      history.pushState(history.state, null);
-    }
     postThing(`/api/edit_5e_character_general/${this.generalData.id}`, {
       [name]: value,
     });
@@ -41,10 +39,6 @@ export default class FiveEPlayerSheet {
 
   updateBackgroundValue = async (name, value) => {
     this.generalData.background[name] = value;
-    if (history.state && history.state.params && history.state.params.content) {
-      history.state.params.content.background[name] = value;
-      history.pushState(history.state, null);
-    }
     postThing(`/api/edit_5e_character_background/${this.generalData.id}`, {
       [name]: value,
     });
@@ -52,10 +46,6 @@ export default class FiveEPlayerSheet {
 
   updateSpellSlotValue = async (name, value) => {
     this.generalData.spell_slots[name] = value;
-    if (history.state && history.state.params && history.state.params.content) {
-      history.state.params.content.spell_slots[name] = value;
-      history.pushState(history.state, null);
-    }
     postThing(
       `/api/edit_5e_character_spell_slots/${this.generalData.spell_slots.id}`,
       {
@@ -66,10 +56,6 @@ export default class FiveEPlayerSheet {
 
   updateProficiencyInfo = async (name, value) => {
     this.generalData.proficiencies[name] = value;
-    if (history.state && history.state.params && history.state.params.content) {
-      history.state.params.content.proficiencies[name] = value;
-      history.pushState(history.state, null);
-    }
     postThing(
       `/api/edit_5e_character_proficiencies/${this.generalData.proficiencies.id}`,
       {
@@ -156,12 +142,16 @@ export default class FiveEPlayerSheet {
     return pp;
   };
 
-  calculateProficiency = (ability, isPro) => {
+  calculateProficiency = (ability, isPro, skillMod) => {
     let abilityMod = this.calculateAbilityScoreModifier(ability);
     if (abilityMod === "0") abilityMod = 0;
     let pro = abilityMod;
     if (isPro) {
       pro += this.calculateProBonus();
+    }
+    // add skill mod
+    if (skillMod) {
+      pro += skillMod;
     }
     if (pro === 0) pro = "0";
     return pro;
@@ -423,41 +413,18 @@ export default class FiveEPlayerSheet {
     ];
 
     return skills.map((skill) => {
-      return createElement("div", { class: "proficiency-item" }, [
-        createElement(
-          "div",
-          {
-            class: this.generalData.proficiencies[skill.key]
-              ? "proficiency-item-radio-checked"
-              : "proficiency-item-radio",
-          },
-          null,
-          {
-            type: "click",
-            event: (e) => {
-              let newVal = !this.generalData.proficiencies[skill.key];
-              this.updateProficiencyInfo(skill.key, newVal);
-              this.render();
-            },
-          }
-        ),
-        createElement(
-          "div",
-          { class: "proficiency-item-number" },
-          this.calculateProficiency(
-            this.generalData[skill.ability],
-            this.generalData.proficiencies[skill.key]
-          )
-        ),
-        createElement("small", { class: "proficiency-item-title" }, [
-          skill.title,
-          createElement(
-            "small",
-            { style: "font-size: smaller; color: var(--light-gray)" },
-            ` (${skill.ability.substring(0, 3)})`
-          ),
-        ]),
-      ]);
+      const elem = createElement("div");
+      skill.value = this.generalData.proficiencies[skill.key];
+      skill.abilityValue = this.generalData[skill.ability];
+      // may be null
+      skill.mod = this.generalData.proficiencies[`${skill.key}_mod`];
+      new SkillComponent({
+        domComponent: elem,
+        updateProficiencyInfo: this.updateProficiencyInfo,
+        calculateProficiency: this.calculateProficiency,
+        skill,
+      });
+      return elem;
     });
   };
 
@@ -1941,127 +1908,5 @@ export default class FiveEPlayerSheet {
     if (this.mainView === "settings") {
       return this.domComponent.append(this.sheetSettings.domComponent);
     }
-  };
-}
-
-class PassivePerceptionComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.calculatePassivePerception = props.calculatePassivePerception;
-    this.wisdom = props.wisdom;
-    this.wisdomMod = props.wisdomMod;
-    this.updateGeneralValue = props.updateGeneralValue;
-
-    this.modView = false;
-
-    this.render();
-  }
-
-  toggleModView = () => {
-    this.modView = !this.modView;
-    this.render();
-  };
-
-  renderModView() {
-    this.domComponent.append(
-      createElement("div", { class: "cp-content-container-long" }, [
-        createElement(
-          "input",
-          {
-            class: "cp-content-long-number",
-            style: `max-width: 50px;`,
-            type: "number",
-            name: "wisdome_mod",
-            value: this.wisdomMod ? this.wisdomMod : 0,
-          },
-          null,
-          {
-            type: "focusout",
-            event: (e) => {
-              if (e.target.value === "") e.target.value = 0;
-              this.wisdomMod = e.target.valueAsNumber;
-              this.updateGeneralValue("wisdom_mod", e.target.valueAsNumber);
-            },
-          }
-        ),
-        createElement(
-          "div",
-          { class: "cp-content-long-title", style: "align-items: baseline" },
-          [
-            createElement(
-              "img",
-              {
-                width: 15,
-                class: "gear-gen",
-                style: "margin-right: 3px;",
-                src: "/assets/gears.svg",
-                title: "Toggle modifier view",
-              },
-              null,
-              {
-                type: "click",
-                event: () => {
-                  this.toggleModView();
-                },
-              }
-            ),
-            createElement(
-              "small",
-              { style: "color: var(--pink)" },
-              "Passive Perception Modifier"
-            ),
-          ]
-        ),
-      ])
-    );
-  }
-
-  render = () => {
-    this.domComponent.innerHTML = "";
-
-    if (this.modView) {
-      return this.renderModView();
-    }
-
-    this.domComponent.append(
-      createElement("div", { class: "cp-content-container-long" }, [
-        createElement(
-          "div",
-          {
-            class: "cp-content-long-number",
-            style: `color: ${calculateColorMod(
-              this.calculatePassivePerception(),
-              this.wisdomMod,
-              "var(--blue6)"
-            )}`,
-          },
-          this.calculatePassivePerception()
-        ),
-        createElement(
-          "div",
-          { class: "cp-content-long-title", style: "align-items: baseline" },
-          [
-            createElement(
-              "img",
-              {
-                width: 15,
-                class: "gear-gen",
-                style: "margin-right: 3px;",
-                src: "/assets/gears.svg",
-                title: "Toggle modifier view",
-              },
-              null,
-              {
-                type: "click",
-                event: () => {
-                  this.toggleModView();
-                },
-              }
-            ),
-            createElement("small", {}, "Passive Perception (Wis)"),
-          ]
-        ),
-      ])
-    );
   };
 }
