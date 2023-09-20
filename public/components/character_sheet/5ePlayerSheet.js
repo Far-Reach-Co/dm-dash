@@ -6,7 +6,6 @@ import AttackComponent from "./AttackComponent.js";
 import EquipmentComponent from "./EquipmentComponent.js";
 import FeatComponent from "./FeatComponent.js";
 import SpellsComponent from "./SpellsComponent.js";
-import calculateColorMod from "./calculateColorMod.js";
 import SheetSettings from "./SheetSettings.js";
 import PassivePerceptionComponent from "./PassivePerceptionComponent.js";
 import SkillComponent from "./SkillComponent.js";
@@ -35,7 +34,29 @@ export default class FiveEPlayerSheet {
     postThing(`/api/edit_5e_character_general/${this.generalData.id}`, {
       [name]: value,
     });
+
+    // Run an update on attack - bonus component element magic words
+    this.attemptUpdateAttackComponentMagicWords(name);
   };
+
+  attemptUpdateAttackComponentMagicWords(name) {
+    if (this.attackComponent) {
+      const mappings = this.attackComponent.getMagicWordMappings();
+      const filteredMappings = mappings.filter(({ _value, key }) => {
+        return name === key;
+      });
+      // level updates proficiency bonus
+      if (!filteredMappings.length) {
+        if (name === "level") {
+          this.attackComponent.updateBonusElementsMagicCalcValue();
+        }
+      } else {
+        filteredMappings.forEach(() => {
+          this.attackComponent.updateBonusElementsMagicCalcValue();
+        });
+      }
+    }
+  }
 
   updateBackgroundValue = async (name, value) => {
     this.generalData.background[name] = value;
@@ -465,7 +486,9 @@ export default class FiveEPlayerSheet {
       const attackComponentElem = createElement("div");
       this.attackComponent = new AttackComponent({
         domComponent: attackComponentElem,
-        general_id: this.generalData.id,
+        generalData: this.generalData,
+        calculateAbilityScoreModifier: this.calculateAbilityScoreModifier,
+        calculateProBonus: this.calculateProBonus,
       });
     }
 

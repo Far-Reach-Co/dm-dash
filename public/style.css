@@ -24,7 +24,7 @@
   --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
   --blue5: rgb(47, 64, 84);
-  --blue6: rgb(133, 176, 216);
+  --blue6: rgb(116, 167, 215);
   --link-blue: rgb(158, 197, 235);
   --purple: rgb(73, 42, 87);
   --pink: rgb(221, 196, 248);
@@ -685,6 +685,18 @@ footer {
   background-color: var(--blue3);
 }
 
+.hover-info {
+  position: absolute;
+  padding: 10px;
+  height: auto;
+  width: 200px;
+  display: none;
+  z-index: 4;
+  opacity: 0.9;
+  border-radius: var(--border-radius);
+  background-color: var(--blue3);
+}
+
 .toast-custom {
   z-index: 4;
   position: absolute;
@@ -954,4 +966,49 @@ input:checked+.slider:before {
   user-select: none;
   /* Non-prefixed version, currently
                                   supported by Chrome and Opera */
+}
+
+.magic-text {
+  padding: 5px;
+  width: 60px;
+  height: 35px;
+  /* input height */
+  overflow: auto;
+  white-space: nowrap;
+  border: none;
+  outline: none;
+  color: var(--main-white);
+  background-color: var(--main-dark);
+}
+
+.glowing-text {
+  color: var(--blue6);
+  /* White text color */
+  animation: glowing 5s infinite alternate;
+}
+
+@keyframes glowing {
+  0% {
+    text-shadow:
+      0 0 2px var(--main-dark),
+      0 0 3px var(--main-dark),
+      0 0 5px var(--main-dark),
+      0 0 6px var(--main-dark);
+  }
+
+  50% {
+    text-shadow:
+      0 0 7px var(--orange3),
+      0 0 8px var(--main-dark),
+      0 0 9px var(--main-dark),
+      0 0 10px var(--main-dark);
+  }
+
+  100% {
+    text-shadow:
+      0 0 2px var(--main-dark),
+      0 0 3px var(--main-dark),
+      0 0 5px var(--main-dark),
+      0 0 6px var(--main-dark);
+  }
 }
