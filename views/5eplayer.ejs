@@ -1,29 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co. | 5e Character Sheet</title>
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/character.css" />
-    <%- include('./partials/icons') %>
-    <script>
-      const USERID = "<%= auth %>";
-    </script>
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <script src="/dist/bundleInitSheet.js" defer type="module"></script>
-  </head>
-  <%- include('./partials/google') %>
-  <body>
-    <%- include('./partials/nav') %>
-    <div class="container-fluid p-3">
-      <div id="app">
-        <!-- Initial spinner -->
-        <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>
-      </div>
-      <!-- Toast -->
-      <div id="toast-custom"></div>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | 5e Character Sheet</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/character.css" />
+  <%- include('./partials/icons') %>
+  <script>
+    const USERID = "<%= auth %>";
+  </script>
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/dist/bundleInitSheet.js" defer type="module"></script>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3">
+    <div id="app">
+      <!-- Initial spinner -->
+      <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>
     </div>
-  </body>
+    <!-- Toast -->
+    <div id="toast-custom"></div>
+  </div>
+  <!-- Hover Info -->
+  <div class="hover-info" id="hover-info"></div>
+</body>
+
 </html>
