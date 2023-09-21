@@ -33,8 +33,8 @@ export default class SkillComponent {
         {
           type: "click",
           event: (e) => {
-            let newVal = !this.skill.value;
-            this.updateProficiencyInfo(this.skill.key, newVal);
+            this.skill.value = !this.skill.value;
+            this.updateProficiencyInfo(this.skill.key, this.skill.value);
             this.render();
           },
         }
@@ -109,8 +109,8 @@ export default class SkillComponent {
         {
           type: "click",
           event: (e) => {
-            let newVal = !this.skill.value;
-            this.updateProficiencyInfo(this.skill.key, newVal);
+            this.skill.value = !this.skill.value;
+            this.updateProficiencyInfo(this.skill.key, this.skill.value);
             this.render();
           },
         }
