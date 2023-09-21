@@ -162,7 +162,9 @@ export default class EquipmentComponent {
           type: "mouseout",
           event: (e) => {
             e.preventDefault();
-            this.resetEquipmentInfoToCurrentValues(equipmentItem);
+            if (e.target.childNodes.length) {
+              this.resetEquipmentInfoToCurrentValues(equipmentItem);
+            }
           },
         }
       )
