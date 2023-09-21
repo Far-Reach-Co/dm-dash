@@ -530,7 +530,9 @@ class SingleSpell {
           type: "mouseout",
           event: (e) => {
             e.preventDefault();
-            this.resetSpellInfoToCurrentValues(spell);
+            if (e.target.childNodes.length) {
+              this.resetSpellInfoToCurrentValues(spell);
+            }
           },
         }
       )

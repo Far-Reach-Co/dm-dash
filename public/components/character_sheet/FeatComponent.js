@@ -238,6 +238,9 @@ class SingleFeatComponent {
           type: "focusout",
           event: (e) => {
             e.preventDefault();
+            // local
+            this.description = e.target.value;
+            // db
             postThing(`/api/edit_5e_character_feat/${this.id}`, {
               description: e.target.value,
             });
@@ -346,7 +349,9 @@ class SingleFeatComponent {
           type: "mouseout",
           event: (e) => {
             e.preventDefault();
-            this.resetFeatInfoToCurrentValues();
+            if (e.target.childNodes.length) {
+              this.resetFeatInfoToCurrentValues();
+            }
           },
         }
       )
@@ -405,7 +410,9 @@ class SingleFeatComponent {
                           e.preventDefault();
                           // hide suggestions
                           this.resetAndHideFeatSuggestions();
-
+                          // update local state
+                          this.title = e.target.value;
+                          // update db state
                           postThing(`/api/edit_5e_character_feat/${this.id}`, {
                             title: e.target.value,
                           });
@@ -466,6 +473,9 @@ class SingleFeatComponent {
               type: "change",
               event: (e) => {
                 e.preventDefault();
+                // local
+                this.type = e.target.value;
+                // db
                 postThing(`/api/edit_5e_character_feat/${this.id}`, {
                   type: e.target.value,
                 });
