@@ -214,6 +214,8 @@ router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         const playerSheetid = req.query.id;
         const playerSheetUserIdData = yield (0, _5eCharGeneral_1.get5eCharGeneralUserIdQuery)(playerSheetid);
         const playerSheetUserId = playerSheetUserIdData.rows[0].user_id;
+        const playerSheetNameData = yield (0, _5eCharGeneral_1.get5eCharNamesQuery)([playerSheetid]);
+        const playerSheetName = playerSheetNameData.rows[0].name;
         if (playerSheetUserId != req.session.user) {
             const playerUserData = yield (0, playerUsers_1.getPlayerUserByUserAndPlayerQuery)(req.session.user, playerSheetid);
             if (!playerUserData.rows.length) {
@@ -227,7 +229,10 @@ router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                         return res.render("forbidden", { auth: req.session.user });
                     }
                     else {
-                        return res.render("5eplayer", { auth: req.session.user });
+                        return res.render("5eplayer", {
+                            auth: req.session.user,
+                            playerSheetName: playerSheetName,
+                        });
                     }
                 }
                 const projectId = req.query.project;
@@ -244,19 +249,31 @@ router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                         return res.render("forbidden", { auth: req.session.user });
                     }
                     else {
-                        return res.render("5eplayer", { auth: req.session.user });
+                        return res.render("5eplayer", {
+                            auth: req.session.user,
+                            playerSheetName: playerSheetName,
+                        });
                     }
                 }
                 else {
-                    return res.render("5eplayer", { auth: req.session.user });
+                    return res.render("5eplayer", {
+                        auth: req.session.user,
+                        playerSheetName: playerSheetName,
+                    });
                 }
             }
             else {
-                return res.render("5eplayer", { auth: req.session.user });
+                return res.render("5eplayer", {
+                    auth: req.session.user,
+                    playerSheetName: playerSheetName,
+                });
             }
         }
         else {
-            return res.render("5eplayer", { auth: req.session.user });
+            return res.render("5eplayer", {
+                auth: req.session.user,
+                playerSheetName: playerSheetName,
+            });
         }
     }
     catch (err) {
