@@ -1,166 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co. | Dash</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <%- include('./partials/icons') %>
-  </head>
-  <%- include('./partials/google') %>
-  <body>
-    <%- include('./partials/nav') %>
-    <div class="container-fluid mt-5 d-flex flex-wrap h-100">
-      <div
-        class="d-flex flex-column p-3"
-        style="width: 33.33%; min-width: 300px"
-      >
-        <h2>Tables</h2>
-        <small
-          >Real-time virtual tables with images and drawing. Invite others to
-          join your table by sharing the link.</small
-        >
-        <br />
-        <a href="/newtable" title="Create a new virtual table">+ New Table</a>
-        <hr />
-        <% if (tables.length === 0) { %>
-        <small class="ms-2">No tables yet...</small>
-        <% } else { %> <% tables.forEach(function(table) { %>
-        <div
-          class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-          onclick="handleTableClick('<%= table.uuid %>')"
-          title="Open table in new tab"
-        >
-          <div class="dash-list-title mb-3"><%= table.title %></div>
-          <a>↗</a>
-        </div>
-        <% }); %> <% } %>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Dash</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid mt-5 d-flex flex-wrap h-100">
+    <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+      <h2>Tables</h2>
+      <small>Real-time virtual tables with images and drawing. Invite others to
+        join your table by sharing the link.</small>
+      <br />
+      <a href="/newtable" title="Create a new virtual table">+ New Table</a>
+      <hr />
+      <% if (tables.length === 0) { %>
+      <small class="ms-2">No tables yet...</small>
+      <% } else { %> <% tables.forEach(function(table) { %>
+      <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleTableClick('<%= table.uuid %>')" title="Open table in new tab">
+        <div class="dash-list-title mb-3"><%= table.title %></div>
+        <a>↗</a>
       </div>
-      <div
-        class="d-flex flex-column p-3"
-        style="width: 33.33%; min-width: 300px"
-      >
-        <h2>Player Character Sheets</h2>
-        <small
-          >We currently offer Dungeons and Dragons 5e sheets. You can invite
-          others to view/edit your character sheet from the settings tab.</small
-        >
-        <br />
-        <a href="/newsheet" title="Create a new player character sheet"
-          >+ New Sheet</a
-        >
-        <hr />
-        <h3>Created</h3>
-        <% if (sheets.length === 0) { %>
-        <small class="ms-2">No sheets yet...</small>
-        <% } else { %> <% sheets.forEach(function(sheet) { %>
-        <div
-          class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-          onclick="handleSheetClick('<%= sheet.id %>')"
-          title="Open character sheet in new tab"
-        >
-          <div class="dash-list-title mb-3"><%= sheet.name %></div>
-          <a>↗</a>
-        </div>
-        <% }); %> <% } %>
-        <br />
-        <h3>Shared With You</h3>
-        <% if (sharedSheets.length === 0) { %>
-        <small class="ms-2">No shared sheets yet...</small>
-        <% } else { %> <% sharedSheets.forEach(function(sheet) { %>
-        <div
-          class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-          onclick="handleSheetClick('<%= sheet.id %>')"
-          title="Open character sheet in new tab"
-        >
-          <div class="dash-list-title mb-3"><%= sheet.name %></div>
-          <a>↗</a>
-        </div>
-        <% }); %> <% } %>
-      </div>
-      <div
-        class="d-flex flex-column p-3"
-        style="width: 33.33%; min-width: 300px"
-      >
-        <h2>Wyrlds</h2>
-        <small
-          >A Wyrld is a contained environment that associates tables and
-          character sheets to create a more organized experience.
-          <ul>
-            <li>Add users with invite links.</li>
-            <li>Link player character sheets.</li>
-            <li>Allow users to manage tables.</li>
-            <!-- <li>File and document sharing.</li> -->
-            <li>Create customized calendars.</li>
-          </ul>
-        </small>
-        <br />
-        <a href="/newwyrld" title="Create a new wyrld">+ Wyrld</a>
-        <hr />
-        <h3>Created</h3>
-        <% if (projects.length === 0) { %>
-        <small class="ms-2">No Wyrlds yet...</small>
-        <% } else { %> <% projects.forEach(function(project) { %>
-        <div class="d-flex">
-          <img
-            class="icon gear mx-2"
-            src="/assets/gears.svg"
-            alt=""
-            title="Open wyrld settings"
-            onclick="handleWyrldSettingsClick('<%= project.id %>')"
-          />
-          <div
-            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-            onclick="handleWyrldClick('<%= project.id %>')"
-            title="Open wyrld dashboard"
-          >
-            <div class="dash-list-title mb-3"><%= project.title %></div>
-            <a>→</a>
-          </div>
-        </div>
-        <% }); %> <% } %>
-        <h3>Shared</h3>
-        <% if (sharedProjects.length === 0) { %>
-        <small class="ms-2">No Shared Wyrlds yet...</small>
-        <% } else { %> <% sharedProjects.forEach(function(project) { %>
-        <div class="d-flex">
-          <img
-            class="icon gear mx-2"
-            src="/assets/gears.svg"
-            alt=""
-            title="Open wyrld settings"
-            onclick="handleSharedWyrldSettingsClick('<%= project.id %>')"
-          />
-          <div
-            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-            onclick="handleWyrldClick('<%= project.id %>')"
-            title="Open wyrld dashboard"
-          >
-            <div class="dash-list-title mb-3"><%= project.title %></div>
-            <a>→</a>
-          </div>
-        </div>
-        <% }); %> <% } %>
-      </div>
+      <% }); %> <% } %>
     </div>
-  </body>
-  <script>
-    function handleSheetClick(id) {
-      window.open(`/5eplayer?id=${id}`, "_blank").focus();
-    }
-    function handleTableClick(uuid) {
-      window.open(`/vtt?uuid=${uuid}`, "_blank").focus();
-    }
-    function handleWyrldClick(id) {
-      window.location.href = `/wyrld?id=${id}`;
-    }
-    function handleWyrldSettingsClick(id) {
-      window.location.href = `/wyrldsettings?id=${id}`;
-    }
-    function handleSharedWyrldSettingsClick(id) {
-      window.location.href = `/sharedwyrldsettings?id=${id}`;
-    }
-  </script>
+    <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+      <h2>Player Character Sheets</h2>
+      <small>We currently offer Dungeons and Dragons 5e sheets. You can invite
+        others to view/edit your character sheet from the settings tab.</small>
+      <br />
+      <a href="/newsheet" title="Create a new player character sheet">+ New Sheet</a>
+      <hr />
+      <h3>Created</h3>
+      <% if (sheets.length === 0) { %>
+      <small class="ms-2">No sheets yet...</small>
+      <% } else { %> <% sheets.forEach(function(sheet) { %>
+      <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
+        <div class="dash-list-title mb-3"><%= sheet.name %></div>
+        <a>↗</a>
+      </div>
+      <% }); %> <% } %>
+      <br />
+      <h3>Shared With You</h3>
+      <% if (sharedSheets.length === 0) { %>
+      <small class="ms-2">No shared sheets yet...</small>
+      <% } else { %> <% sharedSheets.forEach(function(sheet) { %>
+      <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
+        <div class="dash-list-title mb-3"><%= sheet.name %></div>
+        <a>↗</a>
+      </div>
+      <% }); %> <% } %>
+    </div>
+    <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+      <h2>Wyrlds</h2>
+      <small>A Wyrld is a contained environment that associates tables and
+        character sheets to create a more organized experience.
+        <ul>
+          <li>Add users with invite links.</li>
+          <li>Link player character sheets.</li>
+          <li>Allow users to manage tables.</li>
+          <!-- <li>File and document sharing.</li> -->
+          <li>Create customized calendars.</li>
+        </ul>
+      </small>
+      <br />
+      <a href="/newwyrld" title="Create a new wyrld">+ Wyrld</a>
+      <hr />
+      <h3>Created</h3>
+      <% if (projects.length === 0) { %>
+      <small class="ms-2">No Wyrlds yet...</small>
+      <% } else { %> <% projects.forEach(function(project) { %>
+      <div class="d-flex">
+        <img class="icon gear mx-2" src="/assets/gears.svg" alt="" title="Open wyrld settings" onclick="handleWyrldSettingsClick('<%= project.id %>')" />
+        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
+          <div class="dash-list-title mb-3"><%= project.title %></div>
+          <a>→</a>
+        </div>
+      </div>
+      <% }); %> <% } %>
+      <h3>Shared</h3>
+      <% if (sharedProjects.length === 0) { %>
+      <small class="ms-2">No Shared Wyrlds yet...</small>
+      <% } else { %> <% sharedProjects.forEach(function(project) { %>
+      <div class="d-flex">
+        <img class="icon gear mx-2" src="/assets/gears.svg" alt="" title="Open wyrld settings" onclick="handleSharedWyrldSettingsClick('<%= project.id %>')" />
+        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
+          <div class="dash-list-title mb-3"><%= project.title %></div>
+          <a>→</a>
+        </div>
+      </div>
+      <% }); %> <% } %>
+    </div>
+  </div>
+</body>
+<script>
+  function handleSheetClick(id) {
+    window.open(`/5eplayer?id=${id}`, "_blank").focus();
+  }
+
+  function handleTableClick(uuid) {
+    window.open(`/vtt?uuid=${uuid}`, "_blank").focus();
+  }
+
+  function handleWyrldClick(id) {
+    window.location.href = `/wyrld?id=${id}`;
+  }
+
+  function handleWyrldSettingsClick(id) {
+    window.location.href = `/wyrldsettings?id=${id}`;
+  }
+
+  function handleSharedWyrldSettingsClick(id) {
+    window.location.href = `/sharedwyrldsettings?id=${id}`;
+  }
+</script>
+
 </html>

@@ -30,6 +30,7 @@ import {
   getProjectInviteByUUIDQuery,
 } from "./api/queries/projectInvites";
 import { getCalendarsQuery } from "./api/queries/calendars";
+import { humanFileSize } from "./lib/utils";
 
 // init csrf
 const csrf = require("csurf");
@@ -263,9 +264,14 @@ router.get(
       if (!req.session.user) return res.redirect("/login");
       const csrfToken = req.csrfToken();
       const { rows } = await getUserByIdQuery(req.session.user);
+
+      // calculate used data formatted
+      const usedDataFormatted = humanFileSize(rows[0].used_data_in_bytes);
+
       res.render("account", {
         auth: req.session.user,
         user: rows[0],
+        usedDataFormatted,
         csrfToken,
       });
     } catch (err) {
@@ -449,6 +455,9 @@ router.get(
       // calendars
       const calendars = await getCalendarsQuery(projectId);
 
+      // calculate used data formatted
+      const usedDataFormatted = humanFileSize(project.used_data_in_bytes);
+
       res.render("wyrld", {
         auth: req.session.user,
         projectAuth,
@@ -456,6 +465,7 @@ router.get(
         tables: tableData.rows,
         sheets: players,
         calendars: calendars.rows,
+        usedDataFormatted,
       });
     } catch (err) {
       next(err);

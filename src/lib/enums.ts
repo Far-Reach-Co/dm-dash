@@ -4,4 +4,8 @@ enum userSubscriptionStatus {
   projectIsNotPro = "PROJECT_IS_NOT_PRO",
 }
 
-export { userSubscriptionStatus };
+enum megabytesInBytes {
+  oneHundred = 104857600,
+}
+
+export { userSubscriptionStatus, megabytesInBytes };
