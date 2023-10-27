@@ -18,6 +18,7 @@ import { getTableViewQuery } from "../queries/tableViews.js";
 import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
 import path = require("path");
 import fs = require("fs");
+import { megabytesInBytes } from "../../lib/enums.js";
 
 config.update({
   signatureVersion: "v4",
@@ -148,8 +149,8 @@ async function checkUserProLimitReachedAndAuth(
   const userData = await getUserByIdQuery(sessionUser);
   const user = userData.rows[0];
   const userDataCount = user.used_data_in_bytes;
-  const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
-  if (userDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
+
+  if (userDataCount >= megabytesInBytes.oneHundred) {
     if (!user.is_pro)
       throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
   }
@@ -175,8 +176,8 @@ async function checkProjectProLimitReachedAndAuth(
   }
 
   const projectDataCount = project.used_data_in_bytes;
-  const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
-  if (projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
+
+  if (projectDataCount >= megabytesInBytes.oneHundred) {
     if (!project.is_pro) {
       throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
     }

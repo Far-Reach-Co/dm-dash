@@ -20,6 +20,7 @@ const projectPlayers_1 = require("./api/queries/projectPlayers");
 const playerInvites_1 = require("./api/queries/playerInvites");
 const projectInvites_1 = require("./api/queries/projectInvites");
 const calendars_1 = require("./api/queries/calendars");
+const utils_1 = require("./lib/utils");
 const csrf = require("csurf");
 const csrfMiddleware = csrf();
 var router = (0, express_1.Router)();
@@ -187,9 +188,11 @@ router.get("/account", csrfMiddleware, (req, res, next) => __awaiter(void 0, voi
             return res.redirect("/login");
         const csrfToken = req.csrfToken();
         const { rows } = yield (0, users_1.getUserByIdQuery)(req.session.user);
+        const usedDataFormatted = (0, utils_1.humanFileSize)(rows[0].used_data_in_bytes);
         res.render("account", {
             auth: req.session.user,
             user: rows[0],
+            usedDataFormatted,
             csrfToken,
         });
     }
@@ -340,6 +343,7 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             players.push(charData.rows[0]);
         }
         const calendars = yield (0, calendars_1.getCalendarsQuery)(projectId);
+        const usedDataFormatted = (0, utils_1.humanFileSize)(project.used_data_in_bytes);
         res.render("wyrld", {
             auth: req.session.user,
             projectAuth,
@@ -347,6 +351,7 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             tables: tableData.rows,
             sheets: players,
             calendars: calendars.rows,
+            usedDataFormatted,
         });
     }
     catch (err) {

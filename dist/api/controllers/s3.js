@@ -22,6 +22,7 @@ const tableViews_js_1 = require("../queries/tableViews.js");
 const projectUsers_js_1 = require("../queries/projectUsers.js");
 const path = require("path");
 const fs = require("fs");
+const enums_js_2 = require("../../lib/enums.js");
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -82,8 +83,7 @@ function checkUserProLimitReachedAndAuth(sessionUser) {
         const userData = yield (0, users_js_1.getUserByIdQuery)(sessionUser);
         const user = userData.rows[0];
         const userDataCount = user.used_data_in_bytes;
-        const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
-        if (userDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
+        if (userDataCount >= enums_js_2.megabytesInBytes.oneHundred) {
             if (!user.is_pro)
                 throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
         }
@@ -103,8 +103,7 @@ function checkProjectProLimitReachedAndAuth(projectId, sessionUser) {
                 throw new Error("Not authorized to update this resource");
         }
         const projectDataCount = project.used_data_in_bytes;
-        const ONE_HUNDRED_MEGABYTES_IN_BYTES = 104857600;
-        if (projectDataCount >= ONE_HUNDRED_MEGABYTES_IN_BYTES) {
+        if (projectDataCount >= enums_js_2.megabytesInBytes.oneHundred) {
             if (!project.is_pro) {
                 throw { status: 402, message: enums_js_1.userSubscriptionStatus.projectIsNotPro };
             }

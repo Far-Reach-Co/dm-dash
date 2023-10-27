@@ -1,177 +1,161 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co. | Wyrlds</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <script type="module" src="/components/Calendar.js" defer></script>
-    <script src="/components/modal.js" type="module"></script>
-    <script type="module" src="/components/loadingWithMessage.js"></script>
-    <%- include('./partials/icons') %>
-  </head>
-  <%- include('./partials/google') %>
-  <body>
-    <%- include('./partials/nav') %>
-    <div class="container-fluid d-flex flex-column h-100">
-      <div class="p-3">
-        <h1 style="color: var(--green)"><%= project.title %></h1>
-        <!-- <br /> -->
-        <!-- <small><%= project.description %></small> -->
-      </div>
-      <div class="d-flex flex-wrap">
-        <div
-          class="d-flex flex-column p-3"
-          style="width: 33.33%; min-width: 300px"
-        >
-          <h2>Wyrld Tables</h2>
-          <small
-            >These tables are shared by the members of the wyrld. The wyrld
-            managers have the ability to upload images and manage the map
-            layer.</small
-          >
-          <br />
-          <% if (projectAuth) { %>
-          <a
-            href="/newwyrldtable?id=<%= project.id %>"
-            title="Create a new virtual table"
-            >+ New Wyrld Table</a
-          >
 
-          <% } %>
-          <hr />
-          <% if (tables.length === 0) { %>
-          <small class="ms-2">No tables yet...</small>
-          <% } else { %> <% tables.forEach(function(table) { %>
-          <div
-            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-            onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')"
-            title="Open table in new tab"
-          >
-            <div class="dash-list-title mb-3"><%= table.title %></div>
-            <a>↗</a>
-          </div>
-          <% }); %> <% } %>
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Wyrlds</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script type="module" src="/components/Calendar.js" defer></script>
+  <script src="/components/modal.js" type="module"></script>
+  <script type="module" src="/components/loadingWithMessage.js"></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid d-flex flex-column h-100">
+    <div class="p-3">
+      <h1 style="color: var(--green)"><%= project.title %></h1>
+      <!-- <br /> -->
+      <!-- <small><%= project.description %></small> -->
+      <br>
+      <% if (!project.is_pro) { %>
+      <div>
+        <h3 style="display: inline-block;">Status:</h3>
+        <p style="display: inline-block;">Free Tier</p>
+      </div>
+      <div>
+        <h3 style="display: inline-block;">Data Used:</h3>
+        <p style="display: inline-block;"><%= usedDataFormatted %> / 100MB</p>
+      </div>
+      <% } else { %>
+      <div>
+        <h3 style="display: inline-block;">Subscription Status:</h3>
+        <p style="display: inline-block;">Pro</p>
+      </div>
+      <div>
+        <h3 style="display: inline-block;">Data Used:</h3>
+        <p style="display: inline-block;"><%= usedDataFormatted %></p>
+      </div>
+      <% } %>
+      <small>-- Subscriptions under Construction --</small>
+    </div>
+    <div class="d-flex flex-wrap">
+      <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+        <h2>Wyrld Tables</h2>
+        <small>These tables are shared by the members of the wyrld. The wyrld
+          managers have the ability to upload images and manage the map
+          layer.</small>
+        <br />
+        <% if (projectAuth) { %>
+        <a href="/newwyrldtable?id=<%= project.id %>" title="Create a new virtual table">+ New Wyrld Table</a>
+
+        <% } %>
+        <hr />
+        <% if (tables.length === 0) { %>
+        <small class="ms-2">No tables yet...</small>
+        <% } else { %> <% tables.forEach(function(table) { %>
+        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')" title="Open table in new tab">
+          <div class="dash-list-title mb-3"><%= table.title %></div>
+          <a>↗</a>
         </div>
-        <div
-          class="d-flex flex-column p-3"
-          style="width: 33.33%; min-width: 300px"
-        >
-          <h2>Player Character Sheets</h2>
-          <small
-            >We currently offer Dungeons and Dragons 5e sheets. Only the creator
-            of the sheet and the wyrld managers are allowed to view these
-            sheets.</small
-          >
-          <br />
-          <!-- <a href="/newsheet" title="Create a new player character sheet"
+        <% }); %> <% } %>
+      </div>
+      <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+        <h2>Player Character Sheets</h2>
+        <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator
+          of the sheet and the wyrld managers are allowed to view these
+          sheets.</small>
+        <br />
+        <!-- <a href="/newsheet" title="Create a new player character sheet"
             >+ New Sheet</a
           > -->
-          <hr />
-          <% if (sheets.length === 0) { %>
-          <small class="ms-2"
-            >No sheets have been connected to this wyrld yet...</small
-          >
-          <% } else { %> <% sheets.forEach(function(sheet) { %>
-          <div
-            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-            onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')"
-            title="Open character sheet in new tab"
-          >
-            <div class="dash-list-title mb-3"><%= sheet.name %></div>
-            <a>↗</a>
-          </div>
-          <% }); %> <% } %>
+        <hr />
+        <% if (sheets.length === 0) { %>
+        <small class="ms-2">No sheets have been connected to this wyrld yet...</small>
+        <% } else { %> <% sheets.forEach(function(sheet) { %>
+        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')" title="Open character sheet in new tab">
+          <div class="dash-list-title mb-3"><%= sheet.name %></div>
+          <a>↗</a>
         </div>
-        <div
-          class="d-flex flex-column p-3"
-          style="width: 33.33%; min-width: 300px"
-        >
-          <h2>Calendars</h2>
-          <small
-            >Custom calendars allow for general time-keeping of the various
-            cultures in the wyrld. Managers have access to create and update the
-            calendars.</small
-          >
-          <br />
-          <% if (projectAuth) { %>
-          <a
-            href="/newwyrldcalendar?id=<%= project.id %>"
-            title="Create a new calendar"
-            >+ New Calendar</a
-          >
+        <% }); %> <% } %>
+      </div>
+      <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+        <h2>Calendars</h2>
+        <small>Custom calendars allow for general time-keeping of the various
+          cultures in the wyrld. Managers have access to create and update the
+          calendars.</small>
+        <br />
+        <% if (projectAuth) { %>
+        <a href="/newwyrldcalendar?id=<%= project.id %>" title="Create a new calendar">+ New Calendar</a>
 
-          <% } %>
-          <hr />
-          <% if (calendars.length === 0) { %>
-          <small class="ms-2">No calendars yet...</small>
-          <% } else { %> <% calendars.forEach(function(calendar) { %>
-          <div
-            class="d-flex justify-content-between w-50 ms-2 dash-list-title-container"
-            onclick="openCalendar('<%= calendar.id %>')"
-            title="Open calendar"
-          >
-            <div
-              class="dash-list-title mb-3"
-              id="calendar-title-<%= calendar.id %>"
-            >
-              <%= calendar.title %>
-            </div>
-            <a class="ms-1"><small>View</small></a>
+        <% } %>
+        <hr />
+        <% if (calendars.length === 0) { %>
+        <small class="ms-2">No calendars yet...</small>
+        <% } else { %> <% calendars.forEach(function(calendar) { %>
+        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="openCalendar('<%= calendar.id %>')" title="Open calendar">
+          <div class="dash-list-title mb-3" id="calendar-title-<%= calendar.id %>">
+            <%= calendar.title %>
           </div>
-          <% }); %> <% } %>
+          <a class="ms-1"><small>View</small></a>
         </div>
+        <% }); %> <% } %>
       </div>
     </div>
-    <!-- Toast -->
-    <div id="toast-custom"></div>
-    <!-- The Modal -->
-    <div id="modal-custom" class="modal-custom">
-      <!-- Modal content -->
-      <div class="modal-custom-container">
-        <div id="close-custom-modal" class="close-custom-modal">&times;</div>
-        <div id="modal-custom-content" class="modal-custom-content"></div>
-      </div>
+  </div>
+  <!-- Toast -->
+  <div id="toast-custom"></div>
+  <!-- The Modal -->
+  <div id="modal-custom" class="modal-custom">
+    <!-- Modal content -->
+    <div class="modal-custom-container">
+      <div id="close-custom-modal" class="close-custom-modal">&times;</div>
+      <div id="modal-custom-content" class="modal-custom-content"></div>
     </div>
-  </body>
-  <script>
+  </div>
+</body>
+<script>
+  function handleSheetClick(id, projectID) {
+    window.open(`/5eplayer?id=${id}&project=${projectID}`, "_blank").focus();
+  }
 
-    function handleSheetClick(id, projectID) {
-      window.open(`/5eplayer?id=${id}&project=${projectID}`, "_blank").focus();
-    }
-    function handleTableClick(uuid, projectID) {
-      window.open(`/vtt?uuid=${uuid}&project=${projectID}`, "_blank").focus();
-    }
+  function handleTableClick(uuid, projectID) {
+    window.open(`/vtt?uuid=${uuid}&project=${projectID}`, "_blank").focus();
+  }
 
-    const projectAuth = <%= projectAuth %>;
+  const projectAuth = <%= projectAuth %>;
 
-    async function openCalendar(id) {
-      modal.show(renderLoadingWithMessage(""));
-      const res = await fetch(`/api/get_calendar/${id}`)
-      if (res.status === 200) {
-        const calendar = await res.json();
-        if (calendar) {
-          const elem = document.createElement("div");
-          elem.className = "p-3 calendar";
+  async function openCalendar(id) {
+    modal.show(renderLoadingWithMessage(""));
+    const res = await fetch(`/api/get_calendar/${id}`)
+    if (res.status === 200) {
+      const calendar = await res.json();
+      if (calendar) {
+        const elem = document.createElement("div");
+        elem.className = "p-3 calendar";
 
-          new Calendar({
-            domComponent: elem,
-            projectAuth,
-            id: calendar.id,
-            projectId: calendar.project_id,
-            year: calendar.year,
-            currentMonthId: calendar.current_month_id,
-            currentDay: calendar.current_day,
-            title: calendar.title,
-            months: calendar.months,
-            daysOfTheWeek: calendar.days_of_the_week
-          })
-          // show in modal
-          modal.show(elem)
-        }
-      } else modal.hide()
-    }
-  </script>
+        new Calendar({
+          domComponent: elem,
+          projectAuth,
+          id: calendar.id,
+          projectId: calendar.project_id,
+          year: calendar.year,
+          currentMonthId: calendar.current_month_id,
+          currentDay: calendar.current_day,
+          title: calendar.title,
+          months: calendar.months,
+          daysOfTheWeek: calendar.days_of_the_week
+        })
+        // show in modal
+        modal.show(elem)
+      }
+    } else modal.hide()
+  }
+</script>
+
 </html>
