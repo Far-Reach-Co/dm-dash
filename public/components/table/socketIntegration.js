@@ -39,6 +39,13 @@ class SocketIntegration {
       }
     });
 
+    this.socket.on("disconnect", (error) => {
+      console.log(error);
+      if (window.confirm("There was a connection error, refresh the page?")) {
+        history.go();
+      }
+    });
+
     // UPDATE CURRENT USERS
     this.socket.on("current-users", (list) => {
       if (this.sidebar) {
