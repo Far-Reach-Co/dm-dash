@@ -342,10 +342,14 @@ export default class TableSidebar {
               const newUrl =
                 window.location.pathname + "?" + newSearchParamsString;
 
-              window.history.replaceState(null, null, newUrl);
-
-              // Reload the page
-              window.location.reload();
+              // Prompt the user
+              if (
+                confirm(
+                  "The GM has requested that you migrate to a new virtual table location, would you like to proceed?"
+                )
+              ) {
+                window.location.href = newUrl;
+              }
             }
           },
         }
