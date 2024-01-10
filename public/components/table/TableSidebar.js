@@ -342,14 +342,7 @@ export default class TableSidebar {
               const newUrl =
                 window.location.pathname + "?" + newSearchParamsString;
 
-              // Prompt the user
-              if (
-                confirm(
-                  "The GM has requested that you migrate to a new virtual table location, would you like to proceed?"
-                )
-              ) {
-                window.location.href = newUrl;
-              }
+              window.location.href = newUrl;
             }
           },
         }
