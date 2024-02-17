@@ -737,6 +737,9 @@ class SingleSpell {
                     postThing(`/api/edit_5e_character_spell/${spell.id}`, {
                       title: e.target.value,
                     });
+                    // update UI
+                    this.spells[this.spells.indexOf(spell)].title =
+                      e.target.value;
                   },
                 },
                 {
