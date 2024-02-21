@@ -16,8 +16,8 @@ export default class CanvasLayer {
     // grid
     this.grid = 100;
     this.unitScale = 10;
-    this.canvasWidth = 250 * this.unitScale;
-    this.canvasHeight = 250 * this.unitScale;
+    this.canvasWidth = 400 * this.unitScale;
+    this.canvasHeight = 400 * this.unitScale;
     this.oGridGroup;
 
     // event setup
