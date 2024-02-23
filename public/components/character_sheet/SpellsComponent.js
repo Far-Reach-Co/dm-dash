@@ -387,7 +387,7 @@ class SingleSpell {
         createElement(
           "a",
           { style: "font-size: small; margin-top: 5px;" },
-          "- Collapse all",
+          "+ Expand all",
           {
             type: "click",
             event: () => {
@@ -398,7 +398,7 @@ class SingleSpell {
         createElement(
           "a",
           { style: "font-size: small; margin-top: 5px;" },
-          "+ Expand all",
+          "- Collapse all",
           {
             type: "click",
             event: () => {
