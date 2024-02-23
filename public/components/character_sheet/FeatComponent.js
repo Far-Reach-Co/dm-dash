@@ -27,7 +27,7 @@ export default class FeatComponent {
 
     this.newLoading = false;
 
-    this.featComponents = [];
+    this.featElements = [];
 
     this.render();
   }
@@ -38,7 +38,7 @@ export default class FeatComponent {
   };
 
   removeItem = (id) => {
-    this.featComponents = this.featComponents.filter((item) => item.id != id);
+    this.featElements = this.featElements.filter((item) => item.id != id);
     this.render();
   };
 
@@ -54,7 +54,7 @@ export default class FeatComponent {
     });
     if (featData) {
       const elem = createElement("div");
-      const featComponent = new SingleFeatComponent({
+      const featElement = new SingleFeatComponent({
         parentRemoveItem: this.removeItem,
         domComponent: elem,
         renderTypeSelectOptions: this.renderTypeSelectOptions,
@@ -64,7 +64,7 @@ export default class FeatComponent {
         description: featData.description,
       });
       // save the components
-      this.featComponents.push(featComponent);
+      this.featElements.push(featElement);
     }
     this.toggleNewLoading();
   };
@@ -86,8 +86,8 @@ export default class FeatComponent {
 
   renderFeatElems = async () => {
     // check if we have some components instantiated already
-    if (this.featComponents.length) {
-      return this.featComponents.map((item) => item.domComponent);
+    if (this.featElements.length) {
+      return this.featElements.map((item) => item.domComponent);
     }
 
     const featsData = await getThings(
@@ -98,7 +98,7 @@ export default class FeatComponent {
 
     return featsData.map((item) => {
       const elem = createElement("div");
-      const featComponent = new SingleFeatComponent({
+      const featElement = new SingleFeatComponent({
         parentRemoveItem: this.removeItem,
         domComponent: elem,
         renderTypeSelectOptions: this.renderTypeSelectOptions,
@@ -108,7 +108,7 @@ export default class FeatComponent {
         description: item.description,
       });
       // save the components
-      this.featComponents.push(featComponent);
+      this.featElements.push(featElement);
 
       return elem;
     });
@@ -144,7 +144,7 @@ export default class FeatComponent {
                 {
                   type: "click",
                   event: () => {
-                    this.featComponents.forEach((item) => item.show());
+                    this.featElements.forEach((item) => item.show());
                   },
                 }
               ),
@@ -155,7 +155,7 @@ export default class FeatComponent {
                 {
                   type: "click",
                   event: () => {
-                    this.featComponents.forEach((item) => item.hide());
+                    this.featElements.forEach((item) => item.hide());
                   },
                 }
               ),
@@ -437,14 +437,14 @@ class SingleFeatComponent {
                     "ⓧ",
                     {
                       type: "click",
-                      event: async (e) => {
+                      event: (e) => {
                         e.preventDefault();
                         if (
                           window.confirm(
                             `Are you sure you want to delete ${this.title}`
                           )
                         ) {
-                          await deleteThing(
+                          deleteThing(
                             `/api/remove_5e_character_feat/${this.id}`
                           );
                           this.parentRemoveItem(this.id);
