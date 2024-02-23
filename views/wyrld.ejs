@@ -11,6 +11,7 @@
   <script type="module" src="/components/Calendar.js" defer></script>
   <script src="/components/modal.js" type="module"></script>
   <script type="module" src="/components/loadingWithMessage.js"></script>
+  <script src="/lib/searchDashElements.js" defer></script>
   <%- include('./partials/icons') %>
 </head>
 <%- include('./partials/google') %>
@@ -58,12 +59,18 @@
         <hr />
         <% if (tables.length === 0) { %>
         <small class="ms-2">No tables yet...</small>
-        <% } else { %> <% tables.forEach(function(table) { %>
-        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')" title="Open table in new tab">
-          <div class="dash-list-title mb-3"><%= table.title %></div>
-          <a>↗</a>
+        <% } else { %>
+        <input class="w-75" id="search-table-elements-input" type="text" placeholder="Search Tables">
+        <br>
+        <div id="table-elements-list">
+          <% tables.forEach(function(table) { %>
+          <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')" title="Open table in new tab">
+            <div class="dash-list-title mb-3"><%= table.title %></div>
+            <a>↗</a>
+          </div>
+          <% }); %>
         </div>
-        <% }); %> <% } %>
+        <% } %>
       </div>
       <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
         <h2>Player Character Sheets</h2>
