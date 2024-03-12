@@ -297,18 +297,74 @@ class ChatBoxComponent {
     this.domComponent.className = "chat-box-container";
     this.socketIntegration = props.socketIntegration;
     this.chatBoxMessages = [];
+    this.focused = true;
+    this.hidden = false;
   }
 
   scrollMessagesDown = () => {
     const messagesDiv = document.querySelector("#chat-box-messages");
-    console.log(messagesDiv.scrollTop, messagesDiv.scrollHeight);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   };
 
-  render = () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.append(
-      createElement(
+  focus = () => {
+    const inputDiv = document.querySelector("#chat-box-form-input");
+    inputDiv.focus();
+  };
+
+  refocus = () => {
+    if (this.focused) {
+      this.focus();
+    }
+  };
+
+  renderHideChatButton = () => {
+    if (this.hidden) {
+      return createElement(
+        "small",
+        { class: "chat-box-hide d-flex align-items-center" },
+        [
+          createElement("img", {
+            style: "margin-right: var(--main-distance)",
+            class: "small-icon chat-box-icon",
+            src: "/assets/show.svg",
+          }),
+          createElement("small", {}, "Show Chat"),
+        ],
+        {
+          type: "click",
+          event: () => {
+            this.hidden = false;
+            this.render();
+          },
+        }
+      );
+    } else
+      return createElement(
+        "small",
+        { class: "chat-box-hide d-flex align-items-center" },
+        [
+          createElement("img", {
+            style: "margin-right: var(--main-distance)",
+            class: "small-icon chat-box-icon",
+            src: "/assets/hide.svg",
+          }),
+          createElement("small", {}, "Hide Chat"),
+        ],
+        {
+          type: "click",
+          event: () => {
+            this.hidden = true;
+            this.render();
+          },
+        }
+      );
+  };
+
+  renderMessagesOrHidden = () => {
+    if (this.hidden) {
+      return createElement("div", { style: "display: none;" });
+    } else
+      return createElement(
         "div",
         {
           class: "chat-box-messages",
@@ -329,7 +385,21 @@ class ChatBoxComponent {
             ])
           ),
         ]
-      ),
+      );
+  };
+
+  render = () => {
+    // check if previously was focused before clearing
+    const inputDiv = document.querySelector("#chat-box-form-input");
+    if (document.activeElement === inputDiv) {
+      this.focused = true;
+    }
+    // clear
+    this.domComponent.innerHTML = "";
+    // render
+    this.domComponent.append(
+      this.renderHideChatButton(),
+      this.renderMessagesOrHidden(),
       createElement(
         "form",
         { class: "chat-box-form" },
@@ -348,15 +418,19 @@ class ChatBoxComponent {
           type: "submit",
           event: (e) => {
             e.preventDefault();
-            console.log(e);
             const content = e.target.elements["chat-box-form-input"].value;
-            console.log(content);
             this.socketIntegration.newTableMessage(content);
+
+            // clear input
+            e.target.elements["chat-box-form-input"].value = "";
+            e.target.elements["chat-box-form-input"].focus();
           },
         }
       )
     );
-    // after render scroll down
+    // scroll down
     this.scrollMessagesDown();
+    // refocus?
+    this.refocus();
   };
 }

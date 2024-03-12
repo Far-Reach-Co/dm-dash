@@ -64,6 +64,8 @@ class Table {
     this.topLayer.chatBoxComponent.chatBoxMessages =
       socketIntegration.tableMessages;
     this.topLayer.chatBoxComponent.render();
+    this.topLayer.chatBoxComponent.scrollMessagesDown();
+    this.topLayer.chatBoxComponent.focus();
 
     // only render the sidebar for owner or managers
     if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)

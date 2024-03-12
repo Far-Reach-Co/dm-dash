@@ -66,8 +66,6 @@ class SocketIntegration {
     this.socket.on("message", (message) => {
       this.topLayer.chatBoxComponent.chatBoxMessages.push(message);
       this.topLayer.chatBoxComponent.render();
-      // scroll down
-      this.topLayer.chatBoxComponent.scrollMessagesDown();
     });
 
     // GRID

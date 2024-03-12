@@ -722,6 +722,11 @@ footer {
   height: 25px;
 }
 
+.small-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .gear:hover {
   opacity: 0.7;
 }
