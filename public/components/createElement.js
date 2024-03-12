@@ -17,8 +17,8 @@ export default function createElement(
   }
 
   if (inner) {
-    // If inner is a string that looks like a tag HTML, set it as innerHTML only for chat box on vtt right now
-    if (typeof inner === "string" && inner.trim().startsWith("<a")) {
+    if (typeof inner === "string" && /<[^>]+>/.test(inner)) {
+      // If inner is a string containing HTML tags, set it as innerHTML
       el.innerHTML = inner;
     } else {
       // Handle non-HTML strings and elements as before
