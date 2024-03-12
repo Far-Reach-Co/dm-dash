@@ -211,7 +211,7 @@ io.on("connection", (socket) => {
       const processedContent = convertURLsToLinks(content);
       // remove any unwanted html only allow a tags
       const sanitizedContent = sanitizeHtml(processedContent, {
-        allowedTags: ["a"], // Allow only <a> tags
+        allowedTags: ["a", "br"], // Allow only <a> and <br> tags
         allowedAttributes: {
           a: ["href", "rel", "target"], // Allow only href, rel, and target attributes on <a> tags
         },

@@ -192,6 +192,11 @@
   flex-wrap: wrap;
 }
 
+.chat-box-messages br {
+  margin-left: 2.5px;
+  margin-right: 2.5px;
+}
+
 .chat-box-form {
   display: flex;
   align-items: center;
