@@ -165,7 +165,7 @@
 .chat-box-container {
   position: absolute;
   width: 100%;
-  max-height: 200px;
+  max-height: 250px;
   z-index: 4;
   bottom: 0;
   left: 0;
@@ -176,13 +176,20 @@
 
 .chat-box-messages {
   flex: 1;
-  padding: var(--main-distance);
   display: flex;
   flex-direction: column;
+  padding: var(--main-distance);
   background-color: var(--blue4);
   overflow-y: scroll;
   word-wrap: break-word;
   opacity: 0.8;
+}
+
+.chat-box-messages * {
+  user-select: text;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
 .chat-box-form {

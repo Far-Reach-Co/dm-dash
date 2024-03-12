@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.humanFileSize = exports.toTitleCase = exports.splitAtIndex = void 0;
+exports.convertURLsToLinks = exports.humanFileSize = exports.toTitleCase = exports.splitAtIndex = void 0;
 function splitAtIndex(value, index) {
     return [value.substring(0, index), value.substring(index)];
 }
@@ -30,3 +30,10 @@ function humanFileSize(bytes, si = true, dp = 1) {
     return bytes.toFixed(dp) + units[u];
 }
 exports.humanFileSize = humanFileSize;
+function convertURLsToLinks(text) {
+    const urlRegex = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+    return text.replace(urlRegex, function (url) {
+        return `<a href="${url}" rel="noopener noreferrer" target="_blank">${url}</a>`;
+    });
+}
+exports.convertURLsToLinks = convertURLsToLinks;

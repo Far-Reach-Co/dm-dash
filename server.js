@@ -39,6 +39,8 @@ const {
   appendMessageToChatLog,
 } = require("./dist/lib/socketUsers.js");
 const { pool } = require("./dist/api/dbconfig.js");
+const sanitizeHtml = require("sanitize-html");
+const { convertURLsToLinks } = require("./dist/lib/utils.js");
 
 //Set CORS
 // app.use(cors())
@@ -145,14 +147,17 @@ io.on("connection", (socket) => {
       // broadcast when a user connects
       io.to(table).emit("table-join", `Hello ${username}`);
 
-      io.to(table).emit("table-messages", await getChatLog(table));
-
       // send users list
       io.to(user.table).emit("current-users", await getTableUsers(table));
     } catch (err) {
       console.log("SOCKET ERROR", err);
     }
   });
+
+  socket.on("get-messages", async ({ table }) => {
+    io.to(table).emit("table-messages", await getChatLog(table));
+  });
+
   // grid
   socket.on("grid-changed", ({ table, gridState }) => {
     socket.broadcast.to(table).emit("grid-change", gridState);
@@ -202,10 +207,20 @@ io.on("connection", (socket) => {
         return;
       }
 
+      // first convert any urls to a tags
+      const processedContent = convertURLsToLinks(content);
+      // remove any unwanted html only allow a tags
+      const sanitizedContent = sanitizeHtml(processedContent, {
+        allowedTags: ["a"], // Allow only <a> tags
+        allowedAttributes: {
+          a: ["href", "rel", "target"], // Allow only href, rel, and target attributes on <a> tags
+        },
+      });
+
       const messageObject = {
         userId: user.id,
         username: user.username,
-        content: content,
+        content: sanitizedContent,
         timestamp: new Date().toISOString(),
       };
 

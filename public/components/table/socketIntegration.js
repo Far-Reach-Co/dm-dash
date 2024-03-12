@@ -6,9 +6,6 @@ class SocketIntegration {
     this.user = null;
     this.sidebar = null;
     this.topLayer = null;
-
-    // temp
-    this.tableMessages = [];
   }
 
   // Listeners
@@ -59,13 +56,31 @@ class SocketIntegration {
 
     // TABLE MESSAGES
     this.socket.on("table-messages", (messages) => {
-      // store here for now until top layer renders
-      this.tableMessages = messages;
+      // check if top layer exists and update messages
+      if (
+        this.topLayer &&
+        this.topLayer.chatBoxComponent &&
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent
+      ) {
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages =
+          messages;
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.render();
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
+      }
     });
 
     this.socket.on("message", (message) => {
-      this.topLayer.chatBoxComponent.chatBoxMessages.push(message);
-      this.topLayer.chatBoxComponent.render();
+      if (
+        this.topLayer &&
+        this.topLayer.chatBoxComponent &&
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent
+      ) {
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages.push(
+          message
+        );
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.render();
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
+      }
     });
 
     // GRID
@@ -230,6 +245,12 @@ class SocketIntegration {
   socketJoined = () => {
     this.socket.emit("table-joined", {
       username: this.user.username,
+      table: `table-${this.tableId}`,
+    });
+  };
+
+  getMessages = () => {
+    this.socket.emit("get-messages", {
       table: `table-${this.tableId}`,
     });
   };

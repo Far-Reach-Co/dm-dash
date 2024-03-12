@@ -1,5 +1,6 @@
 import modal from "../modal.js";
 import createElement from "../createElement.js";
+import isoDateFormat from "../../lib/isoDateFormat.js";
 
 export default class TopLayer {
   constructor(props) {
@@ -296,29 +297,19 @@ class ChatBoxComponent {
     this.domComponent = props.domComponent;
     this.domComponent.className = "chat-box-container";
     this.socketIntegration = props.socketIntegration;
-    this.chatBoxMessages = [];
-    this.focused = true;
-    this.hidden = false;
+
+    this.chatBoxMessagesComponent = new ChatBoxMessagesComponent({
+      domComponent: createElement("div", {
+        class: "chat-box-messages",
+        id: "chat-box-messages",
+      }),
+    });
+
+    this.render();
   }
 
-  scrollMessagesDown = () => {
-    const messagesDiv = document.querySelector("#chat-box-messages");
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
-  };
-
-  focus = () => {
-    const inputDiv = document.querySelector("#chat-box-form-input");
-    inputDiv.focus();
-  };
-
-  refocus = () => {
-    if (this.focused) {
-      this.focus();
-    }
-  };
-
   renderHideChatButton = () => {
-    if (this.hidden) {
+    if (this.chatBoxMessagesComponent.hidden) {
       return createElement(
         "small",
         { class: "chat-box-hide d-flex align-items-center" },
@@ -333,7 +324,8 @@ class ChatBoxComponent {
         {
           type: "click",
           event: () => {
-            this.hidden = false;
+            this.chatBoxMessagesComponent.hidden = false;
+            this.chatBoxMessagesComponent.render();
             this.render();
           },
         }
@@ -353,53 +345,21 @@ class ChatBoxComponent {
         {
           type: "click",
           event: () => {
-            this.hidden = true;
+            this.chatBoxMessagesComponent.hidden = true;
+            this.chatBoxMessagesComponent.render();
             this.render();
           },
         }
       );
   };
 
-  renderMessagesOrHidden = () => {
-    if (this.hidden) {
-      return createElement("div", { style: "display: none;" });
-    } else
-      return createElement(
-        "div",
-        {
-          class: "chat-box-messages",
-          id: "chat-box-messages",
-        },
-        [
-          ...this.chatBoxMessages.map((message) =>
-            createElement("div", { class: "d-flex" }, [
-              createElement(
-                "div",
-                {
-                  style:
-                    "font-weight: bold; margin-right: var(--main-distance);",
-                },
-                `${message.username}:`
-              ),
-              createElement("div", {}, message.content),
-            ])
-          ),
-        ]
-      );
-  };
-
   render = () => {
-    // check if previously was focused before clearing
-    const inputDiv = document.querySelector("#chat-box-form-input");
-    if (document.activeElement === inputDiv) {
-      this.focused = true;
-    }
     // clear
     this.domComponent.innerHTML = "";
     // render
     this.domComponent.append(
       this.renderHideChatButton(),
-      this.renderMessagesOrHidden(),
+      this.chatBoxMessagesComponent.domComponent,
       createElement(
         "form",
         { class: "chat-box-form" },
@@ -428,9 +388,51 @@ class ChatBoxComponent {
         }
       )
     );
-    // scroll down
-    this.scrollMessagesDown();
-    // refocus?
-    this.refocus();
+  };
+}
+
+class ChatBoxMessagesComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.chatBoxMessages = [];
+    this.hidden = false;
+
+    this.render();
+  }
+
+  scrollDown = () => {
+    this.domComponent.scrollTop = this.domComponent.scrollHeight;
+  };
+
+  renderMessagesOrHidden = () => {
+    if (this.hidden) {
+      return [createElement("div", { style: "display: none;" })];
+    } else
+      return [
+        ...this.chatBoxMessages.map((message) =>
+          createElement("div", { class: "d-flex align-items-center" }, [
+            createElement(
+              "small",
+              { style: "margin-right: var(--main-distance)" },
+              isoDateFormat(message.timestamp)
+            ),
+            createElement(
+              "div",
+              {
+                style: "font-weight: bold; margin-right: var(--main-distance);",
+              },
+              `${message.username}:`
+            ),
+            createElement("div", {}, message.content),
+          ])
+        ),
+      ];
+  };
+
+  render = () => {
+    // clear
+    this.domComponent.innerHTML = "";
+    // render
+    this.domComponent.append(...this.renderMessagesOrHidden());
   };
 }
