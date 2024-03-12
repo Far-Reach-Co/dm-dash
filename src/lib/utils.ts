@@ -37,3 +37,11 @@ export function humanFileSize(
 
   return bytes.toFixed(dp) + units[u];
 }
+
+export function convertURLsToLinks(text: string) {
+  const urlRegex =
+    /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gi;
+  return text.replace(urlRegex, function (url: string) {
+    return `<a href="${url}" rel="noopener noreferrer" target="_blank">${url}</a>`;
+  });
+}

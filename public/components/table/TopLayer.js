@@ -1,11 +1,18 @@
 import modal from "../modal.js";
 import createElement from "../createElement.js";
+import isoDateFormat from "../../lib/isoDateFormat.js";
 
 export default class TopLayer {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.canvasLayer = props.canvasLayer;
     this.tableView = props.tableView;
+    this.socketIntegration = props.socketIntegration;
+
+    this.chatBoxComponent = new ChatBoxComponent({
+      domComponent: createElement("div"),
+      socketIntegration: this.socketIntegration,
+    });
   }
 
   handleChangeCanvasLayer = () => {
@@ -279,7 +286,153 @@ export default class TopLayer {
       this.renderDrawColorAndWidthPicker(),
       this.renderLayersElem(),
       this.renderGridControlElem(),
-      this.renderInfoMenu()
+      this.renderInfoMenu(),
+      this.chatBoxComponent.domComponent
     );
+  };
+}
+
+class ChatBoxComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "chat-box-container";
+    this.socketIntegration = props.socketIntegration;
+
+    this.chatBoxMessagesComponent = new ChatBoxMessagesComponent({
+      domComponent: createElement("div", {
+        class: "chat-box-messages",
+        id: "chat-box-messages",
+      }),
+    });
+
+    this.render();
+  }
+
+  renderHideChatButton = () => {
+    if (this.chatBoxMessagesComponent.hidden) {
+      return createElement(
+        "small",
+        { class: "chat-box-hide d-flex align-items-center" },
+        [
+          createElement("img", {
+            style: "margin-right: var(--main-distance)",
+            class: "small-icon chat-box-icon",
+            src: "/assets/show.svg",
+          }),
+          createElement("small", {}, "Show Chat"),
+        ],
+        {
+          type: "click",
+          event: () => {
+            this.chatBoxMessagesComponent.hidden = false;
+            this.chatBoxMessagesComponent.render();
+            this.render();
+          },
+        }
+      );
+    } else
+      return createElement(
+        "small",
+        { class: "chat-box-hide d-flex align-items-center" },
+        [
+          createElement("img", {
+            style: "margin-right: var(--main-distance)",
+            class: "small-icon chat-box-icon",
+            src: "/assets/hide.svg",
+          }),
+          createElement("small", {}, "Hide Chat"),
+        ],
+        {
+          type: "click",
+          event: () => {
+            this.chatBoxMessagesComponent.hidden = true;
+            this.chatBoxMessagesComponent.render();
+            this.render();
+          },
+        }
+      );
+  };
+
+  render = () => {
+    // clear
+    this.domComponent.innerHTML = "";
+    // render
+    this.domComponent.append(
+      this.renderHideChatButton(),
+      this.chatBoxMessagesComponent.domComponent,
+      createElement(
+        "form",
+        { class: "chat-box-form" },
+        [
+          createElement("input", {
+            id: "chat-box-form-input",
+            autofocus: true,
+            type: "text",
+            required: true,
+            autocomplete: "off",
+            placeholder: "Type message here...",
+          }),
+          createElement("button", { class: "chat-box-btn" }, "Send"),
+        ],
+        {
+          type: "submit",
+          event: (e) => {
+            e.preventDefault();
+            const content = e.target.elements["chat-box-form-input"].value;
+            this.socketIntegration.newTableMessage(content);
+
+            // clear input
+            e.target.elements["chat-box-form-input"].value = "";
+            e.target.elements["chat-box-form-input"].focus();
+          },
+        }
+      )
+    );
+  };
+}
+
+class ChatBoxMessagesComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.chatBoxMessages = [];
+    this.hidden = false;
+
+    this.render();
+  }
+
+  scrollDown = () => {
+    this.domComponent.scrollTop = this.domComponent.scrollHeight;
+  };
+
+  renderMessagesOrHidden = () => {
+    if (this.hidden) {
+      return [createElement("div", { style: "display: none;" })];
+    } else
+      return [
+        ...this.chatBoxMessages.map((message) =>
+          createElement("div", { class: "d-flex align-items-center" }, [
+            createElement(
+              "small",
+              { style: "margin-right: var(--main-distance)" },
+              isoDateFormat(message.timestamp)
+            ),
+            createElement(
+              "div",
+              {
+                style: "font-weight: bold; margin-right: var(--main-distance);",
+              },
+              `${message.username}:`
+            ),
+            createElement("div", {}, message.content),
+          ])
+        ),
+      ];
+  };
+
+  render = () => {
+    // clear
+    this.domComponent.innerHTML = "";
+    // render
+    this.domComponent.append(...this.renderMessagesOrHidden());
   };
 }

@@ -38,6 +38,7 @@ class Table {
     this.topLayer = new TopLayer({
       domComponent: createElement("div"),
       canvasLayer: this.canvasLayer,
+      socketIntegration,
       tableView,
     });
     // provide top layer to socket int
@@ -60,6 +61,7 @@ class Table {
     this.render();
     await this.canvasLayer.init();
     this.topLayer.render();
+    socketIntegration.getMessages();
 
     // only render the sidebar for owner or managers
     if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)

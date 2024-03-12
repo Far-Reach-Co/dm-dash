@@ -303,7 +303,6 @@ export default class CanvasLayer {
     document.addEventListener(
       "touchend",
       throttle(async () => {
-        console.log("yeah");
         await this.saveToDatabase();
       }, 3000)
     );

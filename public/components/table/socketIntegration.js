@@ -54,6 +54,35 @@ class SocketIntegration {
       }
     });
 
+    // TABLE MESSAGES
+    this.socket.on("table-messages", (messages) => {
+      // check if top layer exists and update messages
+      if (
+        this.topLayer &&
+        this.topLayer.chatBoxComponent &&
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent
+      ) {
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages =
+          messages;
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.render();
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
+      }
+    });
+
+    this.socket.on("message", (message) => {
+      if (
+        this.topLayer &&
+        this.topLayer.chatBoxComponent &&
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent
+      ) {
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages.push(
+          message
+        );
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.render();
+        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
+      }
+    });
+
     // GRID
     this.socket.on("grid-change", (gridState) => {
       // console.log("grid change", gridState)
@@ -217,6 +246,19 @@ class SocketIntegration {
     this.socket.emit("table-joined", {
       username: this.user.username,
       table: `table-${this.tableId}`,
+    });
+  };
+
+  getMessages = () => {
+    this.socket.emit("get-messages", {
+      table: `table-${this.tableId}`,
+    });
+  };
+
+  newTableMessage = (content) => {
+    this.socket.emit("new-message", {
+      table: `table-${this.tableId}`,
+      content,
     });
   };
 

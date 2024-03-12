@@ -33,9 +33,14 @@ const dndRoutes = require("./dist/dnd/routes.js");
 const {
   userJoin,
   userLeave,
+  getCurrentUser,
   getTableUsers,
+  getChatLog,
+  appendMessageToChatLog,
 } = require("./dist/lib/socketUsers.js");
 const { pool } = require("./dist/api/dbconfig.js");
+const sanitizeHtml = require("sanitize-html");
+const { convertURLsToLinks } = require("./dist/lib/utils.js");
 
 //Set CORS
 // app.use(cors())
@@ -148,6 +153,11 @@ io.on("connection", (socket) => {
       console.log("SOCKET ERROR", err);
     }
   });
+
+  socket.on("get-messages", async ({ table }) => {
+    io.to(table).emit("table-messages", await getChatLog(table));
+  });
+
   // grid
   socket.on("grid-changed", ({ table, gridState }) => {
     socket.broadcast.to(table).emit("grid-change", gridState);
@@ -183,6 +193,43 @@ io.on("connection", (socket) => {
     if (user) {
       // send users list
       io.to(user.table).emit("current-users", await getTableUsers(user.table));
+    }
+  });
+  // Chat system new message
+  socket.on("new-message", async ({ table, content }) => {
+    try {
+      // Fetch the user details from Redis or your user management system
+      const user = await getCurrentUser(socket.id);
+      if (!user) {
+        console.log(
+          "Failure to fetch current user for new message on socket chat system"
+        );
+        return;
+      }
+
+      // first convert any urls to a tags
+      const processedContent = convertURLsToLinks(content);
+      // remove any unwanted html only allow a tags
+      const sanitizedContent = sanitizeHtml(processedContent, {
+        allowedTags: ["a"], // Allow only <a> tags
+        allowedAttributes: {
+          a: ["href", "rel", "target"], // Allow only href, rel, and target attributes on <a> tags
+        },
+      });
+
+      const messageObject = {
+        userId: user.id,
+        username: user.username,
+        content: sanitizedContent,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Append message to chat log
+      await appendMessageToChatLog(table, messageObject);
+
+      io.to(table).emit("message", messageObject);
+    } catch (err) {
+      console.log("Error handling message event:", err);
     }
   });
 });

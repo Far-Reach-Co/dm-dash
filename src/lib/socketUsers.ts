@@ -14,6 +14,13 @@ type User = {
   table: string;
 };
 
+type Message = {
+  userId: string;
+  username: string;
+  content: string;
+  timestamp: string;
+};
+
 async function userJoin(
   id: string,
   username: string,
@@ -53,4 +60,34 @@ async function getTableUsers(table: string): Promise<User[]> {
     .filter((user) => user.table === table);
 }
 
-export { userJoin, getCurrentUser, getTableUsers, userLeave };
+async function getChatLog(table: string) {
+  const chatLogKey = `${table}-table-chatlog`;
+  const messages = await redisClient.lRange(chatLogKey, 0, -1);
+  return messages.map((message) => JSON.parse(message));
+}
+
+async function appendMessageToChatLog(table: string, message: Message) {
+  const chatLogKey = `${table}-table-chatlog`;
+
+  await redisClient.rPush(
+    chatLogKey,
+    JSON.stringify({
+      userId: message.userId,
+      username: message.username,
+      content: message.content,
+      timestamp: message.timestamp,
+    })
+  );
+
+  // Keep only the last 100 messages
+  await redisClient.lTrim(chatLogKey, -100, -1);
+}
+
+export {
+  userJoin,
+  getCurrentUser,
+  getTableUsers,
+  userLeave,
+  getChatLog,
+  appendMessageToChatLog,
+};
