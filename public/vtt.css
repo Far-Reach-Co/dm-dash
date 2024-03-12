@@ -161,3 +161,41 @@
   background-color: var(--blue3);
   color: var(--green);
 }
+
+.chat-box-container {
+  position: absolute;
+  width: 100%;
+  height: 160px;
+  z-index: 4;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chat-box-messages {
+  flex: 1;
+  padding: var(--main-distance);
+  display: flex;
+  flex-direction: column;
+  background-color: var(--blue4);
+  overflow-y: scroll;
+  word-wrap: break-word;
+  opacity: 0.8;
+}
+
+.chat-box-form {
+  display: flex;
+  align-items: center;
+}
+
+.chat-box-form input {
+  flex: 1;
+  padding: 5px 10px;
+  background-color: var(--main-dark);
+}
+
+.chat-box-btn {
+  padding: 5px 10px;
+}

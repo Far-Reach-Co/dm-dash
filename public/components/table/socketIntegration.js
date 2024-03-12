@@ -6,6 +6,9 @@ class SocketIntegration {
     this.user = null;
     this.sidebar = null;
     this.topLayer = null;
+
+    // temp
+    this.tableMessages = [];
   }
 
   // Listeners
@@ -52,6 +55,19 @@ class SocketIntegration {
         this.sidebar.onlineUsersComponent.usersList = list;
         this.sidebar.onlineUsersComponent.render();
       }
+    });
+
+    // TABLE MESSAGES
+    this.socket.on("table-messages", (messages) => {
+      // store here for now until top layer renders
+      this.tableMessages = messages;
+    });
+
+    this.socket.on("message", (message) => {
+      this.topLayer.chatBoxComponent.chatBoxMessages.push(message);
+      this.topLayer.chatBoxComponent.render();
+      // scroll down
+      this.topLayer.chatBoxComponent.scrollMessagesDown();
     });
 
     // GRID
@@ -217,6 +233,13 @@ class SocketIntegration {
     this.socket.emit("table-joined", {
       username: this.user.username,
       table: `table-${this.tableId}`,
+    });
+  };
+
+  newTableMessage = (content) => {
+    this.socket.emit("new-message", {
+      table: `table-${this.tableId}`,
+      content,
     });
   };
 

@@ -6,6 +6,12 @@ export default class TopLayer {
     this.domComponent = props.domComponent;
     this.canvasLayer = props.canvasLayer;
     this.tableView = props.tableView;
+    this.socketIntegration = props.socketIntegration;
+
+    this.chatBoxComponent = new ChatBoxComponent({
+      domComponent: createElement("div"),
+      socketIntegration: this.socketIntegration,
+    });
   }
 
   handleChangeCanvasLayer = () => {
@@ -279,7 +285,78 @@ export default class TopLayer {
       this.renderDrawColorAndWidthPicker(),
       this.renderLayersElem(),
       this.renderGridControlElem(),
-      this.renderInfoMenu()
+      this.renderInfoMenu(),
+      this.chatBoxComponent.domComponent
     );
+  };
+}
+
+class ChatBoxComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "chat-box-container";
+    this.socketIntegration = props.socketIntegration;
+    this.chatBoxMessages = [];
+  }
+
+  scrollMessagesDown = () => {
+    const messagesDiv = document.querySelector("#chat-box-messages");
+    console.log(messagesDiv.scrollTop, messagesDiv.scrollHeight);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+    this.domComponent.append(
+      createElement(
+        "div",
+        {
+          class: "chat-box-messages",
+          id: "chat-box-messages",
+        },
+        [
+          ...this.chatBoxMessages.map((message) =>
+            createElement("div", { class: "d-flex" }, [
+              createElement(
+                "div",
+                {
+                  style:
+                    "font-weight: bold; margin-right: var(--main-distance);",
+                },
+                `${message.username}:`
+              ),
+              createElement("div", {}, message.content),
+            ])
+          ),
+        ]
+      ),
+      createElement(
+        "form",
+        { class: "chat-box-form" },
+        [
+          createElement("input", {
+            id: "chat-box-form-input",
+            autofocus: true,
+            type: "text",
+            required: true,
+            autocomplete: "off",
+            placeholder: "Type message here...",
+          }),
+          createElement("button", { class: "chat-box-btn" }, "Send"),
+        ],
+        {
+          type: "submit",
+          event: (e) => {
+            e.preventDefault();
+            console.log(e);
+            const content = e.target.elements["chat-box-form-input"].value;
+            console.log(content);
+            this.socketIntegration.newTableMessage(content);
+          },
+        }
+      )
+    );
+    // after render scroll down
+    this.scrollMessagesDown();
   };
 }

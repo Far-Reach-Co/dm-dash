@@ -33,7 +33,10 @@ const dndRoutes = require("./dist/dnd/routes.js");
 const {
   userJoin,
   userLeave,
+  getCurrentUser,
   getTableUsers,
+  getChatLog,
+  appendMessageToChatLog,
 } = require("./dist/lib/socketUsers.js");
 const { pool } = require("./dist/api/dbconfig.js");
 
@@ -142,6 +145,8 @@ io.on("connection", (socket) => {
       // broadcast when a user connects
       io.to(table).emit("table-join", `Hello ${username}`);
 
+      io.to(table).emit("table-messages", await getChatLog(table));
+
       // send users list
       io.to(user.table).emit("current-users", await getTableUsers(table));
     } catch (err) {
@@ -183,6 +188,33 @@ io.on("connection", (socket) => {
     if (user) {
       // send users list
       io.to(user.table).emit("current-users", await getTableUsers(user.table));
+    }
+  });
+  // Chat system new message
+  socket.on("new-message", async ({ table, content }) => {
+    try {
+      // Fetch the user details from Redis or your user management system
+      const user = await getCurrentUser(socket.id);
+      if (!user) {
+        console.log(
+          "Failure to fetch current user for new message on socket chat system"
+        );
+        return;
+      }
+
+      const messageObject = {
+        userId: user.id,
+        username: user.username,
+        content: content,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Append message to chat log
+      await appendMessageToChatLog(table, messageObject);
+
+      io.to(table).emit("message", messageObject);
+    } catch (err) {
+      console.log("Error handling message event:", err);
     }
   });
 });

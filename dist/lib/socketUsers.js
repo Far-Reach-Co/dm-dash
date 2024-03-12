@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.userLeave = exports.getTableUsers = exports.getCurrentUser = exports.userJoin = exports.redisClient = void 0;
+exports.appendMessageToChatLog = exports.getChatLog = exports.userLeave = exports.getTableUsers = exports.getCurrentUser = exports.userJoin = exports.redisClient = void 0;
 const redis_1 = require("redis");
 exports.redisClient = (0, redis_1.createClient)();
 exports.redisClient.connect();
@@ -55,3 +55,24 @@ function getTableUsers(table) {
     });
 }
 exports.getTableUsers = getTableUsers;
+function getChatLog(table) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const chatLogKey = `${table}-table-chatlog`;
+        const messages = yield exports.redisClient.lRange(chatLogKey, 0, -1);
+        return messages.map((message) => JSON.parse(message));
+    });
+}
+exports.getChatLog = getChatLog;
+function appendMessageToChatLog(table, message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const chatLogKey = `${table}-table-chatlog`;
+        yield exports.redisClient.rPush(chatLogKey, JSON.stringify({
+            userId: message.userId,
+            username: message.username,
+            content: message.content,
+            timestamp: message.timestamp,
+        }));
+        yield exports.redisClient.lTrim(chatLogKey, -100, -1);
+    });
+}
+exports.appendMessageToChatLog = appendMessageToChatLog;
