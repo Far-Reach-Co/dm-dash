@@ -1,6 +1,7 @@
 import modal from "../modal.js";
 import createElement from "../createElement.js";
 import isoDateFormat from "../../lib/isoDateFormat.js";
+import { createValidatedImage, isImageUrl } from "../../lib/imageValidation.js";
 
 export default class TopLayer {
   constructor(props) {
@@ -242,7 +243,7 @@ export default class TopLayer {
         createElement(
           "div",
           { class: "canvas-log-item" },
-          JSON.stringify(obj.id),
+          `${index} ${JSON.stringify(obj.id)}`,
           [
             {
               type: "mouseenter",
@@ -476,29 +477,63 @@ class ChatBoxMessagesComponent {
     this.domComponent.scrollTop = this.domComponent.scrollHeight;
   };
 
+  createMessage = (data, isNew = false) => {
+    // isNew is bool to render message with animation
+    const parseMessageContent = (content) => {
+      const urlRegexAll = /(https?:\/\/[^\s]+)/g;
+      const urlRegex = /^https?:\/\/[^\s]+$/;
+      const parts = content.split(urlRegexAll);
+
+      return parts.map((part) => {
+        if (urlRegex.test(part)) {
+          if (isImageUrl(part)) {
+            return createValidatedImage(part);
+          } else {
+            return createElement(
+              "a",
+              {
+                href: part,
+                target: "_blank",
+                rel: "noopener noreferrer",
+                style: "margin: 0 5px;",
+              },
+              part
+            );
+          }
+        } else {
+          return part;
+        }
+      });
+    };
+
+    const elem = createElement("div", { class: "chat-box-message-content" }, [
+      createElement(
+        "small",
+        { style: "margin-right: var(--main-distance)" },
+        isoDateFormat(data.timestamp)
+      ),
+      createElement(
+        "div",
+        {
+          style: "font-weight: bold; margin-right: var(--main-distance);",
+        },
+        `${data.username}:`
+      ),
+      ...parseMessageContent(data.content),
+    ]);
+
+    if (isNew) {
+      elem.style.animation = "highlightFade 1s ease-out";
+    }
+
+    return elem;
+  };
+
   renderMessagesOrHidden = () => {
     if (this.hidden) {
       return [createElement("div", { style: "display: none;" })];
     } else
-      return [
-        ...this.chatBoxMessages.map((message) =>
-          createElement("div", { class: "d-flex align-items-center" }, [
-            createElement(
-              "small",
-              { style: "margin-right: var(--main-distance)" },
-              isoDateFormat(message.timestamp)
-            ),
-            createElement(
-              "div",
-              {
-                style: "font-weight: bold; margin-right: var(--main-distance);",
-              },
-              `${message.username}:`
-            ),
-            createElement("div", {}, message.content),
-          ])
-        ),
-      ];
+      return [...this.chatBoxMessages.map((data) => this.createMessage(data))];
   };
 
   render = () => {

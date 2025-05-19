@@ -26,7 +26,7 @@ export default function createElement(
         inner = [inner];
       }
       for (var k = 0; k < inner.length; k++) {
-        if (inner[k].tagName) {
+        if (inner[k] instanceof Node) {
           el.appendChild(inner[k]);
         } else {
           el.appendChild(document.createTextNode(inner[k]));
