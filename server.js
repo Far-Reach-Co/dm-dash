@@ -39,7 +39,7 @@ const {
   appendMessageToChatLog,
 } = require("./dist/lib/socketUsers.js");
 const { pool } = require("./dist/api/dbconfig.js");
-const sanitizeHtml = require("sanitize-html");
+
 const { convertURLsToLinks } = require("./dist/lib/utils.js");
 const morgan = require("morgan");
 
@@ -211,20 +211,10 @@ io.on("connection", (socket) => {
         return;
       }
 
-      // first convert any urls to a tags
-      const processedContent = convertURLsToLinks(content);
-      // remove any unwanted html only allow a tags
-      const sanitizedContent = sanitizeHtml(processedContent, {
-        allowedTags: ["a", "br"], // Allow only <a> and <br> tags
-        allowedAttributes: {
-          a: ["href", "rel", "target"], // Allow only href, rel, and target attributes on <a> tags
-        },
-      });
-
       const messageObject = {
         userId: user.id,
         username: user.username,
-        content: sanitizedContent,
+        content: content,
         timestamp: new Date().toISOString(),
       };
 
