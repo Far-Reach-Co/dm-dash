@@ -107,8 +107,13 @@ class SocketIntegration {
           fill: false,
           stroke: newImg.stroke,
           strokeWidth: newImg.strokeWidth,
+          layer: newImg.layer,
         });
-        return canvasLayer.canvas.add(newPath);
+
+        canvasLayer.canvas.add(newPath);
+        canvasLayer.placeImageOnLayer(newPath);
+        canvasLayer.updateObjectProperties(newPath);
+        return;
       }
 
       // uploaded images
@@ -118,45 +123,12 @@ class SocketIntegration {
           img[key] = value;
         }
         // add to canvas on correct layer
-        switch (canvasLayer.currentLayer) {
-          case "Map":
-            canvasLayer.canvas.add(img);
-            // Center the new image in the viewport
-            canvasLayer.canvas.viewportCenterObject(img);
-
-            const gridObjectIndex = canvasLayer.canvas
-              .getObjects()
-              .indexOf(canvasLayer.oGridGroup);
-            img.moveTo(gridObjectIndex);
-            break;
-
-          case "Object":
-            canvasLayer.canvas.add(img);
-            // Center the new image in the viewport
-            canvasLayer.canvas.viewportCenterObject(img);
-
-            // Move the new image to the highest index below the fog layer
-            const fogObjects = canvasLayer.canvas
-              .getObjects()
-              .filter((obj) => obj.layer === "Fog");
-            const lowestFogIndex =
-              fogObjects.length > 0
-                ? canvasLayer.canvas.getObjects().indexOf(fogObjects[0])
-                : canvasLayer.canvas.getObjects().length;
-            img.moveTo(lowestFogIndex);
-
-            break;
-
-          case "Fog":
-            canvasLayer.canvas.add(img);
-            // Center the new image in the viewport
-            canvasLayer.canvas.viewportCenterObject(img);
-
-            // Move the new image to the very top (highest layer index)
-            img.moveTo(canvasLayer.canvas.getObjects().length - 1);
-
-            break;
-        }
+        canvasLayer.canvas.add(img);
+        // Center the new image in the viewport
+        canvasLayer.canvas.viewportCenterObject(img);
+        // Place image on layer
+        canvasLayer.placeImageOnLayer(img);
+        canvasLayer.updateObjectProperties(img);
         // event listener
         img.on("selected", (options) => {
           canvasLayer.moveObjectUp(options.target);
@@ -181,20 +153,7 @@ class SocketIntegration {
           for (var [key, value] of Object.entries(image)) {
             object[key] = value;
           }
-          if (object.layer === "Map") {
-            object.selectable = canvasLayer.currentLayer === "Map";
-            object.evented = canvasLayer.currentLayer === "Map";
-            object.opacity = canvasLayer.currentLayer === "Fog" ? "0.5" : "1";
-          } else if (object.layer === "Object") {
-            object.selectable = canvasLayer.currentLayer === "Object";
-            object.evented = canvasLayer.currentLayer === "Object";
-            object.opacity =
-              canvasLayer.currentLayer !== "Object" ? "0.5" : "1";
-          } else if (object.layer === "Fog") {
-            object.selectable = canvasLayer.currentLayer === "Fog";
-            object.evented = canvasLayer.currentLayer === "Fog";
-            object.opacity = canvasLayer.currentLayer !== "Fog" ? "0.5" : "1";
-          }
+          canvasLayer.updateObjectProperties(object);
           canvasLayer.canvas.renderAll();
         }
       });
