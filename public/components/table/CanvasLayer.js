@@ -400,45 +400,12 @@ export default class CanvasLayer {
         newImg.set("layer", this.currentLayer);
 
         // add to canvas on correct layer
-        switch (this.currentLayer) {
-          case "Map":
-            this.canvas.add(newImg);
-            // Center the new image in the viewport
-            this.canvas.viewportCenterObject(newImg);
-
-            const gridObjectIndex = this.canvas
-              .getObjects()
-              .indexOf(this.oGridGroup);
-            newImg.moveTo(gridObjectIndex);
-            break;
-
-          case "Object":
-            this.canvas.add(newImg);
-            // Center the new image in the viewport
-            this.canvas.viewportCenterObject(newImg);
-
-            // Move the new image to the highest index below the fog layer
-            const fogObjects = this.canvas
-              .getObjects()
-              .filter((obj) => obj.layer === "Fog");
-            const lowestFogIndex =
-              fogObjects.length > 0
-                ? this.canvas.getObjects().indexOf(fogObjects[0])
-                : this.canvas.getObjects().length;
-            newImg.moveTo(lowestFogIndex);
-
-            break;
-
-          case "Fog":
-            this.canvas.add(newImg);
-            // Center the new image in the viewport
-            this.canvas.viewportCenterObject(newImg);
-
-            // Move the new image to the very top (highest layer index)
-            newImg.moveTo(this.canvas.getObjects().length - 1);
-
-            break;
-        }
+        this.canvas.add(newImg);
+        // Center the new image in the viewport
+        this.canvas.viewportCenterObject(newImg);
+        // Place image on layer
+        this.placeImageOnLayer(newImg);
+        this.updateObjectProperties(newImg);
 
         // add event listeners
         newImg.on("selected", (options) => {
@@ -448,6 +415,54 @@ export default class CanvasLayer {
         // emit through through socket
         socketIntegration.imageAdded(newImg);
       });
+    }
+  };
+
+  placeImageOnLayer = (img) => {
+    switch (img.layer) {
+      case "Map":
+        const gridObjectIndex = this.canvas
+          .getObjects()
+          .indexOf(this.oGridGroup);
+        img.moveTo(gridObjectIndex);
+        break;
+
+      case "Object":
+        // Move the new image to the highest index below the fog layer
+        const fogObjects = this.canvas
+          .getObjects()
+          .filter((obj) => obj.layer === "Fog");
+        const lowestFogIndex =
+          fogObjects.length > 0
+            ? this.canvas.getObjects().indexOf(fogObjects[0])
+            : this.canvas.getObjects().length;
+        img.moveTo(lowestFogIndex);
+
+        break;
+
+      case "Fog":
+        // Move the new image to the very top (highest layer index)
+        img.moveTo(this.canvas.getObjects().length - 1);
+
+        break;
+    }
+    console.log(this.canvas.getObjects());
+  };
+
+  // Function to update object properties based on current layer
+  updateObjectProperties = (object) => {
+    if (object.layer === "Map") {
+      object.selectable = this.currentLayer === "Map";
+      object.evented = this.currentLayer === "Map";
+      object.opacity = this.currentLayer === "Fog" ? "0.5" : "1";
+    } else if (object.layer === "Object") {
+      object.selectable = this.currentLayer === "Object";
+      object.evented = this.currentLayer === "Object";
+      object.opacity = this.currentLayer !== "Object" ? "0.5" : "1";
+    } else if (object.layer === "Fog") {
+      object.selectable = this.currentLayer === "Fog";
+      object.evented = this.currentLayer === "Fog";
+      object.opacity = this.currentLayer !== "Fog" ? "0.5" : "1";
     }
   };
 
@@ -494,23 +509,6 @@ export default class CanvasLayer {
   //   // Emit through socket
   //   socketIntegration.objectChangeLayer(object);
   // };
-
-  // Function to update object properties based on current layer
-  updateObjectProperties = (object) => {
-    if (object.layer === "Map") {
-      object.selectable = this.currentLayer === "Map";
-      object.evented = this.currentLayer === "Map";
-      object.opacity = this.currentLayer === "Fog" ? "0.5" : "1";
-    } else if (object.layer === "Object") {
-      object.selectable = this.currentLayer === "Object";
-      object.evented = this.currentLayer === "Object";
-      object.opacity = this.currentLayer !== "Object" ? "0.5" : "1";
-    } else if (object.layer === "Fog") {
-      object.selectable = this.currentLayer === "Fog";
-      object.evented = this.currentLayer === "Fog";
-      object.opacity = this.currentLayer !== "Fog" ? "0.5" : "1";
-    }
-  };
 
   saveToDatabase = async () => {
     const jsonCanvas = this.canvas.toJSON();
