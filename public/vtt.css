@@ -9,7 +9,7 @@
 
 .table-config {
   width: max-content;
-  padding: 5px;
+  padding: 8px;
   position: absolute;
   display: flex;
   flex-direction: column;
