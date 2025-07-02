@@ -89,7 +89,6 @@ export default class TopLayer {
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
         this.renderStyledLayerInfoComponent(),
-        createElement("br"),
         createElement(
           "button",
           {
@@ -111,7 +110,6 @@ export default class TopLayer {
     } else {
       return createElement("div", { class: "table-config grid-control-elem" }, [
         createElement("small", {}, "Grid Control"),
-        createElement("br"),
         createElement(
           "button",
           { title: "Hide or show the grid lines and toggle snap-to-grid" },
@@ -136,7 +134,6 @@ export default class TopLayer {
       { class: "table-config draw-mode-toggle-elem" },
       [
         createElement("small", {}, "Draw Mode"),
-        createElement("br"),
         createElement(
           "button",
           {
@@ -288,6 +285,7 @@ export default class TopLayer {
               createElement("h1", {}, "Key Commands"),
               createElement("hr"),
               createElement("b", {}, "Option/Alt (⌥)"),
+              createElement("br"),
               createElement(
                 "small",
                 {},
@@ -325,25 +323,25 @@ export default class TopLayer {
                 {},
                 "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original."
               ),
-              createElement("br"),
-              createElement("b", {}, "Canvas Log"),
-              createElement("br"),
-              createElement("button", {}, "Open Log", {
-                type: "click",
-                event: (e) => {
-                  const canvasObjectsList =
-                    this.canvasLayer.canvas.getObjects();
-                  modal.show(
-                    createElement("div", { class: "help-content" }, [
-                      createElement("h1", {}, "Canvas Log"),
-                      createElement("hr"),
-                      createElement("h2", {}, "Objects List"),
-                      createElement("hr"),
-                      ...this.renderCanvasObjectList(canvasObjectsList),
-                    ])
-                  );
-                },
-              }),
+              // createElement("br"),
+              // createElement("b", {}, "Canvas Log"),
+              // createElement("br"),
+              // createElement("button", {}, "Open Log", {
+              //   type: "click",
+              //   event: (e) => {
+              //     const canvasObjectsList =
+              //       this.canvasLayer.canvas.getObjects();
+              //     modal.show(
+              //       createElement("div", { class: "help-content" }, [
+              //         createElement("h1", {}, "Canvas Log"),
+              //         createElement("hr"),
+              //         createElement("h2", {}, "Objects List"),
+              //         createElement("hr"),
+              //         ...this.renderCanvasObjectList(canvasObjectsList),
+              //       ])
+              //     );
+              //   },
+              // }),
             ])
           );
         },
