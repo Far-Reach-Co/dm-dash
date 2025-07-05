@@ -22,6 +22,10 @@ export default class CanvasLayer {
 
     // event setup
     this.rightClick = false;
+
+    this.throttleImageMoved = throttle((obj) => {
+      socketIntegration.imageMoved(obj);
+    }, 100);
   }
 
   init = async () => {
@@ -115,9 +119,9 @@ export default class CanvasLayer {
           const newObj = JSON.parse(JSON.stringify(object)); // important not to disturb original object
           newObj.left = absoluteLeft;
           newObj.top = absoluteTop;
-          socketIntegration.imageMoved(newObj);
+          this.throttleImageMoved(newObj);
         }
-      } else socketIntegration.imageMoved(options.target);
+      } else this.throttleImageMoved(options.target);
     });
 
     // Zoom
@@ -352,11 +356,11 @@ export default class CanvasLayer {
 
     // more object event handlers
     this.canvas.on("object:rotating", (options) => {
-      socketIntegration.imageMoved(options.target);
+      this.throttleImageMoved(options.target);
     });
 
     this.canvas.on("object:scaling", (options) => {
-      socketIntegration.imageMoved(options.target);
+      this.throttleImageMoved(options.target);
     });
 
     // DOCUMENT MOUSE UP HACKS
@@ -610,27 +614,18 @@ export default class CanvasLayer {
   };
 }
 
-///////// UTILS
-const throttle = (fn, wait) => {
-  let inThrottle, lastFn, lastTime;
-  return function () {
-    const context = this,
-      args = arguments;
-    if (!inThrottle) {
-      fn.apply(context, args);
-      lastTime = Date.now();
-      inThrottle = true;
-    } else {
-      clearTimeout(lastFn);
-      lastFn = setTimeout(function () {
-        if (Date.now() - lastTime >= wait) {
-          fn.apply(context, args);
-          lastTime = Date.now();
-        }
-      }, Math.max(wait - (Date.now() - lastTime), 0));
+function throttle(fn, wait) {
+  let lastCall = 0;
+
+  return function (...args) {
+    const now = Date.now();
+
+    if (now - lastCall >= wait) {
+      lastCall = now;
+      fn.apply(this, args);
     }
   };
-};
+}
 
 function detectMob() {
   let check = false;
