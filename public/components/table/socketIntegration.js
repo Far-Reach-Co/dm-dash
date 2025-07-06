@@ -146,6 +146,10 @@ class SocketIntegration {
       });
     });
 
+    this.socket.on("run-indicator-animation", (coords) => {
+      canvasLayer.runIndicatorAnimation(coords.x, coords.y);
+    });
+
     this.socket.on("image-move", (image) => {
       // console.log("Move socket image", image);
       canvasLayer.canvas.getObjects().forEach((object) => {
@@ -294,6 +298,15 @@ class SocketIntegration {
     this.socket.emit("object-changed-layer", {
       table: `table-${this.tableId}`,
       object,
+    });
+  };
+
+  // ANIMATION
+  indicatorAnimation = (x, y) => {
+    this.socket.emit("indicator-animation", {
+      table: `table-${this.tableId}`,
+      x,
+      y,
     });
   };
 }

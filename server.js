@@ -179,6 +179,11 @@ io.on("connection", (socket) => {
   socket.on("object-changed-layer", ({ table, object }) => {
     socket.broadcast.to(table).emit("object-change-layer", object);
   });
+
+  socket.on("indicator-animation", ({ table, x, y }) => {
+    socket.broadcast.to(table).emit("run-indicator-animation", { x, y });
+  });
+
   // when a user disconnects
   socket.on("disconnect", async () => {
     const user = await userLeave(socket.id);
