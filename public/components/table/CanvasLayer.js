@@ -162,6 +162,15 @@ export default class CanvasLayer {
         this.canvas.lastPosY = evt.clientY;
       }
     });
+
+    // For double click 'here' indicator animation
+    this.canvas.on("mouse:dblclick", (e) => {
+      const pointer = this.canvas.getPointer(e.e);
+
+      this.runIndicatorAnimation(pointer.x, pointer.y);
+      socketIntegration.indicatorAnimation(pointer.x, pointer.y);
+    });
+
     // normal movement
     this.canvas.on("mouse:move", (opt) => {
       // dont use for mobile
@@ -420,6 +429,33 @@ export default class CanvasLayer {
         socketIntegration.imageAdded(newImg);
       });
     }
+  };
+
+  runIndicatorAnimation = (x, y) => {
+    const ripple = new fabric.Circle({
+      left: x,
+      top: y,
+      originX: "center",
+      originY: "center",
+      radius: 0,
+      fill: "rgba(123, 86, 255, 0.57)",
+      selectable: false,
+      evented: false,
+    });
+
+    this.canvas.add(ripple);
+
+    ripple.animate("radius", 150, {
+      duration: 500,
+      onChange: this.canvas.renderAll.bind(this.canvas),
+      onComplete: () => {
+        ripple.animate("opacity", 0, {
+          duration: 500,
+          onChange: this.canvas.renderAll.bind(this.canvas),
+          onComplete: () => this.canvas.remove(ripple),
+        });
+      },
+    });
   };
 
   placeImageOnLayer = (img) => {
