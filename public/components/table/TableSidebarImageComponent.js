@@ -2,6 +2,7 @@ import createElement from "../createElement.js";
 import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import imageFollowingCursor from "../imageFollowingCursor.js";
+import detectMob from "../../lib/detectMobile.js";
 
 export default class TableSidebarImageComponent {
   constructor(props) {
@@ -17,6 +18,8 @@ export default class TableSidebarImageComponent {
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
     this.tableImageSearchQuery = null;
+    // Set From Canvas Layer
+    this.addImageToTable = null;
   }
 
   toggleImageLoading = () => {
@@ -27,27 +30,43 @@ export default class TableSidebarImageComponent {
   renderImage = async (image) => {
     if (image.src) {
       this.downloadedImageSourceList[image.id] = image.src;
+
+      const isMobile = detectMob();
+
+      const handlers = [];
+
+      if (!isMobile) {
+        // Desktop: drag to place
+        handlers.push({
+          type: "mousedown",
+          event: () => {
+            imageFollowingCursor.setImageSrc(image.src);
+            imageFollowingCursor.render();
+            this.currentMouseDownImage = image;
+          },
+        });
+      } else {
+        // Mobile: tap to place
+        handlers.push({
+          type: "click",
+          event: () => {
+            this.addImageToTable(image);
+          },
+        });
+      }
+
       return createElement(
         "div",
         {
           class: "sidebar-image-container",
-          title: "Click and drag image to the table",
+          title: "Click + drag or tap to place image on table",
         },
         createElement("img", {
           src: image.src,
           height: "38px",
-          style: "pointer-events: none; max-width: 38px",
+          style: `${isMobile ? "" : "pointer-events: none;"} max-width: 38px;`, // ✨ Only apply pointer-events:none if NOT mobile
         }),
-        {
-          type: "mousedown",
-          event: () => {
-            imageFollowingCursor.setImageSrc(
-              this.downloadedImageSourceList[image.id]
-            );
-            imageFollowingCursor.render();
-            this.currentMouseDownImage = image;
-          },
-        }
+        ...handlers
       );
     }
   };

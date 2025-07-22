@@ -154,6 +154,29 @@ export default class TopLayer {
     );
   };
 
+  renderRemoveImageBtn = () => {
+    return createElement(
+      "div",
+      { class: "table-config remove-image-btn-elem" },
+      [
+        createElement(
+          "button",
+          {
+            title: "Remove the selected object from the table",
+            class: "btn-red",
+          },
+          "🗑️",
+          {
+            type: "click",
+            event: () => {
+              this.canvasLayer.removeObject();
+            },
+          }
+        ),
+      ]
+    );
+  };
+
   renderDrawColorAndWidthPicker = () => {
     if (this.canvasLayer.canvas.isDrawingMode) {
       return createElement(
@@ -357,6 +380,7 @@ export default class TopLayer {
       this.renderDrawColorAndWidthPicker(),
       this.renderLayersElem(),
       this.renderGridControlElem(),
+      this.renderRemoveImageBtn(),
       this.renderInfoMenu(),
       this.chatBoxComponent.domComponent
     );
