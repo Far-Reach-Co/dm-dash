@@ -21,7 +21,7 @@
 }
 
 .layers-elem {
-  top: 120px;
+  top: 130px;
   left: var(--main-distance);
 }
 
@@ -42,18 +42,23 @@
 }
 
 .grid-control-elem {
-  top: 190px;
+  top: 200px;
   left: var(--main-distance);
 }
 
 .draw-mode-toggle-elem {
-  top: 50px;
+  top: 60px;
   left: var(--main-distance);
 }
 
 .draw-mode-picker-elem {
-  top: 50px;
+  top: 60px;
   left: 102.5px;
+}
+
+.remove-image-btn-elem {
+  top: 8px;
+  left: 50px;
 }
 
 .help-content {
@@ -119,7 +124,8 @@
   width: 125px;
   word-wrap: break-word;
   margin-right: 3px;
-  font-size: small;
+  /* Important so we don't zoom in on mobile */
+  font-size: 16px;
   border: none;
   background-color: inherit;
 }
