@@ -1,6 +1,8 @@
 import imageFollowingCursor from "../imageFollowingCursor.js";
 import { getPresignedUrlsForImages } from "../../lib/imageUtils.js";
 import socketIntegration from "./socketIntegration.js";
+import GridManager from "./GridManager.js";
+
 import throttle from "../../lib/throttle.js";
 import detectMob from "../../lib/detectMobile.js";
 
@@ -17,11 +19,7 @@ export default class CanvasLayer {
     this.tableSidebarImageComponent.addImageToTable = this.addImageToTable;
 
     // grid
-    this.grid = 100;
-    this.unitScale = 10;
-    this.canvasWidth = 400 * this.unitScale;
-    this.canvasHeight = 400 * this.unitScale;
-    this.oGridGroup;
+    this.gridManager = null;
 
     // event setup
     this.rightClick = false;
@@ -72,12 +70,17 @@ export default class CanvasLayer {
       freeDrawingCursor: "cell",
     });
 
+    this.gridManager = new GridManager(this.canvas, {
+      gridSize: 100,
+      unitScale: this.unitScale,
+    });
+
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
-      this.renderGridObjects();
+      this.gridManager.renderGrid();
     } else {
       if (!this.currentTableView.data.objects.length) {
-        this.renderGridObjects();
+        this.gridManager.renderGrid();
       } else {
         // update image links
         const imageIds = [
@@ -108,15 +111,14 @@ export default class CanvasLayer {
   setupEventListeners = () => {
     // objects
     this.canvas.on("object:moving", (options) => {
-      if (this.snapToGrid) {
-        // align to grid
-        const left = Math.round(options.target.left / this.grid) * this.grid;
-        const top = Math.round(options.target.top / this.grid) * this.grid;
-        options.target.set({
-          left,
-          top,
+      if (this.gridManager.isSnapEnabled()) {
+        const snapped = this.gridManager.snapPosition({
+          left: options.target.left,
+          top: options.target.top,
         });
+        options.target.set(snapped);
       }
+
       // if multiple objects calculate special distance
       if (options.target.hasOwnProperty("_objects")) {
         for (var object of options.target._objects) {
@@ -271,9 +273,7 @@ export default class CanvasLayer {
         case "Map":
           this.canvas.add(opt.path);
           // Move the path to the correct z-index (below the grid)
-          const gridObjectIndex = this.canvas
-            .getObjects()
-            .indexOf(this.oGridGroup);
+          const gridObjectIndex = this.gridManager.getIndexInCanvas();
           opt.path.moveTo(gridObjectIndex);
           break;
 
@@ -351,9 +351,8 @@ export default class CanvasLayer {
               case "Map":
                 this.canvas.add(clone);
                 // Move the clone to the correct z-index (below the grid)
-                const gridObjectIndex = this.canvas
-                  .getObjects()
-                  .indexOf(this.oGridGroup);
+                const gridObjectIndex = this.gridManager.getIndexInCanvas();
+
                 clone.moveTo(gridObjectIndex);
                 break;
 
@@ -509,9 +508,7 @@ export default class CanvasLayer {
   placeImageOnLayer = (img) => {
     switch (img.layer) {
       case "Map":
-        const gridObjectIndex = this.canvas
-          .getObjects()
-          .indexOf(this.oGridGroup);
+        const gridObjectIndex = this.gridManager.getIndexInCanvas();
         img.moveTo(gridObjectIndex);
         break;
 
@@ -557,11 +554,10 @@ export default class CanvasLayer {
   moveObjectUp = (object) => {
     // Do nothing for now... broken
     return;
+
     switch (object.layer) {
       case "Map":
-        const gridObjectIndex = this.canvas
-          .getObjects()
-          .indexOf(this.oGridGroup);
+        const gridObjectIndex = this.gridManager.getIndexInCanvas();
         object.moveTo(gridObjectIndex - 1);
         break;
 
@@ -581,13 +577,14 @@ export default class CanvasLayer {
   };
 
   // moveObjectToOtherLayer = (object) => {
+
   //   if (object.layer === "Map") {
   //     object.layer = "Object";
   //     object.bringToFront();
   //     this.updateObjectProperties(object);
   //   } else if (object.layer === "Object") {
   //     object.layer = "Map";
-  //     const gridObjectIndex = this.canvas.getObjects().indexOf(this.oGridGroup);
+  //     const gridObjectIndex = this.gridManager.getIndexInCanvas();
   //     object.moveTo(gridObjectIndex);
   //     this.updateObjectProperties(object);
   //   } else if (object.layer === "Fog") {
@@ -621,79 +618,47 @@ export default class CanvasLayer {
       return null;
     }
   };
+
   renderSavedData = async () => {
     return new Promise((resolve) => {
-      // Render old data
       this.canvas.loadFromJSON(this.currentTableView.data, () => {
         this.canvas.getObjects().forEach((object) => {
-          // Group layer events
           if (object.type === "group") {
-            this.oGridGroup = object;
-            // Handle if grid is snapping based on visibility
-            if (!this.oGridGroup.visible) this.snapToGrid = false;
+            // Tell GridManager about the restored grid
+            if (this.gridManager) {
+              this.gridManager.gridGroup = object;
+            }
+
+            // Update snapping based on visibility
+            if (!object.visible && this.gridManager) {
+              this.gridManager.snapToGrid = false;
+            }
+
             object.selectable = false;
             object.evented = false;
             return;
           }
-          // Set event listeners
+
+          // normal object setup
           object.on("selected", (options) => {
             this.moveObjectUp(options.target);
           });
-          // Handle layer events using updateObjectProperties
           this.updateObjectProperties(object);
         });
+
         this.canvas.renderAll();
         resolve();
       });
     });
   };
 
-  renderGridObjects = () => {
-    // create grid
-    const gridLineList = [];
-
-    for (var i = 0; i < this.canvasWidth / this.grid; i++) {
-      const lineh = new fabric.Line(
-        [i * this.grid + 0.5, 0, i * this.grid + 0.5, this.canvasHeight],
-        {
-          type: "line",
-          strokeWidth: 1,
-          stroke: "#ccc",
-          selectable: false,
-        }
-      );
-      gridLineList.push(lineh);
-      const linew = new fabric.Line(
-        [0, i * this.grid + 0.5, this.canvasWidth, i * this.grid + 0.5],
-        {
-          type: "line",
-          strokeWidth: 1,
-          stroke: "#ccc",
-          selectable: false,
-        }
-      );
-      gridLineList.push(linew);
-    }
-    this.oGridGroup = new fabric.Group(gridLineList, {
-      left: 0,
-      top: 0,
-      selectable: false,
-      evented: false,
-    });
-    this.canvas.add(this.oGridGroup);
-  };
-
   hideGrid = () => {
-    this.oGridGroup.set("visible", false);
-    this.canvas.renderAll();
-    this.snapToGrid = false;
+    this.gridManager.hideGrid();
     socketIntegration.gridChange(false);
   };
 
   showGrid = () => {
-    this.oGridGroup.set("visible", true);
-    this.canvas.renderAll();
-    this.snapToGrid = true;
+    this.gridManager.showGrid();
     socketIntegration.gridChange(true);
   };
 }
