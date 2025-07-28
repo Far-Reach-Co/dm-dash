@@ -107,25 +107,100 @@ export default class TopLayer {
   renderGridControlElem = () => {
     if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
       return createElement("div", { style: "display: none;" });
-    } else {
-      return createElement("div", { class: "table-config grid-control-elem" }, [
-        createElement("small", {}, "Grid Control"),
+    }
+
+    const gridGroup = this.canvasLayer.gridManager?.getGroup();
+    const isVisible = gridGroup?.visible ?? false;
+
+    // Default user input (in squares, not pixels)
+    if (!this.gridSizeInputs) {
+      this.gridSizeInputs = {
+        width: 40,
+        height: 40,
+      };
+    }
+
+    const updateInput = (key) => (e) => {
+      const val = parseInt(e.target.value);
+      if (!isNaN(val)) {
+        this.gridSizeInputs[key] = val;
+      }
+    };
+
+    return createElement("div", { class: "table-config grid-control-elem" }, [
+      createElement("small", {}, "Grid Control"),
+
+      // Toggle visibility
+      createElement(
+        "button",
+        { title: "Hide or show the grid lines and toggle snap-to-grid" },
+        isVisible ? "Hide" : "Show",
+        {
+          type: "click",
+          event: () => {
+            isVisible
+              ? this.canvasLayer.hideGrid()
+              : this.canvasLayer.showGrid();
+            this.render(); // update label
+          },
+        }
+      ),
+      createElement("br"),
+      // Input for grid width (in squares)
+      createElement("div", {}, [
+        createElement("label", {}, "Width"),
         createElement(
-          "button",
-          { title: "Hide or show the grid lines and toggle snap-to-grid" },
-          this.canvasLayer.oGridGroup.visible ? "Hide" : "Show",
+          "input",
           {
-            type: "click",
-            event: () => {
-              this.canvasLayer.oGridGroup.visible
-                ? this.canvasLayer.hideGrid()
-                : this.canvasLayer.showGrid();
-              this.render();
-            },
+            type: "number",
+            value: this.gridSizeInputs.width,
+            min: 1,
+            style: "margin-left: 5px; width: 80px;",
+          },
+          null,
+          {
+            type: "input",
+            event: updateInput("width"),
           }
         ),
-      ]);
-    }
+      ]),
+      // Input for grid height (in squares)
+      createElement("div", {}, [
+        createElement("label", {}, "Height"),
+        createElement(
+          "input",
+          {
+            type: "number",
+            value: this.gridSizeInputs.height,
+            min: 1,
+            style: "margin-left: 5px; width: 80px;",
+          },
+          null,
+          {
+            type: "input",
+            event: updateInput("height"),
+          }
+        ),
+      ]),
+      createElement("br"),
+      // Button to apply new grid size
+      createElement(
+        "button",
+        {
+          title: "Resize the grid area (in squares)",
+        },
+        "Resize Grid",
+        {
+          type: "click",
+          event: () => {
+            const w = this.gridSizeInputs.width;
+            const h = this.gridSizeInputs.height;
+
+            this.canvasLayer.gridManager.rebuildGrid(w, h);
+          },
+        }
+      ),
+    ]);
   };
 
   renderDrawModeToggle = () => {
