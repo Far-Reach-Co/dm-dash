@@ -365,6 +365,73 @@ export default class TopLayer {
               //     );
               //   },
               // }),
+              createElement("br"),
+              createElement("br"),
+              createElement("h1", {}, "Chat '/' Commands"),
+              createElement("hr"),
+              createElement("h2", {}, "/roll <input>"),
+              createElement(
+                "small",
+                {},
+                "The command expects a text input in the format:"
+              ),
+              createElement("br"),
+              createElement(
+                "small",
+                {},
+                "[number of dice] d [dice sides] + [modifier]"
+              ),
+              createElement("br"),
+              createElement("br"),
+              createElement("b", {}, "[number of dice]: "),
+              createElement("small", {}, "Specifies how many dice to roll."),
+              createElement("br"),
+              createElement("b", {}, "[dice sides]: "),
+              createElement(
+                "small",
+                {},
+                "Represents the number of sides on the dice."
+              ),
+              createElement("br"),
+              createElement("b", {}, "[modifier]: "),
+              createElement(
+                "small",
+                {},
+                "(Optional) A number that's added to the total result of the dice rolls. If multiple modifiers are given, they are all added."
+              ),
+              createElement("br"),
+              createElement("br"),
+              createElement("b", {}, "Example"),
+              createElement("br"),
+              createElement("small", {}, "If a user inputs "),
+              createElement("code", {}, "2d6+3"),
+              createElement(
+                "small",
+                {},
+                ", the command will simulate rolling two 6-sided dice and then add a modifier of 3 to the total."
+              ),
+              createElement("br"),
+              createElement("small", {}, "The bot might respond with:"),
+              createElement("br"),
+              createElement("code", {}, "Input: 2d6+3"),
+              createElement("br"),
+              createElement("code", {}, "Roll 1: 4"),
+              createElement("br"),
+              createElement("code", {}, "Roll 2: 6 - CRITICAL"),
+              createElement("br"),
+              createElement("code", {}, "TOTAL = 13"),
+              createElement("br"),
+              createElement("br"),
+              createElement("b", {}, "Error Handling"),
+              createElement("br"),
+              createElement(
+                "small",
+                {},
+                "If the input is incorrect or malformed, the bot will respond with:"
+              ),
+              createElement("br"),
+              createElement("code", {}, "Failed to calculate, try again."),
+              createElement("br"),
             ])
           );
         },
@@ -506,26 +573,42 @@ class ChatBoxMessagesComponent {
       const urlRegex = /^https?:\/\/[^\s]+$/;
       const parts = content.split(urlRegexAll);
 
-      return parts.map((part) => {
-        if (urlRegex.test(part)) {
-          if (isImageUrl(part)) {
-            return createValidatedImage(part);
+      const nodes = [];
+
+      parts.forEach((part, index) => {
+        // For each chunk, split further on \n to insert <br>
+        const subparts = part.split("\n");
+
+        subparts.forEach((subpart, subIndex) => {
+          if (urlRegex.test(subpart)) {
+            if (isImageUrl(subpart)) {
+              nodes.push(createValidatedImage(subpart));
+            } else {
+              nodes.push(
+                createElement(
+                  "a",
+                  {
+                    href: subpart,
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    style: "margin: 0 5px;",
+                  },
+                  subpart
+                )
+              );
+            }
           } else {
-            return createElement(
-              "a",
-              {
-                href: part,
-                target: "_blank",
-                rel: "noopener noreferrer",
-                style: "margin: 0 5px;",
-              },
-              part
-            );
+            nodes.push(subpart);
           }
-        } else {
-          return part;
-        }
+
+          // Only add <br> if it's not the last subpart
+          if (subIndex < subparts.length - 1) {
+            nodes.push(createElement("br"));
+          }
+        });
       });
+
+      return nodes;
     };
 
     const elem = createElement("div", { class: "chat-box-message-content" }, [

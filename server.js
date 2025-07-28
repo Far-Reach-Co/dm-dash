@@ -27,6 +27,7 @@ const {
   getChatLog,
   appendMessageToChatLog,
 } = require("./dist/lib/socketUsers.js");
+const { calculateDiceRollResponse } = require("./dist/lib/dice.js");
 const { pool } = require("./dist/api/dbconfig.js");
 
 const { convertURLsToLinks } = require("./dist/lib/utils.js");
@@ -203,6 +204,22 @@ io.on("connection", (socket) => {
           "Failure to fetch current user for new message on socket chat system"
         );
         return;
+      }
+
+      // Handle special message cases here including / commands:
+      if (content.startsWith("/")) {
+        let slashCmdArr = [];
+        slashCmdArr = [command, ...args] = content.slice(1).split(" ");
+        console.log(command, args);
+        switch (command) {
+          // Dice rolling message
+          case "roll": // Should only take 1 argument
+            const diceRes = calculateDiceRollResponse(slashCmdArr[1]);
+            content = diceRes;
+            break;
+          default:
+            content = `Unknown command: /${command}`;
+        }
       }
 
       const messageObject = {
