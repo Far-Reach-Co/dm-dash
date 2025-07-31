@@ -84,14 +84,17 @@ class SocketIntegration {
     });
 
     // GRID
-    this.socket.on("grid-change", (gridState) => {
-      // console.log("grid change", gridState)
-      canvasLayer.oGridGroup.visible = gridState;
-      canvasLayer.snapToGrid = gridState;
-      canvasLayer.canvas.renderAll();
+    this.socket.on("grid-toggle", (gridState) => {
+      // console.log("grid toggle", gridState);
+      gridState ? canvasLayer.showGrid() : canvasLayer.hideGrid();
       if (this.topLayer) {
         this.topLayer.render();
       }
+    });
+
+    this.socket.on("grid-resize", (gridState) => {
+      console.log("grid resize", gridState);
+      canvasLayer.resizeGrid(gridState);
     });
 
     // OBJECTS LISTENERS
@@ -111,8 +114,10 @@ class SocketIntegration {
         });
 
         canvasLayer.canvas.add(newPath);
-        canvasLayer.placeImageOnLayer(newPath);
+        canvasLayer.placeObjectOnLayer(newPath);
         canvasLayer.updateObjectProperties(newPath);
+        // event listener
+        canvasLayer.setupObjectEventListeners(img);
         return;
       }
 
@@ -124,15 +129,11 @@ class SocketIntegration {
         }
         // add to canvas on correct layer
         canvasLayer.canvas.add(img);
-        // Center the new image in the viewport
-        canvasLayer.canvas.viewportCenterObject(img);
         // Place image on layer
-        canvasLayer.placeImageOnLayer(img);
+        canvasLayer.placeObjectOnLayer(img);
         canvasLayer.updateObjectProperties(img);
         // event listener
-        img.on("selected", (options) => {
-          canvasLayer.moveObjectUp(options.target);
-        });
+        canvasLayer.setupObjectEventListeners(img);
       });
     });
 
@@ -258,8 +259,17 @@ class SocketIntegration {
   };
 
   // GRID
-  gridChange = (gridState) => {
-    this.socket.emit("grid-changed", {
+  gridToggle = (gridState) => {
+    // Bool
+    this.socket.emit("grid-toggled", {
+      table: `table-${this.tableId}`,
+      gridState,
+    });
+  };
+
+  gridResized = (gridState) => {
+    // {width, height}
+    this.socket.emit("grid-resized", {
       table: `table-${this.tableId}`,
       gridState,
     });
