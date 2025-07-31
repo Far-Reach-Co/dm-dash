@@ -141,6 +141,7 @@ export default class TopLayer {
             isVisible
               ? this.canvasLayer.hideGrid()
               : this.canvasLayer.showGrid();
+            this.socketIntegration.gridToggle(!isVisible);
             this.render(); // update label
           },
         }
@@ -155,6 +156,7 @@ export default class TopLayer {
             type: "number",
             value: this.gridSizeInputs.width,
             min: 1,
+            max: 100,
             style: "margin-left: 5px; width: 80px;",
           },
           null,
@@ -173,6 +175,7 @@ export default class TopLayer {
             type: "number",
             value: this.gridSizeInputs.height,
             min: 1,
+            max: 100,
             style: "margin-left: 5px; width: 80px;",
           },
           null,
@@ -197,6 +200,7 @@ export default class TopLayer {
             const h = this.gridSizeInputs.height;
 
             this.canvasLayer.gridManager.rebuildGrid(w, h);
+            this.socketIntegration.gridResized({ width: w, height: h });
           },
         }
       ),
@@ -244,7 +248,7 @@ export default class TopLayer {
           {
             type: "click",
             event: () => {
-              this.canvasLayer.removeObject();
+              this.canvasLayer.removeObjects();
             },
           }
         ),

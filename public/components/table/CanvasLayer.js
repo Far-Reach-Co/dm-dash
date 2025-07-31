@@ -104,11 +104,13 @@ export default class CanvasLayer {
         await this.renderSavedData();
       }
     }
+
     // init event listeners
-    this.setupEventListeners();
+    this.setupCanvasEventListeners();
+    this.setupDocumentEventListeners();
   };
 
-  setupEventListeners = () => {
+  setupCanvasEventListeners = () => {
     // objects
     this.canvas.on("object:moving", (options) => {
       if (this.gridManager.isSnapEnabled()) {
@@ -267,45 +269,20 @@ export default class CanvasLayer {
 
       // Remove initial drawing created by canvas
       this.canvas.remove(opt.path);
-
+      // Re-add
+      this.canvas.add(opt.path);
       // Add the path to the canvas on the correct layer
-      switch (this.currentLayer) {
-        case "Map":
-          this.canvas.add(opt.path);
-          // Move the path to the correct z-index (below the grid)
-          const gridObjectIndex = this.gridManager.getIndexInCanvas();
-          opt.path.moveTo(gridObjectIndex);
-          break;
-
-        case "Object":
-          this.canvas.add(opt.path);
-          // Move the path to the highest index below the fog layer
-          const fogObjects = this.canvas
-            .getObjects()
-            .filter((obj) => obj.layer === "Fog");
-          const lowestFogIndex =
-            fogObjects.length > 0
-              ? this.canvas.getObjects().indexOf(fogObjects[0])
-              : this.canvas.getObjects().length;
-          opt.path.moveTo(lowestFogIndex);
-          break;
-
-        case "Fog":
-          this.canvas.add(opt.path);
-          // Move the path to the very top (highest layer index)
-          opt.path.moveTo(this.canvas.getObjects().length - 1);
-          break;
-      }
+      this.placeObjectOnLayer(opt.path);
 
       // Add event listeners
-      opt.path.on("selected", (options) => {
-        this.moveObjectUp(options.target);
-      });
+      this.setupObjectEventListeners(opt.path);
 
       // Emit through the socket
       socketIntegration.imageAdded(opt.path);
     });
+  };
 
+  setupDocumentEventListeners = () => {
     // KEYS
     document.addEventListener("keydown", (e) => {
       // alt key change cursor
@@ -313,16 +290,7 @@ export default class CanvasLayer {
         this.canvas.defaultCursor = "crosshair";
         this.canvas.setCursor("crosshair");
       }
-      // move active objects to other layer
-      // if (e.ctrlKey && e.key == "m") {
-      //   // only allow gm to do this
-      //   if (USERID == this.tableView.user_id || IS_MANAGER_OR_OWNER) {
-      //     const activeObjects = this.canvas.getActiveObjects();
-      //     for (var object of activeObjects) {
-      //       this.moveObjectToOtherLayer(object);
-      //     }
-      //   } else return;
-      // }
+
       // duplicate
       if (e.ctrlKey && e.key == "d") {
         const activeObjects = this.canvas.getActiveObjects();
@@ -345,36 +313,10 @@ export default class CanvasLayer {
               clone.set("left", object.left + 50);
               clone.set("top", object.top + 50);
             }
+            this.canvas.add(clone);
 
             // add to canvas on correct layer
-            switch (object.layer) {
-              case "Map":
-                this.canvas.add(clone);
-                // Move the clone to the correct z-index (below the grid)
-                const gridObjectIndex = this.gridManager.getIndexInCanvas();
-
-                clone.moveTo(gridObjectIndex);
-                break;
-
-              case "Object":
-                this.canvas.add(clone);
-                // Move the clone to the highest index below the fog layer
-                const fogObjects = this.canvas
-                  .getObjects()
-                  .filter((obj) => obj.layer === "Fog");
-                const lowestFogIndex =
-                  fogObjects.length > 0
-                    ? this.canvas.getObjects().indexOf(fogObjects[0])
-                    : this.canvas.getObjects().length;
-                clone.moveTo(lowestFogIndex);
-                break;
-
-              case "Fog":
-                this.canvas.add(clone);
-                // Move the clone to the very top (highest layer index)
-                clone.moveTo(this.canvas.getObjects().length - 1);
-                break;
-            }
+            this.placeObjectOnLayer(object);
 
             // send to socket
             socketIntegration.imageAdded(clone);
@@ -382,11 +324,12 @@ export default class CanvasLayer {
         }
       }
     });
+
     document.addEventListener("keyup", (e) => {
       var key = e.key;
       // remove selected objects
       if (key === "Backspace" || key === "Delete") {
-        this.removeObject();
+        this.removeObjects();
       }
 
       // reset cursor to default
@@ -434,6 +377,12 @@ export default class CanvasLayer {
     });
   };
 
+  setupObjectEventListeners = (obj) => {
+    obj.on("selected", (options) => {
+      //
+    });
+  };
+
   addImageToTable = async (image) => {
     if (image.src) {
       fabric.Image.fromURL(image.src, (newImg) => {
@@ -448,18 +397,19 @@ export default class CanvasLayer {
         // Center the new image in the viewport
         this.canvas.viewportCenterObject(newImg);
         // Place image on layer
-        this.placeImageOnLayer(newImg);
+        this.placeObjectOnLayer(newImg);
         this.updateObjectProperties(newImg);
 
         // add event listeners
-        newImg.on("selected", (options) => {
-          this.moveObjectUp(options.target);
-        });
+        this.setupObjectEventListeners(newImg);
 
         // emit through through socket
         socketIntegration.imageAdded(newImg);
       });
-    }
+    } else
+      console.error(
+        "Failed to create new fabric image from URL. SRC URL missing."
+      );
   };
 
   runIndicatorAnimation = (x, y) => {
@@ -489,7 +439,7 @@ export default class CanvasLayer {
     });
   };
 
-  removeObject = () => {
+  removeObjects = () => {
     if (this.canvas.getActiveObjects().length) {
       this.canvas.getActiveObjects().forEach((object) => {
         if (object.hasOwnProperty("_objects")) {
@@ -505,7 +455,7 @@ export default class CanvasLayer {
     }
   };
 
-  placeImageOnLayer = (img) => {
+  placeObjectOnLayer = (img) => {
     switch (img.layer) {
       case "Map":
         const gridObjectIndex = this.gridManager.getIndexInCanvas();
@@ -551,50 +501,6 @@ export default class CanvasLayer {
     }
   };
 
-  moveObjectUp = (object) => {
-    // Do nothing for now... broken
-    return;
-
-    switch (object.layer) {
-      case "Map":
-        const gridObjectIndex = this.gridManager.getIndexInCanvas();
-        object.moveTo(gridObjectIndex - 1);
-        break;
-
-      case "Object":
-        const objects = this.canvas.getObjects();
-        const fogBottomIndex =
-          objects.filter((obj) => obj.layer === "Fog").length + 2;
-        object.moveTo(fogBottomIndex);
-        break;
-
-      case "Fog":
-        object.bringToFront();
-        break;
-    }
-    // emit through socket
-    socketIntegration.objectMoveUp(object);
-  };
-
-  // moveObjectToOtherLayer = (object) => {
-
-  //   if (object.layer === "Map") {
-  //     object.layer = "Object";
-  //     object.bringToFront();
-  //     this.updateObjectProperties(object);
-  //   } else if (object.layer === "Object") {
-  //     object.layer = "Map";
-  //     const gridObjectIndex = this.gridManager.getIndexInCanvas();
-  //     object.moveTo(gridObjectIndex);
-  //     this.updateObjectProperties(object);
-  //   } else if (object.layer === "Fog") {
-  //     // Logic to handle moving from Fog layer if necessary
-  //   }
-
-  //   // Emit through socket
-  //   socketIntegration.objectChangeLayer(object);
-  // };
-
   saveToDatabase = async () => {
     const jsonCanvas = this.canvas.toJSON();
     try {
@@ -639,11 +545,10 @@ export default class CanvasLayer {
             return;
           }
 
-          // normal object setup
-          object.on("selected", (options) => {
-            this.moveObjectUp(options.target);
-          });
+          // setup properties
           this.updateObjectProperties(object);
+          // event listeners
+          this.setupObjectEventListeners(object);
         });
 
         this.canvas.renderAll();
@@ -654,11 +559,13 @@ export default class CanvasLayer {
 
   hideGrid = () => {
     this.gridManager.hideGrid();
-    socketIntegration.gridChange(false);
   };
 
   showGrid = () => {
     this.gridManager.showGrid();
-    socketIntegration.gridChange(true);
+  };
+
+  resizeGrid = (gridState) => {
+    this.gridManager.rebuildGrid(gridState.width, gridState.height);
   };
 }

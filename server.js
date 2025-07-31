@@ -153,8 +153,12 @@ io.on("connection", (socket) => {
   });
 
   // grid
-  socket.on("grid-changed", ({ table, gridState }) => {
-    socket.broadcast.to(table).emit("grid-change", gridState);
+  socket.on("grid-toggled", ({ table, gridState }) => {
+    socket.broadcast.to(table).emit("grid-toggle", gridState);
+  });
+
+  socket.on("grid-resized", ({ table, gridState }) => {
+    socket.broadcast.to(table).emit("grid-resize", gridState);
   });
   // table change
   socket.on("table-changed", ({ table, newTableUUID }) => {
