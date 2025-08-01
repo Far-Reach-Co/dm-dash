@@ -1,15 +1,11 @@
 class SocketIntegration {
   constructor() {
     this.socket = io(window.location.origin);
-
-    this.tableId = null;
-    this.user = null;
-    this.sidebar = null;
-    this.topLayer = null;
+    this.tableApp = null;
   }
 
   // Listeners
-  setupListeners = (canvasLayer) => {
+  setupListeners = () => {
     // USER JOIN
     this.socket.on("table-join", (message) => {
       console.log("User Joined:\n", message);
@@ -48,53 +44,40 @@ class SocketIntegration {
 
     // UPDATE CURRENT USERS
     this.socket.on("current-users", (list) => {
-      if (this.sidebar) {
-        this.sidebar.onlineUsersComponent.usersList = list;
-        this.sidebar.onlineUsersComponent.render();
-      }
+      this.tableApp.sidebar.onlineUsersComponent.usersList = list;
+      this.tableApp.sidebar.onlineUsersComponent.render();
     });
 
     // TABLE MESSAGES
     this.socket.on("table-messages", (messages) => {
-      // check if top layer exists and update messages
-      if (
-        this.topLayer &&
-        this.topLayer.chatBoxComponent &&
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent
-      ) {
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages =
-          messages;
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.render();
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
-      }
+      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages =
+        messages;
+      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.render();
+      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
     });
 
     this.socket.on("message", (message) => {
-      if (
-        this.topLayer &&
-        this.topLayer.chatBoxComponent &&
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent
-      ) {
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages.push(
-          message
-        );
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.render();
-        this.topLayer.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
-      }
+      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages.push(
+        message
+      );
+      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.render();
+      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
     });
 
     // GRID
     this.socket.on("grid-toggle", (gridState) => {
       // console.log("grid toggle", gridState);
-      gridState ? canvasLayer.showGrid() : canvasLayer.hideGrid();
-      if (this.topLayer) {
-        this.topLayer.render();
+      gridState
+        ? this.tableApp.canvasLayer.showGrid()
+        : this.tableApp.canvasLayer.hideGrid();
+      if (this.tableApp.topLayer) {
+        this.tableApp.topLayer.render(); // re-render UI layer for any users that have grid toggle button available
       }
     });
 
     this.socket.on("grid-resize", (gridState) => {
-      console.log("grid resize", gridState);
-      canvasLayer.resizeGrid(gridState);
+      // console.log("grid resize", gridState);
+      this.tableApp.canvasLayer.resizeGrid(gridState);
     });
 
     // OBJECTS LISTENERS
@@ -113,11 +96,11 @@ class SocketIntegration {
           layer: newImg.layer,
         });
 
-        canvasLayer.canvas.add(newPath);
-        canvasLayer.placeObjectOnLayer(newPath);
-        canvasLayer.updateObjectProperties(newPath);
+        this.tableApp.canvasLayer.canvas.add(newPath);
+        this.tableApp.canvasLayer.placeObjectOnLayer(newPath);
+        this.tableApp.canvasLayer.updateObjectProperties(newPath);
         // event listener
-        canvasLayer.setupObjectEventListeners(img);
+        this.tableApp.canvasLayer.setupObjectEventListeners(img);
         return;
       }
 
@@ -128,103 +111,38 @@ class SocketIntegration {
           img[key] = value;
         }
         // add to canvas on correct layer
-        canvasLayer.canvas.add(img);
+        this.tableApp.canvasLayer.canvas.add(img);
         // Place image on layer
-        canvasLayer.placeObjectOnLayer(img);
-        canvasLayer.updateObjectProperties(img);
+        this.tableApp.canvasLayer.placeObjectOnLayer(img);
+        this.tableApp.canvasLayer.updateObjectProperties(img);
         // event listener
-        canvasLayer.setupObjectEventListeners(img);
+        this.tableApp.canvasLayer.setupObjectEventListeners(img);
       });
     });
 
     this.socket.on("image-remove", (id) => {
       // console.log("Remove socket image", id);
 
-      canvasLayer.canvas.getObjects().forEach((object) => {
+      this.tableApp.canvasLayer.canvas.getObjects().forEach((object) => {
         if (object.id === id) {
-          canvasLayer.canvas.remove(object);
+          this.tableApp.canvasLayer.canvas.remove(object);
         }
       });
     });
 
     this.socket.on("run-indicator-animation", (coords) => {
-      canvasLayer.runIndicatorAnimation(coords.x, coords.y);
+      this.tableApp.canvasLayer.runIndicatorAnimation(coords.x, coords.y);
     });
 
     this.socket.on("image-move", (image) => {
       // console.log("Move socket image", image);
-      canvasLayer.canvas.getObjects().forEach((object) => {
+      this.tableApp.canvasLayer.canvas.getObjects().forEach((object) => {
         if (object.id === image.id) {
           for (var [key, value] of Object.entries(image)) {
             object[key] = value;
           }
-          canvasLayer.updateObjectProperties(object);
-          canvasLayer.canvas.renderAll();
-        }
-      });
-      //
-    });
-
-    this.socket.on("object-move-up", (object) => {
-      // console.log("Move socket object up", object);
-      canvasLayer.canvas.getObjects().forEach((item) => {
-        if (item.id === object.id) {
-          switch (item.layer) {
-            case "Map":
-              const gridObjectIndex = canvasLayer.canvas
-                .getObjects()
-                .indexOf(canvasLayer.oGridGroup);
-              item.moveTo(gridObjectIndex - 1);
-              break;
-
-            case "Object":
-              const objects = canvasLayer.canvas.getObjects();
-              const fogBottomIndex =
-                objects.filter((obj) => obj.layer === "Fog").length + 2;
-              item.moveTo(fogBottomIndex);
-              break;
-
-            case "Fog":
-              item.bringToFront();
-              break;
-          }
-        }
-      });
-      //
-    });
-
-    this.socket.on("object-change-layer", (object) => {
-      console.log("Move socket object to different layer", object);
-      canvasLayer.canvas.getObjects().forEach((item) => {
-        if (item.id === object.id) {
-          item.layer = object.layer;
-
-          if (item.layer === "Map") {
-            const gridObjectIndex = canvasLayer.canvas
-              .getObjects()
-              .indexOf(canvasLayer.oGridGroup);
-            item.moveTo(gridObjectIndex);
-            if (canvasLayer.currentLayer === "Map") {
-              item.opacity = "1";
-              item.selectable = true;
-              item.evented = true;
-            } else {
-              item.opacity = "1";
-              item.selectable = false;
-              item.evented = false;
-            }
-          } else if (item.layer === "Object") {
-            item.bringToFront();
-            if (canvasLayer.currentLayer === "Map") {
-              item.opacity = "0.5";
-              item.selectable = false;
-              item.evented = false;
-            } else {
-              item.opacity = "1";
-              item.selectable = true;
-              item.evented = true;
-            }
-          }
+          this.tableApp.canvasLayer.updateObjectProperties(object);
+          this.tableApp.canvasLayer.canvas.renderAll();
         }
       });
       //
@@ -233,27 +151,27 @@ class SocketIntegration {
 
   socketJoined = () => {
     this.socket.emit("table-joined", {
-      username: this.user.username,
-      table: `table-${this.tableId}`,
+      username: this.tableApp.user.username,
+      table: `table-${this.tableApp.tableId}`,
     });
   };
 
   getMessages = () => {
     this.socket.emit("get-messages", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
     });
   };
 
   newTableMessage = (content) => {
     this.socket.emit("new-message", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       content,
     });
   };
 
   tableChanged = (newTableUUID) => {
     this.socket.emit("table-changed", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       newTableUUID,
     });
   };
@@ -262,7 +180,7 @@ class SocketIntegration {
   gridToggle = (gridState) => {
     // Bool
     this.socket.emit("grid-toggled", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       gridState,
     });
   };
@@ -270,7 +188,7 @@ class SocketIntegration {
   gridResized = (gridState) => {
     // {width, height}
     this.socket.emit("grid-resized", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       gridState,
     });
   };
@@ -278,43 +196,29 @@ class SocketIntegration {
   // OBJECTS
   imageAdded = (image) => {
     this.socket.emit("image-added", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       image,
     });
   };
 
   imageRemoved = (id) => {
     this.socket.emit("image-removed", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       id,
     });
   };
 
   imageMoved = (image) => {
     this.socket.emit("image-moved", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       image,
-    });
-  };
-
-  objectMoveUp = (object) => {
-    this.socket.emit("object-moved-up", {
-      table: `table-${this.tableId}`,
-      object,
-    });
-  };
-
-  objectChangeLayer = (object) => {
-    this.socket.emit("object-changed-layer", {
-      table: `table-${this.tableId}`,
-      object,
     });
   };
 
   // ANIMATION
   indicatorAnimation = (x, y) => {
     this.socket.emit("indicator-animation", {
-      table: `table-${this.tableId}`,
+      table: `table-${this.tableApp.tableId}`,
       x,
       y,
     });

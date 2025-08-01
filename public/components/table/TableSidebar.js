@@ -18,6 +18,7 @@ export default class TableSidebar {
     this.tableView = props.tableView;
     this.isVisible = false;
     this.navigate = props.navigate;
+    this.tableApp = props.tableApp;
 
     // project
     const searchParams = new URLSearchParams(window.location.search);
@@ -34,6 +35,7 @@ export default class TableSidebar {
     this.tableSidebarImageComponent = new TableSidebarImageComponent({
       domComponent: createElement("div"),
       tableView: this.tableView,
+      tableApp: this.tableApp,
       getCurrentFolder: () => {
         return this.tableSidebarFolderComponent.currentFolder;
       },

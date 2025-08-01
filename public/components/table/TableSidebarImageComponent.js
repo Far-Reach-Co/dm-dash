@@ -9,6 +9,7 @@ export default class TableSidebarImageComponent {
     this.domComponent = props.domComponent;
     this.domComponent.className = "table-sidebar-image-component";
     this.tableView = props.tableView;
+    this.tableApp = props.tableApp;
     this.getCurrentFolder = props.getCurrentFolder;
     // project
     const searchParams = new URLSearchParams(window.location.search);
@@ -19,7 +20,6 @@ export default class TableSidebarImageComponent {
     this.downloadedImageSourceList = {};
     this.tableImageSearchQuery = null;
     // Set From Canvas Layer
-    this.addImageToTable = null;
   }
 
   toggleImageLoading = () => {
@@ -50,7 +50,7 @@ export default class TableSidebarImageComponent {
         handlers.push({
           type: "click",
           event: () => {
-            this.addImageToTable(image);
+            this.tableApp.addImageToCanvas(image);
           },
         });
       }

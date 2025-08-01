@@ -1,59 +1,18 @@
 import modal from "../modal.js";
 import createElement from "../createElement.js";
-import isoDateFormat from "../../lib/isoDateFormat.js";
-import { createValidatedImage, isImageUrl } from "../../lib/imageValidation.js";
+import socketIntegration from "./socketIntegration.js";
 
 export default class TopLayer {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.canvasLayer = props.canvasLayer;
+    this.tableApp = props.tableApp;
     this.tableView = props.tableView;
-    this.socketIntegration = props.socketIntegration;
-
-    this.chatBoxComponent = new ChatBoxComponent({
-      domComponent: createElement("div"),
-      socketIntegration: this.socketIntegration,
-    });
   }
-
-  handleChangeCanvasLayer = () => {
-    switch (this.canvasLayer.currentLayer) {
-      case "Map":
-        this.canvasLayer.currentLayer = "Object";
-        break;
-      case "Object":
-        this.canvasLayer.currentLayer = "Fog";
-        break;
-      case "Fog":
-        this.canvasLayer.currentLayer = "Map";
-        break;
-    }
-
-    this.canvasLayer.canvas.getObjects().forEach((object, index) => {
-      if (object.layer === "Map") {
-        object.selectable = this.canvasLayer.currentLayer === "Map";
-        object.evented = this.canvasLayer.currentLayer === "Map";
-        object.opacity = this.canvasLayer.currentLayer === "Fog" ? "0.5" : "1";
-      } else if (object.layer === "Object") {
-        object.selectable = this.canvasLayer.currentLayer === "Object";
-        object.evented = this.canvasLayer.currentLayer === "Object";
-        object.opacity =
-          this.canvasLayer.currentLayer !== "Object" ? "0.5" : "1";
-      } else if (object.layer === "Fog") {
-        object.selectable = this.canvasLayer.currentLayer === "Fog";
-        object.evented = this.canvasLayer.currentLayer === "Fog";
-        object.opacity = this.canvasLayer.currentLayer !== "Fog" ? "0.5" : "1";
-      }
-    });
-
-    this.canvasLayer.canvas.renderAll();
-    this.render();
-  };
 
   renderStyledLayerInfoComponent = () => {
     let layerInfo;
 
-    switch (this.canvasLayer.currentLayer) {
+    switch (this.tableApp.currentLayer) {
       case "Map":
         layerInfo = createElement(
           "small",
@@ -97,7 +56,10 @@ export default class TopLayer {
           "Switch Layer",
           {
             type: "click",
-            event: () => this.handleChangeCanvasLayer(),
+            event: () => {
+              this.tableApp.changeLayer();
+              this.render();
+            },
           }
         ),
       ]);
@@ -109,7 +71,7 @@ export default class TopLayer {
       return createElement("div", { style: "display: none;" });
     }
 
-    const gridGroup = this.canvasLayer.gridManager?.getGroup();
+    const gridGroup = this.tableApp.canvasLayer.gridManager?.getGroup();
     const isVisible = gridGroup?.visible ?? false;
 
     // Default user input (in squares, not pixels)
@@ -139,9 +101,9 @@ export default class TopLayer {
           type: "click",
           event: () => {
             isVisible
-              ? this.canvasLayer.hideGrid()
-              : this.canvasLayer.showGrid();
-            this.socketIntegration.gridToggle(!isVisible);
+              ? this.tableApp.canvasLayer.hideGrid()
+              : this.tableApp.canvasLayer.showGrid();
+            socketIntegration.gridToggle(!isVisible);
             this.render(); // update label
           },
         }
@@ -199,8 +161,8 @@ export default class TopLayer {
             const w = this.gridSizeInputs.width;
             const h = this.gridSizeInputs.height;
 
-            this.canvasLayer.gridManager.rebuildGrid(w, h);
-            this.socketIntegration.gridResized({ width: w, height: h });
+            this.tableApp.canvasLayer.gridManager.rebuildGrid(w, h);
+            socketIntegration.gridResized({ width: w, height: h });
           },
         }
       ),
@@ -217,14 +179,13 @@ export default class TopLayer {
           "button",
           {
             title: "Toggle the drawing tool",
-            class: `${this.canvasLayer.canvas.isDrawingMode ? "new-btn" : ""}`,
           },
-          this.canvasLayer.canvas.isDrawingMode ? "On" : "Off",
+          this.tableApp.canvasLayer.canvas.isDrawingMode ? "On" : "Off",
           {
             type: "click",
             event: () => {
-              this.canvasLayer.canvas.isDrawingMode =
-                !this.canvasLayer.canvas.isDrawingMode;
+              this.tableApp.canvasLayer.canvas.isDrawingMode =
+                !this.tableApp.canvasLayer.canvas.isDrawingMode;
               this.render();
             },
           }
@@ -248,7 +209,7 @@ export default class TopLayer {
           {
             type: "click",
             event: () => {
-              this.canvasLayer.removeObjects();
+              this.tableApp.canvasLayer.removeObjects();
             },
           }
         ),
@@ -257,7 +218,7 @@ export default class TopLayer {
   };
 
   renderDrawColorAndWidthPicker = () => {
-    if (this.canvasLayer.canvas.isDrawingMode) {
+    if (this.tableApp.canvasLayer.canvas.isDrawingMode) {
       return createElement(
         "div",
         { class: "table-config draw-mode-picker-elem" },
@@ -284,13 +245,14 @@ export default class TopLayer {
                       type: "color",
                       id: "colorpicker",
                       name: "colorpicker",
-                      value: this.canvasLayer.canvas.freeDrawingBrush.color,
+                      value:
+                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.color,
                     },
                     null,
                     {
                       type: "change",
                       event: (e) => {
-                        this.canvasLayer.canvas.freeDrawingBrush.color =
+                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.color =
                           e.target.value;
                       },
                     }
@@ -311,14 +273,15 @@ export default class TopLayer {
                       style: "width: 30px; height: 25px;",
                       type: "number",
                       id: "linewidth",
-                      value: this.canvasLayer.canvas.freeDrawingBrush.width,
+                      value:
+                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.width,
                       name: "linewidth",
                     },
                     null,
                     {
                       type: "change",
                       event: (e) => {
-                        this.canvasLayer.canvas.freeDrawingBrush.width =
+                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.width =
                           e.target.valueAsNumber;
                       },
                     }
@@ -355,7 +318,7 @@ export default class TopLayer {
                     offsetY: 0,
                   },
                 });
-                this.canvasLayer.canvas.renderAll();
+                this.tableApp.canvasLayer.canvas.renderAll();
               },
             },
             {
@@ -364,7 +327,7 @@ export default class TopLayer {
                 obj.set({
                   shadow: null,
                 });
-                this.canvasLayer.canvas.renderAll();
+                this.tableApp.canvasLayer.canvas.renderAll();
               },
             },
           ]
@@ -432,7 +395,7 @@ export default class TopLayer {
               //   type: "click",
               //   event: (e) => {
               //     const canvasObjectsList =
-              //       this.canvasLayer.canvas.getObjects();
+              //       this.tableApp.canvasLayer.canvas.getObjects();
               //     modal.show(
               //       createElement("div", { class: "help-content" }, [
               //         createElement("h1", {}, "Canvas Log"),
@@ -527,203 +490,7 @@ export default class TopLayer {
       this.renderLayersElem(),
       this.renderGridControlElem(),
       this.renderRemoveImageBtn(),
-      this.renderInfoMenu(),
-      this.chatBoxComponent.domComponent
+      this.renderInfoMenu()
     );
-  };
-}
-
-class ChatBoxComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "chat-box-container";
-    this.socketIntegration = props.socketIntegration;
-
-    this.chatBoxMessagesComponent = new ChatBoxMessagesComponent({
-      domComponent: createElement("div", {
-        class: "chat-box-messages",
-        id: "chat-box-messages",
-      }),
-    });
-
-    this.render();
-  }
-
-  renderHideChatButton = () => {
-    if (this.chatBoxMessagesComponent.hidden) {
-      return createElement(
-        "small",
-        { class: "chat-box-hide d-flex align-items-center" },
-        [
-          createElement("img", {
-            style: "margin-right: var(--main-distance)",
-            class: "small-icon chat-box-icon",
-            src: "/assets/show.svg",
-          }),
-          createElement("small", {}, "Show Chat"),
-        ],
-        {
-          type: "click",
-          event: () => {
-            this.chatBoxMessagesComponent.hidden = false;
-            this.chatBoxMessagesComponent.render();
-            this.render();
-          },
-        }
-      );
-    } else
-      return createElement(
-        "small",
-        { class: "chat-box-hide d-flex align-items-center" },
-        [
-          createElement("img", {
-            style: "margin-right: var(--main-distance)",
-            class: "small-icon chat-box-icon",
-            src: "/assets/hide.svg",
-          }),
-          createElement("small", {}, "Hide Chat"),
-        ],
-        {
-          type: "click",
-          event: () => {
-            this.chatBoxMessagesComponent.hidden = true;
-            this.chatBoxMessagesComponent.render();
-            this.render();
-          },
-        }
-      );
-  };
-
-  render = () => {
-    // clear
-    this.domComponent.innerHTML = "";
-    // render
-    this.domComponent.append(
-      this.renderHideChatButton(),
-      this.chatBoxMessagesComponent.domComponent,
-      createElement(
-        "form",
-        { class: "chat-box-form" },
-        [
-          createElement("input", {
-            id: "chat-box-form-input",
-            autofocus: true,
-            type: "text",
-            required: true,
-            autocomplete: "off",
-            placeholder: "Type message here...",
-          }),
-          createElement("button", { class: "chat-box-btn" }, "Send"),
-        ],
-        {
-          type: "submit",
-          event: (e) => {
-            e.preventDefault();
-            const content = e.target.elements["chat-box-form-input"].value;
-            this.socketIntegration.newTableMessage(content);
-
-            // clear input
-            e.target.elements["chat-box-form-input"].value = "";
-            e.target.elements["chat-box-form-input"].focus();
-          },
-        }
-      )
-    );
-  };
-}
-
-class ChatBoxMessagesComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.chatBoxMessages = [];
-    this.hidden = false;
-
-    this.render();
-  }
-
-  scrollDown = () => {
-    this.domComponent.scrollTop = this.domComponent.scrollHeight;
-  };
-
-  createMessage = (data, isNew = false) => {
-    // isNew is bool to render message with animation
-    const parseMessageContent = (content) => {
-      const urlRegexAll = /(https?:\/\/[^\s]+)/g;
-      const urlRegex = /^https?:\/\/[^\s]+$/;
-      const parts = content.split(urlRegexAll);
-
-      const nodes = [];
-
-      parts.forEach((part, index) => {
-        // For each chunk, split further on \n to insert <br>
-        const subparts = part.split("\n");
-
-        subparts.forEach((subpart, subIndex) => {
-          if (urlRegex.test(subpart)) {
-            if (isImageUrl(subpart)) {
-              nodes.push(createValidatedImage(subpart));
-            } else {
-              nodes.push(
-                createElement(
-                  "a",
-                  {
-                    href: subpart,
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                    style: "margin: 0 5px;",
-                  },
-                  subpart
-                )
-              );
-            }
-          } else {
-            nodes.push(subpart);
-          }
-
-          // Only add <br> if it's not the last subpart
-          if (subIndex < subparts.length - 1) {
-            nodes.push(createElement("br"));
-          }
-        });
-      });
-
-      return nodes;
-    };
-
-    const elem = createElement("div", { class: "chat-box-message-content" }, [
-      createElement(
-        "small",
-        { style: "margin-right: var(--main-distance)" },
-        isoDateFormat(data.timestamp)
-      ),
-      createElement(
-        "div",
-        {
-          style: "font-weight: bold; margin-right: var(--main-distance);",
-        },
-        `${data.username}:`
-      ),
-      ...parseMessageContent(data.content),
-    ]);
-
-    if (isNew) {
-      elem.style.animation = "highlightFade 1s ease-out";
-    }
-
-    return elem;
-  };
-
-  renderMessagesOrHidden = () => {
-    if (this.hidden) {
-      return [createElement("div", { style: "display: none;" })];
-    } else
-      return [...this.chatBoxMessages.map((data) => this.createMessage(data))];
-  };
-
-  render = () => {
-    // clear
-    this.domComponent.innerHTML = "";
-    // render
-    this.domComponent.append(...this.renderMessagesOrHidden());
   };
 }

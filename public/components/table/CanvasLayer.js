@@ -1,4 +1,3 @@
-import imageFollowingCursor from "../imageFollowingCursor.js";
 import { getPresignedUrlsForImages } from "../../lib/imageUtils.js";
 import socketIntegration from "./socketIntegration.js";
 import GridManager from "./GridManager.js";
@@ -10,19 +9,10 @@ export default class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
     this.currentTableView = props.tableView;
-    this.currentLayer = "Object";
-    this.snapToGrid = true;
     this.tableView = props.tableView;
+    this.tableApp = props.tableApp;
 
-    // table sidebar component
-    this.tableSidebarImageComponent = props.tableSidebarImageComponent;
-    this.tableSidebarImageComponent.addImageToTable = this.addImageToTable;
-
-    // grid
     this.gridManager = null;
-
-    // event setup
-    this.rightClick = false;
 
     this.throttleImageMoved = throttle((obj) => {
       socketIntegration.imageMoved(obj);
@@ -30,6 +20,19 @@ export default class CanvasLayer {
   }
 
   init = async () => {
+    this.setupCanvasConfig();
+
+    this.gridManager = new GridManager(this.canvas, {
+      gridSize: 100,
+    });
+
+    await this.createNewOrSetupSaved();
+
+    // init event listeners
+    this.setupCanvasEventListeners();
+  };
+
+  setupCanvasConfig = () => {
     //EXTEND THE PROPS FABRIC WILL EXPORT TO JSON
     fabric.Object.prototype.toObject = (function (toObject) {
       return function () {
@@ -69,12 +72,9 @@ export default class CanvasLayer {
       hoverCursor: "pointer",
       freeDrawingCursor: "cell",
     });
+  };
 
-    this.gridManager = new GridManager(this.canvas, {
-      gridSize: 100,
-      unitScale: this.unitScale,
-    });
-
+  createNewOrSetupSaved = async () => {
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
       this.gridManager.renderGrid();
@@ -104,14 +104,10 @@ export default class CanvasLayer {
         await this.renderSavedData();
       }
     }
-
-    // init event listeners
-    this.setupCanvasEventListeners();
-    this.setupDocumentEventListeners();
   };
 
   setupCanvasEventListeners = () => {
-    // objects
+    // objects movement
     this.canvas.on("object:moving", (options) => {
       if (this.gridManager.isSnapEnabled()) {
         const snapped = this.gridManager.snapPosition({
@@ -136,6 +132,14 @@ export default class CanvasLayer {
       } else this.throttleImageMoved(options.target);
     });
 
+    this.canvas.on("object:rotating", (options) => {
+      this.throttleImageMoved(options.target);
+    });
+
+    this.canvas.on("object:scaling", (options) => {
+      this.throttleImageMoved(options.target);
+    });
+
     // Zoom
     this.canvas.on("mouse:wheel", (opt) => {
       var delta = opt.e.deltaY;
@@ -147,6 +151,7 @@ export default class CanvasLayer {
       opt.e.preventDefault();
       opt.e.stopPropagation();
     });
+
     this.canvas.on("touch:gesture", (opt) => {
       if (opt.e.touches && opt.e.touches.length === 2) {
         this.canvas.isDragging = false;
@@ -265,7 +270,7 @@ export default class CanvasLayer {
     this.canvas.on("path:created", (opt) => {
       const id = uuidv4();
       opt.path.set("id", id);
-      opt.path.set("layer", this.currentLayer);
+      opt.path.set("layer", this.tableApp.currentLayer);
 
       // Remove initial drawing created by canvas
       this.canvas.remove(opt.path);
@@ -282,105 +287,52 @@ export default class CanvasLayer {
     });
   };
 
-  setupDocumentEventListeners = () => {
-    // KEYS
-    document.addEventListener("keydown", (e) => {
-      // alt key change cursor
-      if (e.altKey) {
-        this.canvas.defaultCursor = "crosshair";
-        this.canvas.setCursor("crosshair");
-      }
-
-      // duplicate
-      if (e.ctrlKey && e.key == "d") {
-        const activeObjects = this.canvas.getActiveObjects();
-        for (var object of activeObjects) {
-          object.clone((clone) => {
-            // new id
-            const id = uuidv4();
-            clone.set("id", id);
-            clone.set("layer", object.layer);
-
-            // place close to the original
-            if (object.group) {
-              let absoluteLeft =
-                object.left + object.group.left + object.group.width / 2;
-              let absoluteTop =
-                object.top + object.group.top + object.group.height / 2;
-              clone.set("left", absoluteLeft + 50);
-              clone.set("top", absoluteTop + 50);
-            } else {
-              clone.set("left", object.left + 50);
-              clone.set("top", object.top + 50);
-            }
-            this.canvas.add(clone);
-
-            // add to canvas on correct layer
-            this.placeObjectOnLayer(object);
-
-            // send to socket
-            socketIntegration.imageAdded(clone);
-          });
-        }
-      }
-    });
-
-    document.addEventListener("keyup", (e) => {
-      var key = e.key;
-      // remove selected objects
-      if (key === "Backspace" || key === "Delete") {
-        this.removeObjects();
-      }
-
-      // reset cursor to default
-      this.canvas.defaultCursor = "grab";
-      this.canvas.setCursor("grab");
-    });
-
-    // more object event handlers
-    this.canvas.on("object:rotating", (options) => {
-      this.throttleImageMoved(options.target);
-    });
-
-    this.canvas.on("object:scaling", (options) => {
-      this.throttleImageMoved(options.target);
-    });
-
-    // DOCUMENT MOUSE UP HACKS
-    // save data in db after mouse up
-    document.addEventListener(
-      "mouseup",
-      throttle(async () => {
-        await this.saveToDatabase();
-      }, 3000)
-    );
-    // save data on touch screen up
-    document.addEventListener(
-      "touchend",
-      throttle(async () => {
-        await this.saveToDatabase();
-      }, 3000)
-    );
-
-    document.addEventListener("mouseup", (e) => {
-      // handle adding new image
-      if (imageFollowingCursor.isOnPage) {
-        if (e.target.nodeName === "CANVAS")
-          this.addImageToTable(
-            this.tableSidebarImageComponent.currentMouseDownImage
-          );
-      }
-      imageFollowingCursor.remove();
-
-      // remove status of holding multi-select on right click down
-      this.rightClick = false;
-    });
-  };
-
   setupObjectEventListeners = (obj) => {
     obj.on("selected", (options) => {
       //
     });
+  };
+
+  setCursorCrosshair = () => {
+    this.canvas.defaultCursor = "crosshair";
+    this.canvas.setCursor("crosshair");
+  };
+
+  setCursorDefault = () => {
+    this.canvas.defaultCursor = "grab";
+    this.canvas.setCursor("grab");
+  };
+
+  duplicateObject = () => {
+    const activeObjects = this.canvas.getActiveObjects();
+    for (var object of activeObjects) {
+      object.clone((clone) => {
+        // new id
+        const id = uuidv4();
+        clone.set("id", id);
+        clone.set("layer", object.layer);
+
+        // place close to the original
+        if (object.group) {
+          let absoluteLeft =
+            object.left + object.group.left + object.group.width / 2;
+          let absoluteTop =
+            object.top + object.group.top + object.group.height / 2;
+          clone.set("left", absoluteLeft + 50);
+          clone.set("top", absoluteTop + 50);
+        } else {
+          clone.set("left", object.left + 50);
+          clone.set("top", object.top + 50);
+        }
+        this.canvas.add(clone);
+
+        // add to canvas on correct layer
+        this.placeObjectOnLayer(object);
+
+        // send to socket
+        socketIntegration.imageAdded(clone);
+      });
+    }
   };
 
   addImageToTable = async (image) => {
@@ -390,7 +342,7 @@ export default class CanvasLayer {
         const id = uuidv4();
         newImg.set("id", id);
         newImg.set("imageId", image.id);
-        newImg.set("layer", this.currentLayer);
+        newImg.set("layer", this.tableApp.currentLayer);
 
         // add to canvas on correct layer
         this.canvas.add(newImg);
@@ -455,11 +407,11 @@ export default class CanvasLayer {
     }
   };
 
-  placeObjectOnLayer = (img) => {
-    switch (img.layer) {
+  placeObjectOnLayer = (obj) => {
+    switch (obj.layer) {
       case "Map":
         const gridObjectIndex = this.gridManager.getIndexInCanvas();
-        img.moveTo(gridObjectIndex);
+        obj.moveTo(gridObjectIndex);
         break;
 
       case "Object":
@@ -471,33 +423,39 @@ export default class CanvasLayer {
           fogObjects.length > 0
             ? this.canvas.getObjects().indexOf(fogObjects[0])
             : this.canvas.getObjects().length;
-        img.moveTo(lowestFogIndex);
+        obj.moveTo(lowestFogIndex);
 
         break;
 
       case "Fog":
         // Move the new image to the very top (highest layer index)
-        img.moveTo(this.canvas.getObjects().length - 1);
+        obj.moveTo(this.canvas.getObjects().length - 1);
 
         break;
     }
-    console.log(this.canvas.getObjects());
+  };
+
+  changeLayer = () => {
+    this.canvas.getObjects().forEach((object, index) => {
+      this.updateObjectProperties(object);
+    });
+    this.canvas.renderAll();
   };
 
   // Function to update object properties based on current layer
   updateObjectProperties = (object) => {
     if (object.layer === "Map") {
-      object.selectable = this.currentLayer === "Map";
-      object.evented = this.currentLayer === "Map";
-      object.opacity = this.currentLayer === "Fog" ? "0.5" : "1";
+      object.selectable = this.tableApp.currentLayer === "Map";
+      object.evented = this.tableApp.currentLayer === "Map";
+      object.opacity = this.tableApp.currentLayer === "Fog" ? "0.5" : "1";
     } else if (object.layer === "Object") {
-      object.selectable = this.currentLayer === "Object";
-      object.evented = this.currentLayer === "Object";
-      object.opacity = this.currentLayer !== "Object" ? "0.5" : "1";
+      object.selectable = this.tableApp.currentLayer === "Object";
+      object.evented = this.tableApp.currentLayer === "Object";
+      object.opacity = this.tableApp.currentLayer !== "Object" ? "0.5" : "1";
     } else if (object.layer === "Fog") {
-      object.selectable = this.currentLayer === "Fog";
-      object.evented = this.currentLayer === "Fog";
-      object.opacity = this.currentLayer !== "Fog" ? "0.5" : "1";
+      object.selectable = this.tableApp.currentLayer === "Fog";
+      object.evented = this.tableApp.currentLayer === "Fog";
+      object.opacity = this.tableApp.currentLayer !== "Fog" ? "0.5" : "1";
     }
   };
 
