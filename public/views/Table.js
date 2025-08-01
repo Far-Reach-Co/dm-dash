@@ -1,89 +1,88 @@
 import createElement from "../components/createElement.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { getThings } from "../lib/apiUtils.js";
 import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/table/TableSidebar.js";
 import CanvasLayer from "../components/table/CanvasLayer.js";
 import socketIntegration from "../components/table/socketIntegration.js";
 import TopLayer from "../components/table/TopLayer.js";
+import ChatBoxComponent from "../components/table/ChatBox.js";
+import imageFollowingCursor from "../components/imageFollowingCursor.js";
+import throttle from "../lib/throttle.js";
 
 class Table {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.params = props.params;
+  constructor() {
+    this.domComponent = document.getElementById("app");
+    this.canvasElem = createElement("canvas", { id: "canvas-layer" });
 
     this.canvasLayer = null;
     this.sidebar = null;
     this.hamburger = null;
+    this.topLayer = null;
+
+    this.currentLayer = "Object";
+
+    // Socket needs to control other components from table
+    socketIntegration.tableApp = this;
 
     this.init();
   }
 
   init = async () => {
-    // get table views
     const searchParams = new URLSearchParams(window.location.search);
-    const tableId = searchParams.get("uuid");
+    this.tableId = searchParams.get("uuid");
 
-    const tableView = await getThings(`/api/get_table_view_by_uuid/${tableId}`);
-    // sidebar and hamburger inst
-    this.instantiateSidebar(tableView);
-    this.instantiateHamburger();
+    const tableView = await getThings(
+      `/api/get_table_view_by_uuid/${this.tableId}`
+    );
+    // TODO: error handling no table view by id
 
-    // create canvas elem and append
-    this.canvasElem = createElement("canvas", { id: "canvas-layer" });
-    this.canvasLayer = new CanvasLayer({
-      tableView,
-      tableSidebarImageComponent: this.sidebar.tableSidebarImageComponent,
-    });
-    // setup top layer
-    this.topLayer = new TopLayer({
-      domComponent: createElement("div"),
-      canvasLayer: this.canvasLayer,
-      socketIntegration,
-      tableView,
-    });
-    // provide top layer to socket int
-    // provide socket necessary variables
-    socketIntegration.tableId = tableId;
-    socketIntegration.sidebar = this.sidebar;
-    socketIntegration.topLayer = this.topLayer;
-    // handle user or anonymous
+    // Handle user or anonymous
     let user = await getThings("/api/get_user");
     if (!user) {
       const randomNumber = Math.floor(100000 + Math.random() * 900000); // random six digit number
       user = { username: `user-${randomNumber}` };
     }
-    socketIntegration.user = user;
-    // setup socket listeners after canvas instantiation
-    socketIntegration.setupListeners(this.canvasLayer);
+    this.user = user;
+
+    socketIntegration.setupListeners();
     socketIntegration.socketJoined();
 
-    // VERY IMPORTANT RENDERING SYSTEM
-    this.render();
-    await this.canvasLayer.init();
-    this.topLayer.render();
-    socketIntegration.getMessages();
-
-    // only render the sidebar for owner or managers
-    if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
-      this.renderSidebarAndHamburger();
-  };
-
-  instantiateSidebar = (tableView) => {
-    const sidebar = new TableSidebar({
+    // Init elements
+    this.sidebar = new TableSidebar({
       domComponent: createElement("div", {}),
       tableView,
+      tableApp: this,
     });
-    this.sidebar = sidebar;
-  };
-
-  instantiateHamburger = () => {
-    const hamburgerElem = createElement("div", {});
-
-    const hamburger = new Hamburger({
-      domComponent: hamburgerElem,
+    this.hamburger = new Hamburger({
+      domComponent: createElement("div", {}),
       sidebar: this.sidebar,
     });
-    this.hamburger = hamburger;
+
+    this.canvasLayer = new CanvasLayer({
+      tableView,
+      tableApp: this,
+    });
+    this.topLayer = new TopLayer({
+      domComponent: createElement("div"),
+      tableApp: this,
+      tableView,
+    });
+    this.chatBoxComponent = new ChatBoxComponent({
+      domComponent: createElement("div"),
+    });
+
+    // Rendering
+    this.render();
+    await this.canvasLayer.init();
+    this.setupDocumentEventListeners();
+    this.topLayer.render();
+    this.chatBoxComponent.render();
+    socketIntegration.getMessages();
+
+    // Only render the sidebar for owner or managers
+    if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
+      // USERID and IS_MANAGER_OR_OWNER is injected from template; check vtt.ejs
+      this.renderSidebarAndHamburger();
   };
 
   renderSidebarAndHamburger = () => {
@@ -95,15 +94,86 @@ class Table {
     this.hamburger.render();
   };
 
+  changeLayer = () => {
+    switch (this.currentLayer) {
+      case "Map":
+        this.currentLayer = "Object";
+        break;
+      case "Object":
+        this.currentLayer = "Fog";
+        break;
+      case "Fog":
+        this.currentLayer = "Map";
+        break;
+    }
+
+    this.canvasLayer.changeLayer();
+  };
+
+  addImageToCanvas = (image) => {
+    this.canvasLayer.addImageToTable(image);
+  };
+
+  setupDocumentEventListeners = () => {
+    // KEYS
+    document.addEventListener("keydown", (e) => {
+      // alt key change cursor
+      if (e.altKey) {
+        this.canvasLayer.setCursorCrosshair();
+      }
+
+      // duplicate
+      if (e.ctrlKey && e.key == "d") {
+        this.canvasLayer.duplicateObject();
+      }
+    });
+
+    document.addEventListener("keyup", (e) => {
+      var key = e.key;
+
+      if (key === "Backspace" || key === "Delete") {
+        this.canvasLayer.removeObjects();
+      }
+      this.canvasLayer.setCursorDefault();
+    });
+
+    // DOCUMENT MOUSE UP HACKS
+    // save data in db after mouse up
+    document.addEventListener(
+      "mouseup",
+      throttle(async () => {
+        await this.canvasLayer.saveToDatabase();
+      }, 3000)
+    );
+    // save data on touch screen up
+    document.addEventListener(
+      "touchend",
+      throttle(async () => {
+        await this.canvasLayer.saveToDatabase();
+      }, 3000)
+    );
+
+    // Allow for drag image to canvas
+    document.addEventListener("mouseup", (e) => {
+      // handle adding new image
+      if (imageFollowingCursor.isOnPage) {
+        if (e.target.nodeName === "CANVAS")
+          this.canvasLayer.addImageToTable(
+            this.sidebar.tableSidebarImageComponent.currentMouseDownImage
+          );
+      }
+      imageFollowingCursor.remove();
+    });
+  };
+
   render = async () => {
     this.domComponent.append(
-      createElement("div", { style: "position: relative;" }, [
-        this.topLayer.domComponent,
-        this.canvasElem,
-      ])
+      this.topLayer.domComponent,
+      this.chatBoxComponent.domComponent,
+      this.canvasElem
     );
   };
 }
 
-const tableApp = new Table({ domComponent: document.getElementById("app") });
+const tableApp = new Table();
 export default tableApp;

@@ -177,14 +177,6 @@ io.on("connection", (socket) => {
     socket.broadcast.to(table).emit("image-move", image);
   });
 
-  socket.on("object-moved-up", ({ table, object }) => {
-    socket.broadcast.to(table).emit("object-move-up", object);
-  });
-
-  socket.on("object-changed-layer", ({ table, object }) => {
-    socket.broadcast.to(table).emit("object-change-layer", object);
-  });
-
   socket.on("indicator-animation", ({ table, x, y }) => {
     socket.broadcast.to(table).emit("run-indicator-animation", { x, y });
   });
