@@ -20,6 +20,7 @@ class Table {
     this.topLayer = null;
 
     this.currentLayer = "Object";
+    this.currentSelectedObject = null;
 
     // Socket needs to control other components from table
     socketIntegration.tableApp = this;
@@ -83,6 +84,22 @@ class Table {
     if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
       // USERID and IS_MANAGER_OR_OWNER is injected from template; check vtt.ejs
       this.renderSidebarAndHamburger();
+  };
+
+  canvasRenderAll = () => {
+    this.canvasLayer.canvas.renderAll();
+  };
+
+  setCurrentSelectedObject = (obj) => {
+    // canvas obj
+    this.currentSelectedObject = obj;
+
+    // display on top layer
+    this.topLayer.render();
+  };
+
+  getCurrentSelectedObject = () => {
+    return this.currentSelectedObject;
   };
 
   renderSidebarAndHamburger = () => {

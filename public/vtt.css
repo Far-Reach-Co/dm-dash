@@ -46,6 +46,11 @@
   left: var(--main-distance);
 }
 
+.selected-obj-info-elem {
+  top: 420px;
+  left: var(--main-distance);
+}
+
 .draw-mode-toggle-elem {
   top: 60px;
   left: var(--main-distance);

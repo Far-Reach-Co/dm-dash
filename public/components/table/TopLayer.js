@@ -1,4 +1,5 @@
 import modal from "../modal.js";
+import { getThings } from "../../lib/apiUtils.js";
 import createElement from "../createElement.js";
 import socketIntegration from "./socketIntegration.js";
 
@@ -9,7 +10,87 @@ export default class TopLayer {
     this.tableView = props.tableView;
   }
 
-  renderStyledLayerInfoComponent = () => {
+  renderSelectedObjectInfoElem = async () => {
+    const obj = this.tableApp.getCurrentSelectedObject();
+    console.log(obj);
+    if (!obj) {
+      return createElement("div", { style: "display: none;" });
+    }
+
+    let displayName = "";
+    let imageSrc = "";
+
+    if (obj.imageId) {
+      const image = await getThings(`/api/get_image/${obj.imageId}`);
+      console.log(image);
+      displayName = image.original_name;
+      imageSrc = image.src;
+    }
+
+    return createElement(
+      "div",
+      { class: "table-config selected-obj-info-elem" },
+      [
+        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+          createElement("small", {}, `"${displayName}"`),
+          obj.type == "image"
+            ? createElement("img", { src: imageSrc, width: 30, height: 30 })
+            : createElement("div", { style: "display: none;" }),
+        ]),
+
+        createElement("small", {}, "Aura Color"),
+        createElement(
+          "div",
+          {
+            style:
+              "display: flex; flex-direction: row; align-items: flex-start",
+          },
+          [
+            createElement(
+              "input",
+              {
+                style:
+                  "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
+                type: "color",
+                id: "colorpicker",
+                name: "colorpicker",
+                value: obj.shadow && obj.shadow.color ? obj.shadow.color : null,
+              },
+              null,
+              {
+                type: "change",
+                event: (e) => {
+                  console.log(e.target.value);
+                  obj.set({
+                    shadow: {
+                      color: e.target.value,
+                      blur: 30,
+                      offsetX: 0,
+                      offsetY: 0,
+                    },
+                  });
+                  this.tableApp.canvasRenderAll();
+                  socketIntegration.imageMoved(obj);
+                },
+              }
+            ),
+            createElement("button", {}, "Clear", {
+              type: "click",
+              event: (e) => {
+                obj.set({
+                  shadow: null,
+                });
+                this.tableApp.canvasRenderAll();
+                socketIntegration.imageMoved(obj);
+              },
+            }),
+          ]
+        ),
+      ]
+    );
+  };
+
+  renderStyledLayerInfoElem = () => {
     let layerInfo;
 
     switch (this.tableApp.currentLayer) {
@@ -47,7 +128,7 @@ export default class TopLayer {
       return createElement("div", { style: "display: none;" });
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
-        this.renderStyledLayerInfoComponent(),
+        this.renderStyledLayerInfoElem(),
         createElement(
           "button",
           {
@@ -233,7 +314,7 @@ export default class TopLayer {
                 "div",
                 {
                   style:
-                    "display: flex; flex-direction: column; align-items: center;",
+                    "display: flex; flex-direction: column; align-items: flex-start;",
                 },
                 [
                   createElement("small", {}, "Color"),
@@ -492,5 +573,7 @@ export default class TopLayer {
       this.renderRemoveImageBtn(),
       this.renderInfoMenu()
     );
+    // append this after since it waits
+    this.domComponent.append(await this.renderSelectedObjectInfoElem());
   };
 }

@@ -285,11 +285,20 @@ export default class CanvasLayer {
       // Emit through the socket
       socketIntegration.imageAdded(opt.path);
     });
+
+    // For deselct of an object
+    this.canvas.on("selection:cleared", (event) => {
+      // clear selected object
+      this.tableApp.setCurrentSelectedObject(null);
+    });
   };
 
   setupObjectEventListeners = (obj) => {
     obj.on("selected", (options) => {
-      //
+      const obj = options.target;
+
+      // display top layer viewport for object
+      this.tableApp.setCurrentSelectedObject(obj);
     });
   };
 
