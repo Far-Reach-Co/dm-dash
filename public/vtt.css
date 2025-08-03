@@ -8,7 +8,7 @@
 }
 
 .table-config {
-  width: max-content;
+  width: 145px;
   padding: 8px;
   position: absolute;
   display: flex;
@@ -26,8 +26,8 @@
 }
 
 .info-elem {
-  top: var(--main-distance);
-  left: var(--main-distance);
+  top: 15px;
+  left: 12px;
   padding-left: 6px;
   align-items: center;
   justify-content: center;
@@ -47,7 +47,7 @@
 }
 
 .selected-obj-info-elem {
-  top: 420px;
+  top: 419px;
   left: var(--main-distance);
 }
 
@@ -58,10 +58,11 @@
 
 .draw-mode-picker-elem {
   top: 60px;
-  left: 102.5px;
+  left: 160px;
 }
 
 .remove-image-btn-elem {
+  width: 103px;
   top: 8px;
   left: 50px;
 }

@@ -63,7 +63,7 @@ export default class CanvasLayer {
       height: window.innerHeight,
       width: window.innerWidth,
       preserveObjectStacking: true,
-      // isDrawingMode: true,
+      isDrawingMode: false,
       backgroundColor: "black",
       fireRightClick: true, // <-- enable firing of right click events
       fireMiddleClick: true, // <-- enable firing of middle click events
@@ -72,6 +72,12 @@ export default class CanvasLayer {
       hoverCursor: "pointer",
       freeDrawingCursor: "cell",
     });
+
+    // overwrite the brush color
+    this.canvas.freeDrawingBrush.color = '#ffffff';
+
+    // overwrite the brush width
+    this.canvas.freeDrawingBrush.width = 10;
   };
 
   createNewOrSetupSaved = async () => {

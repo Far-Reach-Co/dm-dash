@@ -2,6 +2,7 @@ import modal from "../modal.js";
 import { getThings } from "../../lib/apiUtils.js";
 import createElement from "../createElement.js";
 import socketIntegration from "./socketIntegration.js";
+import truncateString from "../../lib/truncateString.js";
 
 export default class TopLayer {
   constructor(props) {
@@ -23,7 +24,7 @@ export default class TopLayer {
     if (obj.imageId) {
       const image = await getThings(`/api/get_image/${obj.imageId}`);
       console.log(image);
-      displayName = image.original_name;
+      displayName = truncateString(image.original_name, 12);
       imageSrc = image.src;
     }
 
@@ -32,10 +33,10 @@ export default class TopLayer {
       { class: "table-config selected-obj-info-elem" },
       [
         createElement("div", { style: "display: flex; flex-direction: row;" }, [
-          createElement("small", {}, `"${displayName}"`),
           obj.type == "image"
             ? createElement("img", { src: imageSrc, width: 30, height: 30 })
             : createElement("div", { style: "display: none;" }),
+          createElement("small", {}, `"${displayName}"`),
         ]),
 
         createElement("small", {}, "Aura Color"),
@@ -58,7 +59,7 @@ export default class TopLayer {
               },
               null,
               {
-                type: "change",
+                type: "input",
                 event: (e) => {
                   console.log(e.target.value);
                   obj.set({
@@ -98,29 +99,26 @@ export default class TopLayer {
         layerInfo = createElement(
           "small",
           { style: "color: var(--orange2)" },
-          "Map"
+          "Map Layer"
         );
         break;
       case "Object":
         layerInfo = createElement(
           "small",
           { style: "color: var(--green)" },
-          "Object"
+          "Object Layer"
         );
         break;
       case "Fog":
         layerInfo = createElement(
           "small",
-          { style: "color: var(--blue)" },
-          "Fog"
+          { style: "color: var(--light-gray)" },
+          "Fog Layer"
         );
         break;
     }
 
-    return createElement("div", { style: "display: flex; width: 150px" }, [
-      createElement("small", { style: "margin-right: 3px;" }, "Current Layer:"),
-      layerInfo,
-    ]);
+    return layerInfo;
   };
 
   renderLayersElem = () => {
@@ -331,7 +329,7 @@ export default class TopLayer {
                     },
                     null,
                     {
-                      type: "change",
+                      type: "input",
                       event: (e) => {
                         this.tableApp.canvasLayer.canvas.freeDrawingBrush.color =
                           e.target.value;
@@ -360,7 +358,7 @@ export default class TopLayer {
                     },
                     null,
                     {
-                      type: "change",
+                      type: "input",
                       event: (e) => {
                         this.tableApp.canvasLayer.canvas.freeDrawingBrush.width =
                           e.target.valueAsNumber;
