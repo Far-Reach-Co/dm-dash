@@ -7,7 +7,7 @@ const app = express();
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
-const server = https.createServer(app);
+const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 // const cors = require("cors");
@@ -95,8 +95,8 @@ app.use(
     cookie: {
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: "None",
-      domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
+      sameSite: "lax",
+      // domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
       secure: true,
     },
   })
