@@ -82,25 +82,47 @@ app.use(express.static("public"));
 // allow first proxy if there is one
 app.set("trust proxy", 1);
 // sessions
-app.use(
-  session({
-    store: new pgSession({
-      pool, // pg pool
-      tableName: "session",
-    }),
-    secret: process.env.SECRET_KEY,
-    name: "frcsession",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: "None",
-      domain: ".farreachco.com", // allows all subdomains
-      secure: true,
-    },
-  })
-);
+
+if (isProd) {
+  app.use(
+    session({
+      store: new pgSession({
+        pool, // pg pool
+        tableName: "session",
+      }),
+      secret: process.env.SECRET_KEY,
+      name: "frcsession",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        sameSite: "None",
+        domain: ".farreachco.com", // allows all subdomains
+        secure: true,
+      },
+    })
+  );
+} else {
+  app.use(
+    session({
+      store: new pgSession({
+        pool, // pg pool
+        tableName: "session",
+      }),
+      secret: process.env.SECRET_KEY,
+      name: "frcsession",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+        sameSite: "lax",
+        secure: false,
+      },
+    })
+  );
+}
 
 // Routes
 // private
