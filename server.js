@@ -78,8 +78,6 @@ app.use(express.static("public"));
 // allow first proxy if there is one
 app.set("trust proxy", 1);
 // sessions
-const isProd = process.env.SERVER_ENV === "prod";
-
 app.use(
   session({
     store: new pgSession({
@@ -93,9 +91,8 @@ app.use(
     cookie: {
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: "None",
-      domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
-      secure: isProd,
+      sameSite: "lax",
+      secure: process.env.SERVER_ENV === "prod" ? true : false,
     },
   })
 );
