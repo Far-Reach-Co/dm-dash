@@ -1,3 +1,5 @@
+const isProd = process.env.SERVER_ENV === "prod";
+
 const dotenv = require("dotenv");
 dotenv.config();
 const express = require("express");
@@ -5,13 +7,15 @@ const app = express();
 const http = require("http");
 const https = require("https");
 const fs = require("fs");
-let server = http.createServer(app);
+const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 // const cors = require("cors");
 // var path = require("path");
 // const requestIp = require("request-ip");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
+const morgan = require("morgan");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const redisAdapter = require("socket.io-redis");
@@ -29,9 +33,6 @@ const {
 } = require("./dist/lib/socketUsers.js");
 const { calculateDiceRollResponse } = require("./dist/lib/dice.js");
 const { pool } = require("./dist/api/dbconfig.js");
-
-const { convertURLsToLinks } = require("./dist/lib/utils.js");
-const morgan = require("morgan");
 
 //Set CORS
 // app.use(cors())
@@ -51,6 +52,9 @@ app.use(
     parameterLimit: 50000,
   })
 );
+
+// Cookie parser for csrf cookies
+app.use(cookieParser());
 
 // Static
 app.use(express.static("public"));
@@ -91,8 +95,9 @@ app.use(
     cookie: {
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: "lax",
-      secure: process.env.SERVER_ENV === "prod" ? true : false,
+      sameSite: "None",
+      domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
+      secure: true,
     },
   })
 );

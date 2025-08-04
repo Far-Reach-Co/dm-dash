@@ -147,7 +147,7 @@ const upload = multer({ dest: "file_uploads/" });
 const csrf = require("csurf");
 
 //csrf use
-const csrfMiddleware = csrf();
+const csrfMiddleware = csrf({ cookie: true });
 
 var router = Router();
 

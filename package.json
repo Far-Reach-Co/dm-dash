@@ -20,6 +20,7 @@
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
     "connect-pg-simple": "^9.0.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "csurf": "^1.11.0",
     "discord-interactions": "^3.4.0",
