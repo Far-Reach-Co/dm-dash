@@ -1,7 +1,7 @@
-const isProd = process.env.SERVER_ENV === "prod";
-
 const dotenv = require("dotenv");
 dotenv.config();
+const isProd = process.env.SERVER_ENV === "prod";
+
 const express = require("express");
 const app = express();
 const http = require("http");
