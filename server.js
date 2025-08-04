@@ -96,7 +96,7 @@ app.use(
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       sameSite: "None",
-      domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
+      // domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
       secure: true,
     },
   })
