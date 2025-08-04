@@ -175,7 +175,6 @@ async function loginUser(
       const validPassword = await compare(password, user.password);
       if (validPassword) {
         req.session.user = user.id;
-
         res.status(200).send({ message: "Successful Login" });
       } else return res.status(400).json({ message: "Invalid Password" });
     }

@@ -125,3 +125,7 @@ typings/
 
 # TernJS port file
 .tern-port
+
+# mkcert local browser certs
+localhost-key.pem
+localhost.pem
