@@ -30,7 +30,7 @@ const discordBot_js_1 = require("./controllers/discordBot.js");
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 const csrf = require("csurf");
-const csrfMiddleware = csrf({ cookie: true });
+const csrfMiddleware = csrf();
 var router = (0, express_1.Router)();
 router.get("/bot/get_all_commands", discordBot_js_1.getCommands);
 router.post("/bot/interactions", (0, express_1.raw)({ type: "application/json" }), (0, discord_interactions_1.verifyKeyMiddleware)(process.env.BOT_PUBLIC_KEY), discordBot_js_1.interactionsController);

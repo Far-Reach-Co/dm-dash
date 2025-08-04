@@ -22,7 +22,7 @@ const projectInvites_1 = require("./api/queries/projectInvites");
 const calendars_1 = require("./api/queries/calendars");
 const utils_1 = require("./lib/utils");
 const csrf = require("csurf");
-const csrfMiddleware = csrf({ cookie: true });
+const csrfMiddleware = csrf();
 var router = (0, express_1.Router)();
 router.get("/", (req, res, next) => {
     try {
