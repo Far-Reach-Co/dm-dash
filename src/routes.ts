@@ -35,7 +35,7 @@ import { humanFileSize } from "./lib/utils";
 // init csrf
 const csrf = require("csurf");
 //csrf use
-const csrfMiddleware = csrf({ cookie: false });
+const csrfMiddleware = csrf();
 
 var router = Router();
 
