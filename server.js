@@ -54,7 +54,7 @@ app.use(
 );
 
 // Cookie parser for csrf cookies
-// app.use(cookieParser());
+app.use(cookieParser());
 
 // Static
 app.use(express.static("public"));
@@ -95,9 +95,9 @@ app.use(
     cookie: {
       httpOnly: true,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      sameSite: "lax",
-      // domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
-      secure: isProd,
+      sameSite: "None",
+      domain: isProd ? ".farreachco.com" : undefined, // allows all subdomains
+      secure: true,
     },
   })
 );
