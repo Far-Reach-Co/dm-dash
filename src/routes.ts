@@ -280,15 +280,6 @@ router.get(
   }
 );
 
-router.get("/dashboard", (req: Request, res: Response, next: NextFunction) => {
-  try {
-    //
-    res.render("dashboard", { auth: req.session.user });
-  } catch (err) {
-    next(err);
-  }
-});
-
 router.get(
   "/5eplayer",
   async (req: Request, res: Response, next: NextFunction) => {

@@ -1,4 +1,4 @@
-import sharp = require("sharp");
+import * as sharp from "sharp";
 
 export async function getMetadata(imagePath: string) {
   try {
