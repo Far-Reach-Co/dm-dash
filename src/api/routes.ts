@@ -636,4 +636,4 @@ router.post(
   editEmail
 );
 
-module.exports = router;
+export default router;

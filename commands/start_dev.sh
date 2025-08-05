@@ -2,11 +2,22 @@
 trap "exit" INT TERM ERR
 trap "kill 0" EXIT
 
-echo "\n*************** RUNNING AUTO MIGRATE ***************\n"
-npm run migrate:up
-echo "\n*************** RUNNING TYPESCRIPT ***************\n"
+echo "🔥 Starting services…"
+
+# Run TypeScript compiler in watch mode in background
 npx tsc --watch &
-echo "\n*************** STARTING JS BUNDLER ***************\n"
+TSC_PID=$!
+
+# Wait until the main file appears (first build is done)
+echo "⏳ Waiting for first compile to finish..."
+while [ ! -f dist/server.js ]; do
+  sleep 0.5
+done
+echo "✅ TypeScript compiled: dist/server.js found"
+
+# Start bundler and server
+echo "🌀 Starting bundler..."
 sh ./commands/start_bundler.sh &
-echo "\n*************** STARTING SERVER ***************\n"
+
+echo "🚀 Starting server..."
 npm run dev
