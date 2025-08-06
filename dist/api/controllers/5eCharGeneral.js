@@ -14,11 +14,6 @@ const _5eCharGeneral_1 = require("../queries/5eCharGeneral");
 const _5eCharPro_1 = require("../queries/5eCharPro");
 const _5eCharBack_1 = require("../queries/5eCharBack");
 const _5eCharSpellSlots_1 = require("../queries/5eCharSpellSlots");
-const _5eCharAttacks_1 = require("../queries/5eCharAttacks");
-const _5eCharEquipment_1 = require("../queries/5eCharEquipment");
-const _5eCharFeats_1 = require("../queries/5eCharFeats");
-const _5eCharSpells_1 = require("../queries/5eCharSpells");
-const _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 const projectPlayers_1 = require("../queries/projectPlayers");
 const playerUsers_1 = require("../queries/playerUsers");
 const playerInvites_1 = require("../queries/playerInvites");
@@ -102,48 +97,15 @@ function remove5eChar(req, res, next) {
                 throw new Error("User is not logged in");
             if (req.session.user != general.user_id)
                 throw new Error("User does not own this property");
-            const proData = yield (0, _5eCharPro_1.get5eCharProByGeneralQuery)(general.id);
-            const pro = proData.rows[0];
-            const backData = yield (0, _5eCharBack_1.get5eCharBackByGeneralQuery)(general.id);
-            const back = backData.rows[0];
-            const spellSlotsData = yield (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfosByGeneralQuery)(general.id);
-            const spellSlots = spellSlotsData.rows[0];
             yield (0, _5eCharGeneral_1.remove5eCharGeneralQuery)(general.id);
-            yield (0, _5eCharPro_1.remove5eCharProQuery)(pro.id);
-            yield (0, _5eCharBack_1.remove5eCharBackQuery)(back.id);
-            yield (0, _5eCharSpellSlots_1.remove5eCharSpellSlotInfoQuery)(spellSlots.id);
-            const attacksData = yield (0, _5eCharAttacks_1.get5eCharAttacksByGeneralQuery)(general.id);
-            attacksData.rows.forEach((attack) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, _5eCharAttacks_1.remove5eCharAttackQuery)(attack.id);
-            }));
-            const equipmentData = yield (0, _5eCharEquipment_1.get5eCharEquipmentsByGeneralQuery)(general.id);
-            equipmentData.rows.forEach((equipment) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, _5eCharEquipment_1.remove5eCharEquipmentQuery)(equipment.id);
-            }));
-            const featsData = yield (0, _5eCharFeats_1.get5eCharFeatsByGeneralQuery)(general.id);
-            featsData.rows.forEach((feat) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, _5eCharFeats_1.remove5eCharFeatQuery)(feat.id);
-            }));
-            const spellsData = yield (0, _5eCharSpells_1.get5eCharSpellsByGeneralQuery)(general.id);
-            spellsData.rows.forEach((spell) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, _5eCharSpells_1.remove5eCharSpellQuery)(spell.id);
-            }));
-            const otherProLangsData = yield (0, _5eCharOtherProLang_1.get5eCharOtherProLangsByGeneralQuery)(general.id);
-            otherProLangsData.rows.forEach((other) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, _5eCharOtherProLang_1.remove5eCharOtherProLangQuery)(other.id);
-            }));
             const projectPlayerData = yield (0, projectPlayers_1.getProjectPlayersByPlayerQuery)(general.id);
-            projectPlayerData.rows.forEach((projectPlayer) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, projectPlayers_1.removeProjectPlayerQuery)(projectPlayer.id);
-            }));
             const playerUserData = yield (0, playerUsers_1.getPlayerUsersByPlayerQuery)(general.id);
-            playerUserData.rows.forEach((playerUser) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, playerUsers_1.removePlayerUserQuery)(playerUser.id);
-            }));
             const playerInviteData = yield (0, playerInvites_1.getPlayerInviteByPlayerQuery)(general.id);
-            playerInviteData.rows.forEach((playerInvite) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, playerInvites_1.removePlayerInviteQuery)(playerInvite.id);
-            }));
+            yield Promise.all([
+                ...projectPlayerData.rows.map((pp) => (0, projectPlayers_1.removeProjectPlayerQuery)(pp.id)),
+                ...playerUserData.rows.map((pu) => (0, playerUsers_1.removePlayerUserQuery)(pu.id)),
+                ...playerInviteData.rows.map((pi) => (0, playerInvites_1.removePlayerInviteQuery)(pi.id)),
+            ]);
             res.status(204).send();
         }
         catch (err) {
