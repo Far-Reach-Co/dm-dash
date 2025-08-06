@@ -161,54 +161,17 @@ async function remove5eChar(req: Request, res: Response, next: NextFunction) {
     if (req.session.user != general.user_id)
       throw new Error("User does not own this property");
 
-    const proData = await get5eCharProByGeneralQuery(general.id);
-    const pro = proData.rows[0];
-    const backData = await get5eCharBackByGeneralQuery(general.id);
-    const back = backData.rows[0];
-    const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(
-      general.id
-    );
-    const spellSlots = spellSlotsData.rows[0];
-
     await remove5eCharGeneralQuery(general.id);
-    await remove5eCharProQuery(pro.id);
-    await remove5eCharBackQuery(back.id);
-    await remove5eCharSpellSlotInfoQuery(spellSlots.id);
 
-    const attacksData = await get5eCharAttacksByGeneralQuery(general.id);
-    attacksData.rows.forEach(async (attack) => {
-      await remove5eCharAttackQuery(attack.id);
-    });
-    const equipmentData = await get5eCharEquipmentsByGeneralQuery(general.id);
-    equipmentData.rows.forEach(async (equipment) => {
-      await remove5eCharEquipmentQuery(equipment.id);
-    });
-    const featsData = await get5eCharFeatsByGeneralQuery(general.id);
-    featsData.rows.forEach(async (feat) => {
-      await remove5eCharFeatQuery(feat.id);
-    });
-    const spellsData = await get5eCharSpellsByGeneralQuery(general.id);
-    spellsData.rows.forEach(async (spell) => {
-      await remove5eCharSpellQuery(spell.id);
-    });
-    const otherProLangsData = await get5eCharOtherProLangsByGeneralQuery(
-      general.id
-    );
-    otherProLangsData.rows.forEach(async (other) => {
-      await remove5eCharOtherProLangQuery(other.id);
-    });
     const projectPlayerData = await getProjectPlayersByPlayerQuery(general.id);
-    projectPlayerData.rows.forEach(async (projectPlayer) => {
-      await removeProjectPlayerQuery(projectPlayer.id);
-    });
     const playerUserData = await getPlayerUsersByPlayerQuery(general.id);
-    playerUserData.rows.forEach(async (playerUser) => {
-      await removePlayerUserQuery(playerUser.id);
-    });
     const playerInviteData = await getPlayerInviteByPlayerQuery(general.id);
-    playerInviteData.rows.forEach(async (playerInvite) => {
-      await removePlayerInviteQuery(playerInvite.id);
-    });
+
+    await Promise.all([
+      ...projectPlayerData.rows.map((pp) => removeProjectPlayerQuery(pp.id)),
+      ...playerUserData.rows.map((pu) => removePlayerUserQuery(pu.id)),
+      ...playerInviteData.rows.map((pi) => removePlayerInviteQuery(pi.id)),
+    ]);
 
     res.status(204).send();
   } catch (err) {

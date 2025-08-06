@@ -200,14 +200,6 @@ router.get("/account", csrfMiddleware, (req, res, next) => __awaiter(void 0, voi
         next(err);
     }
 }));
-router.get("/dashboard", (req, res, next) => {
-    try {
-        res.render("dashboard", { auth: req.session.user });
-    }
-    catch (err) {
-        next(err);
-    }
-});
 router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!req.session.user)
