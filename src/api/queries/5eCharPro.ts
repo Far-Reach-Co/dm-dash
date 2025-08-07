@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { columnNamesQuery } from "./utils";
 
 export interface DndFiveEProModel {
   id: number,
@@ -58,6 +59,34 @@ async function add5eCharProQuery(data: {general_id: string | number}) {
   return await db.query<DndFiveEProModel>(query)
 }
 
+async function duplicate5eCharProQuery(data: {
+  oldGeneralId: number
+  newGeneralId: number
+}) {
+  const tableName = "dnd_5e_character_proficiencies"
+  const columnNames = await columnNamesQuery(tableName)
+  const columnStr = columnNames.join(", ")
+  const selectStr = columnNames.map(col => {
+    if (col === "general_id") return "$2";
+    return col
+  }).join(", ")
+
+  const query = {
+    text: /*sql*/ `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+    values: [
+      data.oldGeneralId,
+      data.newGeneralId
+    ]
+  }
+  
+  await db.query<DndFiveEProModel>(query);
+}
+
 async function get5eCharProQuery(id: string) {
   const query = {
     text: /*sql*/ `select * from public."dnd_5e_character_proficiencies" where id = $1`,
@@ -110,5 +139,6 @@ export {
   get5eCharProByGeneralQuery,
   get5eCharProQuery,
   remove5eCharProQuery,
-  edit5eCharProQuery
+  edit5eCharProQuery,
+  duplicate5eCharProQuery
 }

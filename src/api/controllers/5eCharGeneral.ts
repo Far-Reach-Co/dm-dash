@@ -5,6 +5,7 @@ import {
   remove5eCharGeneralQuery,
   edit5eCharGeneralQuery,
   DndFiveEGeneralModel,
+  duplicate5eCharGeneralQuery,
 } from "../queries/5eCharGeneral";
 import {
   get5eCharProQuery,
@@ -13,6 +14,7 @@ import {
   remove5eCharProQuery,
   edit5eCharProQuery,
   DndFiveEProModel,
+  duplicate5eCharProQuery,
 } from "../queries/5eCharPro";
 import {
   add5eCharBackQuery,
@@ -21,30 +23,37 @@ import {
   get5eCharBackQuery,
   edit5eCharBackQuery,
   DndFiveEBackgroundModel,
+  duplicate5eCharBackQuery,
 } from "../queries/5eCharBack";
 import {
   get5eCharSpellSlotInfosByGeneralQuery,
   add5eCharSpellSlotInfoQuery,
   remove5eCharSpellSlotInfoQuery,
   DndFiveESpellSlotsModel,
+  duplicate5eCharSpellSlotsQuery,
 } from "../queries/5eCharSpellSlots";
 import {
+  duplicate5eCharAttacksQuery,
   get5eCharAttacksByGeneralQuery,
   remove5eCharAttackQuery,
 } from "../queries/5eCharAttacks";
 import {
   remove5eCharEquipmentQuery,
   get5eCharEquipmentsByGeneralQuery,
+  duplicate5eCharEquipmentsQuery,
 } from "../queries/5eCharEquipment";
 import {
+  duplicate5eCharFeatsQuery,
   get5eCharFeatsByGeneralQuery,
   remove5eCharFeatQuery,
 } from "../queries/5eCharFeats";
 import {
+  duplicate5eCharSpellsQuery,
   get5eCharSpellsByGeneralQuery,
   remove5eCharSpellQuery,
 } from "../queries/5eCharSpells";
 import {
+  duplicate5eCharOtherProLangsQuery,
   get5eCharOtherProLangsByGeneralQuery,
   remove5eCharOtherProLangQuery,
 } from "../queries/5eCharOtherProLang";
@@ -65,20 +74,110 @@ import {
   removePlayerInviteQuery,
 } from "../queries/playerInvites";
 
-async function add5eChar(req: Request, res: Response, next: NextFunction) {
+interface add5eCharRequest extends Request {
+  body: {
+    name: string;
+  };
+}
+
+async function add5eChar(
+  req: add5eCharRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
 
-    req.body.user_id = req.session.user;
-    const generalData = await add5eCharGeneralQuery(req.body);
-    const general = generalData.rows[0];
-    await add5eCharProQuery({ general_id: general.id });
-    await add5eCharBackQuery({ general_id: general.id });
-    await add5eCharSpellSlotInfoQuery({ general_id: general.id });
+    const generalId = await createNew5eChar({
+      user_id: String(req.session.user),
+      name: req.body.name,
+    });
     // HTMX redirect
     res
-      .set("HX-Redirect", `/5eplayer?id=${general.id}`)
+      .set("HX-Redirect", `/5eplayer?id=${generalId}`)
       .send("Form submission was successful.");
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function createNew5eChar(data: {
+  user_id: string;
+  name: string;
+}): Promise<number> {
+  const generalData = await add5eCharGeneralQuery(data);
+  const general = generalData.rows[0];
+  await add5eCharProQuery({ general_id: general.id });
+  await add5eCharBackQuery({ general_id: general.id });
+  await add5eCharSpellSlotInfoQuery({ general_id: general.id });
+
+  return general.id;
+}
+
+interface duplicate5eCharRequest extends Request {
+  body: {
+    general_id: string | number;
+  };
+}
+
+async function duplicate5eChar(
+  req: duplicate5eCharRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    // if (!req.session.user) throw new Error("User is not logged in");
+    // Get original by general id
+    const generalsData = await get5eCharGeneralQuery(req.body.general_id);
+    const general = generalsData.rows[0];
+    // Duplicate
+    // Gen
+    const newGeneral = await duplicate5eCharGeneralQuery({
+      generalId: general.id,
+    });
+    const newGeneralId = newGeneral.rows[0].id;
+    // Pro
+    await duplicate5eCharProQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Background
+    await duplicate5eCharBackQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Spell slots
+    await duplicate5eCharSpellSlotsQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Spells
+    await duplicate5eCharSpellsQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Attacks
+    await duplicate5eCharAttacksQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Equipment
+    await duplicate5eCharEquipmentsQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Feats
+    await duplicate5eCharFeatsQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Other pro lang
+    await duplicate5eCharOtherProLangsQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+
+    res.status(201).json({ general_id: newGeneralId });
   } catch (err) {
     next(err);
   }
@@ -279,4 +378,5 @@ export {
   edit5eCharGeneral,
   edit5eCharPro,
   edit5eCharBack,
+  duplicate5eChar,
 };

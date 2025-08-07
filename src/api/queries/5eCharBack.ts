@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { columnNamesQuery } from "./utils";
 
 export interface DndFiveEBackgroundModel {
   id: number,
@@ -31,6 +32,34 @@ async function add5eCharBackQuery(data: {
     ]
   }
   return await db.query<DndFiveEBackgroundModel>(query)
+}
+
+async function duplicate5eCharBackQuery(data: {
+  oldGeneralId: number
+  newGeneralId: number
+}) {
+  const tableName = "dnd_5e_character_background"
+  const columnNames = await columnNamesQuery(tableName)
+  const columnStr = columnNames.join(", ")
+  const selectStr = columnNames.map(col => {
+    if (col === "general_id") return "$2";
+    return col
+  }).join(", ")
+
+  const query = {
+    text: /*sql*/ `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+    values: [
+      data.oldGeneralId,
+      data.newGeneralId
+    ]
+  }
+  
+  await db.query<DndFiveEBackgroundModel>(query);
 }
 
 async function get5eCharBackQuery(id: string) {
@@ -85,5 +114,6 @@ export {
   get5eCharBackByGeneralQuery,
   get5eCharBackQuery,
   remove5eCharBackQuery,
-  edit5eCharBackQuery
+  edit5eCharBackQuery,
+  duplicate5eCharBackQuery
 }

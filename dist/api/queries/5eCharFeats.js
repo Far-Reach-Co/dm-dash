@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharFeatQuery = exports.remove5eCharFeatQuery = exports.get5eCharFeatQuery = exports.get5eCharFeatsByGeneralQuery = exports.add5eCharFeatQuery = void 0;
+exports.duplicate5eCharFeatsQuery = exports.edit5eCharFeatQuery = exports.remove5eCharFeatQuery = exports.get5eCharFeatQuery = exports.get5eCharFeatsByGeneralQuery = exports.add5eCharFeatQuery = void 0;
 const dbconfig_1 = require("../dbconfig");
+const utils_1 = require("./utils");
 function add5eCharFeatQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -26,6 +27,32 @@ function add5eCharFeatQuery(data) {
     });
 }
 exports.add5eCharFeatQuery = add5eCharFeatQuery;
+function duplicate5eCharFeatsQuery(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableName = "dnd_5e_character_feat_trait";
+        const columnNames = yield (0, utils_1.columnNamesQuery)(tableName);
+        const columnStr = columnNames.join(", ");
+        const selectStr = columnNames.map(col => {
+            if (col === "general_id")
+                return "$2";
+            return col;
+        }).join(", ");
+        const query = {
+            text: `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+            values: [
+                data.oldGeneralId,
+                data.newGeneralId
+            ]
+        };
+        yield dbconfig_1.default.query(query);
+    });
+}
+exports.duplicate5eCharFeatsQuery = duplicate5eCharFeatsQuery;
 function get5eCharFeatQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {

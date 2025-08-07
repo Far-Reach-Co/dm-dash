@@ -248,6 +248,28 @@ export default class SheetSettings {
     this.domComponent.append(
       ...(await this.renderInviteLinkComponent()),
       createElement("hr"),
+      createElement("h2", {}, "Duplicate Sheet"),
+      createElement(
+        "div",
+        { class: "hint" },
+        "*Duplicate this character sheet with all its details except for settings."
+      ),
+      createElement("button", {}, "Duplicate", {
+        type: "click",
+        event: async () => {
+          //
+          const res = await postThing("/api/duplicate_5e_character", {
+            general_id: this.generalData.id,
+          });
+          if (res.general_id) {
+            window.alert(
+              "Your character sheet has been successfully duplicated!"
+            );
+          } else
+            window.alert("Something went wrong when attempting to duplicate!");
+        },
+      }),
+      createElement("hr"),
       createElement("h2", {}, `Wyrld Connections`),
       createElement(
         "div",

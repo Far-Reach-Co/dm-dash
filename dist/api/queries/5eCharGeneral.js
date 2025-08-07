@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.get5eCharNamesQuery = exports.edit5eCharGeneralQuery = exports.remove5eCharGeneralQuery = exports.get5eCharGeneralQuery = exports.get5eCharsGeneralByUserQuery = exports.get5eCharGeneralUserIdQuery = exports.add5eCharGeneralQuery = void 0;
+exports.duplicate5eCharGeneralQuery = exports.get5eCharNamesQuery = exports.edit5eCharGeneralQuery = exports.remove5eCharGeneralQuery = exports.get5eCharGeneralQuery = exports.get5eCharsGeneralByUserQuery = exports.get5eCharGeneralUserIdQuery = exports.add5eCharGeneralQuery = void 0;
 const dbconfig_1 = require("../dbconfig");
+const utils_1 = require("./utils");
 function add5eCharGeneralQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,6 +25,32 @@ function add5eCharGeneralQuery(data) {
     });
 }
 exports.add5eCharGeneralQuery = add5eCharGeneralQuery;
+function duplicate5eCharGeneralQuery(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableName = "dnd_5e_character_general";
+        const columnNames = yield (0, utils_1.columnNamesQuery)(tableName);
+        const columnStr = columnNames.join(", ");
+        const selectStr = columnNames.map(col => {
+            if (col === "name")
+                return `${col} || ' (copy)'`;
+            return col;
+        }).join(", ");
+        const query = {
+            text: `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE id = $1
+      RETURNING *
+    `,
+            values: [
+                data.generalId
+            ]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+exports.duplicate5eCharGeneralQuery = duplicate5eCharGeneralQuery;
 function get5eCharGeneralQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
