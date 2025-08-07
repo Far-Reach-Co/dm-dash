@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { columnNamesQuery } from "./utils";
 
 interface DndFiveEFeatModel {
   id: number,
@@ -24,6 +25,34 @@ async function add5eCharFeatQuery(data: {
     ]
   }
   return await db.query<DndFiveEFeatModel>(query)
+}
+
+async function duplicate5eCharFeatsQuery(data: {
+  oldGeneralId: number
+  newGeneralId: number
+}) {
+  const tableName = "dnd_5e_character_feat_trait"
+  const columnNames = await columnNamesQuery(tableName)
+  const columnStr = columnNames.join(", ")
+  const selectStr = columnNames.map(col => {
+    if (col === "general_id") return "$2";
+    return col
+  }).join(", ")
+
+  const query = {
+    text: /*sql*/ `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+    values: [
+      data.oldGeneralId,
+      data.newGeneralId
+    ]
+  }
+  
+  await db.query<DndFiveEFeatModel>(query);
 }
 
 async function get5eCharFeatQuery(id: string) {
@@ -78,5 +107,6 @@ export {
   get5eCharFeatsByGeneralQuery,
   get5eCharFeatQuery,
   remove5eCharFeatQuery,
-  edit5eCharFeatQuery
+  edit5eCharFeatQuery,
+  duplicate5eCharFeatsQuery
 }

@@ -89,6 +89,7 @@ router.post("/add_5e_character", (0, express_validator_1.body)("name")
     .trim()
     .customSanitizer((val) => sanitizeHtml(val)), _5eCharGeneral_js_1.add5eChar);
 router.delete("/remove_5e_character/:id", _5eCharGeneral_js_1.remove5eChar);
+router.post("/duplicate_5e_character", _5eCharGeneral_js_1.duplicate5eChar);
 router.post("/edit_5e_character_general/:id", (0, express_validator_1.body)().customSanitizer((value) => {
     if (typeof value === "object" && value !== null) {
         for (let key in value) {

@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharSpellSlotInfoQuery = exports.remove5eCharSpellSlotInfoQuery = exports.get5eCharSpellSlotInfoQuery = exports.get5eCharSpellSlotInfosByGeneralQuery = exports.add5eCharSpellSlotInfoQuery = void 0;
+exports.duplicate5eCharSpellSlotsQuery = exports.edit5eCharSpellSlotInfoQuery = exports.remove5eCharSpellSlotInfoQuery = exports.get5eCharSpellSlotInfoQuery = exports.get5eCharSpellSlotInfosByGeneralQuery = exports.add5eCharSpellSlotInfoQuery = void 0;
 const dbconfig_1 = require("../dbconfig");
+const utils_1 = require("./utils");
 function add5eCharSpellSlotInfoQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -23,6 +24,32 @@ function add5eCharSpellSlotInfoQuery(data) {
     });
 }
 exports.add5eCharSpellSlotInfoQuery = add5eCharSpellSlotInfoQuery;
+function duplicate5eCharSpellSlotsQuery(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableName = "dnd_5e_spell_slots";
+        const columnNames = yield (0, utils_1.columnNamesQuery)(tableName);
+        const columnStr = columnNames.join(", ");
+        const selectStr = columnNames.map(col => {
+            if (col === "general_id")
+                return "$2";
+            return col;
+        }).join(", ");
+        const query = {
+            text: `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+            values: [
+                data.oldGeneralId,
+                data.newGeneralId
+            ]
+        };
+        yield dbconfig_1.default.query(query);
+    });
+}
+exports.duplicate5eCharSpellSlotsQuery = duplicate5eCharSpellSlotsQuery;
 function get5eCharSpellSlotInfoQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {

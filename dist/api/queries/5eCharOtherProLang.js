@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharOtherProLangQuery = exports.remove5eCharOtherProLangQuery = exports.get5eCharOtherProLangQuery = exports.get5eCharOtherProLangsByGeneralQuery = exports.add5eCharOtherProLangQuery = void 0;
+exports.duplicate5eCharOtherProLangsQuery = exports.edit5eCharOtherProLangQuery = exports.remove5eCharOtherProLangQuery = exports.get5eCharOtherProLangQuery = exports.get5eCharOtherProLangsByGeneralQuery = exports.add5eCharOtherProLangQuery = void 0;
 const dbconfig_1 = require("../dbconfig");
+const utils_1 = require("./utils");
 function add5eCharOtherProLangQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,6 +25,32 @@ function add5eCharOtherProLangQuery(data) {
     });
 }
 exports.add5eCharOtherProLangQuery = add5eCharOtherProLangQuery;
+function duplicate5eCharOtherProLangsQuery(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableName = "dnd_5e_character_other_pro_lang";
+        const columnNames = yield (0, utils_1.columnNamesQuery)(tableName);
+        const columnStr = columnNames.join(", ");
+        const selectStr = columnNames.map(col => {
+            if (col === "general_id")
+                return "$2";
+            return col;
+        }).join(", ");
+        const query = {
+            text: `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+            values: [
+                data.oldGeneralId,
+                data.newGeneralId
+            ]
+        };
+        yield dbconfig_1.default.query(query);
+    });
+}
+exports.duplicate5eCharOtherProLangsQuery = duplicate5eCharOtherProLangsQuery;
 function get5eCharOtherProLangQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {

@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { columnNamesQuery } from "./utils";
 
 export interface DndFiveESpellSlotsModel {
   id: number,
@@ -34,6 +35,34 @@ async function add5eCharSpellSlotInfoQuery(data: {
     ]
   }
   return await db.query<DndFiveESpellSlotsModel>(query)
+}
+
+async function duplicate5eCharSpellSlotsQuery(data: {
+  oldGeneralId: number
+  newGeneralId: number
+}) {
+  const tableName = "dnd_5e_spell_slots"
+  const columnNames = await columnNamesQuery(tableName)
+  const columnStr = columnNames.join(", ")
+  const selectStr = columnNames.map(col => {
+    if (col === "general_id") return "$2";
+    return col
+  }).join(", ")
+
+  const query = {
+    text: /*sql*/ `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+    values: [
+      data.oldGeneralId,
+      data.newGeneralId
+    ]
+  }
+  
+  await db.query<DndFiveESpellSlotsModel>(query);
 }
 
 async function get5eCharSpellSlotInfoQuery(id: string | number) {
@@ -88,5 +117,6 @@ export {
   get5eCharSpellSlotInfosByGeneralQuery,
   get5eCharSpellSlotInfoQuery,
   remove5eCharSpellSlotInfoQuery,
-  edit5eCharSpellSlotInfoQuery
+  edit5eCharSpellSlotInfoQuery,
+  duplicate5eCharSpellSlotsQuery
 }

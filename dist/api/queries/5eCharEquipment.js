@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharEquipmentQuery = exports.remove5eCharEquipmentQuery = exports.get5eCharEquipmentQuery = exports.get5eCharEquipmentsByGeneralQuery = exports.add5eCharEquipmentQuery = void 0;
+exports.duplicate5eCharEquipmentsQuery = exports.edit5eCharEquipmentQuery = exports.remove5eCharEquipmentQuery = exports.get5eCharEquipmentQuery = exports.get5eCharEquipmentsByGeneralQuery = exports.add5eCharEquipmentQuery = void 0;
 const dbconfig_1 = require("../dbconfig");
+const utils_1 = require("./utils");
 function add5eCharEquipmentQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -27,6 +28,32 @@ function add5eCharEquipmentQuery(data) {
     });
 }
 exports.add5eCharEquipmentQuery = add5eCharEquipmentQuery;
+function duplicate5eCharEquipmentsQuery(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableName = "dnd_5e_character_equipment";
+        const columnNames = yield (0, utils_1.columnNamesQuery)(tableName);
+        const columnStr = columnNames.join(", ");
+        const selectStr = columnNames.map(col => {
+            if (col === "general_id")
+                return "$2";
+            return col;
+        }).join(", ");
+        const query = {
+            text: `
+      INSERT INTO public."${tableName}" (${columnStr})
+      SELECT ${selectStr}
+      FROM ${tableName}
+      WHERE general_id = $1
+    `,
+            values: [
+                data.oldGeneralId,
+                data.newGeneralId
+            ]
+        };
+        yield dbconfig_1.default.query(query);
+    });
+}
+exports.duplicate5eCharEquipmentsQuery = duplicate5eCharEquipmentsQuery;
 function get5eCharEquipmentQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {

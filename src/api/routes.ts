@@ -56,6 +56,7 @@ import {
   edit5eCharPro,
   edit5eCharBack,
   get5eCharGeneral,
+  duplicate5eChar,
 } from "./controllers/5eCharGeneral.js";
 import {
   get5eCharOtherProLangsByGeneral,
@@ -287,6 +288,7 @@ router.post(
   add5eChar
 );
 router.delete("/remove_5e_character/:id", remove5eChar);
+router.post("/duplicate_5e_character", duplicate5eChar);
 router.post(
   "/edit_5e_character_general/:id",
   body().customSanitizer((value) => {

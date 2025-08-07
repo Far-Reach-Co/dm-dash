@@ -9,11 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharBack = exports.edit5eCharPro = exports.edit5eCharGeneral = exports.remove5eChar = exports.get5eCharGeneral = exports.get5eCharsByUser = exports.add5eChar = void 0;
+exports.duplicate5eChar = exports.edit5eCharBack = exports.edit5eCharPro = exports.edit5eCharGeneral = exports.remove5eChar = exports.get5eCharGeneral = exports.get5eCharsByUser = exports.add5eChar = void 0;
 const _5eCharGeneral_1 = require("../queries/5eCharGeneral");
 const _5eCharPro_1 = require("../queries/5eCharPro");
 const _5eCharBack_1 = require("../queries/5eCharBack");
 const _5eCharSpellSlots_1 = require("../queries/5eCharSpellSlots");
+const _5eCharAttacks_1 = require("../queries/5eCharAttacks");
+const _5eCharEquipment_1 = require("../queries/5eCharEquipment");
+const _5eCharFeats_1 = require("../queries/5eCharFeats");
+const _5eCharSpells_1 = require("../queries/5eCharSpells");
+const _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 const projectPlayers_1 = require("../queries/projectPlayers");
 const playerUsers_1 = require("../queries/playerUsers");
 const playerInvites_1 = require("../queries/playerInvites");
@@ -22,14 +27,12 @@ function add5eChar(req, res, next) {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
-            req.body.user_id = req.session.user;
-            const generalData = yield (0, _5eCharGeneral_1.add5eCharGeneralQuery)(req.body);
-            const general = generalData.rows[0];
-            yield (0, _5eCharPro_1.add5eCharProQuery)({ general_id: general.id });
-            yield (0, _5eCharBack_1.add5eCharBackQuery)({ general_id: general.id });
-            yield (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id });
+            const generalId = yield createNew5eChar({
+                user_id: String(req.session.user),
+                name: req.body.name,
+            });
             res
-                .set("HX-Redirect", `/5eplayer?id=${general.id}`)
+                .set("HX-Redirect", `/5eplayer?id=${generalId}`)
                 .send("Form submission was successful.");
         }
         catch (err) {
@@ -38,6 +41,65 @@ function add5eChar(req, res, next) {
     });
 }
 exports.add5eChar = add5eChar;
+function createNew5eChar(data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const generalData = yield (0, _5eCharGeneral_1.add5eCharGeneralQuery)(data);
+        const general = generalData.rows[0];
+        yield (0, _5eCharPro_1.add5eCharProQuery)({ general_id: general.id });
+        yield (0, _5eCharBack_1.add5eCharBackQuery)({ general_id: general.id });
+        yield (0, _5eCharSpellSlots_1.add5eCharSpellSlotInfoQuery)({ general_id: general.id });
+        return general.id;
+    });
+}
+function duplicate5eChar(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const generalsData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(req.body.general_id);
+            const general = generalsData.rows[0];
+            const newGeneral = yield (0, _5eCharGeneral_1.duplicate5eCharGeneralQuery)({
+                generalId: general.id,
+            });
+            const newGeneralId = newGeneral.rows[0].id;
+            yield (0, _5eCharPro_1.duplicate5eCharProQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharBack_1.duplicate5eCharBackQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharSpellSlots_1.duplicate5eCharSpellSlotsQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharSpells_1.duplicate5eCharSpellsQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharAttacks_1.duplicate5eCharAttacksQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharEquipment_1.duplicate5eCharEquipmentsQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharFeats_1.duplicate5eCharFeatsQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharOtherProLang_1.duplicate5eCharOtherProLangsQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            res.status(201).json({ general_id: newGeneralId });
+        }
+        catch (err) {
+            next(err);
+        }
+    });
+}
+exports.duplicate5eChar = duplicate5eChar;
 function get5eCharsByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
