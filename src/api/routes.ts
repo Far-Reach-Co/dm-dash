@@ -143,6 +143,12 @@ import {
   getCommands,
   interactionsController,
 } from "./controllers/discordBot.js";
+import {
+  add5eCharClass,
+  edit5eCharClass,
+  get5eCharClassesByGeneral,
+  remove5eCharClass,
+} from "./controllers/5eCharClasses.js";
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 const csrf = require("csurf");
@@ -485,6 +491,40 @@ router.post(
     return value;
   }),
   edit5eCharOtherProLang
+);
+
+// 5e characters classes
+router.get("/get_5e_character_classes/:general_id", get5eCharClassesByGeneral);
+router.post(
+  "/add_5e_character_class",
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = sanitizeHtml(value[key].trim());
+        }
+      }
+    }
+    return value;
+  }),
+  add5eCharClass
+);
+router.delete("/remove_5e_character_class/:id", remove5eCharClass);
+router.post(
+  "/edit_5e_character_class/:id",
+  body().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+      // Loop over all properties of the object and sanitize them if they're strings
+      for (let key in value) {
+        if (typeof value[key] === "string") {
+          value[key] = sanitizeHtml(value[key].trim());
+        }
+      }
+    }
+    return value;
+  }),
+  edit5eCharClass
 );
 
 // months
