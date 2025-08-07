@@ -22,6 +22,7 @@ const _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 const projectPlayers_1 = require("../queries/projectPlayers");
 const playerUsers_1 = require("../queries/playerUsers");
 const playerInvites_1 = require("../queries/playerInvites");
+const _5eCharClasses_1 = require("../queries/5eCharClasses");
 function add5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -89,6 +90,10 @@ function duplicate5eChar(req, res, next) {
                 newGeneralId: newGeneralId,
             });
             yield (0, _5eCharOtherProLang_1.duplicate5eCharOtherProLangsQuery)({
+                oldGeneralId: general.id,
+                newGeneralId: newGeneralId,
+            });
+            yield (0, _5eCharClasses_1.duplicate5eCharClassesQuery)({
                 oldGeneralId: general.id,
                 newGeneralId: newGeneralId,
             });

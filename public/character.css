@@ -91,10 +91,6 @@ input {
   font-size: 1.5rem;
 }
 
-.cp-input-char-name {
-  font-size: 1.5rem;
-}
-
 .cp-input-regular {
   width: fit-content;
   max-width: 130px;

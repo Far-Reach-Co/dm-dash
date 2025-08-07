@@ -73,6 +73,7 @@ import {
   getPlayerInviteByPlayerQuery,
   removePlayerInviteQuery,
 } from "../queries/playerInvites";
+import { duplicate5eCharClassesQuery } from "../queries/5eCharClasses";
 
 interface add5eCharRequest extends Request {
   body: {
@@ -173,6 +174,11 @@ async function duplicate5eChar(
     });
     // Other pro lang
     await duplicate5eCharOtherProLangsQuery({
+      oldGeneralId: general.id,
+      newGeneralId: newGeneralId,
+    });
+    // Classes
+    await duplicate5eCharClassesQuery({
       oldGeneralId: general.id,
       newGeneralId: newGeneralId,
     });

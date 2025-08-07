@@ -9,6 +9,7 @@ import SpellsComponent from "./SpellsComponent.js";
 import SheetSettings from "./SheetSettings.js";
 import PassivePerceptionComponent from "./PassivePerceptionComponent.js";
 import SkillComponent from "./SkillComponent.js";
+import ClassesComponent from "./ClassesComponent.js";
 
 export default class FiveEPlayerSheet {
   constructor(props) {
@@ -474,6 +475,14 @@ export default class FiveEPlayerSheet {
       });
     }
 
+    if (!this.classesComponent) {
+      const classesComponentElem = createElement("div");
+      this.classesComponent = new ClassesComponent({
+        domComponent: classesComponentElem,
+        general_id: this.generalData.id,
+      });
+    }
+
     if (!this.otherProLangComponent) {
       const otherProLangComponentElem = createElement("div");
       this.otherProLangComponent = new OtherProLangComponent({
@@ -515,40 +524,24 @@ export default class FiveEPlayerSheet {
           style: "display: flex; flex: 1; flex-wrap: wrap;",
         },
         [
-          createElement("div", { class: "cp-info-container-column" }, [
-            createElement(
-              "div",
-              { class: "special-font", style: "align-self: center;" },
-              "General Info"
-            ),
-            createElement("div", { class: "cp-content-container" }, [
-              createElement("small", {}, "Character Name"),
-              createElement(
-                "input",
-                {
-                  class: "cp-input-gen cp-input-char-name",
-                  name: "name",
-                  value: this.generalData.name ? this.generalData.name : "",
-                },
-                null,
-                {
-                  type: "focusout",
-                  event: (e) => {
-                    this.updateGeneralValue(e.target.name, e.target.value);
-                  },
-                }
-              ),
-            ]),
-            createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
-              createElement("div", {}, [
+          createElement(
+            "div",
+            { style: "display: flex: flex-direction: column;" },
+            [
+              createElement("div", { class: "cp-info-container-column" }, [
+                createElement(
+                  "div",
+                  { class: "special-font", style: "align-self: center;" },
+                  "General Info"
+                ),
                 createElement("div", { class: "cp-content-container" }, [
-                  createElement("small", {}, "Race"),
+                  createElement("small", {}, "Character Name"),
                   createElement(
                     "input",
                     {
-                      class: "cp-input-gen cp-input-regular",
-                      name: "race",
-                      value: this.generalData.race ? this.generalData.race : "",
+                      class: "cp-input-gen cp-input-large",
+                      name: "name",
+                      value: this.generalData.name ? this.generalData.name : "",
                     },
                     null,
                     {
@@ -559,253 +552,72 @@ export default class FiveEPlayerSheet {
                     }
                   ),
                 ]),
-                createElement("div", { class: "cp-content-container" }, [
-                  createElement("small", {}, "Class"),
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-gen cp-input-regular",
-                      name: "class",
-                      value: this.generalData.class
-                        ? this.generalData.class
-                        : "",
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(e.target.name, e.target.value);
-                      },
-                    }
-                  ),
-                ]),
-              ]),
-              createElement("div", {}, [
-                createElement("div", { class: "cp-content-container" }, [
-                  createElement("small", {}, "Sub-Class"),
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-gen cp-input-regular",
-                      name: "subclass",
-                      value: this.generalData.subclass
-                        ? this.generalData.subclass
-                        : "",
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(e.target.name, e.target.value);
-                      },
-                    }
-                  ),
-                ]),
-                createElement("div", { class: "cp-content-container" }, [
-                  createElement("small", {}, "Other Class"),
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-gen cp-input-regular",
-                      name: "other_class",
-                      value: this.generalData.other_class
-                        ? this.generalData.other_class
-                        : "",
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(e.target.name, e.target.value);
-                      },
-                    }
-                  ),
-                ]),
-              ]),
-              createElement("div", {}, [
-                createElement("div", { class: "cp-content-container" }, [
-                  createElement("small", {}, "Level"),
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-gen cp-input-regular",
-                      type: "number",
-                      name: "level",
-                      value: this.generalData.level
-                        ? this.generalData.level
-                        : 0,
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(
-                          e.target.name,
-                          e.target.valueAsNumber
-                        );
-                        this.render();
-                      },
-                    }
-                  ),
-                ]),
-                createElement("div", { class: "cp-content-container" }, [
-                  createElement("small", {}, "EXP"),
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-gen cp-input-regular",
-                      type: "number",
-                      name: "exp",
-                      value: this.generalData.exp ? this.generalData.exp : 0,
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(
-                          e.target.name,
-                          e.target.valueAsNumber
-                        );
-                      },
-                    }
-                  ),
-                ]),
-              ]),
-            ]),
-          ]),
-          createElement("div", { class: "cp-info-container-column" }, [
-            createElement(
-              "div",
-              {
-                style:
-                  "display: flex; flex-wrap: wrap; justify-content: center;",
-              },
-              [
-                createElement("div", { class: "cp-content-container-center" }, [
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-no-border cp-input-large",
-                      type: "number",
-                      name: "armor_class",
-                      value: this.generalData.armor_class
-                        ? this.generalData.armor_class
-                        : 0,
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(
-                          e.target.name,
-                          e.target.valueAsNumber
-                        );
-                      },
-                    }
-                  ),
-                  createElement("small", {}, "Armor Class"),
-                ]),
-                createElement("div", { class: "cp-content-container-center" }, [
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-no-border cp-input-large",
-                      type: "number",
-                      name: "initiative",
-                      value: this.generalData.initiative
-                        ? this.generalData.initiative
-                        : 0,
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(
-                          e.target.name,
-                          e.target.valueAsNumber
-                        );
-                      },
-                    }
-                  ),
-                  createElement("small", {}, "Initiative"),
-                ]),
-                createElement("div", { class: "cp-content-container-center" }, [
-                  createElement(
-                    "input",
-                    {
-                      class: "cp-input-no-border cp-input-large",
-                      type: "number",
-                      name: "speed",
-                      value: this.generalData.speed
-                        ? this.generalData.speed
-                        : 0,
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(
-                          e.target.name,
-                          e.target.valueAsNumber
-                        );
-                      },
-                    }
-                  ),
-                  createElement("small", {}, "Speed"),
-                ]),
-              ]
-            ),
-            createElement(
-              "div",
-              {
-                style:
-                  "display: flex; flex-wrap: wrap; justify-content: center;",
-              },
-              [
-                createElement("div", { class: "cp-content-container-center" }, [
-                  createElement(
-                    "div",
-                    {
-                      class: this.generalData.inspiration
-                        ? "boolean-input-active"
-                        : "boolean-input",
-                      name: "inspiration",
-                    },
-                    null,
-                    {
-                      type: "click",
-                      event: (e) => {
-                        if (e.target.className === "boolean-input")
-                          e.target.className = "boolean-input-active";
-                        else e.target.className = "boolean-input";
-                        this.generalData.inspiration =
-                          !this.generalData.inspiration;
-                        this.updateGeneralValue(
-                          "inspiration",
-                          this.generalData.inspiration
-                        );
-                      },
-                    }
-                  ),
-                  createElement("small", {}, "Inspiration"),
-                ]),
-                createElement("div", { class: "cp-content-container-center" }, [
-                  createElement(
-                    "div",
-                    {
-                      style:
-                        "display: flex; align-items: center; justify-content: center;",
-                    },
-                    [
-                      createElement("small", {}, "Total"),
+                createElement(
+                  "div",
+                  { style: "display: flex; flex-wrap: wrap;" },
+                  [
+                    createElement("div", {}, [
+                      createElement("div", { class: "cp-content-container" }, [
+                        createElement("small", {}, "Race"),
+                        createElement(
+                          "input",
+                          {
+                            class: "cp-input-gen cp-input-regular",
+                            name: "race",
+                            value: this.generalData.race
+                              ? this.generalData.race
+                              : "",
+                          },
+                          null,
+                          {
+                            type: "focusout",
+                            event: (e) => {
+                              this.updateGeneralValue(
+                                e.target.name,
+                                e.target.value
+                              );
+                            },
+                          }
+                        ),
+                      ]),
+                    ]),
+                    createElement("div", {}, [
+                      createElement("div", { class: "cp-content-container" }, [
+                        createElement("small", {}, "EXP"),
+                        createElement(
+                          "input",
+                          {
+                            class: "cp-input-gen cp-input-regular",
+                            type: "number",
+                            name: "exp",
+                            value: this.generalData.exp
+                              ? this.generalData.exp
+                              : 0,
+                          },
+                          null,
+                          {
+                            type: "focusout",
+                            event: (e) => {
+                              this.updateGeneralValue(
+                                e.target.name,
+                                e.target.valueAsNumber
+                              );
+                            },
+                          }
+                        ),
+                      ]),
+                    ]),
+                    createElement("div", { class: "cp-content-container" }, [
+                      createElement("small", {}, "Total Level"),
                       createElement(
                         "input",
                         {
-                          class: "cp-input-no-border-small",
-                          name: "hit_dice_total",
-                          value: this.generalData.hit_dice_total
-                            ? this.generalData.hit_dice_total
-                            : "",
+                          class: "cp-input-gen cp-input-regular",
+                          type: "number",
+                          name: "level",
+                          value: this.generalData.level
+                            ? this.generalData.level
+                            : 0,
                         },
                         null,
                         {
@@ -813,90 +625,302 @@ export default class FiveEPlayerSheet {
                           event: (e) => {
                             this.updateGeneralValue(
                               e.target.name,
-                              e.target.value
+                              e.target.valueAsNumber
                             );
+                            this.render();
                           },
                         }
                       ),
+                    ]),
+                  ]
+                ),
+              ]),
+              this.classesComponent.domComponent,
+            ]
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; flex-direction: column;" },
+            [
+              createElement("div", { class: "cp-info-container-column" }, [
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: flex; flex-wrap: wrap; justify-content: center;",
+                  },
+                  [
+                    createElement(
+                      "div",
+                      { class: "cp-content-container-center" },
+                      [
+                        createElement(
+                          "input",
+                          {
+                            class: "cp-input-no-border cp-input-large",
+                            type: "number",
+                            name: "armor_class",
+                            value: this.generalData.armor_class
+                              ? this.generalData.armor_class
+                              : 0,
+                          },
+                          null,
+                          {
+                            type: "focusout",
+                            event: (e) => {
+                              this.updateGeneralValue(
+                                e.target.name,
+                                e.target.valueAsNumber
+                              );
+                            },
+                          }
+                        ),
+                        createElement("small", {}, "Armor Class"),
+                      ]
+                    ),
+                    createElement(
+                      "div",
+                      { class: "cp-content-container-center" },
+                      [
+                        createElement(
+                          "input",
+                          {
+                            class: "cp-input-no-border cp-input-large",
+                            type: "number",
+                            name: "initiative",
+                            value: this.generalData.initiative
+                              ? this.generalData.initiative
+                              : 0,
+                          },
+                          null,
+                          {
+                            type: "focusout",
+                            event: (e) => {
+                              this.updateGeneralValue(
+                                e.target.name,
+                                e.target.valueAsNumber
+                              );
+                            },
+                          }
+                        ),
+                        createElement("small", {}, "Initiative"),
+                      ]
+                    ),
+                    createElement(
+                      "div",
+                      { class: "cp-content-container-center" },
+                      [
+                        createElement(
+                          "input",
+                          {
+                            class: "cp-input-no-border cp-input-large",
+                            type: "number",
+                            name: "speed",
+                            value: this.generalData.speed
+                              ? this.generalData.speed
+                              : 0,
+                          },
+                          null,
+                          {
+                            type: "focusout",
+                            event: (e) => {
+                              this.updateGeneralValue(
+                                e.target.name,
+                                e.target.valueAsNumber
+                              );
+                            },
+                          }
+                        ),
+                        createElement("small", {}, "Speed"),
+                      ]
+                    ),
+                  ]
+                ),
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: flex; flex-wrap: wrap; justify-content: center;",
+                  },
+                  [
+                    createElement(
+                      "div",
+                      { class: "cp-content-container-center" },
+                      [
+                        createElement(
+                          "div",
+                          {
+                            class: this.generalData.inspiration
+                              ? "boolean-input-active"
+                              : "boolean-input",
+                            name: "inspiration",
+                          },
+                          null,
+                          {
+                            type: "click",
+                            event: (e) => {
+                              if (e.target.className === "boolean-input")
+                                e.target.className = "boolean-input-active";
+                              else e.target.className = "boolean-input";
+                              this.generalData.inspiration =
+                                !this.generalData.inspiration;
+                              this.updateGeneralValue(
+                                "inspiration",
+                                this.generalData.inspiration
+                              );
+                            },
+                          }
+                        ),
+                        createElement("small", {}, "Inspiration"),
+                      ]
+                    ),
+                    createElement(
+                      "div",
+                      { class: "cp-content-container-center" },
+                      [
+                        createElement(
+                          "div",
+                          {
+                            style:
+                              "display: flex; align-items: center; justify-content: center;",
+                          },
+                          [
+                            createElement("small", {}, "Total"),
+                            createElement(
+                              "input",
+                              {
+                                class: "cp-input-no-border-small",
+                                name: "hit_dice_total",
+                                value: this.generalData.hit_dice_total
+                                  ? this.generalData.hit_dice_total
+                                  : "",
+                              },
+                              null,
+                              {
+                                type: "focusout",
+                                event: (e) => {
+                                  this.updateGeneralValue(
+                                    e.target.name,
+                                    e.target.value
+                                  );
+                                },
+                              }
+                            ),
+                          ]
+                        ),
+                        createElement(
+                          "input",
+                          {
+                            class: "cp-input-no-border cp-input-large",
+                            name: "hit_dice",
+                            type: "number",
+                            value: this.generalData.hit_dice
+                              ? this.generalData.hit_dice
+                              : 0,
+                          },
+                          null,
+                          {
+                            type: "focusout",
+                            event: (e) => {
+                              this.updateGeneralValue(
+                                e.target.name,
+                                e.target.valueAsNumber
+                              );
+                            },
+                          }
+                        ),
+                        createElement("small", {}, "Hit Dice"),
+                      ]
+                    ),
+                    this.hpComponent.domComponent,
+                  ]
+                ),
+              ]),
+              createElement(
+                "div",
+                { style: "display: flex; flex-wrap: wrap;" },
+                [
+                  createElement(
+                    "div",
+                    { style: "display: flex; flex-direction: column;" },
+                    [
+                      createElement(
+                        "div",
+                        { class: "cp-content-container-long" },
+                        [
+                          createElement(
+                            "div",
+                            {
+                              class: "cp-content-long-number",
+                            },
+                            `+${this.calculateProBonus()}`
+                          ),
+                          createElement(
+                            "div",
+                            { class: "cp-content-long-title" },
+                            createElement("small", {}, "Proficiency Bonus")
+                          ),
+                        ]
+                      ),
+                      this.renderPassivePerceptionComponent(),
                     ]
                   ),
                   createElement(
-                    "input",
-                    {
-                      class: "cp-input-no-border cp-input-large",
-                      name: "hit_dice",
-                      type: "number",
-                      value: this.generalData.hit_dice
-                        ? this.generalData.hit_dice
-                        : 0,
-                    },
-                    null,
-                    {
-                      type: "focusout",
-                      event: (e) => {
-                        this.updateGeneralValue(
-                          e.target.name,
-                          e.target.valueAsNumber
-                        );
-                      },
-                    }
+                    "div",
+                    { style: "display: flex; flex-direction: column;" },
+                    [
+                      createElement(
+                        "div",
+                        { class: "cp-content-container-long" },
+                        [
+                          createElement(
+                            "div",
+                            {
+                              class: "cp-content-long-number",
+                            },
+                            this.calculateSpellSaveDC()
+                          ),
+                          createElement(
+                            "div",
+                            { class: "cp-content-long-title" },
+                            createElement("small", {}, "Spell Save DC")
+                          ),
+                        ]
+                      ),
+                      createElement(
+                        "div",
+                        { class: "cp-content-container-long" },
+                        [
+                          createElement(
+                            "div",
+                            {
+                              class: "cp-content-long-number",
+                            },
+                            `+${this.calculateSpellAttackBonus()}`
+                          ),
+                          createElement(
+                            "div",
+                            { class: "cp-content-long-title" },
+                            createElement("small", {}, "Spell Attack Bonus")
+                          ),
+                        ]
+                      ),
+                    ]
                   ),
-                  createElement("small", {}, "Hit Dice"),
-                ]),
-                this.hpComponent.domComponent,
-              ]
-            ),
-          ]),
+                ]
+              ),
+            ]
+          ),
         ]
       ),
-      createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
-        ...this.renderAbilityScores(),
-      ]),
-      createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
-        createElement("div", { class: "cp-content-container-long" }, [
-          createElement(
-            "div",
-            {
-              class: "cp-content-long-number",
-            },
-            `+${this.calculateProBonus()}`
-          ),
-          createElement(
-            "div",
-            { class: "cp-content-long-title" },
-            createElement("small", {}, "Proficiency Bonus")
-          ),
-        ]),
-        this.renderPassivePerceptionComponent(),
-        createElement("div", { class: "cp-content-container-long" }, [
-          createElement(
-            "div",
-            {
-              class: "cp-content-long-number",
-            },
-            this.calculateSpellSaveDC()
-          ),
-          createElement(
-            "div",
-            { class: "cp-content-long-title" },
-            createElement("small", {}, "Spell Save DC")
-          ),
-        ]),
-        createElement("div", { class: "cp-content-container-long" }, [
-          createElement(
-            "div",
-            {
-              class: "cp-content-long-number",
-            },
-            `+${this.calculateSpellAttackBonus()}`
-          ),
-          createElement(
-            "div",
-            { class: "cp-content-long-title" },
-            createElement("small", {}, "Spell Attack Bonus")
-          ),
-        ]),
-      ]),
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; flex-wrap: wrap; margin-bottom: var(--main-distance);",
+        },
+        [...this.renderAbilityScores()]
+      ),
       createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
         createElement(
           "div",

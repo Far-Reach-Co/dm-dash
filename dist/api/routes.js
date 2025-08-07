@@ -27,6 +27,7 @@ const tableFolders_js_1 = require("./controllers/tableFolders.js");
 const discord_interactions_1 = require("discord-interactions");
 const express_rate_limit_1 = require("express-rate-limit");
 const discordBot_js_1 = require("./controllers/discordBot.js");
+const _5eCharClasses_js_1 = require("./controllers/5eCharClasses.js");
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 const csrf = require("csurf");
@@ -213,6 +214,28 @@ router.post("/edit_5e_character_other_pro_lang/:id", (0, express_validator_1.bod
     }
     return value;
 }), _5eCharOtherProLang_js_1.edit5eCharOtherProLang);
+router.get("/get_5e_character_classes/:general_id", _5eCharClasses_js_1.get5eCharClassesByGeneral);
+router.post("/add_5e_character_class", (0, express_validator_1.body)().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+        for (let key in value) {
+            if (typeof value[key] === "string") {
+                value[key] = sanitizeHtml(value[key].trim());
+            }
+        }
+    }
+    return value;
+}), _5eCharClasses_js_1.add5eCharClass);
+router.delete("/remove_5e_character_class/:id", _5eCharClasses_js_1.remove5eCharClass);
+router.post("/edit_5e_character_class/:id", (0, express_validator_1.body)().customSanitizer((value) => {
+    if (typeof value === "object" && value !== null) {
+        for (let key in value) {
+            if (typeof value[key] === "string") {
+                value[key] = sanitizeHtml(value[key].trim());
+            }
+        }
+    }
+    return value;
+}), _5eCharClasses_js_1.edit5eCharClass);
 router.get("/get_months/:calendar_id", months_js_1.getMonths);
 router.post("/add_month", (0, express_validator_1.body)("title")
     .trim()
