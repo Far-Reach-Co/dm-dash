@@ -8,7 +8,7 @@ import {
   editPlayerUserQuery,
   removePlayerUsersByPlayerQuery,
 } from "../queries/playerUsers.js";
-import { UserModel, getUserByIdQuery } from "../queries/users.js";
+import { User, getUserByIdQuery } from "../queries/users.js";
 import { Request, Response, NextFunction } from "express";
 
 async function addPlayerUser(req: Request, res: Response, next: NextFunction) {
@@ -46,7 +46,7 @@ async function getPlayerUserByUserAndPlayer(
   }
 }
 
-interface GetPlayerUsersByPlayerReturnUserModel extends UserModel {
+interface GetPlayerUsersByPlayerReturnUser extends User {
   player_user_id: number;
   is_editor: boolean;
 }
@@ -66,9 +66,8 @@ async function getPlayerUsersByPlayer(
     for (const PlayerUser of PlayerUsersData.rows) {
       const userData = await getUserByIdQuery(PlayerUser.user_id);
       const user = userData.rows[0];
-      (user as GetPlayerUsersByPlayerReturnUserModel).player_user_id =
-        PlayerUser.id;
-      (user as GetPlayerUsersByPlayerReturnUserModel).is_editor =
+      (user as GetPlayerUsersByPlayerReturnUser).player_user_id = PlayerUser.id;
+      (user as GetPlayerUsersByPlayerReturnUser).is_editor =
         PlayerUser.is_editor;
       usersList.push(user);
     }

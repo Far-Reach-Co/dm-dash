@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-export interface DndFiveEProModel {
+export interface DndFiveEPro {
   id: number,
   general_id: number,
   sv_str: boolean,
@@ -56,7 +56,7 @@ async function add5eCharProQuery(data: {general_id: string | number}) {
       data.general_id,
     ]
   }
-  return await db.query<DndFiveEProModel>(query)
+  return await db.query<DndFiveEPro>(query)
 }
 
 async function duplicate5eCharProQuery(data: {
@@ -84,7 +84,7 @@ async function duplicate5eCharProQuery(data: {
     ]
   }
   
-  await db.query<DndFiveEProModel>(query);
+  await db.query<DndFiveEPro>(query);
 }
 
 async function get5eCharProQuery(id: string) {
@@ -92,7 +92,7 @@ async function get5eCharProQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_proficiencies" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEProModel>(query)
+  return await db.query<DndFiveEPro>(query)
 }
 
 async function get5eCharProByGeneralQuery(generalId: string | number) {
@@ -100,7 +100,7 @@ async function get5eCharProByGeneralQuery(generalId: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_character_proficiencies" where general_id = $1`,
     values: [generalId]
   }
-  return await db.query<DndFiveEProModel>(query)
+  return await db.query<DndFiveEPro>(query)
 }
 
 async function remove5eCharProQuery(id: string | number) {
@@ -109,7 +109,7 @@ async function remove5eCharProQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveEProModel>(query)
+  return await db.query<DndFiveEPro>(query)
 }
 
 async function edit5eCharProQuery(id: string, data: any) {
@@ -131,7 +131,7 @@ async function edit5eCharProQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveEProModel>(query)
+  return await db.query<DndFiveEPro>(query)
 }
 
 export {

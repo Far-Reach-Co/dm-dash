@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-interface DndFiveESpellModel {
+interface DndFiveESpell {
   id: number,
   title: string,
   description: string,
@@ -15,7 +15,7 @@ interface DndFiveESpellModel {
 }
 
 async function add5eCharSpellQuery(data: {
-  general_id: string,
+  general_id: number | string,
   title: string,
   description: string,
   type: string
@@ -29,7 +29,7 @@ async function add5eCharSpellQuery(data: {
       data.type
     ]
   }
-  return await db.query<DndFiveESpellModel>(query)
+  return await db.query<DndFiveESpell>(query)
 }
 
 async function duplicate5eCharSpellsQuery(data: {
@@ -57,7 +57,7 @@ async function duplicate5eCharSpellsQuery(data: {
     ]
   }
   
-  await db.query<DndFiveESpellModel>(query);
+  await db.query<DndFiveESpell>(query);
 }
 
 async function get5eCharSpellQuery(id: string) {
@@ -65,7 +65,7 @@ async function get5eCharSpellQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_spell" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveESpellModel>(query)
+  return await db.query<DndFiveESpell>(query)
 }
 
 async function get5eCharSpellsByTypeQuery(generalId: string, type: string) {
@@ -73,7 +73,7 @@ async function get5eCharSpellsByTypeQuery(generalId: string, type: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_spell" where general_id = $1 and type = $2 order by id`,
     values: [generalId, type]
   }
-  return await db.query<DndFiveESpellModel>(query)
+  return await db.query<DndFiveESpell>(query)
 }
 
 async function get5eCharSpellsByGeneralQuery(generalId: string | number) {
@@ -81,7 +81,7 @@ async function get5eCharSpellsByGeneralQuery(generalId: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_character_spell" where general_id = $1`,
     values: [generalId]
   }
-  return await db.query<DndFiveESpellModel>(query)
+  return await db.query<DndFiveESpell>(query)
 }
 
 async function remove5eCharSpellQuery(id: string | number) {
@@ -90,7 +90,7 @@ async function remove5eCharSpellQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveESpellModel>(query)
+  return await db.query<DndFiveESpell>(query)
 }
 
 async function edit5eCharSpellQuery(id: string, data: any) {
@@ -112,7 +112,7 @@ async function edit5eCharSpellQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveESpellModel>(query)
+  return await db.query<DndFiveESpell>(query)
 }
 
 export {

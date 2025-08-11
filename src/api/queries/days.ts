@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-export interface DayModel {
+export interface Day {
   id: number,
   title: string,
   calendar_id: number,
@@ -20,7 +20,7 @@ async function addDayQuery(data: {
       data.title
     ]
   }
-  return await db.query<DayModel>(query)
+  return await db.query<Day>(query)
 }
 
 async function getDayQuery(id: string) {
@@ -28,7 +28,7 @@ async function getDayQuery(id: string) {
     text: /*sql*/ `select * from public."Day" where id = $1`,
     values: [id]
   }
-  return await db.query<DayModel>(query)
+  return await db.query<Day>(query)
 }
 
 async function getDaysQuery(calendarId: string | number) {
@@ -36,7 +36,7 @@ async function getDaysQuery(calendarId: string | number) {
     text: /*sql*/ `select * from public."Day" where calendar_id = $1 order by index asc`,
     values: [calendarId]
   }
-  return await db.query<DayModel>(query)
+  return await db.query<Day>(query)
 }
 
 async function removeDayQuery(id: string) {
@@ -45,7 +45,7 @@ async function removeDayQuery(id: string) {
     values: [id]
   }
 
-  return await db.query<DayModel>(query)
+  return await db.query<Day>(query)
 }
 
 async function editDayQuery(id: string, data: any) {
@@ -67,7 +67,7 @@ async function editDayQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DayModel>(query)
+  return await db.query<Day>(query)
 }
 
 export {

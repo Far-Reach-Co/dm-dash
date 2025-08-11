@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-export interface ImageModal {
+export interface Image {
   id: number,
   original_name: string,
   size: number,
@@ -21,7 +21,7 @@ async function addImageQuery(data: {
       data.file_name
     ]
   }
-  return await db.query<ImageModal>(query)
+  return await db.query<Image>(query)
 }
 
 async function getImageQuery(id: string | number) {
@@ -29,7 +29,7 @@ async function getImageQuery(id: string | number) {
     text: /*sql*/ `select * from public."Image" where id = $1`,
     values: [id]
   }
-  return await db.query<ImageModal>(query)
+  return await db.query<Image>(query)
 }
 
 async function getImagesQuery(ids: (string | number)[]) {
@@ -39,7 +39,7 @@ async function getImagesQuery(ids: (string | number)[]) {
     text: /*sql*/ `SELECT * FROM public."Image" WHERE id IN (${placeholders})`,
     values: ids,
   };
-  return await db.query<ImageModal>(query)
+  return await db.query<Image>(query)
 }
 
 async function removeImageQuery(id: string | number) {
@@ -48,7 +48,7 @@ async function removeImageQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<ImageModal>(query)
+  return await db.query<Image>(query)
 }
 
 async function editImageQuery(id: string, data: any) {
@@ -70,7 +70,7 @@ async function editImageQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<ImageModal>(query)
+  return await db.query<Image>(query)
 }
 
 export {

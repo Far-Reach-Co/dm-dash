@@ -4,59 +4,34 @@ import {
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
   edit5eCharGeneralQuery,
-  DndFiveEGeneralModel,
+  DndFiveEGeneral,
   duplicate5eCharGeneralQuery,
 } from "../queries/5eCharGeneral";
 import {
-  get5eCharProQuery,
   add5eCharProQuery,
   get5eCharProByGeneralQuery,
-  remove5eCharProQuery,
   edit5eCharProQuery,
-  DndFiveEProModel,
+  DndFiveEPro,
   duplicate5eCharProQuery,
 } from "../queries/5eCharPro";
 import {
   add5eCharBackQuery,
   get5eCharBackByGeneralQuery,
-  remove5eCharBackQuery,
-  get5eCharBackQuery,
   edit5eCharBackQuery,
-  DndFiveEBackgroundModel,
+  DndFiveEBackground,
   duplicate5eCharBackQuery,
 } from "../queries/5eCharBack";
 import {
   get5eCharSpellSlotInfosByGeneralQuery,
   add5eCharSpellSlotInfoQuery,
-  remove5eCharSpellSlotInfoQuery,
-  DndFiveESpellSlotsModel,
+  DndFiveESpellSlots,
   duplicate5eCharSpellSlotsQuery,
 } from "../queries/5eCharSpellSlots";
-import {
-  duplicate5eCharAttacksQuery,
-  get5eCharAttacksByGeneralQuery,
-  remove5eCharAttackQuery,
-} from "../queries/5eCharAttacks";
-import {
-  remove5eCharEquipmentQuery,
-  get5eCharEquipmentsByGeneralQuery,
-  duplicate5eCharEquipmentsQuery,
-} from "../queries/5eCharEquipment";
-import {
-  duplicate5eCharFeatsQuery,
-  get5eCharFeatsByGeneralQuery,
-  remove5eCharFeatQuery,
-} from "../queries/5eCharFeats";
-import {
-  duplicate5eCharSpellsQuery,
-  get5eCharSpellsByGeneralQuery,
-  remove5eCharSpellQuery,
-} from "../queries/5eCharSpells";
-import {
-  duplicate5eCharOtherProLangsQuery,
-  get5eCharOtherProLangsByGeneralQuery,
-  remove5eCharOtherProLangQuery,
-} from "../queries/5eCharOtherProLang";
+import { duplicate5eCharAttacksQuery } from "../queries/5eCharAttacks";
+import { duplicate5eCharEquipmentsQuery } from "../queries/5eCharEquipment";
+import { duplicate5eCharFeatsQuery } from "../queries/5eCharFeats";
+import { duplicate5eCharSpellsQuery } from "../queries/5eCharSpells";
+import { duplicate5eCharOtherProLangsQuery } from "../queries/5eCharOtherProLang";
 import {
   getProjectPlayersByPlayerQuery,
   removeProjectPlayerQuery,
@@ -65,7 +40,6 @@ import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
 import { getUserByIdQuery } from "../queries/users";
 import {
-  getPlayerUserByUserAndPlayerQuery,
   getPlayerUsersByPlayerQuery,
   removePlayerUserQuery,
 } from "../queries/playerUsers";
@@ -127,10 +101,14 @@ async function duplicate5eChar(
   next: NextFunction
 ) {
   try {
-    // if (!req.session.user) throw new Error("User is not logged in");
-    // Get original by general id
-    const generalsData = await get5eCharGeneralQuery(req.body.general_id);
-    const general = generalsData.rows[0];
+    const generalData = await get5eCharGeneralQuery(req.body.general_id);
+    const general = generalData.rows[0];
+
+    // check if owner
+    if (!req.session.user) throw new Error("User is not logged in");
+    if (req.session.user != general.user_id)
+      throw new Error("User does not own this property");
+
     // Duplicate
     // Gen
     const newGeneral = await duplicate5eCharGeneralQuery({
@@ -189,10 +167,10 @@ async function duplicate5eChar(
   }
 }
 
-interface Get5eCharsDataReturnModel extends DndFiveEGeneralModel {
-  proficiencies: DndFiveEProModel;
-  background: DndFiveEBackgroundModel;
-  spell_slots: DndFiveESpellSlotsModel;
+interface Get5eCharsDataReturnModel extends DndFiveEGeneral {
+  proficiencies: DndFiveEPro;
+  background: DndFiveEBackground;
+  spell_slots: DndFiveESpellSlots;
 }
 
 async function get5eCharsByUser(

@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-export interface TableFolderModel {
+export interface TableFolder {
   id: number,
   title: string,
   user_id?: number,
@@ -24,7 +24,7 @@ async function addTableFolderByProjectQuery(data: {
       data.parent_folder_id
     ]
   }
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 async function addTableFolderByUserQuery(data: {
@@ -42,7 +42,7 @@ async function addTableFolderByUserQuery(data: {
       data.parent_folder_id
     ]
   }
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 async function getTableFolderQuery(id: string) {
@@ -50,7 +50,7 @@ async function getTableFolderQuery(id: string) {
     text: /*sql*/ `select * from public."TableFolder" where id = $1`,
     values: [id]
   }
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 async function getTableFoldersByUserQuery(userId: string | number) {
@@ -58,7 +58,7 @@ async function getTableFoldersByUserQuery(userId: string | number) {
     text: /*sql*/ `select * from public."TableFolder" where user_id = $1 order by id`,
     values: [userId]
   }
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 async function getTableFoldersByProjectQuery(projectId: string | number) {
@@ -66,7 +66,7 @@ async function getTableFoldersByProjectQuery(projectId: string | number) {
     text: /*sql*/ `select * from public."TableFolder" where project_id = $1 order by id`,
     values: [projectId]
   }
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 async function getTableFoldersByParentQuery(parentFolderId: string | number) {
@@ -74,7 +74,7 @@ async function getTableFoldersByParentQuery(parentFolderId: string | number) {
     text: /*sql*/ `select * from public."TableFolder" where parent_folder_id = $1 order by id`,
     values: [parentFolderId]
   }
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 async function removeTableFolderQuery(id: string | number) {
@@ -83,7 +83,7 @@ async function removeTableFolderQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 async function editTableFolderQuery(id: string, data: any) {
@@ -105,7 +105,7 @@ async function editTableFolderQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<TableFolderModel>(query)
+  return await db.query<TableFolder>(query)
 }
 
 export {

@@ -1,13 +1,25 @@
 import {
   add5eCharSpellQuery,
-  get5eCharSpellQuery,
   get5eCharSpellsByTypeQuery,
   remove5eCharSpellQuery,
   edit5eCharSpellQuery,
 } from "../queries/5eCharSpells";
 import { Request, Response, NextFunction } from "express";
 
-async function add5eCharSpell(req: Request, res: Response, next: NextFunction) {
+interface add5eCharSpellRequest {
+  body: {
+    general_id: number | string;
+    title: string;
+    description: string;
+    type: string;
+  };
+}
+
+async function add5eCharSpell(
+  req: add5eCharSpellRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await add5eCharSpellQuery(req.body);
     res.status(201).json(data.rows[0]);

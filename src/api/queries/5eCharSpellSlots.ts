@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-export interface DndFiveESpellSlotsModel {
+export interface DndFiveESpellSlots {
   id: number,
   general_id: number,
   first_total: number,
@@ -34,7 +34,7 @@ async function add5eCharSpellSlotInfoQuery(data: {
       data.general_id,
     ]
   }
-  return await db.query<DndFiveESpellSlotsModel>(query)
+  return await db.query<DndFiveESpellSlots>(query)
 }
 
 async function duplicate5eCharSpellSlotsQuery(data: {
@@ -62,7 +62,7 @@ async function duplicate5eCharSpellSlotsQuery(data: {
     ]
   }
   
-  await db.query<DndFiveESpellSlotsModel>(query);
+  await db.query<DndFiveESpellSlots>(query);
 }
 
 async function get5eCharSpellSlotInfoQuery(id: string | number) {
@@ -70,7 +70,7 @@ async function get5eCharSpellSlotInfoQuery(id: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveESpellSlotsModel>(query)
+  return await db.query<DndFiveESpellSlots>(query)
 }
 
 async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string | number) {
@@ -78,7 +78,7 @@ async function get5eCharSpellSlotInfosByGeneralQuery(generalId: string | number)
     text: /*sql*/ `select * from public."dnd_5e_spell_slots" where general_id = $1`,
     values: [generalId]
   }
-  return await db.query<DndFiveESpellSlotsModel>(query)
+  return await db.query<DndFiveESpellSlots>(query)
 }
 
 async function remove5eCharSpellSlotInfoQuery(id: string | number) {
@@ -87,7 +87,7 @@ async function remove5eCharSpellSlotInfoQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveESpellSlotsModel>(query)
+  return await db.query<DndFiveESpellSlots>(query)
 }
 
 async function edit5eCharSpellSlotInfoQuery(id: string, data: any) {
@@ -109,7 +109,7 @@ async function edit5eCharSpellSlotInfoQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveESpellSlotsModel>(query)
+  return await db.query<DndFiveESpellSlots>(query)
 }
 
 export {

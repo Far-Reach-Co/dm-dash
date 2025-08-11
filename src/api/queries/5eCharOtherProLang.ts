@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-interface DndFiveEOtherProLangModel {
+interface DndFiveEOtherProLang {
   id: number,
   general_id: number,
   type: string,
@@ -9,7 +9,7 @@ interface DndFiveEOtherProLangModel {
 }
 
 async function add5eCharOtherProLangQuery(data: {
-  general_id: string,
+  general_id: number | string,
   type: string
 }) {
   const query = {
@@ -19,7 +19,7 @@ async function add5eCharOtherProLangQuery(data: {
       data.type,
     ]
   }
-  return await db.query<DndFiveEOtherProLangModel>(query)
+  return await db.query<DndFiveEOtherProLang>(query)
 }
 
 async function duplicate5eCharOtherProLangsQuery(data: {
@@ -47,7 +47,7 @@ async function duplicate5eCharOtherProLangsQuery(data: {
     ]
   }
   
-  await db.query<DndFiveEOtherProLangModel>(query);
+  await db.query<DndFiveEOtherProLang>(query);
 }
 
 async function get5eCharOtherProLangQuery(id: string) {
@@ -55,7 +55,7 @@ async function get5eCharOtherProLangQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEOtherProLangModel>(query)
+  return await db.query<DndFiveEOtherProLang>(query)
 }
 
 async function get5eCharOtherProLangsByGeneralQuery(generalId: string | number) {
@@ -63,7 +63,7 @@ async function get5eCharOtherProLangsByGeneralQuery(generalId: string | number) 
     text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where general_id = $1 order by id`,
     values: [generalId]
   }
-  return await db.query<DndFiveEOtherProLangModel>(query)
+  return await db.query<DndFiveEOtherProLang>(query)
 }
 
 async function remove5eCharOtherProLangQuery(id: string | number) {
@@ -72,7 +72,7 @@ async function remove5eCharOtherProLangQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveEOtherProLangModel>(query)
+  return await db.query<DndFiveEOtherProLang>(query)
 }
 
 async function edit5eCharOtherProLangQuery(id: string, data: any) {
@@ -94,7 +94,7 @@ async function edit5eCharOtherProLangQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveEOtherProLangModel>(query)
+  return await db.query<DndFiveEOtherProLang>(query)
 }
 
 export {

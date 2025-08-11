@@ -1,15 +1,24 @@
 import {
   add5eCharClassQuery,
-  get5eCharClassQuery,
   get5eCharClassesByGeneralQuery,
   remove5eCharClassQuery,
   edit5eCharClassQuery,
 } from "../queries/5eCharClasses";
 import { Request, Response, NextFunction } from "express";
 
-async function add5eCharClass(req: Request, res: Response, next: NextFunction) {
+interface add5eCharClassRequest extends Request {
+  body: {
+    general_id: number | string;
+  };
+}
+
+async function add5eCharClass(
+  req: add5eCharClassRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
-    const data = await add5eCharClassQuery(req.body);
+    const data = await add5eCharClassQuery({ general_id: req.body.general_id });
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);

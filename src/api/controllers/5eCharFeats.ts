@@ -1,13 +1,25 @@
 import {
   add5eCharFeatQuery,
-  get5eCharFeatQuery,
   get5eCharFeatsByGeneralQuery,
   remove5eCharFeatQuery,
   edit5eCharFeatQuery,
 } from "../queries/5eCharFeats";
 import { Request, Response, NextFunction } from "express";
 
-async function add5eCharFeat(req: Request, res: Response, next: NextFunction) {
+interface add5eCharFeatRequest {
+  body: {
+    general_id: number | string;
+    title: string;
+    description: string;
+    type: string;
+  };
+}
+
+async function add5eCharFeat(
+  req: add5eCharFeatRequest,
+  res: Response,
+  next: NextFunction
+) {
   try {
     const data = await add5eCharFeatQuery(req.body);
     res.status(201).json(data.rows[0]);

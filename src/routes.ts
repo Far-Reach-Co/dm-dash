@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { Request, Response, NextFunction } from "express";
-import { UserModel, getUserByIdQuery } from "./api/queries/users";
+import { User, getUserByIdQuery } from "./api/queries/users";
 import {
   get5eCharGeneralQuery,
   get5eCharGeneralUserIdQuery,
@@ -464,7 +464,7 @@ router.get(
   }
 );
 
-interface GetProjectUsersByProjectReturnUserModel extends UserModel {
+interface GetProjectUsersByProjectReturnUser extends User {
   project_user_id: number;
   is_editor: boolean;
 }
@@ -506,9 +506,9 @@ router.get(
       for (const projectUser of projectUsersData.rows) {
         const userData = await getUserByIdQuery(projectUser.user_id);
         const user = userData.rows[0];
-        (user as GetProjectUsersByProjectReturnUserModel).project_user_id =
+        (user as GetProjectUsersByProjectReturnUser).project_user_id =
           projectUser.id;
-        (user as GetProjectUsersByProjectReturnUserModel).is_editor =
+        (user as GetProjectUsersByProjectReturnUser).is_editor =
           projectUser.is_editor;
         usersList.push(user);
       }

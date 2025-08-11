@@ -2,7 +2,7 @@ import { QueryResult } from "pg";
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-export interface DndFiveEGeneralModel {
+export interface DndFiveEGeneral {
   id: number;
   user_id: number;
   name: string;
@@ -58,12 +58,12 @@ async function add5eCharGeneralQuery(data: {
       data.name,
     ]
   }
-  return await db.query<DndFiveEGeneralModel>(query)
+  return await db.query<DndFiveEGeneral>(query)
 }
 
 async function duplicate5eCharGeneralQuery(data: {
   generalId: number
-}): Promise<QueryResult<DndFiveEGeneralModel>> {
+}): Promise<QueryResult<DndFiveEGeneral>> {
   const tableName = "dnd_5e_character_general"
   const columnNames = await columnNamesQuery(tableName)
   const columnStr = columnNames.join(", ")
@@ -84,7 +84,7 @@ async function duplicate5eCharGeneralQuery(data: {
       data.generalId
     ]
   }
-  return await db.query<DndFiveEGeneralModel>(query);
+  return await db.query<DndFiveEGeneral>(query);
 }
 
 async function get5eCharGeneralQuery(id: string | number) {
@@ -92,7 +92,7 @@ async function get5eCharGeneralQuery(id: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_character_general" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEGeneralModel>(query)
+  return await db.query<DndFiveEGeneral>(query)
 }
 
 async function get5eCharGeneralUserIdQuery(id: string) {
@@ -100,7 +100,7 @@ async function get5eCharGeneralUserIdQuery(id: string) {
     text: /*sql*/ `select user_id from public."dnd_5e_character_general" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEGeneralModel>(query)
+  return await db.query<DndFiveEGeneral>(query)
 }
 
 async function get5eCharNamesQuery(ids: (string | number)[]) {
@@ -110,7 +110,7 @@ async function get5eCharNamesQuery(ids: (string | number)[]) {
     text: /*sql*/ `SELECT id, name FROM public."dnd_5e_character_general" WHERE id IN (${placeholders})`,
     values: ids,
   };
-  return await db.query<DndFiveEGeneralModel>(query)
+  return await db.query<DndFiveEGeneral>(query)
 }
 
 async function get5eCharsGeneralByUserQuery(userId: string | number) {
@@ -118,7 +118,7 @@ async function get5eCharsGeneralByUserQuery(userId: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_character_general" where user_id = $1`,
     values: [userId]
   }
-  return await db.query<DndFiveEGeneralModel>(query)
+  return await db.query<DndFiveEGeneral>(query)
 }
 
 async function remove5eCharGeneralQuery(id: string | number) {
@@ -127,7 +127,7 @@ async function remove5eCharGeneralQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveEGeneralModel>(query)
+  return await db.query<DndFiveEGeneral>(query)
 }
 
 async function edit5eCharGeneralQuery(id: string, data: any) {
@@ -148,7 +148,7 @@ async function edit5eCharGeneralQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveEGeneralModel>(query)
+  return await db.query<DndFiveEGeneral>(query)
 }
 
 export {

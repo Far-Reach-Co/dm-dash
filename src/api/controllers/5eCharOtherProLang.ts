@@ -1,19 +1,28 @@
 import { Request, Response, NextFunction } from "express";
 import {
   add5eCharOtherProLangQuery,
-  get5eCharOtherProLangQuery,
   get5eCharOtherProLangsByGeneralQuery,
   remove5eCharOtherProLangQuery,
   edit5eCharOtherProLangQuery,
 } from "../queries/5eCharOtherProLang";
 
+interface add5eCharOtherProLangRequest {
+  body: {
+    general_id: number | string;
+    type: string;
+  };
+}
+
 async function add5eCharOtherProLang(
-  req: Request,
+  req: add5eCharOtherProLangRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const data = await add5eCharOtherProLangQuery(req.body);
+    const data = await add5eCharOtherProLangQuery({
+      general_id: req.body.general_id,
+      type: req.body.type,
+    });
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);

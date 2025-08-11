@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-export interface PlayerInviteModel {
+export interface PlayerInvite {
   id: number,
   uuid: string,
   player_id: number
@@ -14,7 +14,7 @@ async function addPlayerInviteQuery(data: {uuid: string, player_id: string}) {
       data.player_id
     ]
   }
-  return await db.query<PlayerInviteModel>(query)
+  return await db.query<PlayerInvite>(query)
 }
 
 async function getPlayerInviteQuery(id: string) {
@@ -22,7 +22,7 @@ async function getPlayerInviteQuery(id: string) {
     text: /*sql*/ `select * from public."PlayerInvite" where id = $1`,
     values: [id]
   }
-  return await db.query<PlayerInviteModel>(query)
+  return await db.query<PlayerInvite>(query)
 }
 
 async function getPlayerInviteByPlayerQuery(playerId: string | number) {
@@ -30,7 +30,7 @@ async function getPlayerInviteByPlayerQuery(playerId: string | number) {
     text: /*sql*/ `select * from public."PlayerInvite" where player_id = $1`,
     values: [playerId]
   }
-  return await db.query<PlayerInviteModel>(query)
+  return await db.query<PlayerInvite>(query)
 }
 
 async function getPlayerInviteByUUIDQuery(uuid: string) {
@@ -38,7 +38,7 @@ async function getPlayerInviteByUUIDQuery(uuid: string) {
     text: /*sql*/ `select * from public."PlayerInvite" where uuid = $1`,
     values: [uuid]
   }
-  return await db.query<PlayerInviteModel>(query)
+  return await db.query<PlayerInvite>(query)
 }
 
 async function removePlayerInviteQuery(id: string | number) {
@@ -47,7 +47,7 @@ async function removePlayerInviteQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<PlayerInviteModel>(query)
+  return await db.query<PlayerInvite>(query)
 }
 
 export {

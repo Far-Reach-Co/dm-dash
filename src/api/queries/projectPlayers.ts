@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface ProjectPlayerModel {
+interface ProjectPlayer {
   id: number,
   project_id: number,
   player_id: number
@@ -14,7 +14,7 @@ async function addProjectPlayerQuery(data: {project_id: string, player_id: strin
       data.player_id,
     ]
   }
-  return await db.query<ProjectPlayerModel>(query)
+  return await db.query<ProjectPlayer>(query)
 }
 
 async function getProjectPlayersByProjectQuery(projectId: string | number) {
@@ -22,7 +22,7 @@ async function getProjectPlayersByProjectQuery(projectId: string | number) {
     text: /*sql*/ `select * from public."ProjectPlayer" where project_id = $1`,
     values: [projectId]
   }
-  return await db.query<ProjectPlayerModel>(query)
+  return await db.query<ProjectPlayer>(query)
 }
 
 async function getProjectPlayersByPlayerQuery(playerId: string | number) {
@@ -30,7 +30,7 @@ async function getProjectPlayersByPlayerQuery(playerId: string | number) {
     text: /*sql*/ `select * from public."ProjectPlayer" where player_id = $1`,
     values: [playerId]
   }
-  return await db.query<ProjectPlayerModel>(query)
+  return await db.query<ProjectPlayer>(query)
 }
 
 async function getProjectPlayerQuery(id: string | number) {
@@ -38,7 +38,7 @@ async function getProjectPlayerQuery(id: string | number) {
     text: /*sql*/ `select * from public."ProjectPlayer" where id = $1`,
     values: [id]
   }
-  return await db.query<ProjectPlayerModel>(query)
+  return await db.query<ProjectPlayer>(query)
 }
 
 async function removeProjectPlayerQuery(id: string | number) {
@@ -47,7 +47,7 @@ async function removeProjectPlayerQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<ProjectPlayerModel>(query)
+  return await db.query<ProjectPlayer>(query)
 }
 
 async function editProjectPlayerQuery(id: string, data: any) {
@@ -69,7 +69,7 @@ async function editProjectPlayerQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<ProjectPlayerModel>(query)
+  return await db.query<ProjectPlayer>(query)
 }
 
 export {

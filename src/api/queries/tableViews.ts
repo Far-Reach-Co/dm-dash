@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface TableViewModel {
+interface TableView {
   id: number,
   project_id: number,
   user_id: number,
@@ -17,7 +17,7 @@ async function addTableViewByProjectQuery(data: {project_id: string | number, ti
       data.title
     ]
   }
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 async function addTableViewByUserQuery(data: {user_id: string | number, title: string}) {
@@ -28,7 +28,7 @@ async function addTableViewByUserQuery(data: {user_id: string | number, title: s
       data.title
     ]
   }
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 async function getTableViewQuery(id: string) {
@@ -36,7 +36,7 @@ async function getTableViewQuery(id: string) {
     text: /*sql*/ `select * from public."TableView" where id = $1`,
     values: [id]
   }
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 async function getTableViewByUUIDQuery(uuid: string) {
@@ -44,7 +44,7 @@ async function getTableViewByUUIDQuery(uuid: string) {
     text: /*sql*/ `select * from public."TableView" where uuid = $1`,
     values: [uuid]
   }
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 async function getTableViewsByProjectQuery(projectId: string | number) {
@@ -52,7 +52,7 @@ async function getTableViewsByProjectQuery(projectId: string | number) {
     text: /*sql*/ `select * from public."TableView" where project_id = $1`,
     values: [projectId]
   }
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 async function getTableViewsByUserQuery(userId: string | number) {
@@ -60,7 +60,7 @@ async function getTableViewsByUserQuery(userId: string | number) {
     text: /*sql*/ `select * from public."TableView" where user_id = $1`,
     values: [userId]
   }
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 async function removeTableViewQuery(id: string | number) {
@@ -69,7 +69,7 @@ async function removeTableViewQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 async function editTableViewQuery(id: string, data: any) {
@@ -91,7 +91,7 @@ async function editTableViewQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<TableViewModel>(query)
+  return await db.query<TableView>(query)
 }
 
 export {

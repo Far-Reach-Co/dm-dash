@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-export interface ProjectInviteModel {
+export interface ProjectInvite {
   id: number,
   uuid: string,
   project_id: number
@@ -14,7 +14,7 @@ async function addProjectInviteQuery(data: {uuid: string, project_id: string}) {
       data.project_id
     ]
   }
-  return await db.query<ProjectInviteModel>(query)
+  return await db.query<ProjectInvite>(query)
 }
 
 async function getProjectInviteQuery(id: string) {
@@ -22,7 +22,7 @@ async function getProjectInviteQuery(id: string) {
     text: /*sql*/ `select * from public."ProjectInvite" where id = $1`,
     values: [id]
   }
-  return await db.query<ProjectInviteModel>(query)
+  return await db.query<ProjectInvite>(query)
 }
 
 async function getProjectInviteByProjectQuery(projectId: string | number) {
@@ -30,7 +30,7 @@ async function getProjectInviteByProjectQuery(projectId: string | number) {
     text: /*sql*/ `select * from public."ProjectInvite" where project_id = $1`,
     values: [projectId]
   }
-  return await db.query<ProjectInviteModel>(query)
+  return await db.query<ProjectInvite>(query)
 }
 
 async function getProjectInviteByUUIDQuery(uuid: string) {
@@ -38,7 +38,7 @@ async function getProjectInviteByUUIDQuery(uuid: string) {
     text: /*sql*/ `select * from public."ProjectInvite" where uuid = $1`,
     values: [uuid]
   }
-  return await db.query<ProjectInviteModel>(query)
+  return await db.query<ProjectInvite>(query)
 }
 
 async function removeProjectInviteQuery(id: string) {
@@ -47,7 +47,7 @@ async function removeProjectInviteQuery(id: string) {
     values: [id]
   }
 
-  return await db.query<ProjectInviteModel>(query)
+  return await db.query<ProjectInvite>(query)
 }
 
 export {

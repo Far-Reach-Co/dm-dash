@@ -14,7 +14,10 @@ const _5eCharAttacks_1 = require("../queries/5eCharAttacks");
 function add5eCharAttack(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = yield (0, _5eCharAttacks_1.add5eCharAttackQuery)(req.body);
+            const data = yield (0, _5eCharAttacks_1.add5eCharAttackQuery)({
+                general_id: req.body.general_id,
+                title: req.body.title,
+            });
             res.status(201).json(data.rows[0]);
         }
         catch (err) {

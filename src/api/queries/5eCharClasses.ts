@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-interface DndFiveEClassModel {
+interface DndFiveEClass {
   id: number,
   general_id: number,
   class: string,
@@ -12,7 +12,7 @@ interface DndFiveEClassModel {
 }
 
 async function add5eCharClassQuery(data: {
-  general_id: string,
+  general_id: number | string,
 }) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_class" (general_id) values($1) returning *`,
@@ -20,7 +20,7 @@ async function add5eCharClassQuery(data: {
       data.general_id,
     ]
   }
-  return await db.query<DndFiveEClassModel>(query)
+  return await db.query<DndFiveEClass>(query)
 }
 
 async function get5eCharClassQuery(id: string) {
@@ -28,7 +28,7 @@ async function get5eCharClassQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_class" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEClassModel>(query)
+  return await db.query<DndFiveEClass>(query)
 }
 
 async function duplicate5eCharClassesQuery(data: {
@@ -56,7 +56,7 @@ async function duplicate5eCharClassesQuery(data: {
     ]
   }
   
-  await db.query<DndFiveEClassModel>(query);
+  await db.query<DndFiveEClass>(query);
 }
 
 async function get5eCharClassesByGeneralQuery(generalId: string | number) {
@@ -64,7 +64,7 @@ async function get5eCharClassesByGeneralQuery(generalId: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_class" where general_id = $1 order by id`,
     values: [generalId]
   }
-  return await db.query<DndFiveEClassModel>(query)
+  return await db.query<DndFiveEClass>(query)
 }
 
 async function remove5eCharClassQuery(id: string | number) {
@@ -73,7 +73,7 @@ async function remove5eCharClassQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveEClassModel>(query)
+  return await db.query<DndFiveEClass>(query)
 }
 
 async function edit5eCharClassQuery(id: string, data: any) {
@@ -95,7 +95,7 @@ async function edit5eCharClassQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveEClassModel>(query)
+  return await db.query<DndFiveEClass>(query)
 }
 
 export {
