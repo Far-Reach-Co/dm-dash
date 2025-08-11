@@ -7,7 +7,7 @@ import {
   getImageQuery,
   getImagesQuery,
   removeImageQuery,
-  ImageModal,
+  Image,
 } from "../queries/images";
 import { getProjectQuery, editProjectQuery } from "../queries/projects";
 import { Request, Response, NextFunction } from "express";
@@ -392,7 +392,7 @@ async function newImageForUser(
   }
 }
 
-interface imageExtendedWithSrc extends ImageModal {
+interface imageExtendedWithSrc extends Image {
   src: string;
 }
 

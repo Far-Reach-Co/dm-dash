@@ -48,7 +48,6 @@ import {
   editImageNotes,
 } from "./controllers/s3.js";
 // for uploading files
-import multer = require("multer");
 import {
   get5eCharsByUser,
   add5eChar,
@@ -162,11 +161,12 @@ import {
   getRecordsByUserQuery,
 } from "./queries/record.js";
 
-const sanitizeHtml = require("sanitize-html");
+// multer
+import * as multer from "multer";
 const upload = multer({ dest: "file_uploads/" });
-const csrf = require("csurf");
 
 //csrf use
+const csrf = require("csurf");
 const csrfMiddleware = csrf({ cookie: true });
 
 var router = Router();
@@ -191,20 +191,8 @@ router.post(
   newImageForProject
 );
 router.post("/new_image_for_user", upload.single("file"), newImageForUser);
-router.post(
-  "/edit_image_name/:id",
-  body("original_name")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editImageName
-);
-router.post(
-  "/edit_image_notes/:id",
-  body("notes")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editImageNotes
-);
+router.post("/edit_image_name/:id", editImageName);
+router.post("/edit_image_notes/:id", editImageNotes);
 router.delete(
   "/remove_image_by_table_user/:image_id/:table_id",
   removeImageByTableUser
@@ -224,33 +212,15 @@ router.post("/edit_record/:id", editRecord);
 router.delete("/remove_record/:id", removeRecord);
 
 // table folders
-router.post(
-  "/add_table_folder_by_user",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  addTableFolderByUser
-);
-router.post(
-  "/add_table_folder_by_project",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  addTableFolderByProject
-);
+router.post("/add_table_folder_by_user", addTableFolderByUser);
+router.post("/add_table_folder_by_project", addTableFolderByProject);
 router.get("/get_table_folders_by_user", getTableFoldersByUser);
 router.get(
   "/get_table_folders_by_project/:project_id",
   getTableFoldersByProject
 );
 router.delete("/remove_table_folder/:id", removeTableFolder);
-router.post(
-  "/edit_table_folder_title/:id",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editTableFolderTitle
-);
+router.post("/edit_table_folder_title/:id", editTableFolderTitle);
 
 // table views
 router.get("/get_table_views_by_project/:project_id", getTableViewsByProject);
@@ -261,13 +231,7 @@ router.post("/add_table_view_by_project/:project_id", addTableViewByProject);
 router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view_data/:id", editTableViewData);
-router.post(
-  "/edit_table_view_title/:id",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editTableViewTitle
-);
+router.post("/edit_table_view_title/:id", editTableViewTitle);
 
 // table images
 router.get(
@@ -316,184 +280,38 @@ router.delete("/remove_player_invite/:id", removePlayerInvite);
 // 5e characters general, proficiencies, background, spell slots
 router.get("/get_5e_characters_by_user", get5eCharsByUser);
 router.get("/get_5e_character_general/:id", get5eCharGeneral);
-router.post(
-  "/add_5e_character",
-  body("name")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  add5eChar
-);
+router.post("/add_5e_character", add5eChar);
 router.delete("/remove_5e_character/:id", remove5eChar);
 router.post("/duplicate_5e_character", duplicate5eChar);
-router.post(
-  "/edit_5e_character_general/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharGeneral
-);
-router.post(
-  "/edit_5e_character_proficiencies/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharPro
-);
-router.post(
-  "/edit_5e_character_background/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharBack
-);
-router.post(
-  "/edit_5e_character_spell_slots/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharSpellSlotInfo
-);
+router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
+router.post("/edit_5e_character_proficiencies/:id", edit5eCharPro);
+router.post("/edit_5e_character_background/:id", edit5eCharBack);
+router.post("/edit_5e_character_spell_slots/:id", edit5eCharSpellSlotInfo);
 
 // 5e characters attacks
 router.get("/get_5e_character_attacks/:general_id", get5eCharAttacksByGeneral);
-router.post(
-  "/add_5e_character_attack",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  add5eCharAttack
-);
+router.post("/add_5e_character_attack", add5eCharAttack);
 router.delete("/remove_5e_character_attack/:id", remove5eCharAttack);
-router.post(
-  "/edit_5e_character_attack/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharAttack
-);
+router.post("/edit_5e_character_attack/:id", edit5eCharAttack);
 
 // 5e characters spells
 router.get("/get_5e_character_spells/:general_id/:type", get5eCharSpellsByType);
 router.post("/add_5e_character_spell", add5eCharSpell);
-router.delete(
-  "/remove_5e_character_spell/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  remove5eCharSpell
-);
+router.delete("/remove_5e_character_spell/:id", remove5eCharSpell);
 router.post("/edit_5e_character_spell/:id", edit5eCharSpell);
 
 // 5e characters feats/traits
 router.get("/get_5e_character_feats/:general_id", get5eCharFeatsByGeneral);
-router.post(
-  "/add_5e_character_feat",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  add5eCharFeat
-);
+router.post("/add_5e_character_feat", add5eCharFeat);
 router.delete("/remove_5e_character_feat/:id", remove5eCharFeat);
-router.post(
-  "/edit_5e_character_feat/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharFeat
-);
+router.post("/edit_5e_character_feat/:id", edit5eCharFeat);
 
 // 5e characters equipments
 router.get(
   "/get_5e_character_equipments/:general_id",
   get5eCharEquipmentsByGeneral
 );
-router.post(
-  "/add_5e_character_equipment",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  add5eCharEquipment
-);
+router.post("/add_5e_character_equipment", add5eCharEquipment);
 router.delete("/remove_5e_character_equipment/:id", remove5eCharEquipment);
 router.post("/edit_5e_character_equipment/:id", edit5eCharEquipment);
 
@@ -507,110 +325,32 @@ router.delete(
   "/remove_5e_character_other_pro_lang/:id",
   remove5eCharOtherProLang
 );
-router.post(
-  "/edit_5e_character_other_pro_lang/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharOtherProLang
-);
+router.post("/edit_5e_character_other_pro_lang/:id", edit5eCharOtherProLang);
 
 // 5e characters classes
 router.get("/get_5e_character_classes/:general_id", get5eCharClassesByGeneral);
-router.post(
-  "/add_5e_character_class",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  add5eCharClass
-);
+router.post("/add_5e_character_class", add5eCharClass);
 router.delete("/remove_5e_character_class/:id", remove5eCharClass);
-router.post(
-  "/edit_5e_character_class/:id",
-  body().customSanitizer((value) => {
-    if (typeof value === "object" && value !== null) {
-      // Loop over all properties of the object and sanitize them if they're strings
-      for (let key in value) {
-        if (typeof value[key] === "string") {
-          value[key] = sanitizeHtml(value[key].trim());
-        }
-      }
-    }
-    return value;
-  }),
-  edit5eCharClass
-);
+router.post("/edit_5e_character_class/:id", edit5eCharClass);
 
 // months
 router.get("/get_months/:calendar_id", getMonths);
-router.post(
-  "/add_month",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  addMonth
-);
+router.post("/add_month", addMonth);
 router.delete("/remove_month/:id", removeMonth);
-router.post(
-  "/edit_month/:id",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editMonth
-);
+router.post("/edit_month/:id", editMonth);
 
 // days
 router.get("/get_days/:calendar_id", getDays);
-router.post(
-  "/add_day",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  addDay
-);
+router.post("/add_day", addDay);
 router.delete("/remove_day/:id", removeDay);
-router.post(
-  "/edit_day/:id",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editDay
-);
+router.post("/edit_day/:id", editDay);
 
 // calendars
 router.get("/get_calendars/:project_id", getCalendars);
 router.get("/get_calendar/:id", getCalendar);
-router.post(
-  "/add_calendar",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  addCalendar
-);
+router.post("/add_calendar", addCalendar);
 router.delete("/remove_calendar/:id", removeCalendar);
-router.post(
-  "/edit_calendar/:id",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editCalendar
-);
+router.post("/edit_calendar/:id", editCalendar);
 
 // project users
 router.delete("/remove_project_user/:id", removeProjectUser);
@@ -623,21 +363,9 @@ router.delete("/remove_project_invite/:id", removeProjectInvite);
 // projects
 router.get("/get_project/:id", getProject);
 router.get("/get_projects", getProjects);
-router.post(
-  "/add_project",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  addProject
-);
+router.post("/add_project", addProject);
 router.delete("/remove_project/:id", removeProject);
-router.post(
-  "/edit_project_title/:id",
-  body("title")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editProjectTitle
-);
+router.post("/edit_project_title/:id", editProjectTitle);
 
 // Auth and Users
 // setup rate limiters
@@ -680,9 +408,6 @@ router.post(
   csrfMiddleware,
   registerLimiter,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
-  body("username")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
   registerUser
 );
 router.post("/login", csrfMiddleware, loginLimiter, loginUser);
@@ -693,14 +418,7 @@ router.post(
   requestResetEmail
 );
 router.post("/user/reset_password", csrfMiddleware, resetPassword);
-router.post(
-  "/update_username",
-  csrfMiddleware,
-  body("username")
-    .trim()
-    .customSanitizer((val) => sanitizeHtml(val)),
-  editUsername
-);
+router.post("/update_username", csrfMiddleware, editUsername);
 router.post(
   "/update_email",
   csrfMiddleware,

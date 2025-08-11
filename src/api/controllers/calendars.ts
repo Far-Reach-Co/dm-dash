@@ -4,14 +4,10 @@ import {
   getCalendarQuery,
   removeCalendarQuery,
   editCalendarQuery,
-  CalendarModel,
+  Calendar,
 } from "../queries/calendars.js";
-import {
-  MonthModel,
-  getMonthsQuery,
-  removeMonthQuery,
-} from "../queries/months.js";
-import { DayModel, getDaysQuery, removeDayQuery } from "../queries/days.js";
+import { Month, getMonthsQuery, removeMonthQuery } from "../queries/months.js";
+import { Day, getDaysQuery, removeDayQuery } from "../queries/days.js";
 import { Request, Response, NextFunction } from "express";
 
 async function addCalendar(req: Request, res: Response, next: NextFunction) {
@@ -23,9 +19,9 @@ async function addCalendar(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-interface GetCalendarDataReturnModel extends CalendarModel {
-  months: MonthModel[];
-  days_of_the_week: DayModel[];
+interface GetCalendarDataReturnModel extends Calendar {
+  months: Month[];
+  days_of_the_week: Day[];
 }
 
 async function getCalendars(req: Request, res: Response, next: NextFunction) {

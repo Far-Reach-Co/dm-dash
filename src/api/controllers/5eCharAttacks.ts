@@ -1,19 +1,28 @@
 import {
   add5eCharAttackQuery,
-  get5eCharAttackQuery,
   get5eCharAttacksByGeneralQuery,
   remove5eCharAttackQuery,
   edit5eCharAttackQuery,
 } from "../queries/5eCharAttacks";
 import { Request, Response, NextFunction } from "express";
 
+interface add5eCharAttackRequest extends Request {
+  body: {
+    general_id: number | string;
+    title: string;
+  };
+}
+
 async function add5eCharAttack(
-  req: Request,
+  req: add5eCharAttackRequest,
   res: Response,
   next: NextFunction
 ) {
   try {
-    const data = await add5eCharAttackQuery(req.body);
+    const data = await add5eCharAttackQuery({
+      general_id: req.body.general_id,
+      title: req.body.title,
+    });
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);

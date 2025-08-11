@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-export interface DndFiveEEquipmentModel {
+export interface DndFiveEEquipment {
   id: number,
   general_id: number,
   title: string,
@@ -11,11 +11,11 @@ export interface DndFiveEEquipmentModel {
 }
 
 async function add5eCharEquipmentQuery(data: {
-  general_id: string,
+  general_id: number | string,
   title: string,
   description: string,
-  quantity: string,
-  weight: string
+  quantity: number,
+  weight: number
 }) {
   const query = {
     text: /*sql*/ `insert into public."dnd_5e_character_equipment" (general_id, title, description, quantity, weight) values($1,$2,$3,$4,$5) returning *`,
@@ -27,7 +27,7 @@ async function add5eCharEquipmentQuery(data: {
       data.weight,
     ]
   }
-  return await db.query<DndFiveEEquipmentModel>(query)
+  return await db.query<DndFiveEEquipment>(query)
 }
 
 async function duplicate5eCharEquipmentsQuery(data: {
@@ -55,7 +55,7 @@ async function duplicate5eCharEquipmentsQuery(data: {
     ]
   }
   
-  await db.query<DndFiveEEquipmentModel>(query);
+  await db.query<DndFiveEEquipment>(query);
 }
 
 async function get5eCharEquipmentQuery(id: string) {
@@ -63,7 +63,7 @@ async function get5eCharEquipmentQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_equipment" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEEquipmentModel>(query)
+  return await db.query<DndFiveEEquipment>(query)
 }
 
 async function get5eCharEquipmentsByGeneralQuery(generalId: string | number) {
@@ -71,7 +71,7 @@ async function get5eCharEquipmentsByGeneralQuery(generalId: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_character_equipment" where general_id = $1 order by id`,
     values: [generalId]
   }
-  return await db.query<DndFiveEEquipmentModel>(query)
+  return await db.query<DndFiveEEquipment>(query)
 }
 
 async function remove5eCharEquipmentQuery(id: string | number) {
@@ -80,7 +80,7 @@ async function remove5eCharEquipmentQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveEEquipmentModel>(query)
+  return await db.query<DndFiveEEquipment>(query)
 }
 
 async function edit5eCharEquipmentQuery(id: string, data: any) {
@@ -102,7 +102,7 @@ async function edit5eCharEquipmentQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveEEquipmentModel>(query)
+  return await db.query<DndFiveEEquipment>(query)
 }
 
 export {

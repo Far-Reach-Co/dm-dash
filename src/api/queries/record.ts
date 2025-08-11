@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface RecordModal {
+interface Record {
   id: number,
   title: string,
   description: string,
@@ -15,7 +15,7 @@ async function addRecordByProjectQuery(projectId: number | string) {
       projectId,
     ]
   }
-  return await db.query<RecordModal>(query)
+  return await db.query<Record>(query)
 
 }
 
@@ -26,7 +26,7 @@ async function addRecordByUserQuery(userId: number | string) {
       userId,
     ]
   }
-  return await db.query<RecordModal>(query)
+  return await db.query<Record>(query)
 }
 
 async function getRecordQuery(id: number | string) {
@@ -34,7 +34,7 @@ async function getRecordQuery(id: number | string) {
     text: /*sql*/ `select * from public."Record" where id = $1`,
     values: [id]
   }
-  return await db.query<RecordModal>(query)
+  return await db.query<Record>(query)
 }
 
 
@@ -43,7 +43,7 @@ async function getRecordsByProjectQuery(projectId: number | string) {
     text: /*sql*/ `select * from public."Record" where project_id = $1 order by title asc`,
     values: [projectId]
   }
-  return await db.query<RecordModal>(query)
+  return await db.query<Record>(query)
 }
 
 async function getRecordsByUserQuery(userId: number | string) {
@@ -51,7 +51,7 @@ async function getRecordsByUserQuery(userId: number | string) {
     text: /*sql*/ `select * from public."Record" where user_id = $1 order by title asc`,
     values: [userId]
   }
-  return await db.query<RecordModal>(query)
+  return await db.query<Record>(query)
 }
 
 async function removeRecordQuery(id: number | string) {
@@ -60,7 +60,7 @@ async function removeRecordQuery(id: number | string) {
     values: [id]
   }
 
-  return await db.query<RecordModal>(query)
+  return await db.query<Record>(query)
 }
 
 async function editRecordQuery(id: number | string, data: any) {
@@ -82,7 +82,7 @@ async function editRecordQuery(id: number | string, data: any) {
     values: values,
   }
 
-  return await db.query<RecordModal>(query)
+  return await db.query<Record>(query)
 }
 
 export {

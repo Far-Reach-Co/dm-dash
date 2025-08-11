@@ -15,15 +15,10 @@ const utils_1 = require("./utils");
 function add5eCharAttackQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
-            text: `insert into public."dnd_5e_character_attack" (general_id, title, description, range, duration, damage_type, bonus) values($1,$2,$3,$4,$5,$6,$7) returning *`,
+            text: `insert into public."dnd_5e_character_attack" (general_id, title) values($1,$2) returning *`,
             values: [
                 data.general_id,
                 data.title,
-                data.description,
-                data.range,
-                data.duration,
-                data.damage_type,
-                data.bonus,
             ]
         };
         return yield dbconfig_1.default.query(query);

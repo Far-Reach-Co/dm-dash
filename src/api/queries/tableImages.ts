@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface TableImageModel {
+interface TableImage {
   id: number,
   project_id?: number,
   user_id?: number,
@@ -17,7 +17,7 @@ async function addTableImageByProjectQuery(data: {project_id: string, image_id: 
       data.folder_id
     ]
   }
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 async function addTableImageByUserQuery(data: {user_id: string, image_id: string, folder_id: string}) {
@@ -29,7 +29,7 @@ async function addTableImageByUserQuery(data: {user_id: string, image_id: string
       data.folder_id
     ]
   }
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 async function getTableImageQuery(id: string) {
@@ -37,7 +37,7 @@ async function getTableImageQuery(id: string) {
     text: /*sql*/ `select * from public."TableImage" where id = $1`,
     values: [id]
   }
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 async function getTableImagesByFolderQuery(folder_id: string | number) {
@@ -45,7 +45,7 @@ async function getTableImagesByFolderQuery(folder_id: string | number) {
     text: /*sql*/ `select * from public."TableImage" where folder_id = $1`,
     values: [folder_id]
   }
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 async function getTableImagesByProjectQuery(project_id: string | number) {
@@ -53,7 +53,7 @@ async function getTableImagesByProjectQuery(project_id: string | number) {
     text: /*sql*/ `select * from public."TableImage" where project_id = $1`,
     values: [project_id]
   }
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 async function getTableImagesByUserQuery(user_id: string | number) {
@@ -61,7 +61,7 @@ async function getTableImagesByUserQuery(user_id: string | number) {
     text: /*sql*/ `select * from public."TableImage" where user_id = $1`,
     values: [user_id]
   }
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 async function removeTableImageQuery(id: string | number) {
@@ -70,7 +70,7 @@ async function removeTableImageQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 async function editTableImageQuery(id: string | number, data: any) {
@@ -92,7 +92,7 @@ async function editTableImageQuery(id: string | number, data: any) {
     values: values,
   }
 
-  return await db.query<TableImageModel>(query)
+  return await db.query<TableImage>(query)
 }
 
 export {

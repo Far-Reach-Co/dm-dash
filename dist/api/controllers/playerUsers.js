@@ -54,8 +54,7 @@ function getPlayerUsersByPlayer(req, res, next) {
             for (const PlayerUser of PlayerUsersData.rows) {
                 const userData = yield (0, users_js_1.getUserByIdQuery)(PlayerUser.user_id);
                 const user = userData.rows[0];
-                user.player_user_id =
-                    PlayerUser.id;
+                user.player_user_id = PlayerUser.id;
                 user.is_editor =
                     PlayerUser.is_editor;
                 usersList.push(user);

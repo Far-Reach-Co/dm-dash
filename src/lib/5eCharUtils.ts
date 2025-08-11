@@ -1,6 +1,6 @@
-import { DndFiveEEquipmentModel } from "../api/queries/5eCharEquipment";
-import { DndFiveEGeneralModel } from "../api/queries/5eCharGeneral";
-import { DndFiveESpellSlotsModel } from "../api/queries/5eCharSpellSlots";
+import { DndFiveEEquipment } from "../api/queries/5eCharEquipment";
+import { DndFiveEGeneral } from "../api/queries/5eCharGeneral";
+import { DndFiveESpellSlots } from "../api/queries/5eCharSpellSlots";
 
 export function calculateAbilityScoreModifier(abilityScore: number) {
   switch (abilityScore) {
@@ -101,7 +101,7 @@ export function calculateProficiency(
 
 export function getAbilityScoreFromSpellCastingAbilityOrNull(
   spellCastingAbility: string,
-  charGeneral: DndFiveEGeneralModel
+  charGeneral: DndFiveEGeneral
 ) {
   switch (spellCastingAbility) {
     case "None":
@@ -149,9 +149,7 @@ export function calculateSpellAttackBonus(
   return bonus;
 }
 
-export function calculateTotalEquipmentWeight(
-  equipment: DndFiveEEquipmentModel[]
-) {
+export function calculateTotalEquipmentWeight(equipment: DndFiveEEquipment[]) {
   let weight = 0;
   equipment.forEach((item) => {
     weight += item.weight;
@@ -188,7 +186,7 @@ export function getSpellQueryTitleByOption(option: string) {
 
 export function getSpellSlotExpendedByOption(
   option: string,
-  spellInfo: DndFiveESpellSlotsModel
+  spellInfo: DndFiveESpellSlots
 ) {
   switch (option) {
     case "first-level":
@@ -215,7 +213,7 @@ export function getSpellSlotExpendedByOption(
 }
 export function getSpellSlotTotalByOption(
   option: string,
-  spellInfo: DndFiveESpellSlotsModel
+  spellInfo: DndFiveESpellSlots
 ) {
   switch (option) {
     case "first-level":

@@ -55,8 +55,12 @@ function createNew5eChar(data) {
 function duplicate5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const generalsData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(req.body.general_id);
-            const general = generalsData.rows[0];
+            const generalData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(req.body.general_id);
+            const general = generalData.rows[0];
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            if (req.session.user != general.user_id)
+                throw new Error("User does not own this property");
             const newGeneral = yield (0, _5eCharGeneral_1.duplicate5eCharGeneralQuery)({
                 generalId: general.id,
             });

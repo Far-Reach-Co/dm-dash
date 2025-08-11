@@ -14,7 +14,10 @@ const _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 function add5eCharOtherProLang(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = yield (0, _5eCharOtherProLang_1.add5eCharOtherProLangQuery)(req.body);
+            const data = yield (0, _5eCharOtherProLang_1.add5eCharOtherProLangQuery)({
+                general_id: req.body.general_id,
+                type: req.body.type,
+            });
             res.status(201).json(data.rows[0]);
         }
         catch (err) {

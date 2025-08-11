@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface PlayerUserModel {
+interface PlayerUser {
   id: number,
   player_id: number,
   user_id: number,
@@ -16,7 +16,7 @@ async function addPlayerUserQuery(data: {player_id: string, user_id: string}) {
       data.user_id,
     ]
   }
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 async function getPlayerUsersQuery(userId: string | number) {
@@ -24,7 +24,7 @@ async function getPlayerUsersQuery(userId: string | number) {
     text: /*sql*/ `select * from public."PlayerUser" where user_id = $1`,
     values: [userId]
   }
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 async function getPlayerUserByUserAndPlayerQuery(userId: string | number, playerId: string | number) {
@@ -32,7 +32,7 @@ async function getPlayerUserByUserAndPlayerQuery(userId: string | number, player
     text: /*sql*/ `select * from public."PlayerUser" where user_id = $1 and player_id = $2`,
     values: [userId, playerId]
   }
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 async function getPlayerUsersByPlayerQuery(playerId: string | number) {
@@ -40,7 +40,7 @@ async function getPlayerUsersByPlayerQuery(playerId: string | number) {
     text: /*sql*/ `select * from public."PlayerUser" where player_id = $1`,
     values: [playerId]
   }
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 async function getPlayerUserQuery(id: string) {
@@ -48,7 +48,7 @@ async function getPlayerUserQuery(id: string) {
     text: /*sql*/ `select * from public."PlayerUser" where id = $1`,
     values: [id]
   }
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 async function removePlayerUsersByPlayerQuery(playerId: string | number) {
@@ -57,7 +57,7 @@ async function removePlayerUsersByPlayerQuery(playerId: string | number) {
     values: [playerId]
   }
 
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 async function removePlayerUserQuery(id: string | number) {
@@ -66,7 +66,7 @@ async function removePlayerUserQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 async function editPlayerUserQuery(id: string, data: any) {
@@ -88,7 +88,7 @@ async function editPlayerUserQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<PlayerUserModel>(query)
+  return await db.query<PlayerUser>(query)
 }
 
 export {

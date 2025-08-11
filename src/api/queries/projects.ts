@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-export interface ProjectModel {
+export interface Project {
   id: number;
   title: string;
   user_id: number;
@@ -19,7 +19,7 @@ async function addProjectQuery(data: {title: string, user_id: string | number}) 
       data.user_id,
     ]
   }
-  return await db.query<ProjectModel>(query)
+  return await db.query<Project>(query)
 }
 
 async function getProjectQuery(projectId: string | number) {
@@ -27,7 +27,7 @@ async function getProjectQuery(projectId: string | number) {
     text: /*sql*/ `select * from public."Project" where id = $1`,
     values: [projectId]
   }
-  return await db.query<ProjectModel>(query)
+  return await db.query<Project>(query)
 }
 
 async function removeProjectQuery(id: string) {
@@ -36,7 +36,7 @@ async function removeProjectQuery(id: string) {
     values: [id]
   }
 
-  return await db.query<ProjectModel>(query)
+  return await db.query<Project>(query)
 }
 
 async function getProjectsQuery(userId: string | number) {
@@ -44,7 +44,7 @@ async function getProjectsQuery(userId: string | number) {
     text: /*sql*/ `select * from public."Project" where user_id = $1 order by id`,
     values: [userId]
   }
-  return await db.query<ProjectModel>(query)
+  return await db.query<Project>(query)
 }
 
 async function editProjectQuery(id: string | number, data: any) {
@@ -66,7 +66,7 @@ async function editProjectQuery(id: string | number, data: any) {
     values: values,
   }
 
-  return await db.query<ProjectModel>(query)
+  return await db.query<Project>(query)
 }
 
 export {

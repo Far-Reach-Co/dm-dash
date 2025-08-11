@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-interface DndFiveEFeatModel {
+interface DndFiveEFeat {
   id: number,
   type: string,
   title: string,
@@ -10,7 +10,7 @@ interface DndFiveEFeatModel {
 }
 
 async function add5eCharFeatQuery(data: {
-  general_id: string,
+  general_id: number | string,
   title: string,
   description: string,
   type: string
@@ -24,7 +24,7 @@ async function add5eCharFeatQuery(data: {
       data.type,
     ]
   }
-  return await db.query<DndFiveEFeatModel>(query)
+  return await db.query<DndFiveEFeat>(query)
 }
 
 async function duplicate5eCharFeatsQuery(data: {
@@ -52,7 +52,7 @@ async function duplicate5eCharFeatsQuery(data: {
     ]
   }
   
-  await db.query<DndFiveEFeatModel>(query);
+  await db.query<DndFiveEFeat>(query);
 }
 
 async function get5eCharFeatQuery(id: string) {
@@ -60,7 +60,7 @@ async function get5eCharFeatQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEFeatModel>(query)
+  return await db.query<DndFiveEFeat>(query)
 }
 
 async function get5eCharFeatsByGeneralQuery(generalId: string | number) {
@@ -68,7 +68,7 @@ async function get5eCharFeatsByGeneralQuery(generalId: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where general_id = $1 order by id`,
     values: [generalId]
   }
-  return await db.query<DndFiveEFeatModel>(query)
+  return await db.query<DndFiveEFeat>(query)
 }
 
 async function remove5eCharFeatQuery(id: string | number) {
@@ -77,7 +77,7 @@ async function remove5eCharFeatQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveEFeatModel>(query)
+  return await db.query<DndFiveEFeat>(query)
 }
 
 async function edit5eCharFeatQuery(id: string, data: any) {
@@ -99,7 +99,7 @@ async function edit5eCharFeatQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveEFeatModel>(query)
+  return await db.query<DndFiveEFeat>(query)
 }
 
 export {

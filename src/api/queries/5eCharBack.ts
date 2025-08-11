@@ -1,7 +1,7 @@
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 
-export interface DndFiveEBackgroundModel {
+export interface DndFiveEBackground {
   id: number,
   general_id: number,
   personality_traits: string,
@@ -31,7 +31,7 @@ async function add5eCharBackQuery(data: {
       data.general_id,
     ]
   }
-  return await db.query<DndFiveEBackgroundModel>(query)
+  return await db.query<DndFiveEBackground>(query)
 }
 
 async function duplicate5eCharBackQuery(data: {
@@ -59,7 +59,7 @@ async function duplicate5eCharBackQuery(data: {
     ]
   }
   
-  await db.query<DndFiveEBackgroundModel>(query);
+  await db.query<DndFiveEBackground>(query);
 }
 
 async function get5eCharBackQuery(id: string) {
@@ -67,7 +67,7 @@ async function get5eCharBackQuery(id: string) {
     text: /*sql*/ `select * from public."dnd_5e_character_background" where id = $1`,
     values: [id]
   }
-  return await db.query<DndFiveEBackgroundModel>(query)
+  return await db.query<DndFiveEBackground>(query)
 }
 
 async function get5eCharBackByGeneralQuery(generalId: string | number) {
@@ -75,7 +75,7 @@ async function get5eCharBackByGeneralQuery(generalId: string | number) {
     text: /*sql*/ `select * from public."dnd_5e_character_background" where general_id = $1`,
     values: [generalId]
   }
-  return await db.query<DndFiveEBackgroundModel>(query)
+  return await db.query<DndFiveEBackground>(query)
 }
 
 async function remove5eCharBackQuery(id: string | number) {
@@ -84,7 +84,7 @@ async function remove5eCharBackQuery(id: string | number) {
     values: [id]
   }
 
-  return await db.query<DndFiveEBackgroundModel>(query)
+  return await db.query<DndFiveEBackground>(query)
 }
 
 async function edit5eCharBackQuery(id: string, data: any) {
@@ -106,7 +106,7 @@ async function edit5eCharBackQuery(id: string, data: any) {
     values: values,
   }
 
-  return await db.query<DndFiveEBackgroundModel>(query)
+  return await db.query<DndFiveEBackground>(query)
 }
 
 export {

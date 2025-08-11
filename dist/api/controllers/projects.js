@@ -62,8 +62,7 @@ function getProject(req, res, next) {
                 const projectUser = projectUsersData.rows[0];
                 project.was_joined = true;
                 project.project_user_id = projectUser.id;
-                project.date_joined =
-                    projectUser.date_joined;
+                project.date_joined = projectUser.date_joined;
                 project.is_editor = projectUser.is_editor;
             }
             res.send(project);
@@ -89,12 +88,10 @@ function getProjects(req, res, next) {
                     if (projectData && projectData.rows && projectData.rows.length) {
                         const project = projectData.rows[0];
                         project.was_joined = true;
-                        project.project_user_id =
-                            projectUser.id;
+                        project.project_user_id = projectUser.id;
                         project.date_joined =
                             projectUser.date_joined;
-                        project.is_editor =
-                            projectUser.is_editor;
+                        project.is_editor = projectUser.is_editor;
                         projectsData.rows.push(project);
                     }
                 }

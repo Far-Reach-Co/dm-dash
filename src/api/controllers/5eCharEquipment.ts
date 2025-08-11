@@ -1,14 +1,23 @@
 import {
   add5eCharEquipmentQuery,
-  get5eCharEquipmentQuery,
   get5eCharEquipmentsByGeneralQuery,
   remove5eCharEquipmentQuery,
   edit5eCharEquipmentQuery,
 } from "../queries/5eCharEquipment";
 import { Request, Response, NextFunction } from "express";
 
+interface add5eCharEquipmentRequest extends Request {
+  body: {
+    general_id: number | string;
+    title: string;
+    description: string;
+    quantity: number;
+    weight: number;
+  };
+}
+
 async function add5eCharEquipment(
-  req: Request,
+  req: add5eCharEquipmentRequest,
   res: Response,
   next: NextFunction
 ) {

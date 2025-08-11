@@ -36,6 +36,7 @@ export default class EquipmentComponent {
     await postThing("/api/add_5e_character_equipment", {
       general_id: this.general_id,
       title: "New Item",
+      description: "",
       quantity: 1,
       weight: 1,
     });
