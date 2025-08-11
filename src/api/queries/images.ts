@@ -5,6 +5,7 @@ export interface ImageModal {
   original_name: string,
   size: number,
   file_name: string
+  notes: string,
 }
 
 async function addImageQuery(data: {

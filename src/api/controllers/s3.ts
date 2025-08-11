@@ -530,6 +530,17 @@ async function editImageName(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+async function editImageNotes(req: Request, res: Response, next: NextFunction) {
+  try {
+    const data = await editImageQuery(req.params.id, {
+      notes: req.body.notes,
+    });
+    res.status(200).send(data.rows[0]);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export {
   getSignedUrlsForDownloads,
   getImage,
@@ -539,4 +550,5 @@ export {
   removeImage,
   removeImageByProject,
   removeImageByTableUser,
+  editImageNotes,
 };

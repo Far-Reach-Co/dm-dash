@@ -42,6 +42,9 @@ router.post("/new_image_for_user", upload.single("file"), s3_js_1.newImageForUse
 router.post("/edit_image_name/:id", (0, express_validator_1.body)("original_name")
     .trim()
     .customSanitizer((val) => sanitizeHtml(val)), s3_js_1.editImageName);
+router.post("/edit_image_notes/:id", (0, express_validator_1.body)("notes")
+    .trim()
+    .customSanitizer((val) => sanitizeHtml(val)), s3_js_1.editImageNotes);
 router.delete("/remove_image_by_table_user/:image_id/:table_id", s3_js_1.removeImageByTableUser);
 router.delete("/remove_image_by_project/:image_id/:project_id", s3_js_1.removeImageByProject);
 router.post("/add_table_folder_by_user", (0, express_validator_1.body)("title")
@@ -72,6 +75,7 @@ router.get("/get_table_images_by_table_user/:table_id", tableImages_js_1.getTabl
 router.post("/add_table_image_by_project", tableImages_js_1.addTableImageByProject);
 router.post("/add_table_image_by_user", tableImages_js_1.addTableImageByUser);
 router.delete("/remove_table_image/:id", tableImages_js_1.removeTableImage);
+router.post("/edit_table_image/:id", tableImages_js_1.editTableImage);
 router.get("/get_project_players_by_player/:player_id", projectPlayers_js_1.getProjectPlayersByPlayer);
 router.post("/add_project_player", projectPlayers_js_1.addProjectPlayer);
 router.delete("/remove_project_player/:id", projectPlayers_js_1.removeProjectPlayer);

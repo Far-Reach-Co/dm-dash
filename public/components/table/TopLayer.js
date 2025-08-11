@@ -13,17 +13,17 @@ export default class TopLayer {
 
   renderSelectedObjectInfoElem = async () => {
     const obj = this.tableApp.getCurrentSelectedObject();
-    console.log(obj);
     if (!obj) {
       return createElement("div", { style: "display: none;" });
     }
 
     let displayName = "";
     let imageSrc = "";
+    let IdPrefix = "lin";
 
     if (obj.imageId) {
+      IdPrefix = "img";
       const image = await getThings(`/api/get_image/${obj.imageId}`);
-      console.log(image);
       displayName = truncateString(image.original_name, 12);
       imageSrc = image.src;
     }
@@ -32,6 +32,11 @@ export default class TopLayer {
       "div",
       { class: "table-config selected-obj-info-elem" },
       [
+        createElement(
+          "div",
+          {},
+          `${IdPrefix}-${truncateString(obj.id, 8, "")}`
+        ),
         createElement("div", { style: "display: flex; flex-direction: row;" }, [
           obj.type == "image"
             ? createElement("img", { src: imageSrc, width: 30, height: 30 })
