@@ -74,7 +74,7 @@ export default class CanvasLayer {
     });
 
     // overwrite the brush color
-    this.canvas.freeDrawingBrush.color = '#ffffff';
+    this.canvas.freeDrawingBrush.color = "#ffffff";
 
     // overwrite the brush width
     this.canvas.freeDrawingBrush.width = 10;
@@ -302,6 +302,7 @@ export default class CanvasLayer {
   setupObjectEventListeners = (obj) => {
     obj.on("selected", (options) => {
       const obj = options.target;
+      console.log(obj);
 
       // display top layer viewport for object
       this.tableApp.setCurrentSelectedObject(obj);
@@ -343,6 +344,9 @@ export default class CanvasLayer {
 
         // add to canvas on correct layer
         this.placeObjectOnLayer(object);
+
+        // add event listeners
+        this.setupObjectEventListeners(clone);
 
         // send to socket
         socketIntegration.imageAdded(clone);
