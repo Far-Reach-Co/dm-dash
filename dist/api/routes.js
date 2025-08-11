@@ -28,6 +28,8 @@ const discord_interactions_1 = require("discord-interactions");
 const express_rate_limit_1 = require("express-rate-limit");
 const discordBot_js_1 = require("./controllers/discordBot.js");
 const _5eCharClasses_js_1 = require("./controllers/5eCharClasses.js");
+const record_js_1 = require("./controllers/record.js");
+const record_js_2 = require("./queries/record.js");
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 const csrf = require("csurf");
@@ -47,6 +49,13 @@ router.post("/edit_image_notes/:id", (0, express_validator_1.body)("notes")
     .customSanitizer((val) => sanitizeHtml(val)), s3_js_1.editImageNotes);
 router.delete("/remove_image_by_table_user/:image_id/:table_id", s3_js_1.removeImageByTableUser);
 router.delete("/remove_image_by_project/:image_id/:project_id", s3_js_1.removeImageByProject);
+router.post("/add_record_by_user", record_js_1.addRecordByUser);
+router.post("/add_record_by_project", record_js_1.addRecordByProject);
+router.get("/get_record/:id", record_js_1.getRecord);
+router.get("/get_records_by_user/:user_id", record_js_2.getRecordsByUserQuery);
+router.get("/get_records_by_project/:project_id", record_js_2.getRecordsByProjectQuery);
+router.post("/edit_record/:id", record_js_1.editRecord);
+router.delete("/remove_record/:id", record_js_1.removeRecord);
 router.post("/add_table_folder_by_user", (0, express_validator_1.body)("title")
     .trim()
     .customSanitizer((val) => sanitizeHtml(val)), tableFolders_js_1.addTableFolderByUser);
