@@ -45,6 +45,7 @@ import {
   newImageForUser,
   editImageName,
   getSignedUrlsForDownloads,
+  editImageNotes,
 } from "./controllers/s3.js";
 // for uploading files
 import multer = require("multer");
@@ -185,6 +186,13 @@ router.post(
     .customSanitizer((val) => sanitizeHtml(val)),
   editImageName
 );
+router.post(
+  "/edit_image_notes/:id",
+  body("notes")
+    .trim()
+    .customSanitizer((val) => sanitizeHtml(val)),
+  editImageNotes
+);
 router.delete(
   "/remove_image_by_table_user/:image_id/:table_id",
   removeImageByTableUser
@@ -252,6 +260,7 @@ router.get(
 router.post("/add_table_image_by_project", addTableImageByProject);
 router.post("/add_table_image_by_user", addTableImageByUser);
 router.delete("/remove_table_image/:id", removeTableImage);
+router.post("/edit_table_image/:id", editTableImage);
 
 // project players
 router.get(

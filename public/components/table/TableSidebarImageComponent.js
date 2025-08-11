@@ -3,6 +3,9 @@ import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import imageFollowingCursor from "../imageFollowingCursor.js";
 import detectMob from "../../lib/detectMobile.js";
+import modal from "../../components/modal.js";
+import renderFolderSelect from "./folderSelect.js";
+import parseUrlTextContent from "../../lib/parseUrlTextContent.js";
 
 export default class TableSidebarImageComponent {
   constructor(props) {
@@ -19,6 +22,7 @@ export default class TableSidebarImageComponent {
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
     this.tableImageSearchQuery = null;
+    this.imageDataAndElems = null;
     // Set From Canvas Layer
   }
 
@@ -98,6 +102,64 @@ export default class TableSidebarImageComponent {
       //   }
       // });
     }
+  };
+
+  renderImageSettings = async (tableImage, image, imageElem) => {
+    const folderSelectElem = await renderFolderSelect(
+      tableImage,
+      this.projectId
+    );
+    folderSelectElem.addEventListener("change", async (e) => {
+      const value = e.target.value;
+      if (value === 0) {
+        // set to null
+        tableImage.folder_id = null;
+      } else {
+        tableImage.folder_id = value;
+      }
+      postThing(`/api/edit_table_image/${tableImage.id}`, { folder_id: value });
+
+      // re-render
+      this.render();
+    });
+
+    return createElement("div", { class: "help-content" }, [
+      createElement("h1", {}, image.original_name),
+      createElement("hr"),
+      createElement("h2", {}, "Change Folder"),
+      folderSelectElem,
+      createElement("hr"),
+      createElement("h2", {}, "Notes"),
+      createElement(
+        "div",
+        {
+          contenteditable: true,
+          class: "image-notes",
+          name: "notes",
+        },
+        image.notes ? parseUrlTextContent(image.notes) : "Placeholder text...",
+        {
+          type: "focusout",
+          event: (e) => {
+            e.preventDefault();
+            // local
+            image.notes = e.target.textContent;
+            // db
+            postThing(`/api/edit_image_notes/${image.id}`, {
+              notes: e.target.textContent,
+            });
+          },
+        }
+      ),
+      createElement("hr"),
+      createElement("button", { class: "btn-red" }, "Delete Image", {
+        type: "click",
+        event: (e) => {
+          this.removeImageFromTableAndSidebar(image, tableImage, imageElem);
+          modal.hide();
+        },
+      }),
+    ]);
   };
 
   renderImageElems = () => {
@@ -195,16 +257,19 @@ export default class TableSidebarImageComponent {
               ]
             ),
             createElement(
-              "div",
+              "img",
               {
-                class: "red-x",
-                title: "Remove image",
+                class: "icon gear",
+                src: "/assets/gears.svg",
+                title: "Open Image Settings",
               },
-              "ⓧ",
+              null,
               {
                 type: "click",
-                event: () => {
-                  this.removeImageFromTableAndSidebar(image, tableImage, elem);
+                event: async () => {
+                  modal.show(
+                    await this.renderImageSettings(tableImage, image, elem)
+                  );
                 },
               }
             ),

@@ -36,7 +36,7 @@ export interface DndFiveEProModel {
   history_mod: boolean,
   insight_mod: boolean,
   intimidation_mod: boolean,
-  investigation_mjod: boolean,
+  investigation_mod: boolean,
   medicine_mod: boolean,
   nature_mod: boolean,
   perception_mod: boolean,

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeImageByTableUser = exports.removeImageByProject = exports.removeImage = exports.newImageForUser = exports.newImageForProject = exports.editImageName = exports.getImage = exports.getSignedUrlsForDownloads = void 0;
+exports.editImageNotes = exports.removeImageByTableUser = exports.removeImageByProject = exports.removeImage = exports.newImageForUser = exports.newImageForProject = exports.editImageName = exports.getImage = exports.getSignedUrlsForDownloads = void 0;
 const aws_sdk_1 = require("aws-sdk");
 const fs_1 = require("fs");
 const enums_js_1 = require("../../lib/enums.js");
@@ -365,3 +365,17 @@ function editImageName(req, res, next) {
     });
 }
 exports.editImageName = editImageName;
+function editImageNotes(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const data = yield (0, images_1.editImageQuery)(req.params.id, {
+                notes: req.body.notes,
+            });
+            res.status(200).send(data.rows[0]);
+        }
+        catch (err) {
+            next(err);
+        }
+    });
+}
+exports.editImageNotes = editImageNotes;
