@@ -150,6 +150,18 @@ import {
   get5eCharClassesByGeneral,
   remove5eCharClass,
 } from "./controllers/5eCharClasses.js";
+import {
+  addRecordByProject,
+  addRecordByUser,
+  editRecord,
+  getRecord,
+  removeRecord,
+} from "./controllers/record.js";
+import {
+  getRecordsByProjectQuery,
+  getRecordsByUserQuery,
+} from "./queries/record.js";
+
 const sanitizeHtml = require("sanitize-html");
 const upload = multer({ dest: "file_uploads/" });
 const csrf = require("csurf");
@@ -201,6 +213,15 @@ router.delete(
   "/remove_image_by_project/:image_id/:project_id",
   removeImageByProject
 );
+
+// records
+router.post("/add_record_by_user", addRecordByUser);
+router.post("/add_record_by_project", addRecordByProject);
+router.get("/get_record/:id", getRecord);
+router.get("/get_records_by_user/:user_id", getRecordsByUserQuery);
+router.get("/get_records_by_project/:project_id", getRecordsByProjectQuery);
+router.post("/edit_record/:id", editRecord);
+router.delete("/remove_record/:id", removeRecord);
 
 // table folders
 router.post(
