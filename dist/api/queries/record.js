@@ -11,24 +11,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.editRecordQuery = exports.removeRecordQuery = exports.getRecordQuery = exports.getRecordsByUserQuery = exports.getRecordsByProjectQuery = exports.addRecordByUserQuery = exports.addRecordByProjectQuery = void 0;
 const dbconfig_1 = require("../dbconfig");
-function addRecordByProjectQuery(projectId) {
+function addRecordByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
-            text: `insert into public."Record" (project_id) values($1) returning *`,
+            text: `insert into public."Record" (project_id, title, description, is_public) values($1,$2,$3,$4) returning *`,
             values: [
-                projectId,
+                data.project_id,
+                data.title,
+                data.description,
+                data.is_public
             ]
         };
         return yield dbconfig_1.default.query(query);
     });
 }
 exports.addRecordByProjectQuery = addRecordByProjectQuery;
-function addRecordByUserQuery(userId) {
+function addRecordByUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
-            text: `insert into public."Record" (user_id) values($1) returning *`,
+            text: `insert into public."Record" (user_id, title, description, is_public) values($1,$2,$3,$4) returning *`,
             values: [
-                userId,
+                data.user_id,
+                data.title,
+                data.description,
+                data.is_public
             ]
         };
         return yield dbconfig_1.default.query(query);

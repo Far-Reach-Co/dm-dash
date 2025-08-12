@@ -1,36 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co. | Create Sheet</title>
-    <link rel="stylesheet" href="/style.css" />
-    <%- include('./partials/icons') %>
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <script src="/lib/htmx.min.js"></script>
-  </head>
-  <%- include('./partials/google') %>
-  <body>
-    <%- include('./partials/nav') %>
-    <div class="container-fluid info-container p-3">
-      <h2>Create Character Sheet</h2>
-      <form hx-post="/api/add_5e_character">
-        <fieldset>
-          <div class="input-container">
-            <label for="name">Name</label>
-            <input
-              id="name"
-              name="name"
-              placeholder="Character Name"
-              required="true,"
-            />
-          </div>
-          <br />
-          <br />
-          <button type="submit">Create</button>
-        </fieldset>
-      </form>
-    </div>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Create Sheet</title>
+  <link rel="stylesheet" href="/style.css" />
+  <%- include('./partials/icons') %>
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/lib/htmx.min.js"></script>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid info-container p-3">
+    <h2>Create Character Sheet</h2>
+    <form hx-post="/api/add_5e_character">
+      <fieldset>
+        <div class="input-container">
+          <label for="name">Name</label>
+          <input id="name" name="name" placeholder="Character Name" required />
+        </div>
+        <br />
+        <br />
+        <button type="submit">Create</button>
+      </fieldset>
+    </form>
+  </div>
+</body>
+
 </html>

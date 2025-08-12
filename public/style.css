@@ -489,6 +489,22 @@ textarea {
   border: 0.5px solid var(--main-gray);
 }
 
+.editable {
+  color: var(--main-white);
+  background-color: var(--main-dark);
+  width: 500px;
+  height: 300px;
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--main-gray);
+  outline: none;
+  font-size: 16px;
+  padding: 5px;
+  resize: both;
+  cursor: text;
+}
+
 footer {
   width: 100vw;
   height: fit-content;

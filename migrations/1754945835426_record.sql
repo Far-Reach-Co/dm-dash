@@ -4,7 +4,8 @@ CREATE TABLE "public"."Record" (
   "project_id" int4,
   "user_id" int4,
   "title" varchar,
-  "description" varchar
+  "description" varchar,
+  "is_public" boolean DEFAULT false NOT NULL
 );
 CREATE TABLE "public"."RecordImage" (
   "id" serial PRIMARY KEY,

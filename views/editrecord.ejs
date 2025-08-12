@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Edit <%= record.title %></title>
+  <link rel="stylesheet" href="/style.css" />
+  <%- include('./partials/icons') %>
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/lib/htmx.min.js"></script>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid info-container p-3">
+    <div>
+      <h1>Edit <%= record.title %></h1>
+      <small>- Record</small>
+    </div>
+    <br />
+    <div class="input-container">
+      <label for="title">Title</label>
+      <input id="title" name="title" placeholder="Record Title" value="<%= record.title %>" />
+    </div>
+    <br />
+    <div class="input-container w-100">
+      <label for="description">Description</label>
+      <textarea class="w-100" id="description" name="description" required><%= record.description %></textarea>
+    </div>
+    <br />
+    <div class="w-25">
+      <small><b style="color: var(--orange2)">Make Public</b></small>
+      <br />
+      <small class="hint">*Allow this page to viewed by anyone otherwise just you.</small>
+      <input type="checkbox" id="is_public" name="is_public" <%= record.is_public ? 'checked' : '' %> />
+    </div>
+    <br />
+    <br />
+    <button id="save">Save</button>
+    <hr>
+    <button class="btn-red" hx-delete="/api/remove_record/<%= record.id %>" hx-swap="none" hx-confirm="Are you sure you want to delete <%= record.title %>?">
+      Delete Record
+    </button>
+    <!-- Toast -->
+    <div id="toast-custom"></div>
+  </div>
+</body>
+<script type="module">
+  import toast from "/components/Toast.js";
+  import {
+    postThing
+  } from "/lib/apiUtils.js"
+  document.getElementById("save").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const titleInput = document.getElementById("title");
+    const descInput = document.getElementById("description");
+    const checkbox = document.getElementById("is_public");
+
+    const searchParams = new URLSearchParams(window.location.search);
+    const recordId = searchParams.get("id");
+
+    const data = {
+      title: titleInput.value.trim(),
+      description: descInput.value.trim(),
+      is_public: checkbox.checked
+    }
+
+    const res = await postThing(`/api/edit_record/${recordId}`, data);
+    if (res) {
+      toast.show("Saved");
+    }
+  })
+</script>
+
+</html>

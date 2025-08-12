@@ -21,6 +21,7 @@ const playerInvites_1 = require("./api/queries/playerInvites");
 const projectInvites_1 = require("./api/queries/projectInvites");
 const calendars_1 = require("./api/queries/calendars");
 const utils_1 = require("./lib/utils");
+const record_1 = require("./api/queries/record");
 const csrf = require("csurf");
 const csrfMiddleware = csrf({ cookie: true });
 var router = (0, express_1.Router)();
@@ -296,6 +297,7 @@ router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             const sharedProjectData = yield (0, projects_1.getProjectQuery)(projectUser.project_id);
             sharedProjectList.push(sharedProjectData.rows[0]);
         }
+        const recordsData = yield (0, record_1.getRecordsByUserQuery)(req.session.user);
         res.render("dash", {
             auth: req.session.user,
             tables: tableData.rows,
@@ -303,6 +305,7 @@ router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             sharedSheets: sharedCharData,
             projects: projectData.rows,
             sharedProjects: sharedProjectList,
+            records: recordsData.rows,
         });
     }
     catch (err) {
@@ -335,6 +338,7 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             players.push(charData.rows[0]);
         }
         const calendars = yield (0, calendars_1.getCalendarsQuery)(projectId);
+        const recordsData = yield (0, record_1.getRecordsByProjectQuery)(project.id);
         const usedDataFormatted = (0, utils_1.humanFileSize)(project.used_data_in_bytes);
         res.render("wyrld", {
             auth: req.session.user,
@@ -343,6 +347,7 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             tables: tableData.rows,
             sheets: players,
             calendars: calendars.rows,
+            records: recordsData.rows,
             usedDataFormatted,
         });
     }
@@ -437,6 +442,122 @@ router.get("/newtable", (req, res, next) => {
         next(err);
     }
 });
+router.get("/newrecord", (req, res, next) => {
+    try {
+        if (!req.session.user)
+            return res.redirect("/forbidden");
+        res.render("newrecord", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/editrecord", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.query.id)
+            return res.redirect("/404");
+        const recordId = req.query.id;
+        const userId = req.session.user;
+        const data = yield (0, record_1.getRecordQuery)(recordId);
+        const record = data.rows[0];
+        if (!req.query.project_id) {
+            let is_author = Number(userId) == Number(record.user_id);
+            if (!is_author)
+                return res.redirect("/forbidden");
+        }
+        else {
+            const projectId = req.query.project_id;
+            const projectData = yield (0, projects_1.getProjectQuery)(projectId);
+            const project = projectData.rows[0];
+            let is_author = Number(userId) != Number(project.user_id);
+            if (!is_author) {
+            }
+        }
+        res.render("editrecord", { auth: userId, record: record });
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.query.id)
+            return res.redirect("/404");
+        const recordId = req.query.id;
+        const userId = req.session.user;
+        const data = yield (0, record_1.getRecordQuery)(recordId);
+        const record = data.rows[0];
+        if (!req.query.project_id) {
+            let is_author = Number(userId) == Number(record.user_id);
+            if (!record.is_public) {
+                if (is_author) {
+                    return res.render("record", {
+                        auth: userId,
+                        record: record,
+                        projectId: null,
+                        canEdit: true,
+                    });
+                }
+                else
+                    return res.redirect("/forbidden");
+            }
+            else {
+                return res.render("record", {
+                    auth: userId,
+                    record: record,
+                    projectId: null,
+                    canEdit: is_author,
+                });
+            }
+        }
+        else {
+            const projectId = req.query.project_id;
+            const projectData = yield (0, projects_1.getProjectQuery)(projectId);
+            const project = projectData.rows[0];
+            let is_author = Number(userId) == Number(project.user_id);
+            if (!is_author) {
+                const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(userId, projectId);
+                if (!projectUserData.rows.length) {
+                    return res.render("forbidden", { auth: userId });
+                }
+                else {
+                    const projectUser = projectUserData.rows[0];
+                    if (!projectUser.is_editor) {
+                        if (!record.is_public) {
+                            return res.render("forbidden", { auth: userId });
+                        }
+                        else
+                            return res.render("record", {
+                                auth: userId,
+                                record: record,
+                                projectId: project.id,
+                                canEdit: false,
+                            });
+                    }
+                    else {
+                        return res.render("record", {
+                            auth: userId,
+                            record: record,
+                            projectId: project.id,
+                            canEdit: true,
+                        });
+                    }
+                }
+            }
+            else {
+                return res.render("record", {
+                    auth: userId,
+                    record: record,
+                    projectId: project.id,
+                    canEdit: is_author,
+                });
+            }
+        }
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 router.get("/newwyrldtable", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!req.session.user)
@@ -504,6 +625,44 @@ router.get("/newwyrldcalendar", (req, res, next) => __awaiter(void 0, void 0, vo
         }
         else {
             res.render("newwyrldcalendar", {
+                auth: req.session.user,
+                projectId: project.id,
+            });
+        }
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get("/newwyrldrecord", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.session.user)
+            return res.redirect("/forbidden");
+        if (!req.query.id)
+            return res.redirect("/dash");
+        const projectId = req.query.id;
+        const projectData = yield (0, projects_1.getProjectQuery)(projectId);
+        const project = projectData.rows[0];
+        if (req.session.user != project.user_id) {
+            const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId);
+            if (!projectUserData.rows.length) {
+                return res.render("forbidden", { auth: req.session.user });
+            }
+            else {
+                const projectUser = projectUserData.rows[0];
+                if (!projectUser.is_editor) {
+                    return res.render("forbidden", { auth: req.session.user });
+                }
+                else {
+                    res.render("newwyrldrecord", {
+                        auth: req.session.user,
+                        projectId: project.id,
+                    });
+                }
+            }
+        }
+        else {
+            res.render("newwyrldrecord", {
                 auth: req.session.user,
                 projectId: project.id,
             });

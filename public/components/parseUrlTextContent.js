@@ -1,4 +1,4 @@
-import createElement from "../components/createElement";
+import createElement from "./createElement.js";
 
 export default function parseUrlTextContent(content) {
   const urlRegexAll = /(https?:\/\/[^\s]+)/g;
@@ -30,7 +30,7 @@ export default function parseUrlTextContent(content) {
           )
         );
       } else {
-        nodes.push(subpart);
+        nodes.push(document.createTextNode(subpart));
       }
 
       if (subIndex < subparts.length - 1) {

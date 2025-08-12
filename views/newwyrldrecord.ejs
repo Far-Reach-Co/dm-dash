@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Far Reach Co. | Create Table</title>
+  <title>Far Reach Co. | Create Wyrld Record</title>
   <link rel="stylesheet" href="/style.css" />
   <%- include('./partials/icons') %>
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -16,12 +16,24 @@
 <body>
   <%- include('./partials/nav') %>
   <div class="container-fluid info-container p-3">
-    <h1>Create Virtual Table</h1>
-    <form hx-post="/api/add_table_view_by_user">
+    <h1>Create Wyrld Record</h1>
+    <form hx-post="/api/add_record_by_project/<%= projectId %>">
       <fieldset>
         <div class="input-container">
           <label for="title">Title</label>
-          <input id="title" name="title" placeholder="Table Title" required />
+          <input id="title" name="title" placeholder="Record Title" required />
+        </div>
+        <br />
+        <div class="input-container w-100">
+          <label for="description">Description</label>
+          <textarea class="w-100" id="description" name="description" required></textarea>
+        </div>
+        <br />
+        <div class="w-25">
+          <small><b style="color: var(--orange2)">Make Public</b></small>
+          <br />
+          <small class="hint">*Allow this page to viewed by anyone otherwise just you.</small>
+          <input type="checkbox" name="is_public" />
         </div>
         <br />
         <br />

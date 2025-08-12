@@ -154,6 +154,8 @@ import {
   addRecordByUser,
   editRecord,
   getRecord,
+  getRecordsByProject,
+  getRecordsByUser,
   removeRecord,
 } from "./controllers/record.js";
 import {
@@ -204,10 +206,10 @@ router.delete(
 
 // records
 router.post("/add_record_by_user", addRecordByUser);
-router.post("/add_record_by_project", addRecordByProject);
+router.post("/add_record_by_project/:project_id", addRecordByProject);
 router.get("/get_record/:id", getRecord);
-router.get("/get_records_by_user/:user_id", getRecordsByUserQuery);
-router.get("/get_records_by_project/:project_id", getRecordsByProjectQuery);
+router.get("/get_records_by_user/:user_id", getRecordsByUser);
+router.get("/get_records_by_project/:project_id", getRecordsByProject);
 router.post("/edit_record/:id", editRecord);
 router.delete("/remove_record/:id", removeRecord);
 
