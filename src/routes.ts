@@ -31,6 +31,11 @@ import {
 } from "./api/queries/projectInvites";
 import { getCalendarsQuery } from "./api/queries/calendars";
 import { humanFileSize } from "./lib/utils";
+import {
+  getRecordQuery,
+  getRecordsByProjectQuery,
+  getRecordsByUserQuery,
+} from "./api/queries/record";
 
 // init csrf
 const csrf = require("csurf");
@@ -392,6 +397,9 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
       sharedProjectList.push(sharedProjectData.rows[0]);
     }
 
+    // records
+    const recordsData = await getRecordsByUserQuery(req.session.user);
+
     res.render("dash", {
       auth: req.session.user,
       tables: tableData.rows,
@@ -399,6 +407,7 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
       sharedSheets: sharedCharData,
       projects: projectData.rows,
       sharedProjects: sharedProjectList,
+      records: recordsData.rows,
     });
   } catch (err) {
     next(err);
@@ -446,6 +455,9 @@ router.get(
       // calendars
       const calendars = await getCalendarsQuery(projectId);
 
+      // records
+      const recordsData = await getRecordsByProjectQuery(project.id);
+
       // calculate used data formatted
       const usedDataFormatted = humanFileSize(project.used_data_in_bytes);
 
@@ -456,6 +468,7 @@ router.get(
         tables: tableData.rows,
         sheets: players,
         calendars: calendars.rows,
+        records: recordsData.rows,
         usedDataFormatted,
       });
     } catch (err) {
@@ -576,6 +589,129 @@ router.get("/newtable", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get("/newrecord", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.session.user) return res.redirect("/forbidden");
+    res.render("newrecord", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get(
+  "/editrecord",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.query.id) return res.redirect("/404");
+      const recordId = req.query.id as string;
+      const userId = req.session.user as string;
+
+      const data = await getRecordQuery(recordId);
+      const record = data.rows[0];
+
+      // render non wyrld public or not
+      if (!req.query.project_id) {
+        let is_author = Number(userId) == Number(record.user_id);
+        if (!is_author) return res.redirect("/forbidden");
+      } else {
+        const projectId = req.query.project_id as string;
+        const projectData = await getProjectQuery(projectId);
+        const project = projectData.rows[0];
+        let is_author = Number(userId) != Number(project.user_id);
+        if (!is_author) {
+        }
+      }
+
+      res.render("editrecord", { auth: userId, record: record });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/record",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.query.id) return res.redirect("/404");
+      const recordId = req.query.id as string;
+      const userId = req.session.user as string;
+
+      const data = await getRecordQuery(recordId);
+      const record = data.rows[0];
+
+      // render non wyrld public or not
+      if (!req.query.project_id) {
+        let is_author = Number(userId) == Number(record.user_id);
+        if (!record.is_public) {
+          if (is_author) {
+            return res.render("record", {
+              auth: userId,
+              record: record,
+              projectId: null,
+              canEdit: true,
+            });
+          } else return res.redirect("/forbidden");
+        } else {
+          return res.render("record", {
+            auth: userId,
+            record: record,
+            projectId: null,
+            canEdit: is_author,
+          });
+        }
+      } else {
+        // handle wyrld auth
+        const projectId = req.query.project_id as string;
+        const projectData = await getProjectQuery(projectId);
+        const project = projectData.rows[0];
+        let is_author = Number(userId) == Number(project.user_id);
+        if (!is_author) {
+          // if user is not owner, check if user is projectUser
+          const projectUserData = await getProjectUserByUserAndProjectQuery(
+            userId,
+            projectId
+          );
+          if (!projectUserData.rows.length) {
+            return res.render("forbidden", { auth: userId });
+          } else {
+            const projectUser = projectUserData.rows[0];
+            // is editor?
+            if (!projectUser.is_editor) {
+              // is public?
+              if (!record.is_public) {
+                return res.render("forbidden", { auth: userId });
+              } else
+                return res.render("record", {
+                  auth: userId,
+                  record: record,
+                  projectId: project.id,
+                  canEdit: false,
+                });
+            } else {
+              return res.render("record", {
+                auth: userId,
+                record: record,
+                projectId: project.id,
+                canEdit: true,
+              });
+            }
+          }
+        } else {
+          return res.render("record", {
+            auth: userId,
+            record: record,
+            projectId: project.id,
+            canEdit: is_author,
+          });
+        }
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 router.get(
   "/newwyrldtable",
   async (req: Request, res: Response, next: NextFunction) => {
@@ -652,6 +788,49 @@ router.get(
         }
       } else {
         res.render("newwyrldcalendar", {
+          auth: req.session.user,
+          projectId: project.id,
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.get(
+  "/newwyrldrecord",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("/forbidden");
+      // get project id
+      if (!req.query.id) return res.redirect("/dash");
+      const projectId = req.query.id as string;
+      const projectData = await getProjectQuery(projectId);
+      const project = projectData.rows[0];
+      // authorize
+      if (req.session.user != project.user_id) {
+        // if user is not owner, check if user is projectUser
+        const projectUserData = await getProjectUserByUserAndProjectQuery(
+          req.session.user,
+          projectId
+        );
+        if (!projectUserData.rows.length) {
+          // send to forbidden
+          return res.render("forbidden", { auth: req.session.user });
+        } else {
+          const projectUser = projectUserData.rows[0];
+          if (!projectUser.is_editor) {
+            return res.render("forbidden", { auth: req.session.user });
+          } else {
+            res.render("newwyrldrecord", {
+              auth: req.session.user,
+              projectId: project.id,
+            });
+          }
+        }
+      } else {
+        res.render("newwyrldrecord", {
           auth: req.session.user,
           projectId: project.id,
         });

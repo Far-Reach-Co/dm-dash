@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | <%= record.title %></title>
+  <link rel="stylesheet" href="/style.css" />
+  <%- include('./partials/icons') %>
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/lib/htmx.min.js"></script>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid info-container p-3">
+    <div>
+      <h1><%= record.title %></h1>
+      <small>- Record</small>
+    </div>
+    <div id="description" style="white-space: pre-wrap;"></div>
+    <hr />
+    <% if (canEdit) { %>
+    <% if (projectId) { %>
+    <small><a href="/editrecord?id=<%= record.id %>&project_id=<%= projectId %>">Edit Record</a></small>
+    <% } else { %>
+    <small><a href="/editrecord?id=<%= record.id %>">Edit Record</a></small>
+    <% } %>
+    <% } %>
+</body>
+<script type="module" defer>
+  import parseUrlTextContent from "/components/parseUrlTextContent.js";
+  const descElem = document.getElementById("description");
+  const description = `<%= record.description %>`;
+  const elems = parseUrlTextContent(description);
+  for (const elem of elems) {
+    descElem.appendChild(elem);
+  }
+</script>
+
+</html>

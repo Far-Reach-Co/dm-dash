@@ -46,7 +46,7 @@
       <small>-- Subscriptions under Construction --</small>
     </div>
     <div class="d-flex flex-wrap">
-      <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
         <h2>Wyrld Tables</h2>
         <small>These tables are shared by the members of the wyrld. The wyrld
           managers have the ability to upload images and manage the map
@@ -72,7 +72,26 @@
         </div>
         <% } %>
       </div>
-      <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
+        <h2>Records</h2>
+        <small>Resource pages which you can use for lore, notes, monster stat blocks and other useful data.</small>
+        <br />
+        <% if (projectAuth) { %>
+        <a href="/newwyrldrecord?id=<%= project.id %>" title="Create a new wyrld record">+ New Wyrld Record</a>
+        <% } %>
+        <hr />
+        <% if (records.length === 0) { %>
+        <small class="ms-2">No records yet...</small>
+        <% } else { %>
+        <% records.forEach(function(record) { %>
+        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleRecordClick('<%= record.id %>', '<%= project.id %>')" title="Open record in new tab">
+          <div class="dash-list-title mb-3"><%= record.title %></div>
+          <a>↗</a>
+        </div>
+        <% }); %>
+        <% } %>
+      </div>
+      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
         <h2>Player Character Sheets</h2>
         <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator
           of the sheet and the wyrld managers are allowed to view these
@@ -91,7 +110,7 @@
         </div>
         <% }); %> <% } %>
       </div>
-      <div class="d-flex flex-column p-3" style="width: 33.33%; min-width: 300px">
+      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
         <h2>Calendars</h2>
         <small>Custom calendars allow for general time-keeping of the various
           cultures in the wyrld. Managers have access to create and update the
@@ -133,6 +152,10 @@
 
   function handleTableClick(uuid, projectID) {
     window.open(`/vtt?uuid=${uuid}&project=${projectID}`, "_blank").focus();
+  }
+
+  function handleRecordClick(id, projectID) {
+    window.open(`/record?id=${id}&project_id=${projectID}`, "_blank").focus();
   }
 
   const projectAuth = <%= projectAuth %>;

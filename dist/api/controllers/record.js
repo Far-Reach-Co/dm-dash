@@ -9,13 +9,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeRecord = exports.editRecord = exports.getRecord = exports.addRecordByUser = exports.addRecordByProject = void 0;
+exports.removeRecord = exports.editRecord = exports.getRecord = exports.getRecordsByProject = exports.getRecordsByUser = exports.addRecordByUser = exports.addRecordByProject = void 0;
 const record_1 = require("../queries/record");
 function addRecordByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = yield (0, record_1.addRecordByUserQuery)(req.body.user_id);
-            res.status(201).json(data.rows[0]);
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            req.body.user_id = req.session.user;
+            const data = yield (0, record_1.addRecordByUserQuery)({
+                user_id: req.body.user_id,
+                title: req.body.title,
+                description: req.body.description,
+                is_public: req.body.is_public ? true : false,
+            });
+            const record = data.rows[0];
+            res
+                .set("HX-Redirect", `/record?id=${record.id}`)
+                .send("Form submission was successful.");
         }
         catch (err) {
             next(err);
@@ -26,8 +37,20 @@ exports.addRecordByUser = addRecordByUser;
 function addRecordByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = yield (0, record_1.addRecordByProjectQuery)(req.body.project_id);
-            res.status(201).json(data.rows[0]);
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            if (!req.params.project_id)
+                throw new Error("No project ID in params");
+            const data = yield (0, record_1.addRecordByProjectQuery)({
+                project_id: req.params.project_id,
+                title: req.body.title,
+                description: req.body.description,
+                is_public: req.body.is_public ? true : false,
+            });
+            const record = data.rows[0];
+            res
+                .set("HX-Redirect", `/record?id=${record.id}&project_id=${req.params.project_id}`)
+                .send("Form submission was successful.");
         }
         catch (err) {
             next(err);
@@ -48,11 +71,38 @@ function getRecord(req, res, next) {
     });
 }
 exports.getRecord = getRecord;
+function getRecordsByUser(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const recordData = yield (0, record_1.getRecordsByUserQuery)(req.params.user_id);
+            const records = recordData.rows;
+            res.send(records);
+        }
+        catch (err) {
+            next(err);
+        }
+    });
+}
+exports.getRecordsByUser = getRecordsByUser;
+function getRecordsByProject(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const recordData = yield (0, record_1.getRecordsByProjectQuery)(req.params.project_id);
+            const records = recordData.rows;
+            res.send(records);
+        }
+        catch (err) {
+            next(err);
+        }
+    });
+}
+exports.getRecordsByProject = getRecordsByProject;
 function editRecord(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield (0, record_1.editRecordQuery)(req.params.id, req.body);
-            res.status(200).send(data.rows[0]);
+            const record = data.rows[0];
+            res.status(200).send(record);
         }
         catch (err) {
             next(err);
@@ -64,7 +114,8 @@ function removeRecord(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield (0, record_1.removeRecordQuery)(req.params.id);
-            res.status(204).send();
+            res.setHeader("HX-Redirect", "/dash");
+            res.send();
         }
         catch (err) {
             next(err);

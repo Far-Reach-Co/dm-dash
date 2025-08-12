@@ -5,7 +5,7 @@ import imageFollowingCursor from "../imageFollowingCursor.js";
 import detectMob from "../../lib/detectMobile.js";
 import modal from "../../components/modal.js";
 import renderFolderSelect from "./folderSelect.js";
-import parseUrlTextContent from "../../lib/parseUrlTextContent.js";
+import parseUrlTextContent from "../../components/parseUrlTextContent.js";
 
 export default class TableSidebarImageComponent {
   constructor(props) {

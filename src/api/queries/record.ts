@@ -1,29 +1,46 @@
 import db from "../dbconfig";
 
 interface Record {
-  id: number,
-  title: string,
-  description: string,
+  id: number
+  title: string
+  description: string
   project_id: number
   user_id: number
+  is_public: boolean
 }
 
-async function addRecordByProjectQuery(projectId: number | string) {
+async function addRecordByProjectQuery(data: {
+  project_id: number | string,
+  title: string,
+  description: string
+  is_public: boolean
+}) {
   const query = {
-    text: /*sql*/ `insert into public."Record" (project_id) values($1) returning *`,
+    text: /*sql*/ `insert into public."Record" (project_id, title, description, is_public) values($1,$2,$3,$4) returning *`,
     values: [
-      projectId,
+      data.project_id,
+      data.title,
+      data.description,
+      data.is_public
     ]
   }
   return await db.query<Record>(query)
 
 }
 
-async function addRecordByUserQuery(userId: number | string) {
+async function addRecordByUserQuery(data: {
+  user_id: number | string,
+  title: string,
+  description: string,
+  is_public: boolean
+}) {
   const query = {
-    text: /*sql*/ `insert into public."Record" (user_id) values($1) returning *`,
+    text: /*sql*/ `insert into public."Record" (user_id, title, description, is_public) values($1,$2,$3,$4) returning *`,
     values: [
-      userId,
+      data.user_id,
+      data.title,
+      data.description,
+      data.is_public
     ]
   }
   return await db.query<Record>(query)
