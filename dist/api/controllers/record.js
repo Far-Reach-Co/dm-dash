@@ -16,17 +16,14 @@ function addRecordByUser(req, res, next) {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
-            req.body.user_id = req.session.user;
             const data = yield (0, record_1.addRecordByUserQuery)({
-                user_id: req.body.user_id,
+                user_id: req.session.user,
                 title: req.body.title,
                 description: req.body.description,
                 is_public: req.body.is_public ? true : false,
             });
             const record = data.rows[0];
-            res
-                .set("HX-Redirect", `/record?id=${record.id}`)
-                .send("Form submission was successful.");
+            res.status(201).send(record);
         }
         catch (err) {
             next(err);
@@ -48,9 +45,7 @@ function addRecordByProject(req, res, next) {
                 is_public: req.body.is_public ? true : false,
             });
             const record = data.rows[0];
-            res
-                .set("HX-Redirect", `/record?id=${record.id}&project_id=${req.params.project_id}`)
-                .send("Form submission was successful.");
+            res.status(201).send(record);
         }
         catch (err) {
             next(err);
@@ -74,7 +69,9 @@ exports.getRecord = getRecord;
 function getRecordsByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const recordData = yield (0, record_1.getRecordsByUserQuery)(req.params.user_id);
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const recordData = yield (0, record_1.getRecordsByUserQuery)(req.session.user);
             const records = recordData.rows;
             res.send(records);
         }

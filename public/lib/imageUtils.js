@@ -9,8 +9,6 @@ export async function getPresignedUrlsForImages(imageIds) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        bucket_name: "wyrld",
-        folder_name: "images",
         image_ids: imageIds,
       }),
     });
@@ -60,6 +58,7 @@ export async function uploadProjectImage(
 }
 
 export async function uploadUserImage(image, makeImageSmall) {
+  // (file, boolean)
   try {
     const formData = new FormData();
     formData.append("file", image);

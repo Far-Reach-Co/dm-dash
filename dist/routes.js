@@ -22,6 +22,9 @@ const projectInvites_1 = require("./api/queries/projectInvites");
 const calendars_1 = require("./api/queries/calendars");
 const utils_1 = require("./lib/utils");
 const record_1 = require("./api/queries/record");
+const recordImage_1 = require("./api/queries/recordImage");
+const images_1 = require("./api/queries/images");
+const s3_1 = require("./api/controllers/s3");
 const csrf = require("csurf");
 const csrfMiddleware = csrf({ cookie: true });
 var router = (0, express_1.Router)();
@@ -460,6 +463,17 @@ router.get("/editrecord", (req, res, next) => __awaiter(void 0, void 0, void 0, 
         const userId = req.session.user;
         const data = yield (0, record_1.getRecordQuery)(recordId);
         const record = data.rows[0];
+        const recordImageData = yield (0, recordImage_1.getRecordImagesByRecordQuery)(recordId);
+        let imagesFromRecordImages = [];
+        let imageUrls = {};
+        if (recordImageData.rows.length) {
+            imagesFromRecordImages = yield Promise.all(recordImageData.rows.map((ri) => __awaiter(void 0, void 0, void 0, function* () {
+                const imageData = yield (0, images_1.getImageQuery)(ri.image_id);
+                return imageData.rows[0];
+            })));
+            imageUrls = yield (0, s3_1.getSignedUrls)(imagesFromRecordImages);
+            console.log(imageUrls);
+        }
         if (!req.query.project_id) {
             let is_author = Number(userId) == Number(record.user_id);
             if (!is_author)
@@ -473,7 +487,11 @@ router.get("/editrecord", (req, res, next) => __awaiter(void 0, void 0, void 0, 
             if (!is_author) {
             }
         }
-        res.render("editrecord", { auth: userId, record: record });
+        res.render("editrecord", {
+            auth: userId,
+            record: record,
+            imageUrls: imageUrls,
+        });
     }
     catch (err) {
         next(err);
@@ -485,8 +503,19 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             return res.redirect("/404");
         const recordId = req.query.id;
         const userId = req.session.user;
-        const data = yield (0, record_1.getRecordQuery)(recordId);
-        const record = data.rows[0];
+        const recordData = yield (0, record_1.getRecordQuery)(recordId);
+        const record = recordData.rows[0];
+        const recordImageData = yield (0, recordImage_1.getRecordImagesByRecordQuery)(recordId);
+        let imagesFromRecordImages = [];
+        let imageUrls = {};
+        if (recordImageData.rows.length) {
+            imagesFromRecordImages = yield Promise.all(recordImageData.rows.map((ri) => __awaiter(void 0, void 0, void 0, function* () {
+                const imageData = yield (0, images_1.getImageQuery)(ri.image_id);
+                return imageData.rows[0];
+            })));
+            imageUrls = yield (0, s3_1.getSignedUrls)(imagesFromRecordImages);
+            console.log(imageUrls);
+        }
         if (!req.query.project_id) {
             let is_author = Number(userId) == Number(record.user_id);
             if (!record.is_public) {
@@ -494,6 +523,7 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
                     return res.render("record", {
                         auth: userId,
                         record: record,
+                        imageUrls: imageUrls,
                         projectId: null,
                         canEdit: true,
                     });
@@ -505,6 +535,7 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
                 return res.render("record", {
                     auth: userId,
                     record: record,
+                    imageUrls: imageUrls,
                     projectId: null,
                     canEdit: is_author,
                 });
@@ -530,6 +561,7 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
                             return res.render("record", {
                                 auth: userId,
                                 record: record,
+                                imageUrls: imageUrls,
                                 projectId: project.id,
                                 canEdit: false,
                             });
@@ -538,6 +570,7 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
                         return res.render("record", {
                             auth: userId,
                             record: record,
+                            imageUrls: imageUrls,
                             projectId: project.id,
                             canEdit: true,
                         });
@@ -548,6 +581,7 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
                 return res.render("record", {
                     auth: userId,
                     record: record,
+                    imageUrls: imageUrls,
                     projectId: project.id,
                     canEdit: is_author,
                 });

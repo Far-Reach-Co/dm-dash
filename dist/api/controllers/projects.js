@@ -148,7 +148,7 @@ function removeProject(req, res, next) {
             tableImages.rows.forEach((tableImage) => __awaiter(this, void 0, void 0, function* () {
                 const imageData = yield (0, images_js_1.getImageQuery)(tableImage.image_id);
                 const image = imageData.rows[0];
-                yield (0, s3_js_1.removeImage)("wyrld/images", image);
+                yield (0, s3_js_1.removeImageFromBucket)("wyrld/images", image);
                 yield (0, tableImages_js_1.removeTableImageQuery)(tableImage.id);
             }));
             const tableViews = yield (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.id);

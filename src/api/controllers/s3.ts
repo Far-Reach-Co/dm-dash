@@ -1,6 +1,6 @@
 import { S3, config, CloudFront } from "aws-sdk";
 import { readFileSync, statSync, unlinkSync } from "fs";
-import { userSubscriptionStatus } from "../../lib/enums.js";
+import { userSubscriptionStatus } from "../../lib/enums";
 import {
   addImageQuery,
   editImageQuery,
@@ -11,14 +11,16 @@ import {
 } from "../queries/images";
 import { getProjectQuery, editProjectQuery } from "../queries/projects";
 import { Request, Response, NextFunction } from "express";
-import { getMetadata, resizeImage } from "../../lib/imageProcessing.js";
-import { splitAtIndex } from "../../lib/utils.js";
-import { editUserQuery, getUserByIdQuery } from "../queries/users.js";
+import { getMetadata, resizeImage } from "../../lib/imageProcessing";
+import { splitAtIndex } from "../../lib/utils";
+import { editUserQuery, getUserByIdQuery } from "../queries/users";
 import { getTableViewQuery } from "../queries/tableViews.js";
-import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers.js";
+import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers";
 import path = require("path");
 import fs = require("fs");
-import { megabytesInBytes } from "../../lib/enums.js";
+import { megabytesInBytes } from "../../lib/enums";
+import { getRecordImagesByImageQuery } from "../queries/recordImage";
+import { getRecordQuery, Record } from "../queries/record";
 
 config.update({
   signatureVersion: "v4",
@@ -31,12 +33,10 @@ const s3 = new S3();
 interface GetSignedUrlsRequestObject {
   body: {
     image_ids: (string | number)[];
-    folder_name: string;
-    bucket_name: string; // this is no longer being used. update the frontend to not send it
   };
 }
 
-async function getSignedUrlsForDownloads(
+async function getSignedUrlsHandler(
   req: GetSignedUrlsRequestObject, // note that the request object type will change
   res: Response,
   next: NextFunction
@@ -44,47 +44,50 @@ async function getSignedUrlsForDownloads(
   try {
     if (!req.body.image_ids.length) return res.send([]);
     const imageDataList = await getImagesQuery(req.body.image_ids); // adjusted function to fetch multiple rows
-
-    const urls: { [key: string]: string } = {};
-
-    for (const imageData of imageDataList.rows) {
-      const objectName = imageData.file_name;
-      const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/${req.body.folder_name}/${objectName}`;
-
-      const privateKeyPath = path.join(
-        __dirname,
-        "..",
-        "..",
-        "..",
-        "private_frc_cloudfront_key.pem"
-      );
-      const privateKey = fs.readFileSync(privateKeyPath, "utf8");
-      const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
-
-      const signingParams = {
-        url: cloudFrontUrl,
-        expires: Math.floor(
-          (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
-        ), // 3 days from now
-        privateKey: privateKey,
-        keyPairId: cloudFrontKeyId,
-      };
-
-      const signer = new CloudFront.Signer(
-        signingParams.keyPairId,
-        signingParams.privateKey
-      );
-
-      urls[imageData.id] = signer.getSignedUrl({
-        url: signingParams.url,
-        expires: signingParams.expires,
-      });
-    }
-
+    const urls = getSignedUrls(imageDataList.rows);
     return res.send({ urls });
   } catch (err) {
     return next(err);
   }
+}
+
+async function getSignedUrls(images: Image[]) {
+  const urls: { [key: string]: string } = {};
+
+  for (const imageData of images) {
+    const objectName = imageData.file_name;
+    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${objectName}`;
+
+    const privateKeyPath = path.join(
+      __dirname,
+      "..",
+      "..",
+      "..",
+      "private_frc_cloudfront_key.pem"
+    );
+    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
+    const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
+
+    const signingParams = {
+      url: cloudFrontUrl,
+      expires: Math.floor(
+        (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
+      ), // 3 days from now
+      privateKey: privateKey,
+      keyPairId: cloudFrontKeyId,
+    };
+
+    const signer = new CloudFront.Signer(
+      signingParams.keyPairId,
+      signingParams.privateKey
+    );
+
+    urls[imageData.id] = signer.getSignedUrl({
+      url: signingParams.url,
+      expires: signingParams.expires,
+    });
+  }
+  return urls;
 }
 
 // async function getSignedUrlForUpload(req: Request, res: Response, next: NextFunction) {
@@ -282,7 +285,7 @@ async function newImageForProject(
       const oldImageData = await getImageQuery(req.body.current_file_id);
       const oldImage = oldImageData.rows[0];
 
-      await removeImage(
+      await removeImageFromBucket(
         `${req.body.bucket_name}/${req.body.folder_name}`,
         oldImage
       );
@@ -392,14 +395,15 @@ async function newImageForUser(
   }
 }
 
-interface imageExtendedWithSrc extends Image {
+interface imageDataResObject extends Image {
   src: string;
+  records: Record[];
 }
 
 async function getImage(req: Request, res: Response, next: NextFunction) {
   try {
     const imageData = await getImageQuery(req.params.id);
-    const image = imageData.rows[0] as imageExtendedWithSrc;
+    const image = imageData.rows[0] as imageDataResObject;
     // append src url from signed url
     const objectName = image.file_name;
 
@@ -434,6 +438,17 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
     });
 
     image.src = url;
+
+    // Get and append recordImage id
+    const recordImageData = await getRecordImagesByImageQuery(image.id);
+    const recordsData = await Promise.all(
+      recordImageData.rows.map(async (ri) => {
+        const recordData = await getRecordQuery(ri.record_id);
+        const record = recordData.rows[0];
+        return record;
+      })
+    );
+    image.records = recordsData;
     res.send(image);
   } catch (err) {
     console.log(err);
@@ -451,7 +466,7 @@ async function removeImageByProject(
     const imageData = await getImageQuery(req.params.image_id);
     const image = imageData.rows[0];
 
-    await removeImage("wyrld/images", image);
+    await removeImageFromBucket("wyrld/images", image);
     await removeImageQuery(req.params.image_id);
 
     // update project data usage
@@ -478,7 +493,7 @@ async function removeImageByTableUser(
     const imageData = await getImageQuery(req.params.image_id);
     const image = imageData.rows[0];
 
-    await removeImage("wyrld/images", image);
+    await removeImageFromBucket("wyrld/images", image);
     await removeImageQuery(req.params.image_id);
 
     // get table
@@ -499,7 +514,10 @@ async function removeImageByTableUser(
   }
 }
 
-async function removeImage(bucket: string, image: { file_name: string }) {
+async function removeImageFromBucket(
+  bucket: string,
+  image: { file_name: string }
+) {
   try {
     const params = {
       Bucket: bucket,
@@ -542,12 +560,13 @@ async function editImageNotes(req: Request, res: Response, next: NextFunction) {
 }
 
 export {
-  getSignedUrlsForDownloads,
+  getSignedUrls,
+  getSignedUrlsHandler,
   getImage,
   editImageName,
   newImageForProject,
   newImageForUser,
-  removeImage,
+  removeImageFromBucket,
   removeImageByProject,
   removeImageByTableUser,
   editImageNotes,

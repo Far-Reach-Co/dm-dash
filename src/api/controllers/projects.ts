@@ -21,7 +21,7 @@ import { getCalendarQuery, removeCalendarQuery } from "../queries/calendars.js";
 import { getMonthsQuery, removeMonthQuery } from "../queries/months.js";
 import { getDaysQuery, removeDayQuery } from "../queries/days.js";
 import { getImageQuery } from "../queries/images.js";
-import { removeImage } from "./s3.js";
+import { removeImageFromBucket } from "./s3.js";
 import {
   addTableViewByProjectQuery,
   getTableViewsByProjectQuery,
@@ -193,7 +193,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
     tableImages.rows.forEach(async (tableImage) => {
       const imageData = await getImageQuery(tableImage.image_id);
       const image = imageData.rows[0];
-      await removeImage("wyrld/images", image);
+      await removeImageFromBucket("wyrld/images", image);
       await removeTableImageQuery(tableImage.id);
     });
     // table views

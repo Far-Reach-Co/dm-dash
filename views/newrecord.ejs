@@ -17,30 +17,139 @@
   <%- include('./partials/nav') %>
   <div class="container-fluid info-container p-3">
     <h1>Create Record</h1>
-    <form hx-post="/api/add_record_by_user">
-      <fieldset>
-        <div class="input-container">
-          <label for="title">Title</label>
-          <input id="title" name="title" placeholder="Record Title" required />
-        </div>
-        <br />
-        <div class="input-container w-100">
-          <label for="description">Description</label>
-          <textarea class="w-100" id="description" name="description" required></textarea>
-        </div>
-        <br />
-        <div class="w-25">
-          <small><b style="color: var(--orange2)">Make Public</b></small>
-          <br />
-          <small class="hint">*Allow this page to viewed by anyone otherwise just you.</small>
-          <input type="checkbox" name="is_public" />
-        </div>
-        <br />
-        <br />
-        <button type="submit">Create</button>
-      </fieldset>
-    </form>
+    <br />
+    <br />
+    <div class="input-container">
+      <label for="title">Title</label>
+      <input id="title" name="title" placeholder="Record Title" required />
+    </div>
+    <br />
+    <div class="input-container w-100">
+      <label for="description">Description</label>
+      <textarea class="w-100" id="description" name="description" required></textarea>
+    </div>
+    <br />
+    <div class="w-25">
+      <small><b style="color: var(--orange2);">Upload Images</b></small>
+      <br />
+      <small class="hint">*These will also be available for use on your tables</small>
+      <br />
+      <input id="image" name="image" type="file" accept="image/*" style="display: none" multiple>
+      <label for="image" class="label-btn" title="Upload Image">Choose Images</label>
+      <div class="d-flex flex-column" id="files-list"></div>
+    </div>
+    <br />
+    <div class="w-25">
+      <small><b style="color: var(--orange2);">Make Public</b></small>
+      <br />
+      <small class="hint">*Allow this page to viewed by others.</small>
+      <input id="is_public" type="checkbox" name="is_public" />
+    </div>
+    <br />
+    <br />
+    <button id="create">Create</button>
+    <!-- Toast -->
+    <div id="toast-custom"></div>
+    <!-- The Modal -->
+    <div id="modal-custom" class="modal-custom">
+      <!-- Modal content -->
+      <div class="modal-custom-container">
+        <div id="close-custom-modal" class="close-custom-modal">&times;</div>
+        <div id="modal-custom-content" class="modal-custom-content"></div>
+      </div>
+    </div>
   </div>
 </body>
+<script type="module">
+  import createElement from "/components/createElement.js";
+  import {
+    postThing
+  } from "/lib/apiUtils.js";
+  import {
+    uploadUserImage
+  } from "/lib/imageUtils.js";
+
+  // image event listener
+  document.getElementById("image").addEventListener("change", async (e) => {
+    if (e.target.files.length) {
+      const filesListElem = document.getElementById("files-list");
+      const fileNameElemList = [];
+      for (const file of e.target.files) {
+        const fileNameElem = createElement("small", {}, `- ${file.name}`);
+        fileNameElemList.push(fileNameElem)
+      }
+      filesListElem.append(...fileNameElemList)
+    }
+  })
+
+  // create event listen
+  document.getElementById("create").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    // loading state
+    e.target.disabled = true;
+    document.body.style.cursor = "wait";
+
+    const titleInput = document.getElementById("title");
+    const descInput = document.getElementById("description");
+    const checkbox = document.getElementById("is_public");
+
+    const data = {
+      title: titleInput.value.trim(),
+      description: descInput.value.trim(),
+      is_public: checkbox.checked
+    }
+
+    try {
+      // create a new record
+      const newRecord = await postThing(`/api/add_record_by_user`, data);
+
+      // upload images
+      const imagesInput = document.getElementById("image");
+      if (imagesInput.files.length) {
+        if (imagesInput.files.length > 1) {
+          // multiple
+          await Promise.all(
+            Array.from(imagesInput.files).map(async (file) => {
+              const newImage = await uploadImage(file);
+
+              // create new record image
+              await postThing(`/api/add_record_image`, {
+                record_id: newRecord.id,
+                image_id: newImage.id
+              })
+            })
+          );
+        } else {
+          const newImage = await uploadImage(imagesInput.files[0]);
+          // create new record image
+          await postThing(`/api/add_record_image`, {
+            record_id: newRecord.id,
+            image_id: newImage.id
+          })
+        }
+      }
+
+      window.location.href = "/dash"
+    } catch (error) {
+      console.log(error)
+      e.target.disabled = false;
+      document.body.style.cursor = "default";
+    }
+
+  })
+
+  async function uploadImage(file) {
+    const newImage = await uploadUserImage(file, false);
+    if (newImage) {
+      // create new table image
+      await postThing(`/api/add_table_image_by_user`, {
+        image_id: newImage.id,
+        folder_id: null
+      });
+      return newImage;
+    }
+  }
+</script>
 
 </html>
