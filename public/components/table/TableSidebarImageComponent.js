@@ -5,6 +5,7 @@ import imageFollowingCursor from "../imageFollowingCursor.js";
 import detectMob from "../../lib/detectMobile.js";
 import modal from "../../components/modal.js";
 import renderFolderSelect from "./folderSelect.js";
+import renderRecordSelect from "./recordSelect.js";
 import parseUrlTextContent from "../../components/parseUrlTextContent.js";
 
 export default class TableSidebarImageComponent {
@@ -130,7 +131,7 @@ export default class TableSidebarImageComponent {
     return createElement("div", { class: "help-content" }, [
       createElement("h1", {}, image.original_name),
       createElement("hr"),
-      createElement("h2", {}, "Associated Records"),
+      createElement("h2", {}, "Associated Record"),
       associatedRecordsComponent.domComponent,
       createElement("hr"),
       createElement("h2", {}, "Change Folder"),
@@ -389,7 +390,7 @@ class AssociatedRecordsComponent {
     }
   };
 
-  renderListOrCreateNew = () => {
+  renderListOrCreateNew = async () => {
     if (this.image.records.length) {
       return createElement("div", {}, [
         ...this.image.records.map((rec) => {
@@ -404,19 +405,46 @@ class AssociatedRecordsComponent {
         }),
       ]);
     } else {
+      const recordSelectElem = await renderRecordSelect(this.projectId);
+      recordSelectElem.addEventListener("change", async (e) => {
+        const recordId = e.target.value;
+        if (e.target.value != 0) {
+          await postThing("/api/add_record_image", {
+            record_id: recordId,
+            image_id: this.image.id,
+          });
+
+          const record = await getThings(`/api/get_record/${recordId}`);
+
+          // update data and render
+          this.image.records.push(record);
+          // re-render
+          this.render();
+        }
+      });
+
       return createElement("div", {}, [
         createElement("div", {}, "None..."),
-        createElement("button", {}, "Create Record", {
-          type: "click",
-          event: () => this.createNewRecord(),
-        }),
+        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+          createElement(
+            "button",
+            { style: "margin-right: 5px;" },
+            "Create Record",
+            {
+              type: "click",
+              event: () => this.createNewRecord(),
+            }
+          ),
+          createElement("div", { style: "margin-right: 5px;" }, "Or"),
+          recordSelectElem,
+        ]),
       ]);
     }
   };
 
-  render = () => {
+  render = async () => {
     this.domComponent.innerHTML = "";
 
-    this.domComponent.append(this.renderListOrCreateNew());
+    this.domComponent.append(await this.renderListOrCreateNew());
   };
 }

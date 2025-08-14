@@ -47,7 +47,7 @@ router.delete("/remove_image_by_project/:image_id/:project_id", s3_js_1.removeIm
 router.post("/add_record_by_user", record_js_1.addRecordByUser);
 router.post("/add_record_by_project/:project_id", record_js_1.addRecordByProject);
 router.get("/get_record/:id", record_js_1.getRecord);
-router.get("/get_records_by_user/:user_id", record_js_1.getRecordsByUser);
+router.get("/get_records_by_user", record_js_1.getRecordsByUser);
 router.get("/get_records_by_project/:project_id", record_js_1.getRecordsByProject);
 router.post("/edit_record/:id", record_js_1.editRecord);
 router.delete("/remove_record/:id", record_js_1.removeRecord);

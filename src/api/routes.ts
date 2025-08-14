@@ -215,7 +215,7 @@ router.delete(
 router.post("/add_record_by_user", addRecordByUser);
 router.post("/add_record_by_project/:project_id", addRecordByProject);
 router.get("/get_record/:id", getRecord);
-router.get("/get_records_by_user/:user_id", getRecordsByUser);
+router.get("/get_records_by_user", getRecordsByUser);
 router.get("/get_records_by_project/:project_id", getRecordsByProject);
 router.post("/edit_record/:id", editRecord);
 router.delete("/remove_record/:id", removeRecord);

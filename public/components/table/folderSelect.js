@@ -2,14 +2,14 @@ import createElement from "../createElement.js";
 import { getThings } from "../../lib/apiUtils.js";
 
 async function renderFolderSelectOptions(foldersData) {
-  const projectElemList = [];
+  const elemsList = [];
 
   foldersData.forEach((folder) => {
     const elem = createElement("option", { value: folder.id }, folder.title);
-    projectElemList.push(elem);
+    elemsList.push(elem);
   });
 
-  return projectElemList;
+  return elemsList;
 }
 
 export default async function renderFolderSelect(tableImage, projectId) {

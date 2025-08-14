@@ -8,10 +8,6 @@ import {
   getRecordsByUserQuery,
   removeRecordQuery,
 } from "../queries/record";
-import {
-  getRecordImagesByRecordQuery,
-  removeRecordImageQuery,
-} from "../queries/recordImage";
 
 interface addRecordByUserRequest extends Request {
   body: {
@@ -89,7 +85,9 @@ async function getRecordsByUser(
   next: NextFunction
 ) {
   try {
-    const recordData = await getRecordsByUserQuery(req.params.user_id);
+    if (!req.session.user) throw new Error("User is not logged in");
+
+    const recordData = await getRecordsByUserQuery(req.session.user);
     const records = recordData.rows;
 
     res.send(records);

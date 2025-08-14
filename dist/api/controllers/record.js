@@ -69,7 +69,9 @@ exports.getRecord = getRecord;
 function getRecordsByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const recordData = yield (0, record_1.getRecordsByUserQuery)(req.params.user_id);
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const recordData = yield (0, record_1.getRecordsByUserQuery)(req.session.user);
             const records = recordData.rows;
             res.send(records);
         }
