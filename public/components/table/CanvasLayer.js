@@ -302,7 +302,6 @@ export default class CanvasLayer {
   setupObjectEventListeners = (obj) => {
     obj.on("selected", (options) => {
       const obj = options.target;
-      console.log(obj);
 
       // display top layer viewport for object
       this.tableApp.setCurrentSelectedObject(obj);

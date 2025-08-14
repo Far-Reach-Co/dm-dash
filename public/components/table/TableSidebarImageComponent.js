@@ -75,7 +75,7 @@ export default class TableSidebarImageComponent {
     }
   };
 
-  removeImageFromTableAndSidebar = (image, tableImage, elem) => {
+  removeImageFromTableAndSidebar = (image, elem) => {
     if (
       window.confirm(`Are you sure you want to delete ${image.original_name}`)
     ) {
@@ -90,8 +90,6 @@ export default class TableSidebarImageComponent {
         );
       }
 
-      // remove table image in db
-      deleteThing(`/api/remove_table_image/${tableImage.id}`);
       // remove elem in sidebar
       elem.remove();
       // remove all from screens and sockets and state
@@ -123,8 +121,17 @@ export default class TableSidebarImageComponent {
       this.render();
     });
 
+    const associatedRecordsComponent = new AssociatedRecordsComponent({
+      domComponent: createElement("div"),
+      image: image,
+      projectId: this.projectId,
+    });
+
     return createElement("div", { class: "help-content" }, [
       createElement("h1", {}, image.original_name),
+      createElement("hr"),
+      createElement("h2", {}, "Associated Records"),
+      associatedRecordsComponent.domComponent,
       createElement("hr"),
       createElement("h2", {}, "Change Folder"),
       folderSelectElem,
@@ -155,7 +162,7 @@ export default class TableSidebarImageComponent {
       createElement("button", { class: "btn-red" }, "Delete Image", {
         type: "click",
         event: (e) => {
-          this.removeImageFromTableAndSidebar(image, tableImage, imageElem);
+          this.removeImageFromTableAndSidebar(image, imageElem);
           modal.hide();
         },
       }),
@@ -333,5 +340,83 @@ export default class TableSidebarImageComponent {
       ),
       this.imagesListContainer
     );
+  };
+}
+
+class AssociatedRecordsComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.image = props.image;
+    this.projectId = props.projectId;
+
+    this.render();
+  }
+
+  createNewRecord = async () => {
+    const title = this.image.original_name.includes(".")
+      ? this.image.original_name.split(".")[0]
+      : this.image.original_name;
+
+    const data = {
+      title: title,
+      description: this.image.description
+        ? this.image.description
+        : "Placeholder text...",
+      is_public: false,
+    };
+
+    let newRecord = null;
+
+    if (this.projectId) {
+      newRecord = await postThing(
+        `/api/add_record_by_project/${this.projectId}`,
+        data
+      );
+    } else {
+      newRecord = await postThing("/api/add_record_by_user", data);
+    }
+
+    if (newRecord) {
+      // make recordimage with this.image
+      await postThing("/api/add_record_image", {
+        record_id: newRecord.id,
+        image_id: this.image.id,
+      });
+
+      // update data and render
+      this.image.records.push(newRecord);
+      this.render();
+    }
+  };
+
+  renderListOrCreateNew = () => {
+    if (this.image.records.length) {
+      return createElement("div", {}, [
+        ...this.image.records.map((rec) => {
+          const href = this.projectId
+            ? `/record?id=${rec.id}&project_id=${this.projectId}`
+            : `/record?id=${rec.id}`;
+          return createElement(
+            "a",
+            { href: href, rel: "noopener noreferrer", target: "_blank" },
+            rec.title
+          );
+        }),
+      ]);
+    } else {
+      return createElement("div", {}, [
+        createElement("div", {}, "None..."),
+        createElement("button", {}, "Create Record", {
+          type: "click",
+          event: () => this.createNewRecord(),
+        }),
+      ]);
+    }
+  };
+
+  render = () => {
+    this.domComponent.innerHTML = "";
+
+    this.domComponent.append(this.renderListOrCreateNew());
   };
 }

@@ -44,7 +44,7 @@ import {
   newImageForProject,
   newImageForUser,
   editImageName,
-  getSignedUrlsForDownloads,
+  getSignedUrlsHandler,
   editImageNotes,
 } from "./controllers/s3.js";
 // for uploading files
@@ -165,6 +165,13 @@ import {
 
 // multer
 import * as multer from "multer";
+import {
+  addRecordImage,
+  getRecordImage,
+  getRecordImagesByImage,
+  getRecordImagesByRecord,
+  removeRecordImageByImage,
+} from "./controllers/recordImage.js";
 const upload = multer({ dest: "file_uploads/" });
 
 //csrf use
@@ -186,7 +193,7 @@ router.post(
 
 // s3
 router.get("/get_image/:id", getImage);
-router.post("/signed_URL_download_multi", getSignedUrlsForDownloads);
+router.post("/signed_URL_download_multi", getSignedUrlsHandler);
 router.post(
   "/new_image_for_project",
   upload.single("file"),
@@ -212,6 +219,16 @@ router.get("/get_records_by_user/:user_id", getRecordsByUser);
 router.get("/get_records_by_project/:project_id", getRecordsByProject);
 router.post("/edit_record/:id", editRecord);
 router.delete("/remove_record/:id", removeRecord);
+
+// record image
+router.post("/add_record_image", addRecordImage);
+router.get("/get_record_image/:id", getRecordImage);
+router.get("/get_record_images_by_record/:record_id", getRecordImagesByRecord);
+router.get("/get_record_images_by_image/:image_id", getRecordImagesByImage);
+router.delete(
+  "/remove_record_image_by_image/:image_id",
+  removeRecordImageByImage
+);
 
 // table folders
 router.post("/add_table_folder_by_user", addTableFolderByUser);
@@ -246,7 +263,7 @@ router.get(
 );
 router.post("/add_table_image_by_project", addTableImageByProject);
 router.post("/add_table_image_by_user", addTableImageByUser);
-router.delete("/remove_table_image/:id", removeTableImage);
+// router.delete("/remove_table_image/:id", removeTableImage);
 router.post("/edit_table_image/:id", editTableImage);
 
 // project players

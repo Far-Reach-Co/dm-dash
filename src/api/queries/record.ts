@@ -1,6 +1,6 @@
 import db from "../dbconfig";
 
-interface Record {
+export interface Record {
   id: number
   title: string
   description: string

@@ -36,6 +36,9 @@ import {
   getRecordsByProjectQuery,
   getRecordsByUserQuery,
 } from "./api/queries/record";
+import { getRecordImagesByRecordQuery } from "./api/queries/recordImage";
+import { getImageQuery, Image } from "./api/queries/images";
+import { getSignedUrls } from "./api/controllers/s3";
 
 // init csrf
 const csrf = require("csurf");
@@ -609,6 +612,20 @@ router.get(
       const data = await getRecordQuery(recordId);
       const record = data.rows[0];
 
+      const recordImageData = await getRecordImagesByRecordQuery(recordId);
+      let imagesFromRecordImages: Image[] = [];
+      let imageUrls: { [key: string]: string } = {};
+      if (recordImageData.rows.length) {
+        imagesFromRecordImages = await Promise.all(
+          recordImageData.rows.map(async (ri) => {
+            const imageData = await getImageQuery(ri.image_id);
+            return imageData.rows[0];
+          })
+        );
+        imageUrls = await getSignedUrls(imagesFromRecordImages);
+        console.log(imageUrls);
+      }
+
       // render non wyrld public or not
       if (!req.query.project_id) {
         let is_author = Number(userId) == Number(record.user_id);
@@ -622,7 +639,11 @@ router.get(
         }
       }
 
-      res.render("editrecord", { auth: userId, record: record });
+      res.render("editrecord", {
+        auth: userId,
+        record: record,
+        imageUrls: imageUrls,
+      });
     } catch (err) {
       next(err);
     }
@@ -637,8 +658,22 @@ router.get(
       const recordId = req.query.id as string;
       const userId = req.session.user as string;
 
-      const data = await getRecordQuery(recordId);
-      const record = data.rows[0];
+      const recordData = await getRecordQuery(recordId);
+      const record = recordData.rows[0];
+
+      const recordImageData = await getRecordImagesByRecordQuery(recordId);
+      let imagesFromRecordImages: Image[] = [];
+      let imageUrls: { [key: string]: string } = {};
+      if (recordImageData.rows.length) {
+        imagesFromRecordImages = await Promise.all(
+          recordImageData.rows.map(async (ri) => {
+            const imageData = await getImageQuery(ri.image_id);
+            return imageData.rows[0];
+          })
+        );
+        imageUrls = await getSignedUrls(imagesFromRecordImages);
+        console.log(imageUrls);
+      }
 
       // render non wyrld public or not
       if (!req.query.project_id) {
@@ -648,6 +683,7 @@ router.get(
             return res.render("record", {
               auth: userId,
               record: record,
+              imageUrls: imageUrls,
               projectId: null,
               canEdit: true,
             });
@@ -656,6 +692,7 @@ router.get(
           return res.render("record", {
             auth: userId,
             record: record,
+            imageUrls: imageUrls,
             projectId: null,
             canEdit: is_author,
           });
@@ -685,6 +722,7 @@ router.get(
                 return res.render("record", {
                   auth: userId,
                   record: record,
+                  imageUrls: imageUrls,
                   projectId: project.id,
                   canEdit: false,
                 });
@@ -692,6 +730,7 @@ router.get(
               return res.render("record", {
                 auth: userId,
                 record: record,
+                imageUrls: imageUrls,
                 projectId: project.id,
                 canEdit: true,
               });
@@ -701,6 +740,7 @@ router.get(
           return res.render("record", {
             auth: userId,
             record: record,
+            imageUrls: imageUrls,
             projectId: project.id,
             canEdit: is_author,
           });

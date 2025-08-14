@@ -474,6 +474,10 @@ select {
   cursor: pointer;
 }
 
+select:hover {
+  background: linear-gradient(var(--blue2) 10%, var(--blue5) 90%);
+}
+
 textarea {
   padding: 5px;
   height: auto;
@@ -715,7 +719,7 @@ footer {
 
 .toast-custom {
   z-index: 4;
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 10%;
   width: fit-content;

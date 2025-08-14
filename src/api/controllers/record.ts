@@ -8,10 +8,13 @@ import {
   getRecordsByUserQuery,
   removeRecordQuery,
 } from "../queries/record";
+import {
+  getRecordImagesByRecordQuery,
+  removeRecordImageQuery,
+} from "../queries/recordImage";
 
 interface addRecordByUserRequest extends Request {
   body: {
-    user_id: string | number;
     title: string;
     description: string;
     is_public: boolean;
@@ -25,18 +28,15 @@ async function addRecordByUser(
 ) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
-    req.body.user_id = req.session.user;
 
     const data = await addRecordByUserQuery({
-      user_id: req.body.user_id,
+      user_id: req.session.user,
       title: req.body.title,
       description: req.body.description,
       is_public: req.body.is_public ? true : false,
     });
     const record = data.rows[0];
-    res
-      .set("HX-Redirect", `/record?id=${record.id}`)
-      .send("Form submission was successful.");
+    res.status(201).send(record);
   } catch (err) {
     next(err);
   }
@@ -44,7 +44,6 @@ async function addRecordByUser(
 
 interface addRecordByProjectRequest extends Request {
   body: {
-    project_id: string | number;
     title: string;
     description: string;
     is_public: boolean;
@@ -67,12 +66,7 @@ async function addRecordByProject(
       is_public: req.body.is_public ? true : false,
     });
     const record = data.rows[0];
-    res
-      .set(
-        "HX-Redirect",
-        `/record?id=${record.id}&project_id=${req.params.project_id}`
-      )
-      .send("Form submission was successful.");
+    res.status(201).send(record);
   } catch (err) {
     next(err);
   }

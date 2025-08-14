@@ -18,9 +18,23 @@
   <div class="container-fluid info-container p-3">
     <div>
       <h1><%= record.title %></h1>
+      <% if (projectId) { %>
+      <small>- Wyrld Record</small>
+      <% } else { %>
       <small>- Record</small>
+      <% } %>
+      <% if (record.is_public) { %>
+      <small>(Public)</small>
+      <% } %>
     </div>
-    <div id="description" style="white-space: pre-wrap;"></div>
+    <p id="description" style="white-space: pre-wrap;"></p>
+    <div>
+      <% if (imageUrls && Object.keys(imageUrls).length) { %>
+      <% Object.entries(imageUrls).forEach(([key, value]) => { %>
+      <img class="my-2" style="max-width: 90%;" id="img-<%= key %>" src="<%= value %>">
+      <% }) %>
+      <% } %>
+    </div>
     <hr />
     <% if (canEdit) { %>
     <% if (projectId) { %>

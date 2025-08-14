@@ -9,6 +9,9 @@ export default class TopLayer {
     this.domComponent = props.domComponent;
     this.tableApp = props.tableApp;
     this.tableView = props.tableView;
+
+    const searchParams = new URLSearchParams(window.location.search);
+    this.projectId = searchParams.get("project");
   }
 
   renderSelectedObjectInfoElem = async () => {
@@ -20,12 +23,23 @@ export default class TopLayer {
     let displayName = "";
     let imageSrc = "";
     let IdPrefix = "lin";
+    let imageAssociatedRecordTitle = null;
+    let associatedRecordHref = null;
 
     if (obj.imageId) {
       IdPrefix = "img";
       const image = await getThings(`/api/get_image/${obj.imageId}`);
       displayName = truncateString(image.original_name, 12);
       imageSrc = image.src;
+      imageAssociatedRecordTitle =
+        image.records.length && image.records[0].is_public
+          ? truncateString(image.records[0].title, 12)
+          : null;
+      if (imageAssociatedRecordTitle) {
+        associatedRecordHref = this.projectId
+          ? `/record?id=${image.records[0].id}&project_id=${this.projectId}`
+          : `/record?id=${image.records[0].id}`;
+      }
     }
 
     return createElement(
@@ -39,11 +53,29 @@ export default class TopLayer {
         ),
         createElement("div", { style: "display: flex; flex-direction: row;" }, [
           obj.type == "image"
-            ? createElement("img", { src: imageSrc, width: 30, height: 30 })
+            ? createElement("img", {
+                style: "margin-right: 2px;",
+                src: imageSrc,
+                width: 30,
+                height: 30,
+              })
             : createElement("div", { style: "display: none;" }),
-          createElement("small", {}, `"${displayName}"`),
+          imageAssociatedRecordTitle
+            ? createElement(
+                "small",
+                {},
+                createElement(
+                  "a",
+                  {
+                    href: associatedRecordHref,
+                    rel: "noopener noreferrer",
+                    target: "_blank",
+                  },
+                  imageAssociatedRecordTitle
+                )
+              )
+            : createElement("small", {}, `"${displayName}"`),
         ]),
-
         createElement("small", {}, "Aura Color"),
         createElement(
           "div",
