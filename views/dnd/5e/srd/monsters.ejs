@@ -269,7 +269,6 @@
         <!-- Spells Prepared-->
         <%
             const spells = Array.isArray(spellDetails.spells) ? spellDetails.spells : [];
-            const spellsPageBase = 'http://localhost:4000/dnd/5e/srd/spells#'; // or /dnd/5e/srd/spells# 
             const slots  = spellDetails.slots || {};
             const cantrips = spells.filter(spell => Number(spell.level) === 0);
             const level1Spells = spells.filter(spell => Number(spell.level) === 1);
