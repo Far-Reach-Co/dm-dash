@@ -298,4 +298,27 @@ router.get(
   }
 );
 
+router.get(
+  "/5e/srd/monsters",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // get json data
+      const data = fs.readFileSync(
+        path.join(
+          __dirname,
+          "../../public/lib/data/5e-srd-monsters.json"
+        ),
+        "utf8"
+      );
+      res.render("dnd/5e/srd/monsters", {
+        auth: req.session.user,
+        data: JSON.parse(data),
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+
 export default router;
