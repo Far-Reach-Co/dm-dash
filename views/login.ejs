@@ -1,94 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co. | Login</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <%- include('./partials/icons') %>
-  </head>
-  <%- include('./partials/google') %>
-  <body>
-    <%- include('./partials/nav') %>
-    <div class="container-fluid info-container p-3">
-      <form id="login-form">
-        <fieldset>
-          <legend>Login</legend>
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <div class="input-container">
-            <label for="email">Email</label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              placeholder="name@whatever.com"
-              required
-            />
-          </div>
-          <br />
-          <div class="input-container">
-            <label for="email">Password</label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              placeholder="password"
-              required
-            />
-          </div>
-          <br />
-          <br />
-          <button type="submit">Login</button>
-        </fieldset>
-      </form>
-      <br />
-      <small>Don't have an account?</small>
-      <a onclick=" window.location.pathname = '/register' "
-        ><small>Register</small></a
-      >
-      <small>Forgot your password?</small>
-      <a href="/forgotpassword"><small>Forgot Password</small></a>
-    </div>
-    <%- include('./partials/footer') %>
-  </body>
-  <script>
-    document.getElementById("login-form").addEventListener("submit", login);
-    async function login(e) {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const formProps = Object.fromEntries(formData);
-      try {
-        const res = await fetch(`/api/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formProps),
-        });
-        const resData = await res.json();
-        if (res.status === 200) {
-          if (resData.message) console.log(resData.message);
-          // if invite UUID in params push to invite page
-          var searchParams = new URLSearchParams(window.location.search);
-          var inviteUUID = searchParams.get("invite");
-          if (inviteUUID) {
-            return (window.location.pathname = "/invite");
-          }
-          // else push to account page
-          window.location.pathname = "/dash";
-        } else if (res.status === 400) {
-          alert(resData.message);
-        } else if (res.status === 403) {
-          alert(resData.error.message);
-        } else if (res.status === 429) {
-          alert(resData.message);
-        } else {
-          throw resData.error;
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Login</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid info-container p-3">
+    <form id="login-form">
+      <fieldset>
+        <legend>Login</legend>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="input-container">
+          <label for="email">Email</label>
+          <input type="email" name="email" id="email" placeholder="name@whatever.com" required />
+        </div>
+        <br />
+        <div class="input-container">
+          <label for="email">Password</label>
+          <input type="password" name="password" id="password" placeholder="password" required />
+        </div>
+        <br />
+        <br />
+        <button type="submit">Login</button>
+      </fieldset>
+    </form>
+    <br />
+    <small>Don't have an account?</small>
+    <a onclick=" window.location.pathname = '/register' "><small>Register</small></a>
+    <small>Forgot your password?</small>
+    <a href="/forgotpassword"><small>Forgot Password</small></a>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+<script>
+  document.getElementById("login-form").addEventListener("submit", login);
+  async function login(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const formProps = Object.fromEntries(formData);
+    try {
+      const res = await fetch(`/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(formProps),
+      });
+      const resData = await res.json();
+      if (res.status === 200) {
+        if (resData.message) console.log(resData.message);
+        // if invite UUID in params push to invite page
+        var searchParams = new URLSearchParams(window.location.search);
+        var inviteUUID = searchParams.get("invite");
+        if (inviteUUID) {
+          return (window.location.pathname = "/invite");
         }
-      } catch (err) {
-        alert("Failed to login");
-        console.log(err);
+        // else push to account page
+        window.location.pathname = "/dash";
+      } else if (res.status === 400) {
+        alert(resData.message);
+      } else if (res.status === 403) {
+        alert(resData.error.message);
+      } else if (res.status === 429) {
+        alert(resData.message);
+      } else {
+        throw resData.error;
       }
+    } catch (err) {
+      alert("Failed to login");
+      console.log(err);
     }
-  </script>
+  }
+</script>
+
 </html>

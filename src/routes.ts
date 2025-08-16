@@ -74,6 +74,13 @@ router.get(
   csrfMiddleware,
   (req: Request, res: Response, next: NextFunction) => {
     try {
+      // Invalidate old session cookie
+      res.clearCookie("frcsession", {
+        path: "/",
+        sameSite: "lax",
+        secure: true,
+      });
+
       //
       const csrfToken = req.csrfToken();
       res.render("login", { auth: req.session.user, csrfToken });
