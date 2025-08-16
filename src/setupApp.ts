@@ -52,7 +52,7 @@ if (isProd) {
         tableName: "session",
       }),
       secret: SECRET_KEY || "",
-      name: "frcsession",
+      name: "frc_session",
       resave: false,
       saveUninitialized: false,
       cookie: {

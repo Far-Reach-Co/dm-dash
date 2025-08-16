@@ -91,7 +91,12 @@ function registerUser(req, res, next) {
             });
             yield (0, tableViews_js_1.addTableViewByUserQuery)({ user_id: data.id, title: "First Table" });
             req.session.user = data.id;
-            res.status(201).send({ message: "Successful registration" });
+            req.session.save((err) => {
+                if (err) {
+                    return next(err);
+                }
+                res.status(201).send({ message: "Successful registration" });
+            });
             index_js_1.default.sendMessage({
                 user: data,
                 title: "Welcome",
@@ -122,7 +127,12 @@ function loginUser(req, res, next) {
                 const validPassword = yield (0, bcrypt_1.compare)(password, user.password);
                 if (validPassword) {
                     req.session.user = user.id;
-                    res.status(200).send({ message: "Successful Login" });
+                    req.session.save((err) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        res.status(200).send({ message: "Successful Login" });
+                    });
                 }
                 else
                     return res.status(400).json({ message: "Invalid Password" });

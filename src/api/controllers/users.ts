@@ -132,7 +132,12 @@ async function registerUser(
 
     // login
     req.session.user = data.id;
-    res.status(201).send({ message: "Successful registration" });
+    req.session.save((err) => {
+      if (err) {
+        return next(err);
+      }
+      res.status(201).send({ message: "Successful registration" });
+    });
     // send welcome email
     mail.sendMessage({
       user: data,
@@ -175,7 +180,12 @@ async function loginUser(
       const validPassword = await compare(password, user.password);
       if (validPassword) {
         req.session.user = user.id;
-        res.status(200).send({ message: "Successful Login" });
+        req.session.save((err) => {
+          if (err) {
+            return next(err);
+          }
+          res.status(200).send({ message: "Successful Login" });
+        });
       } else return res.status(400).json({ message: "Invalid Password" });
     }
   } catch (err) {

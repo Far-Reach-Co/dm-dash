@@ -51,6 +51,11 @@ router.get("/index", (req, res, next) => {
 });
 router.get("/login", csrfMiddleware, (req, res, next) => {
     try {
+        res.clearCookie("frcsession", {
+            path: "/",
+            sameSite: "lax",
+            secure: true,
+        });
         const csrfToken = req.csrfToken();
         res.render("login", { auth: req.session.user, csrfToken });
     }

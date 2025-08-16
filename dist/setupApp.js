@@ -36,7 +36,7 @@ if (config_1.isProd) {
             tableName: "session",
         }),
         secret: config_1.SECRET_KEY || "",
-        name: "frcsession",
+        name: "frc_session",
         resave: false,
         saveUninitialized: false,
         cookie: {
