@@ -9,42 +9,42 @@
 
 <url>
   <loc>https://farreachco.com/</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>1.00</priority>
 </url>
 <url>
   <loc>https://farreachco.com/resources</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://farreachco.com/login</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://farreachco.com/index</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://farreachco.com/terms-of-use</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://farreachco.com/privacy-policy</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://farreachco.com/attributions</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.80</priority>
 </url>
 <url>
   <loc>https://farreachco.com/preaethrend</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
@@ -64,17 +64,17 @@
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/contents</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://farreachco.com/aether-bot</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
   <loc>https://farreachco.com/forgotpassword</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.64</priority>
 </url>
 <url>
@@ -109,57 +109,62 @@
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/ability-scores</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/alignments</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/classes</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/conditions</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/damage-types</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/equipment</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/languages</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
+  <priority>0.51</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/monsters</loc>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/races</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/skills</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/spells</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 <url>
   <loc>https://farreachco.com/dnd/5e/srd/weapon-properties</loc>
-  <lastmod>2023-10-04T19:57:21+00:00</lastmod>
+  <lastmod>2025-08-19T22:53:06+00:00</lastmod>
   <priority>0.51</priority>
 </url>
 
