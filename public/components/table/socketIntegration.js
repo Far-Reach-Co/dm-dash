@@ -42,6 +42,14 @@ class SocketIntegration {
       }
     });
 
+    this.socket.on("object-change-layer", (id) => {
+      this.tableApp.canvasLayer.canvas.getObjects().forEach((object) => {
+        if (object.id === id) {
+          this.tableApp.canvasLayer.placeObjectOnLayer(object);
+        }
+      });
+    });
+
     // UPDATE CURRENT USERS
     this.socket.on("current-users", (list) => {
       this.tableApp.sidebar.onlineUsersComponent.usersList = list;
@@ -212,6 +220,13 @@ class SocketIntegration {
     this.socket.emit("image-moved", {
       table: `table-${this.tableApp.tableId}`,
       image,
+    });
+  };
+
+  objectChangeLayer = (id) => {
+    this.socket.emit("object-changed-layer", {
+      table: `table-${this.tableApp.tableId}`,
+      id,
     });
   };
 

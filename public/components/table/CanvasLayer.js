@@ -417,39 +417,74 @@ export default class CanvasLayer {
             this.canvas.remove(subObj);
             socketIntegration.imageRemoved(subObj.id);
           }
+          return this.saveToDatabase();
+        } else {
+          this.canvas.remove(object);
+          socketIntegration.imageRemoved(object.id);
+          return this.saveToDatabase();
         }
-        this.canvas.remove(object);
-        socketIntegration.imageRemoved(object.id);
-        this.saveToDatabase();
       });
     }
   };
 
+  moveObjectToTop = () => {
+    if (this.canvas.getActiveObjects().length) {
+      this.canvas.getActiveObjects().forEach((object) => {
+        // if (object.hasOwnProperty("_objects")) {
+        //   for (var subObj of object._objects) {
+        //     //
+        //   }
+        // }
+        this.placeObjectOnLayer(object);
+        socketIntegration.objectChangeLayer(object.id);
+        return this.saveToDatabase();
+      });
+    }
+  };
+
+  // Also can be used to place image at top of layer
   placeObjectOnLayer = (obj) => {
+    const objects = this.canvas.getObjects();
+
     switch (obj.layer) {
-      case "Map":
-        const gridObjectIndex = this.gridManager.getIndexInCanvas();
-        obj.moveTo(gridObjectIndex);
+      case "Map": {
+        const grid = this.gridManager.gridGroup;
+        const gridIndex = this.gridManager.getIndexInCanvas();
+
+        // Step 1: Insert object at gridIndex
+        obj.moveTo(gridIndex);
+
+        // Step 2: Reassert grid above
+        grid.moveTo(gridIndex + 1);
         break;
+      }
 
-      case "Object":
-        // Move the new image to the highest index below the fog layer
-        const fogObjects = this.canvas
-          .getObjects()
-          .filter((obj) => obj.layer === "Fog");
-        const lowestFogIndex =
-          fogObjects.length > 0
-            ? this.canvas.getObjects().indexOf(fogObjects[0])
-            : this.canvas.getObjects().length;
-        obj.moveTo(lowestFogIndex);
+      case "Object": {
+        const all = this.canvas.getObjects();
+
+        // Find highest "Object" sibling
+        const topObjectIndex = all.reduce(
+          (max, o, i) => (o !== obj && o.layer === "Object" ? i : max),
+          -1
+        );
+
+        if (topObjectIndex != -1) {
+          const topObject = this.canvas.item(topObjectIndex);
+          obj.moveTo(topObjectIndex);
+
+          topObject.moveTo(topObjectIndex - 1);
+        } else {
+          const gridIndex = this.gridManager.getIndexInCanvas();
+          obj.moveTo(gridIndex + 1);
+        }
 
         break;
+      }
 
-      case "Fog":
-        // Move the new image to the very top (highest layer index)
-        obj.moveTo(this.canvas.getObjects().length - 1);
-
+      case "Fog": {
+        obj.moveTo(objects.length);
         break;
+      }
     }
   };
 
