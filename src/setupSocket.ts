@@ -76,7 +76,7 @@ export default function setupSocketHandlers(
 
     socket.on(
       "image-removed",
-      ({ table, id }: { table: string; id: string | number }) => {
+      ({ table, id }: { table: string; id: string }) => {
         socket.broadcast.to(table).emit("image-remove", id);
       }
     );
@@ -85,6 +85,13 @@ export default function setupSocketHandlers(
       "image-moved",
       ({ table, image }: { table: string; image: any }) => {
         socket.broadcast.to(table).emit("image-move", image);
+      }
+    );
+
+    socket.on(
+      "object-changed-layer",
+      ({ table, id }: { table: string; id: string }) => {
+        socket.broadcast.to(table).emit("object-change-layer", id);
       }
     );
 

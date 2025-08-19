@@ -310,27 +310,37 @@ export default class TopLayer {
     );
   };
 
-  renderRemoveImageBtn = () => {
-    return createElement(
-      "div",
-      { class: "table-config remove-image-btn-elem" },
-      [
-        createElement(
-          "button",
-          {
-            title: "Remove the selected object from the table",
-            class: "btn-red",
+  renderImageOptions = () => {
+    return createElement("div", { class: "table-config image-options-elem" }, [
+      createElement(
+        "button",
+        {
+          title: "Remove the selected object from the table",
+          class: "btn-red",
+        },
+        "🗑️",
+        {
+          type: "click",
+          event: () => {
+            this.tableApp.canvasLayer.removeObjects();
           },
-          "🗑️",
-          {
-            type: "click",
-            event: () => {
-              this.tableApp.canvasLayer.removeObjects();
-            },
-          }
-        ),
-      ]
-    );
+        }
+      ),
+      createElement(
+        "button",
+        {
+          title: "Move the selected object to the top of its layer",
+          class: "",
+        },
+        "↑",
+        {
+          type: "click",
+          event: () => {
+            this.tableApp.canvasLayer.moveObjectToTop();
+          },
+        }
+      ),
+    ]);
   };
 
   renderDrawColorAndWidthPicker = () => {
@@ -489,14 +499,14 @@ export default class TopLayer {
                 "While object(s) are selected, press delete key to remove object(s) from table."
               ),
               createElement("br"),
-              // createElement("b", {}, "Control (⌃) + m"),
-              // createElement("br"),
-              // createElement(
-              //   "small",
-              //   {},
-              //   "*GM only* While object(s) are selected, pressing ctrl + m will change the layer that the object(s) are currently on."
-              // ),
-              // createElement("br"),
+              createElement("b", {}, "Control (⌃) + t"),
+              createElement("br"),
+              createElement(
+                "small",
+                {},
+                "While object(s) are selected, pressing ctrl + t will change the layer that the object(s) are currently on."
+              ),
+              createElement("br"),
               createElement("b", {}, "Control (⌃) + d"),
               createElement("br"),
               createElement(
@@ -605,7 +615,7 @@ export default class TopLayer {
       this.renderDrawColorAndWidthPicker(),
       this.renderLayersElem(),
       this.renderGridControlElem(),
-      this.renderRemoveImageBtn(),
+      this.renderImageOptions(),
       this.renderInfoMenu()
     );
     // append this after since it waits

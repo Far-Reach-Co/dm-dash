@@ -47,6 +47,9 @@ function setupSocketHandlers(server) {
         socket.on("image-moved", ({ table, image }) => {
             socket.broadcast.to(table).emit("image-move", image);
         });
+        socket.on("object-changed-layer", ({ table, id }) => {
+            socket.broadcast.to(table).emit("object-change-layer", id);
+        });
         socket.on("indicator-animation", ({ table, x, y, }) => {
             socket.broadcast.to(table).emit("run-indicator-animation", { x, y });
         });

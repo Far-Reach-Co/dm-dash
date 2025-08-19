@@ -61,7 +61,9 @@
   left: 160px;
 }
 
-.remove-image-btn-elem {
+.image-options-elem {
+  display: flex;
+  flex-direction: row;
   width: 103px;
   top: 8px;
   left: 50px;

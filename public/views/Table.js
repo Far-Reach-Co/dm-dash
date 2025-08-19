@@ -143,6 +143,11 @@ class Table {
       if (e.ctrlKey && e.key == "d") {
         this.canvasLayer.duplicateObject();
       }
+
+      // move to top
+      if (e.ctrlKey && e.key == "t") {
+        this.canvasLayer.moveObjectToTop();
+      }
     });
 
     document.addEventListener("keyup", (e) => {
