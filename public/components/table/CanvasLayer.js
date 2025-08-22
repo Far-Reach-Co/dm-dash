@@ -442,6 +442,32 @@ export default class CanvasLayer {
     }
   };
 
+  centerViewOnObject = (obj) => {
+    const canvasCenter = {
+      x: this.canvas.getWidth() / 2,
+      y: this.canvas.getHeight() / 2,
+    };
+
+    const zoom = this.canvas.getZoom();
+    const objCenter = obj.getCenterPoint();
+
+    const panX = canvasCenter.x - objCenter.x * zoom;
+    const panY = canvasCenter.y - objCenter.y * zoom;
+
+    this.canvas.setViewportTransform([zoom, 0, 0, zoom, panX, panY]);
+    this.canvas.renderAll();
+  };
+
+  selectObjectById = (id) => {
+    this.canvas.getObjects().forEach((obj) => {
+      if (id == obj.id) {
+        this.canvas.discardActiveObject();
+        this.canvas.setActiveObject(obj);
+        this.centerViewOnObject(obj);
+      }
+    });
+  };
+
   // Also can be used to place image at top of layer
   placeObjectOnLayer = (obj) => {
     const objects = this.canvas.getObjects();

@@ -423,43 +423,44 @@ export default class TopLayer {
 
   renderCanvasObjectList = (canvasObjectList) => {
     return canvasObjectList.map((obj, index) => {
-      console.log(obj);
+      let IdPrefix = "lin";
+      if (obj.imageId) {
+        IdPrefix = "img";
+      }
       if (!obj.id) {
         return createElement("div", { style: "display: none;" });
       }
-      return createElement("div", {}, [
-        createElement(
-          "div",
-          { class: "canvas-log-item" },
-          `${index} ${JSON.stringify(obj.id)}`,
-          [
-            {
-              type: "mouseenter",
-              event: () => {
-                obj.set({
-                  shadow: {
-                    color: "yellow",
-                    blur: 30,
-                    offsetX: 0,
-                    offsetY: 0,
-                  },
-                });
-                this.tableApp.canvasLayer.canvas.renderAll();
-              },
-            },
-            {
-              type: "mouseleave",
-              event: () => {
-                obj.set({
-                  shadow: null,
-                });
-                this.tableApp.canvasLayer.canvas.renderAll();
-              },
-            },
-          ]
-        ),
-        createElement("br"),
-      ]);
+
+      return createElement(
+        "div",
+        {
+          class: "canvas-log-item",
+          style:
+            "display: flex; flex-direction: row; justify-content: space-between;",
+        },
+        [
+          createElement(
+            "div",
+            {},
+            `${index} ${IdPrefix}-${truncateString(obj.id, 8, "")}`
+          ),
+          createElement("img", {
+            src: this.tableApp.sidebar.tableSidebarImageComponent
+              .downloadedImageSourceList[obj.imageId]
+              ? this.tableApp.sidebar.tableSidebarImageComponent
+                  .downloadedImageSourceList[obj.imageId]
+              : "",
+            style: "width: 30px; height: 30px;",
+          }),
+          createElement("br"),
+        ],
+        {
+          type: "click",
+          event: (e) => {
+            this.tableApp.canvasLayer.selectObjectById(obj.id);
+          },
+        }
+      );
     });
   };
 
@@ -473,6 +474,30 @@ export default class TopLayer {
         event: () => {
           modal.show(
             createElement("div", { class: "help-content" }, [
+              createElement("br"),
+              createElement("h1", {}, "Canvas Log"),
+              createElement("button", {}, "Open Log", {
+                type: "click",
+                event: (e) => {
+                  const canvasObjectsList =
+                    this.tableApp.canvasLayer.canvas.getObjects();
+                  modal.show(
+                    createElement("div", { class: "help-content" }, [
+                      createElement("h1", {}, "Canvas Log"),
+                      createElement("hr"),
+                      createElement("h2", {}, "Objects List"),
+                      createElement("hr"),
+                      createElement(
+                        "div",
+                        { style: "overflow: auto; height: 300px;" },
+                        [...this.renderCanvasObjectList(canvasObjectsList)]
+                      ),
+                    ])
+                  );
+                },
+              }),
+              createElement("br"),
+              createElement("br"),
               createElement("h1", {}, "Key Commands"),
               createElement("hr"),
               createElement("b", {}, "Option/Alt (⌥)"),
@@ -514,30 +539,11 @@ export default class TopLayer {
                 {},
                 "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original."
               ),
-              // createElement("br"),
-              // createElement("b", {}, "Canvas Log"),
-              // createElement("br"),
-              // createElement("button", {}, "Open Log", {
-              //   type: "click",
-              //   event: (e) => {
-              //     const canvasObjectsList =
-              //       this.tableApp.canvasLayer.canvas.getObjects();
-              //     modal.show(
-              //       createElement("div", { class: "help-content" }, [
-              //         createElement("h1", {}, "Canvas Log"),
-              //         createElement("hr"),
-              //         createElement("h2", {}, "Objects List"),
-              //         createElement("hr"),
-              //         ...this.renderCanvasObjectList(canvasObjectsList),
-              //       ])
-              //     );
-              //   },
-              // }),
               createElement("br"),
               createElement("br"),
               createElement("h1", {}, "Chat '/' Commands"),
               createElement("hr"),
-              createElement("h2", {}, "/roll <input>"),
+              createElement("h2", {}, "/roll *input*"),
               createElement(
                 "small",
                 {},
