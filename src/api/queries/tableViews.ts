@@ -1,12 +1,13 @@
 import db from "../dbconfig";
 
 interface TableView {
-  id: number,
-  project_id: number,
-  user_id: number,
-  data: {[key: string]: any},
+  id: number
+  project_id: number
+  user_id: number
+  data: {[key: string]: any}
   date_created: string
   title: string
+  is_public: boolean
 }
 
 async function addTableViewByProjectQuery(data: {project_id: string | number, title: string}) {

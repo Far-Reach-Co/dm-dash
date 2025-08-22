@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTableViewTitle = exports.editTableViewData = exports.removeTableView = exports.getTableView = exports.getTableViewByUUID = exports.getTableViewsByProject = exports.getTableViewsByUser = exports.addTableViewByUser = exports.addTableViewByProject = void 0;
+exports.editTableView = exports.editTableViewData = exports.removeTableView = exports.getTableView = exports.getTableViewByUUID = exports.getTableViewsByProject = exports.getTableViewsByUser = exports.addTableViewByUser = exports.addTableViewByProject = void 0;
 const tableViews_js_1 = require("../queries/tableViews.js");
 function addTableViewByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -123,12 +123,10 @@ function editTableViewData(req, res, next) {
     });
 }
 exports.editTableViewData = editTableViewData;
-function editTableViewTitle(req, res, next) {
+function editTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = yield (0, tableViews_js_1.editTableViewQuery)(req.params.id, {
-                title: req.body.title,
-            });
+            const data = yield (0, tableViews_js_1.editTableViewQuery)(req.params.id, req.body);
             res.status(200).send(data.rows[0]);
         }
         catch (err) {
@@ -136,4 +134,4 @@ function editTableViewTitle(req, res, next) {
         }
     });
 }
-exports.editTableViewTitle = editTableViewTitle;
+exports.editTableView = editTableView;

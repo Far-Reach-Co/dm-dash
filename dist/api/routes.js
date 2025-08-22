@@ -70,7 +70,7 @@ router.post("/add_table_view_by_project/:project_id", tableViews_js_1.addTableVi
 router.post("/add_table_view_by_user", tableViews_js_1.addTableViewByUser);
 router.delete("/remove_table_view/:id", tableViews_js_1.removeTableView);
 router.post("/edit_table_view_data/:id", tableViews_js_1.editTableViewData);
-router.post("/edit_table_view_title/:id", tableViews_js_1.editTableViewTitle);
+router.post("/edit_table_view/:id", tableViews_js_1.editTableView);
 router.get("/get_table_images_by_table_project/:table_id", tableImages_js_1.getTableImagesByTableProject);
 router.get("/get_table_images_by_table_user/:table_id", tableImages_js_1.getTableImagesByTableUser);
 router.post("/add_table_image_by_project", tableImages_js_1.addTableImageByProject);

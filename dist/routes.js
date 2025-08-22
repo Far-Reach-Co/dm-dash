@@ -732,7 +732,21 @@ router.get("/vtt", (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         }
         const table = tableData.rows[0];
         if (!table.project_id) {
-            return res.render("vtt", { auth: req.session.user, projectAuth: false });
+            if (table.is_public) {
+                return res.render("vtt", {
+                    auth: req.session.user,
+                    projectAuth: false,
+                });
+            }
+            else if (table.user_id === req.session.user) {
+                return res.render("vtt", {
+                    auth: req.session.user,
+                    projectAuth: false,
+                });
+            }
+            else {
+                return res.render("forbidden", { auth: req.session.user });
+            }
         }
         const projectData = yield (0, projects_1.getProjectQuery)(table.project_id);
         if (!projectData.rows.length) {
@@ -750,6 +764,17 @@ router.get("/vtt", (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             return res.render("forbidden", { auth: req.session.user });
         }
         const projectUser = projectUserData.rows[0];
+        if (!projectUser.is_editor) {
+            if (!table.is_public) {
+                return res.render("forbidden", { auth: req.session.user });
+            }
+            else {
+                return res.render("vtt", {
+                    auth: req.session.user,
+                    projectAuth: projectUser.is_editor,
+                });
+            }
+        }
         return res.render("vtt", {
             auth: req.session.user,
             projectAuth: projectUser.is_editor,
