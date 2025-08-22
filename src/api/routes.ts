@@ -111,7 +111,7 @@ import {
   getTableViewsByUser,
   addTableViewByProject,
   editTableViewData,
-  editTableViewTitle,
+  editTableView,
 } from "./controllers/tableViews.js";
 import {
   addPlayerInvite,
@@ -250,7 +250,7 @@ router.post("/add_table_view_by_project/:project_id", addTableViewByProject);
 router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view_data/:id", editTableViewData);
-router.post("/edit_table_view_title/:id", editTableViewTitle);
+router.post("/edit_table_view/:id", editTableView);
 
 // table images
 router.get(

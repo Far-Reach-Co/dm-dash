@@ -352,64 +352,80 @@ export default class TableSidebar {
       createElement("hr"),
       createElement("h2", {}, "Details"),
       createElement("div", {}, [
-        createElement(
-          "form",
-          {},
-          [
-            createElement("div", { class: "input-container" }, [
-              createElement(
-                "label",
-                {
-                  for: "title",
-                  class: "me-1",
-                },
-                "Edit Title"
-              ),
-              createElement("input", {
-                value: this.tableView.title,
-                name: "title",
-                id: "title",
-                required: true,
-              }),
-            ]),
-            createElement("br"),
-            createElement("button", { class: "new-btn me-1" }, "Save"),
-            createElement("small", {
-              class: "success-message",
-              id: "title-update-success",
-            }),
-          ],
-          {
-            type: "submit",
-            event: (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const formProps = Object.fromEntries(formData);
-              const res = postThing(
-                `/api/edit_table_view_title/${this.tableView.id}`,
-                {
-                  title: formProps.title,
-                }
-              );
-              if (res) {
-                // update success message
-                const titleUpdateMessageElem = document.querySelector(
-                  "#title-update-success"
-                );
-                titleUpdateMessageElem.innerText = "Saved!";
-                // remove after 3 seconds
-                setTimeout(() => {
-                  titleUpdateMessageElem.innerText = "";
-                }, 3000); // 10seconds
-                // update table title on sidebar
-                document.querySelector("#table-display-title").innerText =
-                  formProps.title;
-                // update local tableState just in case
-                this.tableView.title = formProps.title;
-              }
+        createElement("div", { class: "input-container" }, [
+          createElement(
+            "label",
+            {
+              for: "title",
+              class: "me-1",
             },
-          }
-        ),
+            "Edit Title"
+          ),
+          createElement("input", {
+            value: this.tableView.title,
+            name: "title",
+            id: "title-input",
+          }),
+        ]),
+        createElement("br"),
+        createElement("div", { style: "display: flex; align-items: center;" }, [
+          createElement(
+            "small",
+            {
+              style: "color: var(--orange2); font-weight: bold;",
+              class: "me-1",
+            },
+            "Make Public"
+          ),
+          this.tableView.is_public
+            ? createElement("input", {
+                type: "checkbox",
+                name: "is_public",
+                id: "is_public-input",
+                checked: true,
+              })
+            : createElement("input", {
+                type: "checkbox",
+                name: "is_public",
+                id: "is_public-input",
+              }),
+        ]),
+        createElement("br"),
+        createElement("button", { class: "new-btn me-1" }, "Save", {
+          type: "click",
+          event: (e) => {
+            e.preventDefault();
+            const titleInput = document.getElementById("title-input");
+            const is_publicInput = document.getElementById("is_public-input");
+
+            const res = postThing(`/api/edit_table_view/${this.tableView.id}`, {
+              title: titleInput.value,
+              is_public: is_publicInput.checked,
+            });
+            if (res) {
+              // update success message
+              const titleUpdateMessageElem = document.querySelector(
+                "#title-update-success"
+              );
+              titleUpdateMessageElem.innerText = "Saved!";
+              // remove after 3 seconds
+              setTimeout(() => {
+                titleUpdateMessageElem.innerText = "";
+              }, 3000); // 10seconds
+              // update table title on sidebar
+              document.querySelector("#table-display-title").innerText =
+                titleInput.value;
+              // update local tableState just in case
+              this.tableView.title = titleInput.value;
+              this.tableView.is_public = is_publicInput.checked;
+            }
+          },
+        }),
+        createElement("small", {
+          class: "success-message",
+          id: "title-update-success",
+        }),
+
         createElement("hr"),
         createElement("button", { class: "btn-red" }, "Delete Table", {
           type: "click",

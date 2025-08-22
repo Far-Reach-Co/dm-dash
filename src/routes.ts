@@ -911,10 +911,23 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
     // check if table belongs to project
     const table = tableData.rows[0];
     if (!table.project_id) {
-      return res.render("vtt", { auth: req.session.user, projectAuth: false });
+      // is public?
+      if (table.is_public) {
+        return res.render("vtt", {
+          auth: req.session.user,
+          projectAuth: false,
+        });
+      } else if (table.user_id === req.session.user) {
+        return res.render("vtt", {
+          auth: req.session.user,
+          projectAuth: false,
+        });
+      } else {
+        return res.render("forbidden", { auth: req.session.user });
+      }
     }
 
-    // if table does not exist
+    // if project exists by id
     const projectData = await getProjectQuery(table.project_id);
     if (!projectData.rows.length) {
       return res.render("404", { auth: req.session.user });
@@ -940,7 +953,21 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
       // send to forbidden
       return res.render("forbidden", { auth: req.session.user });
     }
+
     const projectUser = projectUserData.rows[0];
+
+    // check if public or editor
+    if (!projectUser.is_editor) {
+      if (!table.is_public) {
+        return res.render("forbidden", { auth: req.session.user });
+      } else {
+        return res.render("vtt", {
+          auth: req.session.user,
+          projectAuth: projectUser.is_editor,
+        });
+      }
+    }
+
     return res.render("vtt", {
       auth: req.session.user,
       projectAuth: projectUser.is_editor,

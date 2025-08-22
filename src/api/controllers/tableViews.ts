@@ -130,15 +130,9 @@ async function editTableViewData(
   }
 }
 
-async function editTableViewTitle(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+async function editTableView(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await editTableViewQuery(req.params.id, {
-      title: req.body.title,
-    });
+    const data = await editTableViewQuery(req.params.id, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -154,5 +148,5 @@ export {
   getTableView,
   removeTableView,
   editTableViewData,
-  editTableViewTitle,
+  editTableView,
 };
