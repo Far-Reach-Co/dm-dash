@@ -1,50 +1,42 @@
-export function calculateDiceRollResponse(input: string) {
-  // INIT Input and clean
-  input = input.trim().toLowerCase();
+export function calculateDiceRollResponse(input: string): string {
+  const raw = input.trim().toLowerCase();
 
-  // get amount of dice
-  const amountOfDice = parseInt(input.split("d", 2)[0].trim());
-  // get dice sides
-  let diceSides: any = input.split("d", 2)[1];
-  if (diceSides.includes("+")) {
-    diceSides = diceSides.split("+", 2)[0].trim();
-  }
-  diceSides = parseInt(diceSides);
-  // get modifiers
-  let modifiers: any;
-  if (input.includes("+")) {
-    modifiers = input.split("+");
-    modifiers.shift();
-    for (var i = 0; i < modifiers.length; i++) {
-      modifiers[i] = parseInt(modifiers[i]);
-    }
-  }
-  // get dice rolls
-  let diceRolls = [];
-  for (var i = 0; i < amountOfDice; i++) {
-    const newValue = Math.floor(Math.random() * diceSides + 1);
-    diceRolls.push(newValue);
+  // Match "<amount>d<sides>" plus modifiers
+  const coreMatch = raw.match(/^(\d+)\s*d\s*(\d+)(.*)?$/);
+  if (!coreMatch) {
+    return `Invalid dice notation: "${input}". Try like "2d6+3" or "1d20-2".`;
   }
 
-  // CALCULATE TOTAL
-  // Add modifiers
-  let total = 0; // ******************** TOTAL ******************************
-  for (var i = 0; i < diceRolls.length; i++) {
-    total += diceRolls[i];
+  const amount = parseInt(coreMatch[1], 10);
+  const sides = parseInt(coreMatch[2], 10);
+  const tail = (coreMatch[3] || "").trim();
+
+  // Parse modifiers, tolerate spaces like "+ 4 - 2"
+  const modifierMatches = tail.match(/[+-]\s*\d+/g) || [];
+  const modifiers = modifierMatches.map(
+    (m) => parseInt(m.replace(/\s+/g, ""), 10) // remove spaces before parsing
+  );
+
+  // Roll dice
+  const rolls: number[] = [];
+  for (let i = 0; i < amount; i++) {
+    rolls.push(Math.floor(Math.random() * sides) + 1);
   }
-  if (modifiers) {
-    for (var i = 0; i < modifiers.length; i++) {
-      total += modifiers[i];
-    }
-  }
-  // Display Information
-  let responseInfo = "";
-  responseInfo += `"/roll" Input: ${input}`;
-  diceRolls.forEach((roll, index) => {
-    let diceInfoString = `\nRoll ${index + 1}: ${roll}`;
-    if (roll === diceSides) diceInfoString += " - *CRITICAL*";
-    responseInfo += diceInfoString;
+
+  // Totals
+  const rollSum = rolls.reduce((a, b) => a + b, 0);
+  const modSum = modifiers.reduce((a, b) => a + b, 0);
+  const total = rollSum + modSum;
+
+  // Build string response
+  let response = `"/roll" Input: ${raw}`;
+  rolls.forEach((r, i) => {
+    response += `\nRoll ${i + 1}: ${r}${r === sides ? " - *CRITICAL*" : ""}`;
   });
-  responseInfo += `\nTOTAL = ${total}`;
-  return responseInfo;
+  if (modifiers.length) {
+    response += `\nModifiers: ${modifierMatches.join(" ")}`;
+  }
+  response += `\nTOTAL = ${total}`;
+
+  return response;
 }
