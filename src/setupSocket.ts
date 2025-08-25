@@ -138,14 +138,22 @@ export default function setupSocketHandlers(
 
           // Handle special message cases here including / commands:
           if (content.startsWith("/")) {
-            const slashCmdArr = content.slice(1).split(" ");
-            const [command, ...args] = slashCmdArr;
+            // remove leading "/" and split once for command; keep the tail intact
+            const match = content.match(/^\/(\w+)\s*(.*)$/);
+            const command = match?.[1]?.toLowerCase();
+            const tail = (match?.[2] || "").trim(); // everything after the command
+
             switch (command) {
-              // Dice rolling message
-              case "roll": // Should only take 1 argument
-                const diceRes = calculateDiceRollResponse(slashCmdArr[1]);
+              case "roll": {
+                if (!tail) {
+                  content =
+                    "Usage: /roll <NdS[ +/- modifiers]>\nEx: /roll 2d6 + 4 + 2";
+                  break;
+                }
+                const diceRes = calculateDiceRollResponse(tail);
                 content = diceRes;
                 break;
+              }
               default:
                 content = `Unknown command: /${command}`;
             }

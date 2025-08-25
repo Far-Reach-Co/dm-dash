@@ -60,6 +60,7 @@ function setupSocketHandlers(server) {
             }
         }));
         socket.on("new-message", ({ table, content }) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             try {
                 const user = yield (0, socketUsers_js_1.getCurrentUser)(socket.id);
                 if (!user) {
@@ -67,13 +68,20 @@ function setupSocketHandlers(server) {
                     return;
                 }
                 if (content.startsWith("/")) {
-                    const slashCmdArr = content.slice(1).split(" ");
-                    const [command, ...args] = slashCmdArr;
+                    const match = content.match(/^\/(\w+)\s*(.*)$/);
+                    const command = (_a = match === null || match === void 0 ? void 0 : match[1]) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+                    const tail = ((match === null || match === void 0 ? void 0 : match[2]) || "").trim();
                     switch (command) {
-                        case "roll":
-                            const diceRes = (0, dice_js_1.calculateDiceRollResponse)(slashCmdArr[1]);
+                        case "roll": {
+                            if (!tail) {
+                                content =
+                                    "Usage: /roll <NdS[ +/- modifiers]>\nEx: /roll 2d6 + 4 + 2";
+                                break;
+                            }
+                            const diceRes = (0, dice_js_1.calculateDiceRollResponse)(tail);
                             content = diceRes;
                             break;
+                        }
                         default:
                             content = `Unknown command: /${command}`;
                     }

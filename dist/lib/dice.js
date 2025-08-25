@@ -2,44 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.calculateDiceRollResponse = void 0;
 function calculateDiceRollResponse(input) {
-    input = input.trim().toLowerCase();
-    const amountOfDice = parseInt(input.split("d", 2)[0].trim());
-    let diceSides = input.split("d", 2)[1];
-    if (diceSides.includes("+")) {
-        diceSides = diceSides.split("+", 2)[0].trim();
+    const raw = input.trim().toLowerCase();
+    const coreMatch = raw.match(/^(\d+)\s*d\s*(\d+)(.*)?$/);
+    if (!coreMatch) {
+        return `Invalid dice notation: "${input}". Try like "2d6+3" or "1d20-2".`;
     }
-    diceSides = parseInt(diceSides);
-    let modifiers;
-    if (input.includes("+")) {
-        modifiers = input.split("+");
-        modifiers.shift();
-        for (var i = 0; i < modifiers.length; i++) {
-            modifiers[i] = parseInt(modifiers[i]);
-        }
+    const amount = parseInt(coreMatch[1], 10);
+    const sides = parseInt(coreMatch[2], 10);
+    const tail = (coreMatch[3] || "").trim();
+    const modifierMatches = tail.match(/[+-]\s*\d+/g) || [];
+    const modifiers = modifierMatches.map((m) => parseInt(m.replace(/\s+/g, ""), 10));
+    const rolls = [];
+    for (let i = 0; i < amount; i++) {
+        rolls.push(Math.floor(Math.random() * sides) + 1);
     }
-    let diceRolls = [];
-    for (var i = 0; i < amountOfDice; i++) {
-        const newValue = Math.floor(Math.random() * diceSides + 1);
-        diceRolls.push(newValue);
-    }
-    let total = 0;
-    for (var i = 0; i < diceRolls.length; i++) {
-        total += diceRolls[i];
-    }
-    if (modifiers) {
-        for (var i = 0; i < modifiers.length; i++) {
-            total += modifiers[i];
-        }
-    }
-    let responseInfo = "";
-    responseInfo += `"/roll" Input: ${input}`;
-    diceRolls.forEach((roll, index) => {
-        let diceInfoString = `\nRoll ${index + 1}: ${roll}`;
-        if (roll === diceSides)
-            diceInfoString += " - *CRITICAL*";
-        responseInfo += diceInfoString;
+    const rollSum = rolls.reduce((a, b) => a + b, 0);
+    const modSum = modifiers.reduce((a, b) => a + b, 0);
+    const total = rollSum + modSum;
+    let response = `"/roll" Input: ${raw}`;
+    rolls.forEach((r, i) => {
+        response += `\nRoll ${i + 1}: ${r}${r === sides ? " - *CRITICAL*" : ""}`;
     });
-    responseInfo += `\nTOTAL = ${total}`;
-    return responseInfo;
+    if (modifiers.length) {
+        response += `\nModifiers: ${modifierMatches.join(" ")}`;
+    }
+    response += `\nTOTAL = ${total}`;
+    return response;
 }
 exports.calculateDiceRollResponse = calculateDiceRollResponse;
