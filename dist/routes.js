@@ -38,12 +38,15 @@ router.get("/", (req, res, next) => {
 });
 router.get("/index", (req, res, next) => {
     try {
-        if (req.session.user) {
-            res.redirect("/dash");
-        }
-        else {
-            res.render("index", { auth: req.session.user });
-        }
+        res.render("index", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/about-us", (req, res, next) => {
+    try {
+        res.render("aboutus", { auth: req.session.user });
     }
     catch (err) {
         next(err);

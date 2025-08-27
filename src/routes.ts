@@ -58,12 +58,15 @@ router.get("/", (req: Request, res: Response, next: NextFunction) => {
 
 router.get("/index", (req: Request, res: Response, next: NextFunction) => {
   try {
-    //
-    if (req.session.user) {
-      res.redirect("/dash");
-    } else {
-      res.render("index", { auth: req.session.user });
-    }
+    res.render("index", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/about-us", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.render("aboutus", { auth: req.session.user });
   } catch (err) {
     next(err);
   }
