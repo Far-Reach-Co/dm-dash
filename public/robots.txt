@@ -1,0 +1,24 @@
+# robots.txt for Far Reach Co.
+
+# Allow all crawlers including AI/LLM crawlers
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://farreachco.com/sitemap.xml
+
+# Allow specific AI crawlers (explicit welcome)
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
