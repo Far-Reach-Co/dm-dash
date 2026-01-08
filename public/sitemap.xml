@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+      xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+<!-- Main Public Pages -->
+<url>
+  <loc>https://farreachco.com/</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/about-us</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/what-is-frc</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/resources</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/aether-bot</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.70</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/preaethrend</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>monthly</changefreq>
+  <priority>0.70</priority>
+</url>
+
+<!-- D&D 5E SRD Pages - High Priority Content -->
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/contents</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/spells</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/monsters</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/classes</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/races</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/equipment</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.90</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/skills</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/conditions</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/damage-types</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.80</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/languages</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.70</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/weapon-properties</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.70</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/alignments</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.70</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/dnd/5e/srd/ability-scores</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.70</priority>
+</url>
+
+<!-- Character Sheet PDFs -->
+<url>
+  <loc>https://farreachco.com/assets/resources/character_sheets/CharSheetPeli_v01.pdf</loc>
+  <lastmod>2023-08-25T20:25:21+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.60</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/assets/resources/character_sheets/CharSheetNOPeli_v02.pdf</loc>
+  <lastmod>2023-08-25T20:25:21+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.60</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/assets/resources/character_sheets/CharSheetNOPeliNOBkgd_v03.pdf</loc>
+  <lastmod>2023-08-25T20:25:21+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.60</priority>
+</url>
+
+<!-- Aethrend Resources -->
+<url>
+  <loc>https://farreachco.com/assets/resources/aethrend/pdf/Aethrend_Background_SkySailor_v1.pdf</loc>
+  <lastmod>2023-08-26T13:40:03+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.50</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/assets/resources/aethrend/pdf/Aethrend_Item_BlindfoldOfInvisibility_v1.pdf</loc>
+  <lastmod>2023-08-26T13:40:03+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.50</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/assets/resources/aethrend/pdf/Aethrend_Monstrosity_Geshling_Newborn_v1.pdf</loc>
+  <lastmod>2023-08-26T13:40:03+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.50</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/assets/resources/aethrend/pdf/Aethrend_NPC_T'wan_v1.pdf</loc>
+  <lastmod>2023-09-05T15:01:42+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.50</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/assets/resources/aethrend/pdf/Aethrend_Beast_Fudduddle_Re_Leaf_San_v1.pdf</loc>
+  <lastmod>2023-09-05T15:01:42+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.50</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/assets/resources/aethrend/pdf/Aethrend_Dragon_Aether_Young_Adult_v1.pdf</loc>
+  <lastmod>2023-09-05T15:01:42+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.50</priority>
+</url>
+
+<!-- Legal Pages -->
+<url>
+  <loc>https://farreachco.com/terms-of-use</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.30</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/privacy-policy</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.30</priority>
+</url>
+<url>
+  <loc>https://farreachco.com/attributions</loc>
+  <lastmod>2024-08-19T22:53:06+00:00</lastmod>
+  <changefreq>yearly</changefreq>
+  <priority>0.50</priority>
+</url>
+
+</urlset>

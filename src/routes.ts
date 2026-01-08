@@ -72,6 +72,14 @@ router.get("/about-us", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get("/what-is-frc", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.render("what-is-frc", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get(
   "/login",
   csrfMiddleware,
