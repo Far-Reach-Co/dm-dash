@@ -11,6 +11,7 @@ import {
 import { Request, Response, NextFunction } from "express";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { getUserByIdQuery } from "../queries/users.js";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 async function addTableViewByProject(
   req: Request,
@@ -20,9 +21,17 @@ async function addTableViewByProject(
   try {
     if (!req.session.user) throw new Error("User is not logged in");
 
-    await addTableViewByProjectQuery({
+    const data = await addTableViewByProjectQuery({
       title: req.body.title,
       project_id: req.params.project_id,
+    });
+    // Log table creation event
+    logEventAsync({
+      userId: req.session.user,
+      projectId: req.params.project_id,
+      eventType: EventType.TABLE_CREATED,
+      eventData: { tableId: data.rows[0].id, title: req.body.title },
+      req,
     });
     res
       .set("HX-Redirect", `/wyrld?id=${req.params.project_id}`)
@@ -40,7 +49,14 @@ async function addTableViewByUser(
   try {
     if (!req.session.user) throw new Error("User is not logged in");
     req.body.user_id = req.session.user;
-    await addTableViewByUserQuery(req.body);
+    const data = await addTableViewByUserQuery(req.body);
+    // Log table creation event
+    logEventAsync({
+      userId: req.session.user,
+      eventType: EventType.TABLE_CREATED,
+      eventData: { tableId: data.rows[0].id, title: req.body.title },
+      req,
+    });
     res.set("HX-Redirect", `/dash`).send("Form submission was successful.");
   } catch (err) {
     next(err);

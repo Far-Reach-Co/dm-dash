@@ -100,7 +100,6 @@ This script will:
 2. Wait for the initial compilation
 3. Start the Rollup bundler for frontend JavaScript
 4. Start the Express server with nodemon (auto-restart on changes)
-5. Automatically run pending database migrations
 
 The server will be available at `http://localhost:4000`
 
@@ -125,13 +124,19 @@ npm run migrate:create <migration_title>
 This creates a new SQL migration file in the `migrations/` directory.
 
 ### Run migrations
-Migrations are automatically run when using `start_dev.sh` or `start_prod.sh`.
-
-To manually run migrations:
+Before starting the server for the first time, or after creating new migrations, run:
 ```bash
 npm run migrate:up       # Apply all pending migrations
 npm run migrate:down     # Rollback the last migration
 npm run migrate:redo     # Rollback and reapply the last migration
+```
+
+### Analytics View
+
+The `monthly_log_events_summary` view provides monthly event statistics:
+
+```sql
+SELECT * FROM monthly_log_events_summary WHERE month >= '2026-01-01';
 ```
 
 ## Project Structure

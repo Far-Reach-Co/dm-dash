@@ -10,6 +10,7 @@ import {
 } from "../queries/playerUsers.js";
 import { User, getUserByIdQuery } from "../queries/users.js";
 import { Request, Response, NextFunction } from "express";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 async function addPlayerUser(req: Request, res: Response, next: NextFunction) {
   try {
@@ -23,7 +24,18 @@ async function addPlayerUser(req: Request, res: Response, next: NextFunction) {
     }
 
     const data = await addPlayerUserQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    const playerUser = data.rows[0];
+    // Log player user creation event
+    logEventAsync({
+      userId: req.session.user,
+      eventType: EventType.PLAYER_USER_CREATED,
+      eventData: {
+        playerUserId: playerUser.id,
+        playerId: req.body.player_id,
+      },
+      req,
+    });
+    res.status(201).json(playerUser);
   } catch (err) {
     next(err);
   }

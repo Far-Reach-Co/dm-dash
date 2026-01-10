@@ -21,6 +21,7 @@ import fs = require("fs");
 import { megabytesInBytes } from "../../lib/enums";
 import { getRecordImagesByImageQuery } from "../queries/recordImage";
 import { getRecordQuery, Record } from "../queries/record";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 config.update({
   signatureVersion: "v4",
@@ -264,6 +265,18 @@ async function newImageForProject(
         resolve(data.Location);
       });
     });
+    // Log image upload event
+    logEventAsync({
+      userId: req.session.user,
+      projectId: req.body.project_id,
+      eventType: EventType.IMAGE_UPLOADED,
+      eventData: {
+        imageId: image.id,
+        fileName: image.original_name,
+        fileSize: image.size,
+      },
+      req,
+    });
     // send back to client
     res.send(image);
   } catch (err) {
@@ -365,6 +378,17 @@ async function newImageForUser(
         }
         resolve(data.Location);
       });
+    });
+    // Log image upload event
+    logEventAsync({
+      userId: req.session.user,
+      eventType: EventType.IMAGE_UPLOADED,
+      eventData: {
+        imageId: image.id,
+        fileName: image.original_name,
+        fileSize: image.size,
+      },
+      req,
     });
     // send back to client
     res.send(image);
@@ -476,6 +500,18 @@ async function removeImageByProject(
     await editProjectQuery(project.id, {
       used_data_in_bytes: newCalculatedData,
     });
+    // Log image deletion event
+    logEventAsync({
+      userId: req.session.user,
+      projectId: req.params.project_id,
+      eventType: EventType.IMAGE_DELETED,
+      eventData: {
+        imageId: req.params.image_id,
+        fileName: image.original_name,
+        fileSize: image.size,
+      },
+      req,
+    });
     res.status(204).send();
   } catch (err) {
     console.log(err);
@@ -506,6 +542,17 @@ async function removeImageByTableUser(
     const newCalculatedData = user.used_data_in_bytes - image.size;
     await editUserQuery(user.id, {
       used_data_in_bytes: newCalculatedData,
+    });
+    // Log image deletion event
+    logEventAsync({
+      userId: req.session.user,
+      eventType: EventType.IMAGE_DELETED,
+      eventData: {
+        imageId: req.params.image_id,
+        fileName: image.original_name,
+        fileSize: image.size,
+      },
+      req,
     });
     res.status(204).send();
   } catch (err) {

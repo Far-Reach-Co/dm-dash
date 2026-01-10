@@ -23,6 +23,7 @@ const projectPlayers_1 = require("../queries/projectPlayers");
 const playerUsers_1 = require("../queries/playerUsers");
 const playerInvites_1 = require("../queries/playerInvites");
 const _5eCharClasses_1 = require("../queries/5eCharClasses");
+const eventLogger_1 = require("../../lib/eventLogger");
 function add5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -31,6 +32,12 @@ function add5eChar(req, res, next) {
             const generalId = yield createNew5eChar({
                 user_id: String(req.session.user),
                 name: req.body.name,
+            });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                eventType: eventLogger_1.EventType.DND_5E_CHARACTER_CREATED,
+                eventData: { characterId: generalId, characterName: req.body.name },
+                req,
             });
             res
                 .set("HX-Redirect", `/5eplayer?id=${generalId}`)

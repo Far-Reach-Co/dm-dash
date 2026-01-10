@@ -13,11 +13,20 @@ exports.editCalendar = exports.removeCalendar = exports.addCalendar = exports.ge
 const calendars_js_1 = require("../queries/calendars.js");
 const months_js_1 = require("../queries/months.js");
 const days_js_1 = require("../queries/days.js");
+const eventLogger_1 = require("../../lib/eventLogger");
 function addCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield (0, calendars_js_1.addCalendarQuery)(req.body);
-            res.status(201).json(data.rows[0]);
+            const calendar = data.rows[0];
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                projectId: req.body.project_id,
+                eventType: eventLogger_1.EventType.CALENDAR_CREATED,
+                eventData: { calendarId: calendar.id, title: calendar.title },
+                req,
+            });
+            res.status(201).json(calendar);
         }
         catch (err) {
             next(err);

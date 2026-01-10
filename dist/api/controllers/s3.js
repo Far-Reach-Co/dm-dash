@@ -25,6 +25,7 @@ const fs = require("fs");
 const enums_2 = require("../../lib/enums");
 const recordImage_1 = require("../queries/recordImage");
 const record_1 = require("../queries/record");
+const eventLogger_1 = require("../../lib/eventLogger");
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -170,6 +171,17 @@ function newImageForProject(req, res, next) {
                     resolve(data.Location);
                 });
             });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                projectId: req.body.project_id,
+                eventType: eventLogger_1.EventType.IMAGE_UPLOADED,
+                eventData: {
+                    imageId: image.id,
+                    fileName: image.original_name,
+                    fileSize: image.size,
+                },
+                req,
+            });
             res.send(image);
         }
         catch (err) {
@@ -236,6 +248,16 @@ function newImageForUser(req, res, next) {
                     }
                     resolve(data.Location);
                 });
+            });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                eventType: eventLogger_1.EventType.IMAGE_UPLOADED,
+                eventData: {
+                    imageId: image.id,
+                    fileName: image.original_name,
+                    fileSize: image.size,
+                },
+                req,
             });
             res.send(image);
         }
@@ -312,6 +334,17 @@ function removeImageByProject(req, res, next) {
             yield (0, projects_1.editProjectQuery)(project.id, {
                 used_data_in_bytes: newCalculatedData,
             });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                projectId: req.params.project_id,
+                eventType: eventLogger_1.EventType.IMAGE_DELETED,
+                eventData: {
+                    imageId: req.params.image_id,
+                    fileName: image.original_name,
+                    fileSize: image.size,
+                },
+                req,
+            });
             res.status(204).send();
         }
         catch (err) {
@@ -335,6 +368,16 @@ function removeImageByTableUser(req, res, next) {
             const newCalculatedData = user.used_data_in_bytes - image.size;
             yield (0, users_1.editUserQuery)(user.id, {
                 used_data_in_bytes: newCalculatedData,
+            });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                eventType: eventLogger_1.EventType.IMAGE_DELETED,
+                eventData: {
+                    imageId: req.params.image_id,
+                    fileName: image.original_name,
+                    fileSize: image.size,
+                },
+                req,
             });
             res.status(204).send();
         }

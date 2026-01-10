@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeRecord = exports.editRecord = exports.getRecord = exports.getRecordsByProject = exports.getRecordsByUser = exports.addRecordByUser = exports.addRecordByProject = void 0;
 const record_1 = require("../queries/record");
+const eventLogger_1 = require("../../lib/eventLogger");
 function addRecordByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -23,6 +24,12 @@ function addRecordByUser(req, res, next) {
                 is_public: req.body.is_public ? true : false,
             });
             const record = data.rows[0];
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                eventType: eventLogger_1.EventType.RECORD_CREATED,
+                eventData: { recordId: record.id, title: record.title },
+                req,
+            });
             res.status(201).send(record);
         }
         catch (err) {
@@ -45,6 +52,13 @@ function addRecordByProject(req, res, next) {
                 is_public: req.body.is_public ? true : false,
             });
             const record = data.rows[0];
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                projectId: req.params.project_id,
+                eventType: eventLogger_1.EventType.RECORD_CREATED,
+                eventData: { recordId: record.id, title: record.title },
+                req,
+            });
             res.status(201).send(record);
         }
         catch (err) {

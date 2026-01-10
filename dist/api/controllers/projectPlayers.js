@@ -11,11 +11,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.editProjectPlayer = exports.removeProjectPlayer = exports.getProjectPlayersByPlayer = exports.getProjectPlayersByProject = exports.addProjectPlayer = void 0;
 const projectPlayers_1 = require("../queries/projectPlayers");
+const eventLogger_1 = require("../../lib/eventLogger");
 function addProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield (0, projectPlayers_1.addProjectPlayerQuery)(req.body);
-            res.status(201).json(data.rows[0]);
+            const projectPlayer = data.rows[0];
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                projectId: req.body.project_id,
+                eventType: eventLogger_1.EventType.PROJECT_PLAYER_CREATED,
+                eventData: {
+                    projectPlayerId: projectPlayer.id,
+                    playerId: req.body.player_id,
+                },
+                req,
+            });
+            res.status(201).json(projectPlayer);
         }
         catch (err) {
             next(err);
