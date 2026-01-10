@@ -1,22 +1,157 @@
 # Far Reach Co. Core
 
-## About:
+A comprehensive web application for Far Reach Co., featuring a dashboard, player character sheets, virtual tabletop system, and Discord bot integration (Aether Bot).
 
-This contains the main website for Far Reach Co. which includes the dashboard view, the player character sheets, the virtual table top system and the Aether Bot
+## Tech Stack
 
-The server is built with express and socket.io. It utilizes a postgres db and redis for certain features. Frontend is mostly ejs templates and has a couple vanilla javascript apps which are bundled with rollup. There is also some use of HTMX for forms.
+- **Backend**: Node.js with Express and TypeScript
+- **Frontend**: EJS templates with vanilla JavaScript (bundled via Rollup) and HTMX for forms
+- **Database**: PostgreSQL with node-pg-migrate for migrations
+- **Real-time**: Socket.io with Redis adapter for WebSocket connections
+- **Cloud Services**: AWS S3 and CloudFront for image storage and delivery
+- **Authentication**: Express sessions with PostgreSQL store
+- **Payment**: Stripe integration
+- **Bot**: Discord bot using discord-interactions
 
-There are some core services being utilize including AWS S3 and Cloudfront. Stripe will be integrated soon. The discord bot relies on a package called discord-interactions.
+## Prerequisites
 
-## Setup:
+- Node.js (v14 or higher)
+- PostgreSQL database server
+- Redis server (default: localhost:6379)
+- AWS account with S3 and CloudFront configured
+- Discord bot application (for bot features)
+- Gmail account with App Password (for email features)
 
-- Setup local postgres server using data found in a `.env` which you will need to request
-- Install all the NPM packages: `npm i`
-- Start dev mode: `sh ./commands/start_dev.sh`
-- Build backend dist with TS for production `npm run build`
-- Run prod mode: `sh ./commands/start_prod.sh`
+## Environment Variables
 
-## DB Migration:
+Create a `.env` file in the root directory with the following variables:
 
-you can create a new migration file with `npm migrate:create <title of migration>` which will be in plain SQL.
-Migrations are automatically run with start_dev.sh or start_prod.sh
+### Database Configuration
+```
+PG_USER=your_postgres_username
+PG_HOST=localhost
+PG_DB=your_database_name
+PG_PW=your_postgres_password
+DATABASE_URL=postgres://username:password@localhost:5432/database_name
+```
+
+### Server Configuration
+```
+SERVER_ENV=dev                              # Options: dev, prod
+SECRET_KEY=your_random_secret_key           # Used for session encryption
+```
+
+### Email Configuration (Gmail SMTP)
+```
+MAIL_USERNAME=your_gmail@gmail.com
+MAIL_PASSWORD=your_gmail_app_password       # Generate from Google Account settings
+```
+
+### AWS Configuration
+```
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+CLOUDFRONT_DISTRIBUTION_DOMAIN=your_cloudfront_domain.cloudfront.net
+CLOUDFRONT_KEY_ID=your_cloudfront_key_id
+```
+Note: You'll also need a `private_frc_cloudfront_key.pem` file in the root directory for CloudFront signed URLs.
+
+### Stripe Configuration
+```
+FRC_STRIPE_TEST=sk_test_your_stripe_test_key
+```
+
+### Discord Bot Configuration
+```
+BOT_APP_ID=your_discord_bot_app_id
+BOT_PUBLIC_KEY=your_discord_bot_public_key
+DISCORD_TOKEN=your_discord_bot_token
+```
+
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Set up your PostgreSQL database:
+   - Create a new database matching your `PG_DB` value
+   - Ensure PostgreSQL is running and accessible
+
+4. Set up Redis:
+   - Install and start Redis server on localhost:6379
+   - Or modify `src/setupRedisAdapter.ts` to use a different Redis URL
+
+5. Create your `.env` file with the required environment variables (see above)
+
+6. Add your CloudFront private key file: `private_frc_cloudfront_key.pem`
+
+## Development
+
+Start the development server:
+```bash
+sh ./commands/start_dev.sh
+```
+
+This script will:
+1. Run TypeScript compiler in watch mode
+2. Wait for the initial compilation
+3. Start the Rollup bundler for frontend JavaScript
+4. Start the Express server with nodemon (auto-restart on changes)
+5. Automatically run pending database migrations
+
+The server will be available at `http://localhost:4000`
+
+## Production
+
+1. Build the TypeScript code:
+   ```bash
+   npm run build
+   ```
+
+2. Start the production server:
+   ```bash
+   sh ./commands/start_prod.sh
+   ```
+
+## Database Migrations
+
+### Create a new migration
+```bash
+npm run migrate:create <migration_title>
+```
+This creates a new SQL migration file in the `migrations/` directory.
+
+### Run migrations
+Migrations are automatically run when using `start_dev.sh` or `start_prod.sh`.
+
+To manually run migrations:
+```bash
+npm run migrate:up       # Apply all pending migrations
+npm run migrate:down     # Rollback the last migration
+npm run migrate:redo     # Rollback and reapply the last migration
+```
+
+## Project Structure
+
+```
+.
+├── commands/           # Shell scripts for development and production
+├── dist/              # Compiled TypeScript output
+├── file_uploads/      # Temporary file storage for uploads
+├── migrations/        # Database migration files (SQL)
+├── public/            # Static assets (CSS, client-side JS bundles)
+├── src/               # TypeScript source code
+│   ├── api/          # API routes, controllers, and queries
+│   ├── lib/          # Shared utilities and services
+│   ├── config.ts     # Environment configuration
+│   ├── server.ts     # Main server entry point
+│   ├── setupApp.ts   # Express app configuration
+│   ├── setupSocket.ts # Socket.io setup
+│   └── setupRedisAdapter.ts # Redis adapter for Socket.io
+├── views/             # EJS templates
+├── .env              # Environment variables (not in git)
+└── tsconfig.json     # TypeScript configuration
+```
