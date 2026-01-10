@@ -8,6 +8,7 @@ import {
   getRecordsByUserQuery,
   removeRecordQuery,
 } from "../queries/record";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 interface addRecordByUserRequest extends Request {
   body: {
@@ -32,6 +33,13 @@ async function addRecordByUser(
       is_public: req.body.is_public ? true : false,
     });
     const record = data.rows[0];
+    // Log record creation event
+    logEventAsync({
+      userId: req.session.user,
+      eventType: EventType.RECORD_CREATED,
+      eventData: { recordId: record.id, title: record.title },
+      req,
+    });
     res.status(201).send(record);
   } catch (err) {
     next(err);
@@ -62,6 +70,14 @@ async function addRecordByProject(
       is_public: req.body.is_public ? true : false,
     });
     const record = data.rows[0];
+    // Log record creation event
+    logEventAsync({
+      userId: req.session.user,
+      projectId: req.params.project_id,
+      eventType: EventType.RECORD_CREATED,
+      eventData: { recordId: record.id, title: record.title },
+      req,
+    });
     res.status(201).send(record);
   } catch (err) {
     next(err);

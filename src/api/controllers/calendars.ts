@@ -9,11 +9,21 @@ import {
 import { Month, getMonthsQuery, removeMonthQuery } from "../queries/months.js";
 import { Day, getDaysQuery, removeDayQuery } from "../queries/days.js";
 import { Request, Response, NextFunction } from "express";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 async function addCalendar(req: Request, res: Response, next: NextFunction) {
   try {
     const data = await addCalendarQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    const calendar = data.rows[0];
+    // Log calendar creation event
+    logEventAsync({
+      userId: req.session.user,
+      projectId: req.body.project_id,
+      eventType: EventType.CALENDAR_CREATED,
+      eventData: { calendarId: calendar.id, title: calendar.title },
+      req,
+    });
+    res.status(201).json(calendar);
   } catch (err) {
     next(err);
   }

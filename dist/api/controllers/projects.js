@@ -23,6 +23,7 @@ const tableImages_js_1 = require("../queries/tableImages.js");
 const projectPlayers_js_1 = require("../queries/projectPlayers.js");
 const users_js_1 = require("../queries/users.js");
 const enums_js_1 = require("../../lib/enums.js");
+const eventLogger_1 = require("../../lib/eventLogger");
 function addProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -39,6 +40,13 @@ function addProject(req, res, next) {
             yield (0, tableViews_js_1.addTableViewByProjectQuery)({
                 project_id: data.rows[0].id,
                 title: "First Wyrld Table",
+            });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                projectId: data.rows[0].id,
+                eventType: eventLogger_1.EventType.PROJECT_CREATED,
+                eventData: { title: data.rows[0].title },
+                req,
             });
             res
                 .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)

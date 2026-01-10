@@ -48,6 +48,7 @@ import {
   removePlayerInviteQuery,
 } from "../queries/playerInvites";
 import { duplicate5eCharClassesQuery } from "../queries/5eCharClasses";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 interface add5eCharRequest extends Request {
   body: {
@@ -66,6 +67,13 @@ async function add5eChar(
     const generalId = await createNew5eChar({
       user_id: String(req.session.user),
       name: req.body.name,
+    });
+    // Log character creation event
+    logEventAsync({
+      userId: req.session.user,
+      eventType: EventType.DND_5E_CHARACTER_CREATED,
+      eventData: { characterId: generalId, characterName: req.body.name },
+      req,
     });
     // HTMX redirect
     res

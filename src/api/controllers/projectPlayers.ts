@@ -6,6 +6,7 @@ import {
   getProjectPlayersByPlayerQuery,
 } from "../queries/projectPlayers";
 import { Request, Response, NextFunction } from "express";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 async function addProjectPlayer(
   req: Request,
@@ -14,7 +15,19 @@ async function addProjectPlayer(
 ) {
   try {
     const data = await addProjectPlayerQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    const projectPlayer = data.rows[0];
+    // Log project player creation event
+    logEventAsync({
+      userId: req.session.user,
+      projectId: req.body.project_id,
+      eventType: EventType.PROJECT_PLAYER_CREATED,
+      eventData: {
+        projectPlayerId: projectPlayer.id,
+        playerId: req.body.player_id,
+      },
+      req,
+    });
+    res.status(201).json(projectPlayer);
   } catch (err) {
     next(err);
   }

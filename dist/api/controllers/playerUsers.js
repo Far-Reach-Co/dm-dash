@@ -13,6 +13,7 @@ exports.editPlayerUser = exports.removePlayerUsersByPlayer = exports.removePlaye
 const _5eCharGeneral_js_1 = require("../queries/5eCharGeneral.js");
 const playerUsers_js_1 = require("../queries/playerUsers.js");
 const users_js_1 = require("../queries/users.js");
+const eventLogger_1 = require("../../lib/eventLogger");
 function addPlayerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -24,7 +25,17 @@ function addPlayerUser(req, res, next) {
                 throw { message: "User is owner" };
             }
             const data = yield (0, playerUsers_js_1.addPlayerUserQuery)(req.body);
-            res.status(201).json(data.rows[0]);
+            const playerUser = data.rows[0];
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                eventType: eventLogger_1.EventType.PLAYER_USER_CREATED,
+                eventData: {
+                    playerUserId: playerUser.id,
+                    playerId: req.body.player_id,
+                },
+                req,
+            });
+            res.status(201).json(playerUser);
         }
         catch (err) {
             next(err);

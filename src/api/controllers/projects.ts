@@ -38,6 +38,7 @@ import {
 } from "../queries/projectPlayers.js";
 import { getUserByIdQuery } from "../queries/users.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 interface addProjectRequest extends Request {
   body: {
@@ -67,6 +68,14 @@ async function addProject(
     await addTableViewByProjectQuery({
       project_id: data.rows[0].id,
       title: "First Wyrld Table",
+    });
+    // Log project creation event
+    logEventAsync({
+      userId: req.session.user,
+      projectId: data.rows[0].id,
+      eventType: EventType.PROJECT_CREATED,
+      eventData: { title: data.rows[0].title },
+      req,
     });
     res
       .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)

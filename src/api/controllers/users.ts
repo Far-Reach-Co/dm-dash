@@ -17,6 +17,7 @@ import {
   addTableViewByUserQuery,
 } from "../queries/tableViews.js";
 import { validationResult } from "express-validator";
+import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 // I had to put this somewhere
 declare module "express-session" {
@@ -136,6 +137,13 @@ async function registerUser(
       if (err) {
         return next(err);
       }
+      // Log registration event
+      logEventAsync({
+        userId: data.id,
+        eventType: EventType.USER_REGISTERED,
+        eventData: { email: data.email, username: data.username },
+        req,
+      });
       res.status(201).send({ message: "Successful registration" });
     });
     // send welcome email
@@ -165,7 +173,7 @@ async function loginUser(
   try {
     const email = req.body.email.toLowerCase();
     const password = req.body.password;
-    let user;
+    let user: any;
 
     const userEmailData = await getUserByEmailQuery(email);
 
@@ -184,6 +192,12 @@ async function loginUser(
           if (err) {
             return next(err);
           }
+          // Log login event
+          logEventAsync({
+            userId: user.id,
+            eventType: EventType.USER_LOGIN,
+            req,
+          });
           res.status(200).send({ message: "Successful Login" });
         });
       } else return res.status(400).json({ message: "Invalid Password" });

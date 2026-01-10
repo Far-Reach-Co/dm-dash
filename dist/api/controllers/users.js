@@ -17,6 +17,7 @@ const users_1 = require("../queries/users");
 const projects_1 = require("../queries/projects");
 const tableViews_js_1 = require("../queries/tableViews.js");
 const express_validator_1 = require("express-validator");
+const eventLogger_1 = require("../../lib/eventLogger");
 function generateAccessToken(id, expires) {
     return (0, jsonwebtoken_1.sign)({ id }, process.env.SECRET_KEY, { expiresIn: expires });
 }
@@ -95,6 +96,12 @@ function registerUser(req, res, next) {
                 if (err) {
                     return next(err);
                 }
+                (0, eventLogger_1.logEventAsync)({
+                    userId: data.id,
+                    eventType: eventLogger_1.EventType.USER_REGISTERED,
+                    eventData: { email: data.email, username: data.username },
+                    req,
+                });
                 res.status(201).send({ message: "Successful registration" });
             });
             index_js_1.default.sendMessage({
@@ -131,6 +138,11 @@ function loginUser(req, res, next) {
                         if (err) {
                             return next(err);
                         }
+                        (0, eventLogger_1.logEventAsync)({
+                            userId: user.id,
+                            eventType: eventLogger_1.EventType.USER_LOGIN,
+                            req,
+                        });
                         res.status(200).send({ message: "Successful Login" });
                     });
                 }

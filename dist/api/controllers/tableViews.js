@@ -11,14 +11,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.editTableView = exports.editTableViewData = exports.removeTableView = exports.getTableView = exports.getTableViewByUUID = exports.getTableViewsByProject = exports.getTableViewsByUser = exports.addTableViewByUser = exports.addTableViewByProject = void 0;
 const tableViews_js_1 = require("../queries/tableViews.js");
+const eventLogger_1 = require("../../lib/eventLogger");
 function addTableViewByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
-            yield (0, tableViews_js_1.addTableViewByProjectQuery)({
+            const data = yield (0, tableViews_js_1.addTableViewByProjectQuery)({
                 title: req.body.title,
                 project_id: req.params.project_id,
+            });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                projectId: req.params.project_id,
+                eventType: eventLogger_1.EventType.TABLE_CREATED,
+                eventData: { tableId: data.rows[0].id, title: req.body.title },
+                req,
             });
             res
                 .set("HX-Redirect", `/wyrld?id=${req.params.project_id}`)
@@ -36,7 +44,13 @@ function addTableViewByUser(req, res, next) {
             if (!req.session.user)
                 throw new Error("User is not logged in");
             req.body.user_id = req.session.user;
-            yield (0, tableViews_js_1.addTableViewByUserQuery)(req.body);
+            const data = yield (0, tableViews_js_1.addTableViewByUserQuery)(req.body);
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                eventType: eventLogger_1.EventType.TABLE_CREATED,
+                eventData: { tableId: data.rows[0].id, title: req.body.title },
+                req,
+            });
             res.set("HX-Redirect", `/dash`).send("Form submission was successful.");
         }
         catch (err) {
