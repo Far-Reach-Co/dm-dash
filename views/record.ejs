@@ -44,10 +44,11 @@
     <% } %>
     <% } %>
 </body>
+<script type="application/json" id="description-data"><%- JSON.stringify(record.description) %></script>
 <script type="module" defer>
   import parseUrlTextContent from "/components/parseUrlTextContent.js";
   const descElem = document.getElementById("description");
-  const description = `<%= record.description %>`;
+  const description = JSON.parse(document.getElementById("description-data").textContent);
   const elems = parseUrlTextContent(description);
   for (const elem of elems) {
     descElem.appendChild(elem);
