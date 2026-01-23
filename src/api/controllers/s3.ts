@@ -31,6 +31,19 @@ config.update({
 });
 
 const s3 = new S3();
+
+// Cache CloudFront signing credentials at module level (read once on startup)
+const cloudFrontPrivateKeyPath = path.join(
+  __dirname,
+  "..",
+  "..",
+  "..",
+  "private_frc_cloudfront_key.pem"
+);
+const cloudFrontPrivateKey = fs.readFileSync(cloudFrontPrivateKeyPath, "utf8");
+const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
+const cloudFrontSigner = new CloudFront.Signer(cloudFrontKeyId, cloudFrontPrivateKey);
+
 interface GetSignedUrlsRequestObject {
   body: {
     image_ids: (string | number)[];
@@ -54,38 +67,14 @@ async function getSignedUrlsHandler(
 
 async function getSignedUrls(images: Image[]) {
   const urls: { [key: string]: string } = {};
+  const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days from now
 
   for (const imageData of images) {
-    const objectName = imageData.file_name;
-    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${objectName}`;
+    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
 
-    const privateKeyPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "private_frc_cloudfront_key.pem"
-    );
-    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
-    const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
-
-    const signingParams = {
+    urls[imageData.id] = cloudFrontSigner.getSignedUrl({
       url: cloudFrontUrl,
-      expires: Math.floor(
-        (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
-      ), // 3 days from now
-      privateKey: privateKey,
-      keyPairId: cloudFrontKeyId,
-    };
-
-    const signer = new CloudFront.Signer(
-      signingParams.keyPairId,
-      signingParams.privateKey
-    );
-
-    urls[imageData.id] = signer.getSignedUrl({
-      url: signingParams.url,
-      expires: signingParams.expires,
+      expires: expiresAt,
     });
   }
   return urls;
@@ -428,40 +417,15 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
   try {
     const imageData = await getImageQuery(req.params.id);
     const image = imageData.rows[0] as imageDataResObject;
-    // append src url from signed url
-    const objectName = image.file_name;
 
-    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${objectName}`;
-    // CloudFront signing parameters
-    const privateKeyPath = path.join(
-      __dirname,
-      "..",
-      "..",
-      "..",
-      "private_frc_cloudfront_key.pem"
-    );
-    const privateKey = fs.readFileSync(privateKeyPath, "utf8");
-    const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
+    // Generate signed URL using cached signer
+    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
+    const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days from now
 
-    const signingParams = {
+    image.src = cloudFrontSigner.getSignedUrl({
       url: cloudFrontUrl,
-      expires: Math.floor(
-        (new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000
-      ), // 3 days from now
-      privateKey: privateKey,
-      keyPairId: cloudFrontKeyId,
-    };
-
-    const signer = new CloudFront.Signer(
-      signingParams.keyPairId,
-      signingParams.privateKey
-    );
-    const url = signer.getSignedUrl({
-      url: signingParams.url,
-      expires: signingParams.expires,
+      expires: expiresAt,
     });
-
-    image.src = url;
 
     // Get and append recordImage id
     const recordImageData = await getRecordImagesByImageQuery(image.id);
