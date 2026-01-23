@@ -315,7 +315,7 @@ export default class AttackComponent {
       "div",
       {
         class: "cp-input-gen input-small magic-text",
-        style: "margin-right: 5px;",
+        style: "margin-right: 5px; max-width: 150px;",
         contentEditable: "true",
         name: "damage_type",
       },
