@@ -22,6 +22,7 @@ import { megabytesInBytes } from "../../lib/enums";
 import { getRecordImagesByImageQuery } from "../queries/recordImage";
 import { getRecordQuery, Record } from "../queries/record";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import { redisClient } from "../../lib/socketUsers";
 
 config.update({
   signatureVersion: "v4",
@@ -43,6 +44,18 @@ const cloudFrontPrivateKeyPath = path.join(
 const cloudFrontPrivateKey = fs.readFileSync(cloudFrontPrivateKeyPath, "utf8");
 const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
 const cloudFrontSigner = new CloudFront.Signer(cloudFrontKeyId, cloudFrontPrivateKey);
+
+// Signed URL cache settings - cache for 2.5 days (URLs expire in 3 days)
+const SIGNED_URL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 2.5; // 2.5 days
+const SIGNED_URL_CACHE_PREFIX = "signed_url:";
+
+function getSignedUrlCacheKey(imageId: number | string): string {
+  return `${SIGNED_URL_CACHE_PREFIX}${imageId}`;
+}
+
+async function invalidateSignedUrlCache(imageId: number | string): Promise<void> {
+  await redisClient.del(getSignedUrlCacheKey(imageId));
+}
 
 interface GetSignedUrlsRequestObject {
   body: {
@@ -67,16 +80,37 @@ async function getSignedUrlsHandler(
 
 async function getSignedUrls(images: Image[]) {
   const urls: { [key: string]: string } = {};
-  const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days from now
+  const uncachedImages: { id: number | string; url: string }[] = [];
 
+  // Check cache first for all images
   for (const imageData of images) {
-    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
+    const cacheKey = getSignedUrlCacheKey(imageData.id);
+    const cachedUrl = await redisClient.get(cacheKey);
 
-    urls[imageData.id] = cloudFrontSigner.getSignedUrl({
-      url: cloudFrontUrl,
-      expires: expiresAt,
-    });
+    if (cachedUrl) {
+      urls[imageData.id] = cachedUrl;
+    } else {
+      // Generate signed URL
+      const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
+      const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days
+      const signedUrl = cloudFrontSigner.getSignedUrl({
+        url: cloudFrontUrl,
+        expires: expiresAt,
+      });
+      urls[imageData.id] = signedUrl;
+      uncachedImages.push({ id: imageData.id, url: signedUrl });
+    }
   }
+
+  // Cache new URLs in background (don't await)
+  if (uncachedImages.length > 0) {
+    Promise.all(
+      uncachedImages.map(({ id, url }) =>
+        redisClient.setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url)
+      )
+    ).catch((err) => console.error("Failed to cache signed URLs:", err));
+  }
+
   return urls;
 }
 
@@ -293,6 +327,11 @@ async function newImageForProject(
       );
       await removeImageQuery(req.body.current_file_id);
 
+      // Invalidate signed URL cache for replaced image
+      invalidateSignedUrlCache(req.body.current_file_id).catch((err) =>
+        console.error("Failed to invalidate signed URL cache:", err)
+      );
+
       dataUsageCount -= oldImage.size;
     }
     // update project data usage
@@ -418,14 +457,27 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
     const imageData = await getImageQuery(req.params.id);
     const image = imageData.rows[0] as imageDataResObject;
 
-    // Generate signed URL using cached signer
-    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-    const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days from now
+    // Check Redis cache first
+    const cacheKey = getSignedUrlCacheKey(image.id);
+    const cachedUrl = await redisClient.get(cacheKey);
 
-    image.src = cloudFrontSigner.getSignedUrl({
-      url: cloudFrontUrl,
-      expires: expiresAt,
-    });
+    if (cachedUrl) {
+      image.src = cachedUrl;
+    } else {
+      // Generate signed URL using cached signer
+      const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
+      const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days from now
+
+      image.src = cloudFrontSigner.getSignedUrl({
+        url: cloudFrontUrl,
+        expires: expiresAt,
+      });
+
+      // Cache in background
+      redisClient
+        .setEx(cacheKey, SIGNED_URL_CACHE_TTL_SECONDS, image.src)
+        .catch((err) => console.error("Failed to cache signed URL:", err));
+    }
 
     // Get and append recordImage id
     const recordImageData = await getRecordImagesByImageQuery(image.id);
@@ -456,6 +508,11 @@ async function removeImageByProject(
 
     await removeImageFromBucket("wyrld/images", image);
     await removeImageQuery(req.params.image_id);
+
+    // Invalidate signed URL cache
+    invalidateSignedUrlCache(req.params.image_id).catch((err) =>
+      console.error("Failed to invalidate signed URL cache:", err)
+    );
 
     // update project data usage
     const projectData = await getProjectQuery(req.params.project_id);
@@ -495,6 +552,11 @@ async function removeImageByTableUser(
 
     await removeImageFromBucket("wyrld/images", image);
     await removeImageQuery(req.params.image_id);
+
+    // Invalidate signed URL cache
+    invalidateSignedUrlCache(req.params.image_id).catch((err) =>
+      console.error("Failed to invalidate signed URL cache:", err)
+    );
 
     // get table
     const tableData = await getTableViewQuery(req.params.table_id);
