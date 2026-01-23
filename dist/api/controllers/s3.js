@@ -26,6 +26,7 @@ const enums_2 = require("../../lib/enums");
 const recordImage_1 = require("../queries/recordImage");
 const record_1 = require("../queries/record");
 const eventLogger_1 = require("../../lib/eventLogger");
+const socketUsers_1 = require("../../lib/socketUsers");
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -37,6 +38,16 @@ const cloudFrontPrivateKeyPath = path.join(__dirname, "..", "..", "..", "private
 const cloudFrontPrivateKey = fs.readFileSync(cloudFrontPrivateKeyPath, "utf8");
 const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
 const cloudFrontSigner = new aws_sdk_1.CloudFront.Signer(cloudFrontKeyId, cloudFrontPrivateKey);
+const SIGNED_URL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 2.5;
+const SIGNED_URL_CACHE_PREFIX = "signed_url:";
+function getSignedUrlCacheKey(imageId) {
+    return `${SIGNED_URL_CACHE_PREFIX}${imageId}`;
+}
+function invalidateSignedUrlCache(imageId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield socketUsers_1.redisClient.del(getSignedUrlCacheKey(imageId));
+    });
+}
 function getSignedUrlsHandler(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -55,13 +66,26 @@ exports.getSignedUrlsHandler = getSignedUrlsHandler;
 function getSignedUrls(images) {
     return __awaiter(this, void 0, void 0, function* () {
         const urls = {};
-        const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
+        const uncachedImages = [];
         for (const imageData of images) {
-            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
-            urls[imageData.id] = cloudFrontSigner.getSignedUrl({
-                url: cloudFrontUrl,
-                expires: expiresAt,
-            });
+            const cacheKey = getSignedUrlCacheKey(imageData.id);
+            const cachedUrl = yield socketUsers_1.redisClient.get(cacheKey);
+            if (cachedUrl) {
+                urls[imageData.id] = cachedUrl;
+            }
+            else {
+                const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
+                const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
+                const signedUrl = cloudFrontSigner.getSignedUrl({
+                    url: cloudFrontUrl,
+                    expires: expiresAt,
+                });
+                urls[imageData.id] = signedUrl;
+                uncachedImages.push({ id: imageData.id, url: signedUrl });
+            }
+        }
+        if (uncachedImages.length > 0) {
+            Promise.all(uncachedImages.map(({ id, url }) => socketUsers_1.redisClient.setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url))).catch((err) => console.error("Failed to cache signed URLs:", err));
         }
         return urls;
     });
@@ -191,6 +215,7 @@ function newImageForProject(req, res, next) {
                 const oldImage = oldImageData.rows[0];
                 yield removeImageFromBucket(`${req.body.bucket_name}/${req.body.folder_name}`, oldImage);
                 yield (0, images_1.removeImageQuery)(req.body.current_file_id);
+                invalidateSignedUrlCache(req.body.current_file_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
                 dataUsageCount -= oldImage.size;
             }
             const projectData = yield (0, projects_1.getProjectQuery)(req.body.project_id);
@@ -282,12 +307,22 @@ function getImage(req, res, next) {
         try {
             const imageData = yield (0, images_1.getImageQuery)(req.params.id);
             const image = imageData.rows[0];
-            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-            const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
-            image.src = cloudFrontSigner.getSignedUrl({
-                url: cloudFrontUrl,
-                expires: expiresAt,
-            });
+            const cacheKey = getSignedUrlCacheKey(image.id);
+            const cachedUrl = yield socketUsers_1.redisClient.get(cacheKey);
+            if (cachedUrl) {
+                image.src = cachedUrl;
+            }
+            else {
+                const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
+                const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
+                image.src = cloudFrontSigner.getSignedUrl({
+                    url: cloudFrontUrl,
+                    expires: expiresAt,
+                });
+                socketUsers_1.redisClient
+                    .setEx(cacheKey, SIGNED_URL_CACHE_TTL_SECONDS, image.src)
+                    .catch((err) => console.error("Failed to cache signed URL:", err));
+            }
             const recordImageData = yield (0, recordImage_1.getRecordImagesByImageQuery)(image.id);
             const recordsData = yield Promise.all(recordImageData.rows.map((ri) => __awaiter(this, void 0, void 0, function* () {
                 const recordData = yield (0, record_1.getRecordQuery)(ri.record_id);
@@ -311,6 +346,7 @@ function removeImageByProject(req, res, next) {
             const image = imageData.rows[0];
             yield removeImageFromBucket("wyrld/images", image);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
+            invalidateSignedUrlCache(req.params.image_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
             const projectData = yield (0, projects_1.getProjectQuery)(req.params.project_id);
             const project = projectData.rows[0];
             const newCalculatedData = project.used_data_in_bytes - image.size;
@@ -344,6 +380,7 @@ function removeImageByTableUser(req, res, next) {
             const image = imageData.rows[0];
             yield removeImageFromBucket("wyrld/images", image);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
+            invalidateSignedUrlCache(req.params.image_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
             const tableData = yield (0, tableViews_js_1.getTableViewQuery)(req.params.table_id);
             const table = tableData.rows[0];
             const userData = yield (0, users_1.getUserByIdQuery)(table.user_id);
