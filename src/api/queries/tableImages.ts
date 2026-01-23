@@ -64,6 +64,39 @@ async function getTableImagesByUserQuery(user_id: string | number) {
   return await db.query<TableImage>(query)
 }
 
+interface TableImageWithImage extends TableImage {
+  original_name: string;
+  size: number;
+  file_name: string;
+  notes: string;
+}
+
+async function getTableImagesWithImageByProjectQuery(project_id: string | number) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.project_id = $1
+    `,
+    values: [project_id]
+  }
+  return await db.query<TableImageWithImage>(query)
+}
+
+async function getTableImagesWithImageByUserQuery(user_id: string | number) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.user_id = $1
+    `,
+    values: [user_id]
+  }
+  return await db.query<TableImageWithImage>(query)
+}
+
 async function removeTableImageQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."TableImage" where id = $1`,
@@ -103,5 +136,8 @@ export {
   getTableImagesByFolderQuery,
   getTableImageQuery,
   removeTableImageQuery,
-  editTableImageQuery
+  editTableImageQuery,
+  getTableImagesWithImageByProjectQuery,
+  getTableImagesWithImageByUserQuery,
+  TableImageWithImage
 }

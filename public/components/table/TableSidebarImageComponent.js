@@ -212,15 +212,15 @@ export default class TableSidebarImageComponent {
   };
 
   renderCurrentImages = async () => {
-    // get images for project or for user
+    // get images with signed URLs in one batched request
     let tableImages = [];
     if (this.projectId) {
       tableImages = await getThings(
-        `/api/get_table_images_by_table_project/${this.tableView.id}`
+        `/api/get_table_images_with_urls_by_table_project/${this.tableView.id}`
       );
     } else {
       tableImages = await getThings(
-        `/api/get_table_images_by_table_user/${this.tableView.id}`
+        `/api/get_table_images_with_urls_by_table_user/${this.tableView.id}`
       );
     }
 
@@ -234,7 +234,15 @@ export default class TableSidebarImageComponent {
     let imageList = [];
     await Promise.all(
       tableImages.map(async (tableImage) => {
-        const image = await getThings(`/api/get_image/${tableImage.image_id}`);
+        // Extract image data from the joined response
+        const image = {
+          id: tableImage.image_id,
+          original_name: tableImage.original_name,
+          size: tableImage.size,
+          file_name: tableImage.file_name,
+          notes: tableImage.notes,
+          src: tableImage.src,
+        };
         if (image) {
           const elem = createElement("div", { class: "sidebar-image-item" }, [
             createElement(
