@@ -40,6 +40,7 @@ import {
   get5eCharSpellQuery,
   get5eCharSpellsByTypeQuery,
 } from "../queries/5eCharSpells";
+import { get5eCharClassesByGeneralQuery } from "../queries/5eCharClasses";
 
 async function handleListCommand(req: Request, res: Response) {
   try {
@@ -692,16 +693,23 @@ async function handleGetGeneralInfoResponse(
     // spell info
     const spellInfoData = await get5eCharSpellSlotInfoQuery(charGeneralId);
     const spellInfo = spellInfoData.rows[0];
+    // classes
+    const classesData = await get5eCharClassesByGeneralQuery(charGeneralId);
+    const classes = classesData.rows;
 
     // format data
     let content = "";
     content += `**${charGeneral.name}**`;
     content += `\n**Race:** ${charGeneral.race}`;
-    content += `\n**Class:** ${charGeneral.class}`;
-    if (charGeneral.subclass)
-      content += `\n**Sub-Class:** ${charGeneral.subclass}`;
-    if (charGeneral.other_class)
-      content += `\n**Other-Class:** ${charGeneral.other_class}`;
+    // format classes
+    if (classes.length > 0) {
+      const classStrings = classes.map((c) => {
+        let classStr = c.class || "Unknown";
+        if (c.subclass) classStr += ` (${c.subclass})`;
+        return classStr;
+      });
+      content += `\n**Class:** ${classStrings.join(" / ")}`;
+    }
     content += `\n**Level:** ${charGeneral.level}`;
     content += `\n**EXP:** ${charGeneral.exp}`;
     content += `\n**Inspiration:** ${charGeneral.inspiration ? "Yes" : "No"}`;
