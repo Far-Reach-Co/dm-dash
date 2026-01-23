@@ -9,17 +9,11 @@ import {
 import {
   ProjectInvite,
   getProjectInviteByProjectQuery,
-  removeProjectInviteQuery,
 } from "../queries/projectInvites.js";
 import {
   getProjectUsersQuery,
   getProjectUserByUserAndProjectQuery,
-  getProjectUsersByProjectQuery,
-  removeProjectUserQuery,
 } from "../queries/projectUsers.js";
-import { getCalendarQuery, removeCalendarQuery } from "../queries/calendars.js";
-import { getMonthsQuery, removeMonthQuery } from "../queries/months.js";
-import { getDaysQuery, removeDayQuery } from "../queries/days.js";
 import { getImageQuery } from "../queries/images.js";
 import { removeImageFromBucket } from "./s3.js";
 import {
@@ -32,10 +26,6 @@ import {
   removeTableImageQuery,
 } from "../queries/tableImages.js";
 import { Request, Response, NextFunction } from "express";
-import {
-  getProjectPlayersByProjectQuery,
-  removeProjectPlayerQuery,
-} from "../queries/projectPlayers.js";
 import { getUserByIdQuery } from "../queries/users.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
@@ -161,55 +151,23 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
     if (req.session.user != project.user_id)
       throw new Error("User is not owner");
 
-    // remove project
-    await removeProjectQuery(req.params.id);
-    // remove all project data
-    // calendars
-    const calendarData = await getCalendarQuery(req.params.id);
-    calendarData.rows.forEach(async (calendar: { id: any }) => {
-      await removeCalendarQuery(calendar.id);
-      // remove months and days associated
-      const monthsData = await getMonthsQuery(calendar.id);
-      monthsData.rows.forEach(async (month: { id: any }) => {
-        await removeMonthQuery(month.id);
-      });
-      const daysData = await getDaysQuery(calendar.id);
-      daysData.rows.forEach(async (day: { id: any }) => {
-        await removeDayQuery(day.id);
-      });
-    });
-    // project invites
-    const projectInvitesData = await getProjectInviteByProjectQuery(
-      req.params.id
-    );
-    projectInvitesData.rows.forEach(async (invite: { id: any }) => {
-      await removeProjectInviteQuery(invite.id);
-    });
-    // project users
-    const projectUsersData = await getProjectUsersByProjectQuery(req.params.id);
-    projectUsersData.rows.forEach(async (user: { id: any }) => {
-      await removeProjectUserQuery(user.id);
-    });
-    // project players
-    const projectPlayersData = await getProjectPlayersByProjectQuery(
-      req.params.id
-    );
-    projectPlayersData.rows.forEach(async (player: { id: any }) => {
-      await removeProjectPlayerQuery(player.id);
-    });
-    // table images
+    // Clean up table images (S3 + database) - project_id is optional so no cascade
     const tableImages = await getTableImagesByProjectQuery(req.params.id);
-    tableImages.rows.forEach(async (tableImage) => {
+    for (const tableImage of tableImages.rows) {
       const imageData = await getImageQuery(tableImage.image_id);
       const image = imageData.rows[0];
       await removeImageFromBucket("wyrld/images", image);
       await removeTableImageQuery(tableImage.id);
-    });
-    // table views
+    }
+
+    // Clean up table views - project_id is optional so no cascade
     const tableViews = await getTableViewsByProjectQuery(req.params.id);
-    tableViews.rows.forEach(async (tableView) => {
+    for (const tableView of tableViews.rows) {
       await removeTableViewQuery(tableView.id);
-    });
+    }
+
+    // Remove project - CASCADE handles Calendar, Month, Day, ProjectInvite, ProjectUser, ProjectPlayer
+    await removeProjectQuery(req.params.id);
 
     res.setHeader("HX-Redirect", "/dash");
     res.send();

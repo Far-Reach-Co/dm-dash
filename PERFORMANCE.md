@@ -2,7 +2,7 @@
 
 This document identifies the heaviest API endpoints and provides guidance for performance testing.
 
-**Last Updated**: 2026-01-10
+**Last Updated**: 2026-01-23
 
 ---
 
@@ -142,19 +142,18 @@ curl -X GET http://localhost:4000/api/get_projects \
 
 ### 4. Delete Project - `DELETE /api/remove_project/:id`
 
-**Location**: `src/api/controllers/projects.ts:147`
+**Location**: `src/api/controllers/projects.ts:139`
 
-**Why it's heavy**:
+**Status**: ✅ Optimized (2026-01-23)
 
-- Cascading deletes across 7+ tables:
-  - Calendars (+ months, days)
-  - Project invites
-  - Project users
-  - Project players
-  - Table images (+ S3 deletion for each)
-  - Table views
-- Multiple async forEach loops (not awaited properly)
-- S3 deletions for each table image
+**How it works**:
+
+- Cleans up TableImages manually (S3 deletion + database) - project_id is optional
+- Cleans up TableViews manually - project_id is optional
+- Deletes project record, triggering CASCADE DELETE on foreign keys
+- Database handles cascading deletes for: Calendar, Month, Day, ProjectInvite, ProjectUser, ProjectPlayer
+
+**Migration**: `1769195631078_foreign-relations-project.sql` adds ON DELETE CASCADE constraints
 
 **Test setup**:
 
@@ -163,20 +162,12 @@ curl -X DELETE http://localhost:4000/api/remove_project/1 \
   -b cookies.txt
 ```
 
-**Expected time**: 1-10 seconds (depends on project size)
+**Expected time**: 500ms-2s (depends on number of S3 images to delete)
 
 **Watch for**:
 
-- Incomplete deletions due to unawaited async operations
 - S3 deletion failures leaving orphaned files
-- Long-running transaction locks
-- Orphaned data if deletion fails midway
-
-**Performance improvement ideas**:
-
-- Use database CASCADE DELETE on foreign keys
-- Use Promise.all() instead of forEach for parallel deletes
-- Consider soft deletes instead
+- CASCADE constraint violations if foreign keys are misconfigured
 
 ---
 
