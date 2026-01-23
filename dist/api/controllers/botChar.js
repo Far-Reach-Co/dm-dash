@@ -24,6 +24,7 @@ const _5eCharAttacks_1 = require("../queries/5eCharAttacks");
 const _5eCharFeats_1 = require("../queries/5eCharFeats");
 const _5eCharBack_1 = require("../queries/5eCharBack");
 const _5eCharSpells_1 = require("../queries/5eCharSpells");
+const _5eCharClasses_1 = require("../queries/5eCharClasses");
 function handleListCommand(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -545,14 +546,20 @@ function handleGetGeneralInfoResponse(charGeneralId, res) {
             const proficiencies = proData.rows[0];
             const spellInfoData = yield (0, _5eCharSpellSlots_1.get5eCharSpellSlotInfoQuery)(charGeneralId);
             const spellInfo = spellInfoData.rows[0];
+            const classesData = yield (0, _5eCharClasses_1.get5eCharClassesByGeneralQuery)(charGeneralId);
+            const classes = classesData.rows;
             let content = "";
             content += `**${charGeneral.name}**`;
             content += `\n**Race:** ${charGeneral.race}`;
-            content += `\n**Class:** ${charGeneral.class}`;
-            if (charGeneral.subclass)
-                content += `\n**Sub-Class:** ${charGeneral.subclass}`;
-            if (charGeneral.other_class)
-                content += `\n**Other-Class:** ${charGeneral.other_class}`;
+            if (classes.length > 0) {
+                const classStrings = classes.map((c) => {
+                    let classStr = c.class || "Unknown";
+                    if (c.subclass)
+                        classStr += ` (${c.subclass})`;
+                    return classStr;
+                });
+                content += `\n**Class:** ${classStrings.join(" / ")}`;
+            }
             content += `\n**Level:** ${charGeneral.level}`;
             content += `\n**EXP:** ${charGeneral.exp}`;
             content += `\n**Inspiration:** ${charGeneral.inspiration ? "Yes" : "No"}`;
