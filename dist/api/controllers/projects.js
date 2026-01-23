@@ -13,14 +13,10 @@ exports.editProjectTitle = exports.removeProject = exports.addProject = exports.
 const projects_js_1 = require("../queries/projects.js");
 const projectInvites_js_1 = require("../queries/projectInvites.js");
 const projectUsers_js_1 = require("../queries/projectUsers.js");
-const calendars_js_1 = require("../queries/calendars.js");
-const months_js_1 = require("../queries/months.js");
-const days_js_1 = require("../queries/days.js");
 const images_js_1 = require("../queries/images.js");
 const s3_js_1 = require("./s3.js");
 const tableViews_js_1 = require("../queries/tableViews.js");
 const tableImages_js_1 = require("../queries/tableImages.js");
-const projectPlayers_js_1 = require("../queries/projectPlayers.js");
 const users_js_1 = require("../queries/users.js");
 const enums_js_1 = require("../../lib/enums.js");
 const eventLogger_1 = require("../../lib/eventLogger");
@@ -127,42 +123,18 @@ function removeProject(req, res, next) {
             const project = projectData.rows[0];
             if (req.session.user != project.user_id)
                 throw new Error("User is not owner");
-            yield (0, projects_js_1.removeProjectQuery)(req.params.id);
-            const calendarData = yield (0, calendars_js_1.getCalendarQuery)(req.params.id);
-            calendarData.rows.forEach((calendar) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, calendars_js_1.removeCalendarQuery)(calendar.id);
-                const monthsData = yield (0, months_js_1.getMonthsQuery)(calendar.id);
-                monthsData.rows.forEach((month) => __awaiter(this, void 0, void 0, function* () {
-                    yield (0, months_js_1.removeMonthQuery)(month.id);
-                }));
-                const daysData = yield (0, days_js_1.getDaysQuery)(calendar.id);
-                daysData.rows.forEach((day) => __awaiter(this, void 0, void 0, function* () {
-                    yield (0, days_js_1.removeDayQuery)(day.id);
-                }));
-            }));
-            const projectInvitesData = yield (0, projectInvites_js_1.getProjectInviteByProjectQuery)(req.params.id);
-            projectInvitesData.rows.forEach((invite) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, projectInvites_js_1.removeProjectInviteQuery)(invite.id);
-            }));
-            const projectUsersData = yield (0, projectUsers_js_1.getProjectUsersByProjectQuery)(req.params.id);
-            projectUsersData.rows.forEach((user) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, projectUsers_js_1.removeProjectUserQuery)(user.id);
-            }));
-            const projectPlayersData = yield (0, projectPlayers_js_1.getProjectPlayersByProjectQuery)(req.params.id);
-            projectPlayersData.rows.forEach((player) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, projectPlayers_js_1.removeProjectPlayerQuery)(player.id);
-            }));
             const tableImages = yield (0, tableImages_js_1.getTableImagesByProjectQuery)(req.params.id);
-            tableImages.rows.forEach((tableImage) => __awaiter(this, void 0, void 0, function* () {
+            for (const tableImage of tableImages.rows) {
                 const imageData = yield (0, images_js_1.getImageQuery)(tableImage.image_id);
                 const image = imageData.rows[0];
                 yield (0, s3_js_1.removeImageFromBucket)("wyrld/images", image);
                 yield (0, tableImages_js_1.removeTableImageQuery)(tableImage.id);
-            }));
+            }
             const tableViews = yield (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.id);
-            tableViews.rows.forEach((tableView) => __awaiter(this, void 0, void 0, function* () {
+            for (const tableView of tableViews.rows) {
                 yield (0, tableViews_js_1.removeTableViewQuery)(tableView.id);
-            }));
+            }
+            yield (0, projects_js_1.removeProjectQuery)(req.params.id);
             res.setHeader("HX-Redirect", "/dash");
             res.send();
         }
