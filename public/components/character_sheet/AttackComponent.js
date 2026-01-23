@@ -315,7 +315,7 @@ export default class AttackComponent {
       "div",
       {
         class: "cp-input-gen input-small magic-text",
-        style: "margin-right: 5px; max-width: 150px;",
+        style: "margin-right: 5px; width: 150px;",
         contentEditable: "true",
         name: "damage_type",
       },
@@ -411,12 +411,16 @@ export default class AttackComponent {
             );
             if (newElem) {
               // New calculation was created
-              newBonusValue = newElem.getAttribute("data-uncalculated-expression");
+              newBonusValue = newElem.getAttribute(
+                "data-uncalculated-expression",
+              );
             } else {
               // Check if there's an existing data-combined span with the expression
               const existingSpan = e.target.querySelector("[data-combined]");
               if (existingSpan) {
-                newBonusValue = existingSpan.getAttribute("data-uncalculated-expression");
+                newBonusValue = existingSpan.getAttribute(
+                  "data-uncalculated-expression",
+                );
               } else {
                 // No magic calculation, just save the plain text
                 newBonusValue = e.target.textContent;
