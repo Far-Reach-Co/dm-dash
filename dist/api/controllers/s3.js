@@ -33,6 +33,10 @@ aws_sdk_1.config.update({
     region: "us-east-1",
 });
 const s3 = new aws_sdk_1.S3();
+const cloudFrontPrivateKeyPath = path.join(__dirname, "..", "..", "..", "private_frc_cloudfront_key.pem");
+const cloudFrontPrivateKey = fs.readFileSync(cloudFrontPrivateKeyPath, "utf8");
+const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
+const cloudFrontSigner = new aws_sdk_1.CloudFront.Signer(cloudFrontKeyId, cloudFrontPrivateKey);
 function getSignedUrlsHandler(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -51,22 +55,12 @@ exports.getSignedUrlsHandler = getSignedUrlsHandler;
 function getSignedUrls(images) {
     return __awaiter(this, void 0, void 0, function* () {
         const urls = {};
+        const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
         for (const imageData of images) {
-            const objectName = imageData.file_name;
-            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${objectName}`;
-            const privateKeyPath = path.join(__dirname, "..", "..", "..", "private_frc_cloudfront_key.pem");
-            const privateKey = fs.readFileSync(privateKeyPath, "utf8");
-            const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
-            const signingParams = {
+            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
+            urls[imageData.id] = cloudFrontSigner.getSignedUrl({
                 url: cloudFrontUrl,
-                expires: Math.floor((new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000),
-                privateKey: privateKey,
-                keyPairId: cloudFrontKeyId,
-            };
-            const signer = new aws_sdk_1.CloudFront.Signer(signingParams.keyPairId, signingParams.privateKey);
-            urls[imageData.id] = signer.getSignedUrl({
-                url: signingParams.url,
-                expires: signingParams.expires,
+                expires: expiresAt,
             });
         }
         return urls;
@@ -288,23 +282,12 @@ function getImage(req, res, next) {
         try {
             const imageData = yield (0, images_1.getImageQuery)(req.params.id);
             const image = imageData.rows[0];
-            const objectName = image.file_name;
-            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${objectName}`;
-            const privateKeyPath = path.join(__dirname, "..", "..", "..", "private_frc_cloudfront_key.pem");
-            const privateKey = fs.readFileSync(privateKeyPath, "utf8");
-            const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID;
-            const signingParams = {
+            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
+            const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
+            image.src = cloudFrontSigner.getSignedUrl({
                 url: cloudFrontUrl,
-                expires: Math.floor((new Date().getTime() + 60 * 60 * 24 * 3 * 1000) / 1000),
-                privateKey: privateKey,
-                keyPairId: cloudFrontKeyId,
-            };
-            const signer = new aws_sdk_1.CloudFront.Signer(signingParams.keyPairId, signingParams.privateKey);
-            const url = signer.getSignedUrl({
-                url: signingParams.url,
-                expires: signingParams.expires,
+                expires: expiresAt,
             });
-            image.src = url;
             const recordImageData = yield (0, recordImage_1.getRecordImagesByImageQuery)(image.id);
             const recordsData = yield Promise.all(recordImageData.rows.map((ri) => __awaiter(this, void 0, void 0, function* () {
                 const recordData = yield (0, record_1.getRecordQuery)(ri.record_id);

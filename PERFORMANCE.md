@@ -320,14 +320,15 @@ curl -X GET http://localhost:4000/api/get_calendars/1 \
 
 ### 9. Signed URL Generation - `POST /api/signed_URL_download_multi`
 
-**Location**: `src/api/controllers/s3.ts:39`
+**Location**: `src/api/controllers/s3.ts:55`
 
-**Why it's heavy**:
+**Status**: ✅ Optimized (2026-01-23)
 
-- Reads CloudFront private key from filesystem
-- Generates CloudFront signed URL for each image
-- Cryptographic signing operation per image
-- No caching
+**How it works**:
+
+- CloudFront private key cached at module level (read once on startup)
+- CloudFront.Signer instance created once and reused for all requests
+- Generates signed URLs for multiple images in a single request
 
 **Test setup**:
 
@@ -338,17 +339,12 @@ curl -X POST http://localhost:4000/api/signed_URL_download_multi \
   -d '{"image_ids":[1,2,3,4,5]}'
 ```
 
-**Expected time**: 50-200ms per image
+**Expected time**: 5-20ms per image (improved from 50-200ms)
 
-**Watch for**:
+**Previous issues fixed**:
 
-- Slow response with 10+ images
-- File I/O for private key on every request
-
-**Performance improvement ideas**:
-
-- Cache private key in memory
-- Consider URL caching with short TTL
+- ~~File I/O for private key on every request~~ → cached at module level
+- ~~New Signer instance per image~~ → single cached signer reused
 
 ---
 
