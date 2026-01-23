@@ -97,10 +97,10 @@ import {
 import {
   removeTableImage,
   editTableImage,
-  getTableImagesByTableUser,
   addTableImageByProject,
   addTableImageByUser,
-  getTableImagesByTableProject,
+  getTableImagesWithSignedUrlsByTableProject,
+  getTableImagesWithSignedUrlsByTableUser,
 } from "./controllers/tableImages.js";
 import {
   getTableViewsByProject,
@@ -254,12 +254,12 @@ router.post("/edit_table_view/:id", editTableView);
 
 // table images
 router.get(
-  "/get_table_images_by_table_project/:table_id",
-  getTableImagesByTableProject
+  "/get_table_images_with_urls_by_table_project/:table_id",
+  getTableImagesWithSignedUrlsByTableProject
 );
 router.get(
-  "/get_table_images_by_table_user/:table_id",
-  getTableImagesByTableUser
+  "/get_table_images_with_urls_by_table_user/:table_id",
+  getTableImagesWithSignedUrlsByTableUser
 );
 router.post("/add_table_image_by_project", addTableImageByProject);
 router.post("/add_table_image_by_user", addTableImageByUser);

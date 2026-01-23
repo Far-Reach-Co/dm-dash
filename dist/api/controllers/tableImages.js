@@ -9,9 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTableImage = exports.removeTableImage = exports.addTableImageByProject = exports.addTableImageByUser = exports.getTableImagesByTableProject = exports.getTableImagesByTableUser = void 0;
+exports.editTableImage = exports.removeTableImage = exports.addTableImageByProject = exports.addTableImageByUser = exports.getTableImagesWithSignedUrlsByTableUser = exports.getTableImagesWithSignedUrlsByTableProject = void 0;
 const tableImages_1 = require("../queries/tableImages");
 const tableViews_1 = require("../queries/tableViews");
+const s3_1 = require("./s3");
 function addTableImageByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -39,32 +40,50 @@ function addTableImageByUser(req, res, next) {
     });
 }
 exports.addTableImageByUser = addTableImageByUser;
-function getTableImagesByTableUser(req, res, next) {
+function getTableImagesWithSignedUrlsByTableProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const tableData = yield (0, tableViews_1.getTableViewQuery)(req.params.table_id);
-            const data = yield (0, tableImages_1.getTableImagesByUserQuery)(tableData.rows[0].user_id);
-            res.send(data.rows);
+            const data = yield (0, tableImages_1.getTableImagesWithImageByProjectQuery)(tableData.rows[0].project_id);
+            const images = data.rows.map((row) => ({
+                id: row.image_id,
+                file_name: row.file_name,
+                original_name: row.original_name,
+                size: row.size,
+                notes: row.notes,
+            }));
+            const signedUrls = yield (0, s3_1.getSignedUrls)(images);
+            const result = data.rows.map((row) => (Object.assign(Object.assign({}, row), { src: signedUrls[row.image_id] })));
+            res.send(result);
         }
         catch (err) {
             next(err);
         }
     });
 }
-exports.getTableImagesByTableUser = getTableImagesByTableUser;
-function getTableImagesByTableProject(req, res, next) {
+exports.getTableImagesWithSignedUrlsByTableProject = getTableImagesWithSignedUrlsByTableProject;
+function getTableImagesWithSignedUrlsByTableUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const tableData = yield (0, tableViews_1.getTableViewQuery)(req.params.table_id);
-            const data = yield (0, tableImages_1.getTableImagesByProjectQuery)(tableData.rows[0].project_id);
-            res.send(data.rows);
+            const data = yield (0, tableImages_1.getTableImagesWithImageByUserQuery)(tableData.rows[0].user_id);
+            const images = data.rows.map((row) => ({
+                id: row.image_id,
+                file_name: row.file_name,
+                original_name: row.original_name,
+                size: row.size,
+                notes: row.notes,
+            }));
+            const signedUrls = yield (0, s3_1.getSignedUrls)(images);
+            const result = data.rows.map((row) => (Object.assign(Object.assign({}, row), { src: signedUrls[row.image_id] })));
+            res.send(result);
         }
         catch (err) {
             next(err);
         }
     });
 }
-exports.getTableImagesByTableProject = getTableImagesByTableProject;
+exports.getTableImagesWithSignedUrlsByTableUser = getTableImagesWithSignedUrlsByTableUser;
 function removeTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {

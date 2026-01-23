@@ -1,14 +1,15 @@
 import {
   addTableImageByUserQuery,
   addTableImageByProjectQuery,
-  getTableImageQuery,
   removeTableImageQuery,
   editTableImageQuery,
-  getTableImagesByUserQuery,
-  getTableImagesByProjectQuery,
+  getTableImagesWithImageByProjectQuery,
+  getTableImagesWithImageByUserQuery,
+  TableImageWithImage,
 } from "../queries/tableImages";
 import { Request, Response, NextFunction } from "express";
 import { getTableViewQuery } from "../queries/tableViews";
+import { getSignedUrls } from "./s3";
 
 async function addTableImageByProject(
   req: Request,
@@ -38,33 +39,75 @@ async function addTableImageByUser(
   }
 }
 
-async function getTableImagesByTableUser(
+interface TableImageWithSignedUrl extends TableImageWithImage {
+  src: string;
+}
+
+async function getTableImagesWithSignedUrlsByTableProject(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
     const tableData = await getTableViewQuery(req.params.table_id);
-    const data = await getTableImagesByUserQuery(tableData.rows[0].user_id);
+    const data = await getTableImagesWithImageByProjectQuery(
+      tableData.rows[0].project_id
+    );
 
-    res.send(data.rows);
+    // Convert to Image format for getSignedUrls
+    const images = data.rows.map((row) => ({
+      id: row.image_id,
+      file_name: row.file_name,
+      original_name: row.original_name,
+      size: row.size,
+      notes: row.notes,
+    }));
+
+    // Get all signed URLs in batch
+    const signedUrls = await getSignedUrls(images);
+
+    // Attach signed URLs to each row
+    const result: TableImageWithSignedUrl[] = data.rows.map((row) => ({
+      ...row,
+      src: signedUrls[row.image_id],
+    }));
+
+    res.send(result);
   } catch (err) {
     next(err);
   }
 }
 
-async function getTableImagesByTableProject(
+async function getTableImagesWithSignedUrlsByTableUser(
   req: Request,
   res: Response,
   next: NextFunction
 ) {
   try {
     const tableData = await getTableViewQuery(req.params.table_id);
-    const data = await getTableImagesByProjectQuery(
-      tableData.rows[0].project_id
+    const data = await getTableImagesWithImageByUserQuery(
+      tableData.rows[0].user_id
     );
 
-    res.send(data.rows);
+    // Convert to Image format for getSignedUrls
+    const images = data.rows.map((row) => ({
+      id: row.image_id,
+      file_name: row.file_name,
+      original_name: row.original_name,
+      size: row.size,
+      notes: row.notes,
+    }));
+
+    // Get all signed URLs in batch
+    const signedUrls = await getSignedUrls(images);
+
+    // Attach signed URLs to each row
+    const result: TableImageWithSignedUrl[] = data.rows.map((row) => ({
+      ...row,
+      src: signedUrls[row.image_id],
+    }));
+
+    res.send(result);
   } catch (err) {
     next(err);
   }
@@ -93,8 +136,8 @@ async function editTableImage(req: Request, res: Response, next: NextFunction) {
 }
 
 export {
-  getTableImagesByTableUser,
-  getTableImagesByTableProject,
+  getTableImagesWithSignedUrlsByTableProject,
+  getTableImagesWithSignedUrlsByTableUser,
   addTableImageByUser,
   addTableImageByProject,
   removeTableImage,

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTableImageQuery = exports.removeTableImageQuery = exports.getTableImageQuery = exports.getTableImagesByFolderQuery = exports.getTableImagesByUserQuery = exports.getTableImagesByProjectQuery = exports.addTableImageByUserQuery = exports.addTableImageByProjectQuery = void 0;
+exports.getTableImagesWithImageByUserQuery = exports.getTableImagesWithImageByProjectQuery = exports.editTableImageQuery = exports.removeTableImageQuery = exports.getTableImageQuery = exports.getTableImagesByFolderQuery = exports.getTableImagesByUserQuery = exports.getTableImagesByProjectQuery = exports.addTableImageByUserQuery = exports.addTableImageByProjectQuery = void 0;
 const dbconfig_1 = require("../dbconfig");
 function addTableImageByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -79,6 +79,36 @@ function getTableImagesByUserQuery(user_id) {
     });
 }
 exports.getTableImagesByUserQuery = getTableImagesByUserQuery;
+function getTableImagesWithImageByProjectQuery(project_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.project_id = $1
+    `,
+            values: [project_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+exports.getTableImagesWithImageByProjectQuery = getTableImagesWithImageByProjectQuery;
+function getTableImagesWithImageByUserQuery(user_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.user_id = $1
+    `,
+            values: [user_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+exports.getTableImagesWithImageByUserQuery = getTableImagesWithImageByUserQuery;
 function removeTableImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
