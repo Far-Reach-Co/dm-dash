@@ -31,7 +31,7 @@ export default class AttackComponent {
       return this.calculateProBonus().toString();
     } else {
       return this.calculateAbilityScoreModifier(
-        this.generalData[mapping.key]
+        this.generalData[mapping.key],
       ).toString();
     }
   };
@@ -60,7 +60,7 @@ export default class AttackComponent {
           createElement("h4", {}, "Magic Words"),
           createElement("div", { style: "color: var(--green)" }, mapping.value),
           createElement("p", {}, `${mapping.key} - (${valueToInsert})`),
-        ])
+        ]),
       );
     });
 
@@ -162,7 +162,7 @@ export default class AttackComponent {
   handleMagicWords = (contentElement) => {
     contentElement = this.applyMagicWordsToContentEditable(
       contentElement,
-      this.getMagicWordMappings()
+      this.getMagicWordMappings(),
     );
     return contentElement;
   };
@@ -189,7 +189,7 @@ export default class AttackComponent {
         createElement("div", {}, [
           createElement("h4", {}, "Magic Calculation"),
           createElement("p", {}, uncalculatedExpression),
-        ])
+        ]),
       );
     });
     span.addEventListener("mouseleave", (e) => {
@@ -241,13 +241,13 @@ export default class AttackComponent {
     // Remove adjacent different operators
     calculatedExpression = calculatedExpression.replace(
       /([+\-*/])([+\-*/])/g,
-      "$2"
+      "$2",
     );
 
     // Check if the expression starts or ends with an operator and remove it
     calculatedExpression = calculatedExpression.replace(
       /^[+\-*/]|[+\-*/]$/g,
-      ""
+      "",
     );
 
     // Evaluate the calculatedExpression safely (no eval)
@@ -257,7 +257,7 @@ export default class AttackComponent {
 
     const span = this.createMagicCalculationSpanElement(
       result,
-      uncalculatedExpression
+      uncalculatedExpression,
     );
 
     // Clear the content and append the new span + space
@@ -277,13 +277,13 @@ export default class AttackComponent {
   updateBonusElementsMagicCalcValue = () => {
     const mappings = this.getMagicWordMappings();
     const magicCalcElem = document.querySelectorAll(
-      "[data-uncalculated-expression]"
+      "[data-uncalculated-expression]",
     );
     // If a magic calculation exists
     if (magicCalcElem && magicCalcElem.length) {
       magicCalcElem.forEach((elem) => {
         const uncalculatedExpression = elem.getAttribute(
-          "data-uncalculated-expression"
+          "data-uncalculated-expression",
         );
 
         // Replace magic words with their calculated numeric values
@@ -292,7 +292,7 @@ export default class AttackComponent {
           const regex = new RegExp(`\\b${mapping.value}\\b`, "g");
           calculatedExpression = calculatedExpression.replace(
             regex,
-            this.getMappingValue(mapping)
+            this.getMappingValue(mapping),
           );
         });
 
@@ -301,13 +301,82 @@ export default class AttackComponent {
 
         const span = this.createMagicCalculationSpanElement(
           result,
-          uncalculatedExpression
+          uncalculatedExpression,
         );
         // replace
         elem.after(span);
         elem.remove();
       });
     }
+  };
+
+  renderDamageTypeElem = (item) => {
+    const elem = createElement(
+      "div",
+      {
+        class: "cp-input-gen input-small magic-text",
+        style: "margin-right: 5px;",
+        contentEditable: "true",
+        name: "damage_type",
+      },
+      item.damage_type,
+      [
+        {
+          type: "input",
+          event: (e) => {
+            e.preventDefault();
+            this.hideHoverInfo();
+            // Apply magic words highlighting (no calculation)
+            this.handleMagicWords(e.target);
+          },
+        },
+        {
+          type: "focusout",
+          event: (e) => {
+            e.preventDefault();
+            // Extract text preserving magic word keywords
+            let newValue = this.extractTextWithMagicWords(e.target);
+            postThing(`/api/edit_5e_character_attack/${item.id}`, {
+              damage_type: newValue,
+            });
+          },
+        },
+        {
+          type: "keydown",
+          event: (e) => {
+            if (e.key === "Backspace") {
+              this.handleRemoveSpanOnBackspace();
+            }
+            if (e.key === "Enter") {
+              e.target.blur();
+              this.hideHoverInfo();
+            }
+          },
+        },
+      ],
+    );
+    // Apply magic words highlighting on initial render
+    this.handleMagicWords(elem);
+
+    return elem;
+  };
+
+  extractTextWithMagicWords = (contentElement) => {
+    // Extract text content, preserving magic word keywords from spans
+    let result = "";
+    const childNodes = contentElement.childNodes;
+
+    childNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        // Remove zero-width spaces but keep other text
+        result += node.nodeValue.replace(/\u200B/g, "");
+      } else if (node.tagName === "SPAN" && node.textContent) {
+        // For magic word spans, use the original keyword (e.g., "dex")
+        result += node.textContent;
+      }
+    });
+
+    return result.trim();
   };
 
   renderBonusElem = (item) => {
@@ -338,15 +407,21 @@ export default class AttackComponent {
             let newBonusValue = "";
             // Combine magic words into a new magic calc
             const newElem = this.applyCalculatedMagicWordsToContentEditable(
-              e.target
+              e.target,
             );
-            if (!newElem) {
-              newBonusValue = e.target.textContent;
-            } else
-              newBonusValue = newElem.getAttribute(
-                "data-uncalculated-expression"
-              );
-            // Revert magic words before posting
+            if (newElem) {
+              // New calculation was created
+              newBonusValue = newElem.getAttribute("data-uncalculated-expression");
+            } else {
+              // Check if there's an existing data-combined span with the expression
+              const existingSpan = e.target.querySelector("[data-combined]");
+              if (existingSpan) {
+                newBonusValue = existingSpan.getAttribute("data-uncalculated-expression");
+              } else {
+                // No magic calculation, just save the plain text
+                newBonusValue = e.target.textContent;
+              }
+            }
             postThing(`/api/edit_5e_character_attack/${item.id}`, {
               bonus: newBonusValue,
             });
@@ -365,7 +440,7 @@ export default class AttackComponent {
             }
           },
         },
-      ]
+      ],
     );
     // run magic words and calculations
     this.handleMagicWords(elem);
@@ -378,6 +453,93 @@ export default class AttackComponent {
     const hoverInfoElem = document.getElementById("hover-info");
     hoverInfoElem.style.display = "none";
     hoverInfoElem.innerHTML = "";
+  };
+
+  renderMagicWordsHelpHoverOnly = () => {
+    return createElement(
+      "div",
+      {
+        class: "magic-words-help",
+        style: `
+          cursor: help;
+          color: var(--blue6);
+          font-size: 11px;
+          margin-left: 6px;
+          width: 14px;
+          height: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          border: 1px solid var(--blue6);
+        `,
+      },
+      "?",
+      [
+        {
+          type: "mouseenter",
+          event: (e) => {
+            const hoverInfoElem = document.getElementById("hover-info");
+            hoverInfoElem.style.display = "block";
+            const rect = e.target.getBoundingClientRect();
+            hoverInfoElem.style.top = rect.bottom + window.scrollY + "px";
+            hoverInfoElem.style.left = rect.left + window.scrollX + "px";
+
+            hoverInfoElem.append(
+              createElement("div", { style: "max-width: 280px;" }, [
+                createElement(
+                  "h4",
+                  { style: "margin-bottom: 8px;" },
+                  "Magic Words",
+                ),
+                createElement(
+                  "p",
+                  { style: "margin-bottom: 8px; font-size: 12px;" },
+                  "Type these keywords to highlight them. Hover over them to see their current value:",
+                ),
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px;",
+                  },
+                  [
+                    createElement("span", { class: "glowing-text" }, "str"),
+                    createElement("span", {}, "Strength mod"),
+                    createElement("span", { class: "glowing-text" }, "dex"),
+                    createElement("span", {}, "Dexterity mod"),
+                    createElement("span", { class: "glowing-text" }, "con"),
+                    createElement("span", {}, "Constitution mod"),
+                    createElement("span", { class: "glowing-text" }, "int"),
+                    createElement("span", {}, "Intelligence mod"),
+                    createElement("span", { class: "glowing-text" }, "wis"),
+                    createElement("span", {}, "Wisdom mod"),
+                    createElement("span", { class: "glowing-text" }, "cha"),
+                    createElement("span", {}, "Charisma mod"),
+                    createElement("span", { class: "glowing-text" }, "pro"),
+                    createElement("span", {}, "Proficiency bonus"),
+                  ],
+                ),
+                createElement(
+                  "p",
+                  {
+                    style:
+                      "margin-top: 8px; font-size: 11px; color: var(--grey3);",
+                  },
+                  "Example: 2d10 + dex piercing",
+                ),
+              ]),
+            );
+          },
+        },
+        {
+          type: "mouseleave",
+          event: () => {
+            this.hideHoverInfo();
+          },
+        },
+      ],
+    );
   };
 
   renderMagicWordsHelp = () => {
@@ -412,30 +574,48 @@ export default class AttackComponent {
 
             hoverInfoElem.append(
               createElement("div", { style: "max-width: 280px;" }, [
-                createElement("h4", { style: "margin-bottom: 8px;" }, "Magic Words"),
-                createElement("p", { style: "margin-bottom: 8px; font-size: 12px;" },
-                  "Type these keywords in the ATK Bonus field to auto-calculate values:"
+                createElement(
+                  "h4",
+                  { style: "margin-bottom: 8px;" },
+                  "Magic Words + Calc",
                 ),
-                createElement("div", { style: "display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px;" }, [
-                  createElement("span", { class: "glowing-text" }, "str"),
-                  createElement("span", {}, "Strength mod"),
-                  createElement("span", { class: "glowing-text" }, "dex"),
-                  createElement("span", {}, "Dexterity mod"),
-                  createElement("span", { class: "glowing-text" }, "con"),
-                  createElement("span", {}, "Constitution mod"),
-                  createElement("span", { class: "glowing-text" }, "int"),
-                  createElement("span", {}, "Intelligence mod"),
-                  createElement("span", { class: "glowing-text" }, "wis"),
-                  createElement("span", {}, "Wisdom mod"),
-                  createElement("span", { class: "glowing-text" }, "cha"),
-                  createElement("span", {}, "Charisma mod"),
-                  createElement("span", { class: "glowing-text" }, "pro"),
-                  createElement("span", {}, "Proficiency bonus"),
-                ]),
-                createElement("p", { style: "margin-top: 8px; font-size: 11px; color: var(--grey3);" },
-                  "Example: dex+pro gives your Dex modifier + proficiency bonus"
+                createElement(
+                  "p",
+                  { style: "margin-bottom: 8px; font-size: 12px;" },
+                  "Type these keywords in the ATK Bonus field to auto-calculate values:",
                 ),
-              ])
+                createElement(
+                  "div",
+                  {
+                    style:
+                      "display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px;",
+                  },
+                  [
+                    createElement("span", { class: "glowing-text" }, "str"),
+                    createElement("span", {}, "Strength mod"),
+                    createElement("span", { class: "glowing-text" }, "dex"),
+                    createElement("span", {}, "Dexterity mod"),
+                    createElement("span", { class: "glowing-text" }, "con"),
+                    createElement("span", {}, "Constitution mod"),
+                    createElement("span", { class: "glowing-text" }, "int"),
+                    createElement("span", {}, "Intelligence mod"),
+                    createElement("span", { class: "glowing-text" }, "wis"),
+                    createElement("span", {}, "Wisdom mod"),
+                    createElement("span", { class: "glowing-text" }, "cha"),
+                    createElement("span", {}, "Charisma mod"),
+                    createElement("span", { class: "glowing-text" }, "pro"),
+                    createElement("span", {}, "Proficiency bonus"),
+                  ],
+                ),
+                createElement(
+                  "p",
+                  {
+                    style:
+                      "margin-top: 8px; font-size: 11px; color: var(--grey3);",
+                  },
+                  "Example: dex+pro gives your Dex modifier + proficiency bonus",
+                ),
+              ]),
             );
           },
         },
@@ -445,7 +625,7 @@ export default class AttackComponent {
             this.hideHoverInfo();
           },
         },
-      ]
+      ],
     );
   };
 
@@ -463,7 +643,7 @@ export default class AttackComponent {
 
   renderAttacksElems = async () => {
     const attacksData = await getThings(
-      `/api/get_5e_character_attacks/${this.generalData.id}`
+      `/api/get_5e_character_attacks/${this.generalData.id}`,
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!attacksData.length) return [createElement("small", {}, "None...")];
@@ -492,7 +672,7 @@ export default class AttackComponent {
                   title: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "input",
@@ -511,7 +691,7 @@ export default class AttackComponent {
                   range: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "input",
@@ -530,28 +710,10 @@ export default class AttackComponent {
                   duration: e.target.value,
                 });
               },
-            }
+            },
           ),
           this.renderBonusElem(item),
-          createElement(
-            "input",
-            {
-              class: "cp-input-gen input-small",
-              style: "margin-right: 5px;",
-              name: "damage_type",
-              value: item.damage_type ? item.damage_type : "",
-            },
-            null,
-            {
-              type: "focusout",
-              event: (e) => {
-                e.preventDefault();
-                postThing(`/api/edit_5e_character_attack/${item.id}`, {
-                  damage_type: e.target.value,
-                });
-              },
-            }
-          ),
+          this.renderDamageTypeElem(item),
           createElement(
             "div",
             {
@@ -564,16 +726,16 @@ export default class AttackComponent {
               event: (e) => {
                 if (
                   window.confirm(
-                    `Are you sure you want to delete ${item.title}`
+                    `Are you sure you want to delete ${item.title}`,
                   )
                 ) {
                   deleteThing(`/api/remove_5e_character_attack/${item.id}`);
                   e.target.parentElement.remove();
                 }
               },
-            }
+            },
           ),
-        ]
+        ],
       );
     });
   };
@@ -589,7 +751,7 @@ export default class AttackComponent {
       createElement(
         "div",
         { class: "special-font", style: "align-self: center;" },
-        "Attacks and Spellcasting"
+        "Attacks and Spellcasting",
       ),
       createElement("br"),
       createElement(
@@ -601,12 +763,25 @@ export default class AttackComponent {
           createElement("small", { style: "margin-right: 140px;" }, "Name"),
           createElement("small", { style: "margin-right: 29px;" }, "Range"),
           createElement("small", { style: "margin-right: 12px;" }, "Duration"),
-          createElement("div", { style: "display: flex; align-items: center; margin-right: 16px;" }, [
-            createElement("small", {}, "ATK Bonus"),
-            this.renderMagicWordsHelp(),
-          ]),
-          createElement("small", {}, "Damage/Type"),
-        ]
+          createElement(
+            "div",
+            {
+              style: "display: flex; align-items: center; margin-right: 16px;",
+            },
+            [
+              createElement("small", {}, "ATK Bonus"),
+              this.renderMagicWordsHelp(),
+            ],
+          ),
+          createElement(
+            "div",
+            { style: "display: flex; align-items: center;" },
+            [
+              createElement("small", {}, "Damage/Type"),
+              this.renderMagicWordsHelpHoverOnly(),
+            ],
+          ),
+        ],
       ),
       createElement("br"),
       ...(await this.renderAttacksElems()),
@@ -617,8 +792,8 @@ export default class AttackComponent {
         {
           type: "click",
           event: this.newAttack,
-        }
-      )
+        },
+      ),
     );
   };
 }
