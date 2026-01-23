@@ -4,6 +4,7 @@ import isInsideSpan from "../../lib/isInsideSpan.js";
 import createElement from "../createElement.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import { setCaretStartAfter } from "../../lib/caretPositions.js";
+import safeMathEval from "../../lib/safeMathEval.js";
 
 export default class AttackComponent {
   constructor(props) {
@@ -249,14 +250,10 @@ export default class AttackComponent {
       ""
     );
 
-    // Evaluate the calculatedExpression
-    let result;
-    try {
-      if (!calculatedExpression.length) return;
-      result = eval(calculatedExpression).toString();
-    } catch (e) {
-      result = "NaN";
-    }
+    // Evaluate the calculatedExpression safely (no eval)
+    if (!calculatedExpression.length) return;
+    let result = safeMathEval(calculatedExpression);
+    result = isNaN(result) ? "NaN" : result.toString();
 
     const span = this.createMagicCalculationSpanElement(
       result,
@@ -299,13 +296,8 @@ export default class AttackComponent {
           );
         });
 
-        // Evaluate the calculatedExpression
-        let result;
-        try {
-          result = eval(calculatedExpression);
-        } catch (e) {
-          result = "NaN";
-        }
+        // Evaluate the calculatedExpression safely (no eval)
+        let result = safeMathEval(calculatedExpression);
 
         const span = this.createMagicCalculationSpanElement(
           result,
@@ -386,6 +378,75 @@ export default class AttackComponent {
     const hoverInfoElem = document.getElementById("hover-info");
     hoverInfoElem.style.display = "none";
     hoverInfoElem.innerHTML = "";
+  };
+
+  renderMagicWordsHelp = () => {
+    return createElement(
+      "div",
+      {
+        class: "magic-words-help",
+        style: `
+          cursor: help;
+          color: var(--blue6);
+          font-size: 11px;
+          margin-left: 6px;
+          width: 14px;
+          height: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          border: 1px solid var(--blue6);
+        `,
+      },
+      "?",
+      [
+        {
+          type: "mouseenter",
+          event: (e) => {
+            const hoverInfoElem = document.getElementById("hover-info");
+            hoverInfoElem.style.display = "block";
+            const rect = e.target.getBoundingClientRect();
+            hoverInfoElem.style.top = rect.bottom + window.scrollY + "px";
+            hoverInfoElem.style.left = rect.left + window.scrollX + "px";
+
+            hoverInfoElem.append(
+              createElement("div", { style: "max-width: 280px;" }, [
+                createElement("h4", { style: "margin-bottom: 8px;" }, "Magic Words"),
+                createElement("p", { style: "margin-bottom: 8px; font-size: 12px;" },
+                  "Type these keywords in the ATK Bonus field to auto-calculate values:"
+                ),
+                createElement("div", { style: "display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 12px;" }, [
+                  createElement("span", { class: "glowing-text" }, "str"),
+                  createElement("span", {}, "Strength mod"),
+                  createElement("span", { class: "glowing-text" }, "dex"),
+                  createElement("span", {}, "Dexterity mod"),
+                  createElement("span", { class: "glowing-text" }, "con"),
+                  createElement("span", {}, "Constitution mod"),
+                  createElement("span", { class: "glowing-text" }, "int"),
+                  createElement("span", {}, "Intelligence mod"),
+                  createElement("span", { class: "glowing-text" }, "wis"),
+                  createElement("span", {}, "Wisdom mod"),
+                  createElement("span", { class: "glowing-text" }, "cha"),
+                  createElement("span", {}, "Charisma mod"),
+                  createElement("span", { class: "glowing-text" }, "pro"),
+                  createElement("span", {}, "Proficiency bonus"),
+                ]),
+                createElement("p", { style: "margin-top: 8px; font-size: 11px; color: var(--grey3);" },
+                  "Example: dex+pro gives your Dex modifier + proficiency bonus"
+                ),
+              ])
+            );
+          },
+        },
+        {
+          type: "mouseleave",
+          event: () => {
+            this.hideHoverInfo();
+          },
+        },
+      ]
+    );
   };
 
   newAttack = async (e) => {
@@ -540,7 +601,10 @@ export default class AttackComponent {
           createElement("small", { style: "margin-right: 140px;" }, "Name"),
           createElement("small", { style: "margin-right: 29px;" }, "Range"),
           createElement("small", { style: "margin-right: 12px;" }, "Duration"),
-          createElement("small", { style: "margin-right: 16px;" }, "ATK Bonus"),
+          createElement("div", { style: "display: flex; align-items: center; margin-right: 16px;" }, [
+            createElement("small", {}, "ATK Bonus"),
+            this.renderMagicWordsHelp(),
+          ]),
           createElement("small", {}, "Damage/Type"),
         ]
       ),
