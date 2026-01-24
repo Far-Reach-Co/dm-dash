@@ -101,8 +101,9 @@ export default class TableSidebar {
 
     if (newImage) {
       // add new table image
+      let tableImage;
       if (this.projectId) {
-        await postThing(`/api/add_table_image_by_project`, {
+        tableImage = await postThing(`/api/add_table_image_by_project`, {
           project_id: this.projectId,
           image_id: newImage.id,
           folder_id: this.tableSidebarFolderComponent.currentFolder
@@ -110,37 +111,56 @@ export default class TableSidebar {
             : null,
         });
       } else {
-        await postThing(`/api/add_table_image_by_user`, {
+        tableImage = await postThing(`/api/add_table_image_by_user`, {
           image_id: newImage.id,
           folder_id: this.tableSidebarFolderComponent.currentFolder
             ? this.tableSidebarFolderComponent.currentFolder.id
             : null,
         });
       }
+      // Return data for appending to sidebar
+      return { image: newImage, tableImage };
     }
+    return null;
   };
 
   addImageToSidebar = async (e) => {
     if (e.target.files.length) {
       modal.hide();
       try {
-        this.tableSidebarImageComponent.toggleImageLoading();
+        this.tableSidebarImageComponent.showLoading();
+
         if (e.target.files.length > 1) {
-          // multiple
-          await Promise.all(
+          // multiple uploads
+          const results = await Promise.all(
             Array.from(e.target.files).map(async (file) => {
-              await this.uploadTableImage(file);
+              return await this.uploadTableImage(file);
             })
           );
+          // append each uploaded image to memory
+          for (const result of results) {
+            if (result) {
+              await this.tableSidebarImageComponent.appendImage(
+                result.image,
+                result.tableImage
+              );
+            }
+          }
         } else {
-          await this.uploadTableImage(e.target.files[0]);
+          const result = await this.uploadTableImage(e.target.files[0]);
+          if (result) {
+            await this.tableSidebarImageComponent.appendImage(
+              result.image,
+              result.tableImage
+            );
+          }
         }
-        // upload table imge
 
-        this.tableSidebarImageComponent.toggleImageLoading();
+        // Render from memory (no refetch)
+        this.tableSidebarImageComponent.hideLoading();
       } catch (err) {
         console.log(err);
-        this.tableSidebarImageComponent.toggleImageLoading();
+        this.tableSidebarImageComponent.hideLoading();
         window.alert("Something went wrong while uploading your image");
       }
     }
