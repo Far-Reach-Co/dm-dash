@@ -27,8 +27,14 @@ export default class TableSidebarImageComponent {
     // Set From Canvas Layer
   }
 
-  toggleImageLoading = () => {
-    this.imageLoading = !this.imageLoading;
+  showLoading = () => {
+    this.imageLoading = true;
+    this.domComponent.innerHTML = "";
+    this.domComponent.append(renderLoadingWithMessage(""));
+  };
+
+  hideLoading = () => {
+    this.imageLoading = false;
     this.render();
   };
 
@@ -244,53 +250,8 @@ export default class TableSidebarImageComponent {
           src: tableImage.src,
         };
         if (image) {
-          const elem = createElement("div", { class: "sidebar-image-item" }, [
-            createElement(
-              "div",
-              {
-                style:
-                  "display: flex; align-items: center; flex: 1; cursor: pointer;",
-              },
-              [
-                await this.renderImage(image),
-                createElement(
-                  "input",
-                  {
-                    class: "image-name",
-                    value: image.original_name,
-                    title: "Click to edit image name",
-                  },
-                  null,
-                  {
-                    type: "focusout",
-                    event: (e) => {
-                      postThing(`/api/edit_image_name/${image.id}`, {
-                        original_name: e.target.value,
-                      });
-                    },
-                  }
-                ),
-              ]
-            ),
-            createElement(
-              "img",
-              {
-                class: "icon gear",
-                src: "/assets/gears.svg",
-                title: "Open Image Settings",
-              },
-              null,
-              {
-                type: "click",
-                event: async () => {
-                  modal.show(
-                    await this.renderImageSettings(tableImage, image, elem)
-                  );
-                },
-              }
-            ),
-          ]);
-          imageList.push({ elem, tableData: tableImage, imageData: image });
+          const item = await this.createImageListItem(tableImage, image);
+          imageList.push(item);
         }
       })
     );
@@ -301,6 +262,84 @@ export default class TableSidebarImageComponent {
     this.imageDataAndElems = imageList;
 
     return this.renderImageElems();
+  };
+
+  createImageListItem = async (tableImage, image) => {
+    const elem = createElement("div", { class: "sidebar-image-item" }, [
+      createElement(
+        "div",
+        {
+          style:
+            "display: flex; align-items: center; flex: 1; cursor: pointer;",
+        },
+        [
+          await this.renderImage(image),
+          createElement(
+            "input",
+            {
+              class: "image-name",
+              value: image.original_name,
+              title: "Click to edit image name",
+            },
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                postThing(`/api/edit_image_name/${image.id}`, {
+                  original_name: e.target.value,
+                });
+              },
+            }
+          ),
+        ]
+      ),
+      createElement(
+        "img",
+        {
+          class: "icon gear",
+          src: "/assets/gears.svg",
+          title: "Open Image Settings",
+        },
+        null,
+        {
+          type: "click",
+          event: async () => {
+            modal.show(
+              await this.renderImageSettings(tableImage, image, elem)
+            );
+          },
+        }
+      ),
+    ]);
+    return { elem, tableData: tableImage, imageData: image };
+  };
+
+  appendImage = async (imageData, tableImageData) => {
+    const image = {
+      id: imageData.id,
+      original_name: imageData.original_name,
+      size: imageData.size,
+      file_name: imageData.file_name,
+      notes: imageData.notes || null,
+      src: imageData.src,
+    };
+    const tableImage = {
+      ...tableImageData,
+      image_id: imageData.id,
+      original_name: imageData.original_name,
+      size: imageData.size,
+      file_name: imageData.file_name,
+      notes: imageData.notes || null,
+      src: imageData.src,
+    };
+
+    const item = await this.createImageListItem(tableImage, image);
+
+    if (!this.imageDataAndElems) {
+      this.imageDataAndElems = [];
+    }
+    this.imageDataAndElems.push(item);
+    this.updateImagesList();
   };
 
   updateImagesList = () => {
@@ -318,15 +357,23 @@ export default class TableSidebarImageComponent {
       return this.domComponent.append(renderLoadingWithMessage(""));
     }
 
-    // temp spinner while loading image assets
-    this.tempLoadingSpinner = renderLoadingWithMessage("");
-    this.domComponent.append(this.tempLoadingSpinner);
+    // Determine what to render
+    let imageElems;
+    if (this.imageDataAndElems) {
+      // Render from memory
+      imageElems = this.renderImageElems();
+    } else {
+      // Fetch and populate memory
+      this.tempLoadingSpinner = renderLoadingWithMessage("");
+      this.domComponent.append(this.tempLoadingSpinner);
+      imageElems = await this.renderCurrentImages();
+    }
 
     // create and save imagesListContainer
     this.imagesListContainer = createElement(
       "div",
       { id: "table-sidebar-images", style: "padding: 3px;" },
-      [...(await this.renderCurrentImages())]
+      [...imageElems]
     );
 
     this.domComponent.append(

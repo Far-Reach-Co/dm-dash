@@ -200,7 +200,16 @@ function newImageForProject(req, res, next) {
                 },
                 req,
             });
-            res.send(image);
+            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
+            const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
+            const signedUrl = cloudFrontSigner.getSignedUrl({
+                url: cloudFrontUrl,
+                expires: expiresAt,
+            });
+            socketUsers_1.redisClient
+                .setEx(getSignedUrlCacheKey(image.id), SIGNED_URL_CACHE_TTL_SECONDS, signedUrl)
+                .catch((err) => console.error("Failed to cache signed URL:", err));
+            res.send(Object.assign(Object.assign({}, image), { src: signedUrl }));
         }
         catch (err) {
             (0, fs_1.unlinkSync)(filePath);
@@ -278,7 +287,16 @@ function newImageForUser(req, res, next) {
                 },
                 req,
             });
-            res.send(image);
+            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
+            const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
+            const signedUrl = cloudFrontSigner.getSignedUrl({
+                url: cloudFrontUrl,
+                expires: expiresAt,
+            });
+            socketUsers_1.redisClient
+                .setEx(getSignedUrlCacheKey(image.id), SIGNED_URL_CACHE_TTL_SECONDS, signedUrl)
+                .catch((err) => console.error("Failed to cache signed URL:", err));
+            res.send(Object.assign(Object.assign({}, image), { src: signedUrl }));
         }
         catch (err) {
             (0, fs_1.unlinkSync)(filePath);
