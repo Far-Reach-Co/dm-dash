@@ -335,6 +335,7 @@ class SingleSpell {
 
   removeItem = (id) => {
     this.spellElements = this.spellElements.filter((item) => item.id != id);
+    this.spells = this.spells.filter((spell) => spell.id != id);
     this.render();
   };
 
@@ -342,10 +343,8 @@ class SingleSpell {
     if (!this.spells.length)
       return [createElement("small", {}, "No spells yet...")];
 
-    // check if we have some components instantiated already
-    if (this.spellElements.length) {
-      return this.spellElements.map((item) => item.domComponent);
-    }
+    // Clear the spellElements array to ensure fresh rendering
+    this.spellElements = [];
 
     return this.spells.map((spell) => {
       const elem = createElement("div");
