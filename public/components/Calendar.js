@@ -265,7 +265,6 @@ export default class Calendar {
       await this.newDay();
       this.toggleLoading();
     });
-    mainDiv.append(addBtn);
     // done
     const doneBtn = createElement("button", {}, "Done");
     doneBtn.addEventListener("click", async () => {
@@ -274,7 +273,9 @@ export default class Calendar {
       await this.updateDays();
       this.toggleLoading();
     });
-    mainDiv.append(doneBtn);
+    mainDiv.append(
+      createElement("div", { class: "calendar-edit-actions" }, [addBtn, doneBtn])
+    );
     // append
     this.domComponent.appendChild(mainDiv);
   };
@@ -383,7 +384,6 @@ export default class Calendar {
       await this.newMonth();
       this.toggleLoading();
     });
-    mainDiv.append(addBtn);
     // done
     const doneBtn = createElement("button", {}, "Done");
     doneBtn.addEventListener("click", async () => {
@@ -392,7 +392,9 @@ export default class Calendar {
       await this.updateMonths();
       this.toggleLoading();
     });
-    mainDiv.append(doneBtn);
+    mainDiv.append(
+      createElement("div", { class: "calendar-edit-actions" }, [addBtn, doneBtn])
+    );
     // append
     this.domComponent.appendChild(mainDiv);
   };
@@ -456,7 +458,7 @@ export default class Calendar {
     }
 
     const manageBtnContainer = createElement("div", {
-      class: "mb-3",
+      class: "calendar-edit-buttons",
     });
 
     const manageCalendarBtn = createElement("button", {}, "Manage Calendar");
@@ -482,14 +484,7 @@ export default class Calendar {
       this.render();
     });
 
-    manageBtnContainer.append(
-      manageCalendarBtn,
-      createElement("br"),
-      manageMonthsBtn,
-      createElement("br"),
-      manageDaysBtn,
-      createElement("br")
-    );
+    manageBtnContainer.append(manageCalendarBtn, manageMonthsBtn, manageDaysBtn);
 
     const doneButton = createElement("button", {}, "Done");
     doneButton.addEventListener("click", async () => {
@@ -514,8 +509,10 @@ export default class Calendar {
       createElement("div", { class: "component-title" }, `Edit ${this.title}`),
       createElement("br"),
       manageBtnContainer,
-      doneButton,
-      removeButton
+      createElement("div", { class: "calendar-edit-actions" }, [
+        doneButton,
+        removeButton,
+      ])
     );
   };
 
@@ -533,27 +530,37 @@ export default class Calendar {
     );
     const monthYear = createElement(
       "div",
-      {},
-      `${this.monthBeingViewed.title} ${this.year}`
+      { class: "calendar-month-display" },
+      `${this.monthBeingViewed.title} ${this.yearBeingViewed}`
     );
     const arrowButtonLeft = createElement(
       "button",
-      { title: "View the previous month" },
+      {
+        class: `calendar-nav-btn${!previousMonth ? " invisible" : ""}`,
+        title: "View the previous month",
+      },
       "<"
     );
-    arrowButtonLeft.addEventListener("click", () => {
-      this.monthBeingViewed = previousMonth;
-      this.render();
-    });
+    if (previousMonth) {
+      arrowButtonLeft.addEventListener("click", () => {
+        this.monthBeingViewed = previousMonth;
+        this.render();
+      });
+    }
     const arrowButtonRight = createElement(
       "button",
-      { title: "View the next month" },
+      {
+        class: `calendar-nav-btn${!nextMonth ? " invisible" : ""}`,
+        title: "View the next month",
+      },
       ">"
     );
-    arrowButtonRight.addEventListener("click", () => {
-      this.monthBeingViewed = nextMonth;
-      this.render();
-    });
+    if (nextMonth) {
+      arrowButtonRight.addEventListener("click", () => {
+        this.monthBeingViewed = nextMonth;
+        this.render();
+      });
+    }
 
     const calendarContainer = createElement("div", {
       class: "calendar-container",
@@ -618,15 +625,13 @@ export default class Calendar {
           height: 30,
         }),
       ]),
-      monthYear
+      createElement("div", { class: "calendar-nav" }, [
+        arrowButtonLeft,
+        monthYear,
+        arrowButtonRight,
+      ]),
+      calendarContainer
     );
-    if (previousMonth) {
-      this.domComponent.append(arrowButtonLeft);
-    }
-    if (nextMonth) {
-      this.domComponent.append(arrowButtonRight);
-    }
-    this.domComponent.append(createElement("br"), calendarContainer);
   };
 
   render = async () => {

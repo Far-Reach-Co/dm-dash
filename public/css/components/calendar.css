@@ -2,11 +2,6 @@
    Calendar Styles
    ========================================================================== */
 
-.current-date {
-  display: flex;
-  margin-bottom: 5px;
-}
-
 .month-container {
   padding: 5px;
   margin-bottom: var(--main-distance);
@@ -14,6 +9,8 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .day-container {
@@ -23,6 +20,8 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-evenly;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .calendar {
@@ -51,15 +50,43 @@
   cursor: pointer;
 }
 
-.non-clickable-day {
-  /* cursor: pointer; */
-}
-
 .clickable-day:hover {
   background-color: var(--blue);
 }
 
-.note-date {
-  font-size: 12px;
-  color: var(--light-gray);
+/* Calendar Navigation */
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.calendar-nav-btn {
+  min-width: 40px;
+}
+
+.calendar-nav-btn.invisible {
+  visibility: hidden;
+}
+
+.calendar-month-display {
+  min-width: 180px;
+  text-align: center;
+}
+
+/* Calendar Edit Buttons */
+.calendar-edit-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.calendar-edit-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
 }
