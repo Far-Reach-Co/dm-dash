@@ -30,6 +30,10 @@
   justify-content: center;
 }
 
+.modal-custom.visible {
+  visibility: visible;
+}
+
 /* Modal Content/Box */
 .modal-custom-container {
   width: fit-content;

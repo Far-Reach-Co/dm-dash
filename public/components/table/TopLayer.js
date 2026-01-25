@@ -17,7 +17,7 @@ export default class TopLayer {
   renderSelectedObjectInfoElem = async () => {
     const obj = this.tableApp.getCurrentSelectedObject();
     if (!obj) {
-      return createElement("div", { style: "display: none;" });
+      return createElement("div", { class: "d-none" });
     }
 
     let displayName = "";
@@ -51,15 +51,15 @@ export default class TopLayer {
           {},
           `${IdPrefix}-${truncateString(obj.id, 8, "")}`
         ),
-        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+        createElement("div", { class: "d-flex flex-row" }, [
           obj.type == "image"
             ? createElement("img", {
-                style: "margin-right: 2px;",
+                class: "me-1",
                 src: imageSrc,
                 width: 30,
                 height: 30,
               })
-            : createElement("div", { style: "display: none;" }),
+            : createElement("div", { class: "d-none" }),
           imageAssociatedRecordTitle
             ? createElement(
                 "small",
@@ -80,8 +80,7 @@ export default class TopLayer {
         createElement(
           "div",
           {
-            style:
-              "display: flex; flex-direction: row; align-items: flex-start",
+            class: "d-flex flex-row align-items-start",
           },
           [
             createElement(
@@ -135,21 +134,21 @@ export default class TopLayer {
       case "Map":
         layerInfo = createElement(
           "small",
-          { style: "color: var(--orange2)" },
+          { class: "text-orange" },
           "Map Layer"
         );
         break;
       case "Object":
         layerInfo = createElement(
           "small",
-          { style: "color: var(--green)" },
+          { class: "text-green" },
           "Object Layer"
         );
         break;
       case "Fog":
         layerInfo = createElement(
           "small",
-          { style: "color: var(--light-gray)" },
+          { class: "text-light-gray" },
           "Fog Layer"
         );
         break;
@@ -160,7 +159,7 @@ export default class TopLayer {
 
   renderLayersElem = () => {
     if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
-      return createElement("div", { style: "display: none;" });
+      return createElement("div", { class: "d-none" });
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
         this.renderStyledLayerInfoElem(),
@@ -184,7 +183,7 @@ export default class TopLayer {
 
   renderGridControlElem = () => {
     if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
-      return createElement("div", { style: "display: none;" });
+      return createElement("div", { class: "d-none" });
     }
 
     const gridGroup = this.tableApp.canvasLayer.gridManager?.getGroup();
@@ -352,22 +351,21 @@ export default class TopLayer {
           createElement(
             "div",
             {
-              style: "display: flex; align-items: flex-end;",
+              class: "d-flex align-items-end",
             },
             [
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; flex-direction: column; align-items: flex-start;",
+                  class: "d-flex flex-column align-items-start",
                 },
                 [
                   createElement("small", {}, "Color"),
                   createElement(
                     "input",
                     {
-                      style:
-                        "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
+                      class: "cursor-pointer me-3",
+                      style: "height: 25px;",
                       type: "color",
                       id: "colorpicker",
                       name: "colorpicker",
@@ -388,8 +386,7 @@ export default class TopLayer {
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; flex-direction: column; align-items: center;",
+                  class: "d-flex flex-column align-items-center",
                 },
                 [
                   createElement("small", {}, "Line Width"),
@@ -418,7 +415,7 @@ export default class TopLayer {
           ),
         ]
       );
-    } else return createElement("div", { style: "display: none;" });
+    } else return createElement("div", { class: "d-none" });
   };
 
   renderCanvasObjectList = (canvasObjectList) => {
@@ -428,15 +425,13 @@ export default class TopLayer {
         IdPrefix = "img";
       }
       if (!obj.id) {
-        return createElement("div", { style: "display: none;" });
+        return createElement("div", { class: "d-none" });
       }
 
       return createElement(
         "div",
         {
-          class: "canvas-log-item",
-          style:
-            "display: flex; flex-direction: row; justify-content: space-between;",
+          class: "canvas-log-item d-flex flex-row justify-content-between",
         },
         [
           createElement(
@@ -489,7 +484,7 @@ export default class TopLayer {
                       createElement("hr"),
                       createElement(
                         "div",
-                        { style: "overflow: auto; height: 300px;" },
+                        { class: "overflow-auto", style: "height: 300px;" },
                         [...this.renderCanvasObjectList(canvasObjectsList)]
                       ),
                     ])

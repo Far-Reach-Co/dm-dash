@@ -125,21 +125,21 @@ export default class FeatComponent {
       createElement(
         "div",
         {
-          style:
-            "display: flex; flex: 1; align-items: center; justify-content: center; position: relative; margin-bottom: var(--main-distance);",
+          class: "d-flex align-items-center justify-content-center position-relative mb-3",
+          style: "flex: 1;",
         },
         [
           createElement("div", { class: "special-font" }, "Feats and Traits"),
           createElement(
             "div",
             {
-              style:
-                "position: absolute; right: 0; top: 0; display: flex; flex-direction: column;",
+              class: "position-absolute d-flex flex-column",
+              style: "right: 0; top: 0;",
             },
             [
               createElement(
                 "a",
-                { style: "font-size: small; margin-bottom: 5px;" },
+                { class: "font-small mb-1" },
                 "+ Expand all",
                 {
                   type: "click",
@@ -150,7 +150,7 @@ export default class FeatComponent {
               ),
               createElement(
                 "a",
-                { style: "font-size: small;" },
+                { class: "font-small" },
                 "- Collapse all",
                 {
                   type: "click",
@@ -167,7 +167,7 @@ export default class FeatComponent {
       ...(await this.renderFeatElems()),
       createElement(
         "a",
-        { style: "align-self: flex-start;", title: "Create a new feat/trait" },
+        { class: "align-self-start", title: "Create a new feat/trait" },
         "+",
         {
           type: "click",
@@ -210,12 +210,12 @@ class SingleFeatComponent {
 
   renderHideFeatButton = () => {
     if (!this.hidden) {
-      return createElement("a", { style: "font-size: small;" }, "- Collapse", {
+      return createElement("a", { class: "font-small" }, "- Collapse", {
         type: "click",
         event: this.toggleHide,
       });
     } else {
-      return createElement("a", { style: "font-size: small;" }, "+ Expand", {
+      return createElement("a", { class: "font-small" }, "+ Expand", {
         type: "click",
         event: this.toggleHide,
       });
@@ -224,7 +224,7 @@ class SingleFeatComponent {
 
   renderDescriptionOrHidden = () => {
     if (this.hidden) {
-      return createElement("div", { style: "display: none;" }, "");
+      return createElement("div", { class: "d-none" }, "");
     } else {
       return createElement(
         "textarea",
@@ -368,29 +368,26 @@ class SingleFeatComponent {
       createElement(
         "div",
         {
-          style: "display: flex; flex-direction: column; position: relative;",
+          class: "d-flex flex-column position-relative",
         },
         [
           createElement(
             "div",
             {
-              style:
-                "display: flex; margin-bottom: 5px; align-items: center; justify-content: space-between;",
+              class: "d-flex mb-1 align-items-center justify-content-between",
             },
             [
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; align-items: center; justify-content: center;",
+                  class: "d-flex align-items-center justify-content-center",
                 },
                 [
                   createElement(
                     "input",
                     {
-                      class: "cp-input-gen",
+                      class: "cp-input-gen text-orange",
                       id: `feat-title-input-${this.id}`,
-                      style: "color: var(--orange2)",
                       name: "title",
                       value: this.title ? this.title : "",
                     },
@@ -430,8 +427,7 @@ class SingleFeatComponent {
                   createElement(
                     "div",
                     {
-                      style:
-                        "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                      class: "text-red cursor-pointer ms-3",
                       title: "Remove feat/trait",
                     },
                     "ⓧ",
@@ -460,8 +456,7 @@ class SingleFeatComponent {
           createElement(
             "select",
             {
-              class: "select-option-small",
-              style: "margin-bottom: 5px;",
+              class: "select-option-small mb-1",
               id: "type",
               name: "type",
             },

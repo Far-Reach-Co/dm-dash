@@ -58,7 +58,7 @@ export default class AttackComponent {
       hoverInfoElem.append(
         createElement("div", {}, [
           createElement("h4", {}, "Magic Words"),
-          createElement("div", { style: "color: var(--green)" }, mapping.value),
+          createElement("div", { class: "text-green" }, mapping.value),
           createElement("p", {}, `${mapping.key} - (${valueToInsert})`),
         ]),
       );
@@ -314,8 +314,8 @@ export default class AttackComponent {
     const elem = createElement(
       "div",
       {
-        class: "cp-input-gen input-small magic-text",
-        style: "margin-right: 5px; width: 150px;",
+        class: "cp-input-gen input-small magic-text me-1",
+        style: "width: 150px;",
         contentEditable: "true",
         name: "damage_type",
       },
@@ -383,9 +383,8 @@ export default class AttackComponent {
     const elem = createElement(
       "div",
       {
-        class: "cp-input-gen-short input-small magic-text",
+        class: "cp-input-gen-short input-small magic-text me-1",
         id: "bonus-magic-text",
-        style: "margin-right: 5px;",
         contentEditable: "true",
         name: "bonus",
       },
@@ -493,7 +492,7 @@ export default class AttackComponent {
               createElement("div", { style: "max-width: 280px;" }, [
                 createElement(
                   "h4",
-                  { style: "margin-bottom: 8px;" },
+                  { class: "mb-2" },
                   "Magic Words",
                 ),
                 createElement(
@@ -580,7 +579,7 @@ export default class AttackComponent {
               createElement("div", { style: "max-width: 280px;" }, [
                 createElement(
                   "h4",
-                  { style: "margin-bottom: 8px;" },
+                  { class: "mb-2" },
                   "Magic Words + Calc",
                 ),
                 createElement(
@@ -656,14 +655,13 @@ export default class AttackComponent {
       return createElement(
         "div",
         {
-          style: "display: flex; align-items: center; margin-bottom: 5px;",
+          class: "d-flex align-items-center mb-1",
         },
         [
           createElement(
             "input",
             {
-              class: "cp-input-gen input-small",
-              style: "margin-right: 5px;",
+              class: "cp-input-gen input-small me-1",
               name: "title",
               value: item.title ? item.title : "",
             },
@@ -681,8 +679,7 @@ export default class AttackComponent {
           createElement(
             "input",
             {
-              class: "cp-input-gen-short input-small",
-              style: "margin-right: 5px;",
+              class: "cp-input-gen-short input-small me-1",
               name: "range",
               value: item.range ? item.range : "",
             },
@@ -700,8 +697,7 @@ export default class AttackComponent {
           createElement(
             "input",
             {
-              class: "cp-input-gen-short input-small",
-              style: "margin-right: 5px;",
+              class: "cp-input-gen-short input-small me-1",
               name: "duration",
               value: item.duration ? item.duration : "",
             },
@@ -721,7 +717,7 @@ export default class AttackComponent {
           createElement(
             "div",
             {
-              style: "color: var(--red1); cursor: pointer;",
+              class: "text-red cursor-pointer",
               title: "Remove attack",
             },
             "ⓧ",
@@ -754,14 +750,14 @@ export default class AttackComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { class: "special-font", style: "align-self: center;" },
+        { class: "special-font align-self-center" },
         "Attacks and Spellcasting",
       ),
       createElement("br"),
       createElement(
         "div",
         {
-          style: "display: flex; align-items: center;",
+          class: "d-flex align-items-center",
         },
         [
           createElement("small", { style: "margin-right: 140px;" }, "Name"),
@@ -770,7 +766,8 @@ export default class AttackComponent {
           createElement(
             "div",
             {
-              style: "display: flex; align-items: center; margin-right: 16px;",
+              class: "d-flex align-items-center",
+              style: "margin-right: 16px;",
             },
             [
               createElement("small", {}, "ATK Bonus"),
@@ -779,7 +776,7 @@ export default class AttackComponent {
           ),
           createElement(
             "div",
-            { style: "display: flex; align-items: center;" },
+            { class: "d-flex align-items-center" },
             [
               createElement("small", {}, "Damage/Type"),
               this.renderMagicWordsHelpHoverOnly(),
@@ -791,7 +788,7 @@ export default class AttackComponent {
       ...(await this.renderAttacksElems()),
       createElement(
         "a",
-        { style: "align-self: flex-start;", title: "Create a new attack" },
+        { class: "align-self-start", title: "Create a new attack" },
         "+",
         {
           type: "click",

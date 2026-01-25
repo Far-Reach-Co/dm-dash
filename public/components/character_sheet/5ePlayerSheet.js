@@ -521,17 +521,17 @@ export default class FiveEPlayerSheet {
       createElement(
         "div",
         {
-          style: "display: flex; flex: 1; flex-wrap: wrap;",
+          class: "d-flex flex-wrap", style: "flex: 1;",
         },
         [
           createElement(
             "div",
-            { style: "display: flex: flex-direction: column;" },
+            { class: "d-flex flex-column" },
             [
               createElement("div", { class: "cp-info-container-column" }, [
                 createElement(
                   "div",
-                  { class: "special-font", style: "align-self: center;" },
+                  { class: "special-font align-self-center" },
                   "General Info"
                 ),
                 createElement("div", { class: "cp-content-container" }, [
@@ -554,7 +554,7 @@ export default class FiveEPlayerSheet {
                 ]),
                 createElement(
                   "div",
-                  { style: "display: flex; flex-wrap: wrap;" },
+                  { class: "d-flex flex-wrap" },
                   [
                     createElement("div", {}, [
                       createElement("div", { class: "cp-content-container" }, [
@@ -640,14 +640,13 @@ export default class FiveEPlayerSheet {
           ),
           createElement(
             "div",
-            { style: "display: flex; flex-direction: column;" },
+            { class: "d-flex flex-column" },
             [
               createElement("div", { class: "cp-info-container-column" }, [
                 createElement(
                   "div",
                   {
-                    style:
-                      "display: flex; flex-wrap: wrap; justify-content: center;",
+                    class: "d-flex flex-wrap justify-content-center",
                   },
                   [
                     createElement(
@@ -739,8 +738,7 @@ export default class FiveEPlayerSheet {
                 createElement(
                   "div",
                   {
-                    style:
-                      "display: flex; flex-wrap: wrap; justify-content: center;",
+                    class: "d-flex flex-wrap justify-content-center",
                   },
                   [
                     createElement(
@@ -781,8 +779,7 @@ export default class FiveEPlayerSheet {
                         createElement(
                           "div",
                           {
-                            style:
-                              "display: flex; align-items: center; justify-content: center;",
+                            class: "d-flex align-items-center justify-content-center",
                           },
                           [
                             createElement("small", {}, "Total"),
@@ -838,11 +835,11 @@ export default class FiveEPlayerSheet {
               ]),
               createElement(
                 "div",
-                { style: "display: flex; flex-wrap: wrap;" },
+                { class: "d-flex flex-wrap" },
                 [
                   createElement(
                     "div",
-                    { style: "display: flex; flex-direction: column;" },
+                    { class: "d-flex flex-column" },
                     [
                       createElement(
                         "div",
@@ -867,7 +864,7 @@ export default class FiveEPlayerSheet {
                   ),
                   createElement(
                     "div",
-                    { style: "display: flex; flex-direction: column;" },
+                    { class: "d-flex flex-column" },
                     [
                       createElement(
                         "div",
@@ -916,20 +913,19 @@ export default class FiveEPlayerSheet {
       createElement(
         "div",
         {
-          style:
-            "display: flex; flex-wrap: wrap; margin-bottom: var(--main-distance);",
+          class: "d-flex flex-wrap mb-3",
         },
         [...this.renderAbilityScores()]
       ),
-      createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+      createElement("div", { class: "d-flex flex-wrap" }, [
         createElement(
           "div",
-          { style: "display: flex; flex-direction: column;" },
+          { class: "d-flex flex-column" },
           [
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { class: "special-font", style: "align-self: center;" },
+                { class: "special-font align-self-center" },
                 "Saving Throws"
               ),
               ...this.renderSavingThrows(),
@@ -940,8 +936,7 @@ export default class FiveEPlayerSheet {
                 createElement(
                   "div",
                   {
-                    style:
-                      "display: flex; align-items: center; justify-content: center;",
+                    class: "d-flex align-items-center justify-content-center",
                   },
                   [
                     createElement("small", {}, "Total"),
@@ -993,7 +988,7 @@ export default class FiveEPlayerSheet {
                   "input",
                   {
                     class: "cp-input-no-border",
-                    style: "font-size: small; color: var(--orange3);",
+                    class: "font-small text-orange3",
                     name: "class_resource_title",
                     value: this.generalData.class_resource_title
                       ? this.generalData.class_resource_title
@@ -1013,8 +1008,7 @@ export default class FiveEPlayerSheet {
                 createElement(
                   "div",
                   {
-                    style:
-                      "display: flex; align-items: center; justify-content: center;",
+                    class: "d-flex align-items-center justify-content-center",
                   },
                   [
                     createElement("small", {}, "Total"),
@@ -1062,7 +1056,7 @@ export default class FiveEPlayerSheet {
                   "input",
                   {
                     class: "cp-input-no-border",
-                    style: "font-size: small; color: var(--orange3);",
+                    class: "font-small text-orange3",
                     name: "other_resource_title",
                     value: this.generalData.other_resource_title
                       ? this.generalData.other_resource_title
@@ -1082,14 +1076,14 @@ export default class FiveEPlayerSheet {
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { class: "special-font", style: "align-self: center;" },
+                { class: "special-font align-self-center" },
                 "Death Saves"
               ),
-              createElement("div", { style: "display: flex;" }, [
+              createElement("div", { class: "d-flex" }, [
                 createElement("small", {}, "Successes"),
                 createElement(
                   "div",
-                  { style: "display: flex; margin-left: auto;" },
+                  { class: "d-flex ms-auto" },
                   [
                     createElement(
                       "div",
@@ -1145,11 +1139,11 @@ export default class FiveEPlayerSheet {
                   ]
                 ),
               ]),
-              createElement("div", { style: "display: flex;" }, [
+              createElement("div", { class: "d-flex" }, [
                 createElement("small", {}, "Failures"),
                 createElement(
                   "div",
-                  { style: "display: flex; margin-left: auto;" },
+                  { class: "d-flex ms-auto" },
                   [
                     createElement(
                       "div",
@@ -1211,12 +1205,12 @@ export default class FiveEPlayerSheet {
         ),
         createElement(
           "div",
-          { style: "display: flex; flex-direction: column;" },
+          { class: "d-flex flex-column" },
           [
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { class: "special-font", style: "align-self: center;" },
+                { class: "special-font align-self-center" },
                 "Skills"
               ),
               ...this.renderSkills(),
@@ -1224,14 +1218,13 @@ export default class FiveEPlayerSheet {
             createElement("div", { class: "cp-info-container-column" }, [
               createElement(
                 "div",
-                { class: "special-font", style: "align-self: center;" },
+                { class: "special-font align-self-center" },
                 "Currency"
               ),
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                  class: "d-flex justify-content-between align-items-center mb-1",
                 },
                 [
                   createElement("small", {}, "Copper"),
@@ -1261,8 +1254,7 @@ export default class FiveEPlayerSheet {
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                  class: "d-flex justify-content-between align-items-center mb-1",
                 },
                 [
                   createElement("small", {}, "Silver"),
@@ -1292,8 +1284,7 @@ export default class FiveEPlayerSheet {
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                  class: "d-flex justify-content-between align-items-center mb-1",
                 },
                 [
                   createElement("small", {}, "Electrum"),
@@ -1323,8 +1314,7 @@ export default class FiveEPlayerSheet {
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                  class: "d-flex justify-content-between align-items-center mb-1",
                 },
                 [
                   createElement("small", {}, "Gold"),
@@ -1352,8 +1342,7 @@ export default class FiveEPlayerSheet {
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;",
+                  class: "d-flex justify-content-between align-items-center mb-1",
                 },
                 [
                   createElement("small", {}, "Platinum"),
@@ -1385,7 +1374,7 @@ export default class FiveEPlayerSheet {
         ),
         createElement(
           "div",
-          { style: "display: flex; flex-direction: column;" },
+          { class: "d-flex flex-column" },
           [this.attackComponent.domComponent, this.featComponent.domComponent]
         ),
       ])
@@ -1397,17 +1386,17 @@ export default class FiveEPlayerSheet {
       createElement(
         "div",
         {
-          style: "display: flex; flex: 1; flex-wrap: wrap;",
+          class: "d-flex flex-wrap", style: "flex: 1;",
         },
         [
           createElement(
             "div",
-            { style: "display: flex; flex-direction: column;" },
+            { class: "d-flex flex-column" },
             [
               createElement("div", { class: "cp-info-container-column" }, [
                 createElement(
                   "div",
-                  { style: "display: flex; flex-wrap: wrap;" },
+                  { class: "d-flex flex-wrap" },
                   [
                     createElement("div", {}, [
                       createElement("div", { class: "cp-content-container" }, [
@@ -1607,7 +1596,7 @@ export default class FiveEPlayerSheet {
               createElement("div", { class: "cp-info-container-column" }, [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Appearance"
                 ),
                 createElement("br"),
@@ -1633,7 +1622,7 @@ export default class FiveEPlayerSheet {
               createElement("div", { class: "cp-info-container-column" }, [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Backstory"
                 ),
                 createElement("br"),
@@ -1659,7 +1648,7 @@ export default class FiveEPlayerSheet {
               createElement("div", { class: "cp-info-container-column" }, [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Allies & Organizations"
                 ),
                 createElement("br"),
@@ -1685,7 +1674,7 @@ export default class FiveEPlayerSheet {
               createElement("div", { class: "cp-info-container-column" }, [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Other Info"
                 ),
                 createElement("br"),
@@ -1713,11 +1702,11 @@ export default class FiveEPlayerSheet {
           createElement("div", { class: "cp-info-container-column " }, [
             createElement(
               "div",
-              { style: "display: flex; flex-direction: column;" },
+              { class: "d-flex flex-column" },
               [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Personality Traits"
                 ),
                 createElement("br"),
@@ -1744,11 +1733,11 @@ export default class FiveEPlayerSheet {
             ),
             createElement(
               "div",
-              { style: "display: flex; flex-direction: column;" },
+              { class: "d-flex flex-column" },
               [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Ideals"
                 ),
                 createElement("br"),
@@ -1775,11 +1764,11 @@ export default class FiveEPlayerSheet {
             ),
             createElement(
               "div",
-              { style: "display: flex; flex-direction: column;" },
+              { class: "d-flex flex-column" },
               [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Bonds"
                 ),
                 createElement("br"),
@@ -1806,11 +1795,11 @@ export default class FiveEPlayerSheet {
             ),
             createElement(
               "div",
-              { style: "display: flex; flex-direction: column;" },
+              { class: "d-flex flex-column" },
               [
                 createElement(
                   "div",
-                  { style: "color: var(--orange3)" },
+                  { class: "text-orange3" },
                   "Flaws"
                 ),
                 createElement("br"),
@@ -1878,7 +1867,7 @@ export default class FiveEPlayerSheet {
           },
         }
       );
-    } else return createElement("div", { style: "display: none;" });
+    } else return createElement("div", { class: "d-none" });
   };
 
   render = async () => {

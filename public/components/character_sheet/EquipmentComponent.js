@@ -183,21 +183,20 @@ export default class EquipmentComponent {
       return createElement(
         "div",
         {
-          style: "display: flex; flex-direction-column;",
+          class: "d-flex flex-column",
         },
         [
           createElement(
             "div",
             {
-              style: "display: flex; align-items: center; margin-bottom: 5px;",
+              class: "d-flex align-items-center mb-1",
             },
             [
               createElement(
                 "input",
                 {
-                  class: "cp-input-gen input-small",
+                  class: "cp-input-gen input-small me-1",
                   id: `equipment-title-input-${equipmentItem.id}`,
-                  style: "margin-right: 5px;",
                   name: "title",
                   value: equipmentItem.title ? equipmentItem.title : "",
                 },
@@ -238,8 +237,7 @@ export default class EquipmentComponent {
               createElement(
                 "input",
                 {
-                  class: "cp-input-gen-short input-small",
-                  style: "margin-right: 5px;",
+                  class: "cp-input-gen-short input-small me-1",
                   type: "number",
                   name: "quantity",
                   value: equipmentItem.quantity ? equipmentItem.quantity : "0",
@@ -264,9 +262,8 @@ export default class EquipmentComponent {
               createElement(
                 "input",
                 {
-                  class: "cp-input-gen-short input-small",
+                  class: "cp-input-gen-short input-small me-1",
                   id: `equipment-weight-input-${equipmentItem.id}`,
-                  style: "margin-right: 5px;",
                   type: "number",
                   name: "weight",
                   value: equipmentItem.weight ? equipmentItem.weight : "0",
@@ -291,7 +288,7 @@ export default class EquipmentComponent {
               createElement(
                 "div",
                 {
-                  style: "color: var(--red1); cursor: pointer;",
+                  class: "text-red cursor-pointer",
                   title: "Remove equipment",
                 },
                 "ⓧ",
@@ -351,18 +348,18 @@ export default class EquipmentComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { class: "special-font", style: "align-self: center;" },
+        { class: "special-font align-self-center" },
         "Equipment"
       ),
       createElement("br"),
       createElement(
         "div",
         {
-          style: "display: flex; align-items: center;",
+          class: "d-flex align-items-center",
         },
         [
           createElement("small", { style: "margin-right: 140px;" }, "Name"),
-          createElement("small", { style: "margin-right: 10px;" }, "Quantity"),
+          createElement("small", { class: "me-2" }, "Quantity"),
           createElement("small", {}, "Weight"),
         ]
       ),
@@ -371,14 +368,13 @@ export default class EquipmentComponent {
       createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: space-between",
+          class: "d-flex align-items-center justify-content-between",
         },
         [
           createElement(
             "a",
             {
-              style: "align-self: flex-start;",
+              class: "align-self-start",
               title: "Create a new equipment item",
             },
             "+",
@@ -387,10 +383,10 @@ export default class EquipmentComponent {
               event: this.newEquipment,
             }
           ),
-          createElement("div", { style: "display: flex;" }, [
+          createElement("div", { class: "d-flex" }, [
             createElement(
               "div",
-              { style: "margin-right: 5px;" },
+              { class: "me-1" },
               "Total Weight:"
             ),
             createElement(

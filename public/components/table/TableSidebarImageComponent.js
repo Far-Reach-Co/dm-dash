@@ -269,8 +269,7 @@ export default class TableSidebarImageComponent {
       createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; flex: 1; cursor: pointer;",
+          class: "d-flex align-items-center cursor-pointer flex-1",
         },
         [
           await this.renderImage(image),
@@ -480,17 +479,17 @@ class AssociatedRecordsComponent {
 
       return createElement("div", {}, [
         createElement("div", {}, "None..."),
-        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+        createElement("div", { class: "d-flex flex-row" }, [
           createElement(
             "button",
-            { style: "margin-right: 5px;" },
+            { class: "me-1" },
             "Create Record",
             {
               type: "click",
               event: () => this.createNewRecord(),
             }
           ),
-          createElement("div", { style: "margin-right: 5px;" }, "Or"),
+          createElement("div", { class: "me-1" }, "Or"),
           recordSelectElem,
         ]),
       ]);

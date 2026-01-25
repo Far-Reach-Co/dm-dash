@@ -15,13 +15,13 @@ class Modal {
   }
 
   show = (content) => {
-    this.domComponent.style.visibility = "visible";
+    this.domComponent.classList.add("visible");
     this.domContent.innerHTML = "";
     this.domContent.append(content);
   };
 
   hide = () => {
-    this.domComponent.style.visibility = "hidden";
+    this.domComponent.classList.remove("visible");
   };
 }
 

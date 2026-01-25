@@ -196,7 +196,7 @@ export default class Calendar {
         const indexLabel = createElement(
           "div",
           {
-            style: "display: inline-block; margin-right: var(--main-distance);",
+            class: "d-inline-block me-3",
           },
           `Day ${index + 1}`
         );
@@ -222,7 +222,7 @@ export default class Calendar {
         });
         // move index
         const moveBtnContainer = createElement("div", {
-          style: "display: inline-block;",
+          class: "d-inline-block",
         });
         const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
         moveUpBtn.addEventListener("click", async () => {
@@ -292,7 +292,7 @@ export default class Calendar {
         const indexLabel = createElement(
           "div",
           {
-            style: "display: inline-block; margin-right: var(--main-distance);",
+            class: "d-inline-block me-3",
           },
           `Month ${index + 1}`
         );
@@ -309,7 +309,7 @@ export default class Calendar {
           "label",
           {
             for: "number_of_days",
-            style: "margin-right: var(--main-distance);",
+            class: "me-3",
           },
           "Days"
         );
@@ -336,7 +336,7 @@ export default class Calendar {
         });
         // move index
         const moveBtnContainer = createElement("div", {
-          style: "display: inline-block;",
+          class: "d-inline-block",
         });
         const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
         moveUpBtn.addEventListener("click", async () => {
@@ -424,7 +424,7 @@ export default class Calendar {
         ]),
         createElement(
           "button",
-          { type: "submit", style: "margin-top: var(--main-distance);" },
+          { type: "submit", class: "mt-3" },
           "Done"
         ),
       ]
@@ -456,7 +456,7 @@ export default class Calendar {
     }
 
     const manageBtnContainer = createElement("div", {
-      style: "margin-bottom: var(--main-distance);",
+      class: "mb-3",
     });
 
     const manageCalendarBtn = createElement("button", {}, "Manage Calendar");
@@ -608,7 +608,7 @@ export default class Calendar {
     this.domComponent.append(
       createElement("div", { class: "d-flex justify-content-between" }, [
         await listItemTitle(
-          createElement("h1", { style: "color: var(--green)" }, this.title),
+          createElement("h1", { class: "text-green" }, this.title),
           this.toggleEdit,
           this.projectAuth
         ),

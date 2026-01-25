@@ -72,14 +72,13 @@ export default class ClassesComponent {
       return createElement(
         "div",
         {
-          style: "display: flex; align-items: center; margin-bottom: 5px;",
+          class: "d-flex align-items-center mb-1",
         },
         [
           createElement(
             "input",
             {
-              class: "cp-input-gen cp-input-regular",
-              style: "margin-right: 5px;",
+              class: "cp-input-gen cp-input-regular me-1",
               name: "class",
               value: item.class ? item.class : "",
             },
@@ -97,8 +96,7 @@ export default class ClassesComponent {
           createElement(
             "input",
             {
-              class: "cp-input-gen cp-input-regular",
-              style: "margin-right: 5px;",
+              class: "cp-input-gen cp-input-regular me-1",
               name: "subclass",
               value: item.subclass ? item.subclass : "",
             },
@@ -116,8 +114,7 @@ export default class ClassesComponent {
           createElement(
             "select",
             {
-              class: "select-option-small",
-              style: "margin-right: 5px;",
+              class: "select-option-small me-1",
               id: "type",
               name: "type",
             },
@@ -138,8 +135,7 @@ export default class ClassesComponent {
           createElement(
             "input",
             {
-              class: "cp-input-gen-short",
-              style: "margin-right: 5px;",
+              class: "cp-input-gen-short me-1",
               name: "total_hit_dice",
               type: "number",
               value: item.total_hit_dice ? item.total_hit_dice : 0,
@@ -177,8 +173,7 @@ export default class ClassesComponent {
           createElement(
             "div",
             {
-              style:
-                "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+              class: "text-red cursor-pointer ms-3",
               title: "Remove Class",
             },
             "ⓧ",
@@ -213,13 +208,13 @@ export default class ClassesComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { class: "special-font", style: "align-self: center;" },
+        { class: "special-font align-self-center" },
         "Class Info"
       ),
       createElement(
         "div",
         {
-          style: "display: flex; align-items: center;",
+          class: "d-flex align-items-center",
         },
         [
           createElement("small", { style: "margin-right: 100px;" }, "Class"),
@@ -237,7 +232,7 @@ export default class ClassesComponent {
       createElement(
         "a",
         {
-          style: "align-self: flex-start;",
+          class: "align-self-start",
           title: "Create a new class + subclass + hit dice",
         },
         "+",

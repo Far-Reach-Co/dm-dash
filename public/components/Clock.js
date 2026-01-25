@@ -154,7 +154,7 @@ export default class Clock {
 
   renderEditButtonsOrNull = () => {
     if (state.currentProject.isEditor === false) {
-      return [createElement("div", { style: "visibility: hidden;" })];
+      return [createElement("div", { class: "invisible" })];
     } else {
       const selectSpeed = createElement(
         "select",

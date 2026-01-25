@@ -2,6 +2,14 @@
    Toast Notification Styles
    ========================================================================== */
 
+#toast-custom {
+  visibility: hidden;
+}
+
+#toast-custom.visible {
+  visibility: visible;
+}
+
 .toast-custom {
   z-index: 4;
   position: fixed;

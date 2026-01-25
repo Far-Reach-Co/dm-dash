@@ -46,6 +46,11 @@ nav {
   opacity: 0.95;
 }
 
+#nav-links-container-mobile.open {
+  visibility: visible;
+  z-index: 4;
+}
+
 #nav-links-container-mobile .top-nav-btn {
   margin-bottom: var(--main-distance);
   height: 10%;

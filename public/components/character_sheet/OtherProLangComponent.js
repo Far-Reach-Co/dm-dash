@@ -55,17 +55,15 @@ export default class OtherProLangComponent {
       return createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;",
+          class: "d-flex align-items-center justify-content-between mb-1",
         },
         [
           createElement(
             "select",
             {
-              class: "select-option-small",
+              class: "select-option-small me-3",
               id: "type",
               name: "type",
-              style: "margin-right: var(--main-distance);",
             },
             [
               createElement("option", { value: "None" }, "None"),
@@ -103,8 +101,7 @@ export default class OtherProLangComponent {
           createElement(
             "div",
             {
-              style:
-                "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+              class: "text-red cursor-pointer ms-3",
               title: "Remove proficiency",
             },
             "ⓧ",
@@ -141,14 +138,14 @@ export default class OtherProLangComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { class: "special-font", style: "align-self: center;" },
+        { class: "special-font align-self-center" },
         "Other Proficiencies & Languages"
       ),
       createElement("br"),
       createElement(
         "div",
         {
-          style: "display: flex; align-items: center;",
+          class: "d-flex align-items-center",
         },
         [
           createElement("small", { style: "margin-right: 85px" }, "Type"),
@@ -160,7 +157,7 @@ export default class OtherProLangComponent {
       ...(await this.renderOtherProLangElems()),
       createElement(
         "a",
-        { style: "align-self: flex-start;", title: "Create a new proficiency" },
+        { class: "align-self-start", title: "Create a new proficiency" },
         "+",
         {
           type: "click",

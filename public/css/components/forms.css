@@ -34,13 +34,14 @@ input {
 fieldset {
   border: none;
   padding: 0px;
-  margin: 0;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 legend {
   font-family: YoungSerif;
   color: var(--bright-white);
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .search {

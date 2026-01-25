@@ -68,18 +68,14 @@ export default class TableSidebar {
 
   close = () => {
     this.isVisible = false;
-    if (this.container && this.container.style)
-      this.container.style.transform = "translate(200px, 0px)";
-    if (this.domComponent && this.domComponent.style)
-      this.domComponent.style.zIndex = "2";
+    if (this.container) this.container.classList.remove("open");
+    if (this.domComponent) this.domComponent.classList.remove("open");
   };
 
   open = () => {
     this.isVisible = true;
-    if (this.container && this.container.style)
-      this.container.style.transform = "translate(0px, 0px)";
-    if (this.domComponent && this.domComponent.style)
-      this.domComponent.style.zIndex = "4";
+    if (this.container) this.container.classList.add("open");
+    if (this.domComponent) this.domComponent.classList.add("open");
   };
 
   hide = () => {
@@ -93,7 +89,7 @@ export default class TableSidebar {
       newImage = await uploadProjectImage(
         file,
         this.projectId,
-        this.makeImageSmall
+        this.makeImageSmall,
       );
     } else {
       newImage = await uploadUserImage(file, this.makeImageSmall);
@@ -135,14 +131,14 @@ export default class TableSidebar {
           const results = await Promise.all(
             Array.from(e.target.files).map(async (file) => {
               return await this.uploadTableImage(file);
-            })
+            }),
           );
           // append each uploaded image to memory
           for (const result of results) {
             if (result) {
               await this.tableSidebarImageComponent.appendImage(
                 result.image,
-                result.tableImage
+                result.tableImage,
               );
             }
           }
@@ -151,7 +147,7 @@ export default class TableSidebar {
           if (result) {
             await this.tableSidebarImageComponent.appendImage(
               result.image,
-              result.tableImage
+              result.tableImage,
             );
           }
         }
@@ -171,9 +167,9 @@ export default class TableSidebar {
       return createElement(
         "small",
         {},
-        `Creating image in folder: "${this.tableSidebarFolderComponent.currentFolder.title}"`
+        `Creating image in folder: "${this.tableSidebarFolderComponent.currentFolder.title}"`,
       );
-    } else return createElement("div", { style: "display: none;" });
+    } else return createElement("div", { class: "d-none" });
   };
 
   renderUploadImage = () => {
@@ -186,7 +182,7 @@ export default class TableSidebar {
         event: (e) => {
           this.makeImageSmall = e.target.value;
         },
-      }
+      },
     );
     smallImageCheckboxComponent.checked = this.makeImageSmall;
 
@@ -198,19 +194,18 @@ export default class TableSidebar {
       createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: center; margin-left: 5px;",
+          class: "d-flex align-items-center justify-content-center ms-1",
           title:
             "If image width is larger than 100px this resizes the image width to 100px while maintaining the aspect ratio. It also will prevent long loading time as the image size will be reduced.",
         },
         [
           createElement(
             "small",
-            { style: "margin-right: var(--main-distance)" },
-            "Make image small (100px): "
+            { class: "me-3" },
+            "Make image small (100px): ",
           ),
           smallImageCheckboxComponent,
-        ]
+        ],
       ),
       createElement("br"),
       createElement(
@@ -220,7 +215,8 @@ export default class TableSidebar {
           name: "image",
           type: "file",
           accept: "image/*",
-          style: "display: none",
+          class: "d-none",
+          style: "display: none;", // Override because class is not working here
           multiple: true,
         },
         null,
@@ -229,7 +225,7 @@ export default class TableSidebar {
           event: async (e) => {
             await this.addImageToSidebar(e);
           },
-        }
+        },
       ),
       createElement(
         "label",
@@ -238,7 +234,7 @@ export default class TableSidebar {
           class: "label-btn",
           title: "Upload image to be used on virtual table",
         },
-        "Choose Image"
+        "Choose Images",
       ),
     ]);
   };
@@ -248,9 +244,9 @@ export default class TableSidebar {
       return createElement(
         "small",
         {},
-        `Creating sub-folder in: "${this.tableSidebarFolderComponent.currentFolder.title}"`
+        `Creating sub-folder in: "${this.tableSidebarFolderComponent.currentFolder.title}"`,
       );
-    } else return createElement("div", { style: "display: none;" });
+    } else return createElement("div", { class: "d-none" });
   };
 
   renderCreateFolder = () => {
@@ -268,7 +264,7 @@ export default class TableSidebar {
                 for: "title",
                 class: "me-1",
               },
-              "Title"
+              "Title",
             ),
             createElement("input", {
               placeholder: "New Folder",
@@ -308,7 +304,7 @@ export default class TableSidebar {
                     project_id: this.projectId,
                     is_sub: isSub,
                     parent_folder_id: parentFolderId,
-                  }
+                  },
                 );
               } else {
                 newFolder = await postThing("/api/add_table_folder_by_user", {
@@ -327,7 +323,7 @@ export default class TableSidebar {
               window.alert("Something went wrong when creating a new folder");
             }
           },
-        }
+        },
       ),
     ]);
   };
@@ -340,7 +336,7 @@ export default class TableSidebar {
       createElement(
         "small",
         {},
-        "This will move everyone viewing this table to another table"
+        "This will move everyone viewing this table to another table",
       ),
       createElement(
         "form",
@@ -367,7 +363,7 @@ export default class TableSidebar {
               window.location.href = newUrl;
             }
           },
-        }
+        },
       ),
       createElement("hr"),
       createElement("h2", {}, "Details"),
@@ -379,7 +375,7 @@ export default class TableSidebar {
               for: "title",
               class: "me-1",
             },
-            "Edit Title"
+            "Edit Title",
           ),
           createElement("input", {
             value: this.tableView.title,
@@ -388,14 +384,14 @@ export default class TableSidebar {
           }),
         ]),
         createElement("br"),
-        createElement("div", { style: "display: flex; align-items: center;" }, [
+        createElement("div", { class: "d-flex align-items-center" }, [
           createElement(
             "small",
             {
-              style: "color: var(--orange2); font-weight: bold;",
-              class: "me-1",
+              class: "text-orange me-1",
+              class: "font-bold",
             },
-            "Make Public"
+            "Make Public",
           ),
           this.tableView.is_public
             ? createElement("input", {
@@ -425,7 +421,7 @@ export default class TableSidebar {
             if (res) {
               // update success message
               const titleUpdateMessageElem = document.querySelector(
-                "#title-update-success"
+                "#title-update-success",
               );
               titleUpdateMessageElem.innerText = "Saved!";
               // remove after 3 seconds
@@ -454,7 +450,7 @@ export default class TableSidebar {
             e.stopPropagation();
             if (
               window.confirm(
-                `Are you sure you want to delete ${this.tableView.title}`
+                `Are you sure you want to delete ${this.tableView.title}`,
               )
             ) {
               deleteThing(`/api/remove_table_view/${this.tableView.id}`);
@@ -488,7 +484,7 @@ export default class TableSidebar {
             createElement(
               "div",
               { id: "table-display-title" },
-              this.tableView.title
+              this.tableView.title,
             ),
             createElement(
               "img",
@@ -503,9 +499,9 @@ export default class TableSidebar {
                 event: async () => {
                   modal.show(await this.renderTableSettings());
                 },
-              }
+              },
             ),
-          ]
+          ],
         ),
         createElement("button", {}, "Copy Share Link", {
           type: "click",
@@ -517,7 +513,7 @@ export default class TableSidebar {
         createElement(
           "div",
           {
-            style: "display: flex; justify-content: space-around",
+            class: "d-flex justify-content-around",
           },
           [
             createElement(
@@ -533,7 +529,7 @@ export default class TableSidebar {
                   if (this.tableSidebarImageComponent.imageLoading) return;
                   modal.show(this.renderUploadImage());
                 },
-              }
+              },
             ),
             createElement(
               "a",
@@ -548,9 +544,9 @@ export default class TableSidebar {
                   if (this.tableSidebarFolderComponent.folderLoading) return;
                   modal.show(this.renderCreateFolder());
                 },
-              }
+              },
             ),
-          ]
+          ],
         ),
         createElement("br"),
         this.tableSidebarFolderComponent.domComponent,
@@ -559,7 +555,7 @@ export default class TableSidebar {
         createElement("div", { class: "sidebar-header" }, "Online Users"),
         this.onlineUsersComponent.domComponent,
         this.renderCloseSidebarElem(),
-      ]
+      ],
     );
     this.container = container;
     this.open();
@@ -588,7 +584,7 @@ class OnlineUsersComponent {
           createElement("div", { class: "online-indicator" }),
           createElement("div", {}, user.username),
           createElement("br"),
-        ]
+        ],
       );
     });
   };

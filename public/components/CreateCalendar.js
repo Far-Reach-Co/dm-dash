@@ -96,7 +96,7 @@ export default class CreateCalendar {
         const indexLabel = createElement(
           "div",
           {
-            style: "display: inline-block; margin-right: var(--main-distance);",
+            class: "d-inline-block me-3",
           },
           `Day ${index + 1}`
         );
@@ -122,7 +122,7 @@ export default class CreateCalendar {
         });
         // move index
         const moveBtnContainer = createElement("div", {
-          style: "display: inline-block;",
+          class: "d-inline-block",
         });
         const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
         moveUpBtn.addEventListener("click", async () => {
@@ -241,7 +241,7 @@ export default class CreateCalendar {
         const indexLabel = createElement(
           "div",
           {
-            style: "display: inline-block; margin-right: var(--main-distance);",
+            class: "d-inline-block me-3",
           },
           `Month ${index + 1}`
         );
@@ -258,7 +258,7 @@ export default class CreateCalendar {
           "label",
           {
             for: "number_of_days",
-            style: "margin-right: var(--main-distance);",
+            class: "me-3",
           },
           "Days"
         );
@@ -285,7 +285,7 @@ export default class CreateCalendar {
         });
         // move index
         const moveBtnContainer = createElement("div", {
-          style: "display: inline-block;",
+          class: "d-inline-block",
         });
         const moveUpBtn = createElement("button", { class: "move-btn" }, "▲");
         moveUpBtn.addEventListener("click", async () => {

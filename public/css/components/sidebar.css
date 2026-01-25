@@ -12,6 +12,10 @@
   background: transparent;
 }
 
+.sidebar.open {
+  z-index: 4;
+}
+
 .sidebar-container {
   display: flex;
   width: 100%;
@@ -21,6 +25,10 @@
   background-color: var(--blue5);
   transition: 0.3s all ease-out;
   border-left: 0.5px solid var(--main-gray);
+}
+
+.sidebar-container.open {
+  transform: translate(0px, 0px);
 }
 
 .sidebar-container button {

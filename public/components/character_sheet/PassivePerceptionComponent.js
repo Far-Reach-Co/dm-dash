@@ -43,14 +43,13 @@ export default class PassivePerceptionComponent {
         ),
         createElement(
           "div",
-          { class: "cp-content-long-title", style: "align-items: baseline" },
+          { class: "cp-content-long-title align-items-baseline" },
           [
             createElement(
               "img",
               {
                 width: 15,
-                class: "gear-gen",
-                style: "margin-right: 3px;",
+                class: "gear-gen me-1",
                 src: "/assets/gears.svg",
                 title: "Toggle modifier view",
               },
@@ -64,7 +63,7 @@ export default class PassivePerceptionComponent {
             ),
             createElement(
               "small",
-              { style: "color: var(--pink)" },
+              { class: "text-pink" },
               "Passive Perception (mod)"
             ),
           ]
@@ -96,14 +95,13 @@ export default class PassivePerceptionComponent {
         ),
         createElement(
           "div",
-          { class: "cp-content-long-title", style: "align-items: baseline" },
+          { class: "cp-content-long-title align-items-baseline" },
           [
             createElement(
               "img",
               {
                 width: 15,
-                class: "gear-gen",
-                style: "margin-right: 3px;",
+                class: "gear-gen me-1",
                 src: "/assets/gears.svg",
                 title: "Toggle modifier view",
               },

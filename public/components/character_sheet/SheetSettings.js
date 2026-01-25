@@ -57,7 +57,7 @@ export default class SheetSettings {
         createElement("br"),
         createElement(
           "div",
-          { style: "display: flex; flex-direction: column;" },
+          { class: "d-flex flex-column" },
           [
             createElement("button", { class: "btn-red" }, "Revoke Access", {
               type: "click",
@@ -107,14 +107,14 @@ export default class SheetSettings {
         createElement("br"),
         createElement(
           "small",
-          { style: "color: var(--blue6); margin-bottom: 3px;" },
+          { class: "text-blue6 mb-1" },
           inviteLink
         ),
-        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+        createElement("div", { class: "d-flex flex-row" }, [
           inviteLinkButton,
           createElement(
             "div",
-            { style: "display: flex; flex-direction: column;" },
+            { class: "d-flex flex-column" },
             [
               removeInviteButton,
               createElement(
@@ -128,7 +128,7 @@ export default class SheetSettings {
         createElement("br"),
         createElement(
           "div",
-          { style: "display: flex; flex-direction: column;" },
+          { class: "d-flex flex-column" },
           [
             createElement("button", { class: "btn-red" }, "Revoke Access", {
               type: "click",
@@ -165,8 +165,7 @@ export default class SheetSettings {
           const elem = createElement(
             "div",
             {
-              style:
-                "margin-left: var(--main-distance); display: flex; align-items: center;",
+              class: "d-flex align-items-center ms-3",
             },
             [
               createElement(
@@ -177,8 +176,7 @@ export default class SheetSettings {
               createElement(
                 "div",
                 {
-                  style:
-                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                  class: "text-red cursor-pointer ms-3",
                   title: "Remove connection",
                 },
                 "ⓧ",

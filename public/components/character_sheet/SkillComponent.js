@@ -39,7 +39,7 @@ export default class SkillComponent {
           },
         }
       ),
-      createElement("div", { style: "display: flex; margin-left: -5px;" }, [
+      createElement("div", { class: "d-flex", style: "margin-left: -5px;" }, [
         createElement(
           "input",
           {
@@ -81,10 +81,10 @@ export default class SkillComponent {
       ]),
       createElement(
         "small",
-        { class: "proficiency-item-title", style: "color: var(--pink)" },
+        { class: "proficiency-item-title text-pink" },
         [
           this.skill.title,
-          createElement("small", { style: "font-size: smaller;" }, ` (mod)`),
+          createElement("small", { class: "font-smaller" }, ` (mod)`),
         ]
       )
     );
@@ -115,7 +115,7 @@ export default class SkillComponent {
           },
         }
       ),
-      createElement("div", { style: "display: flex;" }, [
+      createElement("div", { class: "d-flex" }, [
         createElement(
           "div",
           {
@@ -158,7 +158,7 @@ export default class SkillComponent {
         this.skill.title,
         createElement(
           "small",
-          { style: "font-size: smaller; color: var(--light-gray)" },
+          { class: "font-smaller text-light-gray" },
           ` (${this.skill.ability.substring(0, 3)})`
         ),
       ])

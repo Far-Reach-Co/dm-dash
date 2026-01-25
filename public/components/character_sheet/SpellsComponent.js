@@ -124,7 +124,7 @@ export default class SpellsComponent {
     this.domComponent.append(
       createElement("div", {}, [
         spellInfoComponent.domComponent,
-        createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+        createElement("div", { class: "d-flex flex-wrap" }, [
           this.renderCantrip(),
           ...this.renderSpellSlotsElems(),
         ]),
@@ -181,13 +181,12 @@ class SpellInfoComponent {
             createElement(
               "div",
               {
-                style:
-                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+                class: "d-flex flex-column align-items-center justify-content-center",
               },
               [
                 createElement(
                   "small",
-                  { style: "margin-bottom: 8px;" },
+                  { class: "mb-2" },
                   "Spell Casting Ability"
                 ),
                 createElement(
@@ -221,8 +220,7 @@ class SpellInfoComponent {
             createElement(
               "div",
               {
-                style:
-                  "display: flex; flex-direction: column; align-items: center; margin-right: var(--main-distance); margin-left: var(--main-distance);",
+                class: "d-flex flex-column align-items-center mx-3",
               },
               [
                 createElement("small", {}, "Spell Save DC"),
@@ -238,8 +236,7 @@ class SpellInfoComponent {
             createElement(
               "div",
               {
-                style:
-                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+                class: "d-flex flex-column align-items-center justify-content-center",
               },
               [
                 createElement("small", {}, "Spell Attack Bonus"),
@@ -386,7 +383,7 @@ class SingleSpell {
         createElement("div", { class: "special-font" }, "Cantrips"),
         createElement(
           "a",
-          { style: "font-size: small; margin-top: 5px;" },
+          { class: "font-small mt-1" },
           "+ Expand all",
           {
             type: "click",
@@ -397,7 +394,7 @@ class SingleSpell {
         ),
         createElement(
           "a",
-          { style: "font-size: small; margin-top: 5px;" },
+          { class: "font-small mt-1" },
           "- Collapse all",
           {
             type: "click",
@@ -411,7 +408,7 @@ class SingleSpell {
         createElement(
           "a",
           {
-            style: "align-self: flex-start;",
+            class: "align-self-start",
             title: "Create a new cantrip",
           },
           "+",
@@ -427,7 +424,7 @@ class SingleSpell {
       createElement("div", { class: "special-font" }, this.spellSlot.title),
       createElement(
         "a",
-        { style: "font-size: small; margin-top: 5px;" },
+        { class: "font-small mt-1" },
         "+ Expand all",
         {
           type: "click",
@@ -438,7 +435,7 @@ class SingleSpell {
       ),
       createElement(
         "a",
-        { style: "font-size: small; margin-top: 5px;" },
+        { class: "font-small mt-1" },
         "- Collapse all",
         {
           type: "click",
@@ -451,8 +448,7 @@ class SingleSpell {
         createElement(
           "div",
           {
-            style:
-              "display: flex; align-items: center; justify-content: center;",
+            class: "d-flex align-items-center justify-content-center",
           },
           [
             createElement("small", {}, "Total"),
@@ -501,8 +497,7 @@ class SingleSpell {
         createElement(
           "div",
           {
-            style:
-              "display: flex; align-items: center; justify-content: center;",
+            class: "d-flex align-items-center justify-content-center",
           },
           this.expendedElement.domComponent
         ),
@@ -512,7 +507,7 @@ class SingleSpell {
       createElement(
         "a",
         {
-          style: "align-self: flex-start;",
+          class: "align-self-start",
           title: "Create a new spell",
         },
         "+",
@@ -560,12 +555,12 @@ class SingleSpellElement {
 
   renderHideSpellButton = () => {
     if (!this.hidden) {
-      return createElement("a", { style: "font-size: small;" }, "- Collapse", {
+      return createElement("a", { class: "font-small" }, "- Collapse", {
         type: "click",
         event: this.toggleHide,
       });
     } else {
-      return createElement("a", { style: "font-size: small;" }, "+ Expand", {
+      return createElement("a", { class: "font-small" }, "+ Expand", {
         type: "click",
         event: this.toggleHide,
       });
@@ -876,7 +871,7 @@ class SingleSpellElement {
           }
         ),
       ];
-    } else return [createElement("div", { style: "display: none;" })];
+    } else return [createElement("div", { class: "d-none" })];
   };
 
   renderSuggestionElem = () => {
@@ -908,13 +903,13 @@ class SingleSpellElement {
       createElement(
         "div",
         {
-          style: "display: flex; flex-direction: column;",
+          class: "d-flex flex-column",
         },
         [
           createElement(
             "div",
             {
-              style: "display: flex; align-items: center; margin-bottom: 5px;",
+              class: "d-flex align-items-center mb-1",
             },
             [
               createElement(
@@ -922,7 +917,7 @@ class SingleSpellElement {
                 {
                   class: "cp-input-gen",
                   id: `spell-title-input-${this.id}`,
-                  style: "color: var(--orange2);",
+                  class: "text-orange",
                   name: "title",
                   value: this.title ? this.title : "",
                 },
@@ -961,8 +956,7 @@ class SingleSpellElement {
               createElement(
                 "div",
                 {
-                  style:
-                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                  class: "text-red cursor-pointer ms-3",
                   title: "Remove spell",
                 },
                 "ⓧ",
@@ -995,8 +989,7 @@ class SingleSpellElement {
 class ExpendedElement {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.style =
-      "display: flex; align-items: center; justify-content: center; flex-wrap: wrap;";
+    this.domComponent.className = "d-flex align-items-center justify-content-center flex-wrap";
     this.totalSpellSlotCount = props.totalSpellSlotCount;
     this.expendedSpellSlotCount = props.expendedSpellSlotCount;
     this.expendedKey = props.expendedKey;

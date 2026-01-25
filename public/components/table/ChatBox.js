@@ -23,7 +23,7 @@ export default class ChatBoxComponent {
         { class: "chat-box-hide d-flex align-items-center" },
         [
           createElement("img", {
-            style: "margin-right: var(--main-distance)",
+            class: "me-3",
             class: "small-icon chat-box-icon",
             src: "/assets/show.svg",
           }),
@@ -44,7 +44,7 @@ export default class ChatBoxComponent {
         { class: "chat-box-hide d-flex align-items-center" },
         [
           createElement("img", {
-            style: "margin-right: var(--main-distance)",
+            class: "me-3",
             class: "small-icon chat-box-icon",
             src: "/assets/hide.svg",
           }),
@@ -137,7 +137,7 @@ class ChatBoxMessagesComponent {
                     href: subpart,
                     target: "_blank",
                     rel: "noopener noreferrer",
-                    style: "margin: 0 5px;",
+                    class: "mx-1",
                   },
                   subpart
                 )
@@ -160,13 +160,13 @@ class ChatBoxMessagesComponent {
     const elem = createElement("div", { class: "chat-box-message-content" }, [
       createElement(
         "small",
-        { style: "margin-right: var(--main-distance)" },
+        { class: "me-3" },
         isoDateFormat(data.timestamp)
       ),
       createElement(
         "div",
         {
-          style: "font-weight: bold; margin-right: var(--main-distance);",
+          class: "font-bold me-3",
         },
         `${data.username}:`
       ),
@@ -182,7 +182,7 @@ class ChatBoxMessagesComponent {
 
   renderMessagesOrHidden = () => {
     if (this.hidden) {
-      return [createElement("div", { style: "display: none;" })];
+      return [createElement("div", { class: "d-none" })];
     } else
       return [...this.chatBoxMessages.map((data) => this.createMessage(data))];
   };
