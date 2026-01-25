@@ -1,0 +1,165 @@
+/* ==========================================================================
+   Form Elements - Inputs, Selects, Textareas
+   ========================================================================== */
+
+.input-container {
+  position: relative;
+  padding-top: 5px;
+  display: inline-block;
+}
+
+label {
+  font-size: small;
+  font-weight: bold;
+  position: absolute;
+  top: -10;
+  left: 10px;
+  transform: translateY(-50%);
+  background: var(--main-dark);
+  color: var(--orange2);
+}
+
+input {
+  float: right;
+  color: inherit;
+  font: inherit;
+  font-size: inherit;
+  padding: 5px;
+  border: none;
+  outline: none;
+  background-color: var(--main-dark);
+  border: 0.5px solid var(--main-gray);
+}
+
+fieldset {
+  border: none;
+  padding: 0px;
+  margin: 0;
+}
+
+legend {
+  font-family: YoungSerif;
+  color: var(--bright-white);
+  margin-bottom: 10px;
+}
+
+.search {
+  border: none;
+  outline: none;
+  color: black;
+  background-color: var(--main-white);
+  height: 30px;
+  display: inline-block;
+  padding-left: 5px;
+  font-size: inherit;
+}
+
+input[type="file"] {
+  all: unset;
+}
+
+input[type="file"]::file-selector-button {
+  width: fit-content;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  color: inherit;
+  border: none;
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+  border: none;
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
+input[type="number"] {
+  color: var(--main-white);
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input[type="checkbox"] {
+  width: 20px;
+}
+
+[contentEditable="true"]:empty:not(:focus)::before {
+  content: attr(data-ph);
+  color: var(--light-gray);
+}
+
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: var(--light-gray);
+  opacity: 1;
+  /* Firefox */
+}
+
+::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: var(--light-gray);
+}
+
+select {
+  width: 100px;
+  height: fit-content;
+  margin: 0;
+  outline: 0;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  border: none;
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+select:hover {
+  background: linear-gradient(var(--blue2) 10%, var(--blue5) 90%);
+}
+
+textarea {
+  padding: 5px;
+  height: auto;
+  min-height: 250px;
+  border: none;
+  outline: none;
+  color: var(--main-white);
+  background-color: var(--main-dark);
+  display: inline-block;
+  font-size: inherit;
+  font-family: inherit;
+  resize: both;
+  border: 0.5px solid var(--main-gray);
+}
+
+.editable {
+  color: var(--main-white);
+  background-color: var(--main-dark);
+  width: 500px;
+  height: 300px;
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--main-gray);
+  outline: none;
+  font-size: 16px;
+  padding: 5px;
+  resize: both;
+  cursor: text;
+}

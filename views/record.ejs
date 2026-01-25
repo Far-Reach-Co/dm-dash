@@ -27,11 +27,11 @@
       <small>(Public)</small>
       <% } %>
     </div>
-    <p id="description" style="white-space: pre-wrap;"></p>
+    <p id="description" class="whitespace-pre-wrap"></p>
     <div>
       <% if (imageUrls && Object.keys(imageUrls).length) { %>
       <% Object.entries(imageUrls).forEach(([key, value]) => { %>
-      <img class="my-2" style="max-width: 90%;" id="img-<%= key %>" src="<%= value %>">
+      <img class="my-2 max-w-90" id="img-<%= key %>" src="<%= value %>">
       <% }) %>
       <% } %>
     </div>

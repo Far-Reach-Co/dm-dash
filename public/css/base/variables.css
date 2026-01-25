@@ -1,0 +1,38 @@
+/* ==========================================================================
+   CSS Custom Properties (Variables)
+   ========================================================================== */
+
+:root {
+  /* Colors - Primary */
+  --main-white: rgb(205, 205, 205);
+  --bright-white: rgb(225, 225, 225);
+  --main-dark: rgb(24, 32, 41);
+  --main-gray: rgb(103, 101, 101);
+  --light-gray: rgb(174, 173, 173);
+
+  /* Colors - Blues */
+  --blue: rgb(72, 99, 125);
+  --blue2: rgb(107, 131, 154);
+  --blue3: #1f2531;
+  --blue4: rgb(43, 64, 83);
+  --blue5: rgb(47, 64, 84);
+  --blue6: rgb(116, 167, 215);
+  --link-blue: rgb(158, 197, 235);
+
+  /* Colors - Accent */
+  --purple: rgb(73, 42, 87);
+  --pink: rgb(221, 196, 248);
+  --green: rgb(161, 190, 128);
+  --green2: rgb(49, 74, 36);
+  --orange: rgb(165, 79, 4);
+  --orange2: rgb(209, 158, 116);
+  --orange3: rgb(222, 199, 174);
+  --orange4: rgb(213, 189, 161);
+  --red1: rgb(206, 101, 101);
+  --red2: rgb(120, 51, 51);
+  --red3: rgb(241, 143, 143);
+
+  /* Layout */
+  --border-radius: 4px;
+  --main-distance: 8px;
+}

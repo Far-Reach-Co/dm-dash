@@ -1,0 +1,47 @@
+/* ==========================================================================
+   Rich Text Editor Styles
+   ========================================================================== */
+
+.rich-text-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.rich-text-option-container {
+  border: 0.5px solid var(--main-gray);
+  width: 120px;
+  display: flex;
+}
+
+.text-area-rich {
+  padding: 5px;
+  height: auto;
+  min-height: 250px;
+  max-height: 350px;
+  overflow: auto;
+  border: none;
+  outline: none;
+  color: var(--main-white);
+  background-color: var(--blue3);
+  font-size: small;
+  resize: both;
+  border: 0.5px solid var(--main-gray);
+  white-space: pre-wrap;
+}
+
+.text-area-rich * {
+  font-size: small;
+}
+
+.magic-text {
+  padding: 5px;
+  width: 60px;
+  height: 35px;
+  /* input height */
+  overflow: auto;
+  white-space: nowrap;
+  border: none;
+  outline: none;
+  color: var(--main-white);
+  background-color: var(--main-dark);
+}

@@ -34,25 +34,25 @@
       <% if (imageUrls && Object.keys(imageUrls).length) { %>
       <% Object.entries(imageUrls).forEach(([key, value]) => { %>
       <div class="d-flex align-items-baseline">
-        <img class="my-2" style="max-width: 90%;" id="img-<%= key %>" src="<%= value %>">
-        <div style="color: var(--red1); margin-left: var(--main-distance); cursor: pointer; font-size: 20px" title="Remove image" data-remove-image="<%= key %>">ⓧ</div>
+        <img class="my-2 max-w-90" id="img-<%= key %>" src="<%= value %>">
+        <div class="text-red ms-2 cursor-pointer red-x" title="Remove image" data-remove-image="<%= key %>">ⓧ</div>
       </div>
       <% }) %>
       <% } %>
     </div>
     <br />
     <div class=" w-25">
-      <small><b style="color: var(--orange2);">Upload Images</b></small>
+      <small><b class="text-orange">Upload Images</b></small>
       <br />
       <small class="hint">*These will also be available for use on your tables</small>
       <br />
-      <input id="image" name="image" type="file" accept="image/*" style="display: none" multiple>
+      <input id="image" name="image" type="file" accept="image/*" class="input-hidden" multiple>
       <label for="image" class="label-btn" title="Upload Image">Choose Images</label>
       <div class="d-flex flex-column" id="files-list"></div>
     </div>
     <br />
     <div class="w-25">
-      <small><b style="color: var(--orange2)">Make Public</b></small>
+      <small><b class="text-orange">Make Public</b></small>
       <br />
       <small class="hint">*Allow this page to viewed by others.</small>
       <input type="checkbox" id="is_public" name="is_public" <%= record.is_public ? 'checked' : '' %> />

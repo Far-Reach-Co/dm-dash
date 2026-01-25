@@ -1,0 +1,22 @@
+/* ==========================================================================
+   Toast Notification Styles
+   ========================================================================== */
+
+.toast-custom {
+  z-index: 4;
+  position: fixed;
+  left: 50%;
+  top: 10%;
+  width: fit-content;
+  height: fit-content;
+  color: var(--main-white);
+  background-color: var(--green2);
+  padding: 3px 6px;
+  font-size: 18px;
+  opacity: 0.9;
+  cursor: pointer;
+}
+
+.toast-error {
+  background-color: var(--red2);
+}

@@ -1,0 +1,82 @@
+/* ==========================================================================
+   Button Styles
+   ========================================================================== */
+
+button {
+  width: fit-content;
+  height: fit-content;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  color: inherit;
+  border: none;
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+button:hover {
+  background: linear-gradient(var(--blue2) 10%, var(--blue5) 90%);
+}
+
+.label-btn {
+  all: unset;
+  padding: 5px;
+  text-align: center;
+  height: fit-content;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  color: inherit;
+  border: none;
+  padding: 2px 4px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 18px;
+  text-shadow: inherit;
+  cursor: pointer;
+}
+
+.label-btn:hover {
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
+.btn-red {
+  background: linear-gradient(var(--red1) 10%, var(--red2) 90%);
+}
+
+.btn-red:hover {
+  background: linear-gradient(var(--red1) 10%, var(--purple) 90%);
+}
+
+.edit-btn {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--link-blue);
+  margin-left: 5px;
+}
+
+.edit-btn:hover {
+  color: var(--green);
+}
+
+.red-x {
+  color: var(--red1);
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.red-x:hover {
+  opacity: .7;
+}
+
+.move-btn {
+  padding: 5px;
+  font-size: small;
+}
+
+.small-clickable {
+  width: max-content;
+  font-size: small;
+  color: var(--link-blue);
+}

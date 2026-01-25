@@ -1,0 +1,77 @@
+/* ==========================================================================
+   Sidebar Styles
+   ========================================================================== */
+
+.sidebar {
+  top: 0px;
+  right: 0px;
+  z-index: 2;
+  width: 200px;
+  height: 100%;
+  position: absolute;
+  background: transparent;
+}
+
+.sidebar-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  transform: translate(200px, 0px);
+  background-color: var(--blue5);
+  transition: 0.3s all ease-out;
+  border-left: 0.5px solid var(--main-gray);
+}
+
+.sidebar-container button {
+  margin: 0;
+  width: 100%;
+}
+
+.sidebar-item {
+  padding-left: var(--main-distance);
+  width: 100%;
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* BEM modifier pattern: --selected */
+.sidebar-item--selected,
+.sidebar-selected-item {
+  color: var(--green);
+}
+
+.sidebar-item:hover {
+  background-color: var(--blue);
+}
+
+.sidebar-image-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 3px;
+  border-bottom: 1px solid var(--main-white);
+}
+
+.sidebar-header {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: var(--main-distance);
+  border-top: 1px solid var(--main-gray);
+  border-bottom: 1px solid var(--main-gray);
+}
+
+.sidebar-close,
+.close-sidebar {
+  position: absolute;
+  top: 0px;
+  left: -11px;
+  margin-right: 3px;
+  margin-top: 3px;
+  cursor: pointer;
+}

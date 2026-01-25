@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Typography - Font Faces & Heading Styles
+   ========================================================================== */
+
+@font-face {
+  font-family: "YoungSerif";
+  font-style: normal;
+  src: url("../../assets/fonts/YoungSerif/fonts/edited/YoungSerif-Light1.woff2");
+}
+
+@font-face {
+  font-family: Brookshire;
+  src: url("../../assets/fonts/Brookshire/Brookshire.otf") format("opentype");
+}
+
+h1 {
+  font-family: YoungSerif;
+  font-size: 1.5rem;
+  display: inline-block;
+  color: var(--bright-white);
+}
+
+h2 {
+  font-family: YoungSerif;
+  color: var(--orange3);
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-family: YoungSerif;
+  color: var(--orange2);
+  font-size: 1.1rem;
+}
+
+h4 {
+  color: var(--bright-white);
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.success-message {
+  color: var(--green);
+}
+
+.hint {
+  font-size: 12px;
+  color: var(-light-gray);
+  margin-top: 3px;
+}
+
+.title-anchor {
+  margin-left: 5px;
+  color: var(--link-blue);
+}

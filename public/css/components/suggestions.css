@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Suggestions & Hover Info Styles
+   ========================================================================== */
+
+.suggestions {
+  position: absolute;
+  height: 200px;
+  width: 200px;
+  overflow-y: auto;
+  display: none;
+  z-index: 4;
+  opacity: 0.9;
+  border-radius: var(--border-radius);
+  background-color: var(--main-dark);
+}
+
+.suggestions-item {
+  padding: 2px 4px;
+  cursor: pointer;
+}
+
+.suggestions-item:hover {
+  background-color: var(--blue3);
+}
+
+.hover-info {
+  position: absolute;
+  padding: 10px;
+  height: auto;
+  width: 200px;
+  display: none;
+  z-index: 4;
+  opacity: 0.9;
+  border-radius: var(--border-radius);
+  background-color: var(--blue3);
+}

@@ -1,0 +1,123 @@
+/* ==========================================================================
+   Reset & Base Element Styles
+   ========================================================================== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  z-index: 3;
+  letter-spacing: 1.1px;
+  word-wrap: break-word;
+  scrollbar-width: thin;
+  scrollbar-color: var(--blue3) transparent;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+*::-webkit-scrollbar-thumb {
+  /* background-color: var(--blue3); */
+  /* border-radius: 20px; */
+}
+
+html {
+  height: 100%;
+}
+
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--main-dark);
+  line-height: 1.4;
+  font-family: serif;
+  font-size: 17px;
+  color: var(--main-white);
+}
+
+span {
+  /* specifically for rich text */
+  font-size: inherit;
+}
+
+small {
+  font-size: 13px;
+  color: var(--orange4);
+}
+
+div {
+  color: var(--bright-white);
+}
+
+p,
+b,
+u {
+  max-width: 100%;
+  color: var(--main-white);
+  margin-bottom: var(--main-distance);
+}
+
+ul {
+  max-width: 100%;
+}
+
+li {
+  color: var(--main-white);
+  margin-left: 15px;
+}
+
+br {
+  display: block;
+  content: "";
+  margin-top: var(--main-distance);
+}
+
+hr {
+  border: 0.5px solid var(--blue2);
+  height: 1px;
+  width: 100%;
+  margin-top: var(--main-distance);
+  margin-bottom: var(--main-distance);
+}
+
+.special-hr {
+  border: 0;
+  background-image: linear-gradient(to right,
+      rgba(255, 255, 255, 0),
+      var(--main-gray),
+      rgba(255, 255, 255, 0));
+  margin-top: 5px;
+  margin-bottom: 20px;
+}
+
+a,
+a small,
+a:not([href]),
+a:not([href]):not([class]) {
+  color: var(--link-blue);
+  cursor: pointer;
+  text-decoration: none;
+  width: fit-content;
+}
+
+a:hover,
+a small:hover,
+a:not([href]):hover,
+a:not([href]):not([class]):hover {
+  color: var(--green);
+  text-decoration: underline;
+}
+
+footer {
+  width: 100vw;
+  height: fit-content;
+  padding: 10px;
+  margin-top: auto;
+  background-color: var(--blue3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

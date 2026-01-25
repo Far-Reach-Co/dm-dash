@@ -1,0 +1,78 @@
+/* ==========================================================================
+   Modal Styles
+   ========================================================================== */
+
+/* The Modal (background) */
+.modal-custom {
+  /* unset everything from bootstrap */
+  all: unset;
+
+  visibility: hidden;
+  /* Hidden by default */
+  position: fixed;
+  /* Stay in place */
+  z-index: 4;
+  /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
+  /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0);
+  /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4);
+  /* Black w/ opacity */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal Content/Box */
+.modal-custom-container {
+  width: fit-content;
+  max-height: 100%;
+  max-width: 100%;
+  /* Could be more or less, depending on screen size */
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-custom-content {
+  width: fit-content;
+  max-height: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+/* The Close Button */
+.close-custom-modal {
+  cursor: pointer;
+  color: var(--main-white);
+  align-self: flex-end;
+  font-size: 30px;
+}
+
+.modal-custom-image {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.modal-pro-warning-container {
+  position: inherit;
+  padding: var(--main-distance);
+  width: fit-content;
+  max-width: 100%;
+  height: fit-content;
+  border-radius: var(--border-radius);
+  border: 0.5px solid var(--main-gray);
+  background-color: var(--blue4);
+  display: flex;
+  flex-direction: column;
+}

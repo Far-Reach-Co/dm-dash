@@ -1,0 +1,65 @@
+/* ==========================================================================
+   Calendar Styles
+   ========================================================================== */
+
+.current-date {
+  display: flex;
+  margin-bottom: 5px;
+}
+
+.month-container {
+  padding: 5px;
+  margin-bottom: var(--main-distance);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.day-container {
+  padding: 5px;
+  margin-bottom: var(--main-distance);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.calendar {
+  width: 800px;
+  overflow: auto;
+  max-width: 100%;
+  background-color: var(--blue3);
+  border: 1px solid var(--main-gray);
+  border-radius: var(--border-radius);
+}
+
+.calendar-container {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.calendar-box {
+  padding: 5px;
+  border: 1px solid var(--main-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.clickable-day {
+  cursor: pointer;
+}
+
+.non-clickable-day {
+  /* cursor: pointer; */
+}
+
+.clickable-day:hover {
+  background-color: var(--blue);
+}
+
+.note-date {
+  font-size: 12px;
+  color: var(--light-gray);
+}
