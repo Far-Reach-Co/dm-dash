@@ -97,6 +97,15 @@ export default class TableSidebarImageComponent {
         );
       }
 
+      // remove from cache
+      if (this.imageDataAndElems) {
+        this.imageDataAndElems = this.imageDataAndElems.filter(
+          (item) => item.imageData.id !== image.id
+        );
+      }
+      // remove from downloaded sources cache
+      delete this.downloadedImageSourceList[image.id];
+
       // remove elem in sidebar
       elem.remove();
       // remove all from screens and sockets and state
@@ -322,9 +331,9 @@ export default class TableSidebarImageComponent {
       file_name: imageData.file_name,
       notes: imageData.notes || null,
       src: imageData.src,
-      record_id: tableImage.record_id,
-      record_title: tableImage.record_title,
-      record_desc: tableImage.record_desc,
+      record_id: tableImageData.record_id,
+      record_title: tableImageData.record_title,
+      record_desc: tableImageData.record_desc,
     };
     const tableImage = {
       ...tableImageData,
