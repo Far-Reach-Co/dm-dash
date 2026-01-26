@@ -5,10 +5,8 @@ var userSubscriptionStatus;
 (function (userSubscriptionStatus) {
     userSubscriptionStatus["userIsNotPro"] = "USER_IS_NOT_PRO";
     userSubscriptionStatus["projectIsNotPro"] = "PROJECT_IS_NOT_PRO";
-})(userSubscriptionStatus || (userSubscriptionStatus = {}));
-exports.userSubscriptionStatus = userSubscriptionStatus;
+})(userSubscriptionStatus || (exports.userSubscriptionStatus = userSubscriptionStatus = {}));
 var megabytesInBytes;
 (function (megabytesInBytes) {
     megabytesInBytes[megabytesInBytes["oneHundred"] = 104857600] = "oneHundred";
-})(megabytesInBytes || (megabytesInBytes = {}));
-exports.megabytesInBytes = megabytesInBytes;
+})(megabytesInBytes || (exports.megabytesInBytes = megabytesInBytes = {}));

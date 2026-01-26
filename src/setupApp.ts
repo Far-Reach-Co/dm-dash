@@ -1,25 +1,74 @@
 import { isProd, SECRET_KEY } from "./config";
 // Init express and create http server + socket io
-import * as express from "express";
-import { Request, Response, NextFunction } from "express";
-import * as http from "http";
+import express, { Request, Response, NextFunction } from "express";
+import http from "http";
 const app = express();
 const server = http.createServer(app);
 
-import * as bodyParser from "body-parser";
-import * as cookieParser from "cookie-parser";
-import * as morgan from "morgan";
-import * as session from "express-session";
-import * as connectPgSimple from "connect-pg-simple";
+import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 const pgSession = connectPgSimple(session);
+import helmet from "helmet";
+import cors from "cors";
+import compression from "compression";
+import pinoHttp from "pino-http";
+import logger from "./lib/logger.js";
 
 import apiRoutes from "./api/routes.js";
 import routes from "./routes.js";
 import dndRoutes from "./dnd/routes.js";
 import { pool } from "./api/dbconfig.js";
 
-//Logging
-app.use(morgan("combined"));
+// Security headers
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: [
+          "'self'",
+          "'unsafe-inline'", // for inline scripts - ideally migrate to nonces later
+          "https://www.googletagmanager.com",
+          "https://www.google-analytics.com",
+        ],
+        scriptSrcAttr: ["'unsafe-inline'"], // for onclick handlers - ideally remove these later
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "blob:", "https://*.amazonaws.com", "https://*.cloudfront.net"],
+        connectSrc: [
+          "'self'",
+          "https://www.google-analytics.com",
+          "wss://*.farreachco.com",
+          "ws://localhost:*",
+        ],
+        frameSrc: ["'self'"],
+        objectSrc: ["'none'"],
+        upgradeInsecureRequests: isProd ? [] : null,
+      },
+    },
+  })
+);
+
+// CORS - allow specific origins
+app.use(
+  cors({
+    origin: [
+      "https://farreachco.com",
+      "https://www.farreachco.com",
+      "https://radio.farreachco.com",
+      /\.farreachco\.com$/,
+    ],
+    credentials: true,
+  })
+);
+
+// Compression
+app.use(compression());
+
+// Structured request logging
+app.use(pinoHttp({ logger }));
 
 // Set view engine to EJS
 app.set("view engine", "ejs");
@@ -93,13 +142,13 @@ app.use("/", routes);
 // dnd pages
 app.use("/dnd", dndRoutes);
 // not found
-app.use((req, res) => {
+app.use((req: Request, res: Response) => {
   res.status(404).render("404", { auth: req.session.user });
 });
 
 //Error
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  console.error(error);
+  logger.error({ err: error, url: req.url, method: req.method }, "Request error");
   if (error.code === "EBADCSRFTOKEN") {
     // CSRF token validation failed
     error.status = 403;

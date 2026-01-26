@@ -8,9 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getProjectUserByUserAndProjectQuery = exports.editProjectUserQuery = exports.removeProjectUserQuery = exports.getProjectUsersByProjectQuery = exports.getProjectUsersQuery = exports.getProjectUserQuery = exports.addProjectUserQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addProjectUserQuery = addProjectUserQuery;
+exports.getProjectUserQuery = getProjectUserQuery;
+exports.getProjectUsersQuery = getProjectUsersQuery;
+exports.getProjectUsersByProjectQuery = getProjectUsersByProjectQuery;
+exports.removeProjectUserQuery = removeProjectUserQuery;
+exports.editProjectUserQuery = editProjectUserQuery;
+exports.getProjectUserByUserAndProjectQuery = getProjectUserByUserAndProjectQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addProjectUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,7 +33,6 @@ function addProjectUserQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addProjectUserQuery = addProjectUserQuery;
 function getProjectUsersQuery(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -34,7 +42,6 @@ function getProjectUsersQuery(userId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectUsersQuery = getProjectUsersQuery;
 function getProjectUserByUserAndProjectQuery(userId, projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -44,7 +51,6 @@ function getProjectUserByUserAndProjectQuery(userId, projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectUserByUserAndProjectQuery = getProjectUserByUserAndProjectQuery;
 function getProjectUsersByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -54,7 +60,6 @@ function getProjectUsersByProjectQuery(projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectUsersByProjectQuery = getProjectUsersByProjectQuery;
 function getProjectUserQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -64,7 +69,6 @@ function getProjectUserQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectUserQuery = getProjectUserQuery;
 function removeProjectUserQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -74,7 +78,6 @@ function removeProjectUserQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeProjectUserQuery = removeProjectUserQuery;
 function editProjectUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -94,4 +97,3 @@ function editProjectUserQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editProjectUserQuery = editProjectUserQuery;

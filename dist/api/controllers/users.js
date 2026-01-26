@@ -8,11 +8,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.requestResetEmail = exports.resetPassword = exports.editUsername = exports.editEmail = exports.verifyJwt = exports.loginUser = exports.registerUser = exports.getUserBySession = exports.getUserById = exports.getAllUsers = exports.verifyUserByToken = void 0;
+exports.verifyUserByToken = verifyUserByToken;
+exports.getAllUsers = getAllUsers;
+exports.getUserById = getUserById;
+exports.getUserBySession = getUserBySession;
+exports.registerUser = registerUser;
+exports.loginUser = loginUser;
+exports.verifyJwt = verifyJwt;
+exports.editEmail = editEmail;
+exports.editUsername = editUsername;
+exports.resetPassword = resetPassword;
+exports.requestResetEmail = requestResetEmail;
 const bcrypt_1 = require("bcrypt");
 const jsonwebtoken_1 = require("jsonwebtoken");
-const index_js_1 = require("../smtp/index.js");
+const index_js_1 = __importDefault(require("../smtp/index.js"));
 const users_1 = require("../queries/users");
 const projects_1 = require("../queries/projects");
 const tableViews_js_1 = require("../queries/tableViews.js");
@@ -41,7 +54,6 @@ function verifyUserByToken(token) {
             return null;
     });
 }
-exports.verifyUserByToken = verifyUserByToken;
 function getAllUsers(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -53,7 +65,6 @@ function getAllUsers(req, res, next) {
         }
     });
 }
-exports.getAllUsers = getAllUsers;
 function getUserById(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -65,7 +76,6 @@ function getUserById(req, res, next) {
         }
     });
 }
-exports.getUserById = getUserById;
 function registerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -115,7 +125,6 @@ function registerUser(req, res, next) {
         }
     });
 }
-exports.registerUser = registerUser;
 function loginUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -155,12 +164,10 @@ function loginUser(req, res, next) {
         }
     });
 }
-exports.loginUser = loginUser;
 function verifyJwt(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
     });
 }
-exports.verifyJwt = verifyJwt;
 function editUsername(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -176,7 +183,6 @@ function editUsername(req, res, next) {
         }
     });
 }
-exports.editUsername = editUsername;
 function editEmail(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -196,7 +202,6 @@ function editEmail(req, res, next) {
         }
     });
 }
-exports.editEmail = editEmail;
 function resetPassword(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -219,7 +224,6 @@ function resetPassword(req, res, next) {
         }
     });
 }
-exports.resetPassword = resetPassword;
 function requestResetEmail(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -238,7 +242,6 @@ function requestResetEmail(req, res, next) {
         }
     });
 }
-exports.requestResetEmail = requestResetEmail;
 function getUserBySession(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -252,4 +255,3 @@ function getUserBySession(req, res, next) {
         }
     });
 }
-exports.getUserBySession = getUserBySession;

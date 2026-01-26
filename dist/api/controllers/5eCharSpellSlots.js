@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharSpellSlotInfo = void 0;
+exports.edit5eCharSpellSlotInfo = edit5eCharSpellSlotInfo;
 const _5eCharSpellSlots_1 = require("../queries/5eCharSpellSlots");
 function edit5eCharSpellSlotInfo(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,4 +22,3 @@ function edit5eCharSpellSlotInfo(req, res, next) {
         }
     });
 }
-exports.edit5eCharSpellSlotInfo = edit5eCharSpellSlotInfo;

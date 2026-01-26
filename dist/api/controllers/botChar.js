@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.characterSheetBotMessageResponse = exports.characterSheetBotCommandResponse = void 0;
+exports.characterSheetBotCommandResponse = characterSheetBotCommandResponse;
+exports.characterSheetBotMessageResponse = characterSheetBotMessageResponse;
 const discord_interactions_1 = require("discord-interactions");
 const socketUsers_1 = require("../../lib/socketUsers");
 const url_1 = require("url");
@@ -755,7 +756,6 @@ function characterSheetBotCommandResponse(req, res) {
         }
     });
 }
-exports.characterSheetBotCommandResponse = characterSheetBotCommandResponse;
 function handleSelectFeatResponse(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const featData = yield (0, _5eCharFeats_1.get5eCharFeatQuery)(req.body.data.values[0]);
@@ -808,4 +808,3 @@ function characterSheetBotMessageResponse(req, res) {
         }
     });
 }
-exports.characterSheetBotMessageResponse = characterSheetBotMessageResponse;

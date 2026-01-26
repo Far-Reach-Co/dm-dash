@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editMonth = exports.removeMonth = exports.addMonth = exports.getMonths = void 0;
+exports.getMonths = getMonths;
+exports.addMonth = addMonth;
+exports.removeMonth = removeMonth;
+exports.editMonth = editMonth;
 const months_js_1 = require("../queries/months.js");
 function addMonth(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +25,6 @@ function addMonth(req, res, next) {
         }
     });
 }
-exports.addMonth = addMonth;
 function getMonths(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +36,6 @@ function getMonths(req, res, next) {
         }
     });
 }
-exports.getMonths = getMonths;
 function removeMonth(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +47,6 @@ function removeMonth(req, res, next) {
         }
     });
 }
-exports.removeMonth = removeMonth;
 function editMonth(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -61,4 +61,3 @@ function editMonth(req, res, next) {
         }
     });
 }
-exports.editMonth = editMonth;

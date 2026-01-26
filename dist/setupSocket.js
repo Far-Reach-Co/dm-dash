@@ -9,13 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = setupSocketHandlers;
 const socket_io_1 = require("socket.io");
 const socketUsers_js_1 = require("./lib/socketUsers.js");
 const dice_js_1 = require("./lib/dice.js");
 function setupSocketHandlers(server) {
     const io = new socket_io_1.Server(server);
     io.on("connection", (socket) => {
-        socket.on("table-joined", ({ table, username }) => __awaiter(this, void 0, void 0, function* () {
+        socket.on("table-joined", (_a) => __awaiter(this, [_a], void 0, function* ({ table, username }) {
             try {
                 const user = yield (0, socketUsers_js_1.userJoin)(socket.id, username, table);
                 socket.join(table);
@@ -26,7 +27,7 @@ function setupSocketHandlers(server) {
                 console.log("SOCKET ERROR", err);
             }
         }));
-        socket.on("get-messages", ({ table }) => __awaiter(this, void 0, void 0, function* () {
+        socket.on("get-messages", (_a) => __awaiter(this, [_a], void 0, function* ({ table }) {
             io.to(table).emit("table-messages", yield (0, socketUsers_js_1.getChatLog)(table));
         }));
         socket.on("grid-toggled", ({ table, gridState }) => {
@@ -59,8 +60,8 @@ function setupSocketHandlers(server) {
                 io.to(user.table).emit("current-users", yield (0, socketUsers_js_1.getTableUsers)(user.table));
             }
         }));
-        socket.on("new-message", ({ table, content }) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
+        socket.on("new-message", (_a) => __awaiter(this, [_a], void 0, function* ({ table, content }) {
+            var _b;
             try {
                 const user = yield (0, socketUsers_js_1.getCurrentUser)(socket.id);
                 if (!user) {
@@ -69,7 +70,7 @@ function setupSocketHandlers(server) {
                 }
                 if (content.startsWith("/")) {
                     const match = content.match(/^\/(\w+)\s*(.*)$/);
-                    const command = (_a = match === null || match === void 0 ? void 0 : match[1]) === null || _a === void 0 ? void 0 : _a.toLowerCase();
+                    const command = (_b = match === null || match === void 0 ? void 0 : match[1]) === null || _b === void 0 ? void 0 : _b.toLowerCase();
                     const tail = ((match === null || match === void 0 ? void 0 : match[2]) || "").trim();
                     switch (command) {
                         case "roll": {
@@ -102,4 +103,3 @@ function setupSocketHandlers(server) {
     });
     return io;
 }
-exports.default = setupSocketHandlers;

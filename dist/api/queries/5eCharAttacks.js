@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eCharAttacksQuery = exports.edit5eCharAttackQuery = exports.remove5eCharAttackQuery = exports.get5eCharAttackQuery = exports.get5eCharAttacksByGeneralQuery = exports.add5eCharAttackQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.add5eCharAttackQuery = add5eCharAttackQuery;
+exports.get5eCharAttacksByGeneralQuery = get5eCharAttacksByGeneralQuery;
+exports.get5eCharAttackQuery = get5eCharAttackQuery;
+exports.remove5eCharAttackQuery = remove5eCharAttackQuery;
+exports.edit5eCharAttackQuery = edit5eCharAttackQuery;
+exports.duplicate5eCharAttacksQuery = duplicate5eCharAttacksQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function add5eCharAttackQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -24,7 +32,6 @@ function add5eCharAttackQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.add5eCharAttackQuery = add5eCharAttackQuery;
 function get5eCharAttackQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -34,7 +41,6 @@ function get5eCharAttackQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharAttackQuery = get5eCharAttackQuery;
 function duplicate5eCharAttacksQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_attack";
@@ -60,7 +66,6 @@ function duplicate5eCharAttacksQuery(data) {
         yield dbconfig_1.default.query(query);
     });
 }
-exports.duplicate5eCharAttacksQuery = duplicate5eCharAttacksQuery;
 function get5eCharAttacksByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -70,7 +75,6 @@ function get5eCharAttacksByGeneralQuery(generalId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharAttacksByGeneralQuery = get5eCharAttacksByGeneralQuery;
 function remove5eCharAttackQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -80,7 +84,6 @@ function remove5eCharAttackQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.remove5eCharAttackQuery = remove5eCharAttackQuery;
 function edit5eCharAttackQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -100,4 +103,3 @@ function edit5eCharAttackQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.edit5eCharAttackQuery = edit5eCharAttackQuery;

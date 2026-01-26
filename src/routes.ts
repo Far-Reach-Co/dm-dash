@@ -40,10 +40,45 @@ import { getRecordImagesByRecordQuery } from "./api/queries/recordImage";
 import { getImageQuery, Image } from "./api/queries/images";
 import { getSignedUrls } from "./api/controllers/s3";
 
-// init csrf
-const csrf = require("csurf");
-//csrf use
-const csrfMiddleware = csrf({ cookie: true });
+// CSRF protection using base csrf package (same as csurf used internally)
+import Tokens from "csrf";
+
+const tokens = new Tokens();
+const CSRF_COOKIE = "_csrf_secret";
+const isProd = process.env.SERVER_ENV === "prod";
+
+// Middleware to generate CSRF token (for GET routes that render forms)
+const csrfMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  // Get or create secret from cookie
+  let secret = req.cookies[CSRF_COOKIE];
+  if (!secret) {
+    secret = tokens.secretSync();
+    res.cookie(CSRF_COOKIE, secret, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: isProd,
+      path: "/",
+    });
+  }
+  // Generate token and make available to templates
+  const token = tokens.create(secret);
+  res.locals.csrfToken = token;
+  next();
+};
+
+// Middleware to validate CSRF token (for POST routes)
+const csrfProtection = (req: Request, res: Response, next: NextFunction) => {
+  const secret = req.cookies[CSRF_COOKIE];
+  const token = req.body?._csrf || req.headers["x-csrf-token"];
+
+  if (!secret || !token || !tokens.verify(secret, token)) {
+    const err: any = new Error("Invalid CSRF token");
+    err.code = "EBADCSRFTOKEN";
+    err.status = 403;
+    return next(err);
+  }
+  next();
+};
 
 var router = Router();
 
@@ -93,7 +128,7 @@ router.get(
       });
 
       //
-      const csrfToken = req.csrfToken();
+      const csrfToken = res.locals.csrfToken;
       res.render("login", { auth: req.session.user, csrfToken });
     } catch (err) {
       next(err);
@@ -107,7 +142,7 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => {
     try {
       //
-      const csrfToken = req.csrfToken();
+      const csrfToken = res.locals.csrfToken;
       res.render("register", { auth: req.session.user, csrfToken });
     } catch (err) {
       next(err);
@@ -121,7 +156,7 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => {
     try {
       //
-      const csrfToken = req.csrfToken();
+      const csrfToken = res.locals.csrfToken;
       res.render("forgotpassword", { auth: req.session.user, csrfToken });
     } catch (err) {
       next(err);
@@ -135,7 +170,7 @@ router.get(
   (req: Request, res: Response, next: NextFunction) => {
     try {
       //
-      const csrfToken = req.csrfToken();
+      const csrfToken = res.locals.csrfToken;
       res.render("resetpassword", { auth: req.session.user, csrfToken });
     } catch (err) {
       next(err);
@@ -288,7 +323,7 @@ router.get(
     try {
       //
       if (!req.session.user) return res.redirect("/login");
-      const csrfToken = req.csrfToken();
+      const csrfToken = res.locals.csrfToken;
       const { rows } = await getUserByIdQuery(req.session.user);
 
       // calculate used data formatted
@@ -1007,3 +1042,4 @@ router.get("/forbidden", (req: Request, res: Response, next: NextFunction) => {
 });
 
 export default router;
+export { csrfProtection };

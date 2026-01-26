@@ -9,7 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeRecord = exports.editRecord = exports.getRecord = exports.getRecordsByProject = exports.getRecordsByUser = exports.addRecordByUser = exports.addRecordByProject = void 0;
+exports.addRecordByProject = addRecordByProject;
+exports.addRecordByUser = addRecordByUser;
+exports.getRecordsByUser = getRecordsByUser;
+exports.getRecordsByProject = getRecordsByProject;
+exports.getRecord = getRecord;
+exports.editRecord = editRecord;
+exports.removeRecord = removeRecord;
 const record_1 = require("../queries/record");
 const eventLogger_1 = require("../../lib/eventLogger");
 function addRecordByUser(req, res, next) {
@@ -37,7 +43,6 @@ function addRecordByUser(req, res, next) {
         }
     });
 }
-exports.addRecordByUser = addRecordByUser;
 function addRecordByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -66,7 +71,6 @@ function addRecordByProject(req, res, next) {
         }
     });
 }
-exports.addRecordByProject = addRecordByProject;
 function getRecord(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -79,7 +83,6 @@ function getRecord(req, res, next) {
         }
     });
 }
-exports.getRecord = getRecord;
 function getRecordsByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -94,7 +97,6 @@ function getRecordsByUser(req, res, next) {
         }
     });
 }
-exports.getRecordsByUser = getRecordsByUser;
 function getRecordsByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -107,7 +109,6 @@ function getRecordsByProject(req, res, next) {
         }
     });
 }
-exports.getRecordsByProject = getRecordsByProject;
 function editRecord(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -120,7 +121,6 @@ function editRecord(req, res, next) {
         }
     });
 }
-exports.editRecord = editRecord;
 function removeRecord(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -133,4 +133,3 @@ function removeRecord(req, res, next) {
         }
     });
 }
-exports.removeRecord = removeRecord;

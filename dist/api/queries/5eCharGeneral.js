@@ -8,9 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eCharGeneralQuery = exports.get5eCharNamesQuery = exports.edit5eCharGeneralQuery = exports.remove5eCharGeneralQuery = exports.get5eCharGeneralQuery = exports.get5eCharsGeneralByUserQuery = exports.get5eCharGeneralUserIdQuery = exports.add5eCharGeneralQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.add5eCharGeneralQuery = add5eCharGeneralQuery;
+exports.get5eCharGeneralUserIdQuery = get5eCharGeneralUserIdQuery;
+exports.get5eCharsGeneralByUserQuery = get5eCharsGeneralByUserQuery;
+exports.get5eCharGeneralQuery = get5eCharGeneralQuery;
+exports.remove5eCharGeneralQuery = remove5eCharGeneralQuery;
+exports.edit5eCharGeneralQuery = edit5eCharGeneralQuery;
+exports.get5eCharNamesQuery = get5eCharNamesQuery;
+exports.duplicate5eCharGeneralQuery = duplicate5eCharGeneralQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function add5eCharGeneralQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -24,7 +34,6 @@ function add5eCharGeneralQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.add5eCharGeneralQuery = add5eCharGeneralQuery;
 function duplicate5eCharGeneralQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_general";
@@ -50,7 +59,6 @@ function duplicate5eCharGeneralQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.duplicate5eCharGeneralQuery = duplicate5eCharGeneralQuery;
 function get5eCharGeneralQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -60,7 +68,6 @@ function get5eCharGeneralQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharGeneralQuery = get5eCharGeneralQuery;
 function get5eCharGeneralUserIdQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -70,7 +77,6 @@ function get5eCharGeneralUserIdQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharGeneralUserIdQuery = get5eCharGeneralUserIdQuery;
 function get5eCharNamesQuery(ids) {
     return __awaiter(this, void 0, void 0, function* () {
         const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
@@ -81,7 +87,6 @@ function get5eCharNamesQuery(ids) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharNamesQuery = get5eCharNamesQuery;
 function get5eCharsGeneralByUserQuery(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -91,7 +96,6 @@ function get5eCharsGeneralByUserQuery(userId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharsGeneralByUserQuery = get5eCharsGeneralByUserQuery;
 function remove5eCharGeneralQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -101,7 +105,6 @@ function remove5eCharGeneralQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.remove5eCharGeneralQuery = remove5eCharGeneralQuery;
 function edit5eCharGeneralQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -121,4 +124,3 @@ function edit5eCharGeneralQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.edit5eCharGeneralQuery = edit5eCharGeneralQuery;

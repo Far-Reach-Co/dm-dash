@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eCharBackQuery = exports.edit5eCharBackQuery = exports.remove5eCharBackQuery = exports.get5eCharBackQuery = exports.get5eCharBackByGeneralQuery = exports.add5eCharBackQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.add5eCharBackQuery = add5eCharBackQuery;
+exports.get5eCharBackByGeneralQuery = get5eCharBackByGeneralQuery;
+exports.get5eCharBackQuery = get5eCharBackQuery;
+exports.remove5eCharBackQuery = remove5eCharBackQuery;
+exports.edit5eCharBackQuery = edit5eCharBackQuery;
+exports.duplicate5eCharBackQuery = duplicate5eCharBackQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function add5eCharBackQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -23,7 +31,6 @@ function add5eCharBackQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.add5eCharBackQuery = add5eCharBackQuery;
 function duplicate5eCharBackQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_background";
@@ -49,7 +56,6 @@ function duplicate5eCharBackQuery(data) {
         yield dbconfig_1.default.query(query);
     });
 }
-exports.duplicate5eCharBackQuery = duplicate5eCharBackQuery;
 function get5eCharBackQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -59,7 +65,6 @@ function get5eCharBackQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharBackQuery = get5eCharBackQuery;
 function get5eCharBackByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -69,7 +74,6 @@ function get5eCharBackByGeneralQuery(generalId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharBackByGeneralQuery = get5eCharBackByGeneralQuery;
 function remove5eCharBackQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -79,7 +83,6 @@ function remove5eCharBackQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.remove5eCharBackQuery = remove5eCharBackQuery;
 function edit5eCharBackQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -99,4 +102,3 @@ function edit5eCharBackQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.edit5eCharBackQuery = edit5eCharBackQuery;

@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeRecordImageQuery = exports.getRecordImagesByImageQuery = exports.getRecordImagesByRecordQuery = exports.getRecordImageQuery = exports.addRecordImageQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addRecordImageQuery = addRecordImageQuery;
+exports.getRecordImageQuery = getRecordImageQuery;
+exports.getRecordImagesByRecordQuery = getRecordImagesByRecordQuery;
+exports.getRecordImagesByImageQuery = getRecordImagesByImageQuery;
+exports.removeRecordImageQuery = removeRecordImageQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addRecordImageQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -23,7 +30,6 @@ function addRecordImageQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addRecordImageQuery = addRecordImageQuery;
 function getRecordImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -33,7 +39,6 @@ function getRecordImageQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getRecordImageQuery = getRecordImageQuery;
 function getRecordImagesByRecordQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -43,7 +48,6 @@ function getRecordImagesByRecordQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getRecordImagesByRecordQuery = getRecordImagesByRecordQuery;
 function getRecordImagesByImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -53,7 +57,6 @@ function getRecordImagesByImageQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getRecordImagesByImageQuery = getRecordImagesByImageQuery;
 function removeRecordImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -63,4 +66,3 @@ function removeRecordImageQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeRecordImageQuery = removeRecordImageQuery;

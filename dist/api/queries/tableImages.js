@@ -8,9 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getTableImagesWithImageByUserQuery = exports.getTableImagesWithImageByProjectQuery = exports.editTableImageQuery = exports.removeTableImageQuery = exports.getTableImageQuery = exports.getTableImagesByFolderQuery = exports.getTableImagesByUserQuery = exports.getTableImagesByProjectQuery = exports.addTableImageByUserQuery = exports.addTableImageByProjectQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addTableImageByProjectQuery = addTableImageByProjectQuery;
+exports.addTableImageByUserQuery = addTableImageByUserQuery;
+exports.getTableImagesByProjectQuery = getTableImagesByProjectQuery;
+exports.getTableImagesByUserQuery = getTableImagesByUserQuery;
+exports.getTableImagesByFolderQuery = getTableImagesByFolderQuery;
+exports.getTableImageQuery = getTableImageQuery;
+exports.removeTableImageQuery = removeTableImageQuery;
+exports.editTableImageQuery = editTableImageQuery;
+exports.getTableImagesWithImageByProjectQuery = getTableImagesWithImageByProjectQuery;
+exports.getTableImagesWithImageByUserQuery = getTableImagesWithImageByUserQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addTableImageByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,7 +36,6 @@ function addTableImageByProjectQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addTableImageByProjectQuery = addTableImageByProjectQuery;
 function addTableImageByUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -38,7 +49,6 @@ function addTableImageByUserQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addTableImageByUserQuery = addTableImageByUserQuery;
 function getTableImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -48,7 +58,6 @@ function getTableImageQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableImageQuery = getTableImageQuery;
 function getTableImagesByFolderQuery(folder_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -58,7 +67,6 @@ function getTableImagesByFolderQuery(folder_id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableImagesByFolderQuery = getTableImagesByFolderQuery;
 function getTableImagesByProjectQuery(project_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -68,7 +76,6 @@ function getTableImagesByProjectQuery(project_id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableImagesByProjectQuery = getTableImagesByProjectQuery;
 function getTableImagesByUserQuery(user_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -78,7 +85,6 @@ function getTableImagesByUserQuery(user_id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableImagesByUserQuery = getTableImagesByUserQuery;
 function getTableImagesWithImageByProjectQuery(project_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -95,7 +101,6 @@ function getTableImagesWithImageByProjectQuery(project_id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableImagesWithImageByProjectQuery = getTableImagesWithImageByProjectQuery;
 function getTableImagesWithImageByUserQuery(user_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -112,7 +117,6 @@ function getTableImagesWithImageByUserQuery(user_id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableImagesWithImageByUserQuery = getTableImagesWithImageByUserQuery;
 function removeTableImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -122,7 +126,6 @@ function removeTableImageQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeTableImageQuery = removeTableImageQuery;
 function editTableImageQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -142,4 +145,3 @@ function editTableImageQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editTableImageQuery = editTableImageQuery;

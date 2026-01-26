@@ -8,9 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removePlayerUsersByPlayerQuery = exports.getPlayerUserByUserAndPlayerQuery = exports.editPlayerUserQuery = exports.removePlayerUserQuery = exports.getPlayerUsersByPlayerQuery = exports.getPlayerUsersQuery = exports.getPlayerUserQuery = exports.addPlayerUserQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addPlayerUserQuery = addPlayerUserQuery;
+exports.getPlayerUserQuery = getPlayerUserQuery;
+exports.getPlayerUsersQuery = getPlayerUsersQuery;
+exports.getPlayerUsersByPlayerQuery = getPlayerUsersByPlayerQuery;
+exports.removePlayerUserQuery = removePlayerUserQuery;
+exports.editPlayerUserQuery = editPlayerUserQuery;
+exports.getPlayerUserByUserAndPlayerQuery = getPlayerUserByUserAndPlayerQuery;
+exports.removePlayerUsersByPlayerQuery = removePlayerUsersByPlayerQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addPlayerUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -23,7 +33,6 @@ function addPlayerUserQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addPlayerUserQuery = addPlayerUserQuery;
 function getPlayerUsersQuery(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -33,7 +42,6 @@ function getPlayerUsersQuery(userId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getPlayerUsersQuery = getPlayerUsersQuery;
 function getPlayerUserByUserAndPlayerQuery(userId, playerId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -43,7 +51,6 @@ function getPlayerUserByUserAndPlayerQuery(userId, playerId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getPlayerUserByUserAndPlayerQuery = getPlayerUserByUserAndPlayerQuery;
 function getPlayerUsersByPlayerQuery(playerId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -53,7 +60,6 @@ function getPlayerUsersByPlayerQuery(playerId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getPlayerUsersByPlayerQuery = getPlayerUsersByPlayerQuery;
 function getPlayerUserQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -63,7 +69,6 @@ function getPlayerUserQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getPlayerUserQuery = getPlayerUserQuery;
 function removePlayerUsersByPlayerQuery(playerId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -73,7 +78,6 @@ function removePlayerUsersByPlayerQuery(playerId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removePlayerUsersByPlayerQuery = removePlayerUsersByPlayerQuery;
 function removePlayerUserQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -83,7 +87,6 @@ function removePlayerUserQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removePlayerUserQuery = removePlayerUserQuery;
 function editPlayerUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -103,4 +106,3 @@ function editPlayerUserQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editPlayerUserQuery = editPlayerUserQuery;

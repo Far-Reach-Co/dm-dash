@@ -8,13 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resizeImage = exports.getMetadata = void 0;
-const sharp = require("sharp");
+exports.getMetadata = getMetadata;
+exports.resizeImage = resizeImage;
+const sharp_1 = __importDefault(require("sharp"));
 function getMetadata(imagePath) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            return yield sharp(imagePath).metadata();
+            return yield (0, sharp_1.default)(imagePath).metadata();
         }
         catch (error) {
             console.log(`An error occurred during processing image metadata: ${error}`);
@@ -22,14 +26,13 @@ function getMetadata(imagePath) {
         }
     });
 }
-exports.getMetadata = getMetadata;
 function resizeImage(imagePath, width, height) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             width = Math.floor(width);
             height = Math.floor(height);
             const newPath = imagePath + "_resized";
-            yield sharp(imagePath)
+            yield (0, sharp_1.default)(imagePath)
                 .resize({
                 width,
                 height,
@@ -43,4 +46,3 @@ function resizeImage(imagePath, width, height) {
         }
     });
 }
-exports.resizeImage = resizeImage;

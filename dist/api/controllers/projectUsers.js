@@ -9,7 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editProjectUserIsEditor = exports.removeProjectUser = exports.getProjectUsersByProject = exports.getProjectUserByUserAndProject = exports.addProjectUserByInvite = void 0;
+exports.addProjectUserByInvite = addProjectUserByInvite;
+exports.getProjectUserByUserAndProject = getProjectUserByUserAndProject;
+exports.getProjectUsersByProject = getProjectUsersByProject;
+exports.removeProjectUser = removeProjectUser;
+exports.editProjectUserIsEditor = editProjectUserIsEditor;
 const projectInvites_js_1 = require("../queries/projectInvites.js");
 const projectUsers_js_1 = require("../queries/projectUsers.js");
 const projects_js_1 = require("../queries/projects.js");
@@ -40,7 +44,6 @@ function addProjectUserByInvite(req, res, next) {
         }
     });
 }
-exports.addProjectUserByInvite = addProjectUserByInvite;
 function getProjectUserByUserAndProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -54,7 +57,6 @@ function getProjectUserByUserAndProject(req, res, next) {
         }
     });
 }
-exports.getProjectUserByUserAndProject = getProjectUserByUserAndProject;
 function getProjectUsersByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -76,7 +78,6 @@ function getProjectUsersByProject(req, res, next) {
         }
     });
 }
-exports.getProjectUsersByProject = getProjectUsersByProject;
 function removeProjectUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -88,7 +89,6 @@ function removeProjectUser(req, res, next) {
         }
     });
 }
-exports.removeProjectUser = removeProjectUser;
 function editProjectUserIsEditor(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -101,4 +101,3 @@ function editProjectUserIsEditor(req, res, next) {
         }
     });
 }
-exports.editProjectUserIsEditor = editProjectUserIsEditor;

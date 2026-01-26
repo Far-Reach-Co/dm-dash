@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editProjectPlayerQuery = exports.removeProjectPlayerQuery = exports.getProjectPlayersByPlayerQuery = exports.getProjectPlayersByProjectQuery = exports.getProjectPlayerQuery = exports.addProjectPlayerQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addProjectPlayerQuery = addProjectPlayerQuery;
+exports.getProjectPlayerQuery = getProjectPlayerQuery;
+exports.getProjectPlayersByProjectQuery = getProjectPlayersByProjectQuery;
+exports.getProjectPlayersByPlayerQuery = getProjectPlayersByPlayerQuery;
+exports.removeProjectPlayerQuery = removeProjectPlayerQuery;
+exports.editProjectPlayerQuery = editProjectPlayerQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addProjectPlayerQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -23,7 +31,6 @@ function addProjectPlayerQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addProjectPlayerQuery = addProjectPlayerQuery;
 function getProjectPlayersByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -33,7 +40,6 @@ function getProjectPlayersByProjectQuery(projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectPlayersByProjectQuery = getProjectPlayersByProjectQuery;
 function getProjectPlayersByPlayerQuery(playerId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -43,7 +49,6 @@ function getProjectPlayersByPlayerQuery(playerId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectPlayersByPlayerQuery = getProjectPlayersByPlayerQuery;
 function getProjectPlayerQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -53,7 +58,6 @@ function getProjectPlayerQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectPlayerQuery = getProjectPlayerQuery;
 function removeProjectPlayerQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -63,7 +67,6 @@ function removeProjectPlayerQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeProjectPlayerQuery = removeProjectPlayerQuery;
 function editProjectPlayerQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -83,4 +86,3 @@ function editProjectPlayerQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editProjectPlayerQuery = editProjectPlayerQuery;

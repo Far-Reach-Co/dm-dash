@@ -9,7 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTableImage = exports.removeTableImage = exports.addTableImageByProject = exports.addTableImageByUser = exports.getTableImagesWithSignedUrlsByTableUser = exports.getTableImagesWithSignedUrlsByTableProject = void 0;
+exports.getTableImagesWithSignedUrlsByTableProject = getTableImagesWithSignedUrlsByTableProject;
+exports.getTableImagesWithSignedUrlsByTableUser = getTableImagesWithSignedUrlsByTableUser;
+exports.addTableImageByUser = addTableImageByUser;
+exports.addTableImageByProject = addTableImageByProject;
+exports.removeTableImage = removeTableImage;
+exports.editTableImage = editTableImage;
 const tableImages_1 = require("../queries/tableImages");
 const tableViews_1 = require("../queries/tableViews");
 const s3_1 = require("./s3");
@@ -24,7 +29,6 @@ function addTableImageByProject(req, res, next) {
         }
     });
 }
-exports.addTableImageByProject = addTableImageByProject;
 function addTableImageByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -39,7 +43,6 @@ function addTableImageByUser(req, res, next) {
         }
     });
 }
-exports.addTableImageByUser = addTableImageByUser;
 function getTableImagesWithSignedUrlsByTableProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -61,7 +64,6 @@ function getTableImagesWithSignedUrlsByTableProject(req, res, next) {
         }
     });
 }
-exports.getTableImagesWithSignedUrlsByTableProject = getTableImagesWithSignedUrlsByTableProject;
 function getTableImagesWithSignedUrlsByTableUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -83,7 +85,6 @@ function getTableImagesWithSignedUrlsByTableUser(req, res, next) {
         }
     });
 }
-exports.getTableImagesWithSignedUrlsByTableUser = getTableImagesWithSignedUrlsByTableUser;
 function removeTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -95,7 +96,6 @@ function removeTableImage(req, res, next) {
         }
     });
 }
-exports.removeTableImage = removeTableImage;
 function editTableImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -107,4 +107,3 @@ function editTableImage(req, res, next) {
         }
     });
 }
-exports.editTableImage = editTableImage;

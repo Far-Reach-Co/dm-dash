@@ -8,9 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTableFolderQuery = exports.removeTableFolderQuery = exports.getTableFolderQuery = exports.getTableFoldersByParentQuery = exports.getTableFoldersByUserQuery = exports.getTableFoldersByProjectQuery = exports.addTableFolderByUserQuery = exports.addTableFolderByProjectQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addTableFolderByProjectQuery = addTableFolderByProjectQuery;
+exports.addTableFolderByUserQuery = addTableFolderByUserQuery;
+exports.getTableFoldersByProjectQuery = getTableFoldersByProjectQuery;
+exports.getTableFoldersByUserQuery = getTableFoldersByUserQuery;
+exports.getTableFoldersByParentQuery = getTableFoldersByParentQuery;
+exports.getTableFolderQuery = getTableFolderQuery;
+exports.removeTableFolderQuery = removeTableFolderQuery;
+exports.editTableFolderQuery = editTableFolderQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addTableFolderByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -25,7 +35,6 @@ function addTableFolderByProjectQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addTableFolderByProjectQuery = addTableFolderByProjectQuery;
 function addTableFolderByUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -40,7 +49,6 @@ function addTableFolderByUserQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addTableFolderByUserQuery = addTableFolderByUserQuery;
 function getTableFolderQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -50,7 +58,6 @@ function getTableFolderQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableFolderQuery = getTableFolderQuery;
 function getTableFoldersByUserQuery(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -60,7 +67,6 @@ function getTableFoldersByUserQuery(userId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableFoldersByUserQuery = getTableFoldersByUserQuery;
 function getTableFoldersByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -70,7 +76,6 @@ function getTableFoldersByProjectQuery(projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableFoldersByProjectQuery = getTableFoldersByProjectQuery;
 function getTableFoldersByParentQuery(parentFolderId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -80,7 +85,6 @@ function getTableFoldersByParentQuery(parentFolderId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableFoldersByParentQuery = getTableFoldersByParentQuery;
 function removeTableFolderQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -90,7 +94,6 @@ function removeTableFolderQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeTableFolderQuery = removeTableFolderQuery;
 function editTableFolderQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -110,4 +113,3 @@ function editTableFolderQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editTableFolderQuery = editTableFolderQuery;

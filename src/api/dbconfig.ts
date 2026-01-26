@@ -1,4 +1,5 @@
 import { Pool, QueryResult, QueryResultRow } from "pg";
+import logger from "../lib/logger.js";
 
 // LOCAL
 var credentials = {
@@ -15,11 +16,15 @@ async function query<T extends QueryResultRow>(
   queryObject: { text: string; values?: any[] },
   params?: any
 ): Promise<QueryResult<T>> {
-  const start = Date.now();
-  const res = await pool.query(queryObject, params);
-  const duration = Date.now() - start;
-  console.log("executed query", { queryObject, duration, rows: res.rowCount });
-  return res;
+  try {
+    return await pool.query(queryObject, params);
+  } catch (error) {
+    logger.error(
+      { err: error, query: queryObject.text },
+      "Database query failed"
+    );
+    throw error;
+  }
 }
 
 const db = {

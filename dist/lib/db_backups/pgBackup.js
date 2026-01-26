@@ -8,6 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
 dotenv.config();
@@ -16,7 +19,7 @@ const fs_1 = require("fs");
 const aws_sdk_1 = require("aws-sdk");
 const dotenv_1 = require("dotenv");
 (0, dotenv_1.config)({ path: "../../../.env" });
-const smtp_1 = require("../../api/smtp");
+const smtp_1 = __importDefault(require("../../api/smtp"));
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,

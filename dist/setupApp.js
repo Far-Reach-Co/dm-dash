@@ -1,36 +1,79 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.server = exports.app = void 0;
 const config_1 = require("./config");
-const express = require("express");
-const http = require("http");
-const app = express();
+const express_1 = __importDefault(require("express"));
+const http_1 = __importDefault(require("http"));
+const app = (0, express_1.default)();
 exports.app = app;
-const server = http.createServer(app);
+const server = http_1.default.createServer(app);
 exports.server = server;
-const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
-const morgan = require("morgan");
-const session = require("express-session");
-const connectPgSimple = require("connect-pg-simple");
-const pgSession = connectPgSimple(session);
-const routes_js_1 = require("./api/routes.js");
-const routes_js_2 = require("./routes.js");
-const routes_js_3 = require("./dnd/routes.js");
+const body_parser_1 = __importDefault(require("body-parser"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
+const express_session_1 = __importDefault(require("express-session"));
+const connect_pg_simple_1 = __importDefault(require("connect-pg-simple"));
+const pgSession = (0, connect_pg_simple_1.default)(express_session_1.default);
+const helmet_1 = __importDefault(require("helmet"));
+const cors_1 = __importDefault(require("cors"));
+const compression_1 = __importDefault(require("compression"));
+const pino_http_1 = __importDefault(require("pino-http"));
+const logger_js_1 = __importDefault(require("./lib/logger.js"));
+const routes_js_1 = __importDefault(require("./api/routes.js"));
+const routes_js_2 = __importDefault(require("./routes.js"));
+const routes_js_3 = __importDefault(require("./dnd/routes.js"));
 const dbconfig_js_1 = require("./api/dbconfig.js");
-app.use(morgan("combined"));
+app.use((0, helmet_1.default)({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://www.googletagmanager.com",
+                "https://www.google-analytics.com",
+            ],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "blob:", "https://*.amazonaws.com", "https://*.cloudfront.net"],
+            connectSrc: [
+                "'self'",
+                "https://www.google-analytics.com",
+                "wss://*.farreachco.com",
+                "ws://localhost:*",
+            ],
+            frameSrc: ["'self'"],
+            objectSrc: ["'none'"],
+            upgradeInsecureRequests: config_1.isProd ? [] : null,
+        },
+    },
+}));
+app.use((0, cors_1.default)({
+    origin: [
+        "https://farreachco.com",
+        "https://www.farreachco.com",
+        "https://radio.farreachco.com",
+        /\.farreachco\.com$/,
+    ],
+    credentials: true,
+}));
+app.use((0, compression_1.default)());
+app.use((0, pino_http_1.default)({ logger: logger_js_1.default }));
 app.set("view engine", "ejs");
-app.use(bodyParser.json({ limit: "10mb" }));
-app.use(bodyParser.urlencoded({
+app.use(body_parser_1.default.json({ limit: "10mb" }));
+app.use(body_parser_1.default.urlencoded({
     limit: "10mb",
     extended: true,
     parameterLimit: 50000,
 }));
-app.use(cookieParser());
-app.use(express.static("public"));
+app.use((0, cookie_parser_1.default)());
+app.use(express_1.default.static("public"));
 app.set("trust proxy", 1);
 if (config_1.isProd) {
-    app.use(session({
+    app.use((0, express_session_1.default)({
         store: new pgSession({
             pool: dbconfig_js_1.pool,
             tableName: "session",
@@ -49,7 +92,7 @@ if (config_1.isProd) {
     }));
 }
 else {
-    app.use(session({
+    app.use((0, express_session_1.default)({
         store: new pgSession({
             pool: dbconfig_js_1.pool,
             tableName: "session",
@@ -73,7 +116,7 @@ app.use((req, res) => {
     res.status(404).render("404", { auth: req.session.user });
 });
 app.use((error, req, res, next) => {
-    console.error(error);
+    logger_js_1.default.error({ err: error, url: req.url, method: req.method }, "Request error");
     if (error.code === "EBADCSRFTOKEN") {
         error.status = 403;
         error.message = "Form has expired or was tampered with.";

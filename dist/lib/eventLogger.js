@@ -8,9 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logEventAsync = exports.logEvent = exports.EventType = void 0;
-const dbconfig_1 = require("../api/dbconfig");
+exports.EventType = void 0;
+exports.logEvent = logEvent;
+exports.logEventAsync = logEventAsync;
+const dbconfig_1 = __importDefault(require("../api/dbconfig"));
 var EventType;
 (function (EventType) {
     EventType["USER_REGISTERED"] = "user.registered";
@@ -24,10 +29,10 @@ var EventType;
     EventType["IMAGE_DELETED"] = "image.deleted";
     EventType["RECORD_CREATED"] = "record.created";
     EventType["CALENDAR_CREATED"] = "calendar.created";
-})(EventType = exports.EventType || (exports.EventType = {}));
+})(EventType || (exports.EventType = EventType = {}));
 function logEvent(params) {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         const { userId, projectId, eventType, eventData, req } = params;
         try {
             const ipAddress = (req === null || req === void 0 ? void 0 : req.ip) || ((_a = req === null || req === void 0 ? void 0 : req.socket) === null || _a === void 0 ? void 0 : _a.remoteAddress) || null;
@@ -52,10 +57,8 @@ function logEvent(params) {
         }
     });
 }
-exports.logEvent = logEvent;
 function logEventAsync(params) {
     logEvent(params).catch((error) => {
         console.error("Async event logging failed:", error);
     });
 }
-exports.logEventAsync = logEventAsync;

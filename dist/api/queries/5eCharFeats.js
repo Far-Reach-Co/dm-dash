@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eCharFeatsQuery = exports.edit5eCharFeatQuery = exports.remove5eCharFeatQuery = exports.get5eCharFeatQuery = exports.get5eCharFeatsByGeneralQuery = exports.add5eCharFeatQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.add5eCharFeatQuery = add5eCharFeatQuery;
+exports.get5eCharFeatsByGeneralQuery = get5eCharFeatsByGeneralQuery;
+exports.get5eCharFeatQuery = get5eCharFeatQuery;
+exports.remove5eCharFeatQuery = remove5eCharFeatQuery;
+exports.edit5eCharFeatQuery = edit5eCharFeatQuery;
+exports.duplicate5eCharFeatsQuery = duplicate5eCharFeatsQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function add5eCharFeatQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,7 +34,6 @@ function add5eCharFeatQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.add5eCharFeatQuery = add5eCharFeatQuery;
 function duplicate5eCharFeatsQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_feat_trait";
@@ -52,7 +59,6 @@ function duplicate5eCharFeatsQuery(data) {
         yield dbconfig_1.default.query(query);
     });
 }
-exports.duplicate5eCharFeatsQuery = duplicate5eCharFeatsQuery;
 function get5eCharFeatQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -62,7 +68,6 @@ function get5eCharFeatQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharFeatQuery = get5eCharFeatQuery;
 function get5eCharFeatsByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -72,7 +77,6 @@ function get5eCharFeatsByGeneralQuery(generalId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharFeatsByGeneralQuery = get5eCharFeatsByGeneralQuery;
 function remove5eCharFeatQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -82,7 +86,6 @@ function remove5eCharFeatQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.remove5eCharFeatQuery = remove5eCharFeatQuery;
 function edit5eCharFeatQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -102,4 +105,3 @@ function edit5eCharFeatQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.edit5eCharFeatQuery = edit5eCharFeatQuery;

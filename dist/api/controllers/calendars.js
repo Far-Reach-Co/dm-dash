@@ -9,7 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editCalendar = exports.removeCalendar = exports.addCalendar = exports.getCalendar = exports.getCalendars = void 0;
+exports.getCalendars = getCalendars;
+exports.getCalendar = getCalendar;
+exports.addCalendar = addCalendar;
+exports.removeCalendar = removeCalendar;
+exports.editCalendar = editCalendar;
 const calendars_js_1 = require("../queries/calendars.js");
 const months_js_1 = require("../queries/months.js");
 const days_js_1 = require("../queries/days.js");
@@ -33,7 +37,6 @@ function addCalendar(req, res, next) {
         }
     });
 }
-exports.addCalendar = addCalendar;
 function getCalendars(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -53,7 +56,6 @@ function getCalendars(req, res, next) {
         }
     });
 }
-exports.getCalendars = getCalendars;
 function getCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -70,7 +72,6 @@ function getCalendar(req, res, next) {
         }
     });
 }
-exports.getCalendar = getCalendar;
 function removeCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -90,7 +91,6 @@ function removeCalendar(req, res, next) {
         }
     });
 }
-exports.removeCalendar = removeCalendar;
 function editCalendar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -105,4 +105,3 @@ function editCalendar(req, res, next) {
         }
     });
 }
-exports.editCalendar = editCalendar;

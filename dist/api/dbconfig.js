@@ -8,9 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pool = void 0;
 const pg_1 = require("pg");
+const logger_js_1 = __importDefault(require("../lib/logger.js"));
 var credentials = {
     user: process.env.PG_USER,
     host: process.env.PG_HOST,
@@ -21,11 +25,13 @@ var credentials = {
 exports.pool = new pg_1.Pool(credentials);
 function query(queryObject, params) {
     return __awaiter(this, void 0, void 0, function* () {
-        const start = Date.now();
-        const res = yield exports.pool.query(queryObject, params);
-        const duration = Date.now() - start;
-        console.log("executed query", { queryObject, duration, rows: res.rowCount });
-        return res;
+        try {
+            return yield exports.pool.query(queryObject, params);
+        }
+        catch (error) {
+            logger_js_1.default.error({ err: error, query: queryObject.text }, "Database query failed");
+            throw error;
+        }
     });
 }
 const db = {

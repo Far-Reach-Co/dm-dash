@@ -9,7 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeProjectInvite = exports.addProjectInvite = exports.getProjectInviteByUUID = void 0;
+exports.getProjectInviteByUUID = getProjectInviteByUUID;
+exports.addProjectInvite = addProjectInvite;
+exports.removeProjectInvite = removeProjectInvite;
 const projectInvites_js_1 = require("../queries/projectInvites.js");
 const uuid_1 = require("uuid");
 function addProjectInvite(req, res, next) {
@@ -32,7 +34,6 @@ function addProjectInvite(req, res, next) {
         }
     });
 }
-exports.addProjectInvite = addProjectInvite;
 function getProjectInviteByUUID(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -44,7 +45,6 @@ function getProjectInviteByUUID(req, res, next) {
         }
     });
 }
-exports.getProjectInviteByUUID = getProjectInviteByUUID;
 function removeProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -58,4 +58,3 @@ function removeProjectInvite(req, res, next) {
         }
     });
 }
-exports.removeProjectInvite = removeProjectInvite;

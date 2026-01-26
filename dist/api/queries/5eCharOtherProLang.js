@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eCharOtherProLangsQuery = exports.edit5eCharOtherProLangQuery = exports.remove5eCharOtherProLangQuery = exports.get5eCharOtherProLangQuery = exports.get5eCharOtherProLangsByGeneralQuery = exports.add5eCharOtherProLangQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.add5eCharOtherProLangQuery = add5eCharOtherProLangQuery;
+exports.get5eCharOtherProLangsByGeneralQuery = get5eCharOtherProLangsByGeneralQuery;
+exports.get5eCharOtherProLangQuery = get5eCharOtherProLangQuery;
+exports.remove5eCharOtherProLangQuery = remove5eCharOtherProLangQuery;
+exports.edit5eCharOtherProLangQuery = edit5eCharOtherProLangQuery;
+exports.duplicate5eCharOtherProLangsQuery = duplicate5eCharOtherProLangsQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function add5eCharOtherProLangQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -24,7 +32,6 @@ function add5eCharOtherProLangQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.add5eCharOtherProLangQuery = add5eCharOtherProLangQuery;
 function duplicate5eCharOtherProLangsQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_other_pro_lang";
@@ -50,7 +57,6 @@ function duplicate5eCharOtherProLangsQuery(data) {
         yield dbconfig_1.default.query(query);
     });
 }
-exports.duplicate5eCharOtherProLangsQuery = duplicate5eCharOtherProLangsQuery;
 function get5eCharOtherProLangQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -60,7 +66,6 @@ function get5eCharOtherProLangQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharOtherProLangQuery = get5eCharOtherProLangQuery;
 function get5eCharOtherProLangsByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -70,7 +75,6 @@ function get5eCharOtherProLangsByGeneralQuery(generalId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharOtherProLangsByGeneralQuery = get5eCharOtherProLangsByGeneralQuery;
 function remove5eCharOtherProLangQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -80,7 +84,6 @@ function remove5eCharOtherProLangQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.remove5eCharOtherProLangQuery = remove5eCharOtherProLangQuery;
 function edit5eCharOtherProLangQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -100,4 +103,3 @@ function edit5eCharOtherProLangQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.edit5eCharOtherProLangQuery = edit5eCharOtherProLangQuery;

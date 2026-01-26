@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removePlayerInvite = exports.addPlayerInvite = exports.getPlayerInviteByPlayer = exports.getPlayerInviteByUUID = void 0;
+exports.getPlayerInviteByUUID = getPlayerInviteByUUID;
+exports.getPlayerInviteByPlayer = getPlayerInviteByPlayer;
+exports.addPlayerInvite = addPlayerInvite;
+exports.removePlayerInvite = removePlayerInvite;
 const playerInvites_js_1 = require("../queries/playerInvites.js");
 const uuid_1 = require("uuid");
 function addPlayerInvite(req, res, next) {
@@ -25,7 +28,6 @@ function addPlayerInvite(req, res, next) {
         }
     });
 }
-exports.addPlayerInvite = addPlayerInvite;
 function getPlayerInviteByUUID(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -37,7 +39,6 @@ function getPlayerInviteByUUID(req, res, next) {
         }
     });
 }
-exports.getPlayerInviteByUUID = getPlayerInviteByUUID;
 function getPlayerInviteByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -49,7 +50,6 @@ function getPlayerInviteByPlayer(req, res, next) {
         }
     });
 }
-exports.getPlayerInviteByPlayer = getPlayerInviteByPlayer;
 function removePlayerInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -61,4 +61,3 @@ function removePlayerInvite(req, res, next) {
         }
     });
 }
-exports.removePlayerInvite = removePlayerInvite;

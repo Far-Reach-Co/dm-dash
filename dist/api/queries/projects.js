@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editProjectQuery = exports.removeProjectQuery = exports.getProjectsQuery = exports.getProjectQuery = exports.addProjectQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addProjectQuery = addProjectQuery;
+exports.getProjectQuery = getProjectQuery;
+exports.getProjectsQuery = getProjectsQuery;
+exports.removeProjectQuery = removeProjectQuery;
+exports.editProjectQuery = editProjectQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -23,7 +30,6 @@ function addProjectQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addProjectQuery = addProjectQuery;
 function getProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -33,7 +39,6 @@ function getProjectQuery(projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectQuery = getProjectQuery;
 function removeProjectQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -43,7 +48,6 @@ function removeProjectQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeProjectQuery = removeProjectQuery;
 function getProjectsQuery(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -53,7 +57,6 @@ function getProjectsQuery(userId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getProjectsQuery = getProjectsQuery;
 function editProjectQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -73,4 +76,3 @@ function editProjectQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editProjectQuery = editProjectQuery;

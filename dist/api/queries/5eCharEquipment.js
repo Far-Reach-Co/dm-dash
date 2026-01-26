@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eCharEquipmentsQuery = exports.edit5eCharEquipmentQuery = exports.remove5eCharEquipmentQuery = exports.get5eCharEquipmentQuery = exports.get5eCharEquipmentsByGeneralQuery = exports.add5eCharEquipmentQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.add5eCharEquipmentQuery = add5eCharEquipmentQuery;
+exports.get5eCharEquipmentsByGeneralQuery = get5eCharEquipmentsByGeneralQuery;
+exports.get5eCharEquipmentQuery = get5eCharEquipmentQuery;
+exports.remove5eCharEquipmentQuery = remove5eCharEquipmentQuery;
+exports.edit5eCharEquipmentQuery = edit5eCharEquipmentQuery;
+exports.duplicate5eCharEquipmentsQuery = duplicate5eCharEquipmentsQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function add5eCharEquipmentQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -27,7 +35,6 @@ function add5eCharEquipmentQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.add5eCharEquipmentQuery = add5eCharEquipmentQuery;
 function duplicate5eCharEquipmentsQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_equipment";
@@ -53,7 +60,6 @@ function duplicate5eCharEquipmentsQuery(data) {
         yield dbconfig_1.default.query(query);
     });
 }
-exports.duplicate5eCharEquipmentsQuery = duplicate5eCharEquipmentsQuery;
 function get5eCharEquipmentQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -63,7 +69,6 @@ function get5eCharEquipmentQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharEquipmentQuery = get5eCharEquipmentQuery;
 function get5eCharEquipmentsByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -73,7 +78,6 @@ function get5eCharEquipmentsByGeneralQuery(generalId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharEquipmentsByGeneralQuery = get5eCharEquipmentsByGeneralQuery;
 function remove5eCharEquipmentQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -83,7 +87,6 @@ function remove5eCharEquipmentQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.remove5eCharEquipmentQuery = remove5eCharEquipmentQuery;
 function edit5eCharEquipmentQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -103,4 +106,3 @@ function edit5eCharEquipmentQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.edit5eCharEquipmentQuery = edit5eCharEquipmentQuery;

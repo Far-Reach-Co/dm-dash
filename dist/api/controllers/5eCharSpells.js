@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharSpell = exports.remove5eCharSpell = exports.add5eCharSpell = exports.get5eCharSpellsByType = void 0;
+exports.get5eCharSpellsByType = get5eCharSpellsByType;
+exports.add5eCharSpell = add5eCharSpell;
+exports.remove5eCharSpell = remove5eCharSpell;
+exports.edit5eCharSpell = edit5eCharSpell;
 const _5eCharSpells_1 = require("../queries/5eCharSpells");
 function add5eCharSpell(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +25,6 @@ function add5eCharSpell(req, res, next) {
         }
     });
 }
-exports.add5eCharSpell = add5eCharSpell;
 function get5eCharSpellsByType(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +36,6 @@ function get5eCharSpellsByType(req, res, next) {
         }
     });
 }
-exports.get5eCharSpellsByType = get5eCharSpellsByType;
 function remove5eCharSpell(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +47,6 @@ function remove5eCharSpell(req, res, next) {
         }
     });
 }
-exports.remove5eCharSpell = remove5eCharSpell;
 function edit5eCharSpell(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -64,4 +64,3 @@ function edit5eCharSpell(req, res, next) {
         }
     });
 }
-exports.edit5eCharSpell = edit5eCharSpell;

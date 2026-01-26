@@ -8,9 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addTableViewByUserQuery = exports.editTableViewQuery = exports.removeTableViewQuery = exports.getTableViewsByUserQuery = exports.getTableViewQuery = exports.getTableViewByUUIDQuery = exports.getTableViewsByProjectQuery = exports.addTableViewByProjectQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addTableViewByProjectQuery = addTableViewByProjectQuery;
+exports.getTableViewsByProjectQuery = getTableViewsByProjectQuery;
+exports.getTableViewByUUIDQuery = getTableViewByUUIDQuery;
+exports.getTableViewQuery = getTableViewQuery;
+exports.getTableViewsByUserQuery = getTableViewsByUserQuery;
+exports.removeTableViewQuery = removeTableViewQuery;
+exports.editTableViewQuery = editTableViewQuery;
+exports.addTableViewByUserQuery = addTableViewByUserQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addTableViewByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -23,7 +33,6 @@ function addTableViewByProjectQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addTableViewByProjectQuery = addTableViewByProjectQuery;
 function addTableViewByUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -36,7 +45,6 @@ function addTableViewByUserQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addTableViewByUserQuery = addTableViewByUserQuery;
 function getTableViewQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -46,7 +54,6 @@ function getTableViewQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableViewQuery = getTableViewQuery;
 function getTableViewByUUIDQuery(uuid) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -56,7 +63,6 @@ function getTableViewByUUIDQuery(uuid) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableViewByUUIDQuery = getTableViewByUUIDQuery;
 function getTableViewsByProjectQuery(projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -66,7 +72,6 @@ function getTableViewsByProjectQuery(projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableViewsByProjectQuery = getTableViewsByProjectQuery;
 function getTableViewsByUserQuery(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -76,7 +81,6 @@ function getTableViewsByUserQuery(userId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getTableViewsByUserQuery = getTableViewsByUserQuery;
 function removeTableViewQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -86,7 +90,6 @@ function removeTableViewQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeTableViewQuery = removeTableViewQuery;
 function editTableViewQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -106,4 +109,3 @@ function editTableViewQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editTableViewQuery = editTableViewQuery;

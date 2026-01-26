@@ -164,7 +164,7 @@ import {
 } from "./queries/record.js";
 
 // multer
-import * as multer from "multer";
+import multer from "multer";
 import {
   addRecordImage,
   getRecordImage,
@@ -174,11 +174,22 @@ import {
 } from "./controllers/recordImage.js";
 const upload = multer({ dest: "file_uploads/" });
 
-//csrf use
-const csrf = require("csurf");
-const csrfMiddleware = csrf({ cookie: true });
+// CSRF validation middleware (token generation is in routes.ts)
+import { csrfProtection } from "../routes.js";
 
 var router = Router();
+
+// Global API rate limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200, // 200 requests per 15 min per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Too many requests, please try again later",
+  },
+});
+router.use(apiLimiter);
 
 // discord bot
 router.get("/bot/get_all_commands", getCommands);
@@ -424,23 +435,23 @@ const requestResetLimiter = rateLimit({
 router.get("/get_user", getUserBySession);
 router.post(
   "/register",
-  csrfMiddleware,
+  csrfProtection,
   registerLimiter,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
   registerUser
 );
-router.post("/login", csrfMiddleware, loginLimiter, loginUser);
+router.post("/login", csrfProtection, loginLimiter, loginUser);
 router.post(
   "/request_reset_email",
-  csrfMiddleware,
+  csrfProtection,
   requestResetLimiter,
   requestResetEmail
 );
-router.post("/user/reset_password", csrfMiddleware, resetPassword);
-router.post("/update_username", csrfMiddleware, editUsername);
+router.post("/user/reset_password", csrfProtection, resetPassword);
+router.post("/update_username", csrfProtection, editUsername);
 router.post(
   "/update_email",
-  csrfMiddleware,
+  csrfProtection,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
   editEmail
 );
