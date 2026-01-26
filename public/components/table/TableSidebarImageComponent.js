@@ -77,7 +77,7 @@ export default class TableSidebarImageComponent {
           height: "38px",
           style: `${isMobile ? "" : "pointer-events: none;"} max-width: 38px;`, // ✨ Only apply pointer-events:none if NOT mobile
         }),
-        ...handlers
+        ...handlers,
       );
     }
   };
@@ -89,11 +89,11 @@ export default class TableSidebarImageComponent {
       // remove image in db
       if (this.projectId) {
         deleteThing(
-          `/api/remove_image_by_project/${image.id}/${this.projectId}`
+          `/api/remove_image_by_project/${image.id}/${this.projectId}`,
         );
       } else {
         deleteThing(
-          `/api/remove_image_by_table_user/${image.id}/${this.tableView.id}`
+          `/api/remove_image_by_table_user/${image.id}/${this.tableView.id}`,
         );
       }
 
@@ -112,7 +112,7 @@ export default class TableSidebarImageComponent {
   renderImageSettings = async (tableImage, image, imageElem) => {
     const folderSelectElem = await renderFolderSelect(
       tableImage,
-      this.projectId
+      this.projectId,
     );
     folderSelectElem.addEventListener("change", async (e) => {
       const value = e.target.value;
@@ -163,7 +163,7 @@ export default class TableSidebarImageComponent {
               notes: e.target.textContent,
             });
           },
-        }
+        },
       ),
       createElement("hr"),
       createElement("button", { class: "btn-red" }, "Delete Image", {
@@ -222,11 +222,11 @@ export default class TableSidebarImageComponent {
     let tableImages = [];
     if (this.projectId) {
       tableImages = await getThings(
-        `/api/get_table_images_with_urls_by_table_project/${this.tableView.id}`
+        `/api/get_table_images_with_urls_by_table_project/${this.tableView.id}`,
       );
     } else {
       tableImages = await getThings(
-        `/api/get_table_images_with_urls_by_table_user/${this.tableView.id}`
+        `/api/get_table_images_with_urls_by_table_user/${this.tableView.id}`,
       );
     }
 
@@ -248,12 +248,15 @@ export default class TableSidebarImageComponent {
           file_name: tableImage.file_name,
           notes: tableImage.notes,
           src: tableImage.src,
+          record_id: tableImage.record_id,
+          record_title: tableImage.record_title,
+          record_desc: tableImage.record_desc,
         };
         if (image) {
           const item = await this.createImageListItem(tableImage, image);
           imageList.push(item);
         }
-      })
+      }),
     );
     // remove temp loading spinner
     this.tempLoadingSpinner.remove();
@@ -288,9 +291,9 @@ export default class TableSidebarImageComponent {
                   original_name: e.target.value,
                 });
               },
-            }
+            },
           ),
-        ]
+        ],
       ),
       createElement(
         "img",
@@ -303,11 +306,9 @@ export default class TableSidebarImageComponent {
         {
           type: "click",
           event: async () => {
-            modal.show(
-              await this.renderImageSettings(tableImage, image, elem)
-            );
+            modal.show(await this.renderImageSettings(tableImage, image, elem));
           },
-        }
+        },
       ),
     ]);
     return { elem, tableData: tableImage, imageData: image };
@@ -321,6 +322,9 @@ export default class TableSidebarImageComponent {
       file_name: imageData.file_name,
       notes: imageData.notes || null,
       src: imageData.src,
+      record_id: tableImage.record_id,
+      record_title: tableImage.record_title,
+      record_desc: tableImage.record_desc,
     };
     const tableImage = {
       ...tableImageData,
@@ -372,7 +376,7 @@ export default class TableSidebarImageComponent {
     this.imagesListContainer = createElement(
       "div",
       { id: "table-sidebar-images", style: "padding: 3px;" },
-      [...imageElems]
+      [...imageElems],
     );
 
     this.domComponent.append(
@@ -391,9 +395,9 @@ export default class TableSidebarImageComponent {
             this.tableImageSearchQuery = e.target.value;
             this.updateImagesList();
           },
-        }
+        },
       ),
-      this.imagesListContainer
+      this.imagesListContainer,
     );
   };
 }
@@ -425,7 +429,7 @@ class AssociatedRecordsComponent {
     if (this.projectId) {
       newRecord = await postThing(
         `/api/add_record_by_project/${this.projectId}`,
-        data
+        data,
       );
     } else {
       newRecord = await postThing("/api/add_record_by_user", data);
@@ -445,19 +449,16 @@ class AssociatedRecordsComponent {
   };
 
   renderListOrCreateNew = async () => {
-    if (this.image.records.length) {
-      return createElement("div", {}, [
-        ...this.image.records.map((rec) => {
-          const href = this.projectId
-            ? `/record?id=${rec.id}&project_id=${this.projectId}`
-            : `/record?id=${rec.id}`;
-          return createElement(
-            "a",
-            { href: href, rel: "noopener noreferrer", target: "_blank" },
-            rec.title
-          );
-        }),
-      ]);
+    console.log(this.image);
+    if (this.image.record_id) {
+      const href = this.projectId
+        ? `/record?id=${this.image.record_id}&project_id=${this.projectId}`
+        : `/record?id=${this.image.record_id}`;
+      return createElement(
+        "a",
+        { href: href, rel: "noopener noreferrer", target: "_blank" },
+        this.image.record_title,
+      );
     } else {
       const recordSelectElem = await renderRecordSelect(this.projectId);
       recordSelectElem.addEventListener("change", async (e) => {
@@ -471,7 +472,9 @@ class AssociatedRecordsComponent {
           const record = await getThings(`/api/get_record/${recordId}`);
 
           // update data and render
-          this.image.records.push(record);
+          this.image.record_id = record.id;
+          this.image.record_title = record.title;
+          this.image.record_desc = record.description;
           // re-render
           this.render();
         }
@@ -482,12 +485,12 @@ class AssociatedRecordsComponent {
         createElement("div", { class: "d-flex flex-row" }, [
           createElement(
             "button",
-            { class: "me-1" },
+            { class: "me-1 btn-green" },
             "Create Record",
             {
               type: "click",
               event: () => this.createNewRecord(),
-            }
+            },
           ),
           createElement("div", { class: "me-1" }, "Or"),
           recordSelectElem,
