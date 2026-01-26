@@ -10,7 +10,7 @@ export function tipBox(message, imageSrc, orientationVertical) {
       }),
       createElement(
         "div",
-        { class: "tipbox-text", style: "margin-top: 5px; color: var(--pink);" },
+        { class: "tipbox-text text-pink mt-1" },
         message
       ),
     ]);
@@ -24,8 +24,7 @@ export function tipBox(message, imageSrc, orientationVertical) {
       createElement(
         "div",
         {
-          class: "tipbox-text",
-          style: "margin-left: 5px; color: var(--pink);",
+          class: "tipbox-text text-pink ms-1",
         },
         message
       ),

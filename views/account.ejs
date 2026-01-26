@@ -59,21 +59,21 @@
     <br>
     <% if (!user.is_pro) { %>
     <div>
-      <h3 style="display: inline-block;">Status:</h3>
-      <p style="display: inline-block;">Free Tier</p>
+      <h3 class="d-inline-block">Status:</h3>
+      <p class="d-inline-block">Free Tier</p>
     </div>
     <div>
-      <h3 style="display: inline-block;">Data Used:</h3>
-      <p style="display: inline-block;"><%= usedDataFormatted %> / 100MB</p>
+      <h3 class="d-inline-block">Data Used:</h3>
+      <p class="d-inline-block"><%= usedDataFormatted %> / 100MB</p>
     </div>
     <% } else { %>
     <div>
-      <h3 style="display: inline-block;">Subscription Status:</h3>
-      <p style="display: inline-block;">Pro</p>
+      <h3 class="d-inline-block">Subscription Status:</h3>
+      <p class="d-inline-block">Pro</p>
     </div>
     <div>
-      <h3 style="display: inline-block;">Data Used:</h3>
-      <p style="display: inline-block;"><%= usedDataFormatted %></p>
+      <h3 class="d-inline-block">Data Used:</h3>
+      <p class="d-inline-block"><%= usedDataFormatted %></p>
     </div>
     <% } %>
   </div>

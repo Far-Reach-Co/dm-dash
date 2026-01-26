@@ -12,19 +12,22 @@ input {
   flex-direction: row;
   align-items: center;
   justify-content: space-evenly;
-  margin-bottom: 25px;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
   width: 100%;
 }
 
 .cp-nav-item {
   cursor: pointer;
   color: var(--link-blue);
-  border-bottom: 2px solid var(--blue5);
+  padding: var(--space-sm) var(--space-md);
+  border-bottom: 2px solid transparent;
+  transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .cp-nav-item:hover {
   text-decoration: none;
-  border-bottom: 2px solid var(--main-gray);
+  border-bottom-color: var(--main-gray);
   color: var(--orange3);
 }
 
@@ -33,24 +36,44 @@ input {
 }
 
 .cp-nav-item-active {
-  border-bottom: 2px solid var(--main-gray);
+  border-bottom-color: var(--orange3);
   color: var(--orange3);
 }
 
 .cp-input-gen {
-  /* border: 1px solid var(--blue); */
   color: var(--main-white);
   width: auto;
   border-radius: var(--border-radius);
-  border-width: 0;
+  border: 1px solid transparent;
+  padding: var(--space-xs) var(--space-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cp-input-gen:hover {
+  border-color: var(--blue2);
+}
+
+.cp-input-gen:focus {
+  border-color: var(--blue6);
+  box-shadow: var(--focus-ring);
 }
 
 .cp-input-gen-short {
-  /* border: 1px solid var(--blue); */
   color: var(--main-white);
   max-width: 60px;
   border-radius: var(--border-radius);
-  border-width: 0;
+  border: 1px solid transparent;
+  padding: var(--space-xs) var(--space-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.cp-input-gen-short:hover {
+  border-color: var(--blue2);
+}
+
+.cp-input-gen-short:focus {
+  border-color: var(--blue6);
+  box-shadow: var(--focus-ring);
 }
 
 .input-small {
@@ -67,7 +90,9 @@ input {
   color: var(--main-white);
   width: 100px;
   border-radius: var(--border-radius);
-  border-width: 0;
+  border: 1px solid transparent;
+  padding: var(--space-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .cp-input-no-border-small {
@@ -76,32 +101,49 @@ input {
   color: var(--main-white);
   width: 50px;
   border-radius: var(--border-radius);
-  border-width: 0;
+  border: 1px solid transparent;
+  padding: var(--space-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-.cp-input-no-border:hover {
-  border: 1px solid var(--purple);
-}
-
+.cp-input-no-border:hover,
 .cp-input-no-border-small:hover {
-  border: 1px solid var(--purple);
+  border-color: var(--purple);
+}
+
+.cp-input-no-border:focus,
+.cp-input-no-border-small:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 2px var(--purple);
 }
 
 .cp-input-large {
   font-size: 1.5rem;
+  padding: var(--space-xs) var(--space-sm);
 }
 
 .cp-input-regular {
   width: fit-content;
   max-width: 130px;
-  border-width: 0;
+  border: 1px solid transparent;
+  padding: var(--space-xs) var(--space-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.cp-input-regular:hover {
+  border-color: var(--blue2);
+}
+
+.cp-input-regular:focus {
+  border-color: var(--blue6);
+  box-shadow: var(--focus-ring);
 }
 
 .cp-content-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin: 5px;
+  margin: var(--space-sm);
 }
 
 .cp-content-container-row {
@@ -109,18 +151,18 @@ input {
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 3px;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
 }
 
 .cp-content-container-center {
   width: 140px;
-  /* border: 1px solid var(--blue); */
-  padding: 5px;
+  padding: var(--space-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin: 5px;
+  margin: var(--space-sm);
   position: relative;
   background-color: var(--blue3);
   border-radius: var(--border-radius);
@@ -133,35 +175,28 @@ input {
 
 .cp-info-container-row {
   display: flex;
-  /* flex-wrap: wrap; */
-  /* align-items: center; */
   justify-content: center;
-  /* min-width: 200px; */
-  /* max-width: 500px; */
+  gap: var(--space-sm);
   height: fit-content;
-  /* border: 2px solid var(--blue); */
-  padding: 8px;
-  margin-right: var(--main-distance);
-  margin-bottom: var(--main-distance);
+  padding: var(--space-md);
+  margin-right: var(--space-md);
+  margin-bottom: var(--space-md);
   background-color: var(--blue5);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-lg);
 }
 
 .cp-info-container-column {
   display: flex;
   flex-direction: column;
-  /* flex-wrap: wrap; */
-  /* align-items: center; */
   justify-content: center;
+  gap: var(--space-sm);
   min-width: 270px;
-  /* max-width: 500px; */
   height: fit-content;
-  /* border: 2px solid var(--blue); */
-  padding: 8px;
-  margin-right: var(--main-distance);
-  margin-bottom: var(--main-distance);
+  padding: var(--space-md);
+  margin-right: var(--space-md);
+  margin-bottom: var(--space-md);
   background-color: var(--blue5);
-  border-radius: var(--border-radius);
+  border-radius: var(--border-radius-lg);
 }
 
 .cp-info-container-pulsate {
@@ -174,7 +209,7 @@ input {
   }
 
   50% {
-    background-color: lighten(var(--blue5), 20%);
+    background-color: var(--blue2);
   }
 
   100% {
@@ -185,40 +220,52 @@ input {
 .boolean-input {
   height: 40px;
   width: 40px;
-  margin: 5px;
+  margin: var(--space-sm);
   border: 1px solid var(--blue);
   cursor: pointer;
   background-color: var(--main-dark);
   border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.boolean-input:hover {
+  border-color: var(--blue6);
 }
 
 .boolean-input-active {
   height: 40px;
   width: 40px;
-  margin: 5px;
-  border: 1px solid var(--blue);
+  margin: var(--space-sm);
+  border: 1px solid var(--green);
   cursor: pointer;
   background-color: var(--green);
   border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .small-boolean-input {
   height: 20px;
   width: 20px;
-  margin: 5px;
+  margin: var(--space-sm);
   border: 2px solid var(--blue);
-  border-radius: 20px;
+  border-radius: 50%;
   cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.small-boolean-input:hover {
+  border-color: var(--blue6);
 }
 
 .small-boolean-input-checked {
   height: 20px;
   width: 20px;
-  margin: 5px;
-  border: 2px solid var(--blue);
-  border-radius: 20px;
+  margin: var(--space-sm);
+  border: 2px solid var(--green);
+  border-radius: 50%;
   cursor: pointer;
   background-color: var(--green);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .small-boolean-input-checked-red {

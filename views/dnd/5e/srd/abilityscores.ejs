@@ -29,7 +29,7 @@
     }
     </script>
     <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/info.css" />
+    <link rel="stylesheet" href="/css/features/info.css" />
     <script src="/lib/MobileNavHandler.js" defer></script>
     <%- include('../../../partials/icons') %>
   </head>
@@ -42,7 +42,7 @@
       <div class="inline-div">
         <small>
           <a href="/dnd/5e/srd/contents">Contents</a> ->
-          <div style="color: var(--green)">Ability Scores</div>
+          <div class="text-green">Ability Scores</div>
         </small>
       </div>
       <hr />
@@ -58,7 +58,7 @@
       <% data.forEach(function(score){ %>
       <div class="inline-div" id="<%= score.index %>">
         <h3><%= score.full_name %></h3>
-        <div style="color: var(--bright-white)">[<%= score.name %>]</div>
+        <div class="text-bright-white">[<%= score.name %>]</div>
       </div>
       <div class="indent">
         <% score.desc.forEach((str, index) => { %>

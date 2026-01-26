@@ -36,7 +36,7 @@ export default class SheetSettings {
 
   renderInviteLinkComponent = async () => {
     const playerInvite = await getThings(
-      `/api/get_player_invite_by_player/${this.generalData.id}`
+      `/api/get_player_invite_by_player/${this.generalData.id}`,
     );
     if (!playerInvite) {
       return [
@@ -52,28 +52,24 @@ export default class SheetSettings {
         createElement(
           "div",
           { class: "hint" },
-          "*Create an invite link to allow other users to view and edit your character sheet."
+          "*Create an invite link to allow other users to view and edit your character sheet.",
         ),
         createElement("br"),
-        createElement(
-          "div",
-          { style: "display: flex; flex-direction: column;" },
-          [
-            createElement("button", { class: "btn-red" }, "Revoke Access", {
-              type: "click",
-              event: () => {
-                deleteThing(
-                  `/api/remove_player_users_by_player/${this.generalData.id}`
-                );
-              },
-            }),
-            createElement(
-              "div",
-              { class: "hint" },
-              "*Revoke all permissions to independant users from invites"
-            ),
-          ]
-        ),
+        createElement("div", { class: "d-flex flex-column" }, [
+          createElement("button", { class: "btn-red" }, "Revoke Access", {
+            type: "click",
+            event: () => {
+              deleteThing(
+                `/api/remove_player_users_by_player/${this.generalData.id}`,
+              );
+            },
+          }),
+          createElement(
+            "div",
+            { class: "hint" },
+            "*Revoke all permissions to independant users from invites",
+          ),
+        ]),
       ];
     } else {
       const inviteLink = `${window.location.origin}/5eplayer?id=${this.generalData.id}&invite=${playerInvite.uuid}`;
@@ -81,7 +77,7 @@ export default class SheetSettings {
       const inviteLinkButton = createElement(
         "button",
         { style: "margin-right: var(--main-distance);" },
-        "Copy Link"
+        "Copy Link",
       );
       inviteLinkButton.addEventListener("click", () => {
         copyTextToClipboard(inviteLink);
@@ -90,7 +86,7 @@ export default class SheetSettings {
       const removeInviteButton = createElement(
         "button",
         { class: "btn-red" },
-        "Delete Link"
+        "Delete Link",
       );
       removeInviteButton.addEventListener("click", async () => {
         if (
@@ -105,53 +101,41 @@ export default class SheetSettings {
         createElement("br"),
         createElement("h2", {}, "Share Invite Link"),
         createElement("br"),
-        createElement(
-          "small",
-          { style: "color: var(--blue6); margin-bottom: 3px;" },
-          inviteLink
-        ),
-        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+        createElement("small", { class: "text-blue6 mb-1" }, inviteLink),
+        createElement("div", { class: "d-flex flex-row" }, [
           inviteLinkButton,
-          createElement(
-            "div",
-            { style: "display: flex; flex-direction: column;" },
-            [
-              removeInviteButton,
-              createElement(
-                "div",
-                { class: "hint" },
-                "*Invite will no longer be used to gain access to this sheet"
-              ),
-            ]
-          ),
-        ]),
-        createElement("br"),
-        createElement(
-          "div",
-          { style: "display: flex; flex-direction: column;" },
-          [
-            createElement("button", { class: "btn-red" }, "Revoke Access", {
-              type: "click",
-              event: () => {
-                deleteThing(
-                  `/api/remove_player_users_by_player/${this.generalData.id}`
-                );
-              },
-            }),
+          createElement("div", { class: "d-flex flex-column" }, [
+            removeInviteButton,
             createElement(
               "div",
               { class: "hint" },
-              "*Revoke all permissions to independant users from invites"
+              "*Invite will no longer be used to gain access to this sheet",
             ),
-          ]
-        ),
+          ]),
+        ]),
+        createElement("br"),
+        createElement("div", { class: "d-flex flex-column" }, [
+          createElement("button", { class: "btn-red" }, "Revoke Access", {
+            type: "click",
+            event: () => {
+              deleteThing(
+                `/api/remove_player_users_by_player/${this.generalData.id}`,
+              );
+            },
+          }),
+          createElement(
+            "div",
+            { class: "hint" },
+            "*Revoke all permissions to independant users from invites",
+          ),
+        ]),
       ];
     }
   };
 
   renderCurrentConnections = async () => {
     const projectPlayerIds = await getThings(
-      `/api/get_project_players_by_player/${this.generalData.id}`
+      `/api/get_project_players_by_player/${this.generalData.id}`,
     );
     if (!projectPlayerIds.length)
       return [createElement("small", {}, "None...")];
@@ -159,26 +143,24 @@ export default class SheetSettings {
     return await Promise.all(
       projectPlayerIds.map(async (projectPlayer) => {
         const project = await getThings(
-          `/api/get_project/${projectPlayer.project_id}`
+          `/api/get_project/${projectPlayer.project_id}`,
         );
         if (project) {
           const elem = createElement(
             "div",
             {
-              style:
-                "margin-left: var(--main-distance); display: flex; align-items: center;",
+              class: "d-flex align-items-center ms-3",
             },
             [
               createElement(
                 "div",
                 { class: "highlighted-item" },
-                project.title
+                project.title,
               ),
               createElement(
                 "div",
                 {
-                  style:
-                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                  class: "text-red cursor-pointer red-x ms-3",
                   title: "Remove connection",
                 },
                 "ⓧ",
@@ -186,17 +168,17 @@ export default class SheetSettings {
                   type: "click",
                   event: async () => {
                     deleteThing(
-                      `/api/remove_project_player/${projectPlayer.id}`
+                      `/api/remove_project_player/${projectPlayer.id}`,
                     );
                     elem.remove();
                   },
-                }
+                },
               ),
-            ]
+            ],
           );
           return elem;
         }
-      })
+      }),
     );
   };
 
@@ -222,11 +204,11 @@ export default class SheetSettings {
               e.stopPropagation();
               if (
                 window.confirm(
-                  `Are you sure you want to disconnect ${this.generalData.name}`
+                  `Are you sure you want to disconnect ${this.generalData.name}`,
                 )
               ) {
                 await deleteThing(
-                  `/api/remove_player_user_by_user_and_player${this.generalData.id}`
+                  `/api/remove_player_user_by_user_and_player${this.generalData.id}`,
                 );
                 window.location.pathname = "/dash";
               }
@@ -235,9 +217,9 @@ export default class SheetSettings {
           createElement(
             "div",
             { class: "hint" },
-            "*Disconnecting removes your ability to view and edit this character sheet"
+            "*Disconnecting removes your ability to view and edit this character sheet",
           ),
-        ])
+        ]),
       );
     }
 
@@ -252,7 +234,7 @@ export default class SheetSettings {
       createElement(
         "div",
         { class: "hint" },
-        "*Duplicate this character sheet with all its details except for settings."
+        "*Duplicate this character sheet with all its details except for settings.",
       ),
       createElement("button", {}, "Duplicate", {
         type: "click",
@@ -263,7 +245,7 @@ export default class SheetSettings {
           });
           if (res.general_id) {
             window.alert(
-              "Your character sheet has been successfully duplicated!"
+              "Your character sheet has been successfully duplicated!",
             );
           } else
             window.alert("Something went wrong when attempting to duplicate!");
@@ -274,14 +256,14 @@ export default class SheetSettings {
       createElement(
         "div",
         { class: "hint" },
-        "*Connect your player character sheet to allow the Dms in your wyrld to view and edit"
+        "*Connect your player character sheet to allow the Dms in your wyrld to view and edit",
       ),
       createElement("br"),
       createElement("h3", {}, "Current Wyrlds"),
       createElement(
         "div",
         { class: "hint" },
-        "*Your character sheet is currently connected to these wyrlds"
+        "*Your character sheet is currently connected to these wyrlds",
       ),
       ...(await this.renderCurrentConnections()),
       createElement("br"),
@@ -289,7 +271,7 @@ export default class SheetSettings {
       createElement(
         "div",
         { class: "hint" },
-        "*Choose from the list of your created/joined wyrlds to connect your player sheet to"
+        "*Choose from the list of your created/joined wyrlds to connect your player sheet to",
       ),
       createElement("br"),
       createElement(
@@ -305,7 +287,7 @@ export default class SheetSettings {
               title: "Add your sheet to this wyrld",
               style: "margin-left: var(--main-distance);",
             },
-            "Add"
+            "Add",
           ),
         ],
         {
@@ -315,7 +297,7 @@ export default class SheetSettings {
             await this.addConnection(e);
             this.render();
           },
-        }
+        },
       ),
       createElement("hr"),
       createElement("button", { class: "btn-red" }, "Delete Character", {
@@ -325,16 +307,16 @@ export default class SheetSettings {
           e.stopPropagation();
           if (
             window.confirm(
-              `Are you sure you want to delete ${this.generalData.name}`
+              `Are you sure you want to delete ${this.generalData.name}`,
             )
           ) {
             await deleteThing(
-              `/api/remove_5e_character/${this.generalData.id}`
+              `/api/remove_5e_character/${this.generalData.id}`,
             );
             window.location.pathname = "/dash";
           }
         },
-      })
+      }),
     );
   };
 }

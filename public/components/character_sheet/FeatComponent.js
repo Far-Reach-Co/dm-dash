@@ -76,7 +76,7 @@ export default class FeatComponent {
       const elem = createElement(
         "option",
         { class: "select-option-small", value: type },
-        type
+        type,
       );
       if (currentType && currentType === type) elem.selected = true;
       typeList.push(elem);
@@ -91,7 +91,7 @@ export default class FeatComponent {
     }
 
     const featsData = await getThings(
-      `/api/get_5e_character_feats/${this.general_id}`
+      `/api/get_5e_character_feats/${this.general_id}`,
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!featsData.length) return [createElement("small", {}, "None...")];
@@ -125,55 +125,46 @@ export default class FeatComponent {
       createElement(
         "div",
         {
-          style:
-            "display: flex; flex: 1; align-items: center; justify-content: center; position: relative; margin-bottom: var(--main-distance);",
+          class:
+            "d-flex align-items-center justify-content-center position-relative mb-3",
+          style: "flex: 1;",
         },
         [
           createElement("div", { class: "special-font" }, "Feats and Traits"),
           createElement(
             "div",
             {
-              style:
-                "position: absolute; right: 0; top: 0; display: flex; flex-direction: column;",
+              class: "position-absolute d-flex flex-column",
+              style: "right: 0; top: 0;",
             },
             [
-              createElement(
-                "a",
-                { style: "font-size: small; margin-bottom: 5px;" },
-                "+ Expand all",
-                {
-                  type: "click",
-                  event: () => {
-                    this.featElements.forEach((item) => item.show());
-                  },
-                }
-              ),
-              createElement(
-                "a",
-                { style: "font-size: small;" },
-                "- Collapse all",
-                {
-                  type: "click",
-                  event: () => {
-                    this.featElements.forEach((item) => item.hide());
-                  },
-                }
-              ),
-            ]
+              createElement("a", { class: "font-small mb-1" }, "+ Expand all", {
+                type: "click",
+                event: () => {
+                  this.featElements.forEach((item) => item.show());
+                },
+              }),
+              createElement("a", { class: "font-small" }, "- Collapse all", {
+                type: "click",
+                event: () => {
+                  this.featElements.forEach((item) => item.hide());
+                },
+              }),
+            ],
           ),
-        ]
+        ],
       ),
       createElement("hr"),
       ...(await this.renderFeatElems()),
       createElement(
         "a",
-        { style: "align-self: flex-start;", title: "Create a new feat/trait" },
+        { class: "align-self-start", title: "Create a new feat/trait" },
         "+",
         {
           type: "click",
           event: this.newFeat,
-        }
-      )
+        },
+      ),
     );
   };
 }
@@ -210,12 +201,12 @@ class SingleFeatComponent {
 
   renderHideFeatButton = () => {
     if (!this.hidden) {
-      return createElement("a", { style: "font-size: small;" }, "- Collapse", {
+      return createElement("a", { class: "font-small" }, "- Collapse", {
         type: "click",
         event: this.toggleHide,
       });
     } else {
-      return createElement("a", { style: "font-size: small;" }, "+ Expand", {
+      return createElement("a", { class: "font-small" }, "+ Expand", {
         type: "click",
         event: this.toggleHide,
       });
@@ -224,7 +215,7 @@ class SingleFeatComponent {
 
   renderDescriptionOrHidden = () => {
     if (this.hidden) {
-      return createElement("div", { style: "display: none;" }, "");
+      return createElement("div", { class: "d-none" }, "");
     } else {
       return createElement(
         "textarea",
@@ -245,7 +236,7 @@ class SingleFeatComponent {
               description: e.target.value,
             });
           },
-        }
+        },
       );
     }
   };
@@ -253,7 +244,7 @@ class SingleFeatComponent {
   saveAllFeatInfo = () => {
     const titleInput = document.getElementById(`feat-title-input-${this.id}`);
     const descriptionInput = document.getElementById(
-      `feat-description-input-${this.id}`
+      `feat-description-input-${this.id}`,
     );
     this.title = titleInput.value;
     this.description = descriptionInput.value;
@@ -267,7 +258,7 @@ class SingleFeatComponent {
   populateFeatInfoWithSuggestion = (item) => {
     const titleInput = document.getElementById(`feat-title-input-${this.id}`);
     const descriptionInput = document.getElementById(
-      `feat-description-input-${this.id}`
+      `feat-description-input-${this.id}`,
     );
     titleInput.value = item.name;
     descriptionInput.value = item.desc.join("");
@@ -276,7 +267,7 @@ class SingleFeatComponent {
   resetFeatInfoToCurrentValues = () => {
     const titleInput = document.getElementById(`feat-title-input-${this.id}`);
     const descriptionInput = document.getElementById(
-      `feat-description-input-${this.id}`
+      `feat-description-input-${this.id}`,
     );
     titleInput.value = this.title;
     descriptionInput.value = this.description;
@@ -305,7 +296,7 @@ class SingleFeatComponent {
       // get suggestions form data
       const searchSuggestionsList = getDataByQuery(
         featSuggestions,
-        e.target.value
+        e.target.value,
       );
       // populate list
       for (const item of searchSuggestionsList) {
@@ -332,7 +323,7 @@ class SingleFeatComponent {
                 this.resetAndHideFeatSuggestions();
               },
             },
-          ]
+          ],
         );
         suggElem.appendChild(elem);
       }
@@ -353,8 +344,8 @@ class SingleFeatComponent {
               this.resetFeatInfoToCurrentValues();
             }
           },
-        }
-      )
+        },
+      ),
     );
   };
 
@@ -368,29 +359,26 @@ class SingleFeatComponent {
       createElement(
         "div",
         {
-          style: "display: flex; flex-direction: column; position: relative;",
+          class: "d-flex flex-column position-relative",
         },
         [
           createElement(
             "div",
             {
-              style:
-                "display: flex; margin-bottom: 5px; align-items: center; justify-content: space-between;",
+              class: "d-flex mb-1 align-items-center justify-content-between",
             },
             [
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; align-items: center; justify-content: center;",
+                  class: "d-flex align-items-center justify-content-center",
                 },
                 [
                   createElement(
                     "input",
                     {
-                      class: "cp-input-gen",
+                      class: "cp-input-gen text-orange",
                       id: `feat-title-input-${this.id}`,
-                      style: "color: var(--orange2)",
                       name: "title",
                       value: this.title ? this.title : "",
                     },
@@ -425,13 +413,12 @@ class SingleFeatComponent {
                           this.showFeatSuggestions(e);
                         },
                       },
-                    ]
+                    ],
                   ),
                   createElement(
                     "div",
                     {
-                      style:
-                        "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                      class: "text-red cursor-pointer red-x ms-3",
                       title: "Remove feat/trait",
                     },
                     "ⓧ",
@@ -441,27 +428,26 @@ class SingleFeatComponent {
                         e.preventDefault();
                         if (
                           window.confirm(
-                            `Are you sure you want to delete ${this.title}`
+                            `Are you sure you want to delete ${this.title}`,
                           )
                         ) {
                           deleteThing(
-                            `/api/remove_5e_character_feat/${this.id}`
+                            `/api/remove_5e_character_feat/${this.id}`,
                           );
                           this.parentRemoveItem(this.id);
                         }
                       },
-                    }
+                    },
                   ),
-                ]
+                ],
               ),
               this.renderHideFeatButton(),
-            ]
+            ],
           ),
           createElement(
             "select",
             {
-              class: "select-option-small",
-              style: "margin-bottom: 5px;",
+              class: "select-option-small mb-1",
               id: "type",
               name: "type",
             },
@@ -480,12 +466,12 @@ class SingleFeatComponent {
                   type: e.target.value,
                 });
               },
-            }
+            },
           ),
           this.renderDescriptionOrHidden(),
           createElement("hr"),
-        ]
-      )
+        ],
+      ),
     );
   };
 }

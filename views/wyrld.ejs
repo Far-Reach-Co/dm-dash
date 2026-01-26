@@ -18,35 +18,35 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid d-flex flex-column h-100">
+  <div class="mt-4 d-flex flex-column h-100">
     <div class="p-3">
-      <h1 style="color: var(--green)"><%= project.title %></h1>
+      <h1 class="text-green"><%= project.title %></h1>
       <!-- <br /> -->
       <!-- <small><%= project.description %></small> -->
       <br>
       <% if (!project.is_pro) { %>
       <div>
-        <h3 style="display: inline-block;">Status:</h3>
-        <p style="display: inline-block;">Free Tier</p>
+        <h3 class="d-inline-block">Status:</h3>
+        <p class="d-inline-block">Free Tier</p>
       </div>
       <div>
-        <h3 style="display: inline-block;">Data Used:</h3>
-        <p style="display: inline-block;"><%= usedDataFormatted %> / 100MB</p>
+        <h3 class="d-inline-block">Data Used:</h3>
+        <p class="d-inline-block"><%= usedDataFormatted %> / 100MB</p>
       </div>
       <% } else { %>
       <div>
-        <h3 style="display: inline-block;">Subscription Status:</h3>
-        <p style="display: inline-block;">Pro</p>
+        <h3 class="d-inline-block">Subscription Status:</h3>
+        <p class="d-inline-block">Pro</p>
       </div>
       <div>
-        <h3 style="display: inline-block;">Data Used:</h3>
-        <p style="display: inline-block;"><%= usedDataFormatted %></p>
+        <h3 class="d-inline-block">Data Used:</h3>
+        <p class="d-inline-block"><%= usedDataFormatted %></p>
       </div>
       <% } %>
       <small>-- Subscriptions under Construction --</small>
     </div>
     <div class="d-flex flex-wrap">
-      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
+      <div class="d-flex flex-column p-3 dash-column">
         <h2>Wyrld Tables</h2>
         <small>These tables are shared by the members of the wyrld. The wyrld
           managers have the ability to upload images and manage the map
@@ -72,7 +72,7 @@
         </div>
         <% } %>
       </div>
-      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
+      <div class="d-flex flex-column p-3 dash-column">
         <h2>Records</h2>
         <small>Resource pages which you can use for lore, notes, monster stat blocks and other useful data.</small>
         <br />
@@ -91,7 +91,7 @@
         <% }); %>
         <% } %>
       </div>
-      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
+      <div class="d-flex flex-column p-3 dash-column">
         <h2>Player Character Sheets</h2>
         <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator
           of the sheet and the wyrld managers are allowed to view these
@@ -110,7 +110,7 @@
         </div>
         <% }); %> <% } %>
       </div>
-      <div class="d-flex flex-column p-3" style="width: 25%; min-width: 300px">
+      <div class="d-flex flex-column p-3 dash-column">
         <h2>Calendars</h2>
         <small>Custom calendars allow for general time-keeping of the various
           cultures in the wyrld. Managers have access to create and update the

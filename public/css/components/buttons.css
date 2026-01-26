@@ -1,0 +1,124 @@
+/* ==========================================================================
+   Button Styles
+   ========================================================================== */
+
+button {
+  width: fit-content;
+  height: fit-content;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 3px 10px;
+  font: inherit;
+  color: var(--main-white);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+button:hover {
+  background: linear-gradient(var(--blue6) 10%, var(--blue2) 90%);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* Green/Success Button */
+.btn-green,
+.new-btn {
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
+.btn-green:hover,
+.new-btn:hover {
+  background: linear-gradient(var(--green) 30%, var(--green2) 100%);
+}
+
+/* Label styled as button (for file inputs) */
+.label-btn {
+  all: unset;
+  display: inline-block;
+  text-align: center;
+  background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
+  border-radius: var(--border-radius);
+  padding: var(--space-sm) var(--space-md);
+  font: inherit;
+  color: var(--main-white);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.label-btn:hover {
+  background: linear-gradient(var(--green) 10%, var(--green2) 90%);
+}
+
+.label-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Red/Danger Button */
+.btn-red {
+  background: linear-gradient(var(--red1) 10%, var(--red2) 90%);
+}
+
+.btn-red:hover {
+  background: linear-gradient(var(--red3) 10%, var(--red1) 90%);
+}
+
+/* Text-style edit button */
+.edit-btn {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: normal;
+  color: var(--link-blue);
+  margin-left: var(--space-sm);
+  transition: color var(--transition-fast);
+}
+
+.edit-btn:hover {
+  color: var(--green);
+}
+
+/* Red X close/delete button */
+.red-x {
+  color: var(--red1);
+  cursor: pointer;
+  font-size: 20px;
+  transition: opacity var(--transition-fast);
+}
+
+.red-x:hover {
+  opacity: 0.7;
+}
+
+/* Move up/down buttons */
+.move-btn {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: small;
+}
+
+/* Small clickable text */
+.small-clickable {
+  width: max-content;
+  font-size: small;
+  color: var(--link-blue);
+  transition: color var(--transition-fast);
+}
+
+.small-clickable:hover {
+  color: var(--green);
+}
+
+/* Compact button variant */
+.btn-compact {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 14px;
+}

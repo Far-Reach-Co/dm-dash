@@ -47,10 +47,10 @@ export default class EquipmentComponent {
   populateEquipmentInfoWithSuggestion = async (equipmentItem, item) => {
     // show data inside inputs
     const titleInput = document.getElementById(
-      `equipment-title-input-${equipmentItem.id}`
+      `equipment-title-input-${equipmentItem.id}`,
     );
     const weightInput = document.getElementById(
-      `equipment-weight-input-${equipmentItem.id}`
+      `equipment-weight-input-${equipmentItem.id}`,
     );
 
     titleInput.value = item.name;
@@ -59,10 +59,10 @@ export default class EquipmentComponent {
 
   resetEquipmentInfoToCurrentValues = (equipmentItem) => {
     const titleInput = document.getElementById(
-      `equipment-title-input-${equipmentItem.id}`
+      `equipment-title-input-${equipmentItem.id}`,
     );
     const weightInput = document.getElementById(
-      `equipment-weight-input-${equipmentItem.id}`
+      `equipment-weight-input-${equipmentItem.id}`,
     );
     if (equipmentItem.title) titleInput.value = equipmentItem.title;
     if (equipmentItem.weight) weightInput.value = equipmentItem.weight;
@@ -71,10 +71,10 @@ export default class EquipmentComponent {
   saveAllEquipmentInfo = (equipmentItem) => {
     // first save to local state
     const titleInput = document.getElementById(
-      `equipment-title-input-${equipmentItem.id}`
+      `equipment-title-input-${equipmentItem.id}`,
     );
     const weightInput = document.getElementById(
-      `equipment-weight-input-${equipmentItem.id}`
+      `equipment-weight-input-${equipmentItem.id}`,
     );
 
     this.equipmentData[this.equipmentData.indexOf(equipmentItem)].title =
@@ -91,7 +91,7 @@ export default class EquipmentComponent {
 
   resetAndHideEquipmentSuggestions(equipmentItem) {
     const suggElem = document.getElementById(
-      `suggestions-equipment-${equipmentItem.id}`
+      `suggestions-equipment-${equipmentItem.id}`,
     );
     suggElem.innerHTML = "";
     suggElem.appendChild(renderLoadingWithMessage());
@@ -100,7 +100,7 @@ export default class EquipmentComponent {
 
   showEquipmentSuggestions = (e, equipmentItem) => {
     const suggElem = document.getElementById(
-      `suggestions-equipment-${equipmentItem.id}`
+      `suggestions-equipment-${equipmentItem.id}`,
     );
     suggElem.style.display = "block";
     // suggestion position relative the current component
@@ -116,7 +116,7 @@ export default class EquipmentComponent {
       // get suggestions form data
       const searchSuggestionsList = getDataByQuery(
         equipmentSuggestions,
-        e.target.value
+        e.target.value,
       );
       // populate list
       for (const item of searchSuggestionsList) {
@@ -143,7 +143,7 @@ export default class EquipmentComponent {
                 this.resetAndHideEquipmentSuggestions(equipmentItem);
               },
             },
-          ]
+          ],
         );
         suggElem.appendChild(elem);
       }
@@ -167,8 +167,8 @@ export default class EquipmentComponent {
               this.resetEquipmentInfoToCurrentValues(equipmentItem);
             }
           },
-        }
-      )
+        },
+      ),
     );
   };
 
@@ -183,21 +183,20 @@ export default class EquipmentComponent {
       return createElement(
         "div",
         {
-          style: "display: flex; flex-direction-column;",
+          class: "d-flex flex-column",
         },
         [
           createElement(
             "div",
             {
-              style: "display: flex; align-items: center; margin-bottom: 5px;",
+              class: "d-flex align-items-center mb-1",
             },
             [
               createElement(
                 "input",
                 {
-                  class: "cp-input-gen input-small",
+                  class: "cp-input-gen input-small me-1",
                   id: `equipment-title-input-${equipmentItem.id}`,
-                  style: "margin-right: 5px;",
                   name: "title",
                   value: equipmentItem.title ? equipmentItem.title : "",
                 },
@@ -220,7 +219,7 @@ export default class EquipmentComponent {
                         `/api/edit_5e_character_equipment/${equipmentItem.id}`,
                         {
                           title: e.target.value,
-                        }
+                        },
                       );
                       this.equipmentData[index].title = e.target.value;
                     },
@@ -232,14 +231,13 @@ export default class EquipmentComponent {
                       this.showEquipmentSuggestions(e, equipmentItem);
                     },
                   },
-                ]
+                ],
               ),
 
               createElement(
                 "input",
                 {
-                  class: "cp-input-gen-short input-small",
-                  style: "margin-right: 5px;",
+                  class: "cp-input-gen-short input-small me-1",
                   type: "number",
                   name: "quantity",
                   value: equipmentItem.quantity ? equipmentItem.quantity : "0",
@@ -253,20 +251,19 @@ export default class EquipmentComponent {
                       `/api/edit_5e_character_equipment/${equipmentItem.id}`,
                       {
                         quantity: e.target.valueAsNumber,
-                      }
+                      },
                     );
                     this.equipmentData[index].quantity = e.target.valueAsNumber;
                     // re-calc weight
                     this.updateWeight();
                   },
-                }
+                },
               ),
               createElement(
                 "input",
                 {
-                  class: "cp-input-gen-short input-small",
+                  class: "cp-input-gen-short input-small me-1",
                   id: `equipment-weight-input-${equipmentItem.id}`,
-                  style: "margin-right: 5px;",
                   type: "number",
                   name: "weight",
                   value: equipmentItem.weight ? equipmentItem.weight : "0",
@@ -280,18 +277,18 @@ export default class EquipmentComponent {
                       `/api/edit_5e_character_equipment/${equipmentItem.id}`,
                       {
                         weight: e.target.valueAsNumber,
-                      }
+                      },
                     );
                     this.equipmentData[index].weight = e.target.valueAsNumber;
                     // re-calc weight
                     this.updateWeight();
                   },
-                }
+                },
               ),
               createElement(
                 "div",
                 {
-                  style: "color: var(--red1); cursor: pointer;",
+                  class: "text-red cursor-pointer red-x",
                   title: "Remove equipment",
                 },
                 "ⓧ",
@@ -300,20 +297,20 @@ export default class EquipmentComponent {
                   event: (e) => {
                     if (
                       window.confirm(
-                        `Are you sure you want to delete ${equipmentItem.title}`
+                        `Are you sure you want to delete ${equipmentItem.title}`,
                       )
                     ) {
                       deleteThing(
-                        `/api/remove_5e_character_equipment/${equipmentItem.id}`
+                        `/api/remove_5e_character_equipment/${equipmentItem.id}`,
                       );
                       e.target.parentElement.remove();
                     }
                   },
-                }
+                },
               ),
-            ]
+            ],
           ),
-        ]
+        ],
       );
     });
   };
@@ -342,7 +339,7 @@ export default class EquipmentComponent {
     }
 
     const equipmentsData = await getThings(
-      `/api/get_5e_character_equipments/${this.general_id}`
+      `/api/get_5e_character_equipments/${this.general_id}`,
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
@@ -351,56 +348,51 @@ export default class EquipmentComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { class: "special-font", style: "align-self: center;" },
-        "Equipment"
+        { class: "special-font align-self-center" },
+        "Equipment",
       ),
       createElement("br"),
       createElement(
         "div",
         {
-          style: "display: flex; align-items: center;",
+          class: "d-flex align-items-center",
         },
         [
           createElement("small", { style: "margin-right: 140px;" }, "Name"),
-          createElement("small", { style: "margin-right: 10px;" }, "Quantity"),
+          createElement("small", { class: "me-2" }, "Quantity"),
           createElement("small", {}, "Weight"),
-        ]
+        ],
       ),
       createElement("br"),
       ...(await this.renderEquipmentsElems()),
       createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: space-between",
+          class: "d-flex align-items-center justify-content-between",
         },
         [
           createElement(
             "a",
             {
-              style: "align-self: flex-start;",
+              class: "align-self-start",
               title: "Create a new equipment item",
             },
             "+",
             {
               type: "click",
               event: this.newEquipment,
-            }
+            },
           ),
-          createElement("div", { style: "display: flex;" }, [
-            createElement(
-              "div",
-              { style: "margin-right: 5px;" },
-              "Total Weight:"
-            ),
+          createElement("div", { class: "d-flex" }, [
+            createElement("div", { class: "me-1" }, "Total Weight:"),
             createElement(
               "div",
               { id: "total-equipment-weight" },
-              this.calculateTotalWeight()
+              this.calculateTotalWeight(),
             ),
           ]),
-        ]
-      )
+        ],
+      ),
     );
   };
 }

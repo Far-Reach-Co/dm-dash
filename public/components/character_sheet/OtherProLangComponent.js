@@ -35,7 +35,7 @@ export default class OtherProLangComponent {
       const elem = createElement(
         "option",
         { class: "select-option-small", value: type },
-        type
+        type,
       );
       if (currentType && currentType === type) elem.selected = true;
       typeList.push(elem);
@@ -45,7 +45,7 @@ export default class OtherProLangComponent {
 
   renderOtherProLangElems = async () => {
     const otherProLangsData = await getThings(
-      `/api/get_5e_character_other_pro_langs/${this.general_id}`
+      `/api/get_5e_character_other_pro_langs/${this.general_id}`,
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!otherProLangsData.length)
@@ -55,17 +55,15 @@ export default class OtherProLangComponent {
       return createElement(
         "div",
         {
-          style:
-            "display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px;",
+          class: "d-flex align-items-center justify-content-between mb-1",
         },
         [
           createElement(
             "select",
             {
-              class: "select-option-small",
+              class: "select-option-small me-3",
               id: "type",
               name: "type",
-              style: "margin-right: var(--main-distance);",
             },
             [
               createElement("option", { value: "None" }, "None"),
@@ -79,7 +77,7 @@ export default class OtherProLangComponent {
                   type: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "input",
@@ -98,13 +96,12 @@ export default class OtherProLangComponent {
                   proficiency: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "div",
             {
-              style:
-                "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+              class: "text-red cursor-pointer red-x ms-3",
               title: "Remove proficiency",
             },
             "ⓧ",
@@ -115,18 +112,18 @@ export default class OtherProLangComponent {
                   window.confirm(
                     `Are you sure you want to delete ${
                       item.proficiency ? item.proficiency : "Empty"
-                    }`
+                    }`,
                   )
                 ) {
                   deleteThing(
-                    `/api/remove_5e_character_other_pro_lang/${item.id}`
+                    `/api/remove_5e_character_other_pro_lang/${item.id}`,
                   );
                   e.target.parentElement.remove();
                 }
               },
-            }
+            },
           ),
-        ]
+        ],
       );
     });
   };
@@ -141,32 +138,32 @@ export default class OtherProLangComponent {
     this.domComponent.append(
       createElement(
         "div",
-        { class: "special-font", style: "align-self: center;" },
-        "Other Proficiencies & Languages"
+        { class: "special-font align-self-center" },
+        "Other Proficiencies & Languages",
       ),
       createElement("br"),
       createElement(
         "div",
         {
-          style: "display: flex; align-items: center;",
+          class: "d-flex align-items-center",
         },
         [
           createElement("small", { style: "margin-right: 85px" }, "Type"),
           createElement("small", {}, "Proficiency"),
           createElement("small", {}, ""),
-        ]
+        ],
       ),
       createElement("br"),
       ...(await this.renderOtherProLangElems()),
       createElement(
         "a",
-        { style: "align-self: flex-start;", title: "Create a new proficiency" },
+        { class: "align-self-start", title: "Create a new proficiency" },
         "+",
         {
           type: "click",
           event: this.newOtherProLang,
-        }
-      )
+        },
+      ),
     );
   };
 }

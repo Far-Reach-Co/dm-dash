@@ -1,0 +1,20 @@
+/* ==========================================================================
+   Dashboard List Styles
+   ========================================================================== */
+
+.component {
+  background-color: var(--blue3);
+}
+
+.dash-list-title-container {
+  cursor: pointer;
+}
+
+.dash-list-title-container:hover .dash-list-title {
+  text-decoration: underline;
+}
+
+.dash-list-title-container:hover a {
+  text-decoration: none;
+  color: var(--green);
+}

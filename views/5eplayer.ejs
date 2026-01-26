@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= playerSheetName %> | Far Reach Co. | 5e Character Sheet</title>
   <link rel="stylesheet" href="/style.css" />
-  <link rel="stylesheet" href="/character.css" />
+  <link rel="stylesheet" href="/css/features/character.css" />
   <%- include('./partials/icons') %>
   <script>
     const USERID = "<%= auth %>";
@@ -19,7 +19,7 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid p-3">
+  <div class="p-5">
     <div id="app">
       <!-- Initial spinner -->
       <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>

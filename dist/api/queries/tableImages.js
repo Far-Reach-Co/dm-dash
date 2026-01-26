@@ -83,9 +83,11 @@ function getTableImagesWithImageByProjectQuery(project_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
             text: `
-      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, ri.record_id, r.title, r.description
       FROM public."TableImage" ti
       JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
       WHERE ti.project_id = $1
     `,
             values: [project_id]
@@ -98,9 +100,11 @@ function getTableImagesWithImageByUserQuery(user_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
             text: `
-      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, ri.record_id, r.title AS record_title, r.description AS record_desc
       FROM public."TableImage" ti
       JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
       WHERE ti.user_id = $1
     `,
             values: [user_id]

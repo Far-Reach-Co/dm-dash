@@ -1,0 +1,118 @@
+/* ==========================================================================
+   Navigation Styles
+   ========================================================================== */
+
+nav {
+  padding-left: var(--main-distance);
+  padding-right: var(--main-distance);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: bold;
+  position: absolute;
+  z-index: 4;
+  margin-top: 3px;
+}
+
+.info-container {
+  width: 1000px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+#nav-ham {
+  visibility: hidden;
+  cursor: pointer;
+}
+
+#nav-ham:hover {
+  opacity: 0.9;
+}
+
+#nav-links-container-mobile {
+  visibility: hidden;
+  position: absolute;
+  top: 10%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80%;
+  width: 100%;
+  z-index: 1;
+  background-color: var(--main-dark);
+  opacity: 0.95;
+}
+
+#nav-links-container-mobile.open {
+  visibility: visible;
+  z-index: 4;
+}
+
+#nav-links-container-mobile .top-nav-btn {
+  margin-bottom: var(--main-distance);
+  height: 10%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 0;
+  padding-left: 0;
+  padding-right: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0.5px solid var(--main-gray);
+  border-top: 0.5px solid var(--main-gray);
+  transition: 0s;
+}
+
+#nav-links-container-mobile .top-nav-btn:hover {
+  background-color: var(--blue);
+}
+
+@media screen and (max-width: 500px) {
+  #nav-ham {
+    visibility: visible;
+  }
+
+  #nav-links-container {
+    display: none;
+    visibility: hidden;
+    position: absolute;
+    z-index: 0;
+  }
+
+  #nav-links-container a {
+    display: none;
+    visibility: hidden;
+  }
+}
+
+.top-nav-btn {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: var(--main-distance);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+/* .top-nav-btn:hover {
+  background-color: var(--blue4);
+} */
+
+.hamburger {
+  top: 0;
+  right: 5px;
+  z-index: 3;
+  position: absolute;
+  cursor: pointer;
+}
+
+.flipXAxis {
+  transform: scaleX(-1);
+}

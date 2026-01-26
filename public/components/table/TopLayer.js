@@ -17,7 +17,7 @@ export default class TopLayer {
   renderSelectedObjectInfoElem = async () => {
     const obj = this.tableApp.getCurrentSelectedObject();
     if (!obj) {
-      return createElement("div", { style: "display: none;" });
+      return createElement("div", { class: "d-none" });
     }
 
     let displayName = "";
@@ -49,17 +49,17 @@ export default class TopLayer {
         createElement(
           "div",
           {},
-          `${IdPrefix}-${truncateString(obj.id, 8, "")}`
+          `${IdPrefix}-${truncateString(obj.id, 8, "")}`,
         ),
-        createElement("div", { style: "display: flex; flex-direction: row;" }, [
+        createElement("div", { class: "d-flex flex-row" }, [
           obj.type == "image"
             ? createElement("img", {
-                style: "margin-right: 2px;",
+                class: "me-1",
                 src: imageSrc,
                 width: 30,
                 height: 30,
               })
-            : createElement("div", { style: "display: none;" }),
+            : createElement("div", { class: "d-none" }),
           imageAssociatedRecordTitle
             ? createElement(
                 "small",
@@ -71,8 +71,8 @@ export default class TopLayer {
                     rel: "noopener noreferrer",
                     target: "_blank",
                   },
-                  imageAssociatedRecordTitle
-                )
+                  imageAssociatedRecordTitle,
+                ),
               )
             : createElement("small", {}, `"${displayName}"`),
         ]),
@@ -80,8 +80,7 @@ export default class TopLayer {
         createElement(
           "div",
           {
-            style:
-              "display: flex; flex-direction: row; align-items: flex-start",
+            class: "d-flex flex-row align-items-start",
           },
           [
             createElement(
@@ -110,7 +109,7 @@ export default class TopLayer {
                   this.tableApp.canvasRenderAll();
                   socketIntegration.imageMoved(obj);
                 },
-              }
+              },
             ),
             createElement("button", {}, "Clear", {
               type: "click",
@@ -122,9 +121,9 @@ export default class TopLayer {
                 socketIntegration.imageMoved(obj);
               },
             }),
-          ]
+          ],
         ),
-      ]
+      ],
     );
   };
 
@@ -135,22 +134,22 @@ export default class TopLayer {
       case "Map":
         layerInfo = createElement(
           "small",
-          { style: "color: var(--orange2)" },
-          "Map Layer"
+          { class: "text-orange" },
+          "Map Layer",
         );
         break;
       case "Object":
         layerInfo = createElement(
           "small",
-          { style: "color: var(--green)" },
-          "Object Layer"
+          { class: "text-green" },
+          "Object Layer",
         );
         break;
       case "Fog":
         layerInfo = createElement(
           "small",
-          { style: "color: var(--light-gray)" },
-          "Fog Layer"
+          { class: "text-light-gray" },
+          "Fog Layer",
         );
         break;
     }
@@ -160,7 +159,7 @@ export default class TopLayer {
 
   renderLayersElem = () => {
     if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
-      return createElement("div", { style: "display: none;" });
+      return createElement("div", { class: "d-none" });
     } else {
       return createElement("div", { class: "table-config layers-elem" }, [
         this.renderStyledLayerInfoElem(),
@@ -176,7 +175,7 @@ export default class TopLayer {
               this.tableApp.changeLayer();
               this.render();
             },
-          }
+          },
         ),
       ]);
     }
@@ -184,7 +183,7 @@ export default class TopLayer {
 
   renderGridControlElem = () => {
     if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
-      return createElement("div", { style: "display: none;" });
+      return createElement("div", { class: "d-none" });
     }
 
     const gridGroup = this.tableApp.canvasLayer.gridManager?.getGroup();
@@ -222,48 +221,58 @@ export default class TopLayer {
             socketIntegration.gridToggle(!isVisible);
             this.render(); // update label
           },
-        }
+        },
       ),
-      createElement("br"),
       // Input for grid width (in squares)
-      createElement("div", {}, [
-        createElement("label", {}, "Width"),
-        createElement(
-          "input",
-          {
-            type: "number",
-            value: this.gridSizeInputs.width,
-            min: 1,
-            max: 100,
-            style: "margin-left: 5px; width: 80px;",
-          },
-          null,
-          {
-            type: "input",
-            event: updateInput("width"),
-          }
-        ),
-      ]),
+      createElement(
+        "div",
+        {
+          class: "d-flex flex-column justify-content-center align-items-center",
+        },
+        [
+          createElement("small", {}, "Width"),
+          createElement(
+            "input",
+            {
+              type: "number",
+              value: this.gridSizeInputs.width,
+              min: 1,
+              max: 100,
+              style: "margin-left: 5px; width: 80px;",
+            },
+            null,
+            {
+              type: "input",
+              event: updateInput("width"),
+            },
+          ),
+        ],
+      ),
       // Input for grid height (in squares)
-      createElement("div", {}, [
-        createElement("label", {}, "Height"),
-        createElement(
-          "input",
-          {
-            type: "number",
-            value: this.gridSizeInputs.height,
-            min: 1,
-            max: 100,
-            style: "margin-left: 5px; width: 80px;",
-          },
-          null,
-          {
-            type: "input",
-            event: updateInput("height"),
-          }
-        ),
-      ]),
-      createElement("br"),
+      createElement(
+        "div",
+        {
+          class: "d-flex flex-column justify-content-center align-items-center",
+        },
+        [
+          createElement("small", {}, "Height"),
+          createElement(
+            "input",
+            {
+              type: "number",
+              value: this.gridSizeInputs.height,
+              min: 1,
+              max: 100,
+              style: "margin-left: 5px; width: 80px;",
+            },
+            null,
+            {
+              type: "input",
+              event: updateInput("height"),
+            },
+          ),
+        ],
+      ),
       // Button to apply new grid size
       createElement(
         "button",
@@ -280,7 +289,7 @@ export default class TopLayer {
             this.tableApp.canvasLayer.gridManager.rebuildGrid(w, h);
             socketIntegration.gridResized({ width: w, height: h });
           },
-        }
+        },
       ),
     ]);
   };
@@ -304,9 +313,9 @@ export default class TopLayer {
                 !this.tableApp.canvasLayer.canvas.isDrawingMode;
               this.render();
             },
-          }
+          },
         ),
-      ]
+      ],
     );
   };
 
@@ -324,7 +333,7 @@ export default class TopLayer {
           event: () => {
             this.tableApp.canvasLayer.removeObjects();
           },
-        }
+        },
       ),
       createElement(
         "button",
@@ -338,7 +347,7 @@ export default class TopLayer {
           event: () => {
             this.tableApp.canvasLayer.moveObjectToTop();
           },
-        }
+        },
       ),
     ]);
   };
@@ -352,22 +361,21 @@ export default class TopLayer {
           createElement(
             "div",
             {
-              style: "display: flex; align-items: flex-end;",
+              class: "d-flex align-items-end",
             },
             [
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; flex-direction: column; align-items: flex-start;",
+                  class: "d-flex flex-column align-items-start",
                 },
                 [
                   createElement("small", {}, "Color"),
                   createElement(
                     "input",
                     {
-                      style:
-                        "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
+                      class: "cursor-pointer me-3",
+                      style: "height: 25px;",
                       type: "color",
                       id: "colorpicker",
                       name: "colorpicker",
@@ -381,15 +389,14 @@ export default class TopLayer {
                         this.tableApp.canvasLayer.canvas.freeDrawingBrush.color =
                           e.target.value;
                       },
-                    }
+                    },
                   ),
-                ]
+                ],
               ),
               createElement(
                 "div",
                 {
-                  style:
-                    "display: flex; flex-direction: column; align-items: center;",
+                  class: "d-flex flex-column align-items-center",
                 },
                 [
                   createElement("small", {}, "Line Width"),
@@ -410,15 +417,15 @@ export default class TopLayer {
                         this.tableApp.canvasLayer.canvas.freeDrawingBrush.width =
                           e.target.valueAsNumber;
                       },
-                    }
+                    },
                   ),
-                ]
+                ],
               ),
-            ]
+            ],
           ),
-        ]
+        ],
       );
-    } else return createElement("div", { style: "display: none;" });
+    } else return createElement("div", { class: "d-none" });
   };
 
   renderCanvasObjectList = (canvasObjectList) => {
@@ -428,21 +435,19 @@ export default class TopLayer {
         IdPrefix = "img";
       }
       if (!obj.id) {
-        return createElement("div", { style: "display: none;" });
+        return createElement("div", { class: "d-none" });
       }
 
       return createElement(
         "div",
         {
-          class: "canvas-log-item",
-          style:
-            "display: flex; flex-direction: row; justify-content: space-between;",
+          class: "canvas-log-item d-flex flex-row justify-content-between",
         },
         [
           createElement(
             "div",
             {},
-            `${index} ${IdPrefix}-${truncateString(obj.id, 8, "")}`
+            `${index} ${IdPrefix}-${truncateString(obj.id, 8, "")}`,
           ),
           createElement("img", {
             src: this.tableApp.sidebar.tableSidebarImageComponent
@@ -459,7 +464,7 @@ export default class TopLayer {
           event: (e) => {
             this.tableApp.canvasLayer.selectObjectById(obj.id);
           },
-        }
+        },
       );
     });
   };
@@ -474,8 +479,8 @@ export default class TopLayer {
         event: () => {
           modal.show(
             createElement("div", { class: "help-content" }, [
-              createElement("br"),
               createElement("h1", {}, "Canvas Log"),
+              createElement("br"),
               createElement("button", {}, "Open Log", {
                 type: "click",
                 event: (e) => {
@@ -489,10 +494,10 @@ export default class TopLayer {
                       createElement("hr"),
                       createElement(
                         "div",
-                        { style: "overflow: auto; height: 300px;" },
-                        [...this.renderCanvasObjectList(canvasObjectsList)]
+                        { class: "overflow-auto", style: "height: 300px;" },
+                        [...this.renderCanvasObjectList(canvasObjectsList)],
                       ),
-                    ])
+                    ]),
                   );
                 },
               }),
@@ -505,7 +510,7 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "Hold key to enable drag-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+                "Hold key to enable drag-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region.",
               ),
               createElement("br"),
               createElement("b", {}, "Shift"),
@@ -513,7 +518,7 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "Hold key and click objects to select multiple."
+                "Hold key and click objects to select multiple.",
               ),
               createElement("br"),
               createElement("b", {}, "Delete/Backspace"),
@@ -521,7 +526,7 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "While object(s) are selected, press delete key to remove object(s) from table."
+                "While object(s) are selected, press delete key to remove object(s) from table.",
               ),
               createElement("br"),
               createElement("b", {}, "Control (⌃) + t"),
@@ -529,7 +534,7 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "While object(s) are selected, pressing ctrl + t will change the layer that the object(s) are currently on."
+                "While object(s) are selected, pressing ctrl + t will change the layer that the object(s) are currently on.",
               ),
               createElement("br"),
               createElement("b", {}, "Control (⌃) + d"),
@@ -537,7 +542,7 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original."
+                "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original.",
               ),
               createElement("br"),
               createElement("br"),
@@ -547,13 +552,13 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "The command expects a text input in the format:"
+                "The command expects a text input in the format:",
               ),
               createElement("br"),
               createElement(
                 "small",
                 {},
-                "[number of dice] d [dice sides] + [modifier]"
+                "[number of dice] d [dice sides] + [modifier]",
               ),
               createElement("br"),
               createElement("br"),
@@ -564,14 +569,14 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "Represents the number of sides on the dice."
+                "Represents the number of sides on the dice.",
               ),
               createElement("br"),
               createElement("b", {}, "[modifier]: "),
               createElement(
                 "small",
                 {},
-                "(Optional) A number that's added to the total result of the dice rolls. If multiple modifiers are given, they are all added."
+                "(Optional) A number that's added to the total result of the dice rolls. If multiple modifiers are given, they are all added.",
               ),
               createElement("br"),
               createElement("br"),
@@ -582,7 +587,7 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                ", the command will simulate rolling two 6-sided dice and then add a modifier of 3 to the total."
+                ", the command will simulate rolling two 6-sided dice and then add a modifier of 3 to the total.",
               ),
               createElement("br"),
               createElement("small", {}, "The bot might respond with:"),
@@ -601,15 +606,15 @@ export default class TopLayer {
               createElement(
                 "small",
                 {},
-                "If the input is incorrect or malformed, the bot will respond with:"
+                "If the input is incorrect or malformed, the bot will respond with:",
               ),
               createElement("br"),
               createElement("code", {}, "Failed to calculate, try again."),
               createElement("br"),
-            ])
+            ]),
           );
         },
-      }
+      },
     );
   };
 
@@ -622,7 +627,7 @@ export default class TopLayer {
       this.renderLayersElem(),
       this.renderGridControlElem(),
       this.renderImageOptions(),
-      this.renderInfoMenu()
+      this.renderInfoMenu(),
     );
     // append this after since it waits
     this.domComponent.append(await this.renderSelectedObjectInfoElem());

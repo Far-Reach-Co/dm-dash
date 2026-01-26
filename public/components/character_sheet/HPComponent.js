@@ -71,7 +71,7 @@ export default class HPComponent {
             },
           }
         ),
-        createElement("small", { style: "color: var(--pink)" }, "Temporary HP"),
+        createElement("small", { class: "text-pink" }, "Temporary HP"),
       ])
     );
   };
@@ -101,8 +101,7 @@ export default class HPComponent {
         createElement(
           "div",
           {
-            style:
-              "display: flex; align-items: center; justify-content: center;",
+            class: "d-flex align-items-center justify-content-center",
           },
           [
             createElement("small", {}, "Max"),

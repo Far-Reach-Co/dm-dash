@@ -5,12 +5,10 @@ class MobileNavHandler {
     // set event listener on nav hamburger
     document.getElementById("nav-ham").addEventListener("click", () => {
       if (this.visible) {
-        mobileNav.style.visibility = "hidden";
-        mobileNav.style.zIndex = "1";
+        mobileNav.classList.remove("open");
         this.visible = false;
       } else {
-        mobileNav.style.visibility = "visible";
-        mobileNav.style.zIndex = "4";
+        mobileNav.classList.add("open");
         this.visible = true;
       }
     });
@@ -18,8 +16,7 @@ class MobileNavHandler {
     document
       .getElementById("nav-links-container-mobile")
       .addEventListener("click", () => {
-        mobileNav.style.visibility = "hidden";
-        mobileNav.style.zIndex = "1";
+        mobileNav.classList.remove("open");
         this.visible = false;
       });
   }

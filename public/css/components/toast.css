@@ -1,0 +1,40 @@
+/* ==========================================================================
+   Toast Notification Styles
+   ========================================================================== */
+
+#toast-custom {
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity var(--transition-normal), transform var(--transition-normal), visibility 0s linear var(--transition-normal);
+}
+
+#toast-custom.visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity var(--transition-normal), transform var(--transition-normal), visibility 0s linear 0s;
+}
+
+.toast-custom {
+  z-index: 200;
+  position: fixed;
+  left: 50%;
+  top: var(--space-xl);
+  width: fit-content;
+  max-width: 90vw;
+  height: fit-content;
+  color: var(--bright-white);
+  background-color: var(--green2);
+  padding: var(--space-md) var(--space-xl);
+  font-size: 16px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  cursor: pointer;
+}
+
+.toast-custom:hover {
+  opacity: 0.9;
+}
+
+.toast-error {
+  background-color: var(--red2);
+}

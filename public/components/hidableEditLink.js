@@ -2,7 +2,7 @@ import createElement from "./createElement.js";
 
 export default function hidableEditLink(toggleEdit, auth) {
   if (!auth) {
-    return createElement("div", { style: "visibility: hidden;" });
+    return createElement("div", { class: "invisible" });
   } else {
     return createElement(
       "div",

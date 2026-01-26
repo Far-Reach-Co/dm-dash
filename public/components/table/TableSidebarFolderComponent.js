@@ -112,14 +112,14 @@ export default class TableSidebarFolderComponent {
           },
         });
       }
-    } else return createElement("div", { style: "display: none;" });
+    } else return createElement("div", { class: "d-none" });
   };
 
   renderRemoveFolder = () => {
     if (this.currentFolder) {
       return createElement(
         "div",
-        { style: "color: var(--red1)", class: "folder-item" },
+        { class: "folder-item text-red" },
         `Remove ${this.currentFolder.title}`,
         {
           type: "click",
@@ -160,7 +160,7 @@ export default class TableSidebarFolderComponent {
         }
       );
     } else {
-      return createElement("div", { style: "display: none;" });
+      return createElement("div", { class: "d-none" });
     }
   };
 

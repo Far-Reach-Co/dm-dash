@@ -124,11 +124,11 @@ export default class SpellsComponent {
     this.domComponent.append(
       createElement("div", {}, [
         spellInfoComponent.domComponent,
-        createElement("div", { style: "display: flex; flex-wrap: wrap;" }, [
+        createElement("div", { class: "d-flex flex-wrap" }, [
           this.renderCantrip(),
           ...this.renderSpellSlotsElems(),
         ]),
-      ])
+      ]),
     );
   };
 }
@@ -158,7 +158,7 @@ class SpellInfoComponent {
       const elem = createElement(
         "option",
         { class: "select-option-small", value: type },
-        type
+        type,
       );
       if (currentType && currentType === type) elem.selected = true;
       typeList.push(elem);
@@ -181,14 +181,14 @@ class SpellInfoComponent {
             createElement(
               "div",
               {
-                style:
-                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+                class:
+                  "d-flex flex-column align-items-center justify-content-center",
               },
               [
                 createElement(
                   "small",
-                  { style: "margin-bottom: 8px;" },
-                  "Spell Casting Ability"
+                  { class: "mb-2" },
+                  "Spell Casting Ability",
                 ),
                 createElement(
                   "select",
@@ -201,7 +201,7 @@ class SpellInfoComponent {
                   [
                     createElement("option", { value: "None" }, "None"),
                     ...this.renderTypeSelectOptions(
-                      this.generalData.spell_slots.spell_casting_ability
+                      this.generalData.spell_slots.spell_casting_ability,
                     ),
                   ],
                   {
@@ -210,19 +210,18 @@ class SpellInfoComponent {
                       e.preventDefault();
                       this.updateSpellSlotValue(
                         "spell_casting_ability",
-                        e.target.value
+                        e.target.value,
                       );
                       this.render();
                     },
-                  }
+                  },
                 ),
-              ]
+              ],
             ),
             createElement(
               "div",
               {
-                style:
-                  "display: flex; flex-direction: column; align-items: center; margin-right: var(--main-distance); margin-left: var(--main-distance);",
+                class: "d-flex flex-column align-items-center mx-3",
               },
               [
                 createElement("small", {}, "Spell Save DC"),
@@ -231,15 +230,15 @@ class SpellInfoComponent {
                   {
                     class: "cp-content-long-number",
                   },
-                  this.calculateSpellSaveDC()
+                  this.calculateSpellSaveDC(),
                 ),
-              ]
+              ],
             ),
             createElement(
               "div",
               {
-                style:
-                  "display: flex; flex-direction: column; align-items: center; justify-content: center;",
+                class:
+                  "d-flex flex-column align-items-center justify-content-center",
               },
               [
                 createElement("small", {}, "Spell Attack Bonus"),
@@ -248,13 +247,13 @@ class SpellInfoComponent {
                   {
                     class: "cp-content-long-number",
                   },
-                  `+${this.calculateSpellAttackBonus()}`
+                  `+${this.calculateSpellAttackBonus()}`,
                 ),
-              ]
+              ],
             ),
-          ]
+          ],
         ),
-      ])
+      ]),
     );
   };
 }
@@ -278,10 +277,10 @@ class SingleSpell {
     this.expendedElement = new ExpendedElement({
       domComponent: createElement("div"),
       totalSpellSlotCount: parseInt(
-        this.generalData.spell_slots[this.spellSlot.totalKey]
+        this.generalData.spell_slots[this.spellSlot.totalKey],
       ),
       expendedSpellSlotCount: parseInt(
-        this.generalData.spell_slots[this.spellSlot.expendedKey]
+        this.generalData.spell_slots[this.spellSlot.expendedKey],
       ),
       expendedKey: this.spellSlot.expendedKey,
       updateSpellSlotValue: this.updateSpellSlotValue,
@@ -293,7 +292,7 @@ class SingleSpell {
   init = async () => {
     // init spells
     const spells = await getThings(
-      `/api/get_5e_character_spells/${this.general_id}/${this.spellSlot.title}`
+      `/api/get_5e_character_spells/${this.general_id}/${this.spellSlot.title}`,
     );
     if (spells.length) this.spells = spells;
 
@@ -338,6 +337,7 @@ class SingleSpell {
 
   removeItem = (id) => {
     this.spellElements = this.spellElements.filter((item) => item.id != id);
+    this.spells = this.spells.filter((spell) => spell.id != id);
     this.render();
   };
 
@@ -345,10 +345,8 @@ class SingleSpell {
     if (!this.spells.length)
       return [createElement("small", {}, "No spells yet...")];
 
-    // check if we have some components instantiated already
-    if (this.spellElements.length) {
-      return this.spellElements.map((item) => item.domComponent);
-    }
+    // Clear the spellElements array to ensure fresh rendering
+    this.spellElements = [];
 
     return this.spells.map((spell) => {
       const elem = createElement("div");
@@ -377,82 +375,61 @@ class SingleSpell {
 
     if (this.newLoading) {
       return this.domComponent.append(
-        renderLoadingWithMessage("Creating New Spell...")
+        renderLoadingWithMessage("Creating New Spell..."),
       );
     }
 
     if (this.isCantrip) {
       return this.domComponent.append(
         createElement("div", { class: "special-font" }, "Cantrips"),
-        createElement(
-          "a",
-          { style: "font-size: small; margin-top: 5px;" },
-          "+ Expand all",
-          {
-            type: "click",
-            event: () => {
-              this.spellElements.forEach((spell) => spell.show());
-            },
-          }
-        ),
-        createElement(
-          "a",
-          { style: "font-size: small; margin-top: 5px;" },
-          "- Collapse all",
-          {
-            type: "click",
-            event: () => {
-              this.spellElements.forEach((spell) => spell.hide());
-            },
-          }
-        ),
+        createElement("a", { class: "font-small mt-1" }, "+ Expand all", {
+          type: "click",
+          event: () => {
+            this.spellElements.forEach((spell) => spell.show());
+          },
+        }),
+        createElement("a", { class: "font-small mt-1" }, "- Collapse all", {
+          type: "click",
+          event: () => {
+            this.spellElements.forEach((spell) => spell.hide());
+          },
+        }),
         createElement("hr"),
         ...this.renderSpells(),
         createElement(
           "a",
           {
-            style: "align-self: flex-start;",
+            class: "align-self-start",
             title: "Create a new cantrip",
           },
           "+",
           {
             type: "click",
             event: () => this.newSpell("cantrip"),
-          }
-        )
+          },
+        ),
       );
     }
 
     this.domComponent.append(
       createElement("div", { class: "special-font" }, this.spellSlot.title),
-      createElement(
-        "a",
-        { style: "font-size: small; margin-top: 5px;" },
-        "+ Expand all",
-        {
-          type: "click",
-          event: () => {
-            this.spellElements.forEach((spell) => spell.show());
-          },
-        }
-      ),
-      createElement(
-        "a",
-        { style: "font-size: small; margin-top: 5px;" },
-        "- Collapse all",
-        {
-          type: "click",
-          event: () => {
-            this.spellElements.forEach((spell) => spell.hide());
-          },
-        }
-      ),
+      createElement("a", { class: "font-small mt-1" }, "+ Expand all", {
+        type: "click",
+        event: () => {
+          this.spellElements.forEach((spell) => spell.show());
+        },
+      }),
+      createElement("a", { class: "font-small mt-1" }, "- Collapse all", {
+        type: "click",
+        event: () => {
+          this.spellElements.forEach((spell) => spell.hide());
+        },
+      }),
       createElement("div", { class: "cp-content-container-center" }, [
         createElement(
           "div",
           {
-            style:
-              "display: flex; align-items: center; justify-content: center;",
+            class: "d-flex align-items-center justify-content-center",
           },
           [
             createElement("small", {}, "Total"),
@@ -474,7 +451,7 @@ class SingleSpell {
                   event: (e) => {
                     this.updateSpellSlotValue(
                       e.target.name,
-                      e.target.valueAsNumber ? e.target.valueAsNumber : 0
+                      e.target.valueAsNumber ? e.target.valueAsNumber : 0,
                     );
                     // reset expended
                     this.updateSpellSlotValue(this.spellSlot.expendedKey, 0);
@@ -493,18 +470,17 @@ class SingleSpell {
                     this.expendedElement.render();
                   },
                 },
-              ]
+              ],
             ),
-          ]
+          ],
         ),
         createElement("small", {}, "Expended"),
         createElement(
           "div",
           {
-            style:
-              "display: flex; align-items: center; justify-content: center;",
+            class: "d-flex align-items-center justify-content-center",
           },
-          this.expendedElement.domComponent
+          this.expendedElement.domComponent,
         ),
       ]),
       createElement("hr"),
@@ -512,15 +488,15 @@ class SingleSpell {
       createElement(
         "a",
         {
-          style: "align-self: flex-start;",
+          class: "align-self-start",
           title: "Create a new spell",
         },
         "+",
         {
           type: "click",
           event: () => this.newSpell(this.spellSlot.title),
-        }
-      )
+        },
+      ),
     );
   };
 }
@@ -560,12 +536,12 @@ class SingleSpellElement {
 
   renderHideSpellButton = () => {
     if (!this.hidden) {
-      return createElement("a", { style: "font-size: small;" }, "- Collapse", {
+      return createElement("a", { class: "font-small" }, "- Collapse", {
         type: "click",
         event: this.toggleHide,
       });
     } else {
-      return createElement("a", { style: "font-size: small;" }, "+ Expand", {
+      return createElement("a", { class: "font-small" }, "+ Expand", {
         type: "click",
         event: this.toggleHide,
       });
@@ -575,20 +551,20 @@ class SingleSpellElement {
   resetSpellInfoToCurrentValues = () => {
     const titleInput = document.getElementById(`spell-title-input-${this.id}`);
     const castingTimeInput = document.getElementById(
-      `spell-casting-time-input-${this.id}`
+      `spell-casting-time-input-${this.id}`,
     );
     const durationInput = document.getElementById(
-      `spell-duration-input-${this.id}`
+      `spell-duration-input-${this.id}`,
     );
     const rangeInput = document.getElementById(`spell-range-input-${this.id}`);
     const damageTypeInput = document.getElementById(
-      `spell-damage-type-input-${this.id}`
+      `spell-damage-type-input-${this.id}`,
     );
     const componentsInput = document.getElementById(
-      `spell-components-input-${this.id}`
+      `spell-components-input-${this.id}`,
     );
     const descriptionInput = document.getElementById(
-      `spell-description-input-${this.id}`
+      `spell-description-input-${this.id}`,
     );
     titleInput.value = this.title;
     castingTimeInput.value = this.castingTime;
@@ -610,20 +586,20 @@ class SingleSpellElement {
     // first save to local state
     const titleInput = document.getElementById(`spell-title-input-${this.id}`);
     const castingTimeInput = document.getElementById(
-      `spell-casting-time-input-${this.id}`
+      `spell-casting-time-input-${this.id}`,
     );
     const durationInput = document.getElementById(
-      `spell-duration-input-${this.id}`
+      `spell-duration-input-${this.id}`,
     );
     const rangeInput = document.getElementById(`spell-range-input-${this.id}`);
     const damageTypeInput = document.getElementById(
-      `spell-damage-type-input-${this.id}`
+      `spell-damage-type-input-${this.id}`,
     );
     const componentsInput = document.getElementById(
-      `spell-components-input-${this.id}`
+      `spell-components-input-${this.id}`,
     );
     const descriptionInput = document.getElementById(
-      `spell-description-input-${this.id}`
+      `spell-description-input-${this.id}`,
     );
 
     this.title = titleInput.value;
@@ -650,20 +626,20 @@ class SingleSpellElement {
     // show data inside inputs
     const titleInput = document.getElementById(`spell-title-input-${this.id}`);
     const castingTimeInput = document.getElementById(
-      `spell-casting-time-input-${this.id}`
+      `spell-casting-time-input-${this.id}`,
     );
     const durationInput = document.getElementById(
-      `spell-duration-input-${this.id}`
+      `spell-duration-input-${this.id}`,
     );
     const rangeInput = document.getElementById(`spell-range-input-${this.id}`);
     const damageTypeInput = document.getElementById(
-      `spell-damage-type-input-${this.id}`
+      `spell-damage-type-input-${this.id}`,
     );
     const componentsInput = document.getElementById(
-      `spell-components-input-${this.id}`
+      `spell-components-input-${this.id}`,
     );
     const descriptionInput = document.getElementById(
-      `spell-description-input-${this.id}`
+      `spell-description-input-${this.id}`,
     );
     titleInput.value = item.name;
     if (item.casting_time) castingTimeInput.value = item.casting_time;
@@ -696,7 +672,7 @@ class SingleSpellElement {
       // get suggestions form data
       const searchSuggestionsList = getDataByQuery(
         spellSuggestions,
-        e.target.value
+        e.target.value,
       );
       // populate list
       for (const item of searchSuggestionsList) {
@@ -723,7 +699,7 @@ class SingleSpellElement {
                 this.resetAndHideSpellSuggestions();
               },
             },
-          ]
+          ],
         );
         suggElem.appendChild(elem);
       }
@@ -754,7 +730,7 @@ class SingleSpellElement {
                 // update UI
                 this.castingTime = e.target.value;
               },
-            }
+            },
           ),
         ]),
         createElement("div", { class: "cp-content-container-row" }, [
@@ -778,7 +754,7 @@ class SingleSpellElement {
                 // update UI
                 this.duration = e.target.value;
               },
-            }
+            },
           ),
         ]),
         createElement("div", { class: "cp-content-container-row" }, [
@@ -802,7 +778,7 @@ class SingleSpellElement {
                 // update UI
                 this.range = e.target.value;
               },
-            }
+            },
           ),
         ]),
         createElement("div", { class: "cp-content-container-row" }, [
@@ -826,7 +802,7 @@ class SingleSpellElement {
                 // update UI
                 this.damageType = e.target.value;
               },
-            }
+            },
           ),
         ]),
         createElement("div", { class: "cp-content-container-row" }, [
@@ -850,7 +826,7 @@ class SingleSpellElement {
                 // update UI
                 this.components = e.target.value;
               },
-            }
+            },
           ),
         ]),
         createElement("br"),
@@ -873,10 +849,10 @@ class SingleSpellElement {
               // update UI
               this.description = e.target.value;
             },
-          }
+          },
         ),
       ];
-    } else return [createElement("div", { style: "display: none;" })];
+    } else return [createElement("div", { class: "d-none" })];
   };
 
   renderSuggestionElem = () => {
@@ -893,8 +869,8 @@ class SingleSpellElement {
               this.resetSpellInfoToCurrentValues();
             }
           },
-        }
-      )
+        },
+      ),
     );
   };
 
@@ -908,13 +884,13 @@ class SingleSpellElement {
       createElement(
         "div",
         {
-          style: "display: flex; flex-direction: column;",
+          class: "d-flex flex-column",
         },
         [
           createElement(
             "div",
             {
-              style: "display: flex; align-items: center; margin-bottom: 5px;",
+              class: "d-flex align-items-center mb-1",
             },
             [
               createElement(
@@ -922,7 +898,7 @@ class SingleSpellElement {
                 {
                   class: "cp-input-gen",
                   id: `spell-title-input-${this.id}`,
-                  style: "color: var(--orange2);",
+                  class: "text-orange",
                   name: "title",
                   value: this.title ? this.title : "",
                 },
@@ -956,13 +932,12 @@ class SingleSpellElement {
                       this.showSpellSuggestions(e);
                     },
                   },
-                ]
+                ],
               ),
               createElement(
                 "div",
                 {
-                  style:
-                    "color: var(--red1); margin-left: var(--main-distance); cursor: pointer;",
+                  class: "text-red cursor-pointer red-x ms-3",
                   title: "Remove spell",
                 },
                 "ⓧ",
@@ -972,22 +947,22 @@ class SingleSpellElement {
                     e.preventDefault();
                     if (
                       window.confirm(
-                        `Are you sure you want to delete ${this.title}`
+                        `Are you sure you want to delete ${this.title}`,
                       )
                     ) {
                       deleteThing(`/api/remove_5e_character_spell/${this.id}`);
                       this.parentRemoveItem(this.id);
                     }
                   },
-                }
+                },
               ),
-            ]
+            ],
           ),
           this.renderHideSpellButton(),
           ...this.renderSpellElemDescriptionsOrHidden(),
           createElement("hr"),
-        ]
-      )
+        ],
+      ),
     );
   };
 }
@@ -995,8 +970,8 @@ class SingleSpellElement {
 class ExpendedElement {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.domComponent.style =
-      "display: flex; align-items: center; justify-content: center; flex-wrap: wrap;";
+    this.domComponent.className =
+      "d-flex align-items-center justify-content-center flex-wrap";
     this.totalSpellSlotCount = props.totalSpellSlotCount;
     this.expendedSpellSlotCount = props.expendedSpellSlotCount;
     this.expendedKey = props.expendedKey;
@@ -1057,7 +1032,7 @@ class ExpendedElement {
         ) {
           this.updateSpellSlotValue(
             this.expendedKey,
-            this.expendedSpellSlotCount
+            this.expendedSpellSlotCount,
           );
 
           this.render();

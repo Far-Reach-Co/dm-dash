@@ -1,0 +1,168 @@
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+/* Selection Prevention */
+.noselect {
+  -webkit-touch-callout: none;
+  /* iOS Safari */
+  -webkit-user-select: none;
+  /* Safari */
+  -khtml-user-select: none;
+  /* Konqueror HTML */
+  -moz-user-select: none;
+  /* Firefox */
+  -ms-user-select: none;
+  /* Internet Explorer/Edge */
+  user-select: none;
+  /* Non-prefixed version */
+}
+
+/* ==========================================================================
+   Text Decoration & Whitespace
+   ========================================================================== */
+
+.text-underline {
+  text-decoration: underline;
+}
+
+.text-no-underline {
+  text-decoration: none;
+}
+
+.whitespace-pre-wrap {
+  white-space: pre-wrap;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Text Colors (using CSS variables)
+   ========================================================================== */
+
+.text-green {
+  color: var(--green);
+}
+
+.text-red {
+  color: var(--red1);
+}
+
+.text-orange {
+  color: var(--orange2);
+}
+
+.text-bright-white {
+  color: var(--bright-white);
+}
+
+.text-link-blue {
+  color: var(--link-blue);
+}
+
+.text-light-gray {
+  color: var(--light-gray);
+}
+
+.text-pink {
+  color: var(--pink);
+}
+
+.text-orange3 {
+  color: var(--orange3);
+}
+
+.text-blue6 {
+  color: var(--blue6);
+}
+
+/* ==========================================================================
+   Font Size Utilities
+   ========================================================================== */
+
+.font-small {
+  font-size: small;
+}
+
+.font-smaller {
+  font-size: smaller;
+}
+
+.font-bold {
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   Max Width Utilities
+   ========================================================================== */
+
+.max-w-90 {
+  max-width: 90%;
+}
+
+.max-w-100 {
+  max-width: 100%;
+}
+
+/* ==========================================================================
+   Dashboard Column Layout
+   ========================================================================== */
+
+.dash-column {
+  width: 25%;
+  min-width: 300px;
+}
+
+
+/* ==========================================================================
+   Cursor Utilities
+   ========================================================================== */
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.cursor-text {
+  cursor: text;
+}
+
+.cursor-help {
+  cursor: help;
+}
+
+/* ==========================================================================
+   Glowing Text Animation
+   ========================================================================== */
+
+.glowing-text {
+  color: var(--blue6);
+  animation: glowing 5s infinite alternate;
+}
+
+@keyframes glowing {
+  0% {
+    text-shadow:
+      0 0 2px var(--main-dark),
+      0 0 3px var(--main-dark),
+      0 0 5px var(--main-dark),
+      0 0 6px var(--main-dark);
+  }
+
+  50% {
+    text-shadow:
+      0 0 7px var(--orange3),
+      0 0 8px var(--main-dark),
+      0 0 9px var(--main-dark),
+      0 0 10px var(--main-dark);
+  }
+
+  100% {
+    text-shadow:
+      0 0 2px var(--main-dark),
+      0 0 3px var(--main-dark),
+      0 0 5px var(--main-dark),
+      0 0 6px var(--main-dark);
+  }
+}
