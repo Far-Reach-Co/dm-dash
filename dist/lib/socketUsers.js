@@ -9,7 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.appendMessageToChatLog = exports.getChatLog = exports.userLeave = exports.getTableUsers = exports.getCurrentUser = exports.userJoin = exports.redisClient = void 0;
+exports.redisClient = void 0;
+exports.userJoin = userJoin;
+exports.getCurrentUser = getCurrentUser;
+exports.getTableUsers = getTableUsers;
+exports.userLeave = userLeave;
+exports.getChatLog = getChatLog;
+exports.appendMessageToChatLog = appendMessageToChatLog;
 const redis_1 = require("redis");
 exports.redisClient = (0, redis_1.createClient)();
 exports.redisClient.connect();
@@ -22,7 +28,6 @@ function userJoin(id, username, table) {
         return user;
     });
 }
-exports.userJoin = userJoin;
 function getCurrentUser(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const userStr = yield exports.redisClient.hGet("users", id);
@@ -32,7 +37,6 @@ function getCurrentUser(id) {
         return JSON.parse(userStr);
     });
 }
-exports.getCurrentUser = getCurrentUser;
 function userLeave(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const userStr = yield exports.redisClient.hGet("users", id);
@@ -43,7 +47,6 @@ function userLeave(id) {
         return JSON.parse(userStr);
     });
 }
-exports.userLeave = userLeave;
 function getTableUsers(table) {
     return __awaiter(this, void 0, void 0, function* () {
         const users = yield exports.redisClient.hGetAll("users");
@@ -54,7 +57,6 @@ function getTableUsers(table) {
             .filter((user) => user.table === table);
     });
 }
-exports.getTableUsers = getTableUsers;
 function getChatLog(table) {
     return __awaiter(this, void 0, void 0, function* () {
         const chatLogKey = `${table}-table-chatlog`;
@@ -62,7 +64,6 @@ function getChatLog(table) {
         return messages.map((message) => JSON.parse(message));
     });
 }
-exports.getChatLog = getChatLog;
 function appendMessageToChatLog(table, message) {
     return __awaiter(this, void 0, void 0, function* () {
         const chatLogKey = `${table}-table-chatlog`;
@@ -75,4 +76,3 @@ function appendMessageToChatLog(table, message) {
         yield exports.redisClient.lTrim(chatLogKey, -100, -1);
     });
 }
-exports.appendMessageToChatLog = appendMessageToChatLog;

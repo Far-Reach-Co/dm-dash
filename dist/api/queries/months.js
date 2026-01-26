@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editMonthQuery = exports.removeMonthQuery = exports.getMonthQuery = exports.getMonthsQuery = exports.addMonthQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addMonthQuery = addMonthQuery;
+exports.getMonthsQuery = getMonthsQuery;
+exports.getMonthQuery = getMonthQuery;
+exports.removeMonthQuery = removeMonthQuery;
+exports.editMonthQuery = editMonthQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addMonthQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -25,7 +32,6 @@ function addMonthQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addMonthQuery = addMonthQuery;
 function getMonthQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -35,7 +41,6 @@ function getMonthQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getMonthQuery = getMonthQuery;
 function getMonthsQuery(calendarId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -45,7 +50,6 @@ function getMonthsQuery(calendarId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getMonthsQuery = getMonthsQuery;
 function removeMonthQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -55,7 +59,6 @@ function removeMonthQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeMonthQuery = removeMonthQuery;
 function editMonthQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -75,4 +78,3 @@ function editMonthQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editMonthQuery = editMonthQuery;

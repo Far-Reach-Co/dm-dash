@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = setupRedisAdapter;
 const redis_adapter_1 = require("@socket.io/redis-adapter");
 const redis_1 = require("redis");
 function setupRedisAdapter(io) {
@@ -20,4 +21,3 @@ function setupRedisAdapter(io) {
         io.adapter((0, redis_adapter_1.createAdapter)(pubClient, subClient));
     });
 }
-exports.default = setupRedisAdapter;

@@ -9,7 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editProjectTitle = exports.removeProject = exports.addProject = exports.getProject = exports.getProjects = void 0;
+exports.getProjects = getProjects;
+exports.getProject = getProject;
+exports.addProject = addProject;
+exports.removeProject = removeProject;
+exports.editProjectTitle = editProjectTitle;
 const projects_js_1 = require("../queries/projects.js");
 const projectInvites_js_1 = require("../queries/projectInvites.js");
 const projectUsers_js_1 = require("../queries/projectUsers.js");
@@ -53,7 +57,6 @@ function addProject(req, res, next) {
         }
     });
 }
-exports.addProject = addProject;
 function getProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -76,7 +79,6 @@ function getProject(req, res, next) {
         }
     });
 }
-exports.getProject = getProject;
 function getProjects(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -113,7 +115,6 @@ function getProjects(req, res, next) {
         }
     });
 }
-exports.getProjects = getProjects;
 function removeProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -143,7 +144,6 @@ function removeProject(req, res, next) {
         }
     });
 }
-exports.removeProject = removeProject;
 function editProjectTitle(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -163,4 +163,3 @@ function editProjectTitle(req, res, next) {
         }
     });
 }
-exports.editProjectTitle = editProjectTitle;

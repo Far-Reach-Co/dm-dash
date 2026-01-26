@@ -9,7 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editImageNotes = exports.removeImageByTableUser = exports.removeImageByProject = exports.removeImageFromBucket = exports.newImageForUser = exports.newImageForProject = exports.editImageName = exports.getImage = exports.getSignedUrlsHandler = exports.getSignedUrls = void 0;
+exports.getSignedUrls = getSignedUrls;
+exports.getSignedUrlsHandler = getSignedUrlsHandler;
+exports.getImage = getImage;
+exports.editImageName = editImageName;
+exports.newImageForProject = newImageForProject;
+exports.newImageForUser = newImageForUser;
+exports.removeImageFromBucket = removeImageFromBucket;
+exports.removeImageByProject = removeImageByProject;
+exports.removeImageByTableUser = removeImageByTableUser;
+exports.editImageNotes = editImageNotes;
 const aws_sdk_1 = require("aws-sdk");
 const fs_1 = require("fs");
 const enums_1 = require("../../lib/enums");
@@ -62,7 +71,6 @@ function getSignedUrlsHandler(req, res, next) {
         }
     });
 }
-exports.getSignedUrlsHandler = getSignedUrlsHandler;
 function getSignedUrls(images) {
     return __awaiter(this, void 0, void 0, function* () {
         const urls = {};
@@ -90,7 +98,6 @@ function getSignedUrls(images) {
         return urls;
     });
 }
-exports.getSignedUrls = getSignedUrls;
 function computeAwsImageParamsFromRequest(req, filePath) {
     if (!req.file)
         throw new Error("Missing file");
@@ -240,7 +247,6 @@ function newImageForProject(req, res, next) {
         }
     });
 }
-exports.newImageForProject = newImageForProject;
 function newImageForUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!req.file)
@@ -319,7 +325,6 @@ function newImageForUser(req, res, next) {
         }
     });
 }
-exports.newImageForUser = newImageForUser;
 function getImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -356,7 +361,6 @@ function getImage(req, res, next) {
         }
     });
 }
-exports.getImage = getImage;
 function removeImageByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -390,7 +394,6 @@ function removeImageByProject(req, res, next) {
         }
     });
 }
-exports.removeImageByProject = removeImageByProject;
 function removeImageByTableUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -425,7 +428,6 @@ function removeImageByTableUser(req, res, next) {
         }
     });
 }
-exports.removeImageByTableUser = removeImageByTableUser;
 function removeImageFromBucket(bucket, image) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -447,7 +449,6 @@ function removeImageFromBucket(bucket, image) {
         }
     });
 }
-exports.removeImageFromBucket = removeImageFromBucket;
 function editImageName(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -461,7 +462,6 @@ function editImageName(req, res, next) {
         }
     });
 }
-exports.editImageName = editImageName;
 function editImageNotes(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -475,4 +475,3 @@ function editImageNotes(req, res, next) {
         }
     });
 }
-exports.editImageNotes = editImageNotes;

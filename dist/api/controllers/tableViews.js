@@ -9,7 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTableView = exports.editTableViewData = exports.removeTableView = exports.getTableView = exports.getTableViewByUUID = exports.getTableViewsByProject = exports.getTableViewsByUser = exports.addTableViewByUser = exports.addTableViewByProject = void 0;
+exports.addTableViewByProject = addTableViewByProject;
+exports.addTableViewByUser = addTableViewByUser;
+exports.getTableViewsByUser = getTableViewsByUser;
+exports.getTableViewsByProject = getTableViewsByProject;
+exports.getTableViewByUUID = getTableViewByUUID;
+exports.getTableView = getTableView;
+exports.removeTableView = removeTableView;
+exports.editTableViewData = editTableViewData;
+exports.editTableView = editTableView;
 const tableViews_js_1 = require("../queries/tableViews.js");
 const eventLogger_1 = require("../../lib/eventLogger");
 function addTableViewByProject(req, res, next) {
@@ -37,7 +45,6 @@ function addTableViewByProject(req, res, next) {
         }
     });
 }
-exports.addTableViewByProject = addTableViewByProject;
 function addTableViewByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -58,7 +65,6 @@ function addTableViewByUser(req, res, next) {
         }
     });
 }
-exports.addTableViewByUser = addTableViewByUser;
 function getTableViewsByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -70,7 +76,6 @@ function getTableViewsByProject(req, res, next) {
         }
     });
 }
-exports.getTableViewsByProject = getTableViewsByProject;
 function getTableViewsByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -84,7 +89,6 @@ function getTableViewsByUser(req, res, next) {
         }
     });
 }
-exports.getTableViewsByUser = getTableViewsByUser;
 function getTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -97,7 +101,6 @@ function getTableView(req, res, next) {
         }
     });
 }
-exports.getTableView = getTableView;
 function getTableViewByUUID(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -110,7 +113,6 @@ function getTableViewByUUID(req, res, next) {
         }
     });
 }
-exports.getTableViewByUUID = getTableViewByUUID;
 function removeTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -122,7 +124,6 @@ function removeTableView(req, res, next) {
         }
     });
 }
-exports.removeTableView = removeTableView;
 function editTableViewData(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -136,7 +137,6 @@ function editTableViewData(req, res, next) {
         }
     });
 }
-exports.editTableViewData = editTableViewData;
 function editTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -148,4 +148,3 @@ function editTableView(req, res, next) {
         }
     });
 }
-exports.editTableView = editTableView;

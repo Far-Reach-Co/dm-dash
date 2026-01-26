@@ -9,7 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editPlayerUser = exports.removePlayerUsersByPlayer = exports.removePlayerUserByUserAndPlayer = exports.removePlayerUser = exports.getPlayerUsersByPlayer = exports.getPlayerUserByUserAndPlayer = exports.addPlayerUser = void 0;
+exports.addPlayerUser = addPlayerUser;
+exports.getPlayerUserByUserAndPlayer = getPlayerUserByUserAndPlayer;
+exports.getPlayerUsersByPlayer = getPlayerUsersByPlayer;
+exports.removePlayerUser = removePlayerUser;
+exports.removePlayerUserByUserAndPlayer = removePlayerUserByUserAndPlayer;
+exports.removePlayerUsersByPlayer = removePlayerUsersByPlayer;
+exports.editPlayerUser = editPlayerUser;
 const _5eCharGeneral_js_1 = require("../queries/5eCharGeneral.js");
 const playerUsers_js_1 = require("../queries/playerUsers.js");
 const users_js_1 = require("../queries/users.js");
@@ -42,7 +48,6 @@ function addPlayerUser(req, res, next) {
         }
     });
 }
-exports.addPlayerUser = addPlayerUser;
 function getPlayerUserByUserAndPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -56,7 +61,6 @@ function getPlayerUserByUserAndPlayer(req, res, next) {
         }
     });
 }
-exports.getPlayerUserByUserAndPlayer = getPlayerUserByUserAndPlayer;
 function getPlayerUsersByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -77,7 +81,6 @@ function getPlayerUsersByPlayer(req, res, next) {
         }
     });
 }
-exports.getPlayerUsersByPlayer = getPlayerUsersByPlayer;
 function removePlayerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -89,7 +92,6 @@ function removePlayerUser(req, res, next) {
         }
     });
 }
-exports.removePlayerUser = removePlayerUser;
 function removePlayerUserByUserAndPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -104,7 +106,6 @@ function removePlayerUserByUserAndPlayer(req, res, next) {
         }
     });
 }
-exports.removePlayerUserByUserAndPlayer = removePlayerUserByUserAndPlayer;
 function removePlayerUsersByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -118,7 +119,6 @@ function removePlayerUsersByPlayer(req, res, next) {
         }
     });
 }
-exports.removePlayerUsersByPlayer = removePlayerUsersByPlayer;
 function editPlayerUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -130,4 +130,3 @@ function editPlayerUser(req, res, next) {
         }
     });
 }
-exports.editPlayerUser = editPlayerUser;

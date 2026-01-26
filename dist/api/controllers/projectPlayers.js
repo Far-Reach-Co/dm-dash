@@ -9,7 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editProjectPlayer = exports.removeProjectPlayer = exports.getProjectPlayersByPlayer = exports.getProjectPlayersByProject = exports.addProjectPlayer = void 0;
+exports.addProjectPlayer = addProjectPlayer;
+exports.getProjectPlayersByProject = getProjectPlayersByProject;
+exports.getProjectPlayersByPlayer = getProjectPlayersByPlayer;
+exports.removeProjectPlayer = removeProjectPlayer;
+exports.editProjectPlayer = editProjectPlayer;
 const projectPlayers_1 = require("../queries/projectPlayers");
 const eventLogger_1 = require("../../lib/eventLogger");
 function addProjectPlayer(req, res, next) {
@@ -34,7 +38,6 @@ function addProjectPlayer(req, res, next) {
         }
     });
 }
-exports.addProjectPlayer = addProjectPlayer;
 function getProjectPlayersByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +49,6 @@ function getProjectPlayersByProject(req, res, next) {
         }
     });
 }
-exports.getProjectPlayersByProject = getProjectPlayersByProject;
 function getProjectPlayersByPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -58,7 +60,6 @@ function getProjectPlayersByPlayer(req, res, next) {
         }
     });
 }
-exports.getProjectPlayersByPlayer = getProjectPlayersByPlayer;
 function removeProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -70,7 +71,6 @@ function removeProjectPlayer(req, res, next) {
         }
     });
 }
-exports.removeProjectPlayer = removeProjectPlayer;
 function editProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -82,4 +82,3 @@ function editProjectPlayer(req, res, next) {
         }
     });
 }
-exports.editProjectPlayer = editProjectPlayer;

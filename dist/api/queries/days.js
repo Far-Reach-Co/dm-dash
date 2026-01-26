@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editDayQuery = exports.removeDayQuery = exports.getDayQuery = exports.getDaysQuery = exports.addDayQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addDayQuery = addDayQuery;
+exports.getDaysQuery = getDaysQuery;
+exports.getDayQuery = getDayQuery;
+exports.removeDayQuery = removeDayQuery;
+exports.editDayQuery = editDayQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addDayQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,7 +31,6 @@ function addDayQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addDayQuery = addDayQuery;
 function getDayQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -34,7 +40,6 @@ function getDayQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getDayQuery = getDayQuery;
 function getDaysQuery(calendarId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -44,7 +49,6 @@ function getDaysQuery(calendarId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getDaysQuery = getDaysQuery;
 function removeDayQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -54,7 +58,6 @@ function removeDayQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeDayQuery = removeDayQuery;
 function editDayQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -74,4 +77,3 @@ function editDayQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editDayQuery = editDayQuery;

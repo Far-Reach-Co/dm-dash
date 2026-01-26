@@ -10,7 +10,9 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "public"]

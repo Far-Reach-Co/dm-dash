@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editClock = exports.removeClock = exports.addClock = exports.getClocks = void 0;
+exports.getClocks = getClocks;
+exports.addClock = addClock;
+exports.removeClock = removeClock;
+exports.editClock = editClock;
 const clocks_1 = require("../queries/clocks");
 function addClock(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +25,6 @@ function addClock(req, res, next) {
         }
     });
 }
-exports.addClock = addClock;
 function getClocks(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +36,6 @@ function getClocks(req, res, next) {
         }
     });
 }
-exports.getClocks = getClocks;
 function removeClock(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +47,6 @@ function removeClock(req, res, next) {
         }
     });
 }
-exports.removeClock = removeClock;
 function editClock(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -58,4 +58,3 @@ function editClock(req, res, next) {
         }
     });
 }
-exports.editClock = editClock;

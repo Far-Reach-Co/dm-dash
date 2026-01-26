@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editCalendarQuery = exports.removeCalendarQuery = exports.getCalendarQuery = exports.getCalendarsQuery = exports.addCalendarQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addCalendarQuery = addCalendarQuery;
+exports.getCalendarsQuery = getCalendarsQuery;
+exports.getCalendarQuery = getCalendarQuery;
+exports.removeCalendarQuery = removeCalendarQuery;
+exports.editCalendarQuery = editCalendarQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addCalendarQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,7 +31,6 @@ function addCalendarQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addCalendarQuery = addCalendarQuery;
 function getCalendarQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -34,7 +40,6 @@ function getCalendarQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getCalendarQuery = getCalendarQuery;
 function getCalendarsQuery(projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -44,7 +49,6 @@ function getCalendarsQuery(projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getCalendarsQuery = getCalendarsQuery;
 function removeCalendarQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -54,7 +58,6 @@ function removeCalendarQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeCalendarQuery = removeCalendarQuery;
 function editCalendarQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -74,4 +77,3 @@ function editCalendarQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editCalendarQuery = editCalendarQuery;

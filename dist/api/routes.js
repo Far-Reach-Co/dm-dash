@@ -1,4 +1,7 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const projects_js_1 = require("./controllers/projects.js");
@@ -28,12 +31,21 @@ const express_rate_limit_1 = require("express-rate-limit");
 const discordBot_js_1 = require("./controllers/discordBot.js");
 const _5eCharClasses_js_1 = require("./controllers/5eCharClasses.js");
 const record_js_1 = require("./controllers/record.js");
-const multer = require("multer");
+const multer_1 = __importDefault(require("multer"));
 const recordImage_js_1 = require("./controllers/recordImage.js");
-const upload = multer({ dest: "file_uploads/" });
-const csrf = require("csurf");
-const csrfMiddleware = csrf({ cookie: true });
+const upload = (0, multer_1.default)({ dest: "file_uploads/" });
+const routes_js_1 = require("../routes.js");
 var router = (0, express_1.Router)();
+const apiLimiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 15 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: "Too many requests, please try again later",
+    },
+});
+router.use(apiLimiter);
 router.get("/bot/get_all_commands", discordBot_js_1.getCommands);
 router.post("/bot/interactions", (0, express_1.raw)({ type: "application/json" }), (0, discord_interactions_1.verifyKeyMiddleware)(process.env.BOT_PUBLIC_KEY), discordBot_js_1.interactionsController);
 router.get("/get_image/:id", s3_js_1.getImage);
@@ -171,10 +183,10 @@ const requestResetLimiter = (0, express_rate_limit_1.rateLimit)({
     legacyHeaders: false,
 });
 router.get("/get_user", users_js_1.getUserBySession);
-router.post("/register", csrfMiddleware, registerLimiter, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.registerUser);
-router.post("/login", csrfMiddleware, loginLimiter, users_js_1.loginUser);
-router.post("/request_reset_email", csrfMiddleware, requestResetLimiter, users_js_1.requestResetEmail);
-router.post("/user/reset_password", csrfMiddleware, users_js_1.resetPassword);
-router.post("/update_username", csrfMiddleware, users_js_1.editUsername);
-router.post("/update_email", csrfMiddleware, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.editEmail);
+router.post("/register", routes_js_1.csrfProtection, registerLimiter, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.registerUser);
+router.post("/login", routes_js_1.csrfProtection, loginLimiter, users_js_1.loginUser);
+router.post("/request_reset_email", routes_js_1.csrfProtection, requestResetLimiter, users_js_1.requestResetEmail);
+router.post("/user/reset_password", routes_js_1.csrfProtection, users_js_1.resetPassword);
+router.post("/update_username", routes_js_1.csrfProtection, users_js_1.editUsername);
+router.post("/update_email", routes_js_1.csrfProtection, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.editEmail);
 exports.default = router;

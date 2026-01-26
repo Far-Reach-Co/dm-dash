@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharEquipment = exports.remove5eCharEquipment = exports.add5eCharEquipment = exports.get5eCharEquipmentsByGeneral = void 0;
+exports.get5eCharEquipmentsByGeneral = get5eCharEquipmentsByGeneral;
+exports.add5eCharEquipment = add5eCharEquipment;
+exports.remove5eCharEquipment = remove5eCharEquipment;
+exports.edit5eCharEquipment = edit5eCharEquipment;
 const _5eCharEquipment_1 = require("../queries/5eCharEquipment");
 function add5eCharEquipment(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +25,6 @@ function add5eCharEquipment(req, res, next) {
         }
     });
 }
-exports.add5eCharEquipment = add5eCharEquipment;
 function get5eCharEquipmentsByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +36,6 @@ function get5eCharEquipmentsByGeneral(req, res, next) {
         }
     });
 }
-exports.get5eCharEquipmentsByGeneral = get5eCharEquipmentsByGeneral;
 function remove5eCharEquipment(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +47,6 @@ function remove5eCharEquipment(req, res, next) {
         }
     });
 }
-exports.remove5eCharEquipment = remove5eCharEquipment;
 function edit5eCharEquipment(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -64,4 +64,3 @@ function edit5eCharEquipment(req, res, next) {
         }
     });
 }
-exports.edit5eCharEquipment = edit5eCharEquipment;

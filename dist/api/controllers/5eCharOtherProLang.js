@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharOtherProLang = exports.remove5eCharOtherProLang = exports.add5eCharOtherProLang = exports.get5eCharOtherProLangsByGeneral = void 0;
+exports.get5eCharOtherProLangsByGeneral = get5eCharOtherProLangsByGeneral;
+exports.add5eCharOtherProLang = add5eCharOtherProLang;
+exports.remove5eCharOtherProLang = remove5eCharOtherProLang;
+exports.edit5eCharOtherProLang = edit5eCharOtherProLang;
 const _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 function add5eCharOtherProLang(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -25,7 +28,6 @@ function add5eCharOtherProLang(req, res, next) {
         }
     });
 }
-exports.add5eCharOtherProLang = add5eCharOtherProLang;
 function get5eCharOtherProLangsByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -37,7 +39,6 @@ function get5eCharOtherProLangsByGeneral(req, res, next) {
         }
     });
 }
-exports.get5eCharOtherProLangsByGeneral = get5eCharOtherProLangsByGeneral;
 function remove5eCharOtherProLang(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -49,7 +50,6 @@ function remove5eCharOtherProLang(req, res, next) {
         }
     });
 }
-exports.remove5eCharOtherProLang = remove5eCharOtherProLang;
 function edit5eCharOtherProLang(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -67,4 +67,3 @@ function edit5eCharOtherProLang(req, res, next) {
         }
     });
 }
-exports.edit5eCharOtherProLang = edit5eCharOtherProLang;

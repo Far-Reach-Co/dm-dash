@@ -9,7 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editTableFolderTitle = exports.removeTableFolder = exports.addTableFolderByUser = exports.addTableFolderByProject = exports.getTableFoldersByUser = exports.getTableFoldersByProject = void 0;
+exports.getTableFoldersByProject = getTableFoldersByProject;
+exports.getTableFoldersByUser = getTableFoldersByUser;
+exports.addTableFolderByProject = addTableFolderByProject;
+exports.addTableFolderByUser = addTableFolderByUser;
+exports.removeTableFolder = removeTableFolder;
+exports.editTableFolderTitle = editTableFolderTitle;
 const tableFolders_1 = require("../queries/tableFolders");
 const tableImages_1 = require("../queries/tableImages");
 function addTableFolderByProject(req, res, next) {
@@ -23,7 +28,6 @@ function addTableFolderByProject(req, res, next) {
         }
     });
 }
-exports.addTableFolderByProject = addTableFolderByProject;
 function addTableFolderByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -38,7 +42,6 @@ function addTableFolderByUser(req, res, next) {
         }
     });
 }
-exports.addTableFolderByUser = addTableFolderByUser;
 function getTableFoldersByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -50,7 +53,6 @@ function getTableFoldersByProject(req, res, next) {
         }
     });
 }
-exports.getTableFoldersByProject = getTableFoldersByProject;
 function getTableFoldersByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -64,7 +66,6 @@ function getTableFoldersByUser(req, res, next) {
         }
     });
 }
-exports.getTableFoldersByUser = getTableFoldersByUser;
 function removeTableFolder(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -94,7 +95,6 @@ function removeTableFolder(req, res, next) {
         }
     });
 }
-exports.removeTableFolder = removeTableFolder;
 function editTableFolderTitle(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -108,4 +108,3 @@ function editTableFolderTitle(req, res, next) {
         }
     });
 }
-exports.editTableFolderTitle = editTableFolderTitle;

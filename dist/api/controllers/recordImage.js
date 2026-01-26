@@ -9,7 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRecordImagesByRecord = exports.getRecordImagesByImage = exports.removeRecordImageByImage = exports.addRecordImage = exports.getRecordImage = void 0;
+exports.getRecordImage = getRecordImage;
+exports.addRecordImage = addRecordImage;
+exports.removeRecordImageByImage = removeRecordImageByImage;
+exports.getRecordImagesByImage = getRecordImagesByImage;
+exports.getRecordImagesByRecord = getRecordImagesByRecord;
 const recordImage_1 = require("../queries/recordImage");
 function addRecordImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -23,7 +27,6 @@ function addRecordImage(req, res, next) {
         }
     });
 }
-exports.addRecordImage = addRecordImage;
 function getRecordImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -35,7 +38,6 @@ function getRecordImage(req, res, next) {
         }
     });
 }
-exports.getRecordImage = getRecordImage;
 function getRecordImagesByRecord(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -47,7 +49,6 @@ function getRecordImagesByRecord(req, res, next) {
         }
     });
 }
-exports.getRecordImagesByRecord = getRecordImagesByRecord;
 function getRecordImagesByImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -59,7 +60,6 @@ function getRecordImagesByImage(req, res, next) {
         }
     });
 }
-exports.getRecordImagesByImage = getRecordImagesByImage;
 function removeRecordImageByImage(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -73,4 +73,3 @@ function removeRecordImageByImage(req, res, next) {
         }
     });
 }
-exports.removeRecordImageByImage = removeRecordImageByImage;

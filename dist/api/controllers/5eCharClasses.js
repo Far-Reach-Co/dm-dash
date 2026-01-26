@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharClass = exports.remove5eCharClass = exports.add5eCharClass = exports.get5eCharClassesByGeneral = void 0;
+exports.get5eCharClassesByGeneral = get5eCharClassesByGeneral;
+exports.add5eCharClass = add5eCharClass;
+exports.remove5eCharClass = remove5eCharClass;
+exports.edit5eCharClass = edit5eCharClass;
 const _5eCharClasses_1 = require("../queries/5eCharClasses");
 function add5eCharClass(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +25,6 @@ function add5eCharClass(req, res, next) {
         }
     });
 }
-exports.add5eCharClass = add5eCharClass;
 function get5eCharClassesByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +36,6 @@ function get5eCharClassesByGeneral(req, res, next) {
         }
     });
 }
-exports.get5eCharClassesByGeneral = get5eCharClassesByGeneral;
 function remove5eCharClass(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +47,6 @@ function remove5eCharClass(req, res, next) {
         }
     });
 }
-exports.remove5eCharClass = remove5eCharClass;
 function edit5eCharClass(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -64,4 +64,3 @@ function edit5eCharClass(req, res, next) {
         }
     });
 }
-exports.edit5eCharClass = edit5eCharClass;

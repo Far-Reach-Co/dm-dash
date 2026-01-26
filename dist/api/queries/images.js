@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editImageQuery = exports.removeImageQuery = exports.getImagesQuery = exports.getImageQuery = exports.addImageQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addImageQuery = addImageQuery;
+exports.getImageQuery = getImageQuery;
+exports.getImagesQuery = getImagesQuery;
+exports.removeImageQuery = removeImageQuery;
+exports.editImageQuery = editImageQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addImageQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,7 +31,6 @@ function addImageQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addImageQuery = addImageQuery;
 function getImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -34,7 +40,6 @@ function getImageQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getImageQuery = getImageQuery;
 function getImagesQuery(ids) {
     return __awaiter(this, void 0, void 0, function* () {
         const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
@@ -45,7 +50,6 @@ function getImagesQuery(ids) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getImagesQuery = getImagesQuery;
 function removeImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -55,7 +59,6 @@ function removeImageQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeImageQuery = removeImageQuery;
 function editImageQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -75,4 +78,3 @@ function editImageQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editImageQuery = editImageQuery;

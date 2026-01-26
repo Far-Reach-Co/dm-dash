@@ -9,7 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eChar = exports.edit5eCharBack = exports.edit5eCharPro = exports.edit5eCharGeneral = exports.remove5eChar = exports.get5eCharGeneral = exports.get5eCharsByUser = exports.add5eChar = void 0;
+exports.add5eChar = add5eChar;
+exports.get5eCharsByUser = get5eCharsByUser;
+exports.get5eCharGeneral = get5eCharGeneral;
+exports.remove5eChar = remove5eChar;
+exports.edit5eCharGeneral = edit5eCharGeneral;
+exports.edit5eCharPro = edit5eCharPro;
+exports.edit5eCharBack = edit5eCharBack;
+exports.duplicate5eChar = duplicate5eChar;
 const _5eCharGeneral_1 = require("../queries/5eCharGeneral");
 const _5eCharPro_1 = require("../queries/5eCharPro");
 const _5eCharBack_1 = require("../queries/5eCharBack");
@@ -48,7 +55,6 @@ function add5eChar(req, res, next) {
         }
     });
 }
-exports.add5eChar = add5eChar;
 function createNew5eChar(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const generalData = yield (0, _5eCharGeneral_1.add5eCharGeneralQuery)(data);
@@ -115,7 +121,6 @@ function duplicate5eChar(req, res, next) {
         }
     });
 }
-exports.duplicate5eChar = duplicate5eChar;
 function get5eCharsByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -143,7 +148,6 @@ function get5eCharsByUser(req, res, next) {
         }
     });
 }
-exports.get5eCharsByUser = get5eCharsByUser;
 function get5eCharGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -165,7 +169,6 @@ function get5eCharGeneral(req, res, next) {
         }
     });
 }
-exports.get5eCharGeneral = get5eCharGeneral;
 function remove5eChar(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -191,7 +194,6 @@ function remove5eChar(req, res, next) {
         }
     });
 }
-exports.remove5eChar = remove5eChar;
 function edit5eCharGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -209,7 +211,6 @@ function edit5eCharGeneral(req, res, next) {
         }
     });
 }
-exports.edit5eCharGeneral = edit5eCharGeneral;
 function edit5eCharPro(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -227,7 +228,6 @@ function edit5eCharPro(req, res, next) {
         }
     });
 }
-exports.edit5eCharPro = edit5eCharPro;
 function edit5eCharBack(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -245,4 +245,3 @@ function edit5eCharBack(req, res, next) {
         }
     });
 }
-exports.edit5eCharBack = edit5eCharBack;

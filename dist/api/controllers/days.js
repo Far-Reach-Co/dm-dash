@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editDay = exports.removeDay = exports.addDay = exports.getDays = void 0;
+exports.getDays = getDays;
+exports.addDay = addDay;
+exports.removeDay = removeDay;
+exports.editDay = editDay;
 const days_1 = require("../queries/days");
 function addDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +25,6 @@ function addDay(req, res, next) {
         }
     });
 }
-exports.addDay = addDay;
 function getDays(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +36,6 @@ function getDays(req, res, next) {
         }
     });
 }
-exports.getDays = getDays;
 function removeDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +47,6 @@ function removeDay(req, res, next) {
         }
     });
 }
-exports.removeDay = removeDay;
 function editDay(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -61,4 +61,3 @@ function editDay(req, res, next) {
         }
     });
 }
-exports.editDay = editDay;

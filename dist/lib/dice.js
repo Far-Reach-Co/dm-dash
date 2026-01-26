@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.calculateDiceRollResponse = void 0;
+exports.calculateDiceRollResponse = calculateDiceRollResponse;
 function calculateDiceRollResponse(input) {
     const raw = input.trim().toLowerCase();
     const coreMatch = raw.match(/^(\d+)\s*d\s*(\d+)(.*)?$/);
@@ -29,4 +29,3 @@ function calculateDiceRollResponse(input) {
     response += `\nTOTAL = ${total}`;
     return response;
 }
-exports.calculateDiceRollResponse = calculateDiceRollResponse;

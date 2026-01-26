@@ -8,9 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.columnNamesQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.columnNamesQuery = columnNamesQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function columnNamesQuery(tableName) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -28,4 +31,3 @@ function columnNamesQuery(tableName) {
         return result.rows.map(row => row.column_name);
     });
 }
-exports.columnNamesQuery = columnNamesQuery;

@@ -8,9 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.duplicate5eCharSpellsQuery = exports.edit5eCharSpellQuery = exports.remove5eCharSpellQuery = exports.get5eCharSpellQuery = exports.get5eCharSpellsByGeneralQuery = exports.get5eCharSpellsByTypeQuery = exports.add5eCharSpellQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.add5eCharSpellQuery = add5eCharSpellQuery;
+exports.get5eCharSpellsByTypeQuery = get5eCharSpellsByTypeQuery;
+exports.get5eCharSpellsByGeneralQuery = get5eCharSpellsByGeneralQuery;
+exports.get5eCharSpellQuery = get5eCharSpellQuery;
+exports.remove5eCharSpellQuery = remove5eCharSpellQuery;
+exports.edit5eCharSpellQuery = edit5eCharSpellQuery;
+exports.duplicate5eCharSpellsQuery = duplicate5eCharSpellsQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function add5eCharSpellQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -26,7 +35,6 @@ function add5eCharSpellQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.add5eCharSpellQuery = add5eCharSpellQuery;
 function duplicate5eCharSpellsQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_spell";
@@ -52,7 +60,6 @@ function duplicate5eCharSpellsQuery(data) {
         yield dbconfig_1.default.query(query);
     });
 }
-exports.duplicate5eCharSpellsQuery = duplicate5eCharSpellsQuery;
 function get5eCharSpellQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -62,7 +69,6 @@ function get5eCharSpellQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharSpellQuery = get5eCharSpellQuery;
 function get5eCharSpellsByTypeQuery(generalId, type) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -72,7 +78,6 @@ function get5eCharSpellsByTypeQuery(generalId, type) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharSpellsByTypeQuery = get5eCharSpellsByTypeQuery;
 function get5eCharSpellsByGeneralQuery(generalId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -82,7 +87,6 @@ function get5eCharSpellsByGeneralQuery(generalId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.get5eCharSpellsByGeneralQuery = get5eCharSpellsByGeneralQuery;
 function remove5eCharSpellQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -92,7 +96,6 @@ function remove5eCharSpellQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.remove5eCharSpellQuery = remove5eCharSpellQuery;
 function edit5eCharSpellQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -112,4 +115,3 @@ function edit5eCharSpellQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.edit5eCharSpellQuery = edit5eCharSpellQuery;

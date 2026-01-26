@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharFeat = exports.remove5eCharFeat = exports.add5eCharFeat = exports.get5eCharFeatsByGeneral = void 0;
+exports.get5eCharFeatsByGeneral = get5eCharFeatsByGeneral;
+exports.add5eCharFeat = add5eCharFeat;
+exports.remove5eCharFeat = remove5eCharFeat;
+exports.edit5eCharFeat = edit5eCharFeat;
 const _5eCharFeats_1 = require("../queries/5eCharFeats");
 function add5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -22,7 +25,6 @@ function add5eCharFeat(req, res, next) {
         }
     });
 }
-exports.add5eCharFeat = add5eCharFeat;
 function get5eCharFeatsByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -34,7 +36,6 @@ function get5eCharFeatsByGeneral(req, res, next) {
         }
     });
 }
-exports.get5eCharFeatsByGeneral = get5eCharFeatsByGeneral;
 function remove5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -46,7 +47,6 @@ function remove5eCharFeat(req, res, next) {
         }
     });
 }
-exports.remove5eCharFeat = remove5eCharFeat;
 function edit5eCharFeat(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -64,4 +64,3 @@ function edit5eCharFeat(req, res, next) {
         }
     });
 }
-exports.edit5eCharFeat = edit5eCharFeat;

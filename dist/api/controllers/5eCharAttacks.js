@@ -9,7 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.edit5eCharAttack = exports.remove5eCharAttack = exports.add5eCharAttack = exports.get5eCharAttacksByGeneral = void 0;
+exports.get5eCharAttacksByGeneral = get5eCharAttacksByGeneral;
+exports.add5eCharAttack = add5eCharAttack;
+exports.remove5eCharAttack = remove5eCharAttack;
+exports.edit5eCharAttack = edit5eCharAttack;
 const _5eCharAttacks_1 = require("../queries/5eCharAttacks");
 function add5eCharAttack(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -25,7 +28,6 @@ function add5eCharAttack(req, res, next) {
         }
     });
 }
-exports.add5eCharAttack = add5eCharAttack;
 function get5eCharAttacksByGeneral(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -37,7 +39,6 @@ function get5eCharAttacksByGeneral(req, res, next) {
         }
     });
 }
-exports.get5eCharAttacksByGeneral = get5eCharAttacksByGeneral;
 function remove5eCharAttack(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -49,7 +50,6 @@ function remove5eCharAttack(req, res, next) {
         }
     });
 }
-exports.remove5eCharAttack = remove5eCharAttack;
 function edit5eCharAttack(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -67,4 +67,3 @@ function edit5eCharAttack(req, res, next) {
         }
     });
 }
-exports.edit5eCharAttack = edit5eCharAttack;

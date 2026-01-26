@@ -1,6 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getSpellSlotTotalByOption = exports.getSpellSlotExpendedByOption = exports.getSpellQueryTitleByOption = exports.calculateTotalEquipmentWeight = exports.calculateSpellAttackBonus = exports.calculateSpellSaveDC = exports.getAbilityScoreFromSpellCastingAbilityOrNull = exports.calculateProficiency = exports.calculatePassivePerception = exports.calculateProBonus = exports.calculateAbilityScoreModifier = void 0;
+exports.calculateAbilityScoreModifier = calculateAbilityScoreModifier;
+exports.calculateProBonus = calculateProBonus;
+exports.calculatePassivePerception = calculatePassivePerception;
+exports.calculateProficiency = calculateProficiency;
+exports.getAbilityScoreFromSpellCastingAbilityOrNull = getAbilityScoreFromSpellCastingAbilityOrNull;
+exports.calculateSpellSaveDC = calculateSpellSaveDC;
+exports.calculateSpellAttackBonus = calculateSpellAttackBonus;
+exports.calculateTotalEquipmentWeight = calculateTotalEquipmentWeight;
+exports.getSpellQueryTitleByOption = getSpellQueryTitleByOption;
+exports.getSpellSlotExpendedByOption = getSpellSlotExpendedByOption;
+exports.getSpellSlotTotalByOption = getSpellSlotTotalByOption;
 function calculateAbilityScoreModifier(abilityScore) {
     switch (abilityScore) {
         case 1:
@@ -53,7 +63,6 @@ function calculateAbilityScoreModifier(abilityScore) {
             return 0;
     }
 }
-exports.calculateAbilityScoreModifier = calculateAbilityScoreModifier;
 function calculateProBonus(level) {
     if (!level)
         return 0;
@@ -72,7 +81,6 @@ function calculateProBonus(level) {
     else
         return 6;
 }
-exports.calculateProBonus = calculateProBonus;
 function calculatePassivePerception(wisdom, wisdom_mod, perceptionProficiency, level) {
     let wis = calculateAbilityScoreModifier(wisdom);
     let pp = 10 + wis;
@@ -84,7 +92,6 @@ function calculatePassivePerception(wisdom, wisdom_mod, perceptionProficiency, l
     }
     return pp;
 }
-exports.calculatePassivePerception = calculatePassivePerception;
 function calculateProficiency(ability, isPro, level) {
     let abilityMod = calculateAbilityScoreModifier(ability);
     if (abilityMod == 0)
@@ -95,7 +102,6 @@ function calculateProficiency(ability, isPro, level) {
     }
     return pro;
 }
-exports.calculateProficiency = calculateProficiency;
 function getAbilityScoreFromSpellCastingAbilityOrNull(spellCastingAbility, charGeneral) {
     switch (spellCastingAbility) {
         case "None":
@@ -116,7 +122,6 @@ function getAbilityScoreFromSpellCastingAbilityOrNull(spellCastingAbility, charG
             return null;
     }
 }
-exports.getAbilityScoreFromSpellCastingAbilityOrNull = getAbilityScoreFromSpellCastingAbilityOrNull;
 function calculateSpellSaveDC(abilityScore, level) {
     let spellSaveDC = 8;
     if (abilityScore) {
@@ -126,7 +131,6 @@ function calculateSpellSaveDC(abilityScore, level) {
     spellSaveDC += calculateProBonus(level);
     return spellSaveDC;
 }
-exports.calculateSpellSaveDC = calculateSpellSaveDC;
 function calculateSpellAttackBonus(abilityScore, level) {
     let bonus = 0;
     if (abilityScore) {
@@ -136,7 +140,6 @@ function calculateSpellAttackBonus(abilityScore, level) {
     bonus += calculateProBonus(level);
     return bonus;
 }
-exports.calculateSpellAttackBonus = calculateSpellAttackBonus;
 function calculateTotalEquipmentWeight(equipment) {
     let weight = 0;
     equipment.forEach((item) => {
@@ -144,7 +147,6 @@ function calculateTotalEquipmentWeight(equipment) {
     });
     return weight;
 }
-exports.calculateTotalEquipmentWeight = calculateTotalEquipmentWeight;
 function getSpellQueryTitleByOption(option) {
     switch (option) {
         case "cantrips":
@@ -171,7 +173,6 @@ function getSpellQueryTitleByOption(option) {
             return "cantrip";
     }
 }
-exports.getSpellQueryTitleByOption = getSpellQueryTitleByOption;
 function getSpellSlotExpendedByOption(option, spellInfo) {
     switch (option) {
         case "first-level":
@@ -196,7 +197,6 @@ function getSpellSlotExpendedByOption(option, spellInfo) {
             return "";
     }
 }
-exports.getSpellSlotExpendedByOption = getSpellSlotExpendedByOption;
 function getSpellSlotTotalByOption(option, spellInfo) {
     switch (option) {
         case "first-level":
@@ -221,4 +221,3 @@ function getSpellSlotTotalByOption(option, spellInfo) {
             return "";
     }
 }
-exports.getSpellSlotTotalByOption = getSpellSlotTotalByOption;

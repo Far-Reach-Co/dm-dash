@@ -8,9 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editUserPasswordQuery = exports.editUserQuery = exports.registerUserQuery = exports.getUserByEmailQuery = exports.getUserByIdQuery = exports.getAllUsersQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.getAllUsersQuery = getAllUsersQuery;
+exports.getUserByIdQuery = getUserByIdQuery;
+exports.getUserByEmailQuery = getUserByEmailQuery;
+exports.registerUserQuery = registerUserQuery;
+exports.editUserQuery = editUserQuery;
+exports.editUserPasswordQuery = editUserPasswordQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function getUserByIdQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -20,7 +28,6 @@ function getUserByIdQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getUserByIdQuery = getUserByIdQuery;
 function getAllUsersQuery() {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -29,7 +36,6 @@ function getAllUsersQuery() {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getAllUsersQuery = getAllUsersQuery;
 function getUserByEmailQuery(email) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -39,9 +45,8 @@ function getUserByEmailQuery(email) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getUserByEmailQuery = getUserByEmailQuery;
-function registerUserQuery({ email, username, password }) {
-    return __awaiter(this, void 0, void 0, function* () {
+function registerUserQuery(_a) {
+    return __awaiter(this, arguments, void 0, function* ({ email, username, password }) {
         const query = {
             text: `insert into public."User" (email, username, password) values($1,$2,$3) RETURNING *`,
             values: [
@@ -53,7 +58,6 @@ function registerUserQuery({ email, username, password }) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.registerUserQuery = registerUserQuery;
 function editUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -73,7 +77,6 @@ function editUserQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editUserQuery = editUserQuery;
 function editUserPasswordQuery(id, password) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -83,4 +86,3 @@ function editUserPasswordQuery(id, password) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editUserPasswordQuery = editUserPasswordQuery;

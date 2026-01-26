@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removePlayerInviteQuery = exports.getPlayerInviteByPlayerQuery = exports.getPlayerInviteByUUIDQuery = exports.getPlayerInviteQuery = exports.addPlayerInviteQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addPlayerInviteQuery = addPlayerInviteQuery;
+exports.getPlayerInviteQuery = getPlayerInviteQuery;
+exports.getPlayerInviteByUUIDQuery = getPlayerInviteByUUIDQuery;
+exports.getPlayerInviteByPlayerQuery = getPlayerInviteByPlayerQuery;
+exports.removePlayerInviteQuery = removePlayerInviteQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addPlayerInviteQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -23,7 +30,6 @@ function addPlayerInviteQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addPlayerInviteQuery = addPlayerInviteQuery;
 function getPlayerInviteQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -33,7 +39,6 @@ function getPlayerInviteQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getPlayerInviteQuery = getPlayerInviteQuery;
 function getPlayerInviteByPlayerQuery(playerId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -43,7 +48,6 @@ function getPlayerInviteByPlayerQuery(playerId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getPlayerInviteByPlayerQuery = getPlayerInviteByPlayerQuery;
 function getPlayerInviteByUUIDQuery(uuid) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -53,7 +57,6 @@ function getPlayerInviteByUUIDQuery(uuid) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getPlayerInviteByUUIDQuery = getPlayerInviteByUUIDQuery;
 function removePlayerInviteQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -63,4 +66,3 @@ function removePlayerInviteQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removePlayerInviteQuery = removePlayerInviteQuery;

@@ -8,10 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.interactionsController = exports.createCommands = exports.deleteCommand = exports.getCommands = void 0;
+exports.getCommands = getCommands;
+exports.deleteCommand = deleteCommand;
+exports.createCommands = createCommands;
+exports.interactionsController = interactionsController;
 const discordUtils_1 = require("../../lib/discordUtils");
-const discordCommands_1 = require("../../lib/discordCommands");
+const discordCommands_1 = __importDefault(require("../../lib/discordCommands"));
 const discord_interactions_1 = require("discord-interactions");
 const botChar_1 = require("./botChar");
 const appId = process.env.BOT_APP_ID;
@@ -30,7 +36,6 @@ function getCommands(_req, res, _next) {
         }
     });
 }
-exports.getCommands = getCommands;
 function deleteCommand(req, res, _next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -45,7 +50,6 @@ function deleteCommand(req, res, _next) {
         }
     });
 }
-exports.deleteCommand = deleteCommand;
 function createCommands(_req, res, _next) {
     return __awaiter(this, void 0, void 0, function* () {
         const slashCommandsList = [
@@ -71,7 +75,6 @@ function createCommands(_req, res, _next) {
         return res.send({ list: responseList });
     });
 }
-exports.createCommands = createCommands;
 function interactionsController(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -106,4 +109,3 @@ function interactionsController(req, res, next) {
         }
     });
 }
-exports.interactionsController = interactionsController;

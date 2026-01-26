@@ -8,9 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.editClockQuery = exports.removeClockQuery = exports.getClockQuery = exports.getClocksQuery = exports.addClockQuery = void 0;
-const dbconfig_1 = require("../dbconfig");
+exports.addClockQuery = addClockQuery;
+exports.getClocksQuery = getClocksQuery;
+exports.getClockQuery = getClockQuery;
+exports.removeClockQuery = removeClockQuery;
+exports.editClockQuery = editClockQuery;
+const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addClockQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -24,7 +31,6 @@ function addClockQuery(data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.addClockQuery = addClockQuery;
 function getClockQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -34,7 +40,6 @@ function getClockQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getClockQuery = getClockQuery;
 function getClocksQuery(projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -44,7 +49,6 @@ function getClocksQuery(projectId) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.getClocksQuery = getClocksQuery;
 function removeClockQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -54,7 +58,6 @@ function removeClockQuery(id) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.removeClockQuery = removeClockQuery;
 function editClockQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         let edits = ``;
@@ -74,4 +77,3 @@ function editClockQuery(id, data) {
         return yield dbconfig_1.default.query(query);
     });
 }
-exports.editClockQuery = editClockQuery;
