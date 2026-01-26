@@ -21,10 +21,16 @@ export default class SpellsComponent {
     this.calculateSpellAttackBonus = props.calculateSpellAttackBonus;
 
     this.newLoading = false;
+
+    // Cache spell components to avoid refetching on re-render
+    this.spellInfoComponent = null;
+    this.cantripComponent = null;
+    this.spellSlotComponents = [];
+
     this.render();
   }
 
-  renderSpellSlotsElems = () => {
+  initSpellSlotComponents = () => {
     const list = [
       {
         title: "First level",
@@ -73,11 +79,11 @@ export default class SpellsComponent {
       },
     ];
 
-    return list.map((spellSlot) => {
+    this.spellSlotComponents = list.map((spellSlot) => {
       const elem = createElement("div");
-      elem.className = "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
+      elem.className = "cp-info-container-column cp-info-container-pulsate";
 
-      new SingleSpell({
+      const component = new SingleSpell({
         domComponent: elem,
         general_id: this.general_id,
         generalData: this.generalData,
@@ -85,15 +91,15 @@ export default class SpellsComponent {
         updateSpellSlotValue: this.updateSpellSlotValue,
         isCantrip: false,
       });
-      return elem;
+      return component;
     });
   };
 
-  renderCantrip = () => {
+  initCantripComponent = () => {
     const elem = createElement("div");
-    elem.className = "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
+    elem.className = "cp-info-container-column cp-info-container-pulsate";
 
-    new SingleSpell({
+    this.cantripComponent = new SingleSpell({
       domComponent: elem,
       general_id: this.general_id,
       spellSlot: { title: "cantrip" },
@@ -101,7 +107,6 @@ export default class SpellsComponent {
       updateSpellSlotValue: this.updateSpellSlotValue,
       isCantrip: true,
     });
-    return elem;
   };
 
   render = async () => {
@@ -111,22 +116,36 @@ export default class SpellsComponent {
       return this.domComponent.append(renderLoadingWithMessage("Loading..."));
     }
 
-    const spellInfoComponent = new SpellInfoComponent({
-      domComponent: createElement("div"),
-      generalData: this.generalData,
-      updateSpellSlotValue: this.updateSpellSlotValue,
-      calculateAbilityScoreModifier: this.calculateAbilityScoreModifier,
-      calculateProBonus: this.calculateProBonus,
-      calculateSpellSaveDC: this.calculateSpellSaveDC,
-      calculateSpellAttackBonus: this.calculateSpellAttackBonus,
-    });
+    // Initialize or re-render SpellInfoComponent
+    if (!this.spellInfoComponent) {
+      this.spellInfoComponent = new SpellInfoComponent({
+        domComponent: createElement("div"),
+        generalData: this.generalData,
+        updateSpellSlotValue: this.updateSpellSlotValue,
+        calculateSpellSaveDC: this.calculateSpellSaveDC,
+        calculateSpellAttackBonus: this.calculateSpellAttackBonus,
+      });
+    } else {
+      this.spellInfoComponent.generalData = this.generalData;
+      this.spellInfoComponent.render();
+    }
+
+    // Initialize cantrip component once
+    if (!this.cantripComponent) {
+      this.initCantripComponent();
+    }
+
+    // Initialize spell slot components once
+    if (!this.spellSlotComponents.length) {
+      this.initSpellSlotComponents();
+    }
 
     this.domComponent.append(
       createElement("div", {}, [
-        spellInfoComponent.domComponent,
+        this.spellInfoComponent.domComponent,
         createElement("div", { class: "d-flex flex-wrap" }, [
-          this.renderCantrip(),
-          ...this.renderSpellSlotsElems(),
+          this.cantripComponent.domComponent,
+          ...this.spellSlotComponents.map((c) => c.domComponent),
         ]),
       ]),
     );
