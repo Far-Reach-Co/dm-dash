@@ -4,7 +4,9 @@
 
 .input-container {
   position: relative;
-  padding-top: 5px;
+  padding-top: var(--space-sm);
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-sm);
   display: inline-block;
 }
 
@@ -12,47 +14,66 @@ label {
   font-size: small;
   font-weight: bold;
   position: absolute;
-  top: -10;
-  left: 10px;
+  top: 0;
+  left: var(--space-sm);
   transform: translateY(-50%);
   background: var(--main-dark);
+  padding: 0 var(--space-xs);
   color: var(--orange2);
 }
 
 input {
   float: right;
-  color: inherit;
+  color: var(--main-white);
   font: inherit;
   font-size: inherit;
-  padding: 5px;
+  padding: var(--space-sm) var(--space-md);
   border: none;
   outline: none;
   background-color: var(--main-dark);
-  border: 0.5px solid var(--main-gray);
+  border: 1px solid var(--main-gray);
+  border-radius: var(--border-radius);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+input:hover {
+  border-color: var(--blue2);
+}
+
+input:focus {
+  border-color: var(--blue6);
+  box-shadow: var(--focus-ring);
 }
 
 fieldset {
   border: none;
-  padding: 0px;
-  margin-top: 15px;
-  margin-bottom: 15px;
+  padding: 0;
+  margin-top: var(--space-lg);
+  margin-bottom: var(--space-lg);
 }
 
 legend {
   font-family: YoungSerif;
   color: var(--bright-white);
-  margin-bottom: 15px;
+  margin-bottom: var(--space-lg);
 }
 
 .search {
-  border: none;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
   outline: none;
   color: black;
   background-color: var(--main-white);
-  height: 30px;
+  height: 36px;
   display: inline-block;
-  padding-left: 5px;
+  padding: var(--space-sm) var(--space-md);
   font-size: inherit;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.search:focus {
+  border-color: var(--blue6);
+  box-shadow: var(--focus-ring);
 }
 
 input[type="file"] {
@@ -122,23 +143,30 @@ select {
   outline: 0;
   background: linear-gradient(var(--blue2) 10%, var(--blue) 90%);
   border: none;
-  padding: 2px 4px;
+  border-radius: var(--border-radius);
+  padding: var(--space-sm) var(--space-md);
   font: inherit;
   color: var(--main-white);
-  font-size: 18px;
-  text-shadow: inherit;
+  font-size: 16px;
   cursor: pointer;
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 select:hover {
-  background: linear-gradient(var(--blue2) 10%, var(--blue5) 90%);
+  background: linear-gradient(var(--blue6) 10%, var(--blue2) 90%);
+}
+
+select:focus {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 textarea {
-  padding: 5px;
+  padding: var(--space-md);
   height: auto;
-  min-height: 250px;
-  border: none;
+  min-height: 200px;
+  border: 1px solid var(--main-gray);
+  border-radius: var(--border-radius);
   outline: none;
   color: var(--main-white);
   background-color: var(--main-dark);
@@ -146,7 +174,16 @@ textarea {
   font-size: inherit;
   font-family: inherit;
   resize: both;
-  border: 0.5px solid var(--main-gray);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+textarea:hover {
+  border-color: var(--blue2);
+}
+
+textarea:focus {
+  border-color: var(--blue6);
+  box-shadow: var(--focus-ring);
 }
 
 .editable {
@@ -160,7 +197,17 @@ textarea {
   border: 1px solid var(--main-gray);
   outline: none;
   font-size: 16px;
-  padding: 5px;
+  padding: var(--space-md);
   resize: both;
   cursor: text;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.editable:hover {
+  border-color: var(--blue2);
+}
+
+.editable:focus {
+  border-color: var(--blue6);
+  box-shadow: var(--focus-ring);
 }

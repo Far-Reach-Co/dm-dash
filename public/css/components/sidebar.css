@@ -3,17 +3,17 @@
    ========================================================================== */
 
 .sidebar {
-  top: 0px;
-  right: 0px;
+  top: 0;
+  right: 0;
   z-index: 2;
-  width: 200px;
+  width: 220px;
   height: 100%;
   position: absolute;
   background: transparent;
 }
 
 .sidebar.open {
-  z-index: 4;
+  z-index: 50;
 }
 
 .sidebar-container {
@@ -21,34 +21,30 @@
   width: 100%;
   height: 100%;
   flex-direction: column;
-  transform: translate(200px, 0px);
+  transform: translateX(100%);
   background-color: var(--blue5);
-  transition: 0.3s all ease-out;
-  border-left: 0.5px solid var(--main-gray);
+  transition: transform var(--transition-normal);
+  border-left: 1px solid var(--main-gray);
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-container.open {
-  transform: translate(0px, 0px);
+  transform: translateX(0);
 }
 
 .sidebar-container button {
   margin: 0;
   width: 100%;
+  border-radius: 0;
 }
 
 .sidebar-item {
-  padding-left: var(--main-distance);
+  padding: var(--space-md) var(--space-lg);
   width: 100%;
-  height: 50px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-/* BEM modifier pattern: --selected */
-.sidebar-item--selected,
-.sidebar-selected-item {
-  color: var(--green);
+  transition: background-color var(--transition-fast);
 }
 
 .sidebar-item:hover {
@@ -60,8 +56,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 3px;
-  border-bottom: 1px solid var(--main-white);
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--blue4);
+  transition: background-color var(--transition-fast);
+}
+
+.sidebar-image-item:hover {
+  background-color: var(--blue4);
 }
 
 .sidebar-header {
@@ -69,17 +70,21 @@
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: var(--main-distance);
+  padding: var(--space-md);
   border-top: 1px solid var(--main-gray);
   border-bottom: 1px solid var(--main-gray);
+  font-weight: bold;
+  color: var(--orange3);
 }
 
-.sidebar-close,
 .close-sidebar {
   position: absolute;
-  top: 0px;
-  left: -11px;
-  margin-right: 3px;
-  margin-top: 3px;
+  top: var(--space-sm);
+  left: calc(-15px - var(--space-sm));
   cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.close-sidebar:hover {
+  opacity: 0.8;
 }

@@ -51,7 +51,7 @@ export default class ClassesComponent {
       const elem = createElement(
         "option",
         { class: "select-option-small", value: type },
-        type
+        type,
       );
       if (currentType && currentType === type) elem.selected = true;
       typeList.push(elem);
@@ -61,7 +61,7 @@ export default class ClassesComponent {
 
   renderClassesElems = async () => {
     const classesData = await getThings(
-      `/api/get_5e_character_classes/${this.general_id}`
+      `/api/get_5e_character_classes/${this.general_id}`,
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!classesData.length) return [createElement("small", {}, "None...")];
@@ -91,7 +91,7 @@ export default class ClassesComponent {
                   class: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "input",
@@ -109,7 +109,7 @@ export default class ClassesComponent {
                   subclass: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "select",
@@ -130,7 +130,7 @@ export default class ClassesComponent {
                   hit_dice_type: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "input",
@@ -149,7 +149,7 @@ export default class ClassesComponent {
                   total_hit_dice: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "input",
@@ -168,12 +168,12 @@ export default class ClassesComponent {
                   current_hit_dice: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "div",
             {
-              class: "text-red cursor-pointer ms-3",
+              class: "text-red cursor-pointer red-x ms-3",
               title: "Remove Class",
             },
             "ⓧ",
@@ -184,16 +184,16 @@ export default class ClassesComponent {
                   window.confirm(
                     `Are you sure you want to delete ${
                       item.class ? item.class : "Empty"
-                    }`
+                    }`,
                   )
                 ) {
                   deleteThing(`/api/remove_5e_character_class/${item.id}`);
                   e.target.parentElement.remove();
                 }
               },
-            }
+            },
           ),
-        ]
+        ],
       );
     });
   };
@@ -209,7 +209,7 @@ export default class ClassesComponent {
       createElement(
         "div",
         { class: "special-font align-self-center" },
-        "Class Info"
+        "Class Info",
       ),
       createElement(
         "div",
@@ -222,11 +222,11 @@ export default class ClassesComponent {
           createElement(
             "small",
             { style: "margin-right: 20px;" },
-            "Hit Dice Type"
+            "Hit Dice Type",
           ),
           createElement("small", { style: "margin-right: 35px;" }, "Total"),
           createElement("small", {}, "Current"),
-        ]
+        ],
       ),
       ...(await this.renderClassesElems()),
       createElement(
@@ -239,8 +239,8 @@ export default class ClassesComponent {
         {
           type: "click",
           event: this.newClassItem,
-        }
-      )
+        },
+      ),
     );
   };
 }

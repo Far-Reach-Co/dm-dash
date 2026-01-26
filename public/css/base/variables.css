@@ -34,5 +34,26 @@
 
   /* Layout */
   --border-radius: 4px;
-  --main-distance: 8px;
+  --border-radius-lg: 8px;
+  --main-distance: 10px;
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.4);
+
+  /* Focus Ring */
+  --focus-ring: 0 0 0 2px var(--blue6);
 }

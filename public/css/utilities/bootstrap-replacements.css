@@ -505,3 +505,53 @@
 .flex-1 {
   flex: 1;
 }
+
+/* ==========================================================================
+   Gap Utilities
+   ========================================================================== */
+
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 1rem;
+}
+
+.gap-4 {
+  gap: 1.5rem;
+}
+
+.gap-5 {
+  gap: 3rem;
+}
+
+/* Row gap */
+.row-gap-1 {
+  row-gap: 0.25rem;
+}
+
+.row-gap-2 {
+  row-gap: 0.5rem;
+}
+
+.row-gap-3 {
+  row-gap: 1rem;
+}
+
+/* Column gap */
+.col-gap-1 {
+  column-gap: 0.25rem;
+}
+
+.col-gap-2 {
+  column-gap: 0.5rem;
+}
+
+.col-gap-3 {
+  column-gap: 1rem;
+}

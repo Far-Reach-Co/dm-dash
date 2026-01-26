@@ -35,7 +35,7 @@ export default class OtherProLangComponent {
       const elem = createElement(
         "option",
         { class: "select-option-small", value: type },
-        type
+        type,
       );
       if (currentType && currentType === type) elem.selected = true;
       typeList.push(elem);
@@ -45,7 +45,7 @@ export default class OtherProLangComponent {
 
   renderOtherProLangElems = async () => {
     const otherProLangsData = await getThings(
-      `/api/get_5e_character_other_pro_langs/${this.general_id}`
+      `/api/get_5e_character_other_pro_langs/${this.general_id}`,
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!otherProLangsData.length)
@@ -77,7 +77,7 @@ export default class OtherProLangComponent {
                   type: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "input",
@@ -96,12 +96,12 @@ export default class OtherProLangComponent {
                   proficiency: e.target.value,
                 });
               },
-            }
+            },
           ),
           createElement(
             "div",
             {
-              class: "text-red cursor-pointer ms-3",
+              class: "text-red cursor-pointer red-x ms-3",
               title: "Remove proficiency",
             },
             "ⓧ",
@@ -112,18 +112,18 @@ export default class OtherProLangComponent {
                   window.confirm(
                     `Are you sure you want to delete ${
                       item.proficiency ? item.proficiency : "Empty"
-                    }`
+                    }`,
                   )
                 ) {
                   deleteThing(
-                    `/api/remove_5e_character_other_pro_lang/${item.id}`
+                    `/api/remove_5e_character_other_pro_lang/${item.id}`,
                   );
                   e.target.parentElement.remove();
                 }
               },
-            }
+            },
           ),
-        ]
+        ],
       );
     });
   };
@@ -139,7 +139,7 @@ export default class OtherProLangComponent {
       createElement(
         "div",
         { class: "special-font align-self-center" },
-        "Other Proficiencies & Languages"
+        "Other Proficiencies & Languages",
       ),
       createElement("br"),
       createElement(
@@ -151,7 +151,7 @@ export default class OtherProLangComponent {
           createElement("small", { style: "margin-right: 85px" }, "Type"),
           createElement("small", {}, "Proficiency"),
           createElement("small", {}, ""),
-        ]
+        ],
       ),
       createElement("br"),
       ...(await this.renderOtherProLangElems()),
@@ -162,8 +162,8 @@ export default class OtherProLangComponent {
         {
           type: "click",
           event: this.newOtherProLang,
-        }
-      )
+        },
+      ),
     );
   };
 }

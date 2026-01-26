@@ -8,86 +8,105 @@
 }
 
 .table-config {
-  width: 145px;
-  padding: 8px;
+  width: 150px;
+  padding: var(--space-md);
   position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-  border-radius: var(--border-radius);
+  gap: var(--space-sm);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--main-gray);
   z-index: 4;
   background-color: var(--blue5);
+  box-shadow: var(--shadow-md);
+}
+
+.table-config small {
+  color: var(--orange3);
+  font-weight: bold;
+  margin-bottom: var(--space-xs);
+}
+
+.table-config input[type="number"] {
+  width: 70px;
+  padding: var(--space-xs) var(--space-sm);
+}
+
+.table-config input[type="color"] {
+  cursor: pointer;
+  height: 28px;
+  border: none;
+  border-radius: var(--border-radius);
 }
 
 .layers-elem {
-  top: 130px;
-  left: var(--main-distance);
+  top: 160px;
+  left: var(--space-md);
 }
 
 .info-elem {
-  top: 15px;
-  left: 12px;
-  padding-left: 6px;
+  top: var(--space-lg);
+  left: var(--space-md);
+  padding: 0;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  width: 30px;
-  border-radius: 30px;
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  font-weight: bold;
+  font-size: 18px;
+  cursor: help;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 
 .info-elem:hover {
-  cursor: help;
   background-color: var(--green);
+  transform: scale(1.1);
 }
 
 .grid-control-elem {
-  top: 200px;
-  left: var(--main-distance);
+  top: 250px;
+  left: var(--space-md);
 }
 
 .selected-obj-info-elem {
-  top: 419px;
-  left: var(--main-distance);
+  top: 10px;
+  right: 300px;
 }
 
 .draw-mode-toggle-elem {
-  top: 60px;
-  left: var(--main-distance);
+  top: 70px;
+  left: var(--space-md);
 }
 
 .draw-mode-picker-elem {
-  top: 60px;
-  left: 160px;
+  top: 70px;
+  left: 170px;
 }
 
 .image-options-elem {
   display: flex;
   flex-direction: row;
-  width: 103px;
-  top: 8px;
-  left: 50px;
+  gap: var(--space-xs);
+  width: auto;
+  top: 10px;
+  left: 58px;
 }
 
-.help-content {
-  min-width: 300px;
-  padding: var(--main-distance);
-  border-radius: var(--border-radius);
-  background-color: var(--main-dark);
-  overflow-y: auto;
-}
-
-.help-content h1 {
-  display: block;
-}
+/* help-content styling is in modals.css */
 
 .canvas-log-item {
-  padding: 5px;
+  padding: var(--space-sm);
   color: var(--link-blue);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
 }
 
 .canvas-log-item:hover {
-  outline: 1px solid var(--main-white)
+  background-color: var(--blue4);
 }
 
 .table-sidebar-image-component {
@@ -108,17 +127,19 @@
 .online-users-container {
   display: flex;
   flex-direction: column;
-  padding: 5px;
+  gap: var(--space-xs);
+  padding: var(--space-sm);
   overflow-y: auto;
   height: 100px;
 }
 
 .online-indicator {
-  width: var(--main-distance);
-  height: var(--main-distance);
-  border-radius: 30px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
   background-color: var(--green);
-  margin-right: 5px;
+  margin-right: var(--space-sm);
+  flex-shrink: 0;
 }
 
 .online-user-item {
@@ -126,6 +147,7 @@
   width: max-content;
   align-items: center;
   justify-content: space-between;
+  padding: var(--space-xs) 0;
 }
 
 .image-name {
@@ -173,6 +195,9 @@
 
 .folder-item {
   width: 100%;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast);
 }
 
 .folder-item:hover {
@@ -223,22 +248,31 @@
 .chat-box-form {
   display: flex;
   align-items: center;
+  gap: 0;
 }
 
 .chat-box-form input {
   flex: 1;
-  padding: 5px 10px;
+  padding: var(--space-sm) var(--space-md);
   background-color: var(--main-dark);
+  border-radius: 0;
+  border: none;
 }
 
 .chat-box-btn {
-  padding: 5px 10px;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: 0;
 }
 
 .chat-box-hide {
-  margin-left: var(--main-distance);
+  padding: var(--space-xs) var(--space-sm);
   font-weight: bold;
   cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.chat-box-hide:hover {
+  color: var(--green);
 }
 
 .chat-box-icon {

@@ -96,9 +96,14 @@ nav {
   justify-content: center;
   align-items: center;
   margin-left: var(--main-distance);
-  padding-left: 5px;
-  padding-right: 5px;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast), color var(--transition-fast);
 }
+
+/* .top-nav-btn:hover {
+  background-color: var(--blue4);
+} */
 
 .hamburger {
   top: 0;

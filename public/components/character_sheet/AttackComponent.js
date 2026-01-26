@@ -490,11 +490,7 @@ export default class AttackComponent {
 
             hoverInfoElem.append(
               createElement("div", { style: "max-width: 280px;" }, [
-                createElement(
-                  "h4",
-                  { class: "mb-2" },
-                  "Magic Words",
-                ),
+                createElement("h4", { class: "mb-2" }, "Magic Words"),
                 createElement(
                   "p",
                   { style: "margin-bottom: 8px; font-size: 12px;" },
@@ -577,11 +573,7 @@ export default class AttackComponent {
 
             hoverInfoElem.append(
               createElement("div", { style: "max-width: 280px;" }, [
-                createElement(
-                  "h4",
-                  { class: "mb-2" },
-                  "Magic Words + Calc",
-                ),
+                createElement("h4", { class: "mb-2" }, "Magic Words + Calc"),
                 createElement(
                   "p",
                   { style: "margin-bottom: 8px; font-size: 12px;" },
@@ -717,7 +709,7 @@ export default class AttackComponent {
           createElement(
             "div",
             {
-              class: "text-red cursor-pointer",
+              class: "text-red cursor-pointer red-x",
               title: "Remove attack",
             },
             "ⓧ",
@@ -774,14 +766,10 @@ export default class AttackComponent {
               this.renderMagicWordsHelp(),
             ],
           ),
-          createElement(
-            "div",
-            { class: "d-flex align-items-center" },
-            [
-              createElement("small", {}, "Damage/Type"),
-              this.renderMagicWordsHelpHoverOnly(),
-            ],
-          ),
+          createElement("div", { class: "d-flex align-items-center" }, [
+            createElement("small", {}, "Damage/Type"),
+            this.renderMagicWordsHelpHoverOnly(),
+          ]),
         ],
       ),
       createElement("br"),

@@ -6,8 +6,8 @@
 .switch {
   position: relative;
   display: inline-block;
-  width: 60px;
-  height: 34px;
+  width: 52px;
+  height: 28px;
 }
 
 /* Hide default HTML checkbox */
@@ -25,40 +25,39 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: var(--light-gray);
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  background-color: var(--main-gray);
+  border-radius: 28px;
+  transition: background-color var(--transition-normal);
 }
 
 .slider:before {
   position: absolute;
   content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: var(--blue);
-  -webkit-transition: 0.4s;
-  transition: 0.4s;
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--bright-white);
+  border-radius: 50%;
+  transition: transform var(--transition-normal);
+  box-shadow: var(--shadow-sm);
 }
 
-input:checked+.slider {
-  background-color: var(--green2);
+input:checked + .slider {
+  background-color: var(--green);
 }
 
-input:focus+.slider {
-  box-shadow: 0 0 1px var(--green2);
+input:focus-visible + .slider {
+  box-shadow: var(--focus-ring);
 }
 
-input:checked+.slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
+input:checked + .slider:before {
+  transform: translateX(24px);
 }
 
-/* Rounded sliders */
+/* Rounded sliders (legacy support) */
 .slider.round {
-  border-radius: 34px;
+  border-radius: 28px;
 }
 
 .slider.round:before {
