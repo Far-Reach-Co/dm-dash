@@ -413,3 +413,18 @@ input {
   background-color: var(--red1);
   cursor: pointer;
 }
+
+.equipment-notes {
+  color: var(--main-white);
+  width: 500px;
+  height: 300px;
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--blue4);
+  outline: none;
+  font-size: 16px;
+  padding: 5px;
+  /* resize: none; */
+  cursor: text;
+}

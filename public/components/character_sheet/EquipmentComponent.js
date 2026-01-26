@@ -2,6 +2,8 @@ import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import createElement from "../../components/createElement.js";
 import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
 import getDataByQuery from "../../lib/getDataByQuery.js";
+import parseUrlTextContent from "../../components/parseUrlTextContent.js";
+import modal from "../../components/modal.js";
 
 // load spells for suggestions on input
 let equipmentSuggestions = [];
@@ -172,6 +174,64 @@ export default class EquipmentComponent {
     );
   };
 
+  hideHoverInfo = () => {
+    const hoverInfoElem = document.getElementById("hover-info");
+    hoverInfoElem.style.display = "none";
+    hoverInfoElem.innerHTML = "";
+  };
+
+  showDescriptionHover = (equipmentItem, e) => {
+    const hoverInfoElem = document.getElementById("hover-info");
+    hoverInfoElem.style.display = "block";
+    const rect = e.target.getBoundingClientRect();
+    hoverInfoElem.style.top = rect.bottom + window.scrollY + "px";
+    hoverInfoElem.style.left = rect.left + window.scrollX + "px";
+
+    const description = equipmentItem.description || "No description";
+    hoverInfoElem.append(
+      createElement("div", { style: "max-width: 300px;" }, [
+        createElement(
+          "h4",
+          { class: "mb-1" },
+          equipmentItem.title || "Equipment",
+        ),
+        createElement("div", {}, parseUrlTextContent(description)),
+      ]),
+    );
+  };
+
+  renderEquipmentDescriptionModal = (equipmentItem, index) => {
+    return createElement("div", { class: "help-content" }, [
+      createElement("h1", {}, equipmentItem.title || "Equipment"),
+      createElement("hr"),
+      createElement("h2", {}, "Description"),
+      createElement(
+        "div",
+        {
+          contenteditable: true,
+          class: "equipment-notes",
+          name: "description",
+          style: "overflow: auto;",
+        },
+        equipmentItem.description
+          ? parseUrlTextContent(equipmentItem.description)
+          : "Add a description...",
+        {
+          type: "focusout",
+          event: (e) => {
+            e.preventDefault();
+            // Update local state
+            this.equipmentData[index].description = e.target.textContent;
+            // Save to db
+            postThing(`/api/edit_5e_character_equipment/${equipmentItem.id}`, {
+              description: e.target.textContent,
+            });
+          },
+        },
+      ),
+    ]);
+  };
+
   renderEquipmentsElems = async () => {
     if (!this.equipmentData.length)
       return [createElement("small", {}, "None...")];
@@ -284,6 +344,35 @@ export default class EquipmentComponent {
                     this.updateWeight();
                   },
                 },
+              ),
+              createElement(
+                "img",
+                {
+                  class: "icon note me-1",
+                  src: "/assets/note.svg",
+                  title: "View/Edit Description",
+                },
+                null,
+                [
+                  {
+                    type: "mouseenter",
+                    event: (e) => this.showDescriptionHover(equipmentItem, e),
+                  },
+                  {
+                    type: "mouseleave",
+                    event: () => this.hideHoverInfo(),
+                  },
+                  {
+                    type: "click",
+                    event: () =>
+                      modal.show(
+                        this.renderEquipmentDescriptionModal(
+                          equipmentItem,
+                          index,
+                        ),
+                      ),
+                  },
+                ],
               ),
               createElement(
                 "div",
