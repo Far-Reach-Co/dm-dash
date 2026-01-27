@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <%
+    // Helper for CR display
+    const crDisplay = cr => {
+      const decimalCR = Number(cr);
+      if (decimalCR === 0.125) return '1/8';
+      if (decimalCR === 0.25)  return '1/4';
+      if (decimalCR === 0.5)   return '1/2';
+      return String(cr);
+    };
+    const monsterImage = monster.image ? imageBaseUrl + monster.image : null;
+  %>
+
+  <title><%= monster.name %> - D&D 5E Monster Stats | Far Reach Co.</title>
+  <meta name="description" content="<%= monster.name %> is a <%= monster.size %> <%= monster.type %> with CR <%= crDisplay(monster.challenge_rating) %>. Complete stat block with AC <%= monster.armor_class[0]?.value %>, HP <%= monster.hit_points %>, abilities, actions, and more." />
+  <meta name="keywords" content="<%= monster.name %> 5e, <%= monster.name %> stats, <%= monster.name %> D&D, <%= monster.type %> 5e, CR <%= crDisplay(monster.challenge_rating) %> monsters" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>" />
+  <meta property="og:title" content="<%= monster.name %> - D&D 5E Stats" />
+  <meta property="og:description" content="<%= monster.size %> <%= monster.type %>, CR <%= crDisplay(monster.challenge_rating) %>. AC <%= monster.armor_class[0]?.value %>, HP <%= monster.hit_points %>." />
+  <meta property="og:site_name" content="Far Reach Co." />
+  <% if (monsterImage) { %>
+  <meta property="og:image" content="<%= monsterImage %>" />
+  <% } %>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="<%= monsterImage ? 'summary_large_image' : 'summary' %>" />
+  <meta name="twitter:title" content="<%= monster.name %> - D&D 5E Stats" />
+  <meta name="twitter:description" content="<%= monster.size %> <%= monster.type %>, CR <%= crDisplay(monster.challenge_rating) %>." />
+  <% if (monsterImage) { %>
+  <meta name="twitter:image" content="<%= monsterImage %>" />
+  <% } %>
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": "<%= monster.name %> - D&D 5E Stats",
+      "headline": "<%= monster.name %>",
+      "description": "<%= monster.size %> <%= monster.type %> with Challenge Rating <%= crDisplay(monster.challenge_rating) %>",
+      "url": "https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>",
+      <% if (monsterImage) { %> "image": "<%= monsterImage %>",
+      <% } %> "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Monsters",
+            "item": "https://farreachco.com/dnd/5e/srd/monsters"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "<%= monster.name %>",
+            "item": "https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>"
+          }
+        ]
+      },
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition",
+        "gamePlatform": "Tabletop"
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <div class="inline-div">
+      <small>
+        <a href="/dnd/5e/srd/contents">Contents</a> ->
+        <a href="/dnd/5e/srd/monsters">Monsters</a> ->
+        <div class="text-green"><%= monster.name %></div>
+      </small>
+    </div>
+    <hr />
+
+    <% const spellsPageBase = '/dnd/5e/srd/spells#'; %>
+
+    <!-- Monster Header with Image -->
+    <div class="d-flex flex-wrap align-items-start" style="gap: 20px;">
+      <% if (monsterImage) { %>
+      <div style="flex-shrink: 0;">
+        <img src="<%= monsterImage %>" alt="<%= monster.name %>" style="max-width: 300px; max-height: 300px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);" onerror="this.style.display='none'" />
+      </div>
+      <% } %>
+      <div style="flex: 1; min-width: 300px;">
+        <h1><%= monster.name %></h1>
+        <div class="inline-div">
+          <i><%= monster.size %>,</i>
+          <i><%= monster.type %>,</i>
+          <i><%= monster.alignment %></i>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <!-- armor class -->
+      <div class="inline-div">
+        <b>Armor Class</b>
+        <div>
+          <% if (monster.armor_class && monster.armor_class.length) { %>
+          <% monster.armor_class.forEach((acEntry, acIndex) => { %>
+          <span><%= acEntry.value %> (<%= acEntry.type %>)</span>
+          <%= acIndex < monster.armor_class.length - 1 ? ', ' : '' %>
+          <% }) %>
+          <% } else { %>
+          —
+          <% } %>
+        </div>
+      </div>
+      <!-- hitpoints -->
+      <div class="inline-div">
+        <b>Hit Points</b>
+        <div> <%= monster.hit_points%></div>
+        <i>(<%= monster.hit_points_roll%>) </i>
+      </div>
+      <!-- speeds -->
+      <div class="inline-div">
+        <b>Speed:</b>
+        <div>
+          <%
+            const speed = monster.speed || {};
+            const order = ['walk','burrow','climb','swim','fly'];
+            const labels = { walk:'Walk ', burrow:'Burrow ', climb:'Climb ', swim:'Swim ', fly:'Fly ' };
+          %>
+          <% order.forEach(speedType => {
+            const speedValue = speed[speedType];
+            if (speedValue) {
+          %>
+          <div>
+            <%= labels[speedType] %><%= speedValue + ',' %><%= (speedType === 'fly' && speed.hover)
+                  ? ' (hover)'
+                  : '' %>
+          </div>
+          <%   } }); %>
+        </div>
+      </div>
+      <br>
+      <!-- Ability scores -->
+      <hr class="w-50" />
+      <div class="inline-div">
+        <b>STR</b>
+        <div> <%= monster.strength%></div>
+        <i>(<%= Math.floor((Number(monster.strength) - 10) / 2) %>)</i>
+        <b>DEX</b>
+        <div> <%= monster.dexterity%></div>
+        <div> (<%= Math.floor((Number(monster.dexterity) - 10) / 2) %>)</div>
+        <b>CON</b>
+        <div> <%= monster.constitution%></div>
+        <div> (<%= Math.floor((Number(monster.constitution) - 10) / 2) %>)</div>
+      </div>
+      <div class="inline-div">
+        <b>INT</b>
+        <div> <%= monster.intelligence%></div>
+        <div> (<%= Math.floor((Number(monster.intelligence) - 10) / 2) %>)</div>
+        <b>WIS</b>
+        <div> <%= monster.wisdom%></div>
+        <div> (<%= Math.floor((Number(monster.wisdom) - 10) / 2) %>)</div>
+        <b>CHA</b>
+        <div> <%= monster.charisma%></div>
+        <div> (<%= Math.floor((Number(monster.charisma) - 10) / 2) %>)</div>
+      </div>
+      <hr class="w-50" />
+      <br>
+      <!-- Saves -->
+      <div class="inline-div">
+        <b>Saving Throws:</b>
+        <%
+          const savingThrowProfs = (monster.proficiencies || []).filter(prof => prof.proficiency.name.startsWith('Saving Throw: '));
+        %>
+        <% if (savingThrowProfs.length) { %>
+        <% savingThrowProfs.forEach((prof, idx) => { %>
+        <div><%= prof.proficiency.name.split(': ')[1] %> +<%= prof.value %></div><%= idx < savingThrowProfs.length - 1 ? ', ' : '' %>
+        <% }) %>
+        <% } else { %>—<% } %>
+      </div>
+      <!-- Skills -->
+      <div class="inline-div">
+        <b>Skills:</b>
+        <%
+          const skillProfs = (monster.proficiencies || []).filter(skill => skill.proficiency.name.startsWith('Skill: '));
+        %>
+        <% if (skillProfs.length) { %>
+        <% skillProfs.forEach((prof, idx) => { %>
+        <div><%= prof.proficiency.name.split(': ')[1] %> +<%= prof.value %></div><%= idx < skillProfs.length - 1 ? ', ' : '' %>
+        <% }) %>
+        <% } else { %>—<% } %>
+      </div>
+      <!-- Vulnerabilities etc -->
+      <div class="inline-div">
+        <b>Damage Vulnerabilities:</b>
+        <%= monster.damage_vulnerabilities && monster.damage_vulnerabilities.length
+          ? monster.damage_vulnerabilities.join(', ')
+          : '—' %>
+      </div>
+      <div class="inline-div">
+        <b>Damage Resistances:</b>
+        <%= monster.damage_resistances && monster.damage_resistances.length
+          ? monster.damage_resistances.join(', ')
+          : '—' %>
+      </div>
+      <div class="inline-div">
+        <b>Damage Immunities:</b>
+        <%= monster.damage_immunities && monster.damage_immunities.length
+          ? monster.damage_immunities.join(', ')
+          : '—' %>
+      </div>
+      <div class="inline-div">
+        <b>Condition Immunities:</b>
+        <%= monster.condition_immunities && monster.condition_immunities.length
+          ? monster.condition_immunities.map(condition => condition.name).join(', ')
+          : '—' %>
+      </div>
+      <!-- Senses -->
+      <div class="inline-div">
+        <b>Senses:</b>
+        <div>
+          <%= monster.senses && Object.keys(monster.senses).length
+              ? Object.keys(monster.senses)
+                  .filter(function(senseName) {
+                    return senseName !== 'passive_perception';
+                  })
+                  .map(function(senseName) {
+                    return senseName + ' ' + String(monster.senses[senseName]);
+                  })
+                  .join(', ')
+              : '—' %>
+        </div>
+      </div>
+      <!-- passive perception -->
+      <div class="inline-div">
+        <b>Passive Perception:</b>
+        <div> <%= monster.senses.passive_perception%>
+        </div>
+      </div>
+      <!-- Languages -->
+      <div class="inline-div">
+        <b>Languages:</b> <%= monster.languages || "-" %>
+      </div>
+      <!-- CR -->
+      <div>
+        <div class="inline-div">
+          <b>CR:</b>
+          <div>
+            <%= crDisplay(monster.challenge_rating)%> </div>
+          <i>(<%= monster.xp %> XP)</i>
+        </div>
+      </div>
+      <!-- Profs -->
+      <div class="inline-div">
+        <b>Proficiency Bonus:</b> <%= monster.proficiency_bonus%>
+      </div>
+      <!-- Traits -->
+      <div>
+        <div>
+          <% if (monster.special_abilities && monster.special_abilities.length) { %>
+          <%
+            const filteredTraits = monster.special_abilities.filter(
+              specialAbility => !specialAbility.name.toLowerCase().includes('spellcasting')
+            );
+          %>
+          <% if (filteredTraits.length) { %>
+          <br>
+          <h3>Traits:</h3>
+          <ul>
+            <% filteredTraits.forEach(specialAbility => { %>
+            <li>
+              <b><%= specialAbility.name %>.</b> <%= specialAbility.desc %>
+            </li>
+            <% }) %>
+            <% } %>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+      <!-- spellcasting -->
+      <div>
+        <% if (monster.special_abilities && monster.special_abilities.length) { %>
+        <%
+        const spellcastingTraits = monster.special_abilities.filter(
+        specialAbility => specialAbility.name.toLowerCase() === ('spellcasting')
+        );
+        %>
+        <% if (spellcastingTraits.length) { %>
+        <h3>Spellcasting:</h3>
+
+        <% spellcastingTraits.forEach(specialAbility => {
+           const spellDetails = specialAbility.spellcasting;
+        %>
+        <div class="indent">
+          <%= specialAbility.desc %>
+        </div>
+        <br>
+        <% if (spellDetails) { %>
+        <p>
+          The <%= monster.name %> is a <%= spellDetails.level %>-level
+          <%= spellDetails.ability && spellDetails.ability.name %> caster.
+        </p>
+        <div class="inline-div">
+          <b>Spell Save DC</b>
+          <div><%= spellDetails.dc %></div>
+        </div>
+        <div class="inline-div">
+          <b>Spell Attack Modifier</b>
+          <div>+<%= spellDetails.modifier %></div>
+        </div>
+        <!-- Spells Prepared-->
+        <%
+            const spells = Array.isArray(spellDetails.spells) ? spellDetails.spells : [];
+            const slots  = spellDetails.slots || {};
+            const cantrips = spells.filter(spell => Number(spell.level) === 0);
+            %>
+        <div class="inline-div">
+          <b>Spells Prepared</b>
+          <br>
+          <div>
+            <% if (cantrips.length) { %>
+            <p>Cantrips</p><i>(at will)</i>
+            <ul><% cantrips.forEach(spell => { %>
+              <li>
+                <a href="<%= spellsPageBase %><%= (spell.url || '').split('/').pop() %>" target="_blank" rel="noopener noreferrer"><%= spell.name %></a>
+              </li><% }) %>
+            </ul>
+            <% } %>
+            <!--leveled spells -->
+            <%
+              const preparedSpells = Array.isArray(spellDetails.spells) ? spellDetails.spells : [];
+              const slotsByLevel   = spellDetails.slots || {};
+              const levelSuffixMap = {1:'st', 2:'nd', 3:'rd', 4:'th', 5:'th', 6:'th', 7:'th', 8:'th', 9:'th'};
+            %>
+            <% for (let currentLevel = 1; currentLevel <= 9; currentLevel++) {
+                const spellsAtThisLevel = preparedSpells.filter(spellItem => Number(spellItem.level) === currentLevel);
+                const slotCount = Number(slotsByLevel[String(currentLevel)]);
+                const showSection = spellsAtThisLevel.length || Number.isFinite(slotCount);
+                if (!showSection) continue;
+              %>
+            <p><%= currentLevel %><%= levelSuffixMap[currentLevel] %> level</p>
+            <% if (Number.isFinite(slotCount)) { %>
+            <i>(<%= slotCount %> <%= slotCount === 1 ? 'slot' : 'slots' %>)</i>
+            <% } %>
+            <ul>
+              <% spellsAtThisLevel.forEach(spellItem => { %>
+              <li>
+                <a href="<%= spellsPageBase %><%= (spellItem.url || '').split('/').pop() %>" target="_blank" rel="noopener noreferrer"><%= spellItem.name %></a>
+              </li>
+              <% }) %>
+            </ul>
+            <% } %>
+          </div>
+        </div>
+        <% } %>
+        <br>
+        <% }) %>
+        <% } %>
+        <% } %>
+      </div>
+      <!-- Innate Spellcasting -->
+      <div>
+        <% if (monster.special_abilities && monster.special_abilities.length) { %>
+        <%
+        const innateSpellcastingTraits = monster.special_abilities.filter(
+        specialAbility => specialAbility.name.toLowerCase().includes('innate spellcasting')
+        );
+        %>
+        <% if (innateSpellcastingTraits.length) { %>
+        <h3>Innate Spellcasting:</h3>
+
+        <% innateSpellcastingTraits.forEach(specialAbility => {
+           const spellDetails = specialAbility.spellcasting;
+        %>
+        <div class="indent">
+          <%= specialAbility.desc %>
+        </div>
+        <br>
+        <% if (spellDetails) { %>
+        <% if (spellDetails.dc) { %>
+        <div class="inline-div">
+          <b>Spell Save DC</b>
+          <div><%= spellDetails.dc %></div>
+        </div>
+        <% } %>
+
+        <% if (spellDetails.modifier) { %>
+        <div class="inline-div">
+          <b>Spell Attack Modifier</b>
+          <div><%= spellDetails.modifier %></div>
+        </div>
+        <% } %>
+        <div class="inline-div">
+          <b>Spells</b>
+          <ul>
+            <% spellDetails.spells.forEach((spellEntry) => {
+              const timesPerDay = (spellEntry.usage && typeof spellEntry.usage.times === 'number')
+                ? spellEntry.usage.times
+                : null;
+            %>
+            <li>
+              <% if (timesPerDay && timesPerDay >= 1) {%>
+              <%= timesPerDay %>/day:
+              <% } else { %>
+              <i>At will</i>
+              <% } %>
+              <a href="<%= spellsPageBase %><%= (spellEntry.url || '').split('/').pop() %>" target="_blank" rel="noopener noreferrer"><%= spellEntry.name %></a>
+              <i>(lvl <%= spellEntry.level %>)</i>
+            </li>
+            <% }) %>
+          </ul>
+        </div>
+        <% } %>
+        <br>
+        <% }) %>
+        <% } %>
+        <% } %>
+      </div>
+      <!-- Actions -->
+      <div>
+        <h3>Actions:</h3>
+        <% if (monster.actions && monster.actions.length) { %>
+        <ul>
+          <% monster.actions.forEach(action => { %>
+          <li>
+            <p><b><%= action.name %> - </b><%= action.desc %></p>
+          </li>
+          <% }) %>
+        </ul>
+
+        <% } else { %>
+        —
+        <% } %>
+      </div>
+      <!-- Legendary Actions -->
+      <div>
+        <% if (monster.legendary_actions && monster.legendary_actions.length) { %>
+        <h3>Legendary Actions:</h3>
+        <ul>
+          <div>
+            <p> The <%= monster.name %> can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The <%= monster.name %> regains spent legendary actions at the start of its turn.</p>
+            <% monster.legendary_actions.forEach(legAct => { %>
+            <li>
+              <b><%= legAct.name %>.</b> <%= legAct.desc %>
+            </li>
+            <% }) %>
+          </div>
+          <% } %>
+        </ul>
+      </div>
+
+      <br />
+      <hr />
+      <div style="margin-top: 20px;">
+        <a href="/dnd/5e/srd/monsters">&larr; Back to Monster List</a>
+      </div>
+    </div>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

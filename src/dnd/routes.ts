@@ -17,7 +17,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -28,9 +28,9 @@ router.get(
       const data = fs.readFileSync(
         path.join(
           __dirname,
-          "../../public/lib/data/5e-srd-ability-scores.json"
+          "../../public/lib/data/5e-srd-ability-scores.json",
         ),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/abilityscores", {
         auth: req.session.user,
@@ -39,7 +39,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -49,7 +49,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-alignments.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/alignments", {
         auth: req.session.user,
@@ -58,7 +58,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -68,7 +68,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-backgrounds.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/backgrounds", {
         auth: req.session.user,
@@ -77,7 +77,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -88,17 +88,17 @@ router.get(
       const categoryData = fs.readFileSync(
         path.join(
           __dirname,
-          "../../public/lib/data/5e-srd-equipment-categories.json"
+          "../../public/lib/data/5e-srd-equipment-categories.json",
         ),
-        "utf8"
+        "utf8",
       );
       const equipmentData = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-equipment.json"),
-        "utf8"
+        "utf8",
       );
       const magicItemsData = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-magic-items.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/equipment", {
         auth: req.session.user,
@@ -109,7 +109,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -119,7 +119,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-damage-types.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/damagetypes", {
         auth: req.session.user,
@@ -128,7 +128,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -141,7 +141,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -151,7 +151,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-conditions.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/conditions", {
         auth: req.session.user,
@@ -160,7 +160,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -170,7 +170,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-feats.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/feats", {
         auth: req.session.user,
@@ -179,7 +179,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -189,7 +189,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-features.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/features", {
         auth: req.session.user,
@@ -198,7 +198,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -208,7 +208,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-languages.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/languages", {
         auth: req.session.user,
@@ -217,7 +217,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -230,7 +230,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -240,11 +240,11 @@ router.get(
       // get json data
       const spellsData = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"),
-        "utf8"
+        "utf8",
       );
       const schoolsData = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/spells", {
         auth: req.session.user,
@@ -254,7 +254,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -264,7 +264,7 @@ router.get(
       // get json data
       const data = fs.readFileSync(
         path.join(__dirname, "../../public/lib/data/5e-srd-skills.json"),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/skills", {
         auth: req.session.user,
@@ -273,7 +273,7 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
 router.get(
@@ -284,9 +284,9 @@ router.get(
       const data = fs.readFileSync(
         path.join(
           __dirname,
-          "../../public/lib/data/5e-srd-weapon-properties.json"
+          "../../public/lib/data/5e-srd-weapon-properties.json",
         ),
-        "utf8"
+        "utf8",
       );
       res.render("dnd/5e/srd/weaponproperties", {
         auth: req.session.user,
@@ -295,30 +295,51 @@ router.get(
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
+const monstersData: any[] = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "../../public/lib/data/5e-srd-monsters.json"),
+    "utf8",
+  ),
+);
+const monstersMap = new Map(monstersData.map((m: any) => [m.index, m]));
+const DND_API_BASE = "https://www.dnd5eapi.co";
+
+// Individual monster page (must be before /monsters to match first)
 router.get(
-  "/5e/srd/monsters",
+  "/5e/srd/monsters/:index",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/5e-srd-monsters.json"
-        ),
-        "utf8"
-      );
-      res.render("dnd/5e/srd/monsters", {
+      const monster = monstersMap.get(req.params.index);
+      if (!monster) {
+        return res.status(404).render("404", { auth: req.session.user });
+      }
+      res.render("dnd/5e/srd/monster", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        monster,
+        imageBaseUrl: DND_API_BASE,
       });
     } catch (err) {
       next(err);
     }
-  }
+  },
 );
 
+// Monster list page
+router.get(
+  "/5e/srd/monsters",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("dnd/5e/srd/monsters", {
+        auth: req.session.user,
+        data: monstersData,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 export default router;
