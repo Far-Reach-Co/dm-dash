@@ -35,6 +35,7 @@ import { duplicate5eCharOtherProLangsQuery } from "../queries/5eCharOtherProLang
 import {
   getProjectPlayersByPlayerQuery,
   removeProjectPlayerQuery,
+  addProjectPlayerQuery,
 } from "../queries/projectPlayers";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
@@ -53,6 +54,7 @@ import { logEventAsync, EventType } from "../../lib/eventLogger";
 interface add5eCharRequest extends Request {
   body: {
     name: string;
+    wyrld_id?: string;
   };
 }
 
@@ -68,6 +70,7 @@ async function add5eChar(
       user_id: String(req.session.user),
       name: req.body.name,
     });
+
     // Log character creation event
     logEventAsync({
       userId: req.session.user,
@@ -75,10 +78,30 @@ async function add5eChar(
       eventData: { characterId: generalId, characterName: req.body.name },
       req,
     });
-    // HTMX redirect
-    res
-      .set("HX-Redirect", `/5eplayer?id=${generalId}`)
-      .send("Form submission was successful.");
+
+    // If wyrld_id is provided, link the character to the Wyrld
+    if (req.body.wyrld_id) {
+      await addProjectPlayerQuery({
+        project_id: req.body.wyrld_id,
+        player_id: String(generalId),
+      });
+      logEventAsync({
+        userId: req.session.user,
+        projectId: Number(req.body.wyrld_id),
+        eventType: EventType.PROJECT_PLAYER_CREATED,
+        eventData: { playerId: generalId, projectId: req.body.wyrld_id },
+        req,
+      });
+      // Redirect to Wyrld view instead of character sheet
+      res
+        .set("HX-Redirect", `/wyrld?id=${req.body.wyrld_id}`)
+        .send("Form submission was successful.");
+    } else {
+      // HTMX redirect to character sheet
+      res
+        .set("HX-Redirect", `/5eplayer?id=${generalId}`)
+        .send("Form submission was successful.");
+    }
   } catch (err) {
     next(err);
   }

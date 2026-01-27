@@ -27,7 +27,15 @@ async function addProjectPlayer(
       },
       req,
     });
-    res.status(201).json(projectPlayer);
+
+    // If HTMX request, redirect to wyrld page
+    if (req.headers["hx-request"]) {
+      res
+        .set("HX-Redirect", `/wyrld?id=${req.body.project_id}`)
+        .send("Character linked successfully.");
+    } else {
+      res.status(201).json(projectPlayer);
+    }
   } catch (err) {
     next(err);
   }

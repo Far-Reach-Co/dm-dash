@@ -299,17 +299,46 @@ router.get(
         is_editor: false,
       });
 
-      // get table views by project
-      const tableData = await getTableViewsByProjectQuery(project.id);
-      // get all character sheets by project
-      const players = [];
-      const projectPlayers = await getProjectPlayersByProjectQuery(project.id);
-      for (var player of projectPlayers.rows) {
-        const charData = await get5eCharGeneralQuery(player.player_id);
-        players.push(charData.rows[0]);
-      }
+      // redirect to welcome page to set up character
+      res.redirect(`/wyrld-welcome?id=${project.id}`);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
-      res.redirect("wyrld");
+router.get(
+  "/wyrld-welcome",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.session.user) return res.redirect("/login");
+      if (!req.query.id) return res.redirect("/dash");
+
+      const projectId = req.query.id as string;
+      const projectData = await getProjectQuery(projectId);
+      if (!projectData.rows.length) return res.redirect("/dash");
+
+      const project = projectData.rows[0];
+
+      // Get user's character sheets
+      const userSheets = await get5eCharsGeneralByUserQuery(req.session.user);
+
+      // Get sheets already linked to this wyrld
+      const projectPlayers = await getProjectPlayersByProjectQuery(projectId);
+      const linkedSheetIds = new Set(
+        projectPlayers.rows.map((pp) => pp.player_id)
+      );
+
+      // Filter to get unlinked sheets
+      const unlinkedSheets = userSheets.rows.filter(
+        (sheet) => !linkedSheetIds.has(sheet.id)
+      );
+
+      res.render("wyrld-welcome", {
+        auth: req.session.user,
+        project,
+        unlinkedSheets,
+      });
     } catch (err) {
       next(err);
     }
@@ -517,6 +546,18 @@ router.get(
       // calculate used data formatted
       const usedDataFormatted = humanFileSize(project.used_data_in_bytes);
 
+      // get invite link if exists (only needed for owners/managers)
+      let inviteLink = null;
+      let inviteId = null;
+      if (projectAuth) {
+        const inviteData = await getProjectInviteByProjectQuery(projectId);
+        if (inviteData.rows.length > 0) {
+          const invite = inviteData.rows[0];
+          inviteId = invite.id;
+          inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
+        }
+      }
+
       res.render("wyrld", {
         auth: req.session.user,
         projectAuth,
@@ -526,6 +567,8 @@ router.get(
         calendars: calendars.rows,
         records: recordsData.rows,
         usedDataFormatted,
+        inviteLink,
+        inviteId,
       });
     } catch (err) {
       next(err);
@@ -630,7 +673,11 @@ router.get(
 router.get("/newsheet", (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.session.user) return res.redirect("/forbidden");
-    res.render("newsheet", { auth: req.session.user });
+    res.render("newsheet", {
+      auth: req.session.user,
+      wyrld_id: req.query.wyrld_id || null,
+      wyrld_title: req.query.wyrld_title || null,
+    });
   } catch (err) {
     next(err);
   }

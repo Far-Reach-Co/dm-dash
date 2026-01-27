@@ -223,14 +223,32 @@ router.get("/invite", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             user_id: req.session.user,
             is_editor: false,
         });
-        const tableData = yield (0, tableViews_1.getTableViewsByProjectQuery)(project.id);
-        const players = [];
-        const projectPlayers = yield (0, projectPlayers_1.getProjectPlayersByProjectQuery)(project.id);
-        for (var player of projectPlayers.rows) {
-            const charData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(player.player_id);
-            players.push(charData.rows[0]);
-        }
-        res.redirect("wyrld");
+        res.redirect(`/wyrld-welcome?id=${project.id}`);
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get("/wyrld-welcome", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        if (!req.session.user)
+            return res.redirect("/login");
+        if (!req.query.id)
+            return res.redirect("/dash");
+        const projectId = req.query.id;
+        const projectData = yield (0, projects_1.getProjectQuery)(projectId);
+        if (!projectData.rows.length)
+            return res.redirect("/dash");
+        const project = projectData.rows[0];
+        const userSheets = yield (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user);
+        const projectPlayers = yield (0, projectPlayers_1.getProjectPlayersByProjectQuery)(projectId);
+        const linkedSheetIds = new Set(projectPlayers.rows.map((pp) => pp.player_id));
+        const unlinkedSheets = userSheets.rows.filter((sheet) => !linkedSheetIds.has(sheet.id));
+        res.render("wyrld-welcome", {
+            auth: req.session.user,
+            project,
+            unlinkedSheets,
+        });
     }
     catch (err) {
         next(err);
@@ -393,6 +411,16 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const calendars = yield (0, calendars_1.getCalendarsQuery)(projectId);
         const recordsData = yield (0, record_1.getRecordsByProjectQuery)(project.id);
         const usedDataFormatted = (0, utils_1.humanFileSize)(project.used_data_in_bytes);
+        let inviteLink = null;
+        let inviteId = null;
+        if (projectAuth) {
+            const inviteData = yield (0, projectInvites_1.getProjectInviteByProjectQuery)(projectId);
+            if (inviteData.rows.length > 0) {
+                const invite = inviteData.rows[0];
+                inviteId = invite.id;
+                inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
+            }
+        }
         res.render("wyrld", {
             auth: req.session.user,
             projectAuth,
@@ -402,6 +430,8 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             calendars: calendars.rows,
             records: recordsData.rows,
             usedDataFormatted,
+            inviteLink,
+            inviteId,
         });
     }
     catch (err) {
@@ -479,7 +509,11 @@ router.get("/newsheet", (req, res, next) => {
     try {
         if (!req.session.user)
             return res.redirect("/forbidden");
-        res.render("newsheet", { auth: req.session.user });
+        res.render("newsheet", {
+            auth: req.session.user,
+            wyrld_id: req.query.wyrld_id || null,
+            wyrld_title: req.query.wyrld_title || null,
+        });
     }
     catch (err) {
         next(err);

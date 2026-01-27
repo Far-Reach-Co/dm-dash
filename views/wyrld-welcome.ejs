@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Welcome to <%= project.title %></title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/lib/htmx.min.js"></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid info-container p-3">
+    <h1>Welcome to <%= project.title %>!</h1>
+    <p>You've successfully joined this wyrld. Now let's get your character set up.</p>
+    <hr />
+
+    <div class="mt-4">
+      <h2>Create a New Character</h2>
+      <p>Start fresh with a new character sheet that will be automatically linked to this wyrld.</p>
+      <a href="/newsheet?wyrld_id=<%= project.id %>&wyrld_title=<%= encodeURIComponent(project.title) %>" class="btn">+ Create New Character</a>
+    </div>
+
+    <% if (unlinkedSheets.length > 0) { %>
+    <hr />
+    <div class="mt-4">
+      <h2>Link an Existing Character</h2>
+      <p>You have character sheets that aren't linked to this wyrld yet. Select one to link:</p>
+      <form hx-post="/api/add_project_player" hx-swap="outerHTML">
+        <input type="hidden" name="project_id" value="<%= project.id %>" />
+        <div class="input-container">
+          <label for="player_id">Select Character</label>
+          <select id="player_id" name="player_id" required>
+            <option value="">-- Choose a character --</option>
+            <% unlinkedSheets.forEach(function(sheet) { %>
+            <option value="<%= sheet.id %>"><%= sheet.name %></option>
+            <% }); %>
+          </select>
+        </div>
+        <br />
+        <button type="submit">Link Character</button>
+      </form>
+    </div>
+    <% } %>
+
+    <hr />
+    <div class="mt-4">
+      <h2>Skip for Now</h2>
+      <p>You can always create or link a character later from the wyrld page.</p>
+      <a href="/wyrld?id=<%= project.id %>">Continue to Wyrld →</a>
+    </div>
+  </div>
+</body>
+
+</html>

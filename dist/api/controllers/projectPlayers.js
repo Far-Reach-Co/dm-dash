@@ -31,7 +31,14 @@ function addProjectPlayer(req, res, next) {
                 },
                 req,
             });
-            res.status(201).json(projectPlayer);
+            if (req.headers["hx-request"]) {
+                res
+                    .set("HX-Redirect", `/wyrld?id=${req.body.project_id}`)
+                    .send("Character linked successfully.");
+            }
+            else {
+                res.status(201).json(projectPlayer);
+            }
         }
         catch (err) {
             next(err);
