@@ -1,0 +1,303 @@
+Running backup
+node:fs:599
+  handleErrorFromBinding(ctx);
+  ^
+
+Error: ENOENT: no such file or directory, open 'backup.sql'
+    at Object.openSync (node:fs:599:3)
+    at Object.readFileSync (node:fs:467:35)
+    at uploadToAws (/root/dm-dash/src/lib/db_backups/pgBackup.js:35:28)
+    at doTheThing (/root/dm-dash/src/lib/db_backups/pgBackup.js:63:34)
+    at runBackup (/root/dm-dash/src/lib/db_backups/pgBackup.js:74:11)
+    at pgBackup (/root/dm-dash/src/lib/db_backups/pgBackup.js:80:3)
+    at Object.<anonymous> (/root/dm-dash/src/lib/db_backups/pgBackup.js:83:1)
+    at Module._compile (node:internal/modules/cjs/loader:1120:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1174:10)
+    at Module.load (node:internal/modules/cjs/loader:998:32) {
+  errno: -2,
+  syscall: 'open',
+  code: 'ENOENT',
+  path: 'backup.sql'
+}
+
+Node.js v18.7.0
+Running backup
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+stdout: 
+stderr: 
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
+Running backup
+stdout: 
+stderr: 
+https://wyrld.s3.amazonaws.com/pg_backups/backup.sql
