@@ -6,6 +6,7 @@ export interface Image {
   size: number,
   file_name: string
   notes: string,
+  is_blocked: boolean,
 }
 
 async function addImageQuery(data: {
@@ -26,7 +27,7 @@ async function addImageQuery(data: {
 
 async function getImageQuery(id: string | number) {
   const query = {
-    text: /*sql*/ `select * from public."Image" where id = $1`,
+    text: /*sql*/ `select * from public."Image" where id = $1 and is_blocked = false`,
     values: [id]
   }
   return await db.query<Image>(query)
@@ -36,7 +37,7 @@ async function getImagesQuery(ids: (string | number)[]) {
   const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
 
   const query = {
-    text: /*sql*/ `SELECT * FROM public."Image" WHERE id IN (${placeholders})`,
+    text: /*sql*/ `SELECT * FROM public."Image" WHERE id IN (${placeholders}) AND is_blocked = false`,
     values: ids,
   };
   return await db.query<Image>(query)

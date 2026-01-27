@@ -34,7 +34,7 @@ function addImageQuery(data) {
 function getImageQuery(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
-            text: `select * from public."Image" where id = $1`,
+            text: `select * from public."Image" where id = $1 and is_blocked = false`,
             values: [id]
         };
         return yield dbconfig_1.default.query(query);
@@ -44,7 +44,7 @@ function getImagesQuery(ids) {
     return __awaiter(this, void 0, void 0, function* () {
         const placeholders = ids.map((_, index) => `$${index + 1}`).join(',');
         const query = {
-            text: `SELECT * FROM public."Image" WHERE id IN (${placeholders})`,
+            text: `SELECT * FROM public."Image" WHERE id IN (${placeholders}) AND is_blocked = false`,
             values: ids,
         };
         return yield dbconfig_1.default.query(query);

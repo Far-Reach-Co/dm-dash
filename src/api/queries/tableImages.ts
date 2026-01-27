@@ -69,6 +69,7 @@ interface TableImageWithImage extends TableImage {
   size: number;
   file_name: string;
   notes: string;
+  is_blocked: boolean;
 }
 
 async function getTableImagesWithImageByProjectQuery(project_id: string | number) {
@@ -79,7 +80,7 @@ async function getTableImagesWithImageByProjectQuery(project_id: string | number
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
       LEFT JOIN public."Record" r ON ri.record_id = r.id
-      WHERE ti.project_id = $1
+      WHERE ti.project_id = $1 AND i.is_blocked = false
     `,
     values: [project_id]
   }
@@ -94,7 +95,7 @@ async function getTableImagesWithImageByUserQuery(user_id: string | number) {
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
       LEFT JOIN public."Record" r ON ri.record_id = r.id
-      WHERE ti.user_id = $1
+      WHERE ti.user_id = $1 AND i.is_blocked = false
     `,
     values: [user_id]
   }

@@ -14,7 +14,7 @@ import { getSignedUrls } from "./s3";
 async function addTableImageByProject(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const data = await addTableImageByProjectQuery(req.body);
@@ -27,7 +27,7 @@ async function addTableImageByProject(
 async function addTableImageByUser(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
@@ -46,12 +46,12 @@ interface TableImageWithSignedUrl extends TableImageWithImage {
 async function getTableImagesWithSignedUrlsByTableProject(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const tableData = await getTableViewQuery(req.params.table_id);
     const data = await getTableImagesWithImageByProjectQuery(
-      tableData.rows[0].project_id
+      tableData.rows[0].project_id,
     );
 
     // Convert to Image format for getSignedUrls
@@ -61,6 +61,7 @@ async function getTableImagesWithSignedUrlsByTableProject(
       original_name: row.original_name,
       size: row.size,
       notes: row.notes,
+      is_blocked: row.is_blocked,
     }));
 
     // Get all signed URLs in batch
@@ -81,12 +82,12 @@ async function getTableImagesWithSignedUrlsByTableProject(
 async function getTableImagesWithSignedUrlsByTableUser(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const tableData = await getTableViewQuery(req.params.table_id);
     const data = await getTableImagesWithImageByUserQuery(
-      tableData.rows[0].user_id
+      tableData.rows[0].user_id,
     );
 
     // Convert to Image format for getSignedUrls
@@ -96,6 +97,7 @@ async function getTableImagesWithSignedUrlsByTableUser(
       original_name: row.original_name,
       size: row.size,
       notes: row.notes,
+      is_blocked: row.is_blocked,
     }));
 
     // Get all signed URLs in batch
@@ -116,7 +118,7 @@ async function getTableImagesWithSignedUrlsByTableUser(
 async function removeTableImage(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     await removeTableImageQuery(req.params.id);
