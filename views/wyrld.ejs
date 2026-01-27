@@ -12,6 +12,8 @@
   <script src="/components/modal.js" type="module"></script>
   <script type="module" src="/components/loadingWithMessage.js"></script>
   <script src="/lib/searchDashElements.js" defer></script>
+  <script src="/lib/htmx.min.js"></script>
+  <script src="/lib/clipboard.js" type="module" defer></script>
   <%- include('./partials/icons') %>
 </head>
 <%- include('./partials/google') %>
@@ -44,6 +46,15 @@
       </div>
       <% } %>
       <small>-- Subscriptions under Construction --</small>
+      <% if (projectAuth) { %>
+      <div class="mt-3" id="invite-section">
+        <% if (inviteLink) { %>
+        <%- include('./partials/wyrld_invite_display', { inviteLink, inviteId }) %>
+        <% } else { %>
+        <%- include('./partials/wyrld_invite_button', { projectId: project.id }) %>
+        <% } %>
+      </div>
+      <% } %>
     </div>
     <div class="d-flex flex-wrap">
       <div class="d-flex flex-column p-3 dash-column">
@@ -97,9 +108,7 @@
           of the sheet and the wyrld managers are allowed to view these
           sheets.</small>
         <br />
-        <!-- <a href="/newsheet" title="Create a new player character sheet"
-            >+ New Sheet</a
-          > -->
+        <a href="/newsheet?wyrld_id=<%= project.id %>&wyrld_title=<%= encodeURIComponent(project.title) %>" title="Create a new character sheet for this wyrld">+ New Character Sheet</a>
         <hr />
         <% if (sheets.length === 0) { %>
         <small class="ms-2">No sheets have been connected to this wyrld yet...</small>
@@ -134,8 +143,6 @@
       </div>
     </div>
   </div>
-  <!-- Toast -->
-  <div id="toast-custom"></div>
   <!-- The Modal -->
   <div id="modal-custom" class="modal-custom">
     <!-- Modal content -->
@@ -144,6 +151,8 @@
       <div id="modal-custom-content" class="modal-custom-content"></div>
     </div>
   </div>
+  <!-- Toast -->
+  <div id="toast-custom"></div>
 </body>
 <script>
   function handleSheetClick(id, projectID) {

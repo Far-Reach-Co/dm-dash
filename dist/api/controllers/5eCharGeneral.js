@@ -46,9 +46,27 @@ function add5eChar(req, res, next) {
                 eventData: { characterId: generalId, characterName: req.body.name },
                 req,
             });
-            res
-                .set("HX-Redirect", `/5eplayer?id=${generalId}`)
-                .send("Form submission was successful.");
+            if (req.body.wyrld_id) {
+                yield (0, projectPlayers_1.addProjectPlayerQuery)({
+                    project_id: req.body.wyrld_id,
+                    player_id: String(generalId),
+                });
+                (0, eventLogger_1.logEventAsync)({
+                    userId: req.session.user,
+                    projectId: Number(req.body.wyrld_id),
+                    eventType: eventLogger_1.EventType.PROJECT_PLAYER_CREATED,
+                    eventData: { playerId: generalId, projectId: req.body.wyrld_id },
+                    req,
+                });
+                res
+                    .set("HX-Redirect", `/wyrld?id=${req.body.wyrld_id}`)
+                    .send("Form submission was successful.");
+            }
+            else {
+                res
+                    .set("HX-Redirect", `/5eplayer?id=${generalId}`)
+                    .send("Form submission was successful.");
+            }
         }
         catch (err) {
             next(err);

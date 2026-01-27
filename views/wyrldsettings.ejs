@@ -1,44 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Far Reach Co. | Wyrld Settings</title>
-    <link rel="stylesheet" href="/style.css" />
-    <script src="/lib/clipboard.js" type="module" defer></script>
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <script src="/lib/htmx.min.js"></script>
-    <%- include('./partials/icons') %>
-  </head>
-  <%- include('./partials/google') %>
-  <body>
-    <%- include('./partials/nav') %>
-    <div class="container-fluid info-container p-3">
-      <div>
-        <h1>Wyrld Settings</h1>
-        <small
-          >Manage important settings and invited users for your wyrld.</small
-        >
-      </div>
-      <h2>Edit Title</h2>
-      <form hx-post="/api/edit_project_title/<%= project.id %>" hx-target="#title-update-success">
-        <fieldset>
-          <div class="input-container">
-            <label for="title">Title</label>
-            <input
-              id="title"
-              name="title"
-              placeholder="Wyrld Title"
-              value="<%= project.title %>"
-              required="true,"
-            />
-          </div>
-          <br />
-          <br />
-          <button type="submit">Save</button>
-          <small class="success-message" id="title-update-success"></small>
-        </fieldset>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Wyrld Settings</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/clipboard.js" type="module" defer></script>
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/lib/htmx.min.js"></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid info-container p-3">
+    <div>
+      <h1>Wyrld Settings</h1>
+      <small>Manage important settings and invited users for your wyrld.</small>
+    </div>
+    <h2>Edit Title</h2>
+    <form hx-post="/api/edit_project_title/<%= project.id %>" hx-target="#title-update-success">
+      <fieldset>
+        <div class="input-container">
+          <label for="title">Title</label>
+          <input id="title" name="title" placeholder="Wyrld Title" value="<%= project.title %>" required="true," />
+        </div>
+        <br />
+        <br />
+        <button type="submit">Save</button>
+        <small class="success-message" id="title-update-success"></small>
+      </fieldset>
       <hr />
       <h2>Share Invite Link</h2>
       <% if (inviteLink) { %> <%- include('./partials/wyrld_settings/invite') %>
@@ -47,10 +41,8 @@
       <hr />
       <h2>Manage Users</h2>
       <div>
-        <small
-          >Give an invited user access to edit the resources in the wyrld by
-          making them a manager.</small
-        >
+        <small>Give an invited user access to edit the resources in the wyrld by
+          making them a manager.</small>
         <br />
         <div class="d-flex justify-content-between w-25">
           <p class="text-underline">Username</p>
@@ -58,64 +50,47 @@
         </div>
         <br />
         <% if (users.length === 0) { %>
-        <small class="ms-2"
-          >No users have joined <%= project.title %> yet...</small
-        >
+        <small class="ms-2">No users have joined <%= project.title %> yet...</small>
         <% } else { %> <% users.forEach(function(user) { %>
-        <div
-          class="mb-2 d-flex justify-content-between w-25"
-          id="user-<%= user.project_user_id %>"
-        >
+        <div class="mb-2 d-flex justify-content-between w-25" id="user-<%= user.project_user_id %>">
           <div class="d-flex align-items-center">
             <div><%= user.username %></div>
-            <div
-              class="red-x ms-4"
-              hx-delete="/api/remove_project_user/<%= user.project_user_id %>"
-              hx-target="#user-<%= user.project_user_id %>"
-              hx-swap="delete"
-              hx-confirm="Are you sure you want to remove <%= user.username %>?"
-            >
+            <div class="red-x ms-4" hx-delete="/api/remove_project_user/<%= user.project_user_id %>" hx-target="#user-<%= user.project_user_id %>" hx-swap="delete" hx-confirm="Are you sure you want to remove <%= user.username %>?">
               ⓧ
             </div>
           </div>
-          <input type="checkbox" name="is_editor"
-          hx-post="/api/edit_project_user_is_editor/<%= user.project_user_id %>"
-          <%= user.is_editor ? 'checked' : '' %> />
+          <input type="checkbox" name="is_editor" hx-post="/api/edit_project_user_is_editor/<%= user.project_user_id %>" <%= user.is_editor ? 'checked' : '' %> />
         </div>
         <% }); %> <% } %>
       </div>
       <hr />
-      <button
-        class="btn-red"
-        hx-delete="/api/remove_project/<%= project.id %>"
-        hx-swap="none"
-        hx-confirm="Are you sure you want to delete <%= project.title %>?"
-      >
+      <button class="btn-red" hx-delete="/api/remove_project/<%= project.id %>" hx-swap="none" hx-confirm="Are you sure you want to delete <%= project.title %>?">
         Delete Wyrld
       </button>
-    </div>
-    <!-- Toast -->
-    <div id="toast-custom"></div>
-    <%- include('./partials/footer') %>
-  </body>
-  <script>
-    // reset success messages
-    document.body.addEventListener("htmx:afterOnLoad", function (event) {
-      setTimeout(function () {
-        const titleUpdateMessage = document.querySelector(
-          "#title-update-success"
-        );
-        if (titleUpdateMessage) {
-          titleUpdateMessage.innerText = "";
-        }
-      }, 3000); // 10seconds
-    });
+  </div>
+  <!-- Toast -->
+  <div id="toast-custom"></div>
+  <%- include('./partials/footer') %>
+</body>
+<script>
+  // reset success messages
+  document.body.addEventListener("htmx:afterOnLoad", function(event) {
+    setTimeout(function() {
+      const titleUpdateMessage = document.querySelector(
+        "#title-update-success"
+      );
+      if (titleUpdateMessage) {
+        titleUpdateMessage.innerText = "";
+      }
+    }, 3000); // 10seconds
+  });
 
-    // handle htmx:responseError event
-    document.body.addEventListener("htmx:responseError", function (event) {
-      // event.detail contains details about the htmx request
-      var errorText = JSON.parse(event.detail.xhr.responseText).error.message; // get the response text
-      window.alert(`Server Error: ${errorText}`);
-    });
-  </script>
+  // handle htmx:responseError event
+  document.body.addEventListener("htmx:responseError", function(event) {
+    // event.detail contains details about the htmx request
+    var errorText = JSON.parse(event.detail.xhr.responseText).error.message; // get the response text
+    window.alert(`Server Error: ${errorText}`);
+  });
+</script>
+
 </html>

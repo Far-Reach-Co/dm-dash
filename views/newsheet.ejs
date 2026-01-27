@@ -17,8 +17,14 @@
   <%- include('./partials/nav') %>
   <div class="container-fluid info-container p-3">
     <h1>Create Character Sheet</h1>
+    <% if (wyrld_title) { %>
+    <p>Creating character for <strong><%= wyrld_title %></strong></p>
+    <% } %>
     <form hx-post="/api/add_5e_character">
       <fieldset>
+        <% if (wyrld_id) { %>
+        <input type="hidden" name="wyrld_id" value="<%= wyrld_id %>" />
+        <% } %>
         <div class="input-container">
           <label for="name">Name</label>
           <input id="name" name="name" placeholder="Character Name" required />

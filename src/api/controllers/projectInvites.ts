@@ -22,7 +22,13 @@ async function addProjectInvite(
       invite.uuid
     }`;
     const inviteId = invite.id;
-    res.render("partials/wyrld_settings/invite", {
+
+    // Render different partial based on source
+    const partial = req.body.source === "wyrld"
+      ? "partials/wyrld_invite_display"
+      : "partials/wyrld_settings/invite";
+
+    res.render(partial, {
       inviteLink,
       inviteId,
       projectId: req.body.project_id,
@@ -52,7 +58,13 @@ async function removeProjectInvite(
 ) {
   try {
     const data = await removeProjectInviteQuery(req.params.id);
-    res.render("partials/wyrld_settings/invitebutton", {
+
+    // Render different partial based on source
+    const partial = req.body.source === "wyrld"
+      ? "partials/wyrld_invite_button"
+      : "partials/wyrld_settings/invitebutton";
+
+    res.render(partial, {
       projectId: data.rows[0].project_id,
     });
   } catch (err) {

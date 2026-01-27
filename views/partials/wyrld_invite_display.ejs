@@ -1,0 +1,7 @@
+<h3>Invite Players</h3>
+<div class="d-flex align-items-center gap-2">
+  <input type="text" value="<%= inviteLink %>" readonly style="min-width: 300px;" />
+  <button onclick="copyTextToClipboard('<%= inviteLink %>')" title="Copy invite link">Copy</button>
+  <button class="btn-red" hx-delete="/api/remove_project_invite/<%= inviteId %>" hx-target="#invite-section" hx-swap="innerHTML" hx-vals='{"source": "wyrld"}' hx-confirm="Are you sure you want to delete this invite link?" title="Delete invite link">Delete</button>
+</div>
+<small>Share this link with players to invite them to your wyrld.</small>
