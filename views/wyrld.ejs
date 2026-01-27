@@ -20,34 +20,33 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="mt-4 d-flex flex-column h-100">
-    <div class="p-3">
-      <h1 class="text-green"><%= project.title %></h1>
-      <!-- <br /> -->
-      <!-- <small><%= project.description %></small> -->
-      <br>
-      <% if (!project.is_pro) { %>
-      <div>
-        <h3 class="d-inline-block">Status:</h3>
-        <p class="d-inline-block">Free Tier</p>
+  <div class="mt-5 d-flex flex-column h-100 px-2">
+    <div class="p-3 wyrld-status mx-2">
+      <h1 class="text-green" style="text-align: left;"><%= project.title %></h1>
+      <div class="d-flex flex-wrap gap-3 mt-2">
+        <% if (!project.is_pro) { %>
+        <div class="wyrld-status-item">
+          <h3>Status:</h3>
+          <p>Free Tier</p>
+        </div>
+        <div class="wyrld-status-item">
+          <h3>Data Used:</h3>
+          <p><%= usedDataFormatted %> / 100MB</p>
+        </div>
+        <% } else { %>
+        <div class="wyrld-status-item">
+          <h3>Subscription:</h3>
+          <p>Pro</p>
+        </div>
+        <div class="wyrld-status-item">
+          <h3>Data Used:</h3>
+          <p><%= usedDataFormatted %></p>
+        </div>
+        <% } %>
       </div>
-      <div>
-        <h3 class="d-inline-block">Data Used:</h3>
-        <p class="d-inline-block"><%= usedDataFormatted %> / 100MB</p>
-      </div>
-      <% } else { %>
-      <div>
-        <h3 class="d-inline-block">Subscription Status:</h3>
-        <p class="d-inline-block">Pro</p>
-      </div>
-      <div>
-        <h3 class="d-inline-block">Data Used:</h3>
-        <p class="d-inline-block"><%= usedDataFormatted %></p>
-      </div>
-      <% } %>
-      <small>-- Subscriptions under Construction --</small>
+      <small class="d-block mt-2">-- Subscriptions under Construction --</small>
       <% if (projectAuth) { %>
-      <div class="mt-3" id="invite-section">
+      <div class="invite-section mt-3" id="invite-section">
         <% if (inviteLink) { %>
         <%- include('./partials/wyrld_invite_display', { inviteLink, inviteId }) %>
         <% } else { %>
