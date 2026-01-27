@@ -32,6 +32,7 @@ app.use(
           "'unsafe-inline'", // for inline scripts - ideally migrate to nonces later
           "https://www.googletagmanager.com",
           "https://www.google-analytics.com",
+          "https://static.cloudflareinsights.com",
         ],
         scriptSrcAttr: ["'unsafe-inline'"], // for onclick handlers - ideally remove these later
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -40,6 +41,7 @@ app.use(
         connectSrc: [
           "'self'",
           "https://www.google-analytics.com",
+          "https://cloudflareinsights.com",
           "wss://*.farreachco.com",
           "ws://localhost:*",
         ],
