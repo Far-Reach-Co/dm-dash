@@ -34,6 +34,7 @@ app.use((0, helmet_1.default)({
                 "'unsafe-inline'",
                 "https://www.googletagmanager.com",
                 "https://www.google-analytics.com",
+                "https://static.cloudflareinsights.com",
             ],
             scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
@@ -42,6 +43,7 @@ app.use((0, helmet_1.default)({
             connectSrc: [
                 "'self'",
                 "https://www.google-analytics.com",
+                "https://cloudflareinsights.com",
                 "wss://*.farreachco.com",
                 "ws://localhost:*",
             ],

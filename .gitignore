@@ -130,3 +130,8 @@ typings/
 # mkcert local browser certs
 localhost-key.pem
 localhost.pem
+
+# misc
+**/nohup.out
+backup.sql
+
