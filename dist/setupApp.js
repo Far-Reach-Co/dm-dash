@@ -39,7 +39,7 @@ app.use((0, helmet_1.default)({
             scriptSrcAttr: ["'unsafe-inline'"],
             styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
             fontSrc: ["'self'", "https://fonts.gstatic.com"],
-            imgSrc: ["'self'", "data:", "blob:", "https://*.amazonaws.com", "https://*.cloudfront.net"],
+            imgSrc: ["'self'", "data:", "blob:", "https://*.amazonaws.com", "https://*.cloudfront.net", "https://www.dnd5eapi.co"],
             connectSrc: [
                 "'self'",
                 "https://www.google-analytics.com",

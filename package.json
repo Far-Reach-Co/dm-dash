@@ -10,7 +10,8 @@
     "migrate:up": "dotenv -e .env -- node-pg-migrate up",
     "migrate:down": "dotenv -e .env -- node-pg-migrate down",
     "migrate:redo": "dotenv -e .env -- node-pg-migrate redo",
-    "migrate:create": "node-pg-migrate create"
+    "migrate:create": "node-pg-migrate create",
+    "sitemap": "npx tsx tools/generate-sitemap.ts"
   },
   "author": "Julian Ranieri",
   "license": "ISC",
@@ -45,6 +46,7 @@
     "pm2": "^6.0.14",
     "redis": "^4.7.1",
     "sharp": "^0.32.1",
+    "sitemap": "^9.0.0",
     "socket.io": "^4.6.1",
     "uuid": "^9.0.0"
   },

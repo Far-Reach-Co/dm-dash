@@ -184,12 +184,30 @@ router.get("/5e/srd/weapon-properties", (req, res, next) => {
         next(err);
     }
 });
+const monstersData = JSON.parse(fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-monsters.json"), "utf8"));
+const monstersMap = new Map(monstersData.map((m) => [m.index, m]));
+const DND_API_BASE = "https://www.dnd5eapi.co";
+router.get("/5e/srd/monsters/:index", (req, res, next) => {
+    try {
+        const monster = monstersMap.get(req.params.index);
+        if (!monster) {
+            return res.status(404).render("404", { auth: req.session.user });
+        }
+        res.render("dnd/5e/srd/monster", {
+            auth: req.session.user,
+            monster,
+            imageBaseUrl: DND_API_BASE,
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/5e/srd/monsters", (req, res, next) => {
     try {
-        const data = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-monsters.json"), "utf8");
         res.render("dnd/5e/srd/monsters", {
             auth: req.session.user,
-            data: JSON.parse(data),
+            data: monstersData,
         });
     }
     catch (err) {
