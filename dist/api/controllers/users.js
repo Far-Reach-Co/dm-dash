@@ -32,7 +32,9 @@ const tableViews_js_1 = require("../queries/tableViews.js");
 const express_validator_1 = require("express-validator");
 const eventLogger_1 = require("../../lib/eventLogger");
 function generateAccessToken(id, expires) {
-    return (0, jsonwebtoken_1.sign)({ id }, process.env.SECRET_KEY, { expiresIn: expires });
+    return (0, jsonwebtoken_1.sign)({ id }, process.env.SECRET_KEY, {
+        expiresIn: expires,
+    });
 }
 function sendResetEmail(user, token) {
     index_js_1.default.sendMessage({
