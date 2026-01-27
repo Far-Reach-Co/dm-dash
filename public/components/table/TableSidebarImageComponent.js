@@ -452,7 +452,9 @@ class AssociatedRecordsComponent {
       });
 
       // update data and render
-      this.image.records.push(newRecord);
+      this.image.record_id = newRecord.id;
+      this.image.record_title = newRecord.title;
+      this.image.record_desc = newRecord.description;
       this.render();
     }
   };

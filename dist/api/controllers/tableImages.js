@@ -54,6 +54,7 @@ function getTableImagesWithSignedUrlsByTableProject(req, res, next) {
                 original_name: row.original_name,
                 size: row.size,
                 notes: row.notes,
+                is_blocked: row.is_blocked,
             }));
             const signedUrls = yield (0, s3_1.getSignedUrls)(images);
             const result = data.rows.map((row) => (Object.assign(Object.assign({}, row), { src: signedUrls[row.image_id] })));
@@ -75,6 +76,7 @@ function getTableImagesWithSignedUrlsByTableUser(req, res, next) {
                 original_name: row.original_name,
                 size: row.size,
                 notes: row.notes,
+                is_blocked: row.is_blocked,
             }));
             const signedUrls = yield (0, s3_1.getSignedUrls)(images);
             const result = data.rows.map((row) => (Object.assign(Object.assign({}, row), { src: signedUrls[row.image_id] })));
