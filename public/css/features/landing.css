@@ -147,3 +147,92 @@ section {
 .fourth p {
   width: 300px;
 }
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+
+/* Tablet and below */
+@media (max-width: 900px) {
+  .second {
+    background-size: 100%;
+    background-position: bottom;
+  }
+
+  .second-container-1,
+  .second-container-2 {
+    width: 100%;
+    padding: var(--space-lg);
+  }
+
+  .second #scroll-img {
+    width: 50%;
+    max-width: 300px;
+  }
+
+  .fourth {
+    flex-direction: column-reverse;
+  }
+
+  #character-img {
+    width: 60%;
+    max-width: 350px;
+  }
+
+  .first-container-1 {
+    padding: var(--space-lg);
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .first p {
+    padding: 0 var(--space-md);
+    font-size: 1.1rem;
+  }
+
+  .first #main-logo {
+    width: 80%;
+  }
+
+  .third #sm-map-img {
+    background-size: 80%;
+    padding: var(--space-lg);
+  }
+
+  .third #sm-map-img h1 {
+    font-size: 1.3rem;
+  }
+
+  .third #sm-map-img p {
+    font-size: 1rem;
+    padding: 0 var(--space-sm);
+  }
+
+  #scroll-svg {
+    width: 15%;
+  }
+
+  .second-container-2 h1 {
+    font-size: 1.3rem;
+  }
+
+  .second-container-2 p {
+    font-size: 1rem;
+    padding: 0 var(--space-sm);
+  }
+
+  .fourth p {
+    width: 100%;
+    padding: 0 var(--space-md);
+    font-size: 1rem;
+  }
+
+  .fourth h1 {
+    font-size: 1.3rem;
+  }
+
+  #character-img {
+    width: 80%;
+  }
+}

@@ -6,15 +6,163 @@
   background-color: var(--blue3);
 }
 
+/* ==========================================================================
+   Dashboard Columns - Responsive Grid
+   ========================================================================== */
+
+.dash-column {
+  flex: 1 1 300px;
+  min-width: 280px;
+  max-width: 100%;
+  background-color: var(--blue3);
+  border-radius: var(--border-radius-lg);
+  margin: var(--space-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+/* On larger screens, limit column width */
+@media (min-width: 1200px) {
+  .dash-column {
+    max-width: 400px;
+  }
+}
+
+/* On mobile, stack columns */
+@media (max-width: 600px) {
+  .dash-column {
+    flex: 1 1 100%;
+    min-width: 100%;
+    margin: var(--space-sm) 0;
+  }
+}
+
+/* ==========================================================================
+   Dashboard List Items
+   ========================================================================== */
+
 .dash-list-title-container {
   cursor: pointer;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast);
+  width: 100%;
+}
+
+.dash-list-title-container:hover {
+  background-color: var(--blue4);
 }
 
 .dash-list-title-container:hover .dash-list-title {
   text-decoration: underline;
 }
 
-.dash-list-title-container:hover a {
-  text-decoration: none;
-  color: var(--green);
+.dash-list-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+/* ==========================================================================
+   Dashboard Headers & Description
+   ========================================================================== */
+
+.dash-column h2 {
+  margin-bottom: var(--space-sm);
+  font-size: 1.25rem;
+}
+
+.dash-column h3 {
+  color: var(--orange2);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+  font-size: 1rem;
+}
+
+.dash-column small {
+  color: var(--light-gray);
+  line-height: 1.5;
+}
+
+.dash-column hr {
+  border-color: var(--blue4);
+  margin: var(--space-md) 0;
+}
+
+/* ==========================================================================
+   Wyrld Status Section
+   ========================================================================== */
+
+.wyrld-status {
+  background-color: var(--blue3);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-lg);
+  margin-bottom: var(--space-lg);
+}
+
+.wyrld-status-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.wyrld-status-item h3 {
+  color: var(--light-gray);
+  font-size: 0.9rem;
+  font-weight: normal;
+  margin: 0;
+}
+
+.wyrld-status-item p {
+  color: var(--bright-white);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Invite Section Styling
+   ========================================================================== */
+
+.invite-section {
+  width: fit-content;
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background-color: var(--blue4);
+  border-radius: var(--border-radius);
+}
+
+.invite-section label {
+  display: block;
+  color: var(--light-gray);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-xs);
+}
+
+.invite-section input[readonly] {
+  background-color: var(--main-dark);
+  border: 1px solid var(--blue);
+  color: var(--bright-white);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: 400px;
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   New Item Links
+   ========================================================================== */
+
+.dash-column>a[href^="/new"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 500;
+  padding: var(--space-sm) 0;
+  transition: color var(--transition-fast);
+}
+
+.dash-column>a[href^="/new"]:hover {
+  color: var(--bright-white);
 }
