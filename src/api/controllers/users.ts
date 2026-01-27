@@ -1,5 +1,5 @@
 import { genSalt, hash, compare } from "bcrypt";
-import { sign, verify } from "jsonwebtoken";
+import { sign, verify, SignOptions } from "jsonwebtoken";
 import mail from "../smtp/index.js";
 import { Request, Response, NextFunction } from "express";
 
@@ -26,8 +26,10 @@ declare module "express-session" {
   }
 }
 
-function generateAccessToken(id: string | number, expires: string) {
-  return sign({ id }, process.env.SECRET_KEY as string, { expiresIn: expires });
+function generateAccessToken(id: string | number, expires: string | number) {
+  return sign({ id }, process.env.SECRET_KEY as string, {
+    expiresIn: expires,
+  } as SignOptions);
 }
 
 function sendResetEmail(user: { email: string }, token: string) {
