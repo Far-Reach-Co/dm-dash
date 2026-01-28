@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <%
+    // Helper for level display
+    const levelDisplay = level => {
+      if (level === 0) return 'Cantrip';
+      const suffix = { 1: 'st', 2: 'nd', 3: 'rd' };
+      return level + (suffix[level] || 'th') + '-level';
+    };
+    const levelDisplayShort = level => level === 0 ? 'Cantrip' : 'Level ' + level;
+    const componentNames = { V: 'Verbal', S: 'Somatic', M: 'Material' };
+  %>
+
+  <title><%= spell.name %> - D&D 5E Spell | Far Reach Co.</title>
+  <meta name="description" content="<%= spell.name %> is a <%= levelDisplay(spell.level) %> <%= spell.school.name %> spell. <%= spell.desc[0].substring(0, 150) %>..." />
+  <meta name="keywords" content="<%= spell.name %> 5e, <%= spell.name %> spell, <%= spell.school.name %> spell, <%= spell.classes.map(c => c.name).join(' spell, ') %> spell, D&D 5E spells" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>" />
+  <meta property="og:title" content="<%= spell.name %> - D&D 5E Spell" />
+  <meta property="og:description" content="<%= levelDisplay(spell.level) %> <%= spell.school.name %> spell. Casting time: <%= spell.casting_time %>. Range: <%= spell.range %>." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= spell.name %> - D&D 5E Spell" />
+  <meta name="twitter:description" content="<%= levelDisplay(spell.level) %> <%= spell.school.name %> spell. Casting time: <%= spell.casting_time %>." />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": "<%= spell.name %> - D&D 5E Spell",
+      "headline": "<%= spell.name %>",
+      "description": "<%= levelDisplay(spell.level) %> <%= spell.school.name %> spell for <%= spell.classes.map(c => c.name).join(', ') %>",
+      "url": "https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Spells",
+            "item": "https://farreachco.com/dnd/5e/srd/spells"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "<%= spell.name %>",
+            "item": "https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>"
+          }
+        ]
+      },
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition",
+        "gamePlatform": "Tabletop"
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <!-- Breadcrumb -->
+    <div class="inline-div">
+      <small>
+        <a href="/dnd/5e/srd/contents">Contents</a> ->
+        <a href="/dnd/5e/srd/spells">Spells</a> ->
+        <div class="text-green"><%= spell.name %></div>
+      </small>
+    </div>
+    <hr />
+
+    <!-- Spell Header -->
+    <h1><%= spell.name %></h1>
+    <div class="inline-div">
+      <i><%= levelDisplay(spell.level) %></i>
+      <i><%= spell.school.name %></i>
+      <% if (spell.ritual) { %><i class="text-green">(Ritual)</i><% } %>
+    </div>
+
+    <br />
+    <hr class="w-75" />
+
+    <!-- Spell Stats -->
+    <div class="spell-stats">
+      <div class="inline-div">
+        <b>Casting Time:</b>
+        <div><%= spell.casting_time %></div>
+      </div>
+      <div class="inline-div">
+        <b>Range:</b>
+        <div><%= spell.range %></div>
+      </div>
+      <div class="inline-div">
+        <b>Components:</b>
+        <div>
+          <%= spell.components.join(', ') %>
+          <% if (spell.material) { %>
+          <i>(<%= spell.material %>)</i>
+          <% } %>
+        </div>
+      </div>
+      <div class="inline-div">
+        <b>Duration:</b>
+        <div>
+          <% if (spell.concentration) { %>
+          <span class="text-orange">Concentration,</span>
+          <% } %>
+          <%= spell.duration %>
+        </div>
+      </div>
+    </div>
+
+    <hr class="w-75" />
+    <br />
+
+    <!-- Spell Description -->
+    <div class="spell-description">
+      <% spell.desc.forEach((paragraph, index) => { %>
+        <% if (index > 0) { %>
+        <p class="pindent"><%= paragraph %></p>
+        <% } else { %>
+        <p><%= paragraph %></p>
+        <% } %>
+      <% }) %>
+    </div>
+
+    <!-- Higher Level -->
+    <% if (spell.higher_level && spell.higher_level.length) { %>
+    <br />
+    <div class="higher-level">
+      <b>At Higher Levels:</b>
+      <% spell.higher_level.forEach(text => { %>
+      <p><%= text %></p>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <br />
+    <hr class="w-75" />
+
+    <!-- Additional Details -->
+    <div class="spell-details">
+      <% if (spell.damage && spell.damage.damage_type) { %>
+      <div class="inline-div">
+        <b>Damage Type:</b>
+        <a href="/dnd/5e/srd/damage-types#<%= spell.damage.damage_type.index %>"><%= spell.damage.damage_type.name %></a>
+      </div>
+      <% } %>
+
+      <% if (spell.damage && spell.damage.damage_at_slot_level) { %>
+      <div class="inline-div">
+        <b>Damage by Slot Level:</b>
+      </div>
+      <div class="indent">
+        <ul>
+          <% Object.entries(spell.damage.damage_at_slot_level).forEach(([level, dice]) => { %>
+          <li>Level <%= level %>: <%= dice %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+
+      <% if (spell.damage && spell.damage.damage_at_character_level) { %>
+      <div class="inline-div">
+        <b>Damage by Character Level:</b>
+      </div>
+      <div class="indent">
+        <ul>
+          <% Object.entries(spell.damage.damage_at_character_level).forEach(([level, dice]) => { %>
+          <li>Level <%= level %>: <%= dice %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+
+      <% if (spell.heal_at_slot_level) { %>
+      <div class="inline-div">
+        <b>Healing by Slot Level:</b>
+      </div>
+      <div class="indent">
+        <ul>
+          <% Object.entries(spell.heal_at_slot_level).forEach(([level, dice]) => { %>
+          <li>Level <%= level %>: <%= dice %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+
+      <% if (spell.dc) { %>
+      <div class="inline-div">
+        <b>Saving Throw:</b>
+        <div><%= spell.dc.dc_type.name %></div>
+        <% if (spell.dc.dc_success) { %>
+        <i>(On success: <%= spell.dc.dc_success.toLowerCase().replace('_', ' ') %>)</i>
+        <% } %>
+      </div>
+      <% } %>
+
+      <% if (spell.area_of_effect) { %>
+      <div class="inline-div">
+        <b>Area of Effect:</b>
+        <div><%= spell.area_of_effect.size %> ft. <%= spell.area_of_effect.type %></div>
+      </div>
+      <% } %>
+    </div>
+
+    <br />
+    <hr class="w-75" />
+
+    <!-- Classes -->
+    <div class="spell-classes">
+      <b>Classes:</b>
+      <div class="indent">
+        <% spell.classes.forEach((cls, idx) => { %>
+        <a href="/dnd/5e/srd/classes#<%= cls.index %>"><%= cls.name %></a><%= idx < spell.classes.length - 1 ? ', ' : '' %>
+        <% }) %>
+      </div>
+    </div>
+
+    <% if (spell.subclasses && spell.subclasses.length) { %>
+    <div class="spell-subclasses">
+      <b>Subclasses:</b>
+      <div class="indent">
+        <% spell.subclasses.forEach((sub, idx) => { %>
+        <span><%= sub.name %></span><%= idx < spell.subclasses.length - 1 ? ', ' : '' %>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <br />
+    <hr />
+    <div style="margin-top: 20px;">
+      <a href="/dnd/5e/srd/spells">&larr; Back to Spell List</a>
+    </div>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

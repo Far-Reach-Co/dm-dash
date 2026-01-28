@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <%
+    const category = item.equipment_category?.name || 'Equipment';
+    const subCategory = item.category_range || item.armor_category || item.gear_category?.name || '';
+    const costStr = item.cost ? `${item.cost.quantity} ${item.cost.unit}` : '';
+  %>
+
+  <title><%= item.name %> - D&D 5E <%= category %> | Far Reach Co.</title>
+  <meta name="description" content="<%= item.name %> is a D&D 5E <%= subCategory || category %>. <%= costStr ? 'Cost: ' + costStr + '.' : '' %> <%= item.weight ? 'Weight: ' + item.weight + ' lb.' : '' %> <%= item.damage ? 'Damage: ' + item.damage.damage_dice + ' ' + item.damage.damage_type.name + '.' : '' %>" />
+  <meta name="keywords" content="<%= item.name %> 5e, <%= item.name %> D&D, <%= category %> 5e, D&D 5E equipment" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>" />
+  <meta property="og:title" content="<%= item.name %> - D&D 5E <%= category %>" />
+  <meta property="og:description" content="<%= subCategory || category %>. <%= costStr ? 'Cost: ' + costStr : '' %>" />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= item.name %> - D&D 5E <%= category %>" />
+  <meta name="twitter:description" content="<%= subCategory || category %>. <%= costStr ? 'Cost: ' + costStr : '' %>" />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": "<%= item.name %> - D&D 5E <%= category %>",
+      "headline": "<%= item.name %>",
+      "description": "<%= subCategory || category %> for D&D 5th Edition",
+      "url": "https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Equipment",
+            "item": "https://farreachco.com/dnd/5e/srd/equipment"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "<%= item.name %>",
+            "item": "https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>"
+          }
+        ]
+      },
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition",
+        "gamePlatform": "Tabletop"
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <!-- Breadcrumb -->
+    <div class="inline-div">
+      <small>
+        <a href="/dnd/5e/srd/contents">Contents</a> ->
+        <a href="/dnd/5e/srd/equipment">Equipment</a> ->
+        <div class="text-green"><%= item.name %></div>
+      </small>
+    </div>
+    <hr />
+
+    <!-- Item Header -->
+    <h1><%= item.name %></h1>
+    <div class="inline-div">
+      <i><%= category %></i>
+      <% if (subCategory) { %><i>- <%= subCategory %></i><% } %>
+    </div>
+
+    <br />
+    <hr class="w-75" />
+
+    <!-- Item Stats -->
+    <div class="equipment-stats">
+      <% if (item.cost) { %>
+      <div class="inline-div">
+        <b>Cost:</b>
+        <div><%= item.cost.quantity %> <%= item.cost.unit %></div>
+      </div>
+      <% } %>
+
+      <% if (item.weight) { %>
+      <div class="inline-div">
+        <b>Weight:</b>
+        <div><%= item.weight %> lb.</div>
+      </div>
+      <% } %>
+
+      <% if (item.damage) { %>
+      <div class="inline-div">
+        <b>Damage:</b>
+        <div><%= item.damage.damage_dice %> <a href="/dnd/5e/srd/damage-types#<%= item.damage.damage_type.index %>"><%= item.damage.damage_type.name %></a></div>
+      </div>
+      <% } %>
+
+      <% if (item.two_handed_damage) { %>
+      <div class="inline-div">
+        <b>Two-Handed Damage:</b>
+        <div><%= item.two_handed_damage.damage_dice %> <a href="/dnd/5e/srd/damage-types#<%= item.two_handed_damage.damage_type.index %>"><%= item.two_handed_damage.damage_type.name %></a></div>
+      </div>
+      <% } %>
+
+      <% if (item.range) { %>
+      <div class="inline-div">
+        <b>Range:</b>
+        <div>
+          <%= item.range.normal %> ft.
+          <% if (item.range.long) { %> / <%= item.range.long %> ft.<% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <% if (item.throw_range) { %>
+      <div class="inline-div">
+        <b>Throw Range:</b>
+        <div>
+          <%= item.throw_range.normal %> ft.
+          <% if (item.throw_range.long) { %> / <%= item.throw_range.long %> ft.<% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <% if (item.armor_class) { %>
+      <div class="inline-div">
+        <b>Armor Class:</b>
+        <div>
+          <%= item.armor_class.base %>
+          <% if (item.armor_class.dex_bonus) { %> + Dex<% if (item.armor_class.max_bonus) { %> (max <%= item.armor_class.max_bonus %>)<% } %><% } %>
+        </div>
+      </div>
+      <% } %>
+
+      <% if (item.str_minimum) { %>
+      <div class="inline-div">
+        <b>Strength Required:</b>
+        <div><%= item.str_minimum %></div>
+      </div>
+      <% } %>
+
+      <% if (item.stealth_disadvantage) { %>
+      <div class="inline-div">
+        <b>Stealth:</b>
+        <div class="text-red">Disadvantage</div>
+      </div>
+      <% } %>
+
+      <% if (item.properties && item.properties.length) { %>
+      <div class="inline-div">
+        <b>Properties:</b>
+        <div>
+          <% item.properties.forEach((prop, idx) => { %>
+          <a href="/dnd/5e/srd/weapon-properties#<%= prop.index %>"><%= prop.name %></a><%= idx < item.properties.length - 1 ? ', ' : '' %>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
+
+      <% if (item.speed) { %>
+      <div class="inline-div">
+        <b>Speed:</b>
+        <div><%= item.speed.quantity %> <%= item.speed.unit %></div>
+      </div>
+      <% } %>
+
+      <% if (item.capacity) { %>
+      <div class="inline-div">
+        <b>Capacity:</b>
+        <div><%= item.capacity %></div>
+      </div>
+      <% } %>
+    </div>
+
+    <% if (item.desc && item.desc.length) { %>
+    <hr class="w-75" />
+    <div class="equipment-description">
+      <% item.desc.forEach(paragraph => { %>
+      <p><%= paragraph %></p>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <% if (item.contents && item.contents.length) { %>
+    <hr class="w-75" />
+    <b>Contents:</b>
+    <ul>
+      <% item.contents.forEach(content => { %>
+      <li>
+        <a href="/dnd/5e/srd/equipment/<%= content.item.index %>"><%= content.item.name %></a>
+        <% if (content.quantity > 1) { %> (x<%= content.quantity %>)<% } %>
+      </li>
+      <% }) %>
+    </ul>
+    <% } %>
+
+    <br />
+    <hr />
+    <div style="margin-top: 20px;">
+      <a href="/dnd/5e/srd/equipment">&larr; Back to Equipment List</a>
+    </div>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

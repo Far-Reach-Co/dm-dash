@@ -1,218 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>D&D 5E Equipment & Magic Items - Complete Reference | Far Reach Co.</title>
-    <meta name="description" content="Complete D&D 5E equipment reference including weapons, armor, adventuring gear, tools, and magic items. Find stats, costs, properties, and descriptions for all equipment." />
-    <meta name="keywords" content="D&D 5E equipment, weapons, armor, magic items, adventuring gear, tools, equipment stats, weapon properties, D&D items" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/equipment" />
-    <meta property="og:title" content="D&D 5E Equipment & Magic Items - Complete Reference" />
-    <meta property="og:description" content="Complete D&D 5E equipment reference including weapons, armor, adventuring gear, and magic items." />
-    <meta property="og:site_name" content="Far Reach Co." />
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D&D 5E Equipment & Magic Items - Complete Reference | Far Reach Co.</title>
+  <meta name="description" content="Complete D&D 5E equipment reference with <%= equipmentData.length %> items and <%= magicItemsData.length %> magic items. Weapons, armor, adventuring gear, tools, and magical treasures." />
+  <meta name="keywords" content="D&D 5E equipment, weapons, armor, magic items, adventuring gear, tools, equipment stats, weapon properties, D&D items" />
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="D&D 5E Equipment & Magic Items - Complete Reference" />
-    <meta name="twitter:description" content="Complete D&D 5E equipment reference including weapons, armor, adventuring gear, and magic items." />
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/equipment" />
+  <meta property="og:title" content="D&D 5E Equipment & Magic Items - Complete Reference" />
+  <meta property="og:description" content="Complete D&D 5E equipment reference with <%= equipmentData.length %> items and <%= magicItemsData.length %> magic items." />
+  <meta property="og:site_name" content="Far Reach Co." />
 
-    <!-- JSON-LD Structured Data -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "D&D 5E Equipment Reference",
-      "description": "Complete equipment and magic items reference for D&D 5th Edition",
-      "url": "https://farreachco.com/dnd/5e/srd/equipment",
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://farreachco.com"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "D&D 5E SRD",
-            "item": "https://farreachco.com/dnd/5e/srd/contents"
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": "Equipment",
-            "item": "https://farreachco.com/dnd/5e/srd/equipment"
-          }
-        ]
-      }
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Equipment & Magic Items - Complete Reference" />
+  <meta name="twitter:description" content="Complete D&D 5E equipment reference with <%= equipmentData.length %> items and <%= magicItemsData.length %> magic items." />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "D&D 5E Equipment Reference",
+    "description": "Complete equipment and magic items reference for D&D 5th Edition",
+    "url": "https://farreachco.com/dnd/5e/srd/equipment",
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://farreachco.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "D&D 5E SRD",
+          "item": "https://farreachco.com/dnd/5e/srd/contents"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Equipment",
+          "item": "https://farreachco.com/dnd/5e/srd/equipment"
+        }
+      ]
     }
-    </script>
+  }
+  </script>
 
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/css/features/info.css" />
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <%- include('../../../partials/icons') %>
-  </head>
-  <%- include('../../../partials/google') %>
-  <body>
-    <%- include('../../../partials/nav') %>
-    <div class="container-fluid p-3 info-container">
-      <%- include('../../../partials/dnd/srdintro') %>
-      <br />
-      <div class="inline-div">
-        <small>
-          <a href="/dnd/5e/srd/contents">Contents</a> ->
-          <div class="text-green">Equipment</div>
-        </small>
-      </div>
-      <hr />
-      <h2>Equipment</h2>
-      <h3>Categories</h3>
-      <ul>
-        <% categoryData.forEach((cat) => { %>
-        <li><a href="#<%= cat.index %>"><%= cat.name %></a></li>
-        <% }); %>
-      </ul>
-      <hr />
-      <% categoryData.forEach((cat) => { %>
-      <div id="<%= cat.index %>">
-        <h4><%= cat.name %></h4>
-        <ul>
-          <% cat.equipment.forEach((item) => { %>
-          <li><a href="#<%= item.index %>"><%= item.name %></a></li>
-          <% }); %>
-        </ul>
-      </div>
-      <% }); %>
-      <hr />
-      <!-- equipment -->
-      <% equipmentData.forEach((equip) => { %>
-      <div class="inline-div" id="<%= equip.index %>">
-        <h3><%= equip.name %></h3>
-        <small>
-          <% if (equip.category_range) { %> - <%= equip.category_range %> <% }%>
-          <% if (equip.armor_category) { %> - <%= equip.armor_category %> <% }%>
-          <% if (equip.gear_category) { %> - <%= equip.gear_category.name %> <%
-          }%>
-        </small>
-      </div>
-      <div class="indent">
-        <% if (equip.range) { %>
-        <div class="inline-div">
-          <h4>Range:</h4>
-          <p>
-            Normal: <%= equip.range.normal %>; Long: <%= equip.range.long %>
-          </p>
-        </div>
-        <% } %> <% if (equip.throw_range) { %>
-        <div class="inline-div">
-          <h4>Throw Range:</h4>
-          <p>
-            Normal: <%= equip.throw_rangenormal %>; Long: <%=
-            equip.throw_range.long %>
-          </p>
-        </div>
-        <% } %> <% if (equip.damage) { %>
-        <h4>Damage:</h4>
-        <div class="indent">
-          <div class="inline-div">
-            <h4>Dice:</h4>
-            <p><%= equip.damage.damage_dice %></p>
-          </div>
-          <div class="inline-div">
-            <h4>Type:</h4>
-            <a
-              href="/dnd/5e/srd/damage-types#<%= equip.damage.damage_type.index %>"
-              ><%= equip.damage.damage_type.name %></a
-            >
-          </div>
-        </div>
-        <% } %> <% if (equip.two_handed_damage) { %>
-        <h4>Two Handed Damage:</h4>
-        <div class="indent">
-          <div class="inline-div">
-            <h4>Dice:</h4>
-            <p><%= equip.two_handed_damage.damage_dice %></p>
-          </div>
-          <div class="inline-div">
-            <h4>Type:</h4>
-            <a
-              href="/dnd/5e/srd/damage-types#<%= equip.two_handed_damage.damage_type.index %>"
-              ><%= equip.two_handed_damage.damage_type.name %></a
-            >
-          </div>
-        </div>
-        <% } %> <% if (equip.armor_class) { %>
-        <h4>Armor Class:</h4>
-        <% Object.entries(equip.armor_class).forEach((x) => { %>
-        <div class="indent">
-          <p><%= x[0] %>: <%= x[1] %></p>
-        </div>
-        <% }) %> <% } %> <% if (equip.str_minimum) { %>
-        <div class="inline-div">
-          <h4>Strength Minimum:</h4>
-          <p><%= equip.str_minimum %></p>
-        </div>
-        <% } %> <% if (equip.stealth_disadvantage) { %>
-        <div class="inline-div">
-          <h4>Stealth Disadvantage:</h4>
-          <p><%= equip.stealth_disadvantage %></p>
-        </div>
-        <% } %>
-        <!--None specific -->
-        <% if (equip.cost) { %>
-        <div class="inline-div">
-          <h4>Cost:</h4>
-          <p><%= equip.cost.quantity %> <%= equip.cost.unit %></p>
-        </div>
-        <% } %> <% if (equip.weight) { %>
-        <div class="inline-div">
-          <h4>Weight:</h4>
-          <p><%= equip.weight %></p>
-        </div>
-        <% } %> <% if (equip.properties && equip.properties.length) { %>
-        <div class="inline-div">
-          <h4>Properties:</h4>
-          <% equip.properties.forEach(property => { %>
-          <a href="/dnd/5e/srd/weapon-properties#<%= property.index %>"
-            ><%= property.name %>
-          </a>
-          <% }) %>
-        </div>
-        <% } %> <% if (equip.desc) { %> <% equip.desc.forEach((str, index) => {
-        %>
-        <p><%= str %></p>
-        <% }) %> <% }%> <% if (equip.contents && equip.contents.length) { %>
-        <h4>Contents:</h4>
-        <ul>
-          <% equip.contents.forEach(obj => { %>
-          <li><a href="#<%= obj.item.index %>"><%= obj.item.name %></a></li>
-          <% }) %>
-        </ul>
-        <% }%>
-      </div>
-      <br />
-      <% }); %>
-      <!-- magic items -->
-      <% magicItemsData.forEach((mItem) => { %>
-      <div class="inline-div" id="<%= mItem.index %>">
-        <h3><%= mItem.name %></h3>
-        <small>- <%= mItem.equipment_category.name %></small>
-      </div>
-      <div class="indent">
-        <% mItem.desc.forEach((str, index) => { %>
-        <p><%= str %></p>
-        <% }) %>
-      </div>
-      <br />
-      <% }); %>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <div class="inline-div">
+      <small>
+        <a href="/dnd/5e/srd/contents">Contents</a> ->
+        <div class="text-green">Equipment</div>
+      </small>
     </div>
-    <%- include('../../../partials/footer') %>
-  </body>
+    <hr />
+    <h2>Equipment</h2>
+    <p>Browse our complete collection of <%= equipmentData.length %> equipment items from the D&D 5E SRD. Click any item to view full details including cost, weight, and properties.</p>
+    <ul style="column-count: 3; column-gap: 20px;">
+      <% equipmentData.sort((a, b) => a.name.localeCompare(b.name)).forEach(item => { %>
+      <li>
+        <a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a>
+      </li>
+      <% }); %>
+    </ul>
+
+    <hr />
+    <h2>Magic Items</h2>
+    <p>Browse our complete collection of <%= magicItemsData.length %> magic items from the D&D 5E SRD. Click any item to view full details including rarity and magical properties.</p>
+    <ul style="column-count: 3; column-gap: 20px;">
+      <% magicItemsData.sort((a, b) => a.name.localeCompare(b.name)).forEach(item => { %>
+      <li>
+        <a href="/dnd/5e/srd/magic-items/<%= item.index %>"><%= item.name %></a>
+      </li>
+      <% }); %>
+    </ul>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
 </html>

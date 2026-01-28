@@ -4,8 +4,8 @@
 User-agent: *
 Allow: /
 
-# Sitemap location
-Sitemap: https://farreachco.com/sitemap.xml
+# Sitemap location (gzipped for faster loading)
+Sitemap: https://farreachco.com/sitemap.xml.gz
 
 # Allow specific AI crawlers (explicit welcome)
 User-agent: GPTBot
