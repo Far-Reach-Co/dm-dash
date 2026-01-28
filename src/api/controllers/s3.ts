@@ -39,22 +39,66 @@ const cloudFrontPrivateKeyPath = path.join(
   "..",
   "..",
   "..",
-  "private_frc_cloudfront_key.pem"
+  "private_frc_cloudfront_key.pem",
 );
 const cloudFrontPrivateKey = fs.readFileSync(cloudFrontPrivateKeyPath, "utf8");
 const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
-const cloudFrontSigner = new CloudFront.Signer(cloudFrontKeyId, cloudFrontPrivateKey);
+const cloudFrontSigner = new CloudFront.Signer(
+  cloudFrontKeyId,
+  cloudFrontPrivateKey,
+);
 
 // Signed URL cache settings - cache for 2.5 days (URLs expire in 3 days)
 const SIGNED_URL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 2.5; // 2.5 days
 const SIGNED_URL_CACHE_PREFIX = "signed_url:";
 
+// === Helper Functions ===
+
 function getSignedUrlCacheKey(imageId: number | string): string {
   return `${SIGNED_URL_CACHE_PREFIX}${imageId}`;
 }
 
-async function invalidateSignedUrlCache(imageId: number | string): Promise<void> {
+async function invalidateSignedUrlCache(
+  imageId: number | string,
+): Promise<void> {
   await redisClient.del(getSignedUrlCacheKey(imageId));
+}
+
+function generateSignedUrl(fileName: string): string {
+  const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${fileName}`;
+  const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days
+  return cloudFrontSigner.getSignedUrl({
+    url: cloudFrontUrl,
+    expires: expiresAt,
+  });
+}
+
+function cacheSignedUrl(imageId: number | string, url: string): void {
+  redisClient
+    .setEx(getSignedUrlCacheKey(imageId), SIGNED_URL_CACHE_TTL_SECONDS, url)
+    .catch((err) => console.error("Failed to cache signed URL:", err));
+}
+
+async function uploadToS3(params: S3.PutObjectRequest): Promise<string> {
+  return new Promise((resolve, reject) => {
+    s3.upload(params, (err: any, data: { Location: string }) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(data.Location);
+    });
+  });
+}
+
+async function deleteFromS3(bucket: string, key: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    s3.deleteObject({ Bucket: bucket, Key: key }, (err, data) => {
+      if (err) {
+        reject(err);
+      }
+      resolve();
+    });
+  });
 }
 
 interface GetSignedUrlsRequestObject {
@@ -66,7 +110,7 @@ interface GetSignedUrlsRequestObject {
 async function getSignedUrlsHandler(
   req: GetSignedUrlsRequestObject, // note that the request object type will change
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     if (!req.body.image_ids.length) return res.send([]);
@@ -90,25 +134,15 @@ async function getSignedUrls(images: Image[]) {
     if (cachedUrl) {
       urls[imageData.id] = cachedUrl;
     } else {
-      // Generate signed URL
-      const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
-      const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days
-      const signedUrl = cloudFrontSigner.getSignedUrl({
-        url: cloudFrontUrl,
-        expires: expiresAt,
-      });
+      const signedUrl = generateSignedUrl(imageData.file_name);
       urls[imageData.id] = signedUrl;
       uncachedImages.push({ id: imageData.id, url: signedUrl });
     }
   }
 
   // Cache new URLs in background (don't await)
-  if (uncachedImages.length > 0) {
-    Promise.all(
-      uncachedImages.map(({ id, url }) =>
-        redisClient.setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url)
-      )
-    ).catch((err) => console.error("Failed to cache signed URLs:", err));
+  for (const { id, url } of uncachedImages) {
+    cacheSignedUrl(id, url);
   }
 
   return urls;
@@ -150,7 +184,6 @@ interface NewImageForProjectRequestObject extends Request {
     bucket_name: string;
     folder_name: string;
     project_id: number;
-    current_file_id?: number;
     make_image_small: boolean;
   };
 }
@@ -170,7 +203,7 @@ function computeAwsImageParamsFromRequest(req: Request, filePath: string) {
 }
 
 async function checkUserProLimitReachedAndAuth(
-  sessionUser: string | number | undefined
+  sessionUser: string | number | undefined,
 ) {
   if (!sessionUser) throw new Error("User is not logged in");
   const userData = await getUserByIdQuery(sessionUser);
@@ -185,7 +218,7 @@ async function checkUserProLimitReachedAndAuth(
 
 async function checkProjectProLimitReachedAndAuth(
   projectId: number | undefined,
-  sessionUser: string | number | undefined
+  sessionUser: string | number | undefined,
 ) {
   if (!sessionUser) throw new Error("User is not logged in");
   if (!projectId) throw new Error("Missing project ID");
@@ -196,7 +229,7 @@ async function checkProjectProLimitReachedAndAuth(
   if (sessionUser != project.user_id) {
     const projectUserData = await getProjectUserByUserAndProjectQuery(
       sessionUser,
-      projectId
+      projectId,
     );
     if (!projectUserData.rows.length)
       throw new Error("Not authorized to update this resource");
@@ -224,7 +257,7 @@ async function makeImageSmall(filePath: string) {
     const newFilePathFromResizedImage = await resizeImage(
       filePath,
       smallImageWidth,
-      smallImageWidth / aspectRatio
+      smallImageWidth / aspectRatio,
     );
     // on success
     // remove previous file
@@ -237,58 +270,40 @@ async function makeImageSmall(filePath: string) {
 async function newImageForProject(
   req: NewImageForProjectRequestObject,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  // error if no file
   if (!req.file) return next();
-  // setup
+
   let filePath = `file_uploads/${req.file.filename}`;
-  let image = null;
 
   try {
-    // check project data usage and pro account status
     await checkProjectProLimitReachedAndAuth(
       req.body.project_id,
-      req.session.user
+      req.session.user,
     );
 
     const params = computeAwsImageParamsFromRequest(req, filePath);
     let fileSize = req.file.size;
 
-    // adjust image size
     if (req.body.make_image_small) {
       const newFilePathFromResizedImage = await makeImageSmall(filePath);
-      // if we have a new file
       if (newFilePathFromResizedImage) {
-        // set new file path to resized image
         filePath = newFilePathFromResizedImage;
-        // update params for aws upload
         params.Body = readFileSync(newFilePathFromResizedImage);
-        // update file size
         const stats = statSync(newFilePathFromResizedImage);
-        const fileSizeInBytes = stats.size;
-        fileSize = fileSizeInBytes;
+        fileSize = stats.size;
       }
     }
 
-    // save image in db
     const imageData = await addImageQuery({
       original_name: req.file.originalname,
       size: fileSize,
       file_name: params.Key,
     });
-    image = imageData.rows[0];
+    const image = imageData.rows[0];
 
-    // make an upload to s3 bucket
-    await new Promise((resolve, reject) => {
-      s3.upload(params, (err: any, data: { Location: unknown }) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(data.Location);
-      });
-    });
-    // Log image upload event
+    await uploadToS3(params as S3.PutObjectRequest);
+
     logEventAsync({
       userId: req.session.user,
       projectId: req.body.project_id,
@@ -301,63 +316,25 @@ async function newImageForProject(
       req,
     });
 
-    // Generate signed URL for immediate use
-    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-    const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days
-    const signedUrl = cloudFrontSigner.getSignedUrl({
-      url: cloudFrontUrl,
-      expires: expiresAt,
-    });
-
-    // Cache the signed URL in background
-    redisClient
-      .setEx(getSignedUrlCacheKey(image.id), SIGNED_URL_CACHE_TTL_SECONDS, signedUrl)
-      .catch((err) => console.error("Failed to cache signed URL:", err));
-
-    // send back to client with signed URL
-    res.send({ ...image, src: signedUrl });
-  } catch (err) {
-    // delete file in storage
-    unlinkSync(filePath);
-    return next(err);
-  }
-  // continue
-
-  // delete file in storage
-  unlinkSync(filePath);
-
-  try {
-    // prepare to update project data usage
-    let dataUsageCount = 0;
-    dataUsageCount += image.size;
-    // if current file, remove current file (which is being replaced with the new file) from the bucket
-    if (req.body.current_file_id) {
-      const oldImageData = await getImageQuery(req.body.current_file_id);
-      const oldImage = oldImageData.rows[0];
-
-      await removeImageFromBucket(
-        `${req.body.bucket_name}/${req.body.folder_name}`,
-        oldImage
-      );
-      await removeImageQuery(req.body.current_file_id);
-
-      // Invalidate signed URL cache for replaced image
-      invalidateSignedUrlCache(req.body.current_file_id).catch((err) =>
-        console.error("Failed to invalidate signed URL cache:", err)
-      );
-
-      dataUsageCount -= oldImage.size;
-    }
-    // update project data usage
+    // Update project data usage
     const projectData = await getProjectQuery(req.body.project_id);
     const project = projectData.rows[0];
-    const newCalculatedData = project.used_data_in_bytes + dataUsageCount;
     await editProjectQuery(project.id, {
-      used_data_in_bytes: newCalculatedData,
+      used_data_in_bytes: project.used_data_in_bytes + image.size,
     });
+
+    const signedUrl = generateSignedUrl(image.file_name);
+    cacheSignedUrl(image.id, signedUrl);
+
+    res.send({ ...image, src: signedUrl });
   } catch (err) {
-    console.log(err);
-    next(err);
+    return next(err);
+  } finally {
+    try {
+      unlinkSync(filePath);
+    } catch {
+      // File may not exist if error occurred before creation
+    }
   }
 }
 
@@ -372,56 +349,39 @@ interface NewImageForUserRequestObject extends Request {
 async function newImageForUser(
   req: NewImageForUserRequestObject,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
-  // error if no file
   if (!req.file) return next();
-  // setup
+
   let filePath = `file_uploads/${req.file.filename}`;
-  let image = null;
 
   try {
     if (!req.session.user) throw new Error("User is not logged in");
-    // check user data usage and pro account status
+
     await checkUserProLimitReachedAndAuth(req.session.user);
 
     const params = computeAwsImageParamsFromRequest(req, filePath);
     let fileSize = req.file.size;
 
-    // adjust image size
     if (req.body.make_image_small) {
       const newFilePathFromResizedImage = await makeImageSmall(filePath);
-      // if we have a new file
       if (newFilePathFromResizedImage) {
-        // set new file path to resized image
         filePath = newFilePathFromResizedImage;
-        // update params for aws upload
         params.Body = readFileSync(newFilePathFromResizedImage);
-        // update file size
         const stats = statSync(newFilePathFromResizedImage);
-        const fileSizeInBytes = stats.size;
-        fileSize = fileSizeInBytes;
+        fileSize = stats.size;
       }
     }
 
-    // save image in db
     const imageData = await addImageQuery({
       original_name: req.file.originalname,
       size: fileSize,
       file_name: params.Key,
     });
-    image = imageData.rows[0];
+    const image = imageData.rows[0];
 
-    // make an upload to s3 bucket
-    await new Promise((resolve, reject) => {
-      s3.upload(params, (err: any, data: { Location: unknown }) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(data.Location);
-      });
-    });
-    // Log image upload event
+    await uploadToS3(params as S3.PutObjectRequest);
+
     logEventAsync({
       userId: req.session.user,
       eventType: EventType.IMAGE_UPLOADED,
@@ -433,45 +393,25 @@ async function newImageForUser(
       req,
     });
 
-    // Generate signed URL for immediate use
-    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-    const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days
-    const signedUrl = cloudFrontSigner.getSignedUrl({
-      url: cloudFrontUrl,
-      expires: expiresAt,
-    });
-
-    // Cache the signed URL in background
-    redisClient
-      .setEx(getSignedUrlCacheKey(image.id), SIGNED_URL_CACHE_TTL_SECONDS, signedUrl)
-      .catch((err) => console.error("Failed to cache signed URL:", err));
-
-    // send back to client with signed URL
-    res.send({ ...image, src: signedUrl });
-  } catch (err) {
-    // delete file in storage
-    unlinkSync(filePath);
-    return next(err);
-  }
-  // continue
-
-  // delete file in storage
-  unlinkSync(filePath);
-
-  try {
-    // prepare to update user data usage
-    let dataUsageCount = 0;
-    dataUsageCount += image.size;
-    // update user data usage
+    // Update user data usage
     const userData = await getUserByIdQuery(req.session.user);
     const user = userData.rows[0];
-    const newCalculatedData = user.used_data_in_bytes + dataUsageCount;
     await editUserQuery(user.id, {
-      used_data_in_bytes: newCalculatedData,
+      used_data_in_bytes: user.used_data_in_bytes + image.size,
     });
+
+    const signedUrl = generateSignedUrl(image.file_name);
+    cacheSignedUrl(image.id, signedUrl);
+
+    res.send({ ...image, src: signedUrl });
   } catch (err) {
-    console.log(err);
-    next(err);
+    return next(err);
+  } finally {
+    try {
+      unlinkSync(filePath);
+    } catch {
+      // File may not exist if error occurred before creation
+    }
   }
 }
 
@@ -485,36 +425,22 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
     const imageData = await getImageQuery(req.params.id);
     const image = imageData.rows[0] as imageDataResObject;
 
-    // Check Redis cache first
     const cacheKey = getSignedUrlCacheKey(image.id);
     const cachedUrl = await redisClient.get(cacheKey);
 
     if (cachedUrl) {
       image.src = cachedUrl;
     } else {
-      // Generate signed URL using cached signer
-      const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-      const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days from now
-
-      image.src = cloudFrontSigner.getSignedUrl({
-        url: cloudFrontUrl,
-        expires: expiresAt,
-      });
-
-      // Cache in background
-      redisClient
-        .setEx(cacheKey, SIGNED_URL_CACHE_TTL_SECONDS, image.src)
-        .catch((err) => console.error("Failed to cache signed URL:", err));
+      image.src = generateSignedUrl(image.file_name);
+      cacheSignedUrl(image.id, image.src);
     }
 
-    // Get and append recordImage id
     const recordImageData = await getRecordImagesByImageQuery(image.id);
     const recordsData = await Promise.all(
       recordImageData.rows.map(async (ri) => {
         const recordData = await getRecordQuery(ri.record_id);
-        const record = recordData.rows[0];
-        return record;
-      })
+        return recordData.rows[0];
+      }),
     );
     image.records = recordsData;
     res.send(image);
@@ -527,29 +453,25 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
 async function removeImageByProject(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    // remove current file
     const imageData = await getImageQuery(req.params.image_id);
     const image = imageData.rows[0];
 
-    await removeImageFromBucket("wyrld/images", image);
+    await deleteFromS3("wyrld/images", image.file_name);
     await removeImageQuery(req.params.image_id);
 
-    // Invalidate signed URL cache
     invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-      console.error("Failed to invalidate signed URL cache:", err)
+      console.error("Failed to invalidate signed URL cache:", err),
     );
 
-    // update project data usage
     const projectData = await getProjectQuery(req.params.project_id);
     const project = projectData.rows[0];
-    const newCalculatedData = project.used_data_in_bytes - image.size;
     await editProjectQuery(project.id, {
-      used_data_in_bytes: newCalculatedData,
+      used_data_in_bytes: project.used_data_in_bytes - image.size,
     });
-    // Log image deletion event
+
     logEventAsync({
       userId: req.session.user,
       projectId: req.params.project_id,
@@ -571,33 +493,28 @@ async function removeImageByProject(
 async function removeImageByTableUser(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
-    // remove current file
     const imageData = await getImageQuery(req.params.image_id);
     const image = imageData.rows[0];
 
-    await removeImageFromBucket("wyrld/images", image);
+    await deleteFromS3("wyrld/images", image.file_name);
     await removeImageQuery(req.params.image_id);
 
-    // Invalidate signed URL cache
     invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-      console.error("Failed to invalidate signed URL cache:", err)
+      console.error("Failed to invalidate signed URL cache:", err),
     );
 
-    // get table
     const tableData = await getTableViewQuery(req.params.table_id);
     const table = tableData.rows[0];
 
-    // update user data usage
     const userData = await getUserByIdQuery(table.user_id);
     const user = userData.rows[0];
-    const newCalculatedData = user.used_data_in_bytes - image.size;
     await editUserQuery(user.id, {
-      used_data_in_bytes: newCalculatedData,
+      used_data_in_bytes: user.used_data_in_bytes - image.size,
     });
-    // Log image deletion event
+
     logEventAsync({
       userId: req.session.user,
       eventType: EventType.IMAGE_DELETED,
@@ -617,22 +534,10 @@ async function removeImageByTableUser(
 
 async function removeImageFromBucket(
   bucket: string,
-  image: { file_name: string }
+  image: { file_name: string },
 ) {
   try {
-    const params = {
-      Bucket: bucket,
-      Key: image.file_name,
-    };
-
-    await new Promise((resolve, reject) => {
-      s3.deleteObject(params, (err, data) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(data.DeleteMarker);
-      });
-    });
+    await deleteFromS3(bucket, image.file_name);
   } catch (err) {
     console.log(err);
   }
