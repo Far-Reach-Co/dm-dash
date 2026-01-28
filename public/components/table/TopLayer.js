@@ -14,177 +14,137 @@ export default class TopLayer {
     this.projectId = searchParams.get("project");
   }
 
+  getRecordHref = (recordId) => {
+    const base = `/record?id=${recordId}`;
+    return this.projectId ? `${base}&project_id=${this.projectId}` : base;
+  };
+
+  getSelectedObjectInfo = async (obj) => {
+    const info = {
+      idPrefix: "lin",
+      displayName: "",
+      imageSrc: "",
+      recordTitle: null,
+      recordHref: null,
+    };
+
+    if (!obj.imageId) return info;
+
+    info.idPrefix = "img";
+    const image = await getThings(`/api/get_image/${obj.imageId}`);
+    info.displayName = truncateString(image.original_name, 12);
+    info.imageSrc = image.src;
+
+    const records = image.records || [];
+    const publicRecord = records.find((r) => r.is_public);
+    if (publicRecord) {
+      info.recordTitle = truncateString(publicRecord.title, 12);
+      info.recordHref = this.getRecordHref(publicRecord.id);
+    }
+
+    return info;
+  };
+
   renderSelectedObjectInfoElem = async () => {
     const obj = this.tableApp.getCurrentSelectedObject();
-    if (!obj) {
-      return createElement("div", { class: "d-none" });
-    }
+    if (!obj) return this.hiddenElement();
 
-    let displayName = "";
-    let imageSrc = "";
-    let IdPrefix = "lin";
-    let imageAssociatedRecordTitle = null;
-    let associatedRecordHref = null;
+    const { idPrefix, displayName, imageSrc, recordTitle, recordHref } =
+      await this.getSelectedObjectInfo(obj);
 
-    if (obj.imageId) {
-      IdPrefix = "img";
-      const image = await getThings(`/api/get_image/${obj.imageId}`);
-      displayName = truncateString(image.original_name, 12);
-      imageSrc = image.src;
-      imageAssociatedRecordTitle =
-        image.records.length && image.records[0].is_public
-          ? truncateString(image.records[0].title, 12)
-          : null;
-      if (imageAssociatedRecordTitle) {
-        associatedRecordHref = this.projectId
-          ? `/record?id=${image.records[0].id}&project_id=${this.projectId}`
-          : `/record?id=${image.records[0].id}`;
-      }
-    }
+    const thumbnailElem =
+      obj.type === "image"
+        ? createElement("img", { class: "me-1", src: imageSrc, width: 30, height: 30 })
+        : this.hiddenElement();
 
-    return createElement(
-      "div",
-      { class: "table-config selected-obj-info-elem" },
-      [
-        createElement(
-          "div",
+    const nameElem = recordTitle
+      ? createElement(
+          "small",
           {},
-          `${IdPrefix}-${truncateString(obj.id, 8, "")}`,
-        ),
-        createElement("div", { class: "d-flex flex-row" }, [
-          obj.type == "image"
-            ? createElement("img", {
-                class: "me-1",
-                src: imageSrc,
-                width: 30,
-                height: 30,
-              })
-            : createElement("div", { class: "d-none" }),
-          imageAssociatedRecordTitle
-            ? createElement(
-                "small",
-                {},
-                createElement(
-                  "a",
-                  {
-                    href: associatedRecordHref,
-                    rel: "noopener noreferrer",
-                    target: "_blank",
-                  },
-                  imageAssociatedRecordTitle,
-                ),
-              )
-            : createElement("small", {}, `"${displayName}"`),
-        ]),
-        createElement("small", {}, "Aura Color"),
-        createElement(
-          "div",
-          {
-            class: "d-flex flex-row align-items-start",
-          },
-          [
-            createElement(
-              "input",
-              {
-                style:
-                  "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
-                type: "color",
-                id: "colorpicker",
-                name: "colorpicker",
-                value: obj.shadow && obj.shadow.color ? obj.shadow.color : null,
-              },
-              null,
-              {
-                type: "input",
-                event: (e) => {
-                  console.log(e.target.value);
-                  obj.set({
-                    shadow: {
-                      color: e.target.value,
-                      blur: 30,
-                      offsetX: 0,
-                      offsetY: 0,
-                    },
-                  });
-                  this.tableApp.canvasRenderAll();
-                  socketIntegration.imageMoved(obj);
-                },
-              },
-            ),
-            createElement("button", {}, "Clear", {
-              type: "click",
-              event: (e) => {
-                obj.set({
-                  shadow: null,
-                });
-                this.tableApp.canvasRenderAll();
-                socketIntegration.imageMoved(obj);
-              },
-            }),
-          ],
-        ),
-      ],
-    );
+          createElement(
+            "a",
+            { href: recordHref, rel: "noopener noreferrer", target: "_blank" },
+            recordTitle
+          )
+        )
+      : createElement("small", {}, `"${displayName}"`);
+
+    return createElement("div", { class: "table-config selected-obj-info-elem" }, [
+      createElement("div", {}, `${idPrefix}-${truncateString(obj.id, 8, "")}`),
+      createElement("div", { class: "d-flex flex-row" }, [thumbnailElem, nameElem]),
+      createElement("small", {}, "Aura Color"),
+      this.renderAuraColorPicker(obj),
+    ]);
+  };
+
+  renderAuraColorPicker = (obj) => {
+    const setAura = (color) => {
+      obj.set({
+        shadow: color ? { color, blur: 30, offsetX: 0, offsetY: 0 } : null,
+      });
+      this.tableApp.canvasRenderAll();
+      socketIntegration.imageMoved(obj);
+    };
+
+    return createElement("div", { class: "d-flex flex-row align-items-start" }, [
+      createElement(
+        "input",
+        {
+          style: "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
+          type: "color",
+          id: "colorpicker",
+          name: "colorpicker",
+          value: obj.shadow?.color ?? null,
+        },
+        null,
+        { type: "input", event: (e) => setAura(e.target.value) }
+      ),
+      createElement("button", {}, "Clear", {
+        type: "click",
+        event: () => setAura(null),
+      }),
+    ]);
+  };
+
+  isOwnerOrManager = () => {
+    return USERID == this.tableView.user_id || IS_MANAGER_OR_OWNER;
+  };
+
+  hiddenElement = () => createElement("div", { class: "d-none" });
+
+  layerStyles = {
+    Map: { class: "text-orange", label: "Map Layer" },
+    Object: { class: "text-green", label: "Object Layer" },
+    Fog: { class: "text-light-gray", label: "Fog Layer" },
   };
 
   renderStyledLayerInfoElem = () => {
-    let layerInfo;
-
-    switch (this.tableApp.currentLayer) {
-      case "Map":
-        layerInfo = createElement(
-          "small",
-          { class: "text-orange" },
-          "Map Layer",
-        );
-        break;
-      case "Object":
-        layerInfo = createElement(
-          "small",
-          { class: "text-green" },
-          "Object Layer",
-        );
-        break;
-      case "Fog":
-        layerInfo = createElement(
-          "small",
-          { class: "text-light-gray" },
-          "Fog Layer",
-        );
-        break;
-    }
-
-    return layerInfo;
+    const style = this.layerStyles[this.tableApp.currentLayer];
+    return createElement("small", { class: style.class }, style.label);
   };
 
   renderLayersElem = () => {
-    if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
-      return createElement("div", { class: "d-none" });
-    } else {
-      return createElement("div", { class: "table-config layers-elem" }, [
-        this.renderStyledLayerInfoElem(),
-        createElement(
-          "button",
-          {
-            title: "Change the layer you are interacting with",
+    if (!this.isOwnerOrManager()) return this.hiddenElement();
+
+    return createElement("div", { class: "table-config layers-elem" }, [
+      this.renderStyledLayerInfoElem(),
+      createElement(
+        "button",
+        { title: "Change the layer you are interacting with" },
+        "Switch Layer",
+        {
+          type: "click",
+          event: () => {
+            this.tableApp.changeLayer();
+            this.render();
           },
-          "Switch Layer",
-          {
-            type: "click",
-            event: () => {
-              this.tableApp.changeLayer();
-              this.render();
-            },
-          },
-        ),
-      ]);
-    }
+        }
+      ),
+    ]);
   };
 
   renderGridControlElem = () => {
-    if (USERID != this.tableView.user_id && !IS_MANAGER_OR_OWNER) {
-      return createElement("div", { class: "d-none" });
-    }
+    if (!this.isOwnerOrManager()) return this.hiddenElement();
 
     const gridGroup = this.tableApp.canvasLayer.gridManager?.getGroup();
     const isVisible = gridGroup?.visible ?? false;

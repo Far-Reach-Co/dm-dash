@@ -83,41 +83,32 @@ export default class TableSidebar {
     this.domComponent.innerHTML = "";
   };
 
-  uploadTableImage = async (file) => {
-    let newImage;
-    if (this.projectId) {
-      newImage = await uploadProjectImage(
-        file,
-        this.projectId,
-        this.makeImageSmall,
-      );
-    } else {
-      newImage = await uploadUserImage(file, this.makeImageSmall);
-    }
+  getCurrentFolderId = () => {
+    return this.tableSidebarFolderComponent.currentFolder?.id ?? null;
+  };
 
-    if (newImage) {
-      // add new table image
-      let tableImage;
-      if (this.projectId) {
-        tableImage = await postThing(`/api/add_table_image_by_project`, {
-          project_id: this.projectId,
-          image_id: newImage.id,
-          folder_id: this.tableSidebarFolderComponent.currentFolder
-            ? this.tableSidebarFolderComponent.currentFolder.id
-            : null,
-        });
-      } else {
-        tableImage = await postThing(`/api/add_table_image_by_user`, {
-          image_id: newImage.id,
-          folder_id: this.tableSidebarFolderComponent.currentFolder
-            ? this.tableSidebarFolderComponent.currentFolder.id
-            : null,
-        });
-      }
-      // Return data for appending to sidebar
-      return { image: newImage, tableImage };
+  // Helper to handle project vs user API routing
+  postByContext = (projectEndpoint, userEndpoint, data) => {
+    if (this.projectId) {
+      return postThing(projectEndpoint, { ...data, project_id: this.projectId });
     }
-    return null;
+    return postThing(userEndpoint, data);
+  };
+
+  uploadTableImage = async (file) => {
+    const newImage = this.projectId
+      ? await uploadProjectImage(file, this.projectId, this.makeImageSmall)
+      : await uploadUserImage(file, this.makeImageSmall);
+
+    if (!newImage) return null;
+
+    const tableImage = await this.postByContext(
+      "/api/add_table_image_by_project",
+      "/api/add_table_image_by_user",
+      { image_id: newImage.id, folder_id: this.getCurrentFolderId() }
+    );
+
+    return { image: newImage, tableImage };
   };
 
   addImageToSidebar = async (e) => {
@@ -282,45 +273,27 @@ export default class TableSidebar {
             e.preventDefault();
             const formData = new FormData(e.target);
             const formProps = Object.fromEntries(formData);
-            const parentFolderId =
-              this.tableSidebarFolderComponent.currentFolder &&
-              this.tableSidebarFolderComponent.currentFolder.id
-                ? this.tableSidebarFolderComponent.currentFolder.id
-                : null;
-            const isSub = parentFolderId ? true : false;
+            const parentFolderId = this.getCurrentFolderId();
 
-            // close the modal
             modal.hide();
-            // show folder loading
             this.tableSidebarFolderComponent.toggleFolderLoading();
 
-            let newFolder = null;
             try {
-              if (this.projectId) {
-                newFolder = await postThing(
-                  "/api/add_table_folder_by_project",
-                  {
-                    title: formProps.title,
-                    project_id: this.projectId,
-                    is_sub: isSub,
-                    parent_folder_id: parentFolderId,
-                  },
-                );
-              } else {
-                newFolder = await postThing("/api/add_table_folder_by_user", {
+              await this.postByContext(
+                "/api/add_table_folder_by_project",
+                "/api/add_table_folder_by_user",
+                {
                   title: formProps.title,
-                  is_sub: isSub,
+                  is_sub: Boolean(parentFolderId),
                   parent_folder_id: parentFolderId,
-                });
-              }
-              // on success clean folders so render gets fresh data
+                }
+              );
               this.tableSidebarFolderComponent.clearFolders();
-              // stop loading
-              this.tableSidebarFolderComponent.toggleFolderLoading();
             } catch (err) {
               console.log(err);
-              this.tableSidebarFolderComponent.toggleFolderLoading();
               window.alert("Something went wrong when creating a new folder");
+            } finally {
+              this.tableSidebarFolderComponent.toggleFolderLoading();
             }
           },
         },
