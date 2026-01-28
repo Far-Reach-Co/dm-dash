@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <%
+    const category = item.equipment_category?.name || 'Magic Item';
+    const rarity = item.rarity?.name || 'Unknown';
+    const descPreview = item.desc && item.desc.length > 1 ? item.desc[1].substring(0, 150) : '';
+  %>
+
+  <title><%= item.name %> - D&D 5E Magic Item | Far Reach Co.</title>
+  <meta name="description" content="<%= item.name %> is a <%= rarity %> magic item in D&D 5E. <%= descPreview %>..." />
+  <meta name="keywords" content="<%= item.name %> 5e, <%= item.name %> magic item, <%= rarity %> magic item, D&D 5E magic items" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/magic-items/<%= item.index %>" />
+  <meta property="og:title" content="<%= item.name %> - D&D 5E Magic Item" />
+  <meta property="og:description" content="<%= rarity %> magic item. <%= category %>." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= item.name %> - D&D 5E Magic Item" />
+  <meta name="twitter:description" content="<%= rarity %> magic item. <%= category %>." />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "name": "<%= item.name %> - D&D 5E Magic Item",
+      "headline": "<%= item.name %>",
+      "description": "<%= rarity %> <%= category %> for D&D 5th Edition",
+      "url": "https://farreachco.com/dnd/5e/srd/magic-items/<%= item.index %>",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Equipment",
+            "item": "https://farreachco.com/dnd/5e/srd/equipment"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
+            "name": "<%= item.name %>",
+            "item": "https://farreachco.com/dnd/5e/srd/magic-items/<%= item.index %>"
+          }
+        ]
+      },
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition",
+        "gamePlatform": "Tabletop"
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <!-- Breadcrumb -->
+    <div class="inline-div">
+      <small>
+        <a href="/dnd/5e/srd/contents">Contents</a> ->
+        <a href="/dnd/5e/srd/equipment">Equipment</a> ->
+        <div class="text-green"><%= item.name %></div>
+      </small>
+    </div>
+    <hr />
+
+    <!-- Item Header -->
+    <h1><%= item.name %></h1>
+    <div class="inline-div">
+      <i><%= category %></i>
+      <i class="text-purple">- <%= rarity %></i>
+    </div>
+
+    <br />
+    <hr class="w-75" />
+
+    <!-- Description -->
+    <div class="magic-item-description">
+      <% if (item.desc && item.desc.length) { %>
+        <% item.desc.forEach((paragraph, idx) => { %>
+          <% if (idx === 0) { %>
+          <p><i><%= paragraph %></i></p>
+          <% } else { %>
+          <p><%= paragraph %></p>
+          <% } %>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <% if (item.variants && item.variants.length) { %>
+    <hr class="w-75" />
+    <b>Variants:</b>
+    <ul>
+      <% item.variants.forEach(variant => { %>
+      <li>
+        <a href="/dnd/5e/srd/magic-items/<%= variant.index %>"><%= variant.name %></a>
+      </li>
+      <% }) %>
+    </ul>
+    <% } %>
+
+    <br />
+    <hr />
+    <div style="margin-top: 20px;">
+      <a href="/dnd/5e/srd/equipment">&larr; Back to Equipment List</a>
+    </div>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

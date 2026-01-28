@@ -1,9 +1,11 @@
 import fs from "fs";
 import path from "path";
+import zlib from "zlib";
 import { SitemapStream, streamToPromise } from "sitemap";
 
 const HOSTNAME = "https://farreachco.com";
 const OUTPUT_PATH = path.join(__dirname, "../public/sitemap.xml");
+const OUTPUT_PATH_GZ = path.join(__dirname, "../public/sitemap.xml.gz");
 const DATA_DIR = path.join(__dirname, "../public/lib/data");
 
 interface SitemapEntry {
@@ -63,8 +65,24 @@ const dynamicRoutes: DynamicRoute[] = [
     priority: 0.7,
     changefreq: "monthly",
   },
-  // Add more as you create individual pages:
-  // { pattern: "/dnd/5e/srd/spells/{index}", dataFile: "5e-srd-spells.json", priority: 0.7, changefreq: "monthly" },
+  {
+    pattern: "/dnd/5e/srd/spells/{index}",
+    dataFile: "5e-srd-spells.json",
+    priority: 0.7,
+    changefreq: "monthly",
+  },
+  {
+    pattern: "/dnd/5e/srd/equipment/{index}",
+    dataFile: "5e-srd-equipment.json",
+    priority: 0.7,
+    changefreq: "monthly",
+  },
+  {
+    pattern: "/dnd/5e/srd/magic-items/{index}",
+    dataFile: "5e-srd-magic-items.json",
+    priority: 0.7,
+    changefreq: "monthly",
+  },
 ];
 
 function loadDataIndexes(dataFile: string): string[] {
@@ -107,9 +125,21 @@ async function generateSitemap(): Promise<void> {
   stream.end();
 
   const xml = await streamToPromise(stream);
-  fs.writeFileSync(OUTPUT_PATH, xml.toString());
+  const xmlString = xml.toString();
 
-  console.log(`Sitemap generated: ${OUTPUT_PATH}`);
+  // Write uncompressed version
+  fs.writeFileSync(OUTPUT_PATH, xmlString);
+
+  // Write gzipped version
+  const gzipped = zlib.gzipSync(xmlString);
+  fs.writeFileSync(OUTPUT_PATH_GZ, gzipped);
+
+  const xmlSizeKB = (xmlString.length / 1024).toFixed(1);
+  const gzSizeKB = (gzipped.length / 1024).toFixed(1);
+
+  console.log(`Sitemap generated:`);
+  console.log(`  - ${OUTPUT_PATH} (${xmlSizeKB} KB)`);
+  console.log(`  - ${OUTPUT_PATH_GZ} (${gzSizeKB} KB)`);
   console.log(`  - ${staticPages.length} static pages`);
   console.log(`  - ${entries.length - staticPages.length} dynamic pages`);
 }

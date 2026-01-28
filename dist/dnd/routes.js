@@ -50,16 +50,46 @@ router.get("/5e/srd/backgrounds", (req, res, next) => {
         next(err);
     }
 });
+const equipmentData = JSON.parse(fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-equipment.json"), "utf8"));
+const magicItemsData = JSON.parse(fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-magic-items.json"), "utf8"));
+const equipmentMap = new Map(equipmentData.map((e) => [e.index, e]));
+const magicItemsMap = new Map(magicItemsData.map((m) => [m.index, m]));
+router.get("/5e/srd/equipment/:index", (req, res, next) => {
+    try {
+        const item = equipmentMap.get(req.params.index);
+        if (!item) {
+            return res.status(404).render("404", { auth: req.session.user });
+        }
+        res.render("dnd/5e/srd/equipment-item", {
+            auth: req.session.user,
+            item,
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/5e/srd/equipment", (req, res, next) => {
     try {
-        const categoryData = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-equipment-categories.json"), "utf8");
-        const equipmentData = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-equipment.json"), "utf8");
-        const magicItemsData = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-magic-items.json"), "utf8");
         res.render("dnd/5e/srd/equipment", {
             auth: req.session.user,
-            categoryData: JSON.parse(categoryData),
-            equipmentData: JSON.parse(equipmentData),
-            magicItemsData: JSON.parse(magicItemsData),
+            equipmentData,
+            magicItemsData,
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
+router.get("/5e/srd/magic-items/:index", (req, res, next) => {
+    try {
+        const item = magicItemsMap.get(req.params.index);
+        if (!item) {
+            return res.status(404).render("404", { auth: req.session.user });
+        }
+        res.render("dnd/5e/srd/magic-item", {
+            auth: req.session.user,
+            item,
         });
     }
     catch (err) {
@@ -146,14 +176,28 @@ router.get("/5e/srd/races", (req, res, next) => {
         next(err);
     }
 });
+const spellsData = JSON.parse(fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"), "utf8"));
+const spellsMap = new Map(spellsData.map((s) => [s.index, s]));
+router.get("/5e/srd/spells/:index", (req, res, next) => {
+    try {
+        const spell = spellsMap.get(req.params.index);
+        if (!spell) {
+            return res.status(404).render("404", { auth: req.session.user });
+        }
+        res.render("dnd/5e/srd/spell", {
+            auth: req.session.user,
+            spell,
+        });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/5e/srd/spells", (req, res, next) => {
     try {
-        const spellsData = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"), "utf8");
-        const schoolsData = fs.readFileSync(path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"), "utf8");
         res.render("dnd/5e/srd/spells", {
             auth: req.session.user,
-            spellsData: JSON.parse(spellsData),
-            schoolsData: JSON.parse(schoolsData),
+            spellsData,
         });
     }
     catch (err) {

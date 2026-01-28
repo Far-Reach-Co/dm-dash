@@ -80,31 +80,69 @@ router.get(
   },
 );
 
+// Pre-load equipment and magic items data for efficient lookup
+const equipmentData: any[] = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "../../public/lib/data/5e-srd-equipment.json"),
+    "utf8",
+  ),
+);
+const magicItemsData: any[] = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "../../public/lib/data/5e-srd-magic-items.json"),
+    "utf8",
+  ),
+);
+const equipmentMap = new Map(equipmentData.map((e: any) => [e.index, e]));
+const magicItemsMap = new Map(magicItemsData.map((m: any) => [m.index, m]));
+
+// Individual equipment page
+router.get(
+  "/5e/srd/equipment/:index",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const item = equipmentMap.get(req.params.index);
+      if (!item) {
+        return res.status(404).render("404", { auth: req.session.user });
+      }
+      res.render("dnd/5e/srd/equipment-item", {
+        auth: req.session.user,
+        item,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Equipment list page
 router.get(
   "/5e/srd/equipment",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const categoryData = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/5e-srd-equipment-categories.json",
-        ),
-        "utf8",
-      );
-      const equipmentData = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-equipment.json"),
-        "utf8",
-      );
-      const magicItemsData = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-magic-items.json"),
-        "utf8",
-      );
       res.render("dnd/5e/srd/equipment", {
         auth: req.session.user,
-        categoryData: JSON.parse(categoryData),
-        equipmentData: JSON.parse(equipmentData),
-        magicItemsData: JSON.parse(magicItemsData),
+        equipmentData,
+        magicItemsData,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Individual magic item page
+router.get(
+  "/5e/srd/magic-items/:index",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const item = magicItemsMap.get(req.params.index);
+      if (!item) {
+        return res.status(404).render("404", { auth: req.session.user });
+      }
+      res.render("dnd/5e/srd/magic-item", {
+        auth: req.session.user,
+        item,
       });
     } catch (err) {
       next(err);
@@ -233,23 +271,42 @@ router.get(
   },
 );
 
+// Pre-load spells data for efficient lookup
+const spellsData: any[] = JSON.parse(
+  fs.readFileSync(
+    path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"),
+    "utf8",
+  ),
+);
+const spellsMap = new Map(spellsData.map((s: any) => [s.index, s]));
+
+// Individual spell page (must be before /spells to match first)
+router.get(
+  "/5e/srd/spells/:index",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const spell = spellsMap.get(req.params.index);
+      if (!spell) {
+        return res.status(404).render("404", { auth: req.session.user });
+      }
+      res.render("dnd/5e/srd/spell", {
+        auth: req.session.user,
+        spell,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+// Spell list page
 router.get(
   "/5e/srd/spells",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const spellsData = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"),
-        "utf8",
-      );
-      const schoolsData = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-magic-schools.json"),
-        "utf8",
-      );
       res.render("dnd/5e/srd/spells", {
         auth: req.session.user,
-        spellsData: JSON.parse(spellsData),
-        schoolsData: JSON.parse(schoolsData),
+        spellsData,
       });
     } catch (err) {
       next(err);
