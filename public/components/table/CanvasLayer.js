@@ -113,190 +113,180 @@ export default class CanvasLayer {
   };
 
   setupCanvasEventListeners = () => {
-    // objects movement
-    this.canvas.on("object:moving", (options) => {
-      if (this.gridManager.isSnapEnabled()) {
-        const snapped = this.gridManager.snapPosition({
-          left: options.target.left,
-          top: options.target.top,
-        });
-        options.target.set(snapped);
-      }
+    this.lastTouchTime = 0;
 
-      // if multiple objects calculate special distance
-      if (options.target.hasOwnProperty("_objects")) {
-        for (var object of options.target._objects) {
-          let absoluteLeft =
-            object.left + options.target.left + options.target.width / 2;
-          let absoluteTop =
-            object.top + options.target.top + options.target.height / 2;
-          const newObj = JSON.parse(JSON.stringify(object)); // important not to disturb original object
-          newObj.left = absoluteLeft;
-          newObj.top = absoluteTop;
-          this.throttleImageMoved(newObj);
-        }
-      } else this.throttleImageMoved(options.target);
-    });
+    // Object manipulation
+    this.canvas.on("object:moving", this.handleObjectMoving);
+    this.canvas.on("object:rotating", this.handleObjectTransform);
+    this.canvas.on("object:scaling", this.handleObjectTransform);
 
-    this.canvas.on("object:rotating", (options) => {
-      this.throttleImageMoved(options.target);
-    });
+    // Zoom and pan
+    this.canvas.on("mouse:wheel", this.handleMouseWheel);
+    this.canvas.on("touch:gesture", this.handlePinchZoom);
+    this.canvas.on("mouse:down", this.handleMouseDown);
+    this.canvas.on("mouse:move", this.handleMouseMove);
+    this.canvas.on("mouse:up", this.handleMouseUp);
+    this.canvas.on("touch:drag", this.handleTouchDrag);
 
-    this.canvas.on("object:scaling", (options) => {
-      this.throttleImageMoved(options.target);
-    });
-
-    // Zoom
-    this.canvas.on("mouse:wheel", (opt) => {
-      var delta = opt.e.deltaY;
-      var zoom = this.canvas.getZoom();
-      zoom *= 0.999 ** delta;
-      if (zoom > 20) zoom = 20;
-      if (zoom < 0.25) zoom = 0.25;
-      this.canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
-      opt.e.preventDefault();
-      opt.e.stopPropagation();
-    });
-
-    this.canvas.on("touch:gesture", (opt) => {
-      if (opt.e.touches && opt.e.touches.length === 2) {
-        this.canvas.isDragging = false;
-
-        const pt = new fabric.Point(opt.self.x, opt.self.y);
-        const zoom = this.canvas.getZoom();
-        const scale = opt.self.scale;
-
-        // 1. Compute how much the fingers have moved:
-        //    When scale < 1 fingers come together (pinch), scale > 1 fingers spread.
-        // 2. We want “pinch” (scale < 1) → zoom in, “spread” (scale > 1) → zoom out.
-        //    So invert by doing (1 – scale).
-        const delta = 1 - scale;
-
-        // 3. Apply a sensitivity factor to slow it down:
-        const sensitivity = 0.1; // try 0.2 for even smoother, 1.0 for full effect
-        const change = zoom * delta * sensitivity;
-
-        // 4. New zoom is old zoom plus that change:
-        let newZoom = zoom + change;
-
-        // 5. Clamp to reasonable bounds:
-        newZoom = Math.max(0.2, Math.min(5, newZoom));
-
-        // 6. Zoom the canvas:
-        this.canvas.zoomToPoint(pt, newZoom);
-
-        // 7. Prevent the browser from doing its own pinch-zoom:
-        opt.e.preventDefault();
-        opt.e.stopPropagation();
-      }
-    });
-
-    let lastTouchTime = 0;
-
-    this.canvas.on("mouse:down", (opt) => {
-      const evt = opt.e;
-
-      // Double-tap logic (only on mobile)
-      if (detectMob()) {
-        const now = Date.now();
-        if (now - lastTouchTime < 300) {
-          const pointer = this.canvas.getPointer(evt);
-          this.runIndicatorAnimation(pointer.x, pointer.y);
-          socketIntegration.indicatorAnimation(pointer.x, pointer.y);
-          lastTouchTime = 0; // reset
-        } else {
-          lastTouchTime = now;
-        }
-      }
-
-      // Pan logic
-      if (evt.altKey === true) return; // override default alt-click for panning
-      if (this.canvas.isDrawingMode) return;
-
-      // Begin drag if empty space or unselectable object
-      if (!opt.target || !opt.target.selectable) {
-        this.canvas.isDragging = true;
-        this.canvas.selection = false;
-        this.canvas.lastPosX = evt.clientX;
-        this.canvas.lastPosY = evt.clientY;
-      }
-    });
-
-    // For double click 'here' indicator animation
-    this.canvas.on("mouse:dblclick", (e) => {
-      const pointer = this.canvas.getPointer(e.e);
-
-      this.runIndicatorAnimation(pointer.x, pointer.y);
-      socketIntegration.indicatorAnimation(pointer.x, pointer.y);
-    });
-
-    // normal movement
-    this.canvas.on("mouse:move", (opt) => {
-      // dont use for mobile
-      if (detectMob()) return;
-
-      if (this.canvas.isDragging) {
-        var e = opt.e;
-        var vpt = this.canvas.viewportTransform;
-        vpt[4] += e.clientX - this.canvas.lastPosX;
-        vpt[5] += e.clientY - this.canvas.lastPosY;
-        this.canvas.requestRenderAll();
-        this.canvas.lastPosX = e.clientX;
-        this.canvas.lastPosY = e.clientY;
-      }
-    });
-    // for mobile
-    this.canvas.on("touch:drag", (opt) => {
-      if (!detectMob()) return;
-
-      if (this.canvas.isDragging) {
-        const xChange = opt.self.x - this.canvas.lastPosTouchX;
-        const yChange = opt.self.y - this.canvas.lastPosTouchY;
-        if (
-          Math.abs(opt.self.x - this.canvas.lastPosTouchX) <= 50 &&
-          Math.abs(opt.self.y - this.canvas.lastPosTouchY) <= 50
-        ) {
-          var delta = new fabric.Point(xChange, yChange);
-          this.canvas.relativePan(delta);
-        }
-
-        this.canvas.lastPosTouchX = opt.self.x;
-        this.canvas.lastPosTouchY = opt.self.y;
-      }
-    });
-    // on mouse up we want to recalculate new interaction
-    // for all objects, so we call setViewportTransform
-    this.canvas.on("mouse:up", (opt) => {
-      this.canvas.setViewportTransform(this.canvas.viewportTransform);
-      this.canvas.isDragging = false;
-      this.canvas.selection = true;
-    });
-
-    // PATH for drawing
-    this.canvas.on("path:created", (opt) => {
-      const id = uuidv4();
-      opt.path.set("id", id);
-      opt.path.set("layer", this.tableApp.currentLayer);
-
-      // Remove initial drawing created by canvas
-      this.canvas.remove(opt.path);
-      // Re-add
-      this.canvas.add(opt.path);
-      // Add the path to the canvas on the correct layer
-      this.placeObjectOnLayer(opt.path);
-
-      // Add event listeners
-      this.setupObjectEventListeners(opt.path);
-
-      // Emit through the socket
-      socketIntegration.imageAdded(opt.path);
-    });
-
-    // For deselct of an object
-    this.canvas.on("selection:cleared", (event) => {
-      // clear selected object
+    // Interactions
+    this.canvas.on("mouse:dblclick", this.handleDoubleClick);
+    this.canvas.on("path:created", this.handlePathCreated);
+    this.canvas.on("selection:cleared", () => {
       this.tableApp.setCurrentSelectedObject(null);
     });
+  };
+
+  handleObjectMoving = (options) => {
+    if (this.gridManager.isSnapEnabled()) {
+      const snapped = this.gridManager.snapPosition({
+        left: options.target.left,
+        top: options.target.top,
+      });
+      options.target.set(snapped);
+    }
+
+    this.broadcastObjectMovement(options.target);
+  };
+
+  handleObjectTransform = (options) => {
+    this.throttleImageMoved(options.target);
+  };
+
+  broadcastObjectMovement = (target) => {
+    if (!target._objects) {
+      this.throttleImageMoved(target);
+      return;
+    }
+
+    // For grouped objects, calculate absolute positions
+    for (const object of target._objects) {
+      const absoluteLeft = object.left + target.left + target.width / 2;
+      const absoluteTop = object.top + target.top + target.height / 2;
+      const newObj = JSON.parse(JSON.stringify(object));
+      newObj.left = absoluteLeft;
+      newObj.top = absoluteTop;
+      this.throttleImageMoved(newObj);
+    }
+  };
+
+  handleMouseWheel = (opt) => {
+    const delta = opt.e.deltaY;
+    const newZoom = this.calculateZoom(this.canvas.getZoom(), delta, 0.25, 20);
+    this.canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, newZoom);
+    opt.e.preventDefault();
+    opt.e.stopPropagation();
+  };
+
+  handlePinchZoom = (opt) => {
+    if (!opt.e.touches || opt.e.touches.length !== 2) return;
+
+    this.canvas.isDragging = false;
+    const pt = new fabric.Point(opt.self.x, opt.self.y);
+    const zoom = this.canvas.getZoom();
+
+    // Invert scale: pinch (scale < 1) → zoom in, spread (scale > 1) → zoom out
+    const delta = 1 - opt.self.scale;
+    const sensitivity = 0.1;
+    const newZoom = Math.max(0.2, Math.min(5, zoom + zoom * delta * sensitivity));
+
+    this.canvas.zoomToPoint(pt, newZoom);
+    opt.e.preventDefault();
+    opt.e.stopPropagation();
+  };
+
+  calculateZoom = (currentZoom, delta, min, max) => {
+    let zoom = currentZoom * 0.999 ** delta;
+    return Math.max(min, Math.min(max, zoom));
+  };
+
+  handleMouseDown = (opt) => {
+    const evt = opt.e;
+
+    // Handle mobile double-tap
+    if (detectMob()) {
+      this.handleMobileDoubleTap(evt);
+    }
+
+    if (evt.altKey || this.canvas.isDrawingMode) return;
+
+    // Begin drag if empty space or unselectable object
+    if (!opt.target || !opt.target.selectable) {
+      this.startDragging(evt.clientX, evt.clientY);
+    }
+  };
+
+  handleMobileDoubleTap = (evt) => {
+    const now = Date.now();
+    if (now - this.lastTouchTime < 300) {
+      const pointer = this.canvas.getPointer(evt);
+      this.triggerIndicatorAnimation(pointer.x, pointer.y);
+      this.lastTouchTime = 0;
+    } else {
+      this.lastTouchTime = now;
+    }
+  };
+
+  handleDoubleClick = (e) => {
+    const pointer = this.canvas.getPointer(e.e);
+    this.triggerIndicatorAnimation(pointer.x, pointer.y);
+  };
+
+  triggerIndicatorAnimation = (x, y) => {
+    this.runIndicatorAnimation(x, y);
+    socketIntegration.indicatorAnimation(x, y);
+  };
+
+  startDragging = (x, y) => {
+    this.canvas.isDragging = true;
+    this.canvas.selection = false;
+    this.canvas.lastPosX = x;
+    this.canvas.lastPosY = y;
+  };
+
+  handleMouseMove = (opt) => {
+    if (detectMob() || !this.canvas.isDragging) return;
+
+    const e = opt.e;
+    const vpt = this.canvas.viewportTransform;
+    vpt[4] += e.clientX - this.canvas.lastPosX;
+    vpt[5] += e.clientY - this.canvas.lastPosY;
+    this.canvas.requestRenderAll();
+    this.canvas.lastPosX = e.clientX;
+    this.canvas.lastPosY = e.clientY;
+  };
+
+  handleTouchDrag = (opt) => {
+    if (!detectMob() || !this.canvas.isDragging) return;
+
+    const xChange = opt.self.x - this.canvas.lastPosTouchX;
+    const yChange = opt.self.y - this.canvas.lastPosTouchY;
+
+    const isSmallMovement = Math.abs(xChange) <= 50 && Math.abs(yChange) <= 50;
+    if (isSmallMovement) {
+      this.canvas.relativePan(new fabric.Point(xChange, yChange));
+    }
+
+    this.canvas.lastPosTouchX = opt.self.x;
+    this.canvas.lastPosTouchY = opt.self.y;
+  };
+
+  handleMouseUp = () => {
+    this.canvas.setViewportTransform(this.canvas.viewportTransform);
+    this.canvas.isDragging = false;
+    this.canvas.selection = true;
+  };
+
+  handlePathCreated = (opt) => {
+    const path = opt.path;
+    path.set("id", uuidv4());
+    path.set("layer", this.tableApp.currentLayer);
+
+    // Re-add to canvas on correct layer
+    this.canvas.remove(path);
+    this.canvas.add(path);
+    this.placeObjectOnLayer(path);
+    this.setupObjectEventListeners(path);
+    socketIntegration.imageAdded(path);
   };
 
   setupObjectEventListeners = (obj) => {
@@ -523,18 +513,19 @@ export default class CanvasLayer {
 
   // Function to update object properties based on current layer
   updateObjectProperties = (object) => {
-    if (object.layer === "Map") {
-      object.selectable = this.tableApp.currentLayer === "Map";
-      object.evented = this.tableApp.currentLayer === "Map";
-      object.opacity = this.tableApp.currentLayer === "Fog" ? "0.5" : "1";
-    } else if (object.layer === "Object") {
-      object.selectable = this.tableApp.currentLayer === "Object";
-      object.evented = this.tableApp.currentLayer === "Object";
-      object.opacity = this.tableApp.currentLayer !== "Object" ? "0.5" : "1";
-    } else if (object.layer === "Fog") {
-      object.selectable = this.tableApp.currentLayer === "Fog";
-      object.evented = this.tableApp.currentLayer === "Fog";
-      object.opacity = this.tableApp.currentLayer !== "Fog" ? "0.5" : "1";
+    const currentLayer = this.tableApp.currentLayer;
+    const objectLayer = object.layer;
+    const isActiveLayer = objectLayer === currentLayer;
+
+    object.selectable = isActiveLayer;
+    object.evented = isActiveLayer;
+
+    // Map layer is fully visible unless viewing Fog layer
+    // Object and Fog layers are dimmed when not active
+    if (objectLayer === "Map") {
+      object.opacity = currentLayer === "Fog" ? "0.5" : "1";
+    } else {
+      object.opacity = isActiveLayer ? "1" : "0.5";
     }
   };
 
@@ -562,29 +553,27 @@ export default class CanvasLayer {
     }
   };
 
+  restoreGridFromObject = (gridObject) => {
+    if (!this.gridManager) return;
+
+    this.gridManager.gridGroup = gridObject;
+    if (!gridObject.visible) {
+      this.gridManager.snapToGrid = false;
+    }
+    gridObject.selectable = false;
+    gridObject.evented = false;
+  };
+
   renderSavedData = async () => {
     return new Promise((resolve) => {
       this.canvas.loadFromJSON(this.currentTableView.data, () => {
         this.canvas.getObjects().forEach((object) => {
           if (object.type === "group") {
-            // Tell GridManager about the restored grid
-            if (this.gridManager) {
-              this.gridManager.gridGroup = object;
-            }
-
-            // Update snapping based on visibility
-            if (!object.visible && this.gridManager) {
-              this.gridManager.snapToGrid = false;
-            }
-
-            object.selectable = false;
-            object.evented = false;
+            this.restoreGridFromObject(object);
             return;
           }
 
-          // setup properties
           this.updateObjectProperties(object);
-          // event listeners
           this.setupObjectEventListeners(object);
         });
 

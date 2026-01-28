@@ -82,40 +82,27 @@ export default class TableSidebarImageComponent {
     }
   };
 
+  getDeleteImageEndpoint = (imageId) => {
+    return this.projectId
+      ? `/api/remove_image_by_project/${imageId}/${this.projectId}`
+      : `/api/remove_image_by_table_user/${imageId}/${this.tableView.id}`;
+  };
+
   removeImageFromTableAndSidebar = (image, elem) => {
-    if (
-      window.confirm(`Are you sure you want to delete ${image.original_name}`)
-    ) {
-      // remove image in db
-      if (this.projectId) {
-        deleteThing(
-          `/api/remove_image_by_project/${image.id}/${this.projectId}`,
-        );
-      } else {
-        deleteThing(
-          `/api/remove_image_by_table_user/${image.id}/${this.tableView.id}`,
-        );
-      }
-
-      // remove from cache
-      if (this.imageDataAndElems) {
-        this.imageDataAndElems = this.imageDataAndElems.filter(
-          (item) => item.imageData.id !== image.id
-        );
-      }
-      // remove from downloaded sources cache
-      delete this.downloadedImageSourceList[image.id];
-
-      // remove elem in sidebar
-      elem.remove();
-      // remove all from screens and sockets and state
-      // this.canvasLayer.canvas.getObjects().forEach((object) => {
-      //   if (object.imageId === image.id) {
-      //     this.canvasLayer.canvas.remove(object);
-      //     socketIntegration.imageRemoved(object.id);
-      //   }
-      // });
+    if (!window.confirm(`Are you sure you want to delete ${image.original_name}`)) {
+      return;
     }
+
+    deleteThing(this.getDeleteImageEndpoint(image.id));
+
+    // Remove from local caches
+    if (this.imageDataAndElems) {
+      this.imageDataAndElems = this.imageDataAndElems.filter(
+        (item) => item.imageData.id !== image.id
+      );
+    }
+    delete this.downloadedImageSourceList[image.id];
+    elem.remove();
   };
 
   renderImageSettings = async (tableImage, image, imageElem) => {
@@ -226,53 +213,42 @@ export default class TableSidebarImageComponent {
     else return [createElement("small", {}, "No images in this folder yet...")];
   };
 
-  renderCurrentImages = async () => {
-    // get images with signed URLs in one batched request
-    let tableImages = [];
-    if (this.projectId) {
-      tableImages = await getThings(
-        `/api/get_table_images_with_urls_by_table_project/${this.tableView.id}`,
-      );
-    } else {
-      tableImages = await getThings(
-        `/api/get_table_images_with_urls_by_table_user/${this.tableView.id}`,
-      );
-    }
+  getTableImagesEndpoint = () => {
+    const base = this.projectId
+      ? "/api/get_table_images_with_urls_by_table_project"
+      : "/api/get_table_images_with_urls_by_table_user";
+    return `${base}/${this.tableView.id}`;
+  };
 
-    // if none
-    if (!tableImages.length) {
-      // remove temp loading spinner
-      this.tempLoadingSpinner.remove();
-      return [createElement("small", {}, "None...")];
-    }
-    // render all
-    let imageList = [];
-    await Promise.all(
-      tableImages.map(async (tableImage) => {
-        // Extract image data from the joined response
-        const image = {
-          id: tableImage.image_id,
-          original_name: tableImage.original_name,
-          size: tableImage.size,
-          file_name: tableImage.file_name,
-          notes: tableImage.notes,
-          src: tableImage.src,
-          record_id: tableImage.record_id,
-          record_title: tableImage.record_title,
-          record_desc: tableImage.record_desc,
-        };
-        if (image) {
-          const item = await this.createImageListItem(tableImage, image);
-          imageList.push(item);
-        }
-      }),
-    );
-    // remove temp loading spinner
+  extractImageFromTableImage = (tableImage) => ({
+    id: tableImage.image_id,
+    original_name: tableImage.original_name,
+    size: tableImage.size,
+    file_name: tableImage.file_name,
+    notes: tableImage.notes,
+    src: tableImage.src,
+    record_id: tableImage.record_id,
+    record_title: tableImage.record_title,
+    record_desc: tableImage.record_desc,
+  });
+
+  renderCurrentImages = async () => {
+    const tableImages = await getThings(this.getTableImagesEndpoint());
+
     this.tempLoadingSpinner.remove();
 
-    // create a state of the image elems
-    this.imageDataAndElems = imageList;
+    if (!tableImages.length) {
+      return [createElement("small", {}, "None...")];
+    }
 
+    const imageList = await Promise.all(
+      tableImages.map(async (tableImage) => {
+        const image = this.extractImageFromTableImage(tableImage);
+        return this.createImageListItem(tableImage, image);
+      })
+    );
+
+    this.imageDataAndElems = imageList;
     return this.renderImageElems();
   };
 
@@ -420,99 +396,96 @@ class AssociatedRecordsComponent {
     this.render();
   }
 
-  createNewRecord = async () => {
-    const title = this.image.original_name.includes(".")
-      ? this.image.original_name.split(".")[0]
-      : this.image.original_name;
+  getRecordHref = (recordId) => {
+    const base = `/record?id=${recordId}`;
+    return this.projectId ? `${base}&project_id=${this.projectId}` : base;
+  };
 
+  getAddRecordEndpoint = () => {
+    return this.projectId
+      ? `/api/add_record_by_project/${this.projectId}`
+      : "/api/add_record_by_user";
+  };
+
+  getTitleFromImageName = () => {
+    const name = this.image.original_name;
+    return name.includes(".") ? name.split(".")[0] : name;
+  };
+
+  updateImageRecord = (record) => {
+    this.image.record_id = record.id;
+    this.image.record_title = record.title;
+    this.image.record_desc = record.description;
+    this.render();
+  };
+
+  linkRecordToImage = async (recordId) => {
+    await postThing("/api/add_record_image", {
+      record_id: recordId,
+      image_id: this.image.id,
+    });
+  };
+
+  createNewRecord = async () => {
     const data = {
-      title: title,
-      description: this.image.description
-        ? this.image.description
-        : "Placeholder text...",
+      title: this.getTitleFromImageName(),
+      description: this.image.description || "Placeholder text...",
       is_public: false,
     };
 
-    let newRecord = null;
-
-    if (this.projectId) {
-      newRecord = await postThing(
-        `/api/add_record_by_project/${this.projectId}`,
-        data,
-      );
-    } else {
-      newRecord = await postThing("/api/add_record_by_user", data);
-    }
+    const newRecord = await postThing(this.getAddRecordEndpoint(), data);
 
     if (newRecord) {
-      // make recordimage with this.image
-      await postThing("/api/add_record_image", {
-        record_id: newRecord.id,
-        image_id: this.image.id,
-      });
-
-      // update data and render
-      this.image.record_id = newRecord.id;
-      this.image.record_title = newRecord.title;
-      this.image.record_desc = newRecord.description;
-      this.render();
+      await this.linkRecordToImage(newRecord.id);
+      this.updateImageRecord(newRecord);
     }
   };
 
-  renderListOrCreateNew = async () => {
-    console.log(this.image);
-    if (this.image.record_id) {
-      const href = this.projectId
-        ? `/record?id=${this.image.record_id}&project_id=${this.projectId}`
-        : `/record?id=${this.image.record_id}`;
-      return createElement(
-        "a",
-        { href: href, rel: "noopener noreferrer", target: "_blank" },
-        this.image.record_title,
-      );
-    } else {
-      const recordSelectElem = await renderRecordSelect(this.projectId);
-      recordSelectElem.addEventListener("change", async (e) => {
-        const recordId = e.target.value;
-        if (e.target.value != 0) {
-          await postThing("/api/add_record_image", {
-            record_id: recordId,
-            image_id: this.image.id,
-          });
+  handleRecordSelect = async (e) => {
+    const recordId = e.target.value;
+    if (recordId == 0) return;
 
-          const record = await getThings(`/api/get_record/${recordId}`);
+    await this.linkRecordToImage(recordId);
+    const record = await getThings(`/api/get_record/${recordId}`);
+    this.updateImageRecord(record);
+  };
 
-          // update data and render
-          this.image.record_id = record.id;
-          this.image.record_title = record.title;
-          this.image.record_desc = record.description;
-          // re-render
-          this.render();
-        }
-      });
+  renderExistingRecord = () => {
+    return createElement(
+      "a",
+      {
+        href: this.getRecordHref(this.image.record_id),
+        rel: "noopener noreferrer",
+        target: "_blank",
+      },
+      this.image.record_title
+    );
+  };
 
-      return createElement("div", {}, [
-        createElement("div", {}, "None..."),
-        createElement("div", { class: "d-flex flex-row" }, [
-          createElement(
-            "button",
-            { class: "me-1 btn-green" },
-            "Create Record",
-            {
-              type: "click",
-              event: () => this.createNewRecord(),
-            },
-          ),
-          createElement("div", { class: "me-1" }, "Or"),
-          recordSelectElem,
-        ]),
-      ]);
-    }
+  renderCreateOrSelectRecord = async () => {
+    const recordSelectElem = await renderRecordSelect(this.projectId);
+    recordSelectElem.addEventListener("change", this.handleRecordSelect);
+
+    return createElement("div", {}, [
+      createElement("div", {}, "None..."),
+      createElement("div", { class: "d-flex flex-row" }, [
+        createElement("button", { class: "me-1 btn-green" }, "Create Record", {
+          type: "click",
+          event: () => this.createNewRecord(),
+        }),
+        createElement("div", { class: "me-1" }, "Or"),
+        recordSelectElem,
+      ]),
+    ]);
   };
 
   render = async () => {
     this.domComponent.innerHTML = "";
 
-    this.domComponent.append(await this.renderListOrCreateNew());
+    const content = this.image.record_id
+      ? this.renderExistingRecord()
+      : await this.renderCreateOrSelectRecord();
+
+    this.domComponent.append(content);
   };
 }

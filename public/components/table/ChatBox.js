@@ -16,49 +16,26 @@ export default class ChatBoxComponent {
     });
   }
 
+  toggleChatVisibility = () => {
+    this.chatBoxMessagesComponent.hidden = !this.chatBoxMessagesComponent.hidden;
+    this.chatBoxMessagesComponent.render();
+    this.render();
+  };
+
   renderHideChatButton = () => {
-    if (this.chatBoxMessagesComponent.hidden) {
-      return createElement(
-        "small",
-        { class: "chat-box-hide d-flex align-items-center" },
-        [
-          createElement("img", {
-            class: "me-3",
-            class: "small-icon chat-box-icon",
-            src: "/assets/show.svg",
-          }),
-          createElement("small", {}, "Show Chat"),
-        ],
-        {
-          type: "click",
-          event: () => {
-            this.chatBoxMessagesComponent.hidden = false;
-            this.chatBoxMessagesComponent.render();
-            this.render();
-          },
-        }
-      );
-    } else
-      return createElement(
-        "small",
-        { class: "chat-box-hide d-flex align-items-center" },
-        [
-          createElement("img", {
-            class: "me-3",
-            class: "small-icon chat-box-icon",
-            src: "/assets/hide.svg",
-          }),
-          createElement("small", {}, "Hide Chat"),
-        ],
-        {
-          type: "click",
-          event: () => {
-            this.chatBoxMessagesComponent.hidden = true;
-            this.chatBoxMessagesComponent.render();
-            this.render();
-          },
-        }
-      );
+    const isHidden = this.chatBoxMessagesComponent.hidden;
+    const icon = isHidden ? "/assets/show.svg" : "/assets/hide.svg";
+    const label = isHidden ? "Show Chat" : "Hide Chat";
+
+    return createElement(
+      "small",
+      { class: "chat-box-hide d-flex align-items-center" },
+      [
+        createElement("img", { class: "small-icon chat-box-icon", src: icon }),
+        createElement("small", {}, label),
+      ],
+      { type: "click", event: this.toggleChatVisibility }
+    );
   };
 
   render = () => {
