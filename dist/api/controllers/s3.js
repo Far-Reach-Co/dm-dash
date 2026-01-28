@@ -57,6 +57,43 @@ function invalidateSignedUrlCache(imageId) {
         yield socketUsers_1.redisClient.del(getSignedUrlCacheKey(imageId));
     });
 }
+function generateSignedUrl(fileName) {
+    const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${fileName}`;
+    const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
+    return cloudFrontSigner.getSignedUrl({
+        url: cloudFrontUrl,
+        expires: expiresAt,
+    });
+}
+function cacheSignedUrl(imageId, url) {
+    socketUsers_1.redisClient
+        .setEx(getSignedUrlCacheKey(imageId), SIGNED_URL_CACHE_TTL_SECONDS, url)
+        .catch((err) => console.error("Failed to cache signed URL:", err));
+}
+function uploadToS3(params) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            s3.upload(params, (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(data.Location);
+            });
+        });
+    });
+}
+function deleteFromS3(bucket, key) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve, reject) => {
+            s3.deleteObject({ Bucket: bucket, Key: key }, (err, data) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve();
+            });
+        });
+    });
+}
 function getSignedUrlsHandler(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -82,18 +119,13 @@ function getSignedUrls(images) {
                 urls[imageData.id] = cachedUrl;
             }
             else {
-                const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${imageData.file_name}`;
-                const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
-                const signedUrl = cloudFrontSigner.getSignedUrl({
-                    url: cloudFrontUrl,
-                    expires: expiresAt,
-                });
+                const signedUrl = generateSignedUrl(imageData.file_name);
                 urls[imageData.id] = signedUrl;
                 uncachedImages.push({ id: imageData.id, url: signedUrl });
             }
         }
-        if (uncachedImages.length > 0) {
-            Promise.all(uncachedImages.map(({ id, url }) => socketUsers_1.redisClient.setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url))).catch((err) => console.error("Failed to cache signed URLs:", err));
+        for (const { id, url } of uncachedImages) {
+            cacheSignedUrl(id, url);
         }
         return urls;
     });
@@ -167,7 +199,6 @@ function newImageForProject(req, res, next) {
         if (!req.file)
             return next();
         let filePath = `file_uploads/${req.file.filename}`;
-        let image = null;
         try {
             yield checkProjectProLimitReachedAndAuth(req.body.project_id, req.session.user);
             const params = computeAwsImageParamsFromRequest(req, filePath);
@@ -178,8 +209,7 @@ function newImageForProject(req, res, next) {
                     filePath = newFilePathFromResizedImage;
                     params.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
                     const stats = (0, fs_1.statSync)(newFilePathFromResizedImage);
-                    const fileSizeInBytes = stats.size;
-                    fileSize = fileSizeInBytes;
+                    fileSize = stats.size;
                 }
             }
             const imageData = yield (0, images_1.addImageQuery)({
@@ -187,15 +217,8 @@ function newImageForProject(req, res, next) {
                 size: fileSize,
                 file_name: params.Key,
             });
-            image = imageData.rows[0];
-            yield new Promise((resolve, reject) => {
-                s3.upload(params, (err, data) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve(data.Location);
-                });
-            });
+            const image = imageData.rows[0];
+            yield uploadToS3(params);
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
                 projectId: req.body.project_id,
@@ -207,43 +230,24 @@ function newImageForProject(req, res, next) {
                 },
                 req,
             });
-            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-            const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
-            const signedUrl = cloudFrontSigner.getSignedUrl({
-                url: cloudFrontUrl,
-                expires: expiresAt,
+            const projectData = yield (0, projects_1.getProjectQuery)(req.body.project_id);
+            const project = projectData.rows[0];
+            yield (0, projects_1.editProjectQuery)(project.id, {
+                used_data_in_bytes: project.used_data_in_bytes + image.size,
             });
-            socketUsers_1.redisClient
-                .setEx(getSignedUrlCacheKey(image.id), SIGNED_URL_CACHE_TTL_SECONDS, signedUrl)
-                .catch((err) => console.error("Failed to cache signed URL:", err));
+            const signedUrl = generateSignedUrl(image.file_name);
+            cacheSignedUrl(image.id, signedUrl);
             res.send(Object.assign(Object.assign({}, image), { src: signedUrl }));
         }
         catch (err) {
-            (0, fs_1.unlinkSync)(filePath);
             return next(err);
         }
-        (0, fs_1.unlinkSync)(filePath);
-        try {
-            let dataUsageCount = 0;
-            dataUsageCount += image.size;
-            if (req.body.current_file_id) {
-                const oldImageData = yield (0, images_1.getImageQuery)(req.body.current_file_id);
-                const oldImage = oldImageData.rows[0];
-                yield removeImageFromBucket(`${req.body.bucket_name}/${req.body.folder_name}`, oldImage);
-                yield (0, images_1.removeImageQuery)(req.body.current_file_id);
-                invalidateSignedUrlCache(req.body.current_file_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
-                dataUsageCount -= oldImage.size;
+        finally {
+            try {
+                (0, fs_1.unlinkSync)(filePath);
             }
-            const projectData = yield (0, projects_1.getProjectQuery)(req.body.project_id);
-            const project = projectData.rows[0];
-            const newCalculatedData = project.used_data_in_bytes + dataUsageCount;
-            yield (0, projects_1.editProjectQuery)(project.id, {
-                used_data_in_bytes: newCalculatedData,
-            });
-        }
-        catch (err) {
-            console.log(err);
-            next(err);
+            catch (_a) {
+            }
         }
     });
 }
@@ -252,7 +256,6 @@ function newImageForUser(req, res, next) {
         if (!req.file)
             return next();
         let filePath = `file_uploads/${req.file.filename}`;
-        let image = null;
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
@@ -265,8 +268,7 @@ function newImageForUser(req, res, next) {
                     filePath = newFilePathFromResizedImage;
                     params.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
                     const stats = (0, fs_1.statSync)(newFilePathFromResizedImage);
-                    const fileSizeInBytes = stats.size;
-                    fileSize = fileSizeInBytes;
+                    fileSize = stats.size;
                 }
             }
             const imageData = yield (0, images_1.addImageQuery)({
@@ -274,15 +276,8 @@ function newImageForUser(req, res, next) {
                 size: fileSize,
                 file_name: params.Key,
             });
-            image = imageData.rows[0];
-            yield new Promise((resolve, reject) => {
-                s3.upload(params, (err, data) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve(data.Location);
-                });
-            });
+            const image = imageData.rows[0];
+            yield uploadToS3(params);
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
                 eventType: eventLogger_1.EventType.IMAGE_UPLOADED,
@@ -293,35 +288,24 @@ function newImageForUser(req, res, next) {
                 },
                 req,
             });
-            const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-            const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
-            const signedUrl = cloudFrontSigner.getSignedUrl({
-                url: cloudFrontUrl,
-                expires: expiresAt,
+            const userData = yield (0, users_1.getUserByIdQuery)(req.session.user);
+            const user = userData.rows[0];
+            yield (0, users_1.editUserQuery)(user.id, {
+                used_data_in_bytes: user.used_data_in_bytes + image.size,
             });
-            socketUsers_1.redisClient
-                .setEx(getSignedUrlCacheKey(image.id), SIGNED_URL_CACHE_TTL_SECONDS, signedUrl)
-                .catch((err) => console.error("Failed to cache signed URL:", err));
+            const signedUrl = generateSignedUrl(image.file_name);
+            cacheSignedUrl(image.id, signedUrl);
             res.send(Object.assign(Object.assign({}, image), { src: signedUrl }));
         }
         catch (err) {
-            (0, fs_1.unlinkSync)(filePath);
             return next(err);
         }
-        (0, fs_1.unlinkSync)(filePath);
-        try {
-            let dataUsageCount = 0;
-            dataUsageCount += image.size;
-            const userData = yield (0, users_1.getUserByIdQuery)(req.session.user);
-            const user = userData.rows[0];
-            const newCalculatedData = user.used_data_in_bytes + dataUsageCount;
-            yield (0, users_1.editUserQuery)(user.id, {
-                used_data_in_bytes: newCalculatedData,
-            });
-        }
-        catch (err) {
-            console.log(err);
-            next(err);
+        finally {
+            try {
+                (0, fs_1.unlinkSync)(filePath);
+            }
+            catch (_a) {
+            }
         }
     });
 }
@@ -336,21 +320,13 @@ function getImage(req, res, next) {
                 image.src = cachedUrl;
             }
             else {
-                const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${image.file_name}`;
-                const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000);
-                image.src = cloudFrontSigner.getSignedUrl({
-                    url: cloudFrontUrl,
-                    expires: expiresAt,
-                });
-                socketUsers_1.redisClient
-                    .setEx(cacheKey, SIGNED_URL_CACHE_TTL_SECONDS, image.src)
-                    .catch((err) => console.error("Failed to cache signed URL:", err));
+                image.src = generateSignedUrl(image.file_name);
+                cacheSignedUrl(image.id, image.src);
             }
             const recordImageData = yield (0, recordImage_1.getRecordImagesByImageQuery)(image.id);
             const recordsData = yield Promise.all(recordImageData.rows.map((ri) => __awaiter(this, void 0, void 0, function* () {
                 const recordData = yield (0, record_1.getRecordQuery)(ri.record_id);
-                const record = recordData.rows[0];
-                return record;
+                return recordData.rows[0];
             })));
             image.records = recordsData;
             res.send(image);
@@ -366,14 +342,13 @@ function removeImageByProject(req, res, next) {
         try {
             const imageData = yield (0, images_1.getImageQuery)(req.params.image_id);
             const image = imageData.rows[0];
-            yield removeImageFromBucket("wyrld/images", image);
+            yield deleteFromS3("wyrld/images", image.file_name);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
             invalidateSignedUrlCache(req.params.image_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
             const projectData = yield (0, projects_1.getProjectQuery)(req.params.project_id);
             const project = projectData.rows[0];
-            const newCalculatedData = project.used_data_in_bytes - image.size;
             yield (0, projects_1.editProjectQuery)(project.id, {
-                used_data_in_bytes: newCalculatedData,
+                used_data_in_bytes: project.used_data_in_bytes - image.size,
             });
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
@@ -399,16 +374,15 @@ function removeImageByTableUser(req, res, next) {
         try {
             const imageData = yield (0, images_1.getImageQuery)(req.params.image_id);
             const image = imageData.rows[0];
-            yield removeImageFromBucket("wyrld/images", image);
+            yield deleteFromS3("wyrld/images", image.file_name);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
             invalidateSignedUrlCache(req.params.image_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
             const tableData = yield (0, tableViews_js_1.getTableViewQuery)(req.params.table_id);
             const table = tableData.rows[0];
             const userData = yield (0, users_1.getUserByIdQuery)(table.user_id);
             const user = userData.rows[0];
-            const newCalculatedData = user.used_data_in_bytes - image.size;
             yield (0, users_1.editUserQuery)(user.id, {
-                used_data_in_bytes: newCalculatedData,
+                used_data_in_bytes: user.used_data_in_bytes - image.size,
             });
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
@@ -431,18 +405,7 @@ function removeImageByTableUser(req, res, next) {
 function removeImageFromBucket(bucket, image) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const params = {
-                Bucket: bucket,
-                Key: image.file_name,
-            };
-            yield new Promise((resolve, reject) => {
-                s3.deleteObject(params, (err, data) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve(data.DeleteMarker);
-                });
-            });
+            yield deleteFromS3(bucket, image.file_name);
         }
         catch (err) {
             console.log(err);
