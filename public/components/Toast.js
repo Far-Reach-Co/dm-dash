@@ -4,17 +4,27 @@ class Toast {
   constructor() {
     this.isVisible = false;
     this.message = "";
-    this.domComponent = document.getElementById("toast-custom");
-    if (!this.domComponent) return;
-    this.domComponent.classList.remove("visible");
-
+    this.domComponent = null;
     this.isError = false;
+    this.init();
+  }
 
+  init() {
+    // Check if toast element already exists
+    this.domComponent = document.getElementById("toast-custom");
+
+    if (!this.domComponent) {
+      // Create toast element dynamically
+      this.domComponent = createElement("div", { id: "toast-custom" });
+      document.body.appendChild(this.domComponent);
+    }
+
+    this.domComponent.classList.remove("visible");
     this.render();
   }
 
   show = (message) => {
-    if (!this.domComponent) return;
+    if (!this.domComponent) this.init();
     this.isVisible = true;
     this.message = message;
     this.render();
@@ -26,7 +36,7 @@ class Toast {
   };
 
   error = (message) => {
-    if (!this.domComponent) return;
+    if (!this.domComponent) this.init();
     this.isError = true;
     this.show(message);
   };

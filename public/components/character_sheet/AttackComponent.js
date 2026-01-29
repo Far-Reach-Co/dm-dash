@@ -5,6 +5,7 @@ import createElement from "../createElement.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import { setCaretStartAfter } from "../../lib/caretPositions.js";
 import safeMathEval from "../../lib/safeMathEval.js";
+import tooltip from "../Tooltip.js";
 
 export default class AttackComponent {
   constructor(props) {
@@ -49,24 +50,19 @@ export default class AttackComponent {
 
     // Mouse enter event
     span.addEventListener("mouseenter", (e) => {
-      const hoverInfoElem = document.getElementById("hover-info");
-      hoverInfoElem.style.display = "block";
-      const rect = e.target.getBoundingClientRect();
-      hoverInfoElem.style.top = rect.bottom + window.scrollY + "px";
-      hoverInfoElem.style.left = rect.left + window.scrollX + "px";
-
-      hoverInfoElem.append(
-        createElement("div", {}, [
+      tooltip.show({
+        content: [
           createElement("h4", {}, "Magic Words"),
           createElement("div", { class: "text-green" }, mapping.value),
           createElement("p", {}, `${mapping.key} - (${valueToInsert})`),
-        ]),
-      );
+        ],
+        event: e,
+      });
     });
 
     // Mouse leave event
     span.addEventListener("mouseleave", (e) => {
-      this.hideHoverInfo();
+      tooltip.hide();
     });
 
     return span;
@@ -176,24 +172,16 @@ export default class AttackComponent {
     span.style.display = "inline";
     span.textContent = isNaN(result) ? "NaN" : result;
     span.addEventListener("mouseenter", (e) => {
-      const hoverInfoElem = document.getElementById("hover-info");
-      hoverInfoElem.style.display = "block";
-      // Get the bounding box of the target element
-      const rect = e.target.getBoundingClientRect();
-      // Set the position of the suggestion element
-      hoverInfoElem.style.top = rect.bottom + window.scrollY + "px"; // You can add an offset here
-      hoverInfoElem.style.left = rect.left + window.scrollX + "px"; // You can add an offset here
-
-      // set content
-      hoverInfoElem.append(
-        createElement("div", {}, [
+      tooltip.show({
+        content: [
           createElement("h4", {}, "Magic Calculation"),
           createElement("p", {}, uncalculatedExpression),
-        ]),
-      );
+        ],
+        event: e,
+      });
     });
     span.addEventListener("mouseleave", (e) => {
-      this.hideHoverInfo();
+      tooltip.hide();
     });
 
     // Storing the un-calculated expression as a data attribute
@@ -325,7 +313,7 @@ export default class AttackComponent {
           type: "input",
           event: (e) => {
             e.preventDefault();
-            this.hideHoverInfo();
+            tooltip.hide();
             // Apply magic words highlighting (no calculation)
             this.handleMagicWords(e.target);
           },
@@ -349,7 +337,7 @@ export default class AttackComponent {
             }
             if (e.key === "Enter") {
               e.target.blur();
-              this.hideHoverInfo();
+              tooltip.hide();
             }
           },
         },
@@ -394,7 +382,7 @@ export default class AttackComponent {
           type: "input",
           event: (e) => {
             e.preventDefault();
-            this.hideHoverInfo();
+            tooltip.hide();
             // handle magic words
             this.handleMagicWords(e.target);
           },
@@ -439,7 +427,7 @@ export default class AttackComponent {
             if (e.key === "Enter") {
               // Trigger focusout (or blur)
               e.target.blur();
-              this.hideHoverInfo();
+              tooltip.hide();
             }
           },
         },
@@ -452,11 +440,6 @@ export default class AttackComponent {
     return elem;
   };
 
-  hideHoverInfo = () => {
-    const hoverInfoElem = document.getElementById("hover-info");
-    hoverInfoElem.style.display = "none";
-    hoverInfoElem.innerHTML = "";
-  };
 
   renderMagicWordsHelpHoverOnly = () => {
     return createElement(
@@ -482,14 +465,8 @@ export default class AttackComponent {
         {
           type: "mouseenter",
           event: (e) => {
-            const hoverInfoElem = document.getElementById("hover-info");
-            hoverInfoElem.style.display = "block";
-            const rect = e.target.getBoundingClientRect();
-            hoverInfoElem.style.top = rect.bottom + window.scrollY + "px";
-            hoverInfoElem.style.left = rect.left + window.scrollX + "px";
-
-            hoverInfoElem.append(
-              createElement("div", { style: "max-width: 280px;" }, [
+            tooltip.show({
+              content: [
                 createElement("h4", { class: "mb-2" }, "Magic Words"),
                 createElement(
                   "p",
@@ -527,14 +504,16 @@ export default class AttackComponent {
                   },
                   "Example: 2d10 + dex piercing",
                 ),
-              ]),
-            );
+              ],
+              event: e,
+              maxWidth: 280,
+            });
           },
         },
         {
           type: "mouseleave",
           event: () => {
-            this.hideHoverInfo();
+            tooltip.hide();
           },
         },
       ],
@@ -565,14 +544,8 @@ export default class AttackComponent {
         {
           type: "mouseenter",
           event: (e) => {
-            const hoverInfoElem = document.getElementById("hover-info");
-            hoverInfoElem.style.display = "block";
-            const rect = e.target.getBoundingClientRect();
-            hoverInfoElem.style.top = rect.bottom + window.scrollY + "px";
-            hoverInfoElem.style.left = rect.left + window.scrollX + "px";
-
-            hoverInfoElem.append(
-              createElement("div", { style: "max-width: 280px;" }, [
+            tooltip.show({
+              content: [
                 createElement("h4", { class: "mb-2" }, "Magic Words + Calc"),
                 createElement(
                   "p",
@@ -610,14 +583,16 @@ export default class AttackComponent {
                   },
                   "Example: dex+pro gives your Dex modifier + proficiency bonus",
                 ),
-              ]),
-            );
+              ],
+              event: e,
+              maxWidth: 280,
+            });
           },
         },
         {
           type: "mouseleave",
           event: () => {
-            this.hideHoverInfo();
+            tooltip.hide();
           },
         },
       ],

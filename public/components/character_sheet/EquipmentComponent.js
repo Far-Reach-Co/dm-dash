@@ -4,14 +4,25 @@ import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
 import getDataByQuery from "../../lib/getDataByQuery.js";
 import parseUrlTextContent from "../../components/parseUrlTextContent.js";
 import modal from "../../components/modal.js";
+import tooltip from "../../components/Tooltip.js";
 
-// load spells for suggestions on input
+// load equipment and magic items for suggestions on input
 let equipmentSuggestions = [];
-fetch("/lib/data/5e-srd-equipment.json")
-  .then((res) => res.json())
-  .then((data) => {
-    equipmentSuggestions = data;
-  });
+Promise.all([
+  fetch("/lib/data/5e-srd-equipment.json").then((res) => res.json()),
+  fetch("/lib/data/5e-srd-magic-items.json").then((res) => res.json()),
+]).then(([equipment, magicItems]) => {
+  // Add item type to distinguish between equipment and magic items
+  const equipmentWithType = equipment.map((item) => ({
+    ...item,
+    itemType: "equipment",
+  }));
+  const magicItemsWithType = magicItems.map((item) => ({
+    ...item,
+    itemType: "magic-items",
+  }));
+  equipmentSuggestions = [...equipmentWithType, ...magicItemsWithType];
+});
 
 export default class EquipmentComponent {
   constructor(props) {
@@ -60,8 +71,15 @@ export default class EquipmentComponent {
 
     // Populate description from JSON data if available
     if (item.desc && item.desc.length) {
-      const description = Array.isArray(item.desc) ? item.desc.join('\n\n') : item.desc;
-      this.equipmentData[this.equipmentData.indexOf(equipmentItem)].description = description;
+      const description = Array.isArray(item.desc)
+        ? item.desc.join("\n\n")
+        : item.desc;
+      // Add link to SRD page
+      const itemType = item.itemType || "equipment";
+      const srdLink = `\n\nView full details: https://farreachco.com/dnd/5e/srd/${itemType}/${item.index}`;
+      this.equipmentData[
+        this.equipmentData.indexOf(equipmentItem)
+      ].description = description + srdLink;
     }
   };
 
@@ -100,7 +118,10 @@ export default class EquipmentComponent {
       dataToSave.description = this.equipmentData[index].description;
     }
 
-    postThing(`/api/edit_5e_character_equipment/${equipmentItem.id}`, dataToSave);
+    postThing(
+      `/api/edit_5e_character_equipment/${equipmentItem.id}`,
+      dataToSave,
+    );
   };
 
   resetAndHideEquipmentSuggestions(equipmentItem) {
@@ -186,30 +207,46 @@ export default class EquipmentComponent {
     );
   };
 
-  hideHoverInfo = () => {
-    const hoverInfoElem = document.getElementById("hover-info");
-    hoverInfoElem.style.display = "none";
-    hoverInfoElem.innerHTML = "";
-  };
-
   showDescriptionHover = (equipmentItem, e) => {
-    const hoverInfoElem = document.getElementById("hover-info");
-    hoverInfoElem.style.display = "block";
-    const rect = e.target.getBoundingClientRect();
-    hoverInfoElem.style.top = rect.bottom + window.scrollY + "px";
-    hoverInfoElem.style.left = rect.left + window.scrollX + "px";
-
     const description = equipmentItem.description || "No description";
-    hoverInfoElem.append(
-      createElement("div", { style: "max-width: 300px;" }, [
+    const maxLength = 200;
+
+    // Truncate if too long
+    let displayDescription = description;
+    let isTruncated = false;
+    if (description.length > maxLength) {
+      displayDescription = description.substring(0, maxLength) + "...";
+      isTruncated = true;
+    }
+
+    const contentElements = [
+      createElement(
+        "h4",
+        { class: "mb-1" },
+        equipmentItem.title || "Equipment",
+      ),
+      createElement("div", {}, parseUrlTextContent(displayDescription)),
+    ];
+
+    // Add hint if truncated
+    if (isTruncated) {
+      contentElements.push(
         createElement(
-          "h4",
-          { class: "mb-1" },
-          equipmentItem.title || "Equipment",
+          "small",
+          {
+            class: "text-grey mt-1",
+            style: "display: block; font-style: italic;",
+          },
+          "Click note icon for full description",
         ),
-        createElement("div", {}, parseUrlTextContent(description)),
-      ]),
-    );
+      );
+    }
+
+    tooltip.show({
+      content: contentElements,
+      event: e,
+      maxWidth: 300,
+    });
   };
 
   renderEquipmentDescriptionModal = (equipmentItem, index) => {
@@ -360,7 +397,7 @@ export default class EquipmentComponent {
               createElement(
                 "img",
                 {
-                  class: "icon note me-1",
+                  class: "icon note me-1 cursor-pointer",
                   src: "/assets/note.svg",
                   title: "View/Edit Description",
                 },
@@ -372,7 +409,7 @@ export default class EquipmentComponent {
                   },
                   {
                     type: "mouseleave",
-                    event: () => this.hideHoverInfo(),
+                    event: () => tooltip.hide(),
                   },
                   {
                     type: "click",

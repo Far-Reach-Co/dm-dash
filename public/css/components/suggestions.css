@@ -23,7 +23,8 @@
   background-color: var(--blue3);
 }
 
-.hover-info {
+/* Tooltip styles - matches old .hover-info */
+#tooltip-hover {
   position: absolute;
   padding: 10px;
   height: auto;
