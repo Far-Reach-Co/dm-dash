@@ -23,41 +23,40 @@
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "D&D 5E Spells Reference",
-    "description": "Complete spell reference for D&D 5th Edition with over <%= spellsData.length %> spells",
-    "url": "https://farreachco.com/dnd/5e/srd/spells",
-    "breadcrumb": {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://farreachco.com"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "D&D 5E SRD",
-          "item": "https://farreachco.com/dnd/5e/srd/contents"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Spells",
-          "item": "https://farreachco.com/dnd/5e/srd/spells"
-        }
-      ]
-    },
-    "about": {
-      "@type": "Game",
-      "name": "Dungeons & Dragons 5th Edition",
-      "gamePlatform": "Tabletop"
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "D&D 5E Spells Reference",
+      "description": "Complete spell reference for D&D 5th Edition with over <%= spellsData.length %> spells",
+      "url": "https://farreachco.com/dnd/5e/srd/spells",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Spells",
+            "item": "https://farreachco.com/dnd/5e/srd/spells"
+          }
+        ]
+      },
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition",
+        "gamePlatform": "Tabletop"
+      }
     }
-  }
   </script>
 
   <link rel="stylesheet" href="/style.css" />
@@ -72,11 +71,10 @@
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
-    <div class="inline-div">
-      <small>
-        <a href="/dnd/5e/srd/contents">Contents</a> ->
-        <div class="text-green">Spells</div>
-      </small>
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <div class="text-green">Spells</div>
     </div>
     <hr />
     <h2>Spells</h2>

@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>D&D 5E Languages Reference | Far Reach Co.</title>
-    <meta name="description" content="Complete D&D 5E languages reference including Common, Dwarvish, Elvish, Giant, Gnomish, Goblin, Halfling, Orc, Abyssal, Celestial, Draconic, Deep Speech, Infernal, Primordial, Sylvan, and Undercommon." />
-    <meta name="keywords" content="D&D 5E languages, common, dwarvish, elvish, draconic, celestial, abyssal, infernal, primordial, sylvan, undercommon" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/languages" />
-    <meta property="og:title" content="D&D 5E Languages Reference" />
-    <meta property="og:description" content="Complete D&D 5E languages reference with standard and exotic languages." />
-    <meta property="og:site_name" content="Far Reach Co." />
-    <meta name="twitter:card" content="summary" />
-    <script type="application/ld+json">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D&D 5E Languages Reference | Far Reach Co.</title>
+  <meta name="description" content="Complete D&D 5E languages reference including Common, Dwarvish, Elvish, Giant, Gnomish, Goblin, Halfling, Orc, Abyssal, Celestial, Draconic, Deep Speech, Infernal, Primordial, Sylvan, and Undercommon." />
+  <meta name="keywords" content="D&D 5E languages, common, dwarvish, elvish, draconic, celestial, abyssal, infernal, primordial, sylvan, undercommon" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/languages" />
+  <meta property="og:title" content="D&D 5E Languages Reference" />
+  <meta property="og:description" content="Complete D&D 5E languages reference with standard and exotic languages." />
+  <meta property="og:site_name" content="Far Reach Co." />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -21,45 +22,59 @@
       "url": "https://farreachco.com/dnd/5e/srd/languages",
       "breadcrumb": {
         "@type": "BreadcrumbList",
-        "itemListElement": [
-          {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://farreachco.com"},
-          {"@type": "ListItem", "position": 2, "name": "D&D 5E SRD", "item": "https://farreachco.com/dnd/5e/srd/contents"},
-          {"@type": "ListItem", "position": 3, "name": "Languages", "item": "https://farreachco.com/dnd/5e/srd/languages"}
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Languages",
+            "item": "https://farreachco.com/dnd/5e/srd/languages"
+          }
         ]
       }
     }
-    </script>
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/css/features/info.css" />
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <%- include('../../../partials/icons') %>
-  </head>
-  <%- include('../../../partials/google') %>
-  <body>
-    <%- include('../../../partials/nav') %>
-    <div class="container-fluid p-3 info-container">
-      <%- include('../../../partials/dnd/srdintro') %>
-      <br />
-      <div class="inline-div">
-        <small>
-          <a href="/dnd/5e/srd/contents">Contents</a> ->
-          <div class="text-green">Languages</div>
-        </small>
-      </div>
-      <hr />
-      <h2>Languages</h2>
-      <ul>
-        <% data.forEach(function(language){ %>
-        <li>
-          <a href="#<%= language.index %>"><%= language.name %></a>
-        </li>
-        <% }); %>
-      </ul>
-      <br />
+  </script>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <span class="current">Languages</span>
+    </div>
+    <hr />
+    <h2>Languages</h2>
+    <ul>
       <% data.forEach(function(language){ %>
-      <div class="inline-div" id="<%= language.index %>">
-        <h3><%= language.name %></h3>
-      </div>
+      <li>
+        <a href="#<%= language.index %>"><%= language.name %></a>
+      </li>
+      <% }); %>
+    </ul>
+    <br />
+    <% data.forEach(function(language){ %>
+    <div class="inline-div" id="<%= language.index %>">
+      <h3><%= language.name %></h3>
+      </span>
       <div class="indent">
         <h4>Typical Speakers</h4>
         <ul>
@@ -67,15 +82,16 @@
           <li><%= speaker %></li>
           <% }) %>
         </ul>
-      </div>
-      <% if (language.desc) { %>
-      <div class="indent">
-        <p><%= language.desc %></p>
-        <br />
-      </div>
-      <br />
-      <% } %> <% }); %>
-    </div>
-    <%- include('../../../partials/footer') %>
-  </body>
+        </span>
+        <% if (language.desc) { %>
+        <div class="indent">
+          <p><%= language.desc %></p>
+          <br />
+          </span>
+          <br />
+          <% } %> <% }); %>
+          </span>
+          <%- include('../../../partials/footer') %>
+</body>
+
 </html>

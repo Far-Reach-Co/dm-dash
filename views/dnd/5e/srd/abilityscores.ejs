@@ -1,18 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>D&D 5E Ability Scores Reference | Far Reach Co.</title>
-    <meta name="description" content="Complete D&D 5E ability scores reference including Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma with descriptions, modifiers, and associated skills." />
-    <meta name="keywords" content="D&D 5E ability scores, STR, DEX, CON, INT, WIS, CHA, strength, dexterity, constitution, intelligence, wisdom, charisma, ability modifiers" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/ability-scores" />
-    <meta property="og:title" content="D&D 5E Ability Scores Reference" />
-    <meta property="og:site_name" content="Far Reach Co." />
-    <meta name="twitter:card" content="summary" />
-    <script type="application/ld+json">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D&D 5E Ability Scores Reference | Far Reach Co.</title>
+  <meta name="description" content="Complete D&D 5E ability scores reference including Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma with descriptions, modifiers, and associated skills." />
+  <meta name="keywords" content="D&D 5E ability scores, STR, DEX, CON, INT, WIS, CHA, strength, dexterity, constitution, intelligence, wisdom, charisma, ability modifiers" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/ability-scores" />
+  <meta property="og:title" content="D&D 5E Ability Scores Reference" />
+  <meta property="og:site_name" content="Far Reach Co." />
+  <meta name="twitter:card" content="summary" />
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -20,64 +21,77 @@
       "url": "https://farreachco.com/dnd/5e/srd/ability-scores",
       "breadcrumb": {
         "@type": "BreadcrumbList",
-        "itemListElement": [
-          {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://farreachco.com"},
-          {"@type": "ListItem", "position": 2, "name": "D&D 5E SRD", "item": "https://farreachco.com/dnd/5e/srd/contents"},
-          {"@type": "ListItem", "position": 3, "name": "Ability Scores", "item": "https://farreachco.com/dnd/5e/srd/ability-scores"}
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          },
+          {
+            "@type": "ListItem",
+            "position": 3,
+            "name": "Ability Scores",
+            "item": "https://farreachco.com/dnd/5e/srd/ability-scores"
+          }
         ]
       }
     }
-    </script>
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/css/features/info.css" />
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <%- include('../../../partials/icons') %>
-  </head>
-  <%- include('../../../partials/google') %>
-  <body>
-    <%- include('../../../partials/nav') %>
-    <div class="container-fluid p-3 info-container">
-      <%- include('../../../partials/dnd/srdintro') %>
-      <br />
-      <div class="inline-div">
-        <small>
-          <a href="/dnd/5e/srd/contents">Contents</a> ->
-          <div class="text-green">Ability Scores</div>
-        </small>
-      </div>
-      <hr />
-      <h2>Ability Scores</h2>
-      <ul>
-        <% data.forEach(function(score){ %>
-        <li>
-          <a href="#<%= score.index %>"><%= score.full_name %></a>
-        </li>
-        <% }); %>
-      </ul>
-      <br />
-      <% data.forEach(function(score){ %>
-      <div class="inline-div" id="<%= score.index %>">
-        <h3><%= score.full_name %></h3>
-        <div class="text-bright-white">[<%= score.name %>]</div>
-      </div>
-      <div class="indent">
-        <% score.desc.forEach((str, index) => { %>
-        <p><%= str %></p>
-        <% }) %>
-        <br />
-        <ul>
-          <% score.skills.forEach(function(skill){ %>
-          <li>
-            <a href="/dnd/5e/srd/skills#<%= skill.index %>"
-              ><%= skill.name %></a
-            >
-          </li>
-          <% }); %>
-        </ul>
-      </div>
-      <br />
-      <% }); %>
+  </script>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <span class="current">Ability Scores</span>
     </div>
-    <%- include('../../../partials/footer') %>
-  </body>
+    <hr />
+    <h2>Ability Scores</h2>
+    <ul>
+      <% data.forEach(function(score){ %>
+      <li>
+        <a href="#<%= score.index %>"><%= score.full_name %></a>
+      </li>
+      <% }); %>
+    </ul>
+    <br />
+    <% data.forEach(function(score){ %>
+    <div class="inline-div" id="<%= score.index %>">
+      <h3><%= score.full_name %></h3>
+      <div class="text-bright-white">[<%= score.name %>]</span>
+        </span>
+        <div class="indent">
+          <% score.desc.forEach((str, index) => { %>
+          <p><%= str %></p>
+          <% }) %>
+          <br />
+          <ul>
+            <% score.skills.forEach(function(skill){ %>
+            <li>
+              <a href="/dnd/5e/srd/skills#<%= skill.index %>"><%= skill.name %></a>
+            </li>
+            <% }); %>
+          </ul>
+          </span>
+          <br />
+          <% }); %>
+          </span>
+          <%- include('../../../partials/footer') %>
+</body>
+
 </html>

@@ -1,27 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>D&D 5E Skills Reference - All 18 Skills | Far Reach Co.</title>
-    <meta name="description" content="Complete D&D 5E skills reference with descriptions and ability score associations for all 18 skills including Acrobatics, Athletics, Deception, Insight, Perception, Stealth, and more." />
-    <meta name="keywords" content="D&D 5E skills, skill checks, ability checks, acrobatics, athletics, deception, insight, perception, stealth, investigation, persuasion" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/skills" />
-    <meta property="og:title" content="D&D 5E Skills Reference - All 18 Skills" />
-    <meta property="og:description" content="Complete D&D 5E skills reference with descriptions and ability score associations." />
-    <meta property="og:site_name" content="Far Reach Co." />
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D&D 5E Skills Reference - All 18 Skills | Far Reach Co.</title>
+  <meta name="description" content="Complete D&D 5E skills reference with descriptions and ability score associations for all 18 skills including Acrobatics, Athletics, Deception, Insight, Perception, Stealth, and more." />
+  <meta name="keywords" content="D&D 5E skills, skill checks, ability checks, acrobatics, athletics, deception, insight, perception, stealth, investigation, persuasion" />
 
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="D&D 5E Skills Reference - All 18 Skills" />
-    <meta name="twitter:description" content="Complete D&D 5E skills reference with descriptions and ability score associations." />
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/skills" />
+  <meta property="og:title" content="D&D 5E Skills Reference - All 18 Skills" />
+  <meta property="og:description" content="Complete D&D 5E skills reference with descriptions and ability score associations." />
+  <meta property="og:site_name" content="Far Reach Co." />
 
-    <!-- JSON-LD Structured Data -->
-    <script type="application/ld+json">
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Skills Reference - All 18 Skills" />
+  <meta name="twitter:description" content="Complete D&D 5E skills reference with descriptions and ability score associations." />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -30,8 +31,7 @@
       "url": "https://farreachco.com/dnd/5e/srd/skills",
       "breadcrumb": {
         "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
+        "itemListElement": [{
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
@@ -52,50 +52,51 @@
         ]
       }
     }
-    </script>
+  </script>
 
-    <link rel="stylesheet" href="/style.css" />
-    <link rel="stylesheet" href="/css/features/info.css" />
-    <script src="/lib/MobileNavHandler.js" defer></script>
-    <%- include('../../../partials/icons') %>
-  </head>
-  <%- include('../../../partials/google') %>
-  <body>
-    <%- include('../../../partials/nav') %>
-    <div class="container-fluid p-3 info-container">
-      <%- include('../../../partials/dnd/srdintro') %>
-      <br />
-      <div class="inline-div">
-        <small>
-          <a href="/dnd/5e/srd/contents">Contents</a> ->
-          <div class="text-green">Skills</div>
-        </small>
-      </div>
-      <hr />
-      <h2>Skills</h2>
-      <ul>
-        <% data.forEach(function(skill){ %>
-        <li>
-          <a href="#<%= skill.index %>"><%= skill.name %></a>
-        </li>
-        <% }); %>
-      </ul>
-      <br />
-      <% data.forEach(function(skill){ %>
-      <div class="inline-div" id="<%= skill.index %>">
-        <h3><%= skill.name %></h3>
-        <div class="text-bright-white">
-          [<%= skill.ability_score.name %>]
-        </div>
-      </div>
-      <div class="indent">
-        <% skill.desc.forEach((str, index) => { %>
-        <p><%= str %></p>
-        <% }) %>
-      </div>
-      <br />
-      <% }); %>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <span class="current">Skills</span>
     </div>
-    <%- include('../../../partials/footer') %>
-  </body>
+    <hr />
+    <h2>Skills</h2>
+    <ul>
+      <% data.forEach(function(skill){ %>
+      <li>
+        <a href="#<%= skill.index %>"><%= skill.name %></a>
+      </li>
+      <% }); %>
+    </ul>
+    <br />
+    <% data.forEach(function(skill){ %>
+    <div class="inline-div" id="<%= skill.index %>">
+      <h3><%= skill.name %></h3>
+      <div class="text-bright-white">
+        [<%= skill.ability_score.name %>]
+        </span>
+        </span>
+        <div class="indent">
+          <% skill.desc.forEach((str, index) => { %>
+          <p><%= str %></p>
+          <% }) %>
+          </span>
+          <br />
+          <% }); %>
+          </span>
+          <%- include('../../../partials/footer') %>
+</body>
+
 </html>
