@@ -6,6 +6,102 @@ import parseUrlTextContent from "../../components/parseUrlTextContent.js";
 import modal from "../../components/modal.js";
 import tooltip from "../../components/Tooltip.js";
 
+// Generate description from structured weapon data
+function generateWeaponDescription(item) {
+  const parts = [];
+
+  // Weapon type
+  if (item.weapon_category && item.weapon_range) {
+    parts.push(`${item.weapon_category} ${item.weapon_range} Weapon`);
+  }
+
+  // Damage
+  if (item.damage) {
+    const damageType = item.damage.damage_type?.name || "";
+    parts.push(`Damage: ${item.damage.damage_dice} ${damageType}`);
+  }
+
+  // Properties
+  if (item.properties && item.properties.length > 0) {
+    const propNames = item.properties.map((p) => p.name).join(", ");
+    parts.push(`Properties: ${propNames}`);
+  }
+
+  // Range
+  if (item.range) {
+    let rangeStr = `Range: ${item.range.normal} ft`;
+    if (item.range.long) {
+      rangeStr += `/${item.range.long} ft`;
+    }
+    if (item.throw_range) {
+      rangeStr += ` (thrown ${item.throw_range.normal}/${item.throw_range.long} ft)`;
+    }
+    parts.push(rangeStr);
+  }
+
+  // Cost
+  if (item.cost) {
+    parts.push(`Cost: ${item.cost.quantity} ${item.cost.unit}`);
+  }
+
+  return parts.join("\n");
+}
+
+// Generate description from structured armor data
+function generateArmorDescription(item) {
+  const parts = [];
+
+  // Armor type
+  if (item.armor_category) {
+    parts.push(`${item.armor_category} Armor`);
+  }
+
+  // AC
+  if (item.armor_class) {
+    let acStr = `AC: ${item.armor_class.base}`;
+    if (item.armor_class.dex_bonus) {
+      if (item.armor_class.max_bonus) {
+        acStr += ` + Dex modifier (max ${item.armor_class.max_bonus})`;
+      } else {
+        acStr += " + Dex modifier";
+      }
+    }
+    parts.push(acStr);
+  }
+
+  // Strength requirement
+  if (item.str_minimum && item.str_minimum > 0) {
+    parts.push(`Strength Required: ${item.str_minimum}`);
+  }
+
+  // Stealth disadvantage
+  if (item.stealth_disadvantage) {
+    parts.push("Stealth: Disadvantage");
+  }
+
+  // Cost
+  if (item.cost) {
+    parts.push(`Cost: ${item.cost.quantity} ${item.cost.unit}`);
+  }
+
+  return parts.join("\n");
+}
+
+// Generate description from item data when desc field is missing
+function generateItemDescription(item) {
+  // Check if it's a weapon
+  if (item.equipment_category?.index === "weapon" || item.weapon_category) {
+    return generateWeaponDescription(item);
+  }
+
+  // Check if it's armor
+  if (item.equipment_category?.index === "armor" || item.armor_category) {
+    return generateArmorDescription(item);
+  }
+
+  return null;
+}
+
 // load equipment and magic items for suggestions on input
 let equipmentSuggestions = [];
 Promise.all([
@@ -69,11 +165,18 @@ export default class EquipmentComponent {
     titleInput.value = item.name;
     if (item.weight) weightInput.value = item.weight;
 
-    // Populate description from JSON data if available
+    // Populate description from JSON data if available, or generate from structured data
+    let description = null;
     if (item.desc && item.desc.length) {
-      const description = Array.isArray(item.desc)
+      description = Array.isArray(item.desc)
         ? item.desc.join("\n\n")
         : item.desc;
+    } else {
+      // Generate description from structured data (weapons, armor, etc.)
+      description = generateItemDescription(item);
+    }
+
+    if (description) {
       // Add link to SRD page
       const itemType = item.itemType || "equipment";
       const srdLink = `\n\nView full details: https://farreachco.com/dnd/5e/srd/${itemType}/${item.index}`;

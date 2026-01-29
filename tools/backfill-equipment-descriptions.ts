@@ -7,7 +7,122 @@ interface EquipmentData {
   name: string;
   desc?: string[];
   itemType?: 'equipment' | 'magic-items';
+  equipment_category?: { index: string; name: string };
+  weapon_category?: string;
+  weapon_range?: string;
+  damage?: {
+    damage_dice: string;
+    damage_type?: { name: string };
+  };
+  properties?: Array<{ name: string }>;
+  range?: { normal: number; long?: number };
+  throw_range?: { normal: number; long: number };
+  armor_category?: string;
+  armor_class?: {
+    base: number;
+    dex_bonus?: boolean;
+    max_bonus?: number;
+  };
+  str_minimum?: number;
+  stealth_disadvantage?: boolean;
+  cost?: { quantity: number; unit: string };
   [key: string]: any;
+}
+
+// Generate description from structured weapon data
+function generateWeaponDescription(item: EquipmentData): string {
+  const parts: string[] = [];
+
+  // Weapon type
+  if (item.weapon_category && item.weapon_range) {
+    parts.push(`${item.weapon_category} ${item.weapon_range} Weapon`);
+  }
+
+  // Damage
+  if (item.damage) {
+    const damageType = item.damage.damage_type?.name || "";
+    parts.push(`Damage: ${item.damage.damage_dice} ${damageType}`);
+  }
+
+  // Properties
+  if (item.properties && item.properties.length > 0) {
+    const propNames = item.properties.map((p) => p.name).join(", ");
+    parts.push(`Properties: ${propNames}`);
+  }
+
+  // Range
+  if (item.range) {
+    let rangeStr = `Range: ${item.range.normal} ft`;
+    if (item.range.long) {
+      rangeStr += `/${item.range.long} ft`;
+    }
+    if (item.throw_range) {
+      rangeStr += ` (thrown ${item.throw_range.normal}/${item.throw_range.long} ft)`;
+    }
+    parts.push(rangeStr);
+  }
+
+  // Cost
+  if (item.cost) {
+    parts.push(`Cost: ${item.cost.quantity} ${item.cost.unit}`);
+  }
+
+  return parts.join("\n");
+}
+
+// Generate description from structured armor data
+function generateArmorDescription(item: EquipmentData): string {
+  const parts: string[] = [];
+
+  // Armor type
+  if (item.armor_category) {
+    parts.push(`${item.armor_category} Armor`);
+  }
+
+  // AC
+  if (item.armor_class) {
+    let acStr = `AC: ${item.armor_class.base}`;
+    if (item.armor_class.dex_bonus) {
+      if (item.armor_class.max_bonus) {
+        acStr += ` + Dex modifier (max ${item.armor_class.max_bonus})`;
+      } else {
+        acStr += " + Dex modifier";
+      }
+    }
+    parts.push(acStr);
+  }
+
+  // Strength requirement
+  if (item.str_minimum && item.str_minimum > 0) {
+    parts.push(`Strength Required: ${item.str_minimum}`);
+  }
+
+  // Stealth disadvantage
+  if (item.stealth_disadvantage) {
+    parts.push("Stealth: Disadvantage");
+  }
+
+  // Cost
+  if (item.cost) {
+    parts.push(`Cost: ${item.cost.quantity} ${item.cost.unit}`);
+  }
+
+  return parts.join("\n");
+}
+
+// Generate description from item data when desc field is missing
+function generateItemDescription(item: EquipmentData): string | null {
+  // Check if it's a weapon
+  if (item.equipment_category?.index === "weapon" || item.weapon_category) {
+    return generateWeaponDescription(item);
+  }
+
+  // Check if it's armor
+  if (item.equipment_category?.index === "armor" || item.armor_category) {
+    return generateArmorDescription(item);
+  }
+
+  return null;
 }
 
 interface DbEquipment {
@@ -102,32 +217,44 @@ async function backfillEquipmentDescriptions() {
         console.log(`🔍 Debug: "${dbItem.title}" → normalized: "${normalizedTitle}" → match: ${srdItem ? '✓' : '✗'}`);
       }
 
-      if (srdItem && srdItem.desc && srdItem.desc.length > 0) {
-        matchCount++;
+      if (srdItem) {
+        // Try to get description from desc field, or generate from structured data
+        let descriptionText: string | null = null;
 
-        // Join description paragraphs
-        const descriptionText = srdItem.desc.join("\n\n");
+        if (srdItem.desc && srdItem.desc.length > 0) {
+          descriptionText = srdItem.desc.join("\n\n");
+        } else {
+          // Generate description from structured data (weapons, armor, etc.)
+          descriptionText = generateItemDescription(srdItem);
+        }
 
-        // Add link to SRD page
-        const itemType = srdItem.itemType || 'equipment';
-        const srdLink = `\n\nView full details: https://farreachco.com/dnd/5e/srd/${itemType}/${srdItem.index}`;
-        const description = descriptionText + srdLink;
+        if (descriptionText) {
+          matchCount++;
 
-        // Update database
-        const updateQuery = {
-          text: `UPDATE public."dnd_5e_character_equipment"
-                 SET description = $1
-                 WHERE id = $2`,
-          values: [description, dbItem.id],
-        };
+          // Add link to SRD page
+          const itemType = srdItem.itemType || 'equipment';
+          const srdLink = `\n\nView full details: https://farreachco.com/dnd/5e/srd/${itemType}/${srdItem.index}`;
+          const description = descriptionText + srdLink;
 
-        await db.query(updateQuery);
-        updateCount++;
+          // Update database
+          const updateQuery = {
+            text: `UPDATE public."dnd_5e_character_equipment"
+                   SET description = $1
+                   WHERE id = $2`,
+            values: [description, dbItem.id],
+          };
 
-        const itemTypeLabel = itemType === 'magic-items' ? '✨' : '⚔️';
-        console.log(
-          `✅ ${itemTypeLabel} Updated: "${dbItem.title}" (ID: ${dbItem.id}) - ${descriptionText.substring(0, 50)}...`
-        );
+          await db.query(updateQuery);
+          updateCount++;
+
+          const itemTypeLabel = itemType === 'magic-items' ? '✨' : '⚔️';
+          console.log(
+            `✅ ${itemTypeLabel} Updated: "${dbItem.title}" (ID: ${dbItem.id}) - ${descriptionText.substring(0, 50)}...`
+          );
+        } else {
+          noMatchCount++;
+          console.log(`⚠️  No description available: "${dbItem.title}" (ID: ${dbItem.id})`);
+        }
       } else {
         noMatchCount++;
         console.log(`⚠️  No match: "${dbItem.title}" (ID: ${dbItem.id})`);
