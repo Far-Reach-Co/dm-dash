@@ -74,16 +74,17 @@
     <% data.forEach(function(prop){ %>
     <div class="inline-div" id="<%= prop.index %>">
       <h3><%= prop.name %></h3>
-      </span>
       <div class="indent">
         <% prop.desc.forEach((str, index) => { %>
         <p><%= str %></p>
         <% }) %>
-        </span>
         <br />
-        <% }); %>
-        </span>
-        <%- include('../../../partials/footer') %>
+      </div>
+    </div>
+    <br>
+    <% }); %>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>

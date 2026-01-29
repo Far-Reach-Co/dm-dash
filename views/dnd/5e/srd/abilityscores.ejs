@@ -73,8 +73,8 @@
     <% data.forEach(function(score){ %>
     <div class="inline-div" id="<%= score.index %>">
       <h3><%= score.full_name %></h3>
-      <div class="text-bright-white">[<%= score.name %>]</span>
-        </span>
+      <div class="text-bright-white">[<%= score.name %>]
+        <br>
         <div class="indent">
           <% score.desc.forEach((str, index) => { %>
           <p><%= str %></p>
@@ -87,11 +87,13 @@
             </li>
             <% }); %>
           </ul>
-          </span>
           <br />
-          <% }); %>
-          </span>
-          <%- include('../../../partials/footer') %>
+        </div>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>
