@@ -91,179 +91,180 @@
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
     <!-- Breadcrumb -->
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <a href="/dnd/5e/srd/spells">Spells</a>
+      <span class="separator">→</span>
+      <div class="text-green"><%= spell.name %></div>
+    </div>
+  </div>
+  <hr />
+
+  <!-- Spell Header -->
+  <h1><%= spell.name %></h1>
+  <div class="inline-div">
+    <i><%= levelDisplay(spell.level) %></i>
+    <i><%= spell.school.name %></i>
+    <% if (spell.ritual) { %><i class="text-green">(Ritual)</i><% } %>
+  </div>
+
+  <br />
+  <hr class="w-75" />
+
+  <!-- Spell Stats -->
+  <div class="spell-stats">
     <div class="inline-div">
-      <small>
-        <a href="/dnd/5e/srd/contents">Contents</a> ->
-        <a href="/dnd/5e/srd/spells">Spells</a> ->
-        <div class="text-green"><%= spell.name %></div>
-      </small>
+      <b>Casting Time:</b>
+      <div><%= spell.casting_time %></div>
     </div>
-    <hr />
-
-    <!-- Spell Header -->
-    <h1><%= spell.name %></h1>
     <div class="inline-div">
-      <i><%= levelDisplay(spell.level) %></i>
-      <i><%= spell.school.name %></i>
-      <% if (spell.ritual) { %><i class="text-green">(Ritual)</i><% } %>
+      <b>Range:</b>
+      <div><%= spell.range %></div>
     </div>
-
-    <br />
-    <hr class="w-75" />
-
-    <!-- Spell Stats -->
-    <div class="spell-stats">
-      <div class="inline-div">
-        <b>Casting Time:</b>
-        <div><%= spell.casting_time %></div>
-      </div>
-      <div class="inline-div">
-        <b>Range:</b>
-        <div><%= spell.range %></div>
-      </div>
-      <div class="inline-div">
-        <b>Components:</b>
-        <div>
-          <%= spell.components.join(', ') %>
-          <% if (spell.material) { %>
-          <i>(<%= spell.material %>)</i>
-          <% } %>
-        </div>
-      </div>
-      <div class="inline-div">
-        <b>Duration:</b>
-        <div>
-          <% if (spell.concentration) { %>
-          <span class="text-orange">Concentration,</span>
-          <% } %>
-          <%= spell.duration %>
-        </div>
-      </div>
-    </div>
-
-    <hr class="w-75" />
-    <br />
-
-    <!-- Spell Description -->
-    <div class="spell-description">
-      <% spell.desc.forEach((paragraph, index) => { %>
-        <% if (index > 0) { %>
-        <p class="pindent"><%= paragraph %></p>
-        <% } else { %>
-        <p><%= paragraph %></p>
+    <div class="inline-div">
+      <b>Components:</b>
+      <div>
+        <%= spell.components.join(', ') %>
+        <% if (spell.material) { %>
+        <i>(<%= spell.material %>)</i>
         <% } %>
-      <% }) %>
+      </div>
     </div>
+    <div class="inline-div">
+      <b>Duration:</b>
+      <div>
+        <% if (spell.concentration) { %>
+        <span class="text-orange">Concentration,</span>
+        <% } %>
+        <%= spell.duration %>
+      </div>
+    </div>
+  </div>
 
-    <!-- Higher Level -->
-    <% if (spell.higher_level && spell.higher_level.length) { %>
-    <br />
-    <div class="higher-level">
-      <b>At Higher Levels:</b>
-      <% spell.higher_level.forEach(text => { %>
-      <p><%= text %></p>
-      <% }) %>
+  <hr class="w-75" />
+  <br />
+
+  <!-- Spell Description -->
+  <div class="spell-description">
+    <% spell.desc.forEach((paragraph, index) => { %>
+    <% if (index > 0) { %>
+    <p class="pindent"><%= paragraph %></p>
+    <% } else { %>
+    <p><%= paragraph %></p>
+    <% } %>
+    <% }) %>
+  </div>
+
+  <!-- Higher Level -->
+  <% if (spell.higher_level && spell.higher_level.length) { %>
+  <br />
+  <div class="higher-level">
+    <b>At Higher Levels:</b>
+    <% spell.higher_level.forEach(text => { %>
+    <p><%= text %></p>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <br />
+  <hr class="w-75" />
+
+  <!-- Additional Details -->
+  <div class="spell-details">
+    <% if (spell.damage && spell.damage.damage_type) { %>
+    <div class="inline-div">
+      <b>Damage Type:</b>
+      <a href="/dnd/5e/srd/damage-types#<%= spell.damage.damage_type.index %>"><%= spell.damage.damage_type.name %></a>
     </div>
     <% } %>
 
-    <br />
-    <hr class="w-75" />
-
-    <!-- Additional Details -->
-    <div class="spell-details">
-      <% if (spell.damage && spell.damage.damage_type) { %>
-      <div class="inline-div">
-        <b>Damage Type:</b>
-        <a href="/dnd/5e/srd/damage-types#<%= spell.damage.damage_type.index %>"><%= spell.damage.damage_type.name %></a>
-      </div>
-      <% } %>
-
-      <% if (spell.damage && spell.damage.damage_at_slot_level) { %>
-      <div class="inline-div">
-        <b>Damage by Slot Level:</b>
-      </div>
-      <div class="indent">
-        <ul>
-          <% Object.entries(spell.damage.damage_at_slot_level).forEach(([level, dice]) => { %>
-          <li>Level <%= level %>: <%= dice %></li>
-          <% }) %>
-        </ul>
-      </div>
-      <% } %>
-
-      <% if (spell.damage && spell.damage.damage_at_character_level) { %>
-      <div class="inline-div">
-        <b>Damage by Character Level:</b>
-      </div>
-      <div class="indent">
-        <ul>
-          <% Object.entries(spell.damage.damage_at_character_level).forEach(([level, dice]) => { %>
-          <li>Level <%= level %>: <%= dice %></li>
-          <% }) %>
-        </ul>
-      </div>
-      <% } %>
-
-      <% if (spell.heal_at_slot_level) { %>
-      <div class="inline-div">
-        <b>Healing by Slot Level:</b>
-      </div>
-      <div class="indent">
-        <ul>
-          <% Object.entries(spell.heal_at_slot_level).forEach(([level, dice]) => { %>
-          <li>Level <%= level %>: <%= dice %></li>
-          <% }) %>
-        </ul>
-      </div>
-      <% } %>
-
-      <% if (spell.dc) { %>
-      <div class="inline-div">
-        <b>Saving Throw:</b>
-        <div><%= spell.dc.dc_type.name %></div>
-        <% if (spell.dc.dc_success) { %>
-        <i>(On success: <%= spell.dc.dc_success.toLowerCase().replace('_', ' ') %>)</i>
-        <% } %>
-      </div>
-      <% } %>
-
-      <% if (spell.area_of_effect) { %>
-      <div class="inline-div">
-        <b>Area of Effect:</b>
-        <div><%= spell.area_of_effect.size %> ft. <%= spell.area_of_effect.type %></div>
-      </div>
-      <% } %>
+    <% if (spell.damage && spell.damage.damage_at_slot_level) { %>
+    <div class="inline-div">
+      <b>Damage by Slot Level:</b>
     </div>
-
-    <br />
-    <hr class="w-75" />
-
-    <!-- Classes -->
-    <div class="spell-classes">
-      <b>Classes:</b>
-      <div class="indent">
-        <% spell.classes.forEach((cls, idx) => { %>
-        <a href="/dnd/5e/srd/classes#<%= cls.index %>"><%= cls.name %></a><%= idx < spell.classes.length - 1 ? ', ' : '' %>
+    <div class="indent">
+      <ul>
+        <% Object.entries(spell.damage.damage_at_slot_level).forEach(([level, dice]) => { %>
+        <li>Level <%= level %>: <%= dice %></li>
         <% }) %>
-      </div>
-    </div>
-
-    <% if (spell.subclasses && spell.subclasses.length) { %>
-    <div class="spell-subclasses">
-      <b>Subclasses:</b>
-      <div class="indent">
-        <% spell.subclasses.forEach((sub, idx) => { %>
-        <span><%= sub.name %></span><%= idx < spell.subclasses.length - 1 ? ', ' : '' %>
-        <% }) %>
-      </div>
+      </ul>
     </div>
     <% } %>
 
-    <br />
-    <hr />
-    <div style="margin-top: 20px;">
-      <a href="/dnd/5e/srd/spells">&larr; Back to Spell List</a>
+    <% if (spell.damage && spell.damage.damage_at_character_level) { %>
+    <div class="inline-div">
+      <b>Damage by Character Level:</b>
     </div>
+    <div class="indent">
+      <ul>
+        <% Object.entries(spell.damage.damage_at_character_level).forEach(([level, dice]) => { %>
+        <li>Level <%= level %>: <%= dice %></li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <% if (spell.heal_at_slot_level) { %>
+    <div class="inline-div">
+      <b>Healing by Slot Level:</b>
+    </div>
+    <div class="indent">
+      <ul>
+        <% Object.entries(spell.heal_at_slot_level).forEach(([level, dice]) => { %>
+        <li>Level <%= level %>: <%= dice %></li>
+        <% }) %>
+      </ul>
+    </div>
+    <% } %>
+
+    <% if (spell.dc) { %>
+    <div class="inline-div">
+      <b>Saving Throw:</b>
+      <div><%= spell.dc.dc_type.name %></div>
+      <% if (spell.dc.dc_success) { %>
+      <i>(On success: <%= spell.dc.dc_success.toLowerCase().replace('_', ' ') %>)</i>
+      <% } %>
+    </div>
+    <% } %>
+
+    <% if (spell.area_of_effect) { %>
+    <div class="inline-div">
+      <b>Area of Effect:</b>
+      <div><%= spell.area_of_effect.size %> ft. <%= spell.area_of_effect.type %></div>
+    </div>
+    <% } %>
+  </div>
+
+  <br />
+  <hr class="w-75" />
+
+  <!-- Classes -->
+  <div class="spell-classes">
+    <b>Classes:</b>
+    <div class="indent">
+      <% spell.classes.forEach((cls, idx) => { %>
+      <a href="/dnd/5e/srd/classes#<%= cls.index %>"><%= cls.name %></a><%= idx < spell.classes.length - 1 ? ', ' : '' %>
+      <% }) %>
+    </div>
+  </div>
+
+  <% if (spell.subclasses && spell.subclasses.length) { %>
+  <div class="spell-subclasses">
+    <b>Subclasses:</b>
+    <div class="indent">
+      <% spell.subclasses.forEach((sub, idx) => { %>
+      <span><%= sub.name %></span><%= idx < spell.subclasses.length - 1 ? ', ' : '' %>
+      <% }) %>
+    </div>
+  </div>
+  <% } %>
+
+  <br />
+  <hr />
+  <div style="margin-top: 20px;">
+    <a href="/dnd/5e/srd/spells">&larr; Back to Spell List</a>
+  </div>
   </div>
   <%- include('../../../partials/footer') %>
 </body>

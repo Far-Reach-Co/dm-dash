@@ -86,12 +86,12 @@
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
     <!-- Breadcrumb -->
-    <div class="inline-div">
-      <small>
-        <a href="/dnd/5e/srd/contents">Contents</a> ->
-        <a href="/dnd/5e/srd/equipment">Equipment</a> ->
-        <div class="text-green"><%= item.name %></div>
-      </small>
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <a href="/dnd/5e/srd/equipment">Equipment</a>
+      <span class="separator">→</span>
+      <div class="text-green"><%= item.name %></div>
     </div>
     <hr />
 
