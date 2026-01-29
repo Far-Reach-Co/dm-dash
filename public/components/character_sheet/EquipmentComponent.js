@@ -57,6 +57,12 @@ export default class EquipmentComponent {
 
     titleInput.value = item.name;
     if (item.weight) weightInput.value = item.weight;
+
+    // Populate description from JSON data if available
+    if (item.desc && item.desc.length) {
+      const description = Array.isArray(item.desc) ? item.desc.join('\n\n') : item.desc;
+      this.equipmentData[this.equipmentData.indexOf(equipmentItem)].description = description;
+    }
   };
 
   resetEquipmentInfoToCurrentValues = (equipmentItem) => {
@@ -79,16 +85,22 @@ export default class EquipmentComponent {
       `equipment-weight-input-${equipmentItem.id}`,
     );
 
-    this.equipmentData[this.equipmentData.indexOf(equipmentItem)].title =
-      titleInput.value;
-    this.equipmentData[this.equipmentData.indexOf(equipmentItem)].weight =
-      weightInput.valueAsNumber;
+    const index = this.equipmentData.indexOf(equipmentItem);
+    this.equipmentData[index].title = titleInput.value;
+    this.equipmentData[index].weight = weightInput.valueAsNumber;
 
     // then save to db
-    postThing(`/api/edit_5e_character_equipment/${equipmentItem.id}`, {
+    const dataToSave = {
       title: titleInput.value,
       weight: weightInput.valueAsNumber,
-    });
+    };
+
+    // Include description if it was populated from autofill
+    if (this.equipmentData[index].description) {
+      dataToSave.description = this.equipmentData[index].description;
+    }
+
+    postThing(`/api/edit_5e_character_equipment/${equipmentItem.id}`, dataToSave);
   };
 
   resetAndHideEquipmentSuggestions(equipmentItem) {
