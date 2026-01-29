@@ -74,17 +74,17 @@
     <% data.forEach(function(condition){ %>
     <div class="inline-div" id="<%= condition.index %>">
       <h3><%= condition.name %></h3>
-      </span>
       <div class="indent">
         <% condition.desc.forEach((str, index) => { %>
         <p><%= str %></p>
         <% }) %>
         <br />
-        </span>
         <br />
-        <% }); %>
-        </span>
-        <%- include('../../../partials/footer') %>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>

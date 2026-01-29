@@ -86,17 +86,18 @@
       <h3><%= skill.name %></h3>
       <div class="text-bright-white">
         [<%= skill.ability_score.name %>]
-        </span>
-        </span>
+        <br>
         <div class="indent">
           <% skill.desc.forEach((str, index) => { %>
           <p><%= str %></p>
           <% }) %>
-          </span>
           <br />
-          <% }); %>
-          </span>
-          <%- include('../../../partials/footer') %>
+        </div>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>

@@ -74,16 +74,16 @@
     <% data.forEach(function(dType){ %>
     <div class="inline-div" id="<%= dType.index %>">
       <h3><%= dType.name %></h3>
-      </span>
       <div class="indent">
         <% dType.desc.forEach((str, index) => { %>
         <p><%= str %></p>
         <% }) %>
-        </span>
         <br />
-        <% }); %>
-        </span>
-        <%- include('../../../partials/footer') %>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>
