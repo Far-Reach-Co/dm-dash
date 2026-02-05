@@ -1,8 +1,139 @@
+/* ==========================================================================
+   Theme Variables
+   ========================================================================== */
+
 :root {
-  --bg-color-blue-dark: #192a39;
-  --bg-color-blue-light: rgb(43, 65, 83);
-  --bg-color-brown-dark: #0a141d;
+  --bg-blue-dark: #192a39;
+  --bg-blue-light: rgb(43, 65, 83);
+  --bg-brown-dark: #0a141d;
+
+  /* Animation Variables */
+  --anim-duration: 0.8s;
+  --anim-stagger: 0.15s;
+  --anim-easing: cubic-bezier(0.16, 1, 0.3, 1);
+  --glow-color: rgba(116, 167, 215, 0.4);
+  --glow-color-warm: rgba(222, 199, 174, 0.3);
 }
+
+/* ==========================================================================
+   Keyframe Animations
+   ========================================================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes etherealGlow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 20px var(--glow-color)) drop-shadow(0 0 40px transparent);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 30px var(--glow-color)) drop-shadow(0 0 60px var(--glow-color));
+  }
+}
+
+@keyframes gentleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes subtleFloat {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(2deg);
+  }
+}
+
+@keyframes diceHover {
+
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-8px) rotate(5deg);
+  }
+
+  75% {
+    transform: translateY(-4px) rotate(-3deg);
+  }
+}
+
+@keyframes breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ==========================================================================
+   Base Elements
+   ========================================================================== */
 
 h1 {
   font-size: 25px;
@@ -12,28 +143,104 @@ h1 {
 p {
   font-size: 1.3rem;
   text-align: center;
-  max-width: 100%;
-  width: 600px;
+  max-width: 600px;
   color: var(--bright-white);
 }
 
-section {
-  height: 100%;
+.section {
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-/* FIRST */
+/* ==========================================================================
+   Scroll-Triggered Animation Classes
+   ========================================================================== */
 
-.first {
-  background-color: var(--bg-color-blue-dark);
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity var(--anim-duration) var(--anim-easing),
+    transform var(--anim-duration) var(--anim-easing);
 }
 
-.first #city-img {
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.animate-scale-on-scroll {
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity var(--anim-duration) var(--anim-easing),
+    transform var(--anim-duration) var(--anim-easing);
+}
+
+.animate-scale-on-scroll.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.animate-left-on-scroll {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity var(--anim-duration) var(--anim-easing),
+    transform var(--anim-duration) var(--anim-easing);
+}
+
+.animate-left-on-scroll.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.animate-right-on-scroll {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity var(--anim-duration) var(--anim-easing),
+    transform var(--anim-duration) var(--anim-easing);
+}
+
+.animate-right-on-scroll.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ==========================================================================
+   HERO / LANDING
+   ========================================================================== */
+
+.hero {
+  background-color: var(--bg-blue-dark);
+  position: relative;
+}
+
+/* Ambient particles overlay */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    radial-gradient(2px 2px at 20% 30%, rgba(116, 167, 215, 0.3) 0%, transparent 100%),
+    radial-gradient(2px 2px at 40% 70%, rgba(222, 199, 174, 0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 60% 20%, rgba(116, 167, 215, 0.4) 0%, transparent 100%),
+    radial-gradient(2px 2px at 80% 50%, rgba(222, 199, 174, 0.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 80%, rgba(116, 167, 215, 0.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 90%, rgba(222, 199, 174, 0.2) 0%, transparent 100%);
+  pointer-events: none;
+  animation: subtleFloat 8s ease-in-out infinite;
+  opacity: 0.7;
+  z-index: 1;
+}
+
+.hero-background {
   width: 100%;
-  padding-top: 13%;
+  padding-top: 15%;
   background-image: url("/assets/landing/city.webp");
   background-size: cover;
   background-position: top;
@@ -41,198 +248,297 @@ section {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 2;
 }
 
-.first #main-logo {
+.hero .logo {
   width: 50%;
+  animation: fadeInScale 1.2s var(--anim-easing) forwards,
+    etherealGlow 4s ease-in-out 1.5s infinite;
+  opacity: 0;
 }
 
-.first #peli-signup {
+.hero p {
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 0.8s var(--anim-easing) 0.4s forwards;
+  opacity: 0;
+}
+
+.hero p.text-center {
+  animation: fadeInUp 0.8s var(--anim-easing) 0.6s forwards;
+  opacity: 0;
+}
+
+.hero p.text-center a {
+  position: relative;
+  display: inline-block;
+}
+
+.hero p.text-center a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--orange3), var(--blue6));
+  transition: width 0.4s var(--anim-easing);
+}
+
+.hero p.text-center a:hover::after {
+  width: 100%;
+}
+
+.hero .cta-signup {
   width: 300px;
   max-width: 60%;
   cursor: pointer;
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 0.8s var(--anim-easing) 0.8s forwards,
+    gentleFloat 3s ease-in-out 1.6s infinite;
+  opacity: 0;
+  transition: transform 0.3s var(--anim-easing), filter 0.3s ease;
 }
 
-.first #peli-signup:hover {
-  opacity: 0.8;
+.hero .cta-signup:hover {
+  transform: translateY(-8px) scale(1.05);
+  filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.4)) drop-shadow(0 0 20px var(--glow-color-warm));
 }
 
-/* SECOND */
+/* ==========================================================================
+   FEATURE / SCROLL SECTION
+   ========================================================================== */
 
-.second {
-  height: 100%;
+.feature-scroll {
   padding-top: 8%;
-  background-color: var(--bg-color-blue-light);
+  background-color: var(--bg-blue-light);
   background-image: url("/assets/landing/water_bg.webp");
   background-size: 65%;
   background-position: right;
   background-repeat: no-repeat;
+
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap-reverse;
 }
 
-.second-container-1 {
+.feature-scroll .media,
+.feature-scroll .content {
   width: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.second-container-2 {
   min-width: 300px;
-  width: 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.second #scroll-img {
+.feature-scroll .content {
+  flex-direction: column;
+}
+
+.feature-scroll .scroll-image {
   width: 60%;
 }
 
-.third {
-  background-color: var(--bg-color-brown-dark);
-  padding-top: 30px;
-  padding-bottom: 30px;
+/* ==========================================================================
+   WORLD MAP SECTION
+   ========================================================================== */
+
+.world-map {
+  background-color: var(--bg-brown-dark);
+  padding: 30px 0;
+  position: relative;
 }
 
-.third #sm-map-img {
-  /* border: 1px solid red; */
+/* Subtle vignette overlay for depth */
+.world-map::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(10, 20, 29, 0.4) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.world-map .map-small {
   width: 100%;
   height: 50%;
   background-image: url("/assets/landing/small_map_bg.webp");
   background-size: 35%;
   background-position: center;
   background-repeat: no-repeat;
+  position: relative;
+  z-index: 2;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 4;
 }
 
-#scroll-svg {
+.world-map .scroll-icon {
   width: 10%;
   height: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
-#lg-map-img {
+.world-map .map-large {
   width: 100%;
   height: auto;
+  position: relative;
+  z-index: 2;
 }
 
-.fourth {
-  background-color: var(--bg-color-blue-dark);
+
+/* ==========================================================================
+   CHARACTERS / DICE
+   ========================================================================== */
+
+.characters {
+  background-color: var(--bg-blue-dark);
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  position: relative;
 }
 
-.first-container-1 {
+.characters .content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
-#dice-svg {
+.characters .dice-icon {
   width: 100px;
   margin-bottom: 30px;
+  animation: diceHover 5s ease-in-out infinite;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
 }
 
-#character-img {
+.characters .character-image {
   width: 40%;
+  position: relative;
+  z-index: 1;
+  transform: translateX(40px);
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
 }
 
-.fourth p {
+
+.characters p {
   width: 300px;
 }
 
+/* Discord link hover effect */
+.characters a {
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.characters a:hover {
+  color: var(--blue6);
+  text-shadow: 0 0 20px var(--glow-color);
+}
+
 /* ==========================================================================
-   Responsive Breakpoints
+   Buttons
    ========================================================================== */
 
-/* Tablet and below */
+.about-btn {
+  display: inline-block;
+  padding: var(--space-md) var(--space-xl);
+  border: 2px solid var(--orange3);
+  border-radius: var(--border-radius);
+  color: var(--orange3);
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.about-btn:hover {
+  background: var(--orange3);
+  color: var(--main-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(165, 79, 4, 0.3);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
 @media (max-width: 900px) {
-  .second {
+  .feature-scroll {
     background-size: 100%;
     background-position: bottom;
   }
 
-  .second-container-1,
-  .second-container-2 {
+  .feature-scroll .media,
+  .feature-scroll .content {
     width: 100%;
     padding: var(--space-lg);
   }
 
-  .second #scroll-img {
+  .feature-scroll .scroll-image {
     width: 50%;
     max-width: 300px;
   }
 
-  .fourth {
+  .characters {
     flex-direction: column-reverse;
   }
 
-  #character-img {
+  .characters .character-image {
     width: 60%;
     max-width: 350px;
   }
-
-  .first-container-1 {
-    padding: var(--space-lg);
-  }
 }
 
-/* Mobile */
 @media (max-width: 600px) {
-  .first p {
+  .hero p {
     padding: 0 var(--space-md);
     font-size: 1.1rem;
   }
 
-  .first #main-logo {
+  .hero .logo {
     width: 80%;
   }
 
-  .third #sm-map-img {
+  .world-map .map-small {
     background-size: 80%;
     padding: var(--space-lg);
   }
 
-  .third #sm-map-img h1 {
+  .world-map h1 {
     font-size: 1.3rem;
   }
 
-  .third #sm-map-img p {
+  .world-map p {
     font-size: 1rem;
     padding: 0 var(--space-sm);
   }
 
-  #scroll-svg {
+  .world-map .scroll-icon {
     width: 15%;
   }
 
-  .second-container-2 h1 {
-    font-size: 1.3rem;
-  }
-
-  .second-container-2 p {
-    font-size: 1rem;
-    padding: 0 var(--space-sm);
-  }
-
-  .fourth p {
+  .characters p {
     width: 100%;
     padding: 0 var(--space-md);
     font-size: 1rem;
   }
 
-  .fourth h1 {
+  .characters h1 {
     font-size: 1.3rem;
   }
 
-  #character-img {
-    width: 80%;
+  .characters .character-image {
+    display: none;
   }
 }

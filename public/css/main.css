@@ -22,6 +22,7 @@
 @import url("./components/rich-text.css");
 @import url("./components/icons.css");
 @import url("./components/dashboard.css");
+@import url("./components/footer.css");
 
 /* Utilities */
 @import url("./utilities/utilities.css");

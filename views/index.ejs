@@ -68,24 +68,33 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <section class="first">
-    <div id="city-img">
-      <img id="main-logo" src="/assets/landing/mainlogo.webp" alt="" />
+
+  <!-- HERO -->
+  <section class="section hero">
+    <div class="hero-background">
+      <img class="logo" src="/assets/landing/mainlogo.webp" alt="Far Reach Co Logo" />
     </div>
+
     <p>
       <b>Unleash your creativity with friends!</b> Far Reach Co. offers an
       engaging, collaborative, roleplaying experience. Assemble your group to
       conquer fearsome beasts, embark on thrilling adventures, and weave
       fantastical tales brimming with excitement and imagination.
     </p>
+
     <p class="text-center mb-3">
-      <a href="/what-is-frc" style="font-size: 1.1em;"><b>What is Far Reach Co? →</b></a>
+      <a href="/what-is-frc" style="font-size: 1.1em;">
+        <b>What is Far Reach Co? →</b>
+      </a>
     </p>
-    <img id="peli-signup" onclick="window.location = '/register'" src="/assets/landing/peli_signup.webp" alt="" />
+
+    <img class="cta-signup" src="/assets/landing/peli_signup.webp" alt="Sign up" onclick="window.location = '/register'" />
   </section>
-  <section class="third">
-    <div id="sm-map-img">
-      <img id="scroll-svg" src="/assets/landing/scroll.svg" alt="" />
+
+  <!-- WORLD MAP -->
+  <section class="section world-map">
+    <div class="map-small">
+      <img class="scroll-icon" src="/assets/landing/scroll.svg" alt="" />
       <h1>Virtual Table Top</h1>
       <p>
         Take your team on an adventure by using our virtual tabletop system.
@@ -94,47 +103,60 @@
         players!
       </p>
     </div>
-    <img id="lg-map-img" src="/assets/landing/large_map_bg.webp" alt="" />
+
+    <img class="map-large" src="/assets/landing/large_map_bg.webp" alt="" />
   </section>
-  <section class="fourth">
-    <div class="first-container-1">
-      <img id="dice-svg" src="/assets/landing/dice.svg" alt="" />
+
+  <!-- CHARACTERS -->
+  <section class="section characters">
+    <div class="content">
+      <img class="dice-icon" src="/assets/landing/dice.svg" alt="" />
       <h1>Character Sheets</h1>
       <p>
         Manage your D&D 5E character sheet with a fresh and intuitive
         approach.
       </p>
-      <p>SPOILER:</p>
-      <p>
-        We will be adding other RPG character sheets in the future, let us
-        know what you would like to see!
-      </p>
+
       <div class="d-flex align-items-center justify-content-center">
-        <img class="me-2" src="/assets/discord_icon.webp" width="30px" height="30px" />
+        <img class="me-2" src="/assets/discord_icon.webp" width="30" height="30" alt="Discord" />
         <h2>Join us on Discord</h2>
       </div>
-      <a href="https://discord.gg/Yzw3xZysxe">https://discord.gg/Yzw3xZysxe</a>
+
+      <a href="https://discord.gg/Yzw3xZysxe">
+        https://discord.gg/Yzw3xZysxe
+      </a>
     </div>
-    <img id="character-img" src="/assets/landing/character.png" alt="" />
+
+    <img class="character-image" src="/assets/landing/character.png" alt="" />
   </section>
-  <section class="second">
-    <div class="second-container-1">
-      <img id="scroll-img" src="/assets/landing/scroll_dice.webp" alt="" />
+
+  <!-- FEATURE / QUEST -->
+  <section class="section feature-scroll">
+    <div class="media">
+      <img class="scroll-image" src="/assets/landing/scroll_dice.webp" alt="" />
     </div>
-    <div class="second-container-2">
+
+    <div class="content">
       <h1>Our Personal Quest</h1>
       <br />
       <p>
         We do whatever it takes to ensure a quality experience by keeping
-        things, accessible and responsive! Players can jump into a game with
+        things accessible and responsive. Players can jump into a game with
         one simple click. Our goal is to cultivate a community of inspired
-        creators that are able to run exciting and fulfilling adventures with
-        the innovations that we provide.
+        creators able to run exciting and fulfilling adventures with the
+        innovations we provide.
       </p>
-      <b><a href="/about-us">Read More About Us</a></b>
+
+      <b>
+        <a class="about-btn" href="/about-us">
+          Read More About Us
+        </a>
+      </b>
     </div>
   </section>
+
   <%- include('./partials/footer') %>
 </body>
+
 
 </html>
