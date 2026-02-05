@@ -1,0 +1,198 @@
+/* ==========================================================================
+   Footer Component
+   ========================================================================== */
+
+footer {
+  width: 100%;
+  padding: var(--space-xl) var(--space-lg);
+  margin-top: auto;
+  background-color: var(--blue3);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(72, 99, 125, 0.15) 0%, transparent 60%);
+}
+
+.footer-content {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xl);
+}
+
+.footer-section {
+  text-align: center;
+}
+
+.footer-section h2 {
+  margin-bottom: var(--space-sm);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+}
+
+/* Email Link */
+.footer-email {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  color: var(--main-white);
+  text-decoration: none;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius);
+  transition: color var(--transition-normal), background-color var(--transition-normal);
+}
+
+.footer-email:hover {
+  color: var(--orange3);
+  background-color: rgba(222, 199, 174, 0.08);
+  text-decoration: none;
+}
+
+/* Social Icons Container */
+.footer-socials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  flex-wrap: wrap;
+}
+
+/* Individual Social Link */
+.footer-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: rgba(72, 99, 125, 0.3);
+  color: var(--main-white);
+  text-decoration: none;
+  transition:
+    transform 0.2s ease,
+    background-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.footer-social:hover {
+  transform: translateY(-4px);
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* Platform-specific hover colors - using class-based targeting */
+.footer-social[aria-label="Instagram"]:hover {
+  background: linear-gradient(135deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: white;
+}
+
+.footer-social[aria-label="TikTok"]:hover {
+  background-color: #000;
+  color: #00f2ea;
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 0 0 2px #ff0050,
+    inset 0 0 12px rgba(0, 242, 234, 0.15);
+}
+
+.footer-social[aria-label="YouTube"]:hover {
+  background-color: #ff0000;
+  color: white;
+}
+
+.footer-social[aria-label="Twitch"]:hover {
+  background-color: #9146ff;
+  color: white;
+}
+
+.footer-social[aria-label="Facebook"]:hover {
+  background-color: #1877f2;
+  color: white;
+}
+
+/* Icon Styles */
+.footer-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.footer-icon--email {
+  width: 18px;
+  height: 18px;
+}
+
+/* Footer Navigation */
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs) var(--space-sm);
+  padding-top: var(--space-lg);
+  border-top: 1px solid rgba(72, 99, 125, 0.4);
+  width: 100%;
+  max-width: 600px;
+}
+
+.footer-links a {
+  color: var(--light-gray);
+  text-decoration: none;
+  font-size: 0.85rem;
+  padding: var(--space-xs);
+  border-radius: var(--border-radius);
+  transition: color var(--transition-fast);
+}
+
+.footer-links a:hover {
+  color: var(--orange3);
+  text-decoration: none;
+}
+
+.footer-links-divider {
+  color: var(--main-gray);
+  font-size: 0.9rem;
+  user-select: none;
+  opacity: 0.6;
+}
+
+/* Copyright */
+.footer-copyright {
+  color: var(--main-gray);
+  font-size: 0.8rem;
+  margin-top: var(--space-xs);
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  footer {
+    padding: var(--space-lg) var(--space-md);
+  }
+
+  .footer-content {
+    gap: var(--space-lg);
+  }
+
+  .footer-socials {
+    gap: var(--space-md);
+  }
+
+  .footer-social {
+    width: 44px;
+    height: 44px;
+  }
+
+  .footer-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .footer-links {
+    gap: var(--space-xs);
+  }
+
+  .footer-links a {
+    font-size: 0.8rem;
+  }
+}

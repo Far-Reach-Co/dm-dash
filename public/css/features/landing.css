@@ -1,8 +1,16 @@
+/* ==========================================================================
+   Theme Variables
+   ========================================================================== */
+
 :root {
-  --bg-color-blue-dark: #192a39;
-  --bg-color-blue-light: rgb(43, 65, 83);
-  --bg-color-brown-dark: #0a141d;
+  --bg-blue-dark: #192a39;
+  --bg-blue-light: rgb(43, 65, 83);
+  --bg-brown-dark: #0a141d;
 }
+
+/* ==========================================================================
+   Base Elements
+   ========================================================================== */
 
 h1 {
   font-size: 25px;
@@ -12,28 +20,29 @@ h1 {
 p {
   font-size: 1.3rem;
   text-align: center;
-  max-width: 100%;
-  width: 600px;
+  max-width: 600px;
   color: var(--bright-white);
 }
 
-section {
-  height: 100%;
+.section {
+  min-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-/* FIRST */
+/* ==========================================================================
+   HERO / LANDING
+   ========================================================================== */
 
-.first {
-  background-color: var(--bg-color-blue-dark);
+.hero {
+  background-color: var(--bg-blue-dark);
 }
 
-.first #city-img {
+.hero-background {
   width: 100%;
-  padding-top: 13%;
+  padding-top: 25%;
   background-image: url("/assets/landing/city.webp");
   background-size: cover;
   background-position: top;
@@ -43,196 +52,210 @@ section {
   justify-content: center;
 }
 
-.first #main-logo {
+.hero .logo {
   width: 50%;
 }
 
-.first #peli-signup {
+.hero .cta-signup {
   width: 300px;
   max-width: 60%;
   cursor: pointer;
 }
 
-.first #peli-signup:hover {
+.hero .cta-signup:hover {
   opacity: 0.8;
 }
 
-/* SECOND */
+/* ==========================================================================
+   FEATURE / SCROLL SECTION
+   ========================================================================== */
 
-.second {
-  height: 100%;
+.feature-scroll {
   padding-top: 8%;
-  background-color: var(--bg-color-blue-light);
+  background-color: var(--bg-blue-light);
   background-image: url("/assets/landing/water_bg.webp");
   background-size: 65%;
   background-position: right;
   background-repeat: no-repeat;
+
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap-reverse;
 }
 
-.second-container-1 {
+.feature-scroll .media,
+.feature-scroll .content {
   width: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.second-container-2 {
   min-width: 300px;
-  width: 50%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.second #scroll-img {
+.feature-scroll .content {
+  flex-direction: column;
+}
+
+.feature-scroll .scroll-image {
   width: 60%;
 }
 
-.third {
-  background-color: var(--bg-color-brown-dark);
-  padding-top: 30px;
-  padding-bottom: 30px;
+/* ==========================================================================
+   WORLD MAP SECTION
+   ========================================================================== */
+
+.world-map {
+  background-color: var(--bg-brown-dark);
+  padding: 30px 0;
 }
 
-.third #sm-map-img {
-  /* border: 1px solid red; */
+.world-map .map-small {
   width: 100%;
   height: 50%;
   background-image: url("/assets/landing/small_map_bg.webp");
   background-size: 35%;
   background-position: center;
   background-repeat: no-repeat;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  z-index: 4;
 }
 
-#scroll-svg {
+.world-map .scroll-icon {
   width: 10%;
   height: auto;
 }
 
-#lg-map-img {
+.world-map .map-large {
   width: 100%;
   height: auto;
 }
 
-.fourth {
-  background-color: var(--bg-color-blue-dark);
+/* ==========================================================================
+   CHARACTERS / DICE
+   ========================================================================== */
+
+.characters {
+  background-color: var(--bg-blue-dark);
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }
 
-.first-container-1 {
+.characters .content {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-#dice-svg {
+.characters .dice-icon {
   width: 100px;
   margin-bottom: 30px;
 }
 
-#character-img {
+.characters .character-image {
   width: 40%;
 }
 
-.fourth p {
+.characters p {
   width: 300px;
 }
 
 /* ==========================================================================
-   Responsive Breakpoints
+   Buttons
    ========================================================================== */
 
-/* Tablet and below */
+.about-btn {
+  display: inline-block;
+  padding: var(--space-md) var(--space-xl);
+  border: 2px solid var(--orange3);
+  border-radius: var(--border-radius);
+  color: var(--orange3);
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.about-btn:hover {
+  background: var(--orange3);
+  color: var(--main-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(165, 79, 4, 0.3);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+
 @media (max-width: 900px) {
-  .second {
+  .feature-scroll {
     background-size: 100%;
     background-position: bottom;
   }
 
-  .second-container-1,
-  .second-container-2 {
+  .feature-scroll .media,
+  .feature-scroll .content {
     width: 100%;
     padding: var(--space-lg);
   }
 
-  .second #scroll-img {
+  .feature-scroll .scroll-image {
     width: 50%;
     max-width: 300px;
   }
 
-  .fourth {
+  .characters {
     flex-direction: column-reverse;
   }
 
-  #character-img {
+  .characters .character-image {
     width: 60%;
     max-width: 350px;
   }
-
-  .first-container-1 {
-    padding: var(--space-lg);
-  }
 }
 
-/* Mobile */
 @media (max-width: 600px) {
-  .first p {
+  .hero p {
     padding: 0 var(--space-md);
     font-size: 1.1rem;
   }
 
-  .first #main-logo {
+  .hero .logo {
     width: 80%;
   }
 
-  .third #sm-map-img {
+  .world-map .map-small {
     background-size: 80%;
     padding: var(--space-lg);
   }
 
-  .third #sm-map-img h1 {
+  .world-map h1 {
     font-size: 1.3rem;
   }
 
-  .third #sm-map-img p {
+  .world-map p {
     font-size: 1rem;
     padding: 0 var(--space-sm);
   }
 
-  #scroll-svg {
+  .world-map .scroll-icon {
     width: 15%;
   }
 
-  .second-container-2 h1 {
-    font-size: 1.3rem;
-  }
-
-  .second-container-2 p {
-    font-size: 1rem;
-    padding: 0 var(--space-sm);
-  }
-
-  .fourth p {
+  .characters p {
     width: 100%;
     padding: 0 var(--space-md);
     font-size: 1rem;
   }
 
-  .fourth h1 {
+  .characters h1 {
     font-size: 1.3rem;
   }
 
-  #character-img {
-    width: 80%;
+  .characters .character-image {
+    display: none;
   }
 }
