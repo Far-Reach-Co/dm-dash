@@ -80,8 +80,8 @@
 
 .close-sidebar {
   position: absolute;
-  top: var(--space-sm);
-  left: calc(-15px - var(--space-sm));
+  top: 80px;
+  left: calc(-3px - var(--space-sm));
   cursor: pointer;
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
