@@ -29,14 +29,14 @@ export class Hamburger {
       createElement(
         "img",
         {
-          height: "40px",
-          width: "40px",
+          height: "32px",
+          width: "32px",
           src: "/assets/sidebar.svg",
           class: "flipXAxis",
           title: "Toggle sidebar",
         },
-        null
-      )
+        null,
+      ),
     );
   };
 }

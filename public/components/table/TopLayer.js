@@ -4,6 +4,16 @@ import createElement from "../createElement.js";
 import socketIntegration from "./socketIntegration.js";
 import truncateString from "../../lib/truncateString.js";
 
+// Feather-style inline SVG icons (18x18 viewBox, currentColor stroke)
+const ICONS = {
+  info: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`,
+  pencil: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>`,
+  layers: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>`,
+  grid: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`,
+  trash: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  chevronUp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+};
+
 export default class TopLayer {
   constructor(props) {
     this.domComponent = props.domComponent;
@@ -12,7 +22,14 @@ export default class TopLayer {
 
     const searchParams = new URLSearchParams(window.location.search);
     this.projectId = searchParams.get("project");
+
+    this.activePanel = null;
+    this._clickAwayBound = false;
   }
+
+  // ---------------------------------------------------------------------------
+  // Helpers
+  // ---------------------------------------------------------------------------
 
   getRecordHref = (recordId) => {
     const base = `/record?id=${recordId}`;
@@ -44,6 +61,416 @@ export default class TopLayer {
 
     return info;
   };
+
+  isOwnerOrManager = () => {
+    return USERID == this.tableView.user_id || IS_MANAGER_OR_OWNER;
+  };
+
+  hiddenElement = () => createElement("div", { class: "d-none" });
+
+  layerStyles = {
+    Map: { class: "text-orange", label: "Map Layer", color: "var(--orange3)" },
+    Object: { class: "text-green", label: "Object Layer", color: "var(--green)" },
+    Fog: { class: "text-light-gray", label: "Fog Layer", color: "var(--light-gray)" },
+  };
+
+  togglePanel = (name) => {
+    this.activePanel = this.activePanel === name ? null : name;
+    this.render();
+  };
+
+  setupClickAway = () => {
+    if (this._clickAwayBound) return;
+    this._clickAwayBound = true;
+
+    document.addEventListener("pointerdown", (e) => {
+      if (this.activePanel && !e.target.closest(".vtt-toolbar")) {
+        this.activePanel = null;
+        this.render();
+      }
+    });
+  };
+
+  renderToolbarButton = (iconSvg, title, { active = false, danger = false, onClick, layerColor } = {}) => {
+    let cls = "vtt-toolbar-btn";
+    if (active) cls += " active";
+    if (danger) cls += " btn-danger";
+
+    const btn = createElement("div", { class: cls, title }, iconSvg, {
+      type: "click",
+      event: (e) => {
+        e.stopPropagation();
+        onClick?.();
+      },
+    });
+
+    if (layerColor) {
+      const badge = createElement("span", {
+        class: "vtt-layer-badge",
+        style: `background-color: ${layerColor};`,
+      });
+      btn.appendChild(badge);
+    }
+
+    return btn;
+  };
+
+  // ---------------------------------------------------------------------------
+  // Toolbar buttons
+  // ---------------------------------------------------------------------------
+
+  renderInfoMenu = () => {
+    return this.renderToolbarButton(ICONS.info, "Info & key commands", {
+      onClick: () => {
+        modal.show(
+          createElement("div", { class: "help-content" }, [
+            createElement("h1", {}, "Canvas Log"),
+            createElement("br"),
+            createElement("button", {}, "Open Log", {
+              type: "click",
+              event: () => {
+                const canvasObjectsList =
+                  this.tableApp.canvasLayer.canvas.getObjects();
+                modal.show(
+                  createElement("div", { class: "help-content" }, [
+                    createElement("h1", {}, "Canvas Log"),
+                    createElement("hr"),
+                    createElement("h2", {}, "Objects List"),
+                    createElement("hr"),
+                    createElement(
+                      "div",
+                      { class: "overflow-auto", style: "height: 300px;" },
+                      [...this.renderCanvasObjectList(canvasObjectsList)]
+                    ),
+                  ])
+                );
+              },
+            }),
+            createElement("br"),
+            createElement("br"),
+            createElement("h1", {}, "Key Commands"),
+            createElement("hr"),
+            createElement("b", {}, "Option/Alt (\u2325)"),
+            createElement("br"),
+            createElement(
+              "small",
+              {},
+              "Hold key to enable drag-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
+            ),
+            createElement("br"),
+            createElement("b", {}, "Shift"),
+            createElement("br"),
+            createElement(
+              "small",
+              {},
+              "Hold key and click objects to select multiple."
+            ),
+            createElement("br"),
+            createElement("b", {}, "Delete/Backspace"),
+            createElement("br"),
+            createElement(
+              "small",
+              {},
+              "While object(s) are selected, press delete key to remove object(s) from table."
+            ),
+            createElement("br"),
+            createElement("b", {}, "Control (\u2303) + t"),
+            createElement("br"),
+            createElement(
+              "small",
+              {},
+              "While object(s) are selected, pressing ctrl + t will change the layer that the object(s) are currently on."
+            ),
+            createElement("br"),
+            createElement("b", {}, "Control (\u2303) + d"),
+            createElement("br"),
+            createElement(
+              "small",
+              {},
+              "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original."
+            ),
+            createElement("br"),
+            createElement("br"),
+            createElement("h1", {}, "Chat '/' Commands"),
+            createElement("hr"),
+            createElement("h2", {}, "/roll *input*"),
+            createElement(
+              "small",
+              {},
+              "The command expects a text input in the format:"
+            ),
+            createElement("br"),
+            createElement(
+              "small",
+              {},
+              "[number of dice] d [dice sides] + [modifier]"
+            ),
+            createElement("br"),
+            createElement("br"),
+            createElement("b", {}, "[number of dice]: "),
+            createElement("small", {}, "Specifies how many dice to roll."),
+            createElement("br"),
+            createElement("b", {}, "[dice sides]: "),
+            createElement(
+              "small",
+              {},
+              "Represents the number of sides on the dice."
+            ),
+            createElement("br"),
+            createElement("b", {}, "[modifier]: "),
+            createElement(
+              "small",
+              {},
+              "(Optional) A number that's added to the total result of the dice rolls. If multiple modifiers are given, they are all added."
+            ),
+            createElement("br"),
+            createElement("br"),
+            createElement("b", {}, "Example"),
+            createElement("br"),
+            createElement("small", {}, "If a user inputs "),
+            createElement("code", {}, "2d6+3"),
+            createElement(
+              "small",
+              {},
+              ", the command will simulate rolling two 6-sided dice and then add a modifier of 3 to the total."
+            ),
+            createElement("br"),
+            createElement("small", {}, "The bot might respond with:"),
+            createElement("br"),
+            createElement("code", {}, "Input: 2d6+3"),
+            createElement("br"),
+            createElement("code", {}, "Roll 1: 4"),
+            createElement("br"),
+            createElement("code", {}, "Roll 2: 6 - CRITICAL"),
+            createElement("br"),
+            createElement("code", {}, "TOTAL = 13"),
+            createElement("br"),
+            createElement("br"),
+            createElement("b", {}, "Error Handling"),
+            createElement("br"),
+            createElement(
+              "small",
+              {},
+              "If the input is incorrect or malformed, the bot will respond with:"
+            ),
+            createElement("br"),
+            createElement("code", {}, "Failed to calculate, try again."),
+            createElement("br"),
+          ])
+        );
+      },
+    });
+  };
+
+  renderDrawModeToggle = () => {
+    const isDrawing = this.tableApp.canvasLayer.canvas.isDrawingMode;
+    return this.renderToolbarButton(ICONS.pencil, "Toggle draw mode", {
+      active: isDrawing,
+      onClick: () => {
+        this.tableApp.canvasLayer.canvas.isDrawingMode = !isDrawing;
+        this.render();
+      },
+    });
+  };
+
+  renderDrawBar = () => {
+    if (!this.tableApp.canvasLayer.canvas.isDrawingMode) {
+      return this.hiddenElement();
+    }
+
+    return createElement("div", { class: "vtt-draw-bar" }, [
+      createElement("small", {}, "Color"),
+      createElement(
+        "input",
+        {
+          type: "color",
+          value: this.tableApp.canvasLayer.canvas.freeDrawingBrush.color,
+          style: "cursor: pointer; height: 26px; width: 32px; border: none; border-radius: var(--border-radius); padding: 0;",
+        },
+        null,
+        {
+          type: "input",
+          event: (e) => {
+            this.tableApp.canvasLayer.canvas.freeDrawingBrush.color =
+              e.target.value;
+          },
+        }
+      ),
+      createElement("small", { style: "margin-left: var(--space-sm);" }, "Width"),
+      createElement(
+        "input",
+        {
+          type: "number",
+          value: this.tableApp.canvasLayer.canvas.freeDrawingBrush.width,
+          min: 1,
+          style: "width: 44px; height: 26px; padding: 2px 4px;",
+        },
+        null,
+        {
+          type: "input",
+          event: (e) => {
+            this.tableApp.canvasLayer.canvas.freeDrawingBrush.width =
+              e.target.valueAsNumber;
+          },
+        }
+      ),
+    ]);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Layers (dropdown)
+  // ---------------------------------------------------------------------------
+
+  renderStyledLayerInfoElem = () => {
+    const style = this.layerStyles[this.tableApp.currentLayer];
+    return createElement("small", { class: style.class }, style.label);
+  };
+
+  renderLayersButton = () => {
+    if (!this.isOwnerOrManager()) return this.hiddenElement();
+
+    const layerColor = this.layerStyles[this.tableApp.currentLayer]?.color;
+    return this.renderToolbarButton(ICONS.layers, "Layers", {
+      active: this.activePanel === "layers",
+      layerColor,
+      onClick: () => this.togglePanel("layers"),
+    });
+  };
+
+  renderLayersPanel = () => {
+    if (this.activePanel !== "layers") return this.hiddenElement();
+
+    return createElement("div", { class: "vtt-toolbar-panel open" }, [
+      this.renderStyledLayerInfoElem(),
+      createElement(
+        "button",
+        { title: "Change the layer you are interacting with" },
+        "Switch Layer",
+        {
+          type: "click",
+          event: () => {
+            this.tableApp.changeLayer();
+            this.render();
+          },
+        }
+      ),
+    ]);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Grid (dropdown)
+  // ---------------------------------------------------------------------------
+
+  renderGridButton = () => {
+    if (!this.isOwnerOrManager()) return this.hiddenElement();
+
+    return this.renderToolbarButton(ICONS.grid, "Grid control", {
+      active: this.activePanel === "grid",
+      onClick: () => this.togglePanel("grid"),
+    });
+  };
+
+  renderGridPanel = () => {
+    if (this.activePanel !== "grid") return this.hiddenElement();
+
+    const gridGroup = this.tableApp.canvasLayer.gridManager?.getGroup();
+    const isVisible = gridGroup?.visible ?? false;
+
+    if (!this.gridSizeInputs) {
+      this.gridSizeInputs = { width: 40, height: 40 };
+    }
+
+    const updateInput = (key) => (e) => {
+      const val = parseInt(e.target.value);
+      if (!isNaN(val)) {
+        this.gridSizeInputs[key] = val;
+      }
+    };
+
+    return createElement("div", { class: "vtt-toolbar-panel open" }, [
+      createElement(
+        "button",
+        { title: "Hide or show the grid lines and toggle snap-to-grid" },
+        isVisible ? "Hide Grid" : "Show Grid",
+        {
+          type: "click",
+          event: () => {
+            isVisible
+              ? this.tableApp.canvasLayer.hideGrid()
+              : this.tableApp.canvasLayer.showGrid();
+            socketIntegration.gridToggle(!isVisible);
+            this.render();
+          },
+        }
+      ),
+      createElement("div", { class: "d-flex flex-row align-items-center", style: "gap: var(--space-sm);" }, [
+        createElement("small", {}, "W"),
+        createElement(
+          "input",
+          {
+            type: "number",
+            value: this.gridSizeInputs.width,
+            min: 1,
+            max: 100,
+            style: "width: 56px; padding: 2px 4px;",
+          },
+          null,
+          { type: "input", event: updateInput("width") }
+        ),
+        createElement("small", {}, "H"),
+        createElement(
+          "input",
+          {
+            type: "number",
+            value: this.gridSizeInputs.height,
+            min: 1,
+            max: 100,
+            style: "width: 56px; padding: 2px 4px;",
+          },
+          null,
+          { type: "input", event: updateInput("height") }
+        ),
+      ]),
+      createElement(
+        "button",
+        { title: "Resize the grid area (in squares)" },
+        "Resize",
+        {
+          type: "click",
+          event: () => {
+            const w = this.gridSizeInputs.width;
+            const h = this.gridSizeInputs.height;
+            this.tableApp.canvasLayer.gridManager.rebuildGrid(w, h);
+            socketIntegration.gridResized({ width: w, height: h });
+          },
+        }
+      ),
+    ]);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Object action buttons (delete, move up)
+  // ---------------------------------------------------------------------------
+
+  renderImageOptionButtons = () => {
+    const obj = this.tableApp.getCurrentSelectedObject();
+    if (!obj) return [];
+
+    return [
+      createElement("div", { class: "vtt-toolbar-sep" }),
+      this.renderToolbarButton(ICONS.trash, "Remove selected object", {
+        danger: true,
+        onClick: () => this.tableApp.canvasLayer.removeObjects(),
+      }),
+      this.renderToolbarButton(ICONS.chevronUp, "Move to top of layer", {
+        onClick: () => this.tableApp.canvasLayer.moveObjectToTop(),
+      }),
+    ];
+  };
+
+  // ---------------------------------------------------------------------------
+  // Selected object info (top-right, unchanged concept)
+  // ---------------------------------------------------------------------------
 
   renderSelectedObjectInfoElem = async () => {
     const obj = this.tableApp.getCurrentSelectedObject();
@@ -106,287 +533,9 @@ export default class TopLayer {
     ]);
   };
 
-  isOwnerOrManager = () => {
-    return USERID == this.tableView.user_id || IS_MANAGER_OR_OWNER;
-  };
-
-  hiddenElement = () => createElement("div", { class: "d-none" });
-
-  layerStyles = {
-    Map: { class: "text-orange", label: "Map Layer" },
-    Object: { class: "text-green", label: "Object Layer" },
-    Fog: { class: "text-light-gray", label: "Fog Layer" },
-  };
-
-  renderStyledLayerInfoElem = () => {
-    const style = this.layerStyles[this.tableApp.currentLayer];
-    return createElement("small", { class: style.class }, style.label);
-  };
-
-  renderLayersElem = () => {
-    if (!this.isOwnerOrManager()) return this.hiddenElement();
-
-    return createElement("div", { class: "table-config layers-elem" }, [
-      this.renderStyledLayerInfoElem(),
-      createElement(
-        "button",
-        { title: "Change the layer you are interacting with" },
-        "Switch Layer",
-        {
-          type: "click",
-          event: () => {
-            this.tableApp.changeLayer();
-            this.render();
-          },
-        }
-      ),
-    ]);
-  };
-
-  renderGridControlElem = () => {
-    if (!this.isOwnerOrManager()) return this.hiddenElement();
-
-    const gridGroup = this.tableApp.canvasLayer.gridManager?.getGroup();
-    const isVisible = gridGroup?.visible ?? false;
-
-    // Default user input (in squares, not pixels)
-    if (!this.gridSizeInputs) {
-      this.gridSizeInputs = {
-        width: 40,
-        height: 40,
-      };
-    }
-
-    const updateInput = (key) => (e) => {
-      const val = parseInt(e.target.value);
-      if (!isNaN(val)) {
-        this.gridSizeInputs[key] = val;
-      }
-    };
-
-    return createElement("div", { class: "table-config grid-control-elem" }, [
-      createElement("small", {}, "Grid Control"),
-
-      // Toggle visibility
-      createElement(
-        "button",
-        { title: "Hide or show the grid lines and toggle snap-to-grid" },
-        isVisible ? "Hide" : "Show",
-        {
-          type: "click",
-          event: () => {
-            isVisible
-              ? this.tableApp.canvasLayer.hideGrid()
-              : this.tableApp.canvasLayer.showGrid();
-            socketIntegration.gridToggle(!isVisible);
-            this.render(); // update label
-          },
-        },
-      ),
-      // Input for grid width (in squares)
-      createElement(
-        "div",
-        {
-          class: "d-flex flex-column justify-content-center align-items-center",
-        },
-        [
-          createElement("small", {}, "Width"),
-          createElement(
-            "input",
-            {
-              type: "number",
-              value: this.gridSizeInputs.width,
-              min: 1,
-              max: 100,
-              style: "margin-left: 5px; width: 80px;",
-            },
-            null,
-            {
-              type: "input",
-              event: updateInput("width"),
-            },
-          ),
-        ],
-      ),
-      // Input for grid height (in squares)
-      createElement(
-        "div",
-        {
-          class: "d-flex flex-column justify-content-center align-items-center",
-        },
-        [
-          createElement("small", {}, "Height"),
-          createElement(
-            "input",
-            {
-              type: "number",
-              value: this.gridSizeInputs.height,
-              min: 1,
-              max: 100,
-              style: "margin-left: 5px; width: 80px;",
-            },
-            null,
-            {
-              type: "input",
-              event: updateInput("height"),
-            },
-          ),
-        ],
-      ),
-      // Button to apply new grid size
-      createElement(
-        "button",
-        {
-          title: "Resize the grid area (in squares)",
-        },
-        "Resize Grid",
-        {
-          type: "click",
-          event: () => {
-            const w = this.gridSizeInputs.width;
-            const h = this.gridSizeInputs.height;
-
-            this.tableApp.canvasLayer.gridManager.rebuildGrid(w, h);
-            socketIntegration.gridResized({ width: w, height: h });
-          },
-        },
-      ),
-    ]);
-  };
-
-  renderDrawModeToggle = () => {
-    return createElement(
-      "div",
-      { class: "table-config draw-mode-toggle-elem" },
-      [
-        createElement("small", {}, "Draw Mode"),
-        createElement(
-          "button",
-          {
-            title: "Toggle the drawing tool",
-          },
-          this.tableApp.canvasLayer.canvas.isDrawingMode ? "On" : "Off",
-          {
-            type: "click",
-            event: () => {
-              this.tableApp.canvasLayer.canvas.isDrawingMode =
-                !this.tableApp.canvasLayer.canvas.isDrawingMode;
-              this.render();
-            },
-          },
-        ),
-      ],
-    );
-  };
-
-  renderImageOptions = () => {
-    return createElement("div", { class: "table-config image-options-elem" }, [
-      createElement(
-        "button",
-        {
-          title: "Remove the selected object from the table",
-          class: "btn-red",
-        },
-        "🗑️",
-        {
-          type: "click",
-          event: () => {
-            this.tableApp.canvasLayer.removeObjects();
-          },
-        },
-      ),
-      createElement(
-        "button",
-        {
-          title: "Move the selected object to the top of its layer",
-          class: "",
-        },
-        "↑",
-        {
-          type: "click",
-          event: () => {
-            this.tableApp.canvasLayer.moveObjectToTop();
-          },
-        },
-      ),
-    ]);
-  };
-
-  renderDrawColorAndWidthPicker = () => {
-    if (this.tableApp.canvasLayer.canvas.isDrawingMode) {
-      return createElement(
-        "div",
-        { class: "table-config draw-mode-picker-elem" },
-        [
-          createElement(
-            "div",
-            {
-              class: "d-flex align-items-end",
-            },
-            [
-              createElement(
-                "div",
-                {
-                  class: "d-flex flex-column align-items-start",
-                },
-                [
-                  createElement("small", {}, "Color"),
-                  createElement(
-                    "input",
-                    {
-                      class: "cursor-pointer me-3",
-                      style: "height: 25px;",
-                      type: "color",
-                      id: "colorpicker",
-                      name: "colorpicker",
-                      value:
-                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.color,
-                    },
-                    null,
-                    {
-                      type: "input",
-                      event: (e) => {
-                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.color =
-                          e.target.value;
-                      },
-                    },
-                  ),
-                ],
-              ),
-              createElement(
-                "div",
-                {
-                  class: "d-flex flex-column align-items-center",
-                },
-                [
-                  createElement("small", {}, "Line Width"),
-                  createElement(
-                    "input",
-                    {
-                      style: "width: 30px; height: 25px;",
-                      type: "number",
-                      id: "linewidth",
-                      value:
-                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.width,
-                      name: "linewidth",
-                    },
-                    null,
-                    {
-                      type: "input",
-                      event: (e) => {
-                        this.tableApp.canvasLayer.canvas.freeDrawingBrush.width =
-                          e.target.valueAsNumber;
-                      },
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
-      );
-    } else return createElement("div", { class: "d-none" });
-  };
+  // ---------------------------------------------------------------------------
+  // Canvas object list (for info modal)
+  // ---------------------------------------------------------------------------
 
   renderCanvasObjectList = (canvasObjectList) => {
     return canvasObjectList.map((obj, index) => {
@@ -407,7 +556,7 @@ export default class TopLayer {
           createElement(
             "div",
             {},
-            `${index} ${IdPrefix}-${truncateString(obj.id, 8, "")}`,
+            `${index} ${IdPrefix}-${truncateString(obj.id, 8, "")}`
           ),
           createElement("img", {
             src: this.tableApp.sidebar.tableSidebarImageComponent
@@ -421,184 +570,50 @@ export default class TopLayer {
         ],
         {
           type: "click",
-          event: (e) => {
+          event: () => {
             this.tableApp.canvasLayer.selectObjectById(obj.id);
           },
-        },
+        }
       );
     });
   };
 
-  renderInfoMenu = () => {
-    return createElement(
-      "div",
-      { class: "table-config info-elem", title: "Open key command info box" },
-      [createElement("div", {}, "?")],
-      {
-        type: "click",
-        event: () => {
-          modal.show(
-            createElement("div", { class: "help-content" }, [
-              createElement("h1", {}, "Canvas Log"),
-              createElement("br"),
-              createElement("button", {}, "Open Log", {
-                type: "click",
-                event: (e) => {
-                  const canvasObjectsList =
-                    this.tableApp.canvasLayer.canvas.getObjects();
-                  modal.show(
-                    createElement("div", { class: "help-content" }, [
-                      createElement("h1", {}, "Canvas Log"),
-                      createElement("hr"),
-                      createElement("h2", {}, "Objects List"),
-                      createElement("hr"),
-                      createElement(
-                        "div",
-                        { class: "overflow-auto", style: "height: 300px;" },
-                        [...this.renderCanvasObjectList(canvasObjectsList)],
-                      ),
-                    ]),
-                  );
-                },
-              }),
-              createElement("br"),
-              createElement("br"),
-              createElement("h1", {}, "Key Commands"),
-              createElement("hr"),
-              createElement("b", {}, "Option/Alt (⌥)"),
-              createElement("br"),
-              createElement(
-                "small",
-                {},
-                "Hold key to enable drag-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region.",
-              ),
-              createElement("br"),
-              createElement("b", {}, "Shift"),
-              createElement("br"),
-              createElement(
-                "small",
-                {},
-                "Hold key and click objects to select multiple.",
-              ),
-              createElement("br"),
-              createElement("b", {}, "Delete/Backspace"),
-              createElement("br"),
-              createElement(
-                "small",
-                {},
-                "While object(s) are selected, press delete key to remove object(s) from table.",
-              ),
-              createElement("br"),
-              createElement("b", {}, "Control (⌃) + t"),
-              createElement("br"),
-              createElement(
-                "small",
-                {},
-                "While object(s) are selected, pressing ctrl + t will change the layer that the object(s) are currently on.",
-              ),
-              createElement("br"),
-              createElement("b", {}, "Control (⌃) + d"),
-              createElement("br"),
-              createElement(
-                "small",
-                {},
-                "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original.",
-              ),
-              createElement("br"),
-              createElement("br"),
-              createElement("h1", {}, "Chat '/' Commands"),
-              createElement("hr"),
-              createElement("h2", {}, "/roll *input*"),
-              createElement(
-                "small",
-                {},
-                "The command expects a text input in the format:",
-              ),
-              createElement("br"),
-              createElement(
-                "small",
-                {},
-                "[number of dice] d [dice sides] + [modifier]",
-              ),
-              createElement("br"),
-              createElement("br"),
-              createElement("b", {}, "[number of dice]: "),
-              createElement("small", {}, "Specifies how many dice to roll."),
-              createElement("br"),
-              createElement("b", {}, "[dice sides]: "),
-              createElement(
-                "small",
-                {},
-                "Represents the number of sides on the dice.",
-              ),
-              createElement("br"),
-              createElement("b", {}, "[modifier]: "),
-              createElement(
-                "small",
-                {},
-                "(Optional) A number that's added to the total result of the dice rolls. If multiple modifiers are given, they are all added.",
-              ),
-              createElement("br"),
-              createElement("br"),
-              createElement("b", {}, "Example"),
-              createElement("br"),
-              createElement("small", {}, "If a user inputs "),
-              createElement("code", {}, "2d6+3"),
-              createElement(
-                "small",
-                {},
-                ", the command will simulate rolling two 6-sided dice and then add a modifier of 3 to the total.",
-              ),
-              createElement("br"),
-              createElement("small", {}, "The bot might respond with:"),
-              createElement("br"),
-              createElement("code", {}, "Input: 2d6+3"),
-              createElement("br"),
-              createElement("code", {}, "Roll 1: 4"),
-              createElement("br"),
-              createElement("code", {}, "Roll 2: 6 - CRITICAL"),
-              createElement("br"),
-              createElement("code", {}, "TOTAL = 13"),
-              createElement("br"),
-              createElement("br"),
-              createElement("b", {}, "Error Handling"),
-              createElement("br"),
-              createElement(
-                "small",
-                {},
-                "If the input is incorrect or malformed, the bot will respond with:",
-              ),
-              createElement("br"),
-              createElement("code", {}, "Failed to calculate, try again."),
-              createElement("br"),
-            ]),
-          );
-        },
-      },
-    );
-  };
+  // ---------------------------------------------------------------------------
+  // Main render
+  // ---------------------------------------------------------------------------
 
   render = async () => {
     this.domComponent.replaceChildren();
+    this.setupClickAway();
 
-    // Left toolbar: flex column container that auto-stacks tools
-    const leftToolbar = createElement(
-      "div",
-      { class: "vtt-toolbar" },
-      [
-        this.renderInfoMenu(),
-        this.renderDrawModeToggle(),
-        this.renderDrawColorAndWidthPicker(),
-        this.renderLayersElem(),
-        this.renderGridControlElem(),
-      ]
-    );
+    const objectActionButtons = this.renderImageOptionButtons();
 
-    this.domComponent.append(
-      leftToolbar,
-      this.renderImageOptions(),
-    );
-    // append this after since it waits
+    // Build panel anchors for layers and grid
+    const layersAnchor = createElement("div", { class: "vtt-toolbar-panel-anchor" }, [
+      this.renderLayersButton(),
+      this.renderLayersPanel(),
+    ]);
+
+    const gridAnchor = createElement("div", { class: "vtt-toolbar-panel-anchor" }, [
+      this.renderGridButton(),
+      this.renderGridPanel(),
+    ]);
+
+    const toolbarRow = createElement("div", { class: "vtt-toolbar-row" }, [
+      this.renderInfoMenu(),
+      this.renderDrawModeToggle(),
+      createElement("div", { class: "vtt-toolbar-sep" }),
+      layersAnchor,
+      gridAnchor,
+      ...objectActionButtons,
+    ]);
+
+    const toolbar = createElement("div", { class: "vtt-toolbar" }, [
+      toolbarRow,
+      this.renderDrawBar(),
+    ]);
+
+    this.domComponent.append(toolbar);
     this.domComponent.append(await this.renderSelectedObjectInfoElem());
   };
 }

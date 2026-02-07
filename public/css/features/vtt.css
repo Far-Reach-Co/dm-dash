@@ -8,7 +8,7 @@
 }
 
 /* ==========================================================================
-   VTT Tool Panels (base style for all floating panels)
+   VTT Tool Panels (base style — still used by .selected-obj-info-elem)
    ========================================================================== */
 
 .table-config {
@@ -45,102 +45,177 @@
   border-radius: var(--border-radius);
 }
 
-/* Compact buttons inside VTT tool panels */
 .table-config button {
   padding: 4px 12px;
   font-size: 14px;
 }
 
 /* ==========================================================================
-   Left Toolbar - Flex column container that auto-stacks tools
-   Replaces hard-coded top/left pixel positioning per panel
+   Horizontal Toolbar — top of canvas
    ========================================================================== */
 
 .vtt-toolbar {
   position: absolute;
-  top: var(--space-md);
-  left: var(--space-md);
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 4;
   display: flex;
   flex-direction: column;
-  gap: var(--space-sm);
+  pointer-events: none;
 }
 
-/* Panels inside the toolbar flow naturally, no absolute positioning */
-.vtt-toolbar .table-config {
-  position: relative;
-  top: auto;
-  left: auto;
+/* Main button row */
+.vtt-toolbar-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-xs) var(--space-sm);
+  background-color: rgba(24, 32, 41, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--surface-border);
+  pointer-events: auto;
 }
 
-/* Info button inside toolbar */
-.vtt-toolbar .info-elem {
+/* 34x34 square icon button */
+.vtt-toolbar-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  color: var(--main-white);
+  cursor: pointer;
   position: relative;
-  top: auto;
-  left: auto;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-/* Draw picker sits inside toolbar flow when draw mode is active */
-.vtt-toolbar .draw-mode-picker-elem {
-  position: relative;
-  top: auto;
-  left: auto;
+.vtt-toolbar-btn:hover {
+  background-color: rgba(116, 167, 215, 0.12);
+  border-color: var(--surface-border);
+}
+
+.vtt-toolbar-btn.active {
+  background-color: rgba(222, 199, 174, 0.15);
+  border-color: var(--orange3);
+  color: var(--orange3);
+}
+
+.vtt-toolbar-btn.btn-danger:hover {
+  background-color: rgba(206, 101, 101, 0.2);
+  border-color: var(--red1);
+  color: var(--red1);
+}
+
+/* SVG inside buttons */
+.vtt-toolbar-btn svg {
+  flex-shrink: 0;
+}
+
+/* Vertical separator between tool groups */
+.vtt-toolbar-sep {
+  width: 1px;
+  height: 22px;
+  margin: 0 var(--space-xs);
+  background-color: rgba(116, 167, 215, 0.2);
+  flex-shrink: 0;
+}
+
+/* Layer color badge on the layers button */
+.vtt-layer-badge {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid rgba(24, 32, 41, 0.6);
+  pointer-events: none;
 }
 
 /* ==========================================================================
-   Individual Panel Styles
+   Dropdown panels (anchored below their button)
    ========================================================================== */
 
-.info-elem {
-  top: var(--space-lg);
-  left: var(--space-md);
-  padding: 0;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  width: 32px;
-  border-radius: 50%;
+.vtt-toolbar-panel-anchor {
+  position: relative;
+}
+
+.vtt-toolbar-panel {
+  position: absolute;
+  top: calc(100% + var(--space-xs));
+  left: 0;
+  min-width: 160px;
+  padding: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  background-color: var(--blue5);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.vtt-toolbar-panel.open {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.vtt-toolbar-panel small {
+  color: var(--orange3);
   font-weight: bold;
-  font-size: 18px;
-  cursor: help;
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
 }
 
-.info-elem:hover {
-  background-color: var(--green);
-  transform: scale(1.1);
+.vtt-toolbar-panel button {
+  padding: 4px 12px;
+  font-size: 14px;
 }
 
-.draw-mode-toggle-elem {
-  /* position handled by .vtt-toolbar flex flow */
+.vtt-toolbar-panel input[type="number"] {
+  width: 56px;
+  padding: 2px var(--space-xs);
 }
 
-.draw-mode-picker-elem {
-  /* position handled by .vtt-toolbar flex flow */
-}
+/* ==========================================================================
+   Draw sub-bar (persistent when draw mode is active)
+   ========================================================================== */
 
-.layers-elem {
-  /* position handled by .vtt-toolbar flex flow */
-}
-
-.grid-control-elem {
-  /* position handled by .vtt-toolbar flex flow */
-}
-
-/* Standalone floating panels (not in toolbar) */
-.selected-obj-info-elem {
-  top: 10px;
-  right: 300px;
-}
-
-/* Floating beside the toolbar */
-.image-options-elem {
+.vtt-draw-bar {
   display: flex;
   flex-direction: row;
-  gap: var(--space-xs);
-  width: auto;
-  top: var(--space-md);
-  left: 180px;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-md);
+  background-color: rgba(24, 32, 41, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--surface-border);
+  pointer-events: auto;
+}
+
+.vtt-draw-bar small {
+  color: var(--orange3);
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Selected object info (top-right, outside toolbar)
+   ========================================================================== */
+
+.selected-obj-info-elem {
+  top: 200px;
+  left: 10px;
 }
 
 /* help-content styling is in modals.css */
