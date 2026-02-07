@@ -30,6 +30,7 @@ const staticPages: SitemapEntry[] = [
   { url: "/resources", priority: 0.9, changefreq: "monthly" },
   { url: "/preaethrend", priority: 0.8, changefreq: "monthly" },
   { url: "/aether-bot", priority: 0.8, changefreq: "monthly" },
+  { url: "/vtt-guide", priority: 0.8, changefreq: "monthly" },
   // Legal
   { url: "/privacy-policy", priority: 0.5, changefreq: "yearly" },
   { url: "/terms-of-use", priority: 0.5, changefreq: "yearly" },

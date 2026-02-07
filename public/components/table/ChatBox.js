@@ -14,6 +14,11 @@ export default class ChatBoxComponent {
         id: "chat-box-messages",
       }),
     });
+
+    this.onlineUsersComponent = new OnlineUsersComponent({
+      domComponent: createElement("div"),
+      rerender: () => this.render(),
+    });
   }
 
   toggleChatVisibility = () => {
@@ -39,11 +44,15 @@ export default class ChatBoxComponent {
   };
 
   render = () => {
-    // clear
-    this.domComponent.innerHTML = "";
+    // clear — using replaceChildren for safe DOM reset (no user content)
+    this.domComponent.replaceChildren();
+    this.onlineUsersComponent.render();
     // render
     this.domComponent.append(
-      this.renderHideChatButton(),
+      createElement("div", { class: "chat-box-top-row" }, [
+        this.onlineUsersComponent.domComponent,
+        this.renderHideChatButton(),
+      ]),
       this.chatBoxMessagesComponent.domComponent,
       createElement(
         "form",
@@ -77,6 +86,7 @@ export default class ChatBoxComponent {
         }
       )
     );
+    this.chatBoxMessagesComponent.scrollDown();
   };
 }
 
@@ -175,9 +185,77 @@ class ChatBoxMessagesComponent {
   };
 
   render = () => {
-    // clear
-    this.domComponent.innerHTML = "";
+    // clear — safe DOM reset, no user content involved
+    this.domComponent.replaceChildren();
     // render
     this.domComponent.append(...this.renderMessagesOrHidden());
+  };
+}
+
+class OnlineUsersComponent {
+  constructor(props) {
+    this.domComponent = props.domComponent;
+    this.domComponent.className = "online-users-wrapper";
+    this.rerender = props.rerender;
+
+    this.usersList = [];
+    this.isOpen = false;
+  }
+
+  toggle = () => {
+    this.isOpen = !this.isOpen;
+    this.rerender();
+  };
+
+  renderUsersList = () => {
+    if (!this.usersList.length) {
+      return [createElement("div", { class: "online-panel-empty" }, "No users connected")];
+    }
+
+    return this.usersList.map((user) => {
+      return createElement(
+        "div",
+        { class: "online-user-item" },
+        [
+          createElement("div", { class: "online-indicator" }),
+          createElement("div", {}, user.username),
+        ],
+      );
+    });
+  };
+
+  renderToggleButton = () => {
+    const count = this.usersList.length;
+    const usersIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
+    return createElement(
+      "div",
+      { class: "chat-box-toggle online-toggle" + (this.isOpen ? " active" : "") },
+      usersIcon + ` ${count}`,
+      { type: "click", event: this.toggle }
+    );
+  };
+
+  renderPanel = () => {
+    if (!this.isOpen) return createElement("div", { class: "d-none" });
+
+    return createElement(
+      "div",
+      { class: "online-panel" },
+      [
+        createElement("div", { class: "online-panel-header" }, [
+          createElement("small", {}, "Online Users"),
+        ]),
+        createElement(
+          "div",
+          { class: "online-panel-list" },
+          this.renderUsersList()
+        ),
+      ],
+    );
+  };
+
+  render = () => {
+    this.domComponent.replaceChildren();
+    this.domComponent.append(this.renderPanel(), this.renderToggleButton());
   };
 }

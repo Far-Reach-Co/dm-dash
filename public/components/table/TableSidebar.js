@@ -47,10 +47,6 @@ export default class TableSidebar {
     this.tableSidebarFolderComponent.imagesRender =
       this.tableSidebarImageComponent.render;
 
-    // setup online users component
-    this.onlineUsersComponent = new OnlineUsersComponent({
-      domComponent: createElement("div"),
-    });
   }
 
   renderCloseBtn = () => {
@@ -457,7 +453,6 @@ export default class TableSidebar {
     this.domComponent.innerHTML = "";
 
     this.tableSidebarImageComponent.render();
-    this.onlineUsersComponent.render();
 
     // Header: title + settings gear + close X
     const header = createElement("div", { class: "sidebar-panel-header" }, [
@@ -504,8 +499,6 @@ export default class TableSidebar {
       actions,
       this.tableSidebarFolderComponent.domComponent,
       this.tableSidebarImageComponent.domComponent,
-      createElement("div", { class: "sidebar-header" }, "Online"),
-      this.onlineUsersComponent.domComponent,
     ]);
 
     this.container = container;
@@ -514,35 +507,3 @@ export default class TableSidebar {
   };
 }
 
-class OnlineUsersComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "online-users-container";
-
-    this.usersList = [];
-  }
-
-  renderUsersList = () => {
-    if (!this.usersList.length) return [createElement("small", {}, "None...")];
-
-    return this.usersList.map((user) => {
-      return createElement(
-        "div",
-        {
-          class: "online-user-item",
-        },
-        [
-          createElement("div", { class: "online-indicator" }),
-          createElement("div", {}, user.username),
-          createElement("br"),
-        ],
-      );
-    });
-  };
-
-  render = () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(...this.renderUsersList());
-  };
-}
