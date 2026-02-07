@@ -71,8 +71,16 @@ export default class TopLayer {
 
   layerStyles = {
     Map: { class: "text-orange", label: "Map Layer", color: "var(--orange3)" },
-    Object: { class: "text-green", label: "Object Layer", color: "var(--green)" },
-    Fog: { class: "text-light-gray", label: "Fog Layer", color: "var(--light-gray)" },
+    Object: {
+      class: "text-green",
+      label: "Object Layer",
+      color: "var(--green)",
+    },
+    Fog: {
+      class: "text-light-gray",
+      label: "Fog Layer",
+      color: "var(--light-gray)",
+    },
   };
 
   togglePanel = (name) => {
@@ -92,7 +100,11 @@ export default class TopLayer {
     });
   };
 
-  renderToolbarButton = (iconSvg, title, { active = false, danger = false, onClick, layerColor } = {}) => {
+  renderToolbarButton = (
+    iconSvg,
+    title,
+    { active = false, danger = false, onClick, layerColor } = {},
+  ) => {
     let cls = "vtt-toolbar-btn";
     if (active) cls += " active";
     if (danger) cls += " btn-danger";
@@ -125,8 +137,150 @@ export default class TopLayer {
       onClick: () => {
         modal.show(
           createElement("div", { class: "help-content" }, [
-            createElement("h1", {}, "Canvas Log"),
+            createElement("h1", {}, "VTT Quick Reference"),
+            createElement("hr"),
+            createElement(
+              "a",
+              {
+                href: "/vtt-guide",
+                target: "_blank",
+                rel: "noopener noreferrer",
+              },
+              "View full guide \u2192",
+            ),
             createElement("br"),
+            createElement("br"),
+
+            // Getting Started
+            createElement("h2", {}, "Getting Started"),
+            createElement("hr"),
+            createElement(
+              "small",
+              {},
+              "Add images via the sidebar (GM), then drag them onto the canvas. Pan by clicking and dragging empty space. Zoom with the scroll wheel or pinch gesture.",
+            ),
+            createElement("br"),
+            createElement("br"),
+
+            // Canvas
+            createElement("h2", {}, "Canvas"),
+            createElement("hr"),
+            createElement("b", {}, "Pan"),
+            createElement("small", {}, " \u2014 Click + drag on empty space"),
+            createElement("br"),
+            createElement("b", {}, "Zoom"),
+            createElement("small", {}, " \u2014 Scroll wheel or pinch"),
+            createElement("br"),
+            createElement("b", {}, "Select"),
+            createElement("small", {}, " \u2014 Click an object"),
+            createElement("br"),
+            createElement("b", {}, "Multi-select"),
+            createElement("small", {}, " \u2014 Shift+click or Alt+drag a box"),
+            createElement("br"),
+            createElement("b", {}, "Ping"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Double-click on empty canvas to ping location for all users",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Aura"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Select a token and set an aura color in the object panel",
+            ),
+            createElement("br"),
+            createElement("br"),
+
+            // Toolbar
+            createElement("h2", {}, "Toolbar"),
+            createElement("hr"),
+            createElement("b", {}, "Draw Mode"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Freehand drawing on the canvas. Set color and width.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Layers (GM)"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Switch between Map, Object, and Fog layers.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Grid (GM)"),
+            createElement("small", {}, " \u2014 Show/hide grid and resize it."),
+            createElement("br"),
+            createElement("b", {}, "Delete / Move to Top"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Remove selected object or bring it to front of its layer.",
+            ),
+            createElement("br"),
+            createElement("br"),
+
+            // Sidebar (GM)
+            createElement("h2", {}, "Sidebar (GM)"),
+            createElement("hr"),
+            createElement(
+              "small",
+              {},
+              "Upload images, create folders to organize them, adjust table settings, and copy the share link for players.",
+            ),
+            createElement("br"),
+            createElement("br"),
+
+            // Chat
+            createElement("h2", {}, "Chat"),
+            createElement("hr"),
+            createElement("b", {}, "/roll"),
+            createElement("small", {}, " \u2014 Roll dice. Format: "),
+            createElement("code", {}, "[count]d[sides]+[modifier]"),
+            createElement("br"),
+            createElement("small", {}, "Example: "),
+            createElement("code", {}, "2d6+3"),
+            createElement("small", {}, " rolls two 6-sided dice and adds 3."),
+            createElement("br"),
+            createElement("br"),
+
+            // Keyboard Shortcuts
+            createElement("h2", {}, "Keyboard Shortcuts"),
+            createElement("hr"),
+            createElement("b", {}, "Alt/Option (\u2325)"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Hold + drag to box-select multiple objects",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Shift"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Hold + click to add objects to selection",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Delete / Backspace"),
+            createElement("small", {}, " \u2014 Remove selected object(s)"),
+            createElement("br"),
+            createElement("b", {}, "Ctrl + T"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Cycle selected object(s) through layers",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Ctrl + D"),
+            createElement("small", {}, " \u2014 Duplicate selected object(s)"),
+            createElement("br"),
+            createElement("br"),
+
+            // Canvas Log
+            createElement("h2", {}, "Canvas Log"),
+            createElement("hr"),
             createElement("button", {}, "Open Log", {
               type: "click",
               event: () => {
@@ -141,123 +295,13 @@ export default class TopLayer {
                     createElement(
                       "div",
                       { class: "overflow-auto", style: "height: 300px;" },
-                      [...this.renderCanvasObjectList(canvasObjectsList)]
+                      [...this.renderCanvasObjectList(canvasObjectsList)],
                     ),
-                  ])
+                  ]),
                 );
               },
             }),
-            createElement("br"),
-            createElement("br"),
-            createElement("h1", {}, "Key Commands"),
-            createElement("hr"),
-            createElement("b", {}, "Option/Alt (\u2325)"),
-            createElement("br"),
-            createElement(
-              "small",
-              {},
-              "Hold key to enable drag-select. While holding key, hold click and drag cursor to select multiple objects within the boxed region."
-            ),
-            createElement("br"),
-            createElement("b", {}, "Shift"),
-            createElement("br"),
-            createElement(
-              "small",
-              {},
-              "Hold key and click objects to select multiple."
-            ),
-            createElement("br"),
-            createElement("b", {}, "Delete/Backspace"),
-            createElement("br"),
-            createElement(
-              "small",
-              {},
-              "While object(s) are selected, press delete key to remove object(s) from table."
-            ),
-            createElement("br"),
-            createElement("b", {}, "Control (\u2303) + t"),
-            createElement("br"),
-            createElement(
-              "small",
-              {},
-              "While object(s) are selected, pressing ctrl + t will change the layer that the object(s) are currently on."
-            ),
-            createElement("br"),
-            createElement("b", {}, "Control (\u2303) + d"),
-            createElement("br"),
-            createElement(
-              "small",
-              {},
-              "While object(s) are selected, pressing ctrl + d will duplicate the object(s) and place them on the table close to the original."
-            ),
-            createElement("br"),
-            createElement("br"),
-            createElement("h1", {}, "Chat '/' Commands"),
-            createElement("hr"),
-            createElement("h2", {}, "/roll *input*"),
-            createElement(
-              "small",
-              {},
-              "The command expects a text input in the format:"
-            ),
-            createElement("br"),
-            createElement(
-              "small",
-              {},
-              "[number of dice] d [dice sides] + [modifier]"
-            ),
-            createElement("br"),
-            createElement("br"),
-            createElement("b", {}, "[number of dice]: "),
-            createElement("small", {}, "Specifies how many dice to roll."),
-            createElement("br"),
-            createElement("b", {}, "[dice sides]: "),
-            createElement(
-              "small",
-              {},
-              "Represents the number of sides on the dice."
-            ),
-            createElement("br"),
-            createElement("b", {}, "[modifier]: "),
-            createElement(
-              "small",
-              {},
-              "(Optional) A number that's added to the total result of the dice rolls. If multiple modifiers are given, they are all added."
-            ),
-            createElement("br"),
-            createElement("br"),
-            createElement("b", {}, "Example"),
-            createElement("br"),
-            createElement("small", {}, "If a user inputs "),
-            createElement("code", {}, "2d6+3"),
-            createElement(
-              "small",
-              {},
-              ", the command will simulate rolling two 6-sided dice and then add a modifier of 3 to the total."
-            ),
-            createElement("br"),
-            createElement("small", {}, "The bot might respond with:"),
-            createElement("br"),
-            createElement("code", {}, "Input: 2d6+3"),
-            createElement("br"),
-            createElement("code", {}, "Roll 1: 4"),
-            createElement("br"),
-            createElement("code", {}, "Roll 2: 6 - CRITICAL"),
-            createElement("br"),
-            createElement("code", {}, "TOTAL = 13"),
-            createElement("br"),
-            createElement("br"),
-            createElement("b", {}, "Error Handling"),
-            createElement("br"),
-            createElement(
-              "small",
-              {},
-              "If the input is incorrect or malformed, the bot will respond with:"
-            ),
-            createElement("br"),
-            createElement("code", {}, "Failed to calculate, try again."),
-            createElement("br"),
-          ])
+          ]),
         );
       },
     });
@@ -286,7 +330,8 @@ export default class TopLayer {
         {
           type: "color",
           value: this.tableApp.canvasLayer.canvas.freeDrawingBrush.color,
-          style: "cursor: pointer; height: 26px; width: 32px; border: none; border-radius: var(--border-radius); padding: 0;",
+          style:
+            "cursor: pointer; height: 26px; width: 32px; border: none; border-radius: var(--border-radius); padding: 0;",
         },
         null,
         {
@@ -295,9 +340,13 @@ export default class TopLayer {
             this.tableApp.canvasLayer.canvas.freeDrawingBrush.color =
               e.target.value;
           },
-        }
+        },
       ),
-      createElement("small", { style: "margin-left: var(--space-sm);" }, "Width"),
+      createElement(
+        "small",
+        { style: "margin-left: var(--space-sm);" },
+        "Width",
+      ),
       createElement(
         "input",
         {
@@ -313,7 +362,7 @@ export default class TopLayer {
             this.tableApp.canvasLayer.canvas.freeDrawingBrush.width =
               e.target.valueAsNumber;
           },
-        }
+        },
       ),
     ]);
   };
@@ -353,7 +402,7 @@ export default class TopLayer {
             this.tableApp.changeLayer();
             this.render();
           },
-        }
+        },
       ),
     ]);
   };
@@ -402,36 +451,43 @@ export default class TopLayer {
             socketIntegration.gridToggle(!isVisible);
             this.render();
           },
-        }
+        },
       ),
-      createElement("div", { class: "d-flex flex-row align-items-center", style: "gap: var(--space-sm);" }, [
-        createElement("small", {}, "W"),
-        createElement(
-          "input",
-          {
-            type: "number",
-            value: this.gridSizeInputs.width,
-            min: 1,
-            max: 100,
-            style: "width: 56px; padding: 2px 4px;",
-          },
-          null,
-          { type: "input", event: updateInput("width") }
-        ),
-        createElement("small", {}, "H"),
-        createElement(
-          "input",
-          {
-            type: "number",
-            value: this.gridSizeInputs.height,
-            min: 1,
-            max: 100,
-            style: "width: 56px; padding: 2px 4px;",
-          },
-          null,
-          { type: "input", event: updateInput("height") }
-        ),
-      ]),
+      createElement(
+        "div",
+        {
+          class: "d-flex flex-row align-items-center",
+          style: "gap: var(--space-sm);",
+        },
+        [
+          createElement("small", {}, "W"),
+          createElement(
+            "input",
+            {
+              type: "number",
+              value: this.gridSizeInputs.width,
+              min: 1,
+              max: 100,
+              style: "width: 56px; padding: 2px 4px;",
+            },
+            null,
+            { type: "input", event: updateInput("width") },
+          ),
+          createElement("small", {}, "H"),
+          createElement(
+            "input",
+            {
+              type: "number",
+              value: this.gridSizeInputs.height,
+              min: 1,
+              max: 100,
+              style: "width: 56px; padding: 2px 4px;",
+            },
+            null,
+            { type: "input", event: updateInput("height") },
+          ),
+        ],
+      ),
       createElement(
         "button",
         { title: "Resize the grid area (in squares)" },
@@ -444,7 +500,7 @@ export default class TopLayer {
             this.tableApp.canvasLayer.gridManager.rebuildGrid(w, h);
             socketIntegration.gridResized({ width: w, height: h });
           },
-        }
+        },
       ),
     ]);
   };
@@ -505,7 +561,12 @@ export default class TopLayer {
 
     const thumbnailElem =
       obj.type === "image"
-        ? createElement("img", { class: "me-1", src: imageSrc, width: 30, height: 30 })
+        ? createElement("img", {
+            class: "me-1",
+            src: imageSrc,
+            width: 30,
+            height: 30,
+          })
         : this.hiddenElement();
 
     const nameElem = recordTitle
@@ -515,17 +576,28 @@ export default class TopLayer {
           createElement(
             "a",
             { href: recordHref, rel: "noopener noreferrer", target: "_blank" },
-            recordTitle
-          )
+            recordTitle,
+          ),
         )
       : createElement("small", {}, `"${displayName}"`);
 
-    return createElement("div", { class: "table-config selected-obj-info-elem" }, [
-      createElement("div", {}, `${idPrefix}-${truncateString(obj.id, 8, "")}`),
-      createElement("div", { class: "d-flex flex-row" }, [thumbnailElem, nameElem]),
-      createElement("small", {}, "Aura Color"),
-      this.renderAuraColorPicker(obj),
-    ]);
+    return createElement(
+      "div",
+      { class: "table-config selected-obj-info-elem" },
+      [
+        createElement(
+          "div",
+          {},
+          `${idPrefix}-${truncateString(obj.id, 8, "")}`,
+        ),
+        createElement("div", { class: "d-flex flex-row" }, [
+          thumbnailElem,
+          nameElem,
+        ]),
+        createElement("small", {}, "Aura Color"),
+        this.renderAuraColorPicker(obj),
+      ],
+    );
   };
 
   renderAuraColorPicker = (obj) => {
@@ -537,24 +609,29 @@ export default class TopLayer {
       socketIntegration.imageMoved(obj);
     };
 
-    return createElement("div", { class: "d-flex flex-row align-items-start" }, [
-      createElement(
-        "input",
-        {
-          style: "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
-          type: "color",
-          id: "colorpicker",
-          name: "colorpicker",
-          value: obj.shadow?.color ?? null,
-        },
-        null,
-        { type: "input", event: (e) => setAura(e.target.value) }
-      ),
-      createElement("button", {}, "Clear", {
-        type: "click",
-        event: () => setAura(null),
-      }),
-    ]);
+    return createElement(
+      "div",
+      { class: "d-flex flex-row align-items-start" },
+      [
+        createElement(
+          "input",
+          {
+            style:
+              "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
+            type: "color",
+            id: "colorpicker",
+            name: "colorpicker",
+            value: obj.shadow?.color ?? null,
+          },
+          null,
+          { type: "input", event: (e) => setAura(e.target.value) },
+        ),
+        createElement("button", {}, "Clear", {
+          type: "click",
+          event: () => setAura(null),
+        }),
+      ],
+    );
   };
 
   // ---------------------------------------------------------------------------
@@ -580,7 +657,7 @@ export default class TopLayer {
           createElement(
             "div",
             {},
-            `${index} ${IdPrefix}-${truncateString(obj.id, 8, "")}`
+            `${index} ${IdPrefix}-${truncateString(obj.id, 8, "")}`,
           ),
           createElement("img", {
             src: this.tableApp.sidebar.tableSidebarImageComponent
@@ -597,7 +674,7 @@ export default class TopLayer {
           event: () => {
             this.tableApp.canvasLayer.selectObjectById(obj.id);
           },
-        }
+        },
       );
     });
   };
@@ -613,15 +690,17 @@ export default class TopLayer {
     const objectActionButtons = this.renderImageOptionButtons();
 
     // Build panel anchors for layers and grid
-    const layersAnchor = createElement("div", { class: "vtt-toolbar-panel-anchor" }, [
-      this.renderLayersButton(),
-      this.renderLayersPanel(),
-    ]);
+    const layersAnchor = createElement(
+      "div",
+      { class: "vtt-toolbar-panel-anchor" },
+      [this.renderLayersButton(), this.renderLayersPanel()],
+    );
 
-    const gridAnchor = createElement("div", { class: "vtt-toolbar-panel-anchor" }, [
-      this.renderGridButton(),
-      this.renderGridPanel(),
-    ]);
+    const gridAnchor = createElement(
+      "div",
+      { class: "vtt-toolbar-panel-anchor" },
+      [this.renderGridButton(), this.renderGridPanel()],
+    );
 
     const toolbarRow = createElement("div", { class: "vtt-toolbar-row" }, [
       this.renderInfoMenu(),

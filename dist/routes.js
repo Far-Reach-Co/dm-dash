@@ -143,6 +143,14 @@ router.get("/resources", (req, res, next) => {
         next(err);
     }
 });
+router.get("/vtt-guide", (req, res, next) => {
+    try {
+        res.render("vtt-guide", { auth: req.session.user });
+    }
+    catch (err) {
+        next(err);
+    }
+});
 router.get("/preaethrend", (req, res, next) => {
     try {
         res.render("preaethrend", { auth: req.session.user });

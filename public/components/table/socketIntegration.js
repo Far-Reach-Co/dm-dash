@@ -52,8 +52,8 @@ class SocketIntegration {
 
     // UPDATE CURRENT USERS
     this.socket.on("current-users", (list) => {
-      this.tableApp.sidebar.onlineUsersComponent.usersList = list;
-      this.tableApp.sidebar.onlineUsersComponent.render();
+      this.tableApp.chatBoxComponent.onlineUsersComponent.usersList = list;
+      this.tableApp.chatBoxComponent.onlineUsersComponent.render();
     });
 
     // TABLE MESSAGES
