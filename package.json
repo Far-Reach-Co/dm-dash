@@ -12,7 +12,8 @@
     "migrate:redo": "dotenv -e .env -- node-pg-migrate redo",
     "migrate:create": "node-pg-migrate create",
     "sitemap": "npx tsx tools/generate-sitemap.ts",
-    "backfill:equipment-desc": "dotenv -e .env -- npx tsx tools/backfill-equipment-descriptions.ts"
+    "backfill:equipment-desc": "dotenv -e .env -- npx tsx tools/backfill-equipment-descriptions.ts",
+    "srd:download": "npx tsx tools/download-5e-srd.ts"
   },
   "author": "Julian Ranieri",
   "license": "ISC",

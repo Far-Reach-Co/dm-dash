@@ -105,8 +105,8 @@ function generateItemDescription(item) {
 // load equipment and magic items for suggestions on input
 let equipmentSuggestions = [];
 Promise.all([
-  fetch("/lib/data/5e-srd-equipment.json").then((res) => res.json()),
-  fetch("/lib/data/5e-srd-magic-items.json").then((res) => res.json()),
+  fetch("/lib/data/2014/5e-srd-equipment.json").then((res) => res.json()),
+  fetch("/lib/data/2014/5e-srd-magic-items.json").then((res) => res.json()),
 ]).then(([equipment, magicItems]) => {
   // Add item type to distinguish between equipment and magic items
   const equipmentWithType = equipment.map((item) => ({

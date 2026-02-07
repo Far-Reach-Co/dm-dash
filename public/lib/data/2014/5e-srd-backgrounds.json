@@ -2,20 +2,16 @@
   {
     "index": "acolyte",
     "name": "Acolyte",
-    "desc": [
-      "You have spent your life in the service of a temple to a specific god or pantheon of gods. You act as an intermediary between the realm of the holy and the mortal world, performing sacred rites and offering sacrifices in order to conduct worshipers into the presence of the divine. You are not necessarily a cleric—performing sacred rites is not the same thing as channeling divine power.",
-      "Choose a god, a pantheon of gods, or some other quasi-divine being from among those listed in \"Fantasy-Historical Pantheons\" or those specified by your GM, and work with your GM to detail the nature of your religious service. Were you a lesser functionary in a temple, raised from childhood to assist the priests in the sacred rites? Or were you a high priest who suddenly experienced a call to serve your god in a different way? Perhaps you were the leader of a small cult outside of any established temple structure, or even an occult group that served a fiendish master that you now deny."
-    ],
     "starting_proficiencies": [
       {
         "index": "skill-insight",
         "name": "Skill: Insight",
-        "url": "/api/proficiencies/skill-insight"
+        "url": "/api/2014/proficiencies/skill-insight"
       },
       {
         "index": "skill-religion",
         "name": "Skill: Religion",
-        "url": "/api/proficiencies/skill-religion"
+        "url": "/api/2014/proficiencies/skill-religion"
       }
     ],
     "language_options": {
@@ -23,7 +19,7 @@
       "type": "languages",
       "from": {
         "option_set_type": "resource_list",
-        "resource_list_url": "/api/languages"
+        "resource_list_url": "/api/2014/languages"
       }
     },
     "starting_equipment": [
@@ -31,7 +27,7 @@
         "equipment": {
           "index": "clothes-common",
           "name": "Clothes, common",
-          "url": "/api/equipment/clothes-common"
+          "url": "/api/2014/equipment/clothes-common"
         },
         "quantity": 1
       },
@@ -39,7 +35,7 @@
         "equipment": {
           "index": "pouch",
           "name": "Pouch",
-          "url": "/api/equipment/pouch"
+          "url": "/api/2014/equipment/pouch"
         },
         "quantity": 1
       }
@@ -53,7 +49,7 @@
           "equipment_category": {
             "index": "holy-symbols",
             "name": "Holy Symbols",
-            "url": "/api/equipment-categories/holy-symbols"
+            "url": "/api/2014/equipment-categories/holy-symbols"
           }
         }
       }
@@ -119,17 +115,17 @@
               {
                 "index": "lawful-good",
                 "name": "Lawful Good",
-                "url": "/api/alignments/lawful-good"
+                "url": "/api/2014/alignments/lawful-good"
               },
               {
                 "index": "lawful-neutral",
                 "name": "Lawful Neutral",
-                "url": "/api/alignments/lawful-neutral"
+                "url": "/api/2014/alignments/lawful-neutral"
               },
               {
                 "index": "lawful-evil",
                 "name": "Lawful Evil",
-                "url": "/api/alignments/lawful-evil"
+                "url": "/api/2014/alignments/lawful-evil"
               }
             ]
           },
@@ -140,17 +136,17 @@
               {
                 "index": "lawful-good",
                 "name": "Lawful Good",
-                "url": "/api/alignments/lawful-good"
+                "url": "/api/2014/alignments/lawful-good"
               },
               {
                 "index": "neutral-good",
                 "name": "Neutral Good",
-                "url": "/api/alignments/neutral-good"
+                "url": "/api/2014/alignments/neutral-good"
               },
               {
                 "index": "chaotic-good",
                 "name": "Chaotic Good",
-                "url": "/api/alignments/chaotic-good"
+                "url": "/api/2014/alignments/chaotic-good"
               }
             ]
           },
@@ -161,17 +157,17 @@
               {
                 "index": "chaotic-good",
                 "name": "Chaotic Good",
-                "url": "/api/alignments/chaotic-good"
+                "url": "/api/2014/alignments/chaotic-good"
               },
               {
                 "index": "chaotic-neutral",
                 "name": "Chaotic Neutral",
-                "url": "/api/alignments/chaotic-neutral"
+                "url": "/api/2014/alignments/chaotic-neutral"
               },
               {
                 "index": "chaotic-evil",
                 "name": "Chaotic Evil",
-                "url": "/api/alignments/chaotic-evil"
+                "url": "/api/2014/alignments/chaotic-evil"
               }
             ]
           },
@@ -182,17 +178,17 @@
               {
                 "index": "lawful-good",
                 "name": "Lawful Good",
-                "url": "/api/alignments/lawful-good"
+                "url": "/api/2014/alignments/lawful-good"
               },
               {
                 "index": "lawful-neutral",
                 "name": "Lawful Neutral",
-                "url": "/api/alignments/lawful-neutral"
+                "url": "/api/2014/alignments/lawful-neutral"
               },
               {
                 "index": "lawful-evil",
                 "name": "Lawful Evil",
-                "url": "/api/alignments/lawful-evil"
+                "url": "/api/2014/alignments/lawful-evil"
               }
             ]
           },
@@ -203,17 +199,17 @@
               {
                 "index": "lawful-good",
                 "name": "Lawful Good",
-                "url": "/api/alignments/lawful-good"
+                "url": "/api/2014/alignments/lawful-good"
               },
               {
                 "index": "lawful-neutral",
                 "name": "Lawful Neutral",
-                "url": "/api/alignments/lawful-neutral"
+                "url": "/api/2014/alignments/lawful-neutral"
               },
               {
                 "index": "lawful-evil",
                 "name": "Lawful Evil",
-                "url": "/api/alignments/lawful-evil"
+                "url": "/api/2014/alignments/lawful-evil"
               }
             ]
           },
@@ -224,47 +220,47 @@
               {
                 "index": "lawful-good",
                 "name": "Lawful Good",
-                "url": "/api/alignments/lawful-good"
+                "url": "/api/2014/alignments/lawful-good"
               },
               {
                 "index": "neutral-good",
                 "name": "Neutral Good",
-                "url": "/api/alignments/neutral-good"
+                "url": "/api/2014/alignments/neutral-good"
               },
               {
                 "index": "chaotic-good",
                 "name": "Chaotic Good",
-                "url": "/api/alignments/chaotic-good"
+                "url": "/api/2014/alignments/chaotic-good"
               },
               {
                 "index": "lawful-neutral",
                 "name": "Lawful Neutral",
-                "url": "/api/alignments/lawful-neutral"
+                "url": "/api/2014/alignments/lawful-neutral"
               },
               {
                 "index": "neutral",
                 "name": "Neutral",
-                "url": "/api/alignments/neutral"
+                "url": "/api/2014/alignments/neutral"
               },
               {
                 "index": "chaotic-neutral",
                 "name": "Chaotic Neutral",
-                "url": "/api/alignments/chaotic-neutral"
+                "url": "/api/2014/alignments/chaotic-neutral"
               },
               {
                 "index": "lawful-evil",
                 "name": "Lawful Evil",
-                "url": "/api/alignments/lawful-evil"
+                "url": "/api/2014/alignments/lawful-evil"
               },
               {
                 "index": "neutral-evil",
                 "name": "Neutral Evil",
-                "url": "/api/alignments/neutral-evil"
+                "url": "/api/2014/alignments/neutral-evil"
               },
               {
                 "index": "chaotic-evil",
                 "name": "Chaotic Evil",
-                "url": "/api/alignments/chaotic-evil"
+                "url": "/api/2014/alignments/chaotic-evil"
               }
             ]
           }
@@ -337,6 +333,6 @@
         ]
       }
     },
-    "url": "/api/backgrounds/acolyte"
+    "url": "/api/2014/backgrounds/acolyte"
   }
 ]

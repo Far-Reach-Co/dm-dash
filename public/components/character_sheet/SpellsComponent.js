@@ -5,7 +5,7 @@ import getDataByQuery from "../../lib/getDataByQuery.js";
 
 // load spells for suggestions on input
 let spellSuggestions = [];
-fetch("/lib/data/5e-srd-spells.json")
+fetch("/lib/data/2014/5e-srd-spells.json")
   .then((res) => res.json())
   .then((data) => {
     spellSuggestions = data;
