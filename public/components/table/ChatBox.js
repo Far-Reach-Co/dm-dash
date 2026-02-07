@@ -24,16 +24,16 @@ export default class ChatBoxComponent {
 
   renderHideChatButton = () => {
     const isHidden = this.chatBoxMessagesComponent.hidden;
-    const icon = isHidden ? "/assets/show.svg" : "/assets/hide.svg";
-    const label = isHidden ? "Show Chat" : "Hide Chat";
+    // Static SVG icons — safe, no user input
+    const showIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+    const hideIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/></svg>`;
+    const icon = isHidden ? showIcon : hideIcon;
+    const label = isHidden ? " Chat" : " Hide";
 
     return createElement(
-      "small",
-      { class: "chat-box-hide d-flex align-items-center" },
-      [
-        createElement("img", { class: "small-icon chat-box-icon", src: icon }),
-        createElement("small", {}, label),
-      ],
+      "div",
+      { class: "chat-box-toggle" },
+      icon + label,
       { type: "click", event: this.toggleChatVisibility }
     );
   };
@@ -57,7 +57,11 @@ export default class ChatBoxComponent {
             autocomplete: "off",
             placeholder: "Type message here...",
           }),
-          createElement("button", { class: "chat-box-btn" }, "Send"),
+          createElement(
+            "button",
+            { class: "chat-box-btn", title: "Send message" },
+            `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+          ),
         ],
         {
           type: "submit",
@@ -89,65 +93,71 @@ class ChatBoxMessagesComponent {
     this.domComponent.scrollTop = this.domComponent.scrollHeight;
   };
 
-  createMessage = (data, isNew = false) => {
-    // isNew is bool to render message with animation
-    const parseMessageContent = (content) => {
-      const urlRegexAll = /(https?:\/\/[^\s]+)/g;
-      const urlRegex = /^https?:\/\/[^\s]+$/;
-      const parts = content.split(urlRegexAll);
+  formatShortTime = (isoDate) => {
+    const date = new Date(isoDate);
+    const hours = date.getUTCHours();
+    const minutes = date.getUTCMinutes().toString().padStart(2, "0");
+    const h = hours % 12 || 12;
+    const ampm = hours < 12 ? "am" : "pm";
+    return `${h}:${minutes}${ampm}`;
+  };
 
-      const nodes = [];
+  parseMessageContent = (content) => {
+    const urlRegexAll = /(https?:\/\/[^\s]+)/g;
+    const urlRegex = /^https?:\/\/[^\s]+$/;
+    const parts = content.split(urlRegexAll);
+    const nodes = [];
 
-      parts.forEach((part, index) => {
-        // For each chunk, split further on \n to insert <br>
-        const subparts = part.split("\n");
-
-        subparts.forEach((subpart, subIndex) => {
-          if (urlRegex.test(subpart)) {
-            if (isImageUrl(subpart)) {
-              nodes.push(createValidatedImage(subpart));
-            } else {
-              nodes.push(
-                createElement(
-                  "a",
-                  {
-                    href: subpart,
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                    class: "mx-1",
-                  },
-                  subpart
-                )
-              );
-            }
+    parts.forEach((part) => {
+      const subparts = part.split("\n");
+      subparts.forEach((subpart, subIndex) => {
+        if (urlRegex.test(subpart)) {
+          if (isImageUrl(subpart)) {
+            nodes.push(createValidatedImage(subpart));
           } else {
-            nodes.push(subpart);
+            nodes.push(
+              createElement(
+                "a",
+                {
+                  href: subpart,
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  class: "mx-1",
+                },
+                subpart
+              )
+            );
           }
-
-          // Only add <br> if it's not the last subpart
-          if (subIndex < subparts.length - 1) {
-            nodes.push(createElement("br"));
-          }
-        });
+        } else {
+          nodes.push(subpart);
+        }
+        if (subIndex < subparts.length - 1) {
+          nodes.push(createElement("br"));
+        }
       });
+    });
 
-      return nodes;
-    };
+    return nodes;
+  };
+
+  createMessage = (data, isNew = false) => {
+    const shortTime = this.formatShortTime(data.timestamp);
+    const fullDate = isoDateFormat(data.timestamp);
+
+    const header = createElement("div", { class: "chat-msg-header" }, [
+      createElement("span", { class: "chat-msg-username" }, data.username),
+      createElement("span", { class: "chat-msg-time", title: fullDate }, shortTime),
+    ]);
+
+    const body = createElement(
+      "div",
+      { class: "chat-msg-body" },
+      this.parseMessageContent(data.content),
+    );
 
     const elem = createElement("div", { class: "chat-box-message-content" }, [
-      createElement(
-        "small",
-        { class: "me-3" },
-        isoDateFormat(data.timestamp)
-      ),
-      createElement(
-        "div",
-        {
-          class: "font-bold me-3",
-        },
-        `${data.username}:`
-      ),
-      ...parseMessageContent(data.content),
+      header,
+      body,
     ]);
 
     if (isNew) {

@@ -103,12 +103,8 @@ class Table {
   };
 
   renderSidebarAndHamburger = () => {
-    this.domComponent.append(
-      this.sidebar.domComponent,
-      this.hamburger.domComponent
-    );
+    this.domComponent.append(this.sidebar.domComponent);
     this.sidebar.render();
-    this.hamburger.render();
   };
 
   changeLayer = () => {
