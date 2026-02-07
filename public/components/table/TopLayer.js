@@ -549,10 +549,10 @@ export default class TopLayer {
   };
 
   // ---------------------------------------------------------------------------
-  // Selected object info (top-right, unchanged concept)
+  // Selected object info (sub-bar, like draw bar)
   // ---------------------------------------------------------------------------
 
-  renderSelectedObjectInfoElem = async () => {
+  renderSelectedObjectBar = async () => {
     const obj = this.tableApp.getCurrentSelectedObject();
     if (!obj) return this.hiddenElement();
 
@@ -562,10 +562,10 @@ export default class TopLayer {
     const thumbnailElem =
       obj.type === "image"
         ? createElement("img", {
-            class: "me-1",
             src: imageSrc,
-            width: 30,
-            height: 30,
+            width: 24,
+            height: 24,
+            style: "border-radius: var(--border-radius);",
           })
         : this.hiddenElement();
 
@@ -581,23 +581,18 @@ export default class TopLayer {
         )
       : createElement("small", {}, `"${displayName}"`);
 
-    return createElement(
-      "div",
-      { class: "table-config selected-obj-info-elem" },
-      [
-        createElement(
-          "div",
-          {},
-          `${idPrefix}-${truncateString(obj.id, 8, "")}`,
-        ),
-        createElement("div", { class: "d-flex flex-row" }, [
-          thumbnailElem,
-          nameElem,
-        ]),
-        createElement("small", {}, "Aura Color"),
-        this.renderAuraColorPicker(obj),
-      ],
-    );
+    return createElement("div", { class: "vtt-draw-bar" }, [
+      thumbnailElem,
+      createElement(
+        "small",
+        { style: "color: var(--light-gray); font-weight: normal;" },
+        `${idPrefix}-${truncateString(obj.id, 8, "")}`,
+      ),
+      nameElem,
+      createElement("div", { class: "vtt-toolbar-sep" }),
+      createElement("small", {}, "Aura"),
+      this.renderAuraColorPicker(obj),
+    ]);
   };
 
   renderAuraColorPicker = (obj) => {
@@ -611,25 +606,28 @@ export default class TopLayer {
 
     return createElement(
       "div",
-      { class: "d-flex flex-row align-items-start" },
+      { class: "d-flex flex-row align-items-center", style: "gap: var(--space-sm);" },
       [
         createElement(
           "input",
           {
-            style:
-              "cursor: pointer; height: 25px; margin-right: var(--main-distance);",
             type: "color",
-            id: "colorpicker",
-            name: "colorpicker",
             value: obj.shadow?.color ?? null,
+            style:
+              "cursor: pointer; height: 26px; width: 32px; border: none; border-radius: var(--border-radius); padding: 0;",
           },
           null,
           { type: "input", event: (e) => setAura(e.target.value) },
         ),
-        createElement("button", {}, "Clear", {
-          type: "click",
-          event: () => setAura(null),
-        }),
+        createElement(
+          "small",
+          {
+            style:
+              "cursor: pointer; color: var(--main-gray); font-weight: normal; text-decoration: underline; text-underline-offset: 2px;",
+          },
+          "Clear",
+          { type: "click", event: () => setAura(null) },
+        ),
       ],
     );
   };
@@ -716,9 +714,9 @@ export default class TopLayer {
     const toolbar = createElement("div", { class: "vtt-toolbar" }, [
       toolbarRow,
       this.renderDrawBar(),
+      await this.renderSelectedObjectBar(),
     ]);
 
     this.domComponent.append(toolbar);
-    this.domComponent.append(await this.renderSelectedObjectInfoElem());
   };
 }
