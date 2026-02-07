@@ -12,6 +12,7 @@ const ICONS = {
   grid: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>`,
   trash: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
   chevronUp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
+  sidebar: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
 };
 
 export default class TopLayer {
@@ -449,6 +450,29 @@ export default class TopLayer {
   };
 
   // ---------------------------------------------------------------------------
+  // Sidebar toggle (far-right of toolbar)
+  // ---------------------------------------------------------------------------
+
+  renderSidebarToggle = () => {
+    if (!this.isOwnerOrManager()) return this.hiddenElement();
+
+    const sidebar = this.tableApp.sidebar;
+    if (!sidebar) return this.hiddenElement();
+
+    return this.renderToolbarButton(ICONS.sidebar, "Toggle sidebar", {
+      active: sidebar.isVisible,
+      onClick: () => {
+        if (sidebar.isVisible) {
+          sidebar.close();
+        } else {
+          sidebar.open();
+        }
+        this.render();
+      },
+    });
+  };
+
+  // ---------------------------------------------------------------------------
   // Object action buttons (delete, move up)
   // ---------------------------------------------------------------------------
 
@@ -606,6 +630,8 @@ export default class TopLayer {
       layersAnchor,
       gridAnchor,
       ...objectActionButtons,
+      createElement("div", { style: "flex: 1;" }),
+      this.renderSidebarToggle(),
     ]);
 
     const toolbar = createElement("div", { class: "vtt-toolbar" }, [

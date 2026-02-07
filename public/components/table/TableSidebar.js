@@ -53,23 +53,30 @@ export default class TableSidebar {
     });
   }
 
-  renderCloseSidebarElem = () => {
-    const elem = createElement("img", {
-      id: "close-sidebar",
-      class: "close-sidebar",
-      src: "/assets/sidebar.svg",
-      title: "Toggle sidebar",
-      height: 32,
-      width: 32,
-    });
-    elem.addEventListener("click", this.close);
-    return elem;
+  renderCloseBtn = () => {
+    return createElement(
+      "div",
+      { class: "sidebar-panel-btn", title: "Close sidebar" },
+      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+      { type: "click", event: this.close }
+    );
+  };
+
+  renderSettingsBtn = () => {
+    return createElement(
+      "div",
+      { class: "sidebar-panel-btn", title: "Table Settings" },
+      `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+      { type: "click", event: async () => modal.show(await this.renderTableSettings()) }
+    );
   };
 
   close = () => {
     this.isVisible = false;
     if (this.container) this.container.classList.remove("open");
     if (this.domComponent) this.domComponent.classList.remove("open");
+    // Update toolbar button active state
+    if (this.tableApp?.topLayer) this.tableApp.topLayer.render();
   };
 
   open = () => {
@@ -435,101 +442,72 @@ export default class TableSidebar {
     ]);
   };
 
+  renderShareBtn = () => {
+    // Static SVG string — safe, no user input
+    const linkIcon = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+    return createElement(
+      "div",
+      { class: "sidebar-action-btn", title: "Copy share link to clipboard" },
+      linkIcon,
+      { type: "click", event: () => copyTextToClipboard(window.location) },
+    );
+  };
+
   render = async () => {
     this.domComponent.innerHTML = "";
 
     this.tableSidebarImageComponent.render();
     this.onlineUsersComponent.render();
 
-    const container = createElement(
-      "div",
-      {
-        class: "sidebar-container",
-      },
-      [
-        createElement(
-          "div",
-          {
-            class:
-              "d-flex align-items-center justify-content-between px-4 py-2",
-          },
-          [
-            createElement(
-              "div",
-              { id: "table-display-title" },
-              this.tableView.title,
-            ),
-            createElement(
-              "img",
-              {
-                class: "icon gear",
-                src: "/assets/gears.svg",
-                title: "Open Table Settings",
-              },
-              null,
-              {
-                type: "click",
-                event: async () => {
-                  modal.show(await this.renderTableSettings());
-                },
-              },
-            ),
-          ],
-        ),
-        createElement("button", {}, "Copy Share Link", {
+    // Header: title + settings gear + close X
+    const header = createElement("div", { class: "sidebar-panel-header" }, [
+      createElement(
+        "div",
+        { class: "sidebar-panel-title", id: "table-display-title" },
+        this.tableView.title,
+      ),
+      this.renderSettingsBtn(),
+      this.renderCloseBtn(),
+    ]);
+
+    // Action buttons
+    const actions = createElement("div", { class: "sidebar-actions" }, [
+      createElement(
+        "div",
+        { class: "sidebar-action-btn", title: "Upload image to be used on virtual table" },
+        "+ Image",
+        {
           type: "click",
           event: () => {
-            copyTextToClipboard(window.location);
+            if (this.tableSidebarImageComponent.imageLoading) return;
+            modal.show(this.renderUploadImage());
           },
-        }),
-        createElement("br"),
-        createElement(
-          "div",
-          {
-            class: "d-flex justify-content-around",
+        },
+      ),
+      createElement(
+        "div",
+        { class: "sidebar-action-btn", title: "Create a new folder space for your images" },
+        "+ Folder",
+        {
+          type: "click",
+          event: () => {
+            if (this.tableSidebarFolderComponent.folderLoading) return;
+            modal.show(this.renderCreateFolder());
           },
-          [
-            createElement(
-              "a",
-              {
-                title: "Upload image to be used on virtual table",
-              },
-              "+ Image",
-              {
-                type: "click",
-                event: (e) => {
-                  // dont allow more images while loading
-                  if (this.tableSidebarImageComponent.imageLoading) return;
-                  modal.show(this.renderUploadImage());
-                },
-              },
-            ),
-            createElement(
-              "a",
-              {
-                title: "Create a new folder space for your images",
-              },
-              "+ Folder",
-              {
-                type: "click",
-                event: (e) => {
-                  // dont allow more folders while loading
-                  if (this.tableSidebarFolderComponent.folderLoading) return;
-                  modal.show(this.renderCreateFolder());
-                },
-              },
-            ),
-          ],
-        ),
-        createElement("br"),
-        this.tableSidebarFolderComponent.domComponent,
-        createElement("br"),
-        this.tableSidebarImageComponent.domComponent,
-        createElement("div", { class: "sidebar-header" }, "Online Users"),
-        this.onlineUsersComponent.domComponent,
-        this.renderCloseSidebarElem(),
-      ],
-    );
+        },
+      ),
+      this.renderShareBtn(),
+    ]);
+
+    const container = createElement("div", { class: "sidebar-container" }, [
+      header,
+      actions,
+      this.tableSidebarFolderComponent.domComponent,
+      this.tableSidebarImageComponent.domComponent,
+      createElement("div", { class: "sidebar-header" }, "Online"),
+      this.onlineUsersComponent.domComponent,
+    ]);
+
     this.container = container;
     this.open();
     return this.domComponent.append(container);
