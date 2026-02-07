@@ -5,13 +5,13 @@ import renderLoadingWithMessage from "../loadingWithMessage.js";
 
 // load features for suggestions on input
 let featSuggestions = [];
-fetch("/lib/data/5e-srd-features.json")
+fetch("/lib/data/2014/5e-srd-features.json")
   .then((res) => res.json())
   .then((data) => {
     featSuggestions = [...featSuggestions, ...data];
   });
 // add traits
-fetch("/lib/data/5e-srd-traits.json")
+fetch("/lib/data/2014/5e-srd-traits.json")
   .then((res) => res.json())
   .then((data) => {
     featSuggestions = [...featSuggestions, ...data];

@@ -28,7 +28,7 @@ router.get(
       const data = fs.readFileSync(
         path.join(
           __dirname,
-          "../../public/lib/data/5e-srd-ability-scores.json",
+          "../../public/lib/data/2014/5e-srd-ability-scores.json",
         ),
         "utf8",
       );
@@ -48,7 +48,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-alignments.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-alignments.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/alignments", {
@@ -67,7 +67,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-backgrounds.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-backgrounds.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/backgrounds", {
@@ -83,13 +83,13 @@ router.get(
 // Pre-load equipment and magic items data for efficient lookup
 const equipmentData: any[] = JSON.parse(
   fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/5e-srd-equipment.json"),
+    path.join(__dirname, "../../public/lib/data/2014/5e-srd-equipment.json"),
     "utf8",
   ),
 );
 const magicItemsData: any[] = JSON.parse(
   fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/5e-srd-magic-items.json"),
+    path.join(__dirname, "../../public/lib/data/2014/5e-srd-magic-items.json"),
     "utf8",
   ),
 );
@@ -156,7 +156,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-damage-types.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-damage-types.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/damagetypes", {
@@ -188,7 +188,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-conditions.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-conditions.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/conditions", {
@@ -207,7 +207,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-feats.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-feats.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/feats", {
@@ -226,7 +226,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-features.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-features.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/features", {
@@ -245,7 +245,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-languages.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-languages.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/languages", {
@@ -274,7 +274,7 @@ router.get(
 // Pre-load spells data for efficient lookup
 const spellsData: any[] = JSON.parse(
   fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/5e-srd-spells.json"),
+    path.join(__dirname, "../../public/lib/data/2014/5e-srd-spells.json"),
     "utf8",
   ),
 );
@@ -320,7 +320,7 @@ router.get(
     try {
       // get json data
       const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/5e-srd-skills.json"),
+        path.join(__dirname, "../../public/lib/data/2014/5e-srd-skills.json"),
         "utf8",
       );
       res.render("dnd/5e/srd/skills", {
@@ -341,7 +341,7 @@ router.get(
       const data = fs.readFileSync(
         path.join(
           __dirname,
-          "../../public/lib/data/5e-srd-weapon-properties.json",
+          "../../public/lib/data/2014/5e-srd-weapon-properties.json",
         ),
         "utf8",
       );
@@ -357,7 +357,7 @@ router.get(
 
 const monstersData: any[] = JSON.parse(
   fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/5e-srd-monsters.json"),
+    path.join(__dirname, "../../public/lib/data/2014/5e-srd-monsters.json"),
     "utf8",
   ),
 );

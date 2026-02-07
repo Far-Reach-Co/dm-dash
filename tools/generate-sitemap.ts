@@ -6,7 +6,7 @@ import { SitemapStream, streamToPromise } from "sitemap";
 const HOSTNAME = "https://farreachco.com";
 const OUTPUT_PATH = path.join(__dirname, "../public/sitemap.xml");
 const OUTPUT_PATH_GZ = path.join(__dirname, "../public/sitemap.xml.gz");
-const DATA_DIR = path.join(__dirname, "../public/lib/data");
+const DATA_DIR = path.join(__dirname, "../public/lib/data/2014");
 
 interface SitemapEntry {
   url: string;
