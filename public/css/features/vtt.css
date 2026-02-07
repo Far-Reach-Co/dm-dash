@@ -7,6 +7,10 @@
   z-index: 3;
 }
 
+/* ==========================================================================
+   VTT Tool Panels (base style for all floating panels)
+   ========================================================================== */
+
 .table-config {
   width: 150px;
   padding: var(--space-md);
@@ -17,7 +21,7 @@
   justify-content: space-evenly;
   gap: var(--space-sm);
   border-radius: var(--border-radius-lg);
-  border: 1px solid var(--main-gray);
+  border: 1px solid var(--surface-border);
   z-index: 4;
   background-color: var(--blue5);
   box-shadow: var(--shadow-md);
@@ -26,7 +30,7 @@
 .table-config small {
   color: var(--orange3);
   font-weight: bold;
-  margin-bottom: var(--space-xs);
+  margin-bottom: 0;
 }
 
 .table-config input[type="number"] {
@@ -41,10 +45,51 @@
   border-radius: var(--border-radius);
 }
 
-.layers-elem {
-  top: 160px;
-  left: var(--space-md);
+/* Compact buttons inside VTT tool panels */
+.table-config button {
+  padding: 4px 12px;
+  font-size: 14px;
 }
+
+/* ==========================================================================
+   Left Toolbar - Flex column container that auto-stacks tools
+   Replaces hard-coded top/left pixel positioning per panel
+   ========================================================================== */
+
+.vtt-toolbar {
+  position: absolute;
+  top: var(--space-md);
+  left: var(--space-md);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Panels inside the toolbar flow naturally, no absolute positioning */
+.vtt-toolbar .table-config {
+  position: relative;
+  top: auto;
+  left: auto;
+}
+
+/* Info button inside toolbar */
+.vtt-toolbar .info-elem {
+  position: relative;
+  top: auto;
+  left: auto;
+}
+
+/* Draw picker sits inside toolbar flow when draw mode is active */
+.vtt-toolbar .draw-mode-picker-elem {
+  position: relative;
+  top: auto;
+  left: auto;
+}
+
+/* ==========================================================================
+   Individual Panel Styles
+   ========================================================================== */
 
 .info-elem {
   top: var(--space-lg);
@@ -66,33 +111,36 @@
   transform: scale(1.1);
 }
 
-.grid-control-elem {
-  top: 250px;
-  left: var(--space-md);
+.draw-mode-toggle-elem {
+  /* position handled by .vtt-toolbar flex flow */
 }
 
+.draw-mode-picker-elem {
+  /* position handled by .vtt-toolbar flex flow */
+}
+
+.layers-elem {
+  /* position handled by .vtt-toolbar flex flow */
+}
+
+.grid-control-elem {
+  /* position handled by .vtt-toolbar flex flow */
+}
+
+/* Standalone floating panels (not in toolbar) */
 .selected-obj-info-elem {
   top: 10px;
   right: 300px;
 }
 
-.draw-mode-toggle-elem {
-  top: 70px;
-  left: var(--space-md);
-}
-
-.draw-mode-picker-elem {
-  top: 70px;
-  left: 170px;
-}
-
+/* Floating beside the toolbar */
 .image-options-elem {
   display: flex;
   flex-direction: row;
   gap: var(--space-xs);
   width: auto;
-  top: 10px;
-  left: 58px;
+  top: var(--space-md);
+  left: 180px;
 }
 
 /* help-content styling is in modals.css */

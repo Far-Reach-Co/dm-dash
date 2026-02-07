@@ -6,11 +6,9 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  z-index: 3;
-  letter-spacing: 1.1px;
   word-wrap: break-word;
   scrollbar-width: thin;
-  scrollbar-color: var(--blue3) transparent;
+  scrollbar-color: var(--blue4) transparent;
 }
 
 *::-webkit-scrollbar {
@@ -31,9 +29,10 @@ body {
   display: flex;
   flex-direction: column;
   background-color: var(--main-dark);
-  line-height: 1.5;
-  font-family: serif;
+  line-height: 1.6;
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
   font-size: 16px;
+  letter-spacing: 0.3px;
   color: var(--main-white);
 }
 
@@ -75,11 +74,12 @@ br {
 }
 
 hr {
-  border: 0.5px solid var(--blue2);
+  border: none;
   height: 1px;
   width: 100%;
   margin-top: var(--main-distance);
   margin-bottom: var(--main-distance);
+  background: linear-gradient(90deg, transparent, var(--blue2), transparent);
 }
 
 a,
@@ -90,14 +90,14 @@ a:not([href]):not([class]) {
   cursor: pointer;
   text-decoration: none;
   width: fit-content;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-normal);
 }
 
 a:hover,
 a small:hover,
 a:not([href]):hover,
 a:not([href]):not([class]):hover {
-  color: var(--green);
+  color: var(--orange3);
   text-decoration: underline;
 }
 

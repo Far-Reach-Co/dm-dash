@@ -136,15 +136,17 @@
    ========================================================================== */
 
 h1 {
-  font-size: 25px;
+  font-size: 1.8rem;
   text-align: center;
+  letter-spacing: 0.5px;
 }
 
 p {
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   text-align: center;
   max-width: 600px;
   color: var(--bright-white);
+  line-height: 1.7;
 }
 
 .section {
@@ -154,6 +156,7 @@ p {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  position: relative;
 }
 
 /* ==========================================================================
@@ -454,19 +457,21 @@ p {
 .about-btn {
   display: inline-block;
   padding: var(--space-md) var(--space-xl);
-  border: 2px solid var(--orange3);
+  border: 1px solid var(--orange3);
   border-radius: var(--border-radius);
   color: var(--orange3);
   text-decoration: none;
   font-weight: bold;
-  transition: all 0.3s ease;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .about-btn:hover {
   background: var(--orange3);
   color: var(--main-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(165, 79, 4, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(165, 79, 4, 0.25);
+  text-decoration: none;
 }
 
 /* ==========================================================================

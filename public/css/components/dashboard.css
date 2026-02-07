@@ -3,7 +3,7 @@
    ========================================================================== */
 
 .component {
-  background-color: var(--blue3);
+  background-color: var(--surface-1);
 }
 
 /* ==========================================================================
@@ -14,10 +14,17 @@
   flex: 1 1 300px;
   min-width: 280px;
   max-width: 100%;
-  background-color: var(--blue3);
+  background-color: var(--surface-1);
+  border: 1px solid var(--surface-border);
   border-radius: var(--border-radius-lg);
   margin: var(--space-sm);
   box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal), border-color var(--transition-normal);
+}
+
+.dash-column:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(116, 167, 215, 0.2);
 }
 
 /* On larger screens, limit column width */
@@ -44,16 +51,21 @@
   cursor: pointer;
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--border-radius);
-  transition: background-color var(--transition-fast);
+  transition: background-color var(--transition-normal), transform var(--transition-fast);
   width: 100%;
 }
 
 .dash-list-title-container:hover {
-  background-color: var(--blue4);
+  background-color: var(--surface-2);
 }
 
 .dash-list-title-container:hover .dash-list-title {
   text-decoration: underline;
+  color: var(--orange3);
+}
+
+.dash-list-title-container:active {
+  transform: scale(0.99);
 }
 
 .dash-list-title {
@@ -61,6 +73,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   flex: 1;
+  transition: color var(--transition-normal);
 }
 
 /* ==========================================================================
@@ -69,7 +82,7 @@
 
 .dash-column h2 {
   margin-bottom: var(--space-sm);
-  font-size: 1.25rem;
+  font-size: 1.35rem;
 }
 
 .dash-column h3 {
@@ -81,7 +94,7 @@
 
 .dash-column small {
   color: var(--light-gray);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .dash-column hr {
@@ -94,7 +107,8 @@
    ========================================================================== */
 
 .wyrld-status {
-  background-color: var(--blue3);
+  background-color: var(--surface-1);
+  border: 1px solid var(--surface-border);
   border-radius: var(--border-radius-lg);
   padding: var(--space-lg);
   margin-bottom: var(--space-lg);
@@ -128,7 +142,8 @@
   width: fit-content;
   margin-top: var(--space-lg);
   padding: var(--space-md);
-  background-color: var(--blue4);
+  background-color: var(--surface-2);
+  border: 1px solid var(--surface-border);
   border-radius: var(--border-radius);
 }
 
@@ -160,9 +175,9 @@
   gap: var(--space-xs);
   font-weight: 500;
   padding: var(--space-sm) 0;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-normal);
 }
 
 .dash-column>a[href^="/new"]:hover {
-  color: var(--bright-white);
+  color: var(--orange3);
 }

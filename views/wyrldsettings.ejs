@@ -16,57 +16,58 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container p-3">
-    <div>
-      <h1>Wyrld Settings</h1>
-      <small>Manage important settings and invited users for your wyrld.</small>
-    </div>
-    <h2>Edit Title</h2>
-    <form hx-post="/api/edit_project_title/<%= project.id %>" hx-target="#title-update-success">
-      <fieldset>
+  <div class="container-fluid info-container page-form p-3">
+    <h1>Wyrld Settings</h1>
+    <small>Manage important settings and invited users for your wyrld.</small>
+
+    <div class="form-section" style="margin-top: var(--space-xl);">
+      <h2>Edit Title</h2>
+      <form hx-post="/api/edit_project_title/<%= project.id %>" hx-target="#title-update-success">
         <div class="input-container">
           <label for="title">Title</label>
           <input id="title" name="title" placeholder="Wyrld Title" value="<%= project.title %>" required="true," />
         </div>
-        <br />
-        <br />
-        <button type="submit">Save</button>
-        <small class="success-message" id="title-update-success"></small>
-      </fieldset>
-      <hr />
+        <div class="form-actions">
+          <button type="submit">Save</button>
+          <small class="success-message" id="title-update-success"></small>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-section">
       <h2>Share Invite Link</h2>
       <% if (inviteLink) { %> <%- include('./partials/wyrld_settings/invite') %>
       <% } else { %> <%- include('./partials/wyrld_settings/invitebutton') %> <%
       } %>
-      <hr />
+    </div>
+
+    <div class="form-section">
       <h2>Manage Users</h2>
-      <div>
-        <small>Give an invited user access to edit the resources in the wyrld by
-          making them a manager.</small>
-        <br />
-        <div class="d-flex justify-content-between w-25">
-          <p class="text-underline">Username</p>
-          <p class="text-underline">Manager</p>
-        </div>
-        <br />
-        <% if (users.length === 0) { %>
-        <small class="ms-2">No users have joined <%= project.title %> yet...</small>
-        <% } else { %> <% users.forEach(function(user) { %>
-        <div class="mb-2 d-flex justify-content-between w-25" id="user-<%= user.project_user_id %>">
-          <div class="d-flex align-items-center">
-            <div><%= user.username %></div>
-            <div class="red-x ms-4" hx-delete="/api/remove_project_user/<%= user.project_user_id %>" hx-target="#user-<%= user.project_user_id %>" hx-swap="delete" hx-confirm="Are you sure you want to remove <%= user.username %>?">
-              ⓧ
-            </div>
-          </div>
-          <input type="checkbox" name="is_editor" hx-post="/api/edit_project_user_is_editor/<%= user.project_user_id %>" <%= user.is_editor ? 'checked' : '' %> />
-        </div>
-        <% }); %> <% } %>
+      <small>Give an invited user access to edit the resources in the wyrld by making them a manager.</small>
+      <div class="d-flex justify-content-between mb-2" style="max-width: 400px;">
+        <small class="text-underline font-bold">Username</small>
+        <small class="text-underline font-bold">Manager</small>
       </div>
-      <hr />
+      <% if (users.length === 0) { %>
+      <small>No users have joined <%= project.title %> yet...</small>
+      <% } else { %> <% users.forEach(function(user) { %>
+      <div class="settings-user-item mb-1" id="user-<%= user.project_user_id %>" style="max-width: 400px;">
+        <div class="d-flex align-items-center gap-2">
+          <div><%= user.username %></div>
+          <div class="red-x" hx-delete="/api/remove_project_user/<%= user.project_user_id %>" hx-target="#user-<%= user.project_user_id %>" hx-swap="delete" hx-confirm="Are you sure you want to remove <%= user.username %>?">
+            ⓧ
+          </div>
+        </div>
+        <input type="checkbox" name="is_editor" hx-post="/api/edit_project_user_is_editor/<%= user.project_user_id %>" <%= user.is_editor ? 'checked' : '' %> />
+      </div>
+      <% }); %> <% } %>
+    </div>
+
+    <div class="form-section">
       <button class="btn-red" hx-delete="/api/remove_project/<%= project.id %>" hx-swap="none" hx-confirm="Are you sure you want to delete <%= project.title %>?">
         Delete Wyrld
       </button>
+    </div>
   </div>
   <%- include('./partials/footer') %>
 </body>

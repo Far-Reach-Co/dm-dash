@@ -15,7 +15,7 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container p-3">
+  <div class="container-fluid info-container page-form p-3">
     <h1>Create Character Sheet</h1>
     <% if (wyrld_title) { %>
     <p>Creating character for <strong><%= wyrld_title %></strong></p>
@@ -29,8 +29,6 @@
           <label for="name">Name</label>
           <input id="name" name="name" placeholder="Character Name" required />
         </div>
-        <br />
-        <br />
         <button type="submit">Create</button>
       </fieldset>
     </form>

@@ -15,39 +15,40 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container p-3">
+  <div class="container-fluid info-container page-form p-3">
     <h1>Create Wyrld Record</h1>
-    <br>
-    <br>
-    <div class="input-container">
-      <label for="title">Title</label>
-      <input id="title" name="title" placeholder="Record Title" required />
-    </div>
-    <br />
-    <div class="input-container w-100">
-      <label for="description">Description</label>
-      <textarea class="w-100" id="description" name="description" required></textarea>
-    </div>
-    <br />
-    <div class="w-25">
-      <small><b class="text-orange">Upload Images</b></small>
-      <br />
-      <small class="hint">*These will also be available for use on your tables</small>
-      <br />
-      <input id="image" name="image" type="file" accept="image/*" style="display: none" multiple>
-      <label for="image" class="label-btn" title="Upload Image">Choose Images</label>
-      <div class="d-flex flex-column" id="files-list"></div>
-    </div>
-    <br />
-    <div class="w-25">
-      <small><b class="text-orange">Make Public</b></small>
-      <br />
-      <small class="hint">*Allow this page to viewed by anyone others in your wyrld.</small>
-      <input id="is_public" type="checkbox" name="is_public" />
-    </div>
-    <br />
-    <br />
-    <button id="create">Create</button>
+
+    <fieldset>
+      <div class="input-container">
+        <label for="title">Title</label>
+        <input id="title" name="title" placeholder="Record Title" required />
+      </div>
+
+      <div class="input-container">
+        <label for="description">Description</label>
+        <textarea id="description" name="description" required></textarea>
+      </div>
+
+      <div class="form-section">
+        <small><b class="text-orange">Upload Images</b></small>
+        <small class="hint">*These will also be available for use on your tables</small>
+        <input id="image" name="image" type="file" accept="image/*" style="display: none" multiple>
+        <label for="image" class="label-btn mt-2" title="Upload Image">Choose Images</label>
+        <div class="d-flex flex-column mt-1" id="files-list"></div>
+      </div>
+
+      <div class="form-section">
+        <div class="d-flex align-items-center gap-2">
+          <input id="is_public" type="checkbox" name="is_public" />
+          <div>
+            <small><b class="text-orange">Make Public</b></small>
+            <small class="hint">*Allow this page to be viewed by anyone in your wyrld.</small>
+          </div>
+        </div>
+      </div>
+
+      <button id="create">Create</button>
+    </fieldset>
   </div>
 </body>
 <script type="module">

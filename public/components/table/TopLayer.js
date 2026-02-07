@@ -579,15 +579,24 @@ export default class TopLayer {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
+    this.domComponent.replaceChildren();
+
+    // Left toolbar: flex column container that auto-stacks tools
+    const leftToolbar = createElement(
+      "div",
+      { class: "vtt-toolbar" },
+      [
+        this.renderInfoMenu(),
+        this.renderDrawModeToggle(),
+        this.renderDrawColorAndWidthPicker(),
+        this.renderLayersElem(),
+        this.renderGridControlElem(),
+      ]
+    );
 
     this.domComponent.append(
-      this.renderDrawModeToggle(),
-      this.renderDrawColorAndWidthPicker(),
-      this.renderLayersElem(),
-      this.renderGridControlElem(),
+      leftToolbar,
       this.renderImageOptions(),
-      this.renderInfoMenu(),
     );
     // append this after since it waits
     this.domComponent.append(await this.renderSelectedObjectInfoElem());

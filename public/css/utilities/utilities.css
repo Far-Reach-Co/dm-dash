@@ -166,3 +166,17 @@
       0 0 6px var(--main-dark);
   }
 }
+
+/* ==========================================================================
+   Selection Styling
+   ========================================================================== */
+
+::selection {
+  background-color: rgba(116, 167, 215, 0.3);
+  color: var(--bright-white);
+}
+
+::-moz-selection {
+  background-color: rgba(116, 167, 215, 0.3);
+  color: var(--bright-white);
+}

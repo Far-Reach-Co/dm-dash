@@ -15,67 +15,69 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container p-3">
+  <div class="container-fluid info-container page-form p-3">
     <h1>Account Details</h1>
-    <div class="mb-3" id="email-area">
+
+    <div class="form-section">
       <form hx-post="/api/update_email" hx-target="#email-update-success">
-        <fieldset>
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <div class="input-container">
-            <label for="email">Edit Email</label>
-            <input type="email" id="email" name="email" value="<%= user.email %>" required />
-          </div>
-          <br />
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="input-container">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" value="<%= user.email %>" required />
+        </div>
+        <div class="form-actions">
           <button type="submit">Save</button>
           <small class="success-message" id="email-update-success"></small>
-        </fieldset>
+        </div>
       </form>
     </div>
-    <div class="mb-3" id="username-area">
+
+    <div class="form-section">
       <form hx-post="/api/update_username" hx-target="#username-update-success">
-        <fieldset>
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <div class="input-container">
-            <label for="username">Edit Username</label>
-            <input type="username" id="username" name="username" value="<%= user.username %>" required />
-          </div>
-          <br />
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <div class="input-container">
+          <label for="username">Username</label>
+          <input type="username" id="username" name="username" value="<%= user.username %>" required />
+        </div>
+        <div class="form-actions">
           <button type="submit">Save</button>
           <small class="success-message" id="username-update-success"></small>
-        </fieldset>
+        </div>
       </form>
     </div>
-    <br />
-    <br />
-    <button class="btn-red" onclick="window.location.pathname = '/logout'">
-      Logout
-    </button>
-    <hr />
-    <h1>Subscriptions</h1>
-    <small>-- Under Construction --</small>
-    <div>
-      <small>User subscriptions will allow more image data usage for your virtual tables and the creation of more "Wyrlds". However each "Wyrld" has its own subscription independent of any individual member.</small>
+
+    <div class="form-section">
+      <button class="btn-red" onclick="window.location.pathname = '/logout'">
+        Logout
+      </button>
     </div>
-    <br>
-    <% if (!user.is_pro) { %>
-    <div>
-      <h3 class="d-inline-block">Status:</h3>
-      <p class="d-inline-block">Free Tier</p>
+
+    <div class="form-section">
+      <h1>Subscriptions</h1>
+      <small>-- Under Construction --</small>
+      <div>
+        <small>User subscriptions will allow more image data usage for your virtual tables and the creation of more "Wyrlds". However each "Wyrld" has its own subscription independent of any individual member.</small>
+      </div>
+      <% if (!user.is_pro) { %>
+      <div class="status-row mt-3">
+        <h3>Status:</h3>
+        <p>Free Tier</p>
+      </div>
+      <div class="status-row">
+        <h3>Data Used:</h3>
+        <p><%= usedDataFormatted %> / 100MB</p>
+      </div>
+      <% } else { %>
+      <div class="status-row mt-3">
+        <h3>Subscription Status:</h3>
+        <p>Pro</p>
+      </div>
+      <div class="status-row">
+        <h3>Data Used:</h3>
+        <p><%= usedDataFormatted %></p>
+      </div>
+      <% } %>
     </div>
-    <div>
-      <h3 class="d-inline-block">Data Used:</h3>
-      <p class="d-inline-block"><%= usedDataFormatted %> / 100MB</p>
-    </div>
-    <% } else { %>
-    <div>
-      <h3 class="d-inline-block">Subscription Status:</h3>
-      <p class="d-inline-block">Pro</p>
-    </div>
-    <div>
-      <h3 class="d-inline-block">Data Used:</h3>
-      <p class="d-inline-block"><%= usedDataFormatted %></p>
-    </div>
-    <% } %>
   </div>
   <%- include('./partials/footer') %>
 </body>
