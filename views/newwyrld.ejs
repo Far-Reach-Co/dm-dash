@@ -16,7 +16,7 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container p-3">
+  <div class="container-fluid info-container page-form p-3">
     <h1>Create Wyrld</h1>
     <form hx-post="/api/add_project">
       <fieldset>
@@ -24,8 +24,6 @@
           <label for="title">Title</label>
           <input id="title" name="title" placeholder="Wyrld Title" required />
         </div>
-        <br />
-        <br />
         <button type="submit">Create</button>
       </fieldset>
     </form>

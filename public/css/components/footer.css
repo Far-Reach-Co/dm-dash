@@ -4,11 +4,12 @@
 
 footer {
   width: 100%;
-  padding: var(--space-xl) var(--space-lg);
+  padding: var(--space-2xl) var(--space-lg);
   margin-top: auto;
   background-color: var(--blue3);
   background-image:
     radial-gradient(ellipse at 50% 0%, rgba(72, 99, 125, 0.15) 0%, transparent 60%);
+  border-top: 1px solid var(--surface-border);
 }
 
 .footer-content {

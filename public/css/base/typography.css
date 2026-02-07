@@ -14,25 +14,28 @@
 }
 
 h1 {
-  font-family: YoungSerif;
-  font-size: 1.5rem;
-  line-height: 1.3;
+  font-family: YoungSerif, Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1.2;
   display: inline-block;
   color: var(--bright-white);
+  letter-spacing: 0.5px;
 }
 
 h2 {
-  font-family: YoungSerif;
+  font-family: YoungSerif, Georgia, serif;
   color: var(--orange3);
-  font-size: 1.25rem;
-  line-height: 1.4;
+  font-size: 1.35rem;
+  line-height: 1.3;
+  letter-spacing: 0.4px;
 }
 
 h3 {
-  font-family: YoungSerif;
+  font-family: YoungSerif, Georgia, serif;
   color: var(--orange2);
   font-size: 1.1rem;
   line-height: 1.4;
+  letter-spacing: 0.3px;
 }
 
 h4 {
@@ -58,8 +61,8 @@ h4 {
 
 /* Component Title - used for section headers */
 .component-title {
-  font-family: YoungSerif;
-  font-size: 1.25rem;
+  font-family: YoungSerif, Georgia, serif;
+  font-size: 1.35rem;
   color: var(--orange3);
   margin-bottom: var(--space-md);
 }

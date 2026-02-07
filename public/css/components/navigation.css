@@ -3,8 +3,8 @@
    ========================================================================== */
 
 nav {
-  padding-left: var(--main-distance);
-  padding-right: var(--main-distance);
+  padding-left: var(--space-lg);
+  padding-right: var(--space-lg);
   width: 100%;
   display: flex;
   align-items: center;
@@ -12,7 +12,8 @@ nav {
   font-weight: bold;
   position: absolute;
   z-index: 4;
-  margin-top: 3px;
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-sm);
 }
 
 .info-container {
@@ -24,10 +25,11 @@ nav {
 #nav-ham {
   visibility: hidden;
   cursor: pointer;
+  transition: opacity var(--transition-fast);
 }
 
 #nav-ham:hover {
-  opacity: 0.9;
+  opacity: 0.8;
 }
 
 #nav-links-container-mobile {
@@ -42,8 +44,9 @@ nav {
   height: 80%;
   width: 100%;
   z-index: 1;
-  background-color: var(--main-dark);
-  opacity: 0.95;
+  background-color: rgba(24, 32, 41, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 #nav-links-container-mobile.open {
@@ -63,9 +66,9 @@ nav {
   padding-right: 0;
   border-left: 0;
   border-right: 0;
-  border-bottom: 0.5px solid var(--main-gray);
-  border-top: 0.5px solid var(--main-gray);
-  transition: 0s;
+  border-bottom: 1px solid rgba(116, 167, 215, 0.12);
+  border-top: 1px solid rgba(116, 167, 215, 0.12);
+  transition: background-color var(--transition-normal);
 }
 
 #nav-links-container-mobile .top-nav-btn:hover {
@@ -95,15 +98,15 @@ nav {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-left: var(--main-distance);
+  margin-left: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--border-radius);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-/* .top-nav-btn:hover {
-  background-color: var(--blue4);
-} */
+.top-nav-btn:hover {
+  background-color: rgba(72, 99, 125, 0.35);
+}
 
 .hamburger {
   top: 0;
