@@ -5,58 +5,66 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D 5E SRD Contents - Complete Reference Guide | Far Reach Co.</title>
-  <meta name="description" content="Complete D&D 5E System Reference Document with spells, monsters, classes, races, equipment, magic items, conditions, and more. Quick reference guide for D&D players and DMs." />
-  <meta name="keywords" content="D&D 5E SRD, System Reference Document, D&D reference, 5E spells, 5E monsters, D&D classes, D&D races, D&D equipment" />
+  <title>D&D 5E SRD Contents - AI-Powered Reference Guide | Far Reach Co.</title>
+  <meta name="description" content="Complete D&D 5E System Reference Document with AI-powered search. Ask questions about spells, monsters, classes, races, equipment, and more. Powered by Mistral AI." />
+  <meta name="keywords" content="D&D 5E SRD, System Reference Document, D&D reference, 5E spells, 5E monsters, D&D classes, D&D races, D&D equipment, AI search, AI assistant, Mistral AI, rules assistant, D&D rules lookup" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/contents" />
-  <meta property="og:title" content="D&D 5E SRD Contents - Complete Reference Guide" />
-  <meta property="og:description" content="Complete D&D 5E System Reference Document including spells, 1340+ monsters, classes, races, equipment, and more." />
+  <meta property="og:title" content="D&D 5E SRD Contents - AI-Powered Reference Guide" />
+  <meta property="og:description" content="Complete D&D 5E System Reference Document with AI-powered search. Ask questions about spells, monsters, classes, and more. Powered by Mistral AI." />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="D&D 5E SRD Contents - Complete Reference Guide" />
-  <meta name="twitter:description" content="Complete D&D 5E System Reference Document including spells, 1340+ monsters, classes, races, equipment, and more." />
+  <meta name="twitter:title" content="D&D 5E SRD Contents - AI-Powered Reference Guide" />
+  <meta name="twitter:description" content="Complete D&D 5E System Reference Document with AI-powered search. Ask questions about spells, monsters, classes, and more. Powered by Mistral AI." />
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "D&D 5E SRD Table of Contents",
-    "description": "Complete table of contents for the D&D 5th Edition System Reference Document",
-    "url": "https://farreachco.com/dnd/5e/srd/contents",
-    "breadcrumb": {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": "https://farreachco.com"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "D&D 5E SRD",
-          "item": "https://farreachco.com/dnd/5e/srd/contents"
-        }
-      ]
-    },
-    "about": {
-      "@type": "Game",
-      "name": "Dungeons & Dragons 5th Edition",
-      "gamePlatform": "Tabletop"
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "D&D 5E SRD Table of Contents",
+      "description": "Complete table of contents for the D&D 5th Edition System Reference Document",
+      "url": "https://farreachco.com/dnd/5e/srd/contents",
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://farreachco.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "D&D 5E SRD",
+            "item": "https://farreachco.com/dnd/5e/srd/contents"
+          }
+        ]
+      },
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition",
+        "gamePlatform": "Tabletop"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://farreachco.com/dnd/5e/srd/contents?q={search_term_string}",
+        "query-input": "required name=search_term_string",
+        "description": "AI-powered D&D 5E rules search using Mistral AI"
+      }
     }
-  }
   </script>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/lib/marked.min.js" defer></script>
+  <script src="/lib/purify.min.js" defer></script>
+  <script src="/lib/srdSearch.js" defer></script>
   <%- include('../../../partials/icons') %>
 </head>
 <%- include('../../../partials/google') %>
@@ -65,6 +73,16 @@
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro') %>
+    <div class="srd-search">
+      <h3>Ask the Archives</h3>
+      <p>Ask a question about D&D 5E rules, spells, monsters, and more.</p>
+      <form id="srd-search-form" class="srd-search-form">
+        <input type="text" id="srd-search-input" placeholder="e.g. What spells deal fire damage at level 3?" autocomplete="off" />
+        <button type="submit">Search</button>
+      </form>
+      <div id="srd-search-results" class="search-results"></div>
+      <small class="search-attribution">Powered by <a href="https://mistral.ai" target="_blank" rel="noopener noreferrer">Mistral AI</a></small>
+    </div>
     <hr />
     <h2>Table of Contents</h2>
     <ul>

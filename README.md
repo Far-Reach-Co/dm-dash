@@ -12,6 +12,7 @@ A comprehensive web application for Far Reach Co., featuring a dashboard, player
 - **Authentication**: Express sessions with PostgreSQL store
 - **Payment**: Stripe integration
 - **Bot**: Discord bot using discord-interactions
+- **AI**: Mistral AI (`@mistralai/mistralai`) for SRD search
 
 ## Prerequisites
 
@@ -20,6 +21,7 @@ A comprehensive web application for Far Reach Co., featuring a dashboard, player
 - Redis server (default: localhost:6379)
 - AWS account with S3 and CloudFront configured
 - Discord bot application (for bot features)
+- Mistral AI API key (for SRD AI search)
 - Gmail account with App Password (for email features)
 
 ## Environment Variables
@@ -60,6 +62,12 @@ Note: You'll also need a `private_frc_cloudfront_key.pem` file in the root direc
 ```
 FRC_STRIPE_TEST=sk_test_your_stripe_test_key
 ```
+
+### Mistral AI Configuration
+```
+MISTRAL_API_KEY=your_mistral_api_key         # Get from https://console.mistral.ai/api-keys
+```
+The "Ask the Archives" AI search on the SRD contents page uses Mistral AI to answer D&D 5E rules questions. Without this key, the search endpoint will return an error.
 
 ### Discord Bot Configuration
 ```
