@@ -94,8 +94,8 @@ class Table {
     // canvas obj
     this.currentSelectedObject = obj;
 
-    // display on top layer
-    this.topLayer.render();
+    // update only the object-related toolbar slots
+    this.topLayer.updateObjectSelection();
   };
 
   getCurrentSelectedObject = () => {

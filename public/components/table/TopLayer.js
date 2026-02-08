@@ -26,6 +26,8 @@ export default class TopLayer {
 
     this.activePanel = null;
     this._clickAwayBound = false;
+    this._initialized = false;
+    this._selectedObjectBarUpdateId = 0;
   }
 
   // ---------------------------------------------------------------------------
@@ -83,11 +85,6 @@ export default class TopLayer {
     },
   };
 
-  togglePanel = (name) => {
-    this.activePanel = this.activePanel === name ? null : name;
-    this.render();
-  };
-
   setupClickAway = () => {
     if (this._clickAwayBound) return;
     this._clickAwayBound = true;
@@ -95,9 +92,17 @@ export default class TopLayer {
     document.addEventListener("pointerdown", (e) => {
       if (this.activePanel && !e.target.closest(".vtt-toolbar")) {
         this.activePanel = null;
-        this.render();
+        this._updateLayersAnchor();
+        this._updateGridAnchor();
       }
     });
+  };
+
+  clearSelection = () => {
+    const canvas = this.tableApp.canvasLayer?.canvas;
+    if (!canvas) return;
+    canvas.discardActiveObject();
+    canvas.requestRenderAll();
   };
 
   renderToolbarButton = (
@@ -157,7 +162,7 @@ export default class TopLayer {
             createElement(
               "small",
               {},
-              "Add images via the sidebar (GM), then drag them onto the canvas. Pan by clicking and dragging empty space. Zoom with the scroll wheel or pinch gesture.",
+              "Add images via the sidebar (GM), then drag them onto the canvas (If click->drag doesn't work then try just clicking the image). Pan by clicking and dragging empty space. Zoom with the scroll wheel or pinch gesture.",
             ),
             createElement("br"),
             createElement("br"),
@@ -312,8 +317,10 @@ export default class TopLayer {
     return this.renderToolbarButton(ICONS.pencil, "Toggle draw mode", {
       active: isDrawing,
       onClick: () => {
+        this.clearSelection();
         this.tableApp.canvasLayer.canvas.isDrawingMode = !isDrawing;
-        this.render();
+        this._updateDrawToggle();
+        this._updateDrawBar();
       },
     });
   };
@@ -383,7 +390,12 @@ export default class TopLayer {
     return this.renderToolbarButton(ICONS.layers, "Layers", {
       active: this.activePanel === "layers",
       layerColor,
-      onClick: () => this.togglePanel("layers"),
+      onClick: () => {
+        this.clearSelection();
+        this.activePanel = this.activePanel === "layers" ? null : "layers";
+        this._updateLayersAnchor();
+        this._updateGridAnchor();
+      },
     });
   };
 
@@ -400,7 +412,7 @@ export default class TopLayer {
           type: "click",
           event: () => {
             this.tableApp.changeLayer();
-            this.render();
+            this._updateLayersAnchor();
           },
         },
       ),
@@ -416,7 +428,12 @@ export default class TopLayer {
 
     return this.renderToolbarButton(ICONS.grid, "Grid control", {
       active: this.activePanel === "grid",
-      onClick: () => this.togglePanel("grid"),
+      onClick: () => {
+        this.clearSelection();
+        this.activePanel = this.activePanel === "grid" ? null : "grid";
+        this._updateGridAnchor();
+        this._updateLayersAnchor();
+      },
     });
   };
 
@@ -449,7 +466,7 @@ export default class TopLayer {
               ? this.tableApp.canvasLayer.hideGrid()
               : this.tableApp.canvasLayer.showGrid();
             socketIntegration.gridToggle(!isVisible);
-            this.render();
+            this._updateGridAnchor();
           },
         },
       ),
@@ -518,12 +535,13 @@ export default class TopLayer {
     return this.renderToolbarButton(ICONS.sidebar, "Toggle sidebar", {
       active: sidebar.isVisible,
       onClick: () => {
+        this.clearSelection();
         if (sidebar.isVisible) {
           sidebar.close();
         } else {
           sidebar.open();
         }
-        this.render();
+        this._updateSidebarToggle();
       },
     });
   };
@@ -606,7 +624,10 @@ export default class TopLayer {
 
     return createElement(
       "div",
-      { class: "d-flex flex-row align-items-center", style: "gap: var(--space-sm);" },
+      {
+        class: "d-flex flex-row align-items-center",
+        style: "gap: var(--space-sm);",
+      },
       [
         createElement(
           "input",
@@ -678,45 +699,110 @@ export default class TopLayer {
   };
 
   // ---------------------------------------------------------------------------
+  // Slot update methods (each section manages its own DOM)
+  // ---------------------------------------------------------------------------
+
+  _updateDrawToggle = () => {
+    this._drawToggleSlot.replaceChildren(this.renderDrawModeToggle());
+  };
+
+  _updateLayersAnchor = () => {
+    this._layersAnchorSlot.replaceChildren(
+      this.renderLayersButton(),
+      this.renderLayersPanel(),
+    );
+  };
+
+  _updateGridAnchor = () => {
+    this._gridAnchorSlot.replaceChildren(
+      this.renderGridButton(),
+      this.renderGridPanel(),
+    );
+  };
+
+  _updateObjectActions = () => {
+    this._objectActionsSlot.replaceChildren(...this.renderImageOptionButtons());
+  };
+
+  _updateSidebarToggle = () => {
+    this._sidebarSlot.replaceChildren(this.renderSidebarToggle());
+  };
+
+  _updateDrawBar = () => {
+    this._drawBarSlot.replaceChildren(this.renderDrawBar());
+  };
+
+  _updateSelectedObjectBar = async () => {
+    const updateId = ++this._selectedObjectBarUpdateId;
+    const el = await this.renderSelectedObjectBar();
+    if (updateId === this._selectedObjectBarUpdateId) {
+      this._selectedObjectBarSlot.replaceChildren(el);
+    }
+  };
+
+  // Called by Table.setCurrentSelectedObject — only updates object-related slots
+  updateObjectSelection = async () => {
+    if (!this._initialized) return;
+    this._updateObjectActions();
+    await this._updateSelectedObjectBar();
+  };
+
+  // ---------------------------------------------------------------------------
   // Main render
   // ---------------------------------------------------------------------------
 
-  render = async () => {
-    this.domComponent.replaceChildren();
+  _buildToolbar = () => {
     this.setupClickAway();
 
-    const objectActionButtons = this.renderImageOptionButtons();
-
-    // Build panel anchors for layers and grid
-    const layersAnchor = createElement(
-      "div",
-      { class: "vtt-toolbar-panel-anchor" },
-      [this.renderLayersButton(), this.renderLayersPanel()],
-    );
-
-    const gridAnchor = createElement(
-      "div",
-      { class: "vtt-toolbar-panel-anchor" },
-      [this.renderGridButton(), this.renderGridPanel()],
-    );
+    // Persistent slot containers — display:contents makes them transparent to flex
+    this._drawToggleSlot = createElement("div", {
+      style: "display: contents;",
+    });
+    this._layersAnchorSlot = createElement("div", {
+      class: "vtt-toolbar-panel-anchor",
+    });
+    this._gridAnchorSlot = createElement("div", {
+      class: "vtt-toolbar-panel-anchor",
+    });
+    this._objectActionsSlot = createElement("div", {
+      style: "display: contents;",
+    });
+    this._sidebarSlot = createElement("div", { style: "display: contents;" });
+    this._drawBarSlot = createElement("div");
+    this._selectedObjectBarSlot = createElement("div");
 
     const toolbarRow = createElement("div", { class: "vtt-toolbar-row" }, [
       this.renderInfoMenu(),
-      this.renderDrawModeToggle(),
+      this._drawToggleSlot,
       createElement("div", { class: "vtt-toolbar-sep" }),
-      layersAnchor,
-      gridAnchor,
-      ...objectActionButtons,
+      this._layersAnchorSlot,
+      this._gridAnchorSlot,
+      this._objectActionsSlot,
       createElement("div", { style: "flex: 1;" }),
-      this.renderSidebarToggle(),
+      this._sidebarSlot,
     ]);
 
     const toolbar = createElement("div", { class: "vtt-toolbar" }, [
       toolbarRow,
-      this.renderDrawBar(),
-      await this.renderSelectedObjectBar(),
+      this._drawBarSlot,
+      this._selectedObjectBarSlot,
     ]);
 
-    this.domComponent.append(toolbar);
+    this.domComponent.replaceChildren(toolbar);
+  };
+
+  render = async () => {
+    if (!this._initialized) {
+      this._initialized = true;
+      this._buildToolbar();
+    }
+
+    this._updateDrawToggle();
+    this._updateLayersAnchor();
+    this._updateGridAnchor();
+    this._updateObjectActions();
+    this._updateSidebarToggle();
+    this._updateDrawBar();
+    await this._updateSelectedObjectBar();
   };
 }
