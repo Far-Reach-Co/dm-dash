@@ -13,6 +13,8 @@ exports.default = setupSocketHandlers;
 const socket_io_1 = require("socket.io");
 const socketUsers_js_1 = require("./lib/socketUsers.js");
 const dice_js_1 = require("./lib/dice.js");
+const mistral_js_1 = require("./dnd/srd/mistral.js");
+const markdownToChat_js_1 = require("./lib/markdownToChat.js");
 function setupSocketHandlers(server) {
     const io = new socket_io_1.Server(server);
     io.on("connection", (socket) => {
@@ -81,6 +83,16 @@ function setupSocketHandlers(server) {
                             }
                             const diceRes = (0, dice_js_1.calculateDiceRollResponse)(tail);
                             content = diceRes;
+                            break;
+                        }
+                        case "5e": {
+                            if (!tail) {
+                                content =
+                                    "Usage: /5e <question>\nEx: /5e what spells deal fire damage at level 3?";
+                                break;
+                            }
+                            content = yield (0, mistral_js_1.searchSrd)(tail);
+                            content = (0, markdownToChat_js_1.markdownToChat)(content);
                             break;
                         }
                         default:

@@ -9,6 +9,8 @@ import {
   appendMessageToChatLog,
 } from "./lib/socketUsers.js";
 import { calculateDiceRollResponse } from "./lib/dice.js";
+import { searchSrd } from "./dnd/srd/mistral.js";
+import { markdownToChat } from "./lib/markdownToChat.js";
 
 export default function setupSocketHandlers(
   server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>
@@ -152,6 +154,16 @@ export default function setupSocketHandlers(
                 }
                 const diceRes = calculateDiceRollResponse(tail);
                 content = diceRes;
+                break;
+              }
+              case "5e": {
+                if (!tail) {
+                  content =
+                    "Usage: /5e <question>\nEx: /5e what spells deal fire damage at level 3?";
+                  break;
+                }
+                content = await searchSrd(tail);
+                content = markdownToChat(content);
                 break;
               }
               default:
