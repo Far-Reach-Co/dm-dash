@@ -93,7 +93,7 @@ export default class CanvasLayer {
           ...new Set(
             this.currentTableView.data.objects
               .filter((object) => Boolean(object.imageId))
-              .map((object) => object.imageId)
+              .map((object) => object.imageId),
           ),
         ];
         const presignedUrls = await getPresignedUrlsForImages(imageIds);
@@ -187,7 +187,10 @@ export default class CanvasLayer {
     // Invert scale: pinch (scale < 1) → zoom in, spread (scale > 1) → zoom out
     const delta = 1 - opt.self.scale;
     const sensitivity = 0.1;
-    const newZoom = Math.max(0.2, Math.min(5, zoom + zoom * delta * sensitivity));
+    const newZoom = Math.max(
+      0.2,
+      Math.min(5, zoom + zoom * delta * sensitivity),
+    );
 
     this.canvas.zoomToPoint(pt, newZoom);
     opt.e.preventDefault();
@@ -368,7 +371,7 @@ export default class CanvasLayer {
       });
     } else
       console.error(
-        "Failed to create new fabric image from URL. SRC URL missing."
+        "Failed to create new fabric image from URL. SRC URL missing.",
       );
   };
 
@@ -460,37 +463,29 @@ export default class CanvasLayer {
 
   // Also can be used to place image at top of layer
   placeObjectOnLayer = (obj) => {
-    const objects = this.canvas.getObjects();
+    const all = this.canvas.getObjects();
+    const gridIndex = this.gridManager.getIndexInCanvas();
 
     switch (obj.layer) {
       case "Map": {
-        const grid = this.gridManager.gridGroup;
-        const gridIndex = this.gridManager.getIndexInCanvas();
-
-        // Step 1: Insert object at gridIndex
-        obj.moveTo(gridIndex);
-
-        // Step 2: Reassert grid above
-        grid.moveTo(gridIndex + 1);
+        // Map objects always live below the grid
+        obj.moveTo(Math.max(0, gridIndex - 1));
         break;
       }
 
       case "Object": {
-        const all = this.canvas.getObjects();
-
-        // Find highest "Object" sibling
+        // Objects must live ABOVE the grid
         const topObjectIndex = all.reduce(
-          (max, o, i) => (o !== obj && o.layer === "Object" ? i : max),
-          -1
+          (max, o, i) =>
+            i > gridIndex && o !== obj && o.layer === "Object"
+              ? Math.max(max, i)
+              : max,
+          -1,
         );
 
-        if (topObjectIndex != -1) {
-          const topObject = this.canvas.item(topObjectIndex);
-          obj.moveTo(topObjectIndex);
-
-          topObject.moveTo(topObjectIndex - 1);
+        if (topObjectIndex !== -1) {
+          obj.moveTo(topObjectIndex + 1);
         } else {
-          const gridIndex = this.gridManager.getIndexInCanvas();
           obj.moveTo(gridIndex + 1);
         }
 
@@ -498,10 +493,13 @@ export default class CanvasLayer {
       }
 
       case "Fog": {
-        obj.moveTo(objects.length);
+        // Fog is always on top
+        obj.moveTo(all.length - 1);
         break;
       }
     }
+
+    this.canvas.requestRenderAll();
   };
 
   changeLayer = () => {
@@ -540,7 +538,7 @@ export default class CanvasLayer {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ data: jsonCanvas }),
-        }
+        },
       );
       // const data = await res.json();
       // if (res.status === 200 || res.status === 201) {
