@@ -1,8 +1,19 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const express_rate_limit_1 = require("express-rate-limit");
 const path = require("path");
 const fs = require("fs");
+const mistral_js_1 = require("./srd/mistral.js");
 var router = (0, express_1.Router)();
 router.get("/5e/srd/contents", (req, res, next) => {
     try {
@@ -258,4 +269,30 @@ router.get("/5e/srd/monsters", (req, res, next) => {
         next(err);
     }
 });
+const srdSearchLimiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { message: "Too many search requests, please try again later" },
+});
+router.post("/5e/srd/search", srdSearchLimiter, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { query } = req.body;
+        if (!query || typeof query !== "string") {
+            res.status(400).json({ message: "Query is required" });
+            return;
+        }
+        const trimmed = query.trim();
+        if (trimmed.length < 3 || trimmed.length > 500) {
+            res.status(400).json({ message: "Query must be between 3 and 500 characters" });
+            return;
+        }
+        const answer = yield (0, mistral_js_1.searchSrd)(trimmed);
+        res.json({ answer });
+    }
+    catch (err) {
+        next(err);
+    }
+}));
 exports.default = router;
