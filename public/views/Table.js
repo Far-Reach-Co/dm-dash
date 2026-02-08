@@ -175,7 +175,8 @@ class Table {
     document.addEventListener("mouseup", (e) => {
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
-        if (e.target.nodeName === "CANVAS")
+        // Drop succeeds unless mouse is still over the sidebar
+        if (!e.target.closest(".sidebar"))
           this.canvasLayer.addImageToTable(
             this.sidebar.tableSidebarImageComponent.currentMouseDownImage
           );
