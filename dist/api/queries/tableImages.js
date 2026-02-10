@@ -30,6 +30,8 @@ exports.getTableImagesWithImageByUserInFolderQuery = getTableImagesWithImageByUs
 exports.getTableImagesWithImageByProjectInFolderQuery = getTableImagesWithImageByProjectInFolderQuery;
 exports.getTableImageCountsByUserQuery = getTableImageCountsByUserQuery;
 exports.getTableImageCountsByProjectQuery = getTableImageCountsByProjectQuery;
+exports.getTableImageCountByUserFilteredQuery = getTableImageCountByUserFilteredQuery;
+exports.getTableImageCountByProjectFilteredQuery = getTableImageCountByProjectFilteredQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function addTableImageByProjectQuery(data) {
@@ -145,7 +147,7 @@ function getTableImageCountByUserQuery(user_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
             text: `SELECT COUNT(*) FROM public."TableImage" WHERE user_id = $1`,
-            values: [user_id]
+            values: [user_id],
         };
         return yield dbconfig_1.default.query(query);
     });
@@ -154,13 +156,47 @@ function getTableImageCountByProjectQuery(project_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
             text: `SELECT COUNT(*) FROM public."TableImage" WHERE project_id = $1`,
-            values: [project_id]
+            values: [project_id],
         };
         return yield dbconfig_1.default.query(query);
     });
 }
-function getTableImagesWithImageByUserPaginatedQuery(user_id, limit, offset) {
-    return __awaiter(this, void 0, void 0, function* () {
+const getOrderByClause = (sort) => {
+    if (sort === "size")
+        return `ORDER BY i.size DESC, i.id DESC`;
+    if (sort === "newest")
+        return `ORDER BY i.created_at DESC NULLS LAST, i.id DESC`;
+    return `ORDER BY i.original_name ASC`;
+};
+const buildFilterClauses = (whereParts, values, opts) => {
+    if (typeof opts.folderId !== "undefined") {
+        if (opts.folderId === null) {
+            whereParts.push(`ti.folder_id IS NULL`);
+        }
+        else {
+            values.push(opts.folderId);
+            whereParts.push(`ti.folder_id = $${values.length}`);
+        }
+    }
+    if (opts.q) {
+        values.push(`%${opts.q}%`);
+        whereParts.push(`(i.original_name ILIKE $${values.length} OR i.notes ILIKE $${values.length})`);
+    }
+};
+function getTableImagesWithImageByUserPaginatedQuery(user_id_1) {
+    return __awaiter(this, arguments, void 0, function* (user_id, opts = {}) {
+        const values = [user_id];
+        const whereParts = [`ti.user_id = $1`, `i.is_blocked = false`];
+        buildFilterClauses(whereParts, values, opts);
+        let limitOffset = "";
+        if (typeof opts.limit === "number") {
+            values.push(opts.limit);
+            limitOffset += ` LIMIT $${values.length}`;
+        }
+        if (typeof opts.offset === "number") {
+            values.push(opts.offset);
+            limitOffset += ` OFFSET $${values.length}`;
+        }
         const query = {
             text: `
       SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title AS record_title, r.description AS record_desc
@@ -168,17 +204,29 @@ function getTableImagesWithImageByUserPaginatedQuery(user_id, limit, offset) {
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
       LEFT JOIN public."Record" r ON ri.record_id = r.id
-      WHERE ti.user_id = $1 AND i.is_blocked = false
-      ORDER BY i.original_name ASC
-      LIMIT $2 OFFSET $3
+      WHERE ${whereParts.join(" AND ")}
+      ${getOrderByClause(opts.sort)}
+      ${limitOffset}
     `,
-            values: [user_id, limit, offset]
+            values,
         };
         return yield dbconfig_1.default.query(query);
     });
 }
-function getTableImagesWithImageByProjectPaginatedQuery(project_id, limit, offset) {
-    return __awaiter(this, void 0, void 0, function* () {
+function getTableImagesWithImageByProjectPaginatedQuery(project_id_1) {
+    return __awaiter(this, arguments, void 0, function* (project_id, opts = {}) {
+        const values = [project_id];
+        const whereParts = [`ti.project_id = $1`, `i.is_blocked = false`];
+        buildFilterClauses(whereParts, values, opts);
+        let limitOffset = "";
+        if (typeof opts.limit === "number") {
+            values.push(opts.limit);
+            limitOffset += ` LIMIT $${values.length}`;
+        }
+        if (typeof opts.offset === "number") {
+            values.push(opts.offset);
+            limitOffset += ` OFFSET $${values.length}`;
+        }
         const query = {
             text: `
       SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title, r.description
@@ -186,11 +234,45 @@ function getTableImagesWithImageByProjectPaginatedQuery(project_id, limit, offse
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
       LEFT JOIN public."Record" r ON ri.record_id = r.id
-      WHERE ti.project_id = $1 AND i.is_blocked = false
-      ORDER BY i.original_name ASC
-      LIMIT $2 OFFSET $3
+      WHERE ${whereParts.join(" AND ")}
+      ${getOrderByClause(opts.sort)}
+      ${limitOffset}
     `,
-            values: [project_id, limit, offset]
+            values,
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImageCountByUserFilteredQuery(user_id_1) {
+    return __awaiter(this, arguments, void 0, function* (user_id, opts = {}) {
+        const values = [user_id];
+        const whereParts = [`ti.user_id = $1`, `i.is_blocked = false`];
+        buildFilterClauses(whereParts, values, opts);
+        const query = {
+            text: `
+      SELECT COUNT(*)
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ${whereParts.join(" AND ")}
+    `,
+            values,
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImageCountByProjectFilteredQuery(project_id_1) {
+    return __awaiter(this, arguments, void 0, function* (project_id, opts = {}) {
+        const values = [project_id];
+        const whereParts = [`ti.project_id = $1`, `i.is_blocked = false`];
+        buildFilterClauses(whereParts, values, opts);
+        const query = {
+            text: `
+      SELECT COUNT(*)
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ${whereParts.join(" AND ")}
+    `,
+            values,
         };
         return yield dbconfig_1.default.query(query);
     });

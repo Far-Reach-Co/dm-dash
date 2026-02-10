@@ -7,6 +7,8 @@ import {
   getTableImagesWithImageByProjectInFolderQuery,
   getTableImageCountsByUserQuery,
   getTableImageCountsByProjectQuery,
+  getTableImageCountByUserFilteredQuery,
+  getTableImageCountByProjectFilteredQuery,
   TableImageWithImage,
 } from "../queries/tableImages";
 import { Request, Response, NextFunction } from "express";
@@ -26,10 +28,26 @@ async function getLibraryImagesByUser(
 
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
+    const q = (req.query.q as string) || null;
+    const sort = (req.query.sort as string) || "name";
+    const folderParam = req.query.folder_id as string | undefined;
+    const parsedFolderId = folderParam ? parseInt(folderParam) : NaN;
+    const folderId =
+      typeof folderParam === "undefined"
+        ? undefined
+        : folderParam === "unsorted" || Number.isNaN(parsedFolderId)
+          ? null
+          : parsedFolderId;
 
     const [data, countData] = await Promise.all([
-      getTableImagesWithImageByUserPaginatedQuery(req.session.user, limit, offset),
-      getTableImageCountByUserQuery(req.session.user),
+      getTableImagesWithImageByUserPaginatedQuery(req.session.user, {
+        limit,
+        offset,
+        q,
+        sort: sort as "newest" | "name" | "size",
+        folderId,
+      }),
+      getTableImageCountByUserFilteredQuery(req.session.user, { q, folderId }),
     ]);
 
     const images = data.rows.map((row) => ({
@@ -69,10 +87,29 @@ async function getLibraryImagesByProject(
 
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
+    const q = (req.query.q as string) || null;
+    const sort = (req.query.sort as string) || "name";
+    const folderParam = req.query.folder_id as string | undefined;
+    const parsedFolderId = folderParam ? parseInt(folderParam) : NaN;
+    const folderId =
+      typeof folderParam === "undefined"
+        ? undefined
+        : folderParam === "unsorted" || Number.isNaN(parsedFolderId)
+          ? null
+          : parsedFolderId;
 
     const [data, countData] = await Promise.all([
-      getTableImagesWithImageByProjectPaginatedQuery(req.params.project_id, limit, offset),
-      getTableImageCountByProjectQuery(req.params.project_id),
+      getTableImagesWithImageByProjectPaginatedQuery(req.params.project_id, {
+        limit,
+        offset,
+        q,
+        sort: sort as "newest" | "name" | "size",
+        folderId,
+      }),
+      getTableImageCountByProjectFilteredQuery(req.params.project_id, {
+        q,
+        folderId,
+      }),
     ]);
 
     const images = data.rows.map((row) => ({

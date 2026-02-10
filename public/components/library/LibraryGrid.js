@@ -84,7 +84,14 @@ export default class LibraryGrid {
 
   setSearchQuery = (query) => {
     this.searchQuery = query;
-    this.renderGrid();
+    if (this.showAllImages) {
+      if (this.searchDebounce) clearTimeout(this.searchDebounce);
+      this.searchDebounce = setTimeout(() => {
+        this.libraryApp.loadImages(true);
+      }, 250);
+    } else {
+      this.renderGrid();
+    }
   };
 
   setCounts = (data) => {
@@ -129,9 +136,11 @@ export default class LibraryGrid {
     // Filter by search
     if (this.searchQuery) {
       const q = this.searchQuery.toLowerCase();
-      filtered = filtered.filter((img) =>
-        img.original_name.toLowerCase().includes(q),
-      );
+      filtered = filtered.filter((img) => {
+        const name = (img.original_name || "").toLowerCase();
+        const notes = (img.notes || "").toLowerCase();
+        return name.includes(q) || notes.includes(q);
+      });
     }
 
     // Sort
@@ -538,7 +547,11 @@ export default class LibraryGrid {
           type: "change",
           event: (e) => {
             this.sortKey = e.target.value;
-            this.renderGrid();
+            if (this.showAllImages) {
+              this.libraryApp.loadImages(true);
+            } else {
+              this.renderGrid();
+            }
           },
         },
       ),
