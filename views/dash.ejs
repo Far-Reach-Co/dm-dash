@@ -15,116 +15,236 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="mt-5 px-2">
-    <div class="p-3 wyrld-status mx-2 mb-3">
-      <h2>Image Library</h2>
-      <small>Browse, organize, and manage all your uploaded images in one place. Create folders, rename images, add notes, and link images to records.</small>
-      <div class="mt-2">
-        <a href="/library">Open Library (<%= imageCount %> images) →</a>
+  <% const formatDate = (value) => value ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"; %>
+  <div class="mt-5 px-2 dashboard-shell">
+    <aside class="dashboard-sidebar">
+      <div class="dashboard-sidebar-card">
+        <div class="dashboard-sidebar-title">Dashboard</div>
+        <div class="dashboard-nav">
+          <a class="dashboard-nav-link <%= section === 'overview' ? 'active' : '' %>" href="/dash">Overview</a>
+          <a class="dashboard-nav-link <%= section === 'tables' ? 'active' : '' %>" href="/dash/tables">Tables</a>
+          <a class="dashboard-nav-link <%= section === 'records' ? 'active' : '' %>" href="/dash/records">Records</a>
+          <a class="dashboard-nav-link <%= section === 'sheets' ? 'active' : '' %>" href="/dash/sheets">Character Sheets</a>
+          <a class="dashboard-nav-link <%= section === 'wyrlds' ? 'active' : '' %>" href="/dash/wyrlds">Wyrlds</a>
+        </div>
       </div>
-    </div>
-    <div class="d-flex flex-wrap">
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Tables</h2>
-        <small>Real-time virtual tables that support images and drawing. Invite others to
-          join your table by copying the share link. Get started by using our <a href="/resources#free-assets">free asset pack</a>.</small>
-        <a href="/newtable" title="Create a new virtual table">+ New Table</a>
+      <div class="dashboard-sidebar-card dashboard-sidebar-card-spaced">
+        <div class="dashboard-sidebar-title">Image Library</div>
+        <small>Browse, organize, and manage all your uploaded images in one place.</small>
+        <div class="mt-2">
+          <a href="/library">Open Library (<%= imageCount %> images) -></a>
+        </div>
+      </div>
+    </aside>
+    <main class="dashboard-main">
+      <% if (section === 'overview') { %>
+      <div class="dashboard-highlights">
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Tables</h2>
+            <a href="/dash/tables">View all</a>
+          </div>
+          <small>Virtual tables you have created.</small>
+          <div class="dashboard-list">
+            <% if (recentTables.length === 0) { %>
+            <small>No tables yet...</small>
+            <% } else { %>
+            <% recentTables.forEach(function(table) { %>
+            <div class="dash-detail-row" onclick="handleTableClick('<%= table.uuid %>')" title="Open table in new tab">
+              <div class="dash-detail-title"><%= table.title %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Records</h2>
+            <a href="/dash/records">View all</a>
+          </div>
+          <small>Notes, lore, and stat blocks.</small>
+          <div class="dashboard-list">
+            <% if (recentRecords.length === 0) { %>
+            <small>No records yet...</small>
+            <% } else { %>
+            <% recentRecords.forEach(function(record) { %>
+            <div class="dash-detail-row" onclick="handleRecordClick('<%= record.id %>')" title="Open record in new tab">
+              <div class="dash-detail-title"><%= record.title %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Character Sheets</h2>
+            <a href="/dash/sheets">View all</a>
+          </div>
+          <small>Player characters created or shared with you.</small>
+          <div class="dashboard-list">
+            <% if (recentSheets.length === 0) { %>
+            <small>No sheets yet...</small>
+            <% } else { %>
+            <% recentSheets.forEach(function(sheet) { %>
+            <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
+              <div class="dash-detail-title"><%= sheet.name %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Wyrlds</h2>
+            <a href="/dash/wyrlds">View all</a>
+          </div>
+          <small>Campaign spaces you created or joined.</small>
+          <div class="dashboard-list">
+            <% if (recentWyrlds.length === 0) { %>
+            <small>No Wyrlds yet...</small>
+            <% } else { %>
+            <% recentWyrlds.forEach(function(project) { %>
+            <div class="dash-detail-row" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
+              <div class="dash-detail-title"><%= project.title %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+      </div>
+      <% } %>
+
+      <% if (section === 'tables') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Tables</h2>
+          <a href="/newtable" title="Create a new virtual table">+ New Table</a>
+        </div>
+        <small>Real-time virtual tables that support images and drawing. Invite others to join your table by copying the share link.</small>
         <hr />
-        <% if (tables.length === 0) { %>
+        <% if (tablesSorted.length === 0) { %>
         <small>No tables yet...</small>
         <% } else { %>
         <input id="search-table-elements-input" type="text" placeholder="Search Tables">
         <br>
-        <div id="table-elements-list">
-          <% tables.forEach(function(table) { %>
-          <div class="d-flex justify-content-between dash-list-title-container" onclick="handleTableClick('<%= table.uuid %>')" title="Open table in new tab">
-            <div class="dash-list-title"><%= table.title %></div>
-            <span>↗</span>
+        <div id="table-elements-list" class="dashboard-list">
+          <% tablesSorted.forEach(function(table) { %>
+          <div class="dash-detail-row" onclick="handleTableClick('<%= table.uuid %>')" title="Open table in new tab">
+            <div class="dash-detail-title"><%= table.title %></div>
+            <div class="dash-detail-meta"><%= table.is_public ? 'Public' : 'Private' %> - <%= formatDate(table.date_created) %></div>
           </div>
           <% }); %>
         </div>
         <% } %>
-      </div>
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Records</h2>
-        <small>Resource pages which you can use for lore, notes, monster stat blocks and other useful data. By connecting or uploading images you can view this data on a virtual table from the sidebar.</small>
-        <a href="/newrecord" title="Create a new record">+ New Record</a>
+      </section>
+      <% } %>
+
+      <% if (section === 'records') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Records</h2>
+          <a href="/newrecord" title="Create a new record">+ New Record</a>
+        </div>
+        <small>Resource pages for lore, notes, monster stat blocks and other useful data.</small>
         <hr />
-        <% if (records.length === 0) { %>
+        <% if (recordsSorted.length === 0) { %>
         <small>No records yet...</small>
         <% } else { %>
-        <% records.forEach(function(record) { %>
-        <div class="d-flex justify-content-between dash-list-title-container" onclick="handleRecordClick('<%= record.id %>')" title="Open record in new tab">
-          <div class="dash-list-title"><%= record.title %></div>
-          <span>↗</span>
+        <div class="dashboard-list">
+          <% recordsSorted.forEach(function(record) { %>
+          <div class="dash-detail-row" onclick="handleRecordClick('<%= record.id %>')" title="Open record in new tab">
+            <div class="dash-detail-title"><%= record.title %></div>
+            <div class="dash-detail-meta"><%= record.is_public ? 'Public' : 'Private' %> - <%= formatDate(record.created_at) %></div>
+          </div>
+          <% }); %>
         </div>
-        <% }); %>
         <% } %>
-      </div>
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Player Character Sheets</h2>
-        <small>We currently offer Dungeons and Dragons 5e sheets. You can invite
-          others to view/edit your character sheet from the settings tab.</small>
-        <a href="/newsheet" title="Create a new player character sheet">+ New Sheet</a>
+      </section>
+      <% } %>
+
+      <% if (section === 'sheets') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Player Character Sheets</h2>
+          <a href="/newsheet" title="Create a new player character sheet">+ New Sheet</a>
+        </div>
+        <small>We currently offer Dungeons and Dragons 5e sheets. You can invite others to view/edit your character sheet from the settings tab.</small>
         <hr />
         <h3>Created</h3>
-        <% if (sheets.length === 0) { %>
+        <% if (sheetsSorted.length === 0) { %>
         <small>No sheets yet...</small>
-        <% } else { %> <% sheets.forEach(function(sheet) { %>
-        <div class="d-flex justify-content-between dash-list-title-container" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
-          <div class="dash-list-title"><%= sheet.name %></div>
-          <span>↗</span>
+        <% } else { %>
+        <div class="dashboard-list">
+          <% sheetsSorted.forEach(function(sheet) { %>
+          <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
+            <div class="dash-detail-title"><%= sheet.name %></div>
+            <div class="dash-detail-meta"><%= sheet.class || 'Class TBD' %> - Level <%= sheet.level ?? 'N/A' %></div>
+          </div>
+          <% }); %>
         </div>
-        <% }); %> <% } %>
+        <% } %>
         <h3>Shared With You</h3>
-        <% if (sharedSheets.length === 0) { %>
+        <% if (sharedSheetsSorted.length === 0) { %>
         <small>No shared sheets yet...</small>
-        <% } else { %> <% sharedSheets.forEach(function(sheet) { %>
-        <div class="d-flex justify-content-between dash-list-title-container" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
-          <div class="dash-list-title"><%= sheet.name %></div>
-          <span>↗</span>
+        <% } else { %>
+        <div class="dashboard-list">
+          <% sharedSheetsSorted.forEach(function(sheet) { %>
+          <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
+            <div class="dash-detail-title"><%= sheet.name %></div>
+            <div class="dash-detail-meta"><%= sheet.class || 'Class TBD' %> - Level <%= sheet.level ?? 'N/A' %></div>
+          </div>
+          <% }); %>
         </div>
-        <% }); %> <% } %>
-      </div>
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Wyrlds</h2>
-        <small>A Wyrld is a contained environment that associates tables and
-          character sheets to create a more organized experience.
-          <ul>
-            <li>Add users with invite links.</li>
-            <li>Link player character sheets.</li>
-            <li>Allow users to manage tables.</li>
-            <li>Create customized calendars.</li>
-          </ul>
-        </small>
-        <a href="/newwyrld" title="Create a new wyrld">+ Wyrld</a>
+        <% } %>
+      </section>
+      <% } %>
+
+      <% if (section === 'wyrlds') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Wyrlds</h2>
+          <a href="/newwyrld" title="Create a new wyrld">+ Wyrld</a>
+        </div>
+        <small>A Wyrld is a contained environment that associates tables and character sheets to create a more organized experience.</small>
         <hr />
         <h3>Created</h3>
-        <% if (projects.length === 0) { %>
+        <% if (projectsSorted.length === 0) { %>
         <small>No Wyrlds yet...</small>
-        <% } else { %> <% projects.forEach(function(project) { %>
-        <div class="d-flex align-items-center">
-          <img class="icon gear me-2" src="/assets/gears.svg" alt="" title="Open wyrld settings" onclick="handleWyrldSettingsClick('<%= project.id %>')" />
-          <div class="d-flex justify-content-between dash-list-title-container flex-1" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
-            <div class="dash-list-title"><%= project.title %></div>
-            <span>→</span>
+        <% } else { %>
+        <div class="dashboard-list">
+          <% projectsSorted.forEach(function(project) { %>
+          <div class="dash-detail-row" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
+            <div class="dash-detail-title"><%= project.title %></div>
+            <div class="dash-detail-actions">
+              <button class="dash-inline-action" type="button" onclick="event.stopPropagation(); handleWyrldSettingsClick('<%= project.id %>')">Settings</button>
+              <div class="dash-detail-meta">Created <%= formatDate(project.date_created) %></div>
+            </div>
           </div>
+          <% }); %>
         </div>
-        <% }); %> <% } %>
+        <% } %>
         <h3>Shared</h3>
-        <% if (sharedProjects.length === 0) { %>
+        <% if (sharedProjectsSorted.length === 0) { %>
         <small>No Shared Wyrlds yet...</small>
-        <% } else { %> <% sharedProjects.forEach(function(project) { %>
-        <div class="d-flex align-items-center">
-          <img class="icon gear me-2" src="/assets/gears.svg" alt="" title="Open wyrld settings" onclick="handleSharedWyrldSettingsClick('<%= project.id %>')" />
-          <div class="d-flex justify-content-between dash-list-title-container flex-1" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
-            <div class="dash-list-title"><%= project.title %></div>
-            <span>→</span>
+        <% } else { %>
+        <div class="dashboard-list">
+          <% sharedProjectsSorted.forEach(function(project) { %>
+          <div class="dash-detail-row" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
+            <div class="dash-detail-title"><%= project.title %></div>
+            <div class="dash-detail-actions">
+              <button class="dash-inline-action" type="button" onclick="event.stopPropagation(); handleSharedWyrldSettingsClick('<%= project.id %>')">Settings</button>
+              <div class="dash-detail-meta">Created <%= formatDate(project.date_created) %></div>
+            </div>
           </div>
+          <% }); %>
         </div>
-        <% }); %> <% } %>
-      </div>
-    </div>
+        <% } %>
+      </section>
+      <% } %>
+    </main>
   </div>
 </body>
 <script>

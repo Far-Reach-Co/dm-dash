@@ -7,7 +7,8 @@ export interface Calendar {
   title: string,
   year: number,
   current_month_id: number,
-  current_day: number
+  current_day: number,
+  created_at: string
 }
 
 async function addCalendarQuery(data: {

@@ -7,6 +7,7 @@ export interface DndFiveEGeneral {
   id: number;
   user_id: number;
   name: string;
+  created_at: string;
   race: string;
   class: string;
   level: number;

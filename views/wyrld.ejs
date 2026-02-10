@@ -20,136 +20,245 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="mt-5 d-flex flex-column h-100 px-2">
-    <div class="p-3 wyrld-status mx-2">
-      <h1 class="text-green" style="text-align: left;"><%= project.title %></h1>
-      <div class="d-flex flex-wrap gap-3 mt-2">
-        <% if (!project.is_pro) { %>
-        <div class="wyrld-status-item">
-          <h3>Status:</h3>
-          <p>Free Tier</p>
+  <% const formatDate = (value) => value ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"; %>
+  <div class="mt-5 px-2 dashboard-shell">
+    <aside class="dashboard-sidebar">
+      <div class="dashboard-sidebar-card">
+        <div class="dashboard-sidebar-title"><%= project.title %></div>
+        <div class="dashboard-nav">
+          <a class="dashboard-nav-link <%= section === 'overview' ? 'active' : '' %>" href="/wyrld?id=<%= project.id %>">Overview</a>
+          <a class="dashboard-nav-link <%= section === 'tables' ? 'active' : '' %>" href="/wyrld/tables?id=<%= project.id %>">Tables</a>
+          <a class="dashboard-nav-link <%= section === 'records' ? 'active' : '' %>" href="/wyrld/records?id=<%= project.id %>">Records</a>
+          <a class="dashboard-nav-link <%= section === 'sheets' ? 'active' : '' %>" href="/wyrld/sheets?id=<%= project.id %>">Character Sheets</a>
+          <a class="dashboard-nav-link <%= section === 'calendars' ? 'active' : '' %>" href="/wyrld/calendars?id=<%= project.id %>">Calendars</a>
         </div>
-        <div class="wyrld-status-item">
-          <h3>Data Used:</h3>
-          <p><%= usedDataFormatted %> / 50MB</p>
-        </div>
-        <% } else { %>
-        <div class="wyrld-status-item">
-          <h3>Subscription:</h3>
-          <p>Pro</p>
-        </div>
-        <div class="wyrld-status-item">
-          <h3>Data Used:</h3>
-          <p><%= usedDataFormatted %></p>
-        </div>
-        <% } %>
       </div>
-      <small class="d-block mt-2">-- Subscriptions under Construction --</small>
       <% if (projectAuth) { %>
-      <div class="invite-section mt-3" id="invite-section">
-        <% if (inviteLink) { %>
-        <%- include('./partials/wyrld_invite_display', { inviteLink, inviteId }) %>
-        <% } else { %>
-        <%- include('./partials/wyrld_invite_button', { projectId: project.id }) %>
-        <% } %>
+      <div class="dashboard-sidebar-card dashboard-sidebar-card-spaced">
+        <div class="dashboard-sidebar-title">Image Library</div>
+        <small>Browse, organize, and manage all your uploaded images in one place.</small>
+        <div class="mt-2">
+          <a href="/library?wyrld=<%= project.id %>">Open Library (<%= imageCount %> images) -></a>
+        </div>
       </div>
       <% } %>
-    </div>
-    <% if (projectAuth) { %>
-    <div class="p-3 wyrld-status mx-2 mb-3">
-      <h2>Image Library</h2>
-      <small>Browse, organize, and manage all your uploaded images in one place. Create folders, rename images, add notes, and link images to records.</small>
-      <div class="mt-2">
-        <a href="/library?wyrld=<%= project.id %>">Open Library (<%= imageCount %> images) →</a>
-      </div>
-    </div>
-    <% } %>
-    <div class="d-flex flex-wrap">
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Wyrld Tables</h2>
-        <small>These tables are shared by the members of the wyrld. The wyrld
-          managers have the ability to upload images and manage the map
-          layer.</small>
-        <br />
+    </aside>
+    <main class="dashboard-main">
+      <div class="p-3 wyrld-status mx-2">
+        <h1 class="text-green" style="text-align: left;"><%= project.title %></h1>
+        <div class="d-flex flex-wrap gap-3 mt-2">
+          <% if (!project.is_pro) { %>
+          <div class="wyrld-status-item">
+            <h3>Status:</h3>
+            <p>Free Tier</p>
+          </div>
+          <div class="wyrld-status-item">
+            <h3>Data Used:</h3>
+            <p><%= usedDataFormatted %> / 50MB</p>
+          </div>
+          <% } else { %>
+          <div class="wyrld-status-item">
+            <h3>Subscription:</h3>
+            <p>Pro</p>
+          </div>
+          <div class="wyrld-status-item">
+            <h3>Data Used:</h3>
+            <p><%= usedDataFormatted %></p>
+          </div>
+          <% } %>
+        </div>
+        <small class="d-block mt-2">-- Subscriptions under Construction --</small>
         <% if (projectAuth) { %>
-        <a href="/newwyrldtable?id=<%= project.id %>" title="Create a new virtual table">+ New Wyrld Table</a>
-
+        <div class="invite-section mt-3" id="invite-section">
+          <% if (inviteLink) { %>
+          <%- include('./partials/wyrld_invite_display', { inviteLink, inviteId }) %>
+          <% } else { %>
+          <%- include('./partials/wyrld_invite_button', { projectId: project.id }) %>
+          <% } %>
+        </div>
         <% } %>
+      </div>
+
+      <% if (section === 'overview') { %>
+      <div class="dashboard-highlights">
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Tables</h2>
+            <a href="/wyrld/tables?id=<%= project.id %>">View all</a>
+          </div>
+          <small>Shared tables for this wyrld.</small>
+          <div class="dashboard-list">
+            <% if (recentTables.length === 0) { %>
+            <small>No tables yet...</small>
+            <% } else { %>
+            <% recentTables.forEach(function(table) { %>
+            <div class="dash-detail-row" onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')" title="Open table in new tab">
+              <div class="dash-detail-title"><%= table.title %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Records</h2>
+            <a href="/wyrld/records?id=<%= project.id %>">View all</a>
+          </div>
+          <small>Shared records and lore.</small>
+          <div class="dashboard-list">
+            <% if (recentRecords.length === 0) { %>
+            <small>No records yet...</small>
+            <% } else { %>
+            <% recentRecords.forEach(function(record) { %>
+            <div class="dash-detail-row" onclick="handleRecordClick('<%= record.id %>', '<%= project.id %>')" title="Open record in new tab">
+              <div class="dash-detail-title"><%= record.title %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Character Sheets</h2>
+            <a href="/wyrld/sheets?id=<%= project.id %>">View all</a>
+          </div>
+          <small>Characters linked to this wyrld.</small>
+          <div class="dashboard-list">
+            <% if (recentSheets.length === 0) { %>
+            <small>No sheets yet...</small>
+            <% } else { %>
+            <% recentSheets.forEach(function(sheet) { %>
+            <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')" title="Open character sheet in new tab">
+              <div class="dash-detail-title"><%= sheet.name %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Recent Calendars</h2>
+            <a href="/wyrld/calendars?id=<%= project.id %>">View all</a>
+          </div>
+          <small>Custom timekeeping for your wyrld.</small>
+          <div class="dashboard-list">
+            <% if (recentCalendars.length === 0) { %>
+            <small>No calendars yet...</small>
+            <% } else { %>
+            <% recentCalendars.forEach(function(calendar) { %>
+            <div class="dash-detail-row" onclick="openCalendar('<%= calendar.id %>')" title="Open calendar">
+              <div class="dash-detail-title"><%= calendar.title %></div>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+      </div>
+      <% } %>
+
+      <% if (section === 'tables') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Wyrld Tables</h2>
+          <% if (projectAuth) { %>
+          <a href="/newwyrldtable?id=<%= project.id %>" title="Create a new virtual table">+ New Wyrld Table</a>
+          <% } %>
+        </div>
+        <small>These tables are shared by the members of the wyrld. Wyrld managers can upload images and manage the map layer.</small>
         <hr />
-        <% if (tables.length === 0) { %>
-        <small class="ms-2">No tables yet...</small>
+        <% if (tablesSorted.length === 0) { %>
+        <small>No tables yet...</small>
         <% } else { %>
-        <input class="w-75" id="search-table-elements-input" type="text" placeholder="Search Tables">
+        <input id="search-table-elements-input" type="text" placeholder="Search Tables">
         <br>
-        <div id="table-elements-list">
-          <% tables.forEach(function(table) { %>
-          <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')" title="Open table in new tab">
-            <div class="dash-list-title mb-3"><%= table.title %></div>
-            <a>↗</a>
+        <div id="table-elements-list" class="dashboard-list">
+          <% tablesSorted.forEach(function(table) { %>
+          <div class="dash-detail-row" onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')" title="Open table in new tab">
+            <div class="dash-detail-title"><%= table.title %></div>
+            <div class="dash-detail-meta"><%= table.is_public ? 'Public' : 'Private' %> - <%= formatDate(table.date_created) %></div>
           </div>
           <% }); %>
         </div>
         <% } %>
-      </div>
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Records</h2>
-        <small>Resource pages which you can use for lore, notes, monster stat blocks and other useful data.</small>
-        <br />
-        <% if (projectAuth) { %>
-        <a href="/newwyrldrecord?id=<%= project.id %>" title="Create a new wyrld record">+ New Wyrld Record</a>
-        <% } %>
-        <hr />
-        <% if (records.length === 0) { %>
-        <small class="ms-2">No records yet...</small>
-        <% } else { %>
-        <% records.forEach(function(record) { %>
-        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleRecordClick('<%= record.id %>', '<%= project.id %>')" title="Open record in new tab">
-          <div class="dash-list-title mb-3"><%= record.title %></div>
-          <a>↗</a>
-        </div>
-        <% }); %>
-        <% } %>
-      </div>
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Player Character Sheets</h2>
-        <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator
-          of the sheet and the wyrld managers are allowed to view these
-          sheets.</small>
-        <br />
-        <a href="/newsheet?wyrld_id=<%= project.id %>&wyrld_title=<%= encodeURIComponent(project.title) %>" title="Create a new character sheet for this wyrld">+ New Character Sheet</a>
-        <hr />
-        <% if (sheets.length === 0) { %>
-        <small class="ms-2">No sheets have been connected to this wyrld yet...</small>
-        <% } else { %> <% sheets.forEach(function(sheet) { %>
-        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')" title="Open character sheet in new tab">
-          <div class="dash-list-title mb-3"><%= sheet.name %></div>
-          <a>↗</a>
-        </div>
-        <% }); %> <% } %>
-      </div>
-      <div class="d-flex flex-column p-3 dash-column">
-        <h2>Calendars</h2>
-        <small>Custom calendars allow for general time-keeping of the various
-          cultures in the wyrld. Managers have access to create and update the
-          calendars.</small>
-        <br />
-        <% if (projectAuth) { %>
-        <a href="/newwyrldcalendar?id=<%= project.id %>" title="Create a new calendar">+ New Calendar</a>
+      </section>
+      <% } %>
 
-        <% } %>
-        <hr />
-        <% if (calendars.length === 0) { %>
-        <small class="ms-2">No calendars yet...</small>
-        <% } else { %> <% calendars.forEach(function(calendar) { %>
-        <div class="d-flex justify-content-between w-50 ms-2 dash-list-title-container" onclick="openCalendar('<%= calendar.id %>')" title="Open calendar">
-          <div class="dash-list-title mb-3" id="calendar-title-<%= calendar.id %>">
-            <%= calendar.title %>
-          </div>
-          <a class="ms-1"><small>View</small></a>
+      <% if (section === 'records') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Records</h2>
+          <% if (projectAuth) { %>
+          <a href="/newwyrldrecord?id=<%= project.id %>" title="Create a new wyrld record">+ New Wyrld Record</a>
+          <% } %>
         </div>
-        <% }); %> <% } %>
-      </div>
-    </div>
+        <small>Resource pages for lore, notes, monster stat blocks and other useful data.</small>
+        <hr />
+        <% if (recordsSorted.length === 0) { %>
+        <small>No records yet...</small>
+        <% } else { %>
+        <div class="dashboard-list">
+          <% recordsSorted.forEach(function(record) { %>
+          <div class="dash-detail-row" onclick="handleRecordClick('<%= record.id %>', '<%= project.id %>')" title="Open record in new tab">
+            <div class="dash-detail-title"><%= record.title %></div>
+            <div class="dash-detail-meta"><%= record.is_public ? 'Public' : 'Private' %> - <%= formatDate(record.created_at) %></div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+      </section>
+      <% } %>
+
+      <% if (section === 'sheets') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Player Character Sheets</h2>
+          <a href="/newsheet?wyrld_id=<%= project.id %>&wyrld_title=<%= encodeURIComponent(project.title) %>" title="Create a new character sheet for this wyrld">+ New Character Sheet</a>
+        </div>
+        <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator of the sheet and the wyrld managers are allowed to view these sheets.</small>
+        <hr />
+        <% if (sheetsSorted.length === 0) { %>
+        <small>No sheets have been connected to this wyrld yet...</small>
+        <% } else { %>
+        <div class="dashboard-list">
+          <% sheetsSorted.forEach(function(sheet) { %>
+          <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')" title="Open character sheet in new tab">
+            <div class="dash-detail-title"><%= sheet.name %></div>
+            <div class="dash-detail-meta"><%= sheet.class || 'Class TBD' %> - Level <%= sheet.level ?? 'N/A' %></div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+      </section>
+      <% } %>
+
+      <% if (section === 'calendars') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Calendars</h2>
+          <% if (projectAuth) { %>
+          <a href="/newwyrldcalendar?id=<%= project.id %>" title="Create a new calendar">+ New Calendar</a>
+          <% } %>
+        </div>
+        <small>Custom calendars allow for general time-keeping of the various cultures in the wyrld.</small>
+        <hr />
+        <% if (calendarsSorted.length === 0) { %>
+        <small>No calendars yet...</small>
+        <% } else { %>
+        <div class="dashboard-list">
+          <% calendarsSorted.forEach(function(calendar) { %>
+          <div class="dash-detail-row" onclick="openCalendar('<%= calendar.id %>')" title="Open calendar">
+            <div class="dash-detail-title" id="calendar-title-<%= calendar.id %>"><%= calendar.title %></div>
+            <div class="dash-detail-meta">Created <%= formatDate(calendar.created_at) %></div>
+          </div>
+          <% }); %>
+        </div>
+        <% } %>
+      </section>
+      <% } %>
+    </main>
   </div>
 </body>
 <script>
