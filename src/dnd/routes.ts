@@ -1,9 +1,8 @@
 import { Router } from "express";
 import { Request, Response, NextFunction } from "express";
 import { rateLimit } from "express-rate-limit";
-import path = require("path");
-import fs = require("fs");
 import { searchSrd } from "./srd/mistral.js";
+import { srdData } from "./srd/data.js";
 
 var router = Router();
 
@@ -26,17 +25,9 @@ router.get(
   "/5e/srd/ability-scores",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/2014/5e-srd-ability-scores.json",
-        ),
-        "utf8",
-      );
       res.render("dnd/5e/srd/abilityscores", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["ability-scores"] || [],
       });
     } catch (err) {
       next(err);
@@ -48,17 +39,9 @@ router.get(
   "/5e/srd/alignments",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/2014/5e-srd-alignments.json",
-        ),
-        "utf8",
-      );
       res.render("dnd/5e/srd/alignments", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["alignments"] || [],
       });
     } catch (err) {
       next(err);
@@ -70,17 +53,9 @@ router.get(
   "/5e/srd/backgrounds",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/2014/5e-srd-backgrounds.json",
-        ),
-        "utf8",
-      );
       res.render("dnd/5e/srd/backgrounds", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["backgrounds"] || [],
       });
     } catch (err) {
       next(err);
@@ -89,18 +64,8 @@ router.get(
 );
 
 // Pre-load equipment and magic items data for efficient lookup
-const equipmentData: any[] = JSON.parse(
-  fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/2014/5e-srd-equipment.json"),
-    "utf8",
-  ),
-);
-const magicItemsData: any[] = JSON.parse(
-  fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/2014/5e-srd-magic-items.json"),
-    "utf8",
-  ),
-);
+const equipmentData: any[] = srdData["equipment"] || [];
+const magicItemsData: any[] = srdData["magic-items"] || [];
 const equipmentMap = new Map(equipmentData.map((e: any) => [e.index, e]));
 const magicItemsMap = new Map(magicItemsData.map((m: any) => [m.index, m]));
 
@@ -162,17 +127,9 @@ router.get(
   "/5e/srd/damage-types",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/2014/5e-srd-damage-types.json",
-        ),
-        "utf8",
-      );
       res.render("dnd/5e/srd/damagetypes", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["damage-types"] || [],
       });
     } catch (err) {
       next(err);
@@ -197,17 +154,9 @@ router.get(
   "/5e/srd/conditions",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/2014/5e-srd-conditions.json",
-        ),
-        "utf8",
-      );
       res.render("dnd/5e/srd/conditions", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["conditions"] || [],
       });
     } catch (err) {
       next(err);
@@ -219,14 +168,9 @@ router.get(
   "/5e/srd/feats",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/2014/5e-srd-feats.json"),
-        "utf8",
-      );
       res.render("dnd/5e/srd/feats", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["feats"] || [],
       });
     } catch (err) {
       next(err);
@@ -238,14 +182,9 @@ router.get(
   "/5e/srd/features",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/2014/5e-srd-features.json"),
-        "utf8",
-      );
       res.render("dnd/5e/srd/features", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["features"] || [],
       });
     } catch (err) {
       next(err);
@@ -257,17 +196,9 @@ router.get(
   "/5e/srd/languages",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/2014/5e-srd-languages.json",
-        ),
-        "utf8",
-      );
       res.render("dnd/5e/srd/languages", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["languages"] || [],
       });
     } catch (err) {
       next(err);
@@ -289,12 +220,7 @@ router.get(
 );
 
 // Pre-load spells data for efficient lookup
-const spellsData: any[] = JSON.parse(
-  fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/2014/5e-srd-spells.json"),
-    "utf8",
-  ),
-);
+const spellsData: any[] = srdData["spells"] || [];
 const spellsMap = new Map(spellsData.map((s: any) => [s.index, s]));
 
 // Individual spell page (must be before /spells to match first)
@@ -335,14 +261,9 @@ router.get(
   "/5e/srd/skills",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(__dirname, "../../public/lib/data/2014/5e-srd-skills.json"),
-        "utf8",
-      );
       res.render("dnd/5e/srd/skills", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["skills"] || [],
       });
     } catch (err) {
       next(err);
@@ -354,17 +275,9 @@ router.get(
   "/5e/srd/weapon-properties",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      // get json data
-      const data = fs.readFileSync(
-        path.join(
-          __dirname,
-          "../../public/lib/data/2014/5e-srd-weapon-properties.json",
-        ),
-        "utf8",
-      );
       res.render("dnd/5e/srd/weaponproperties", {
         auth: req.session.user,
-        data: JSON.parse(data),
+        data: srdData["weapon-properties"] || [],
       });
     } catch (err) {
       next(err);
@@ -372,12 +285,7 @@ router.get(
   },
 );
 
-const monstersData: any[] = JSON.parse(
-  fs.readFileSync(
-    path.join(__dirname, "../../public/lib/data/2014/5e-srd-monsters.json"),
-    "utf8",
-  ),
-);
+const monstersData: any[] = srdData["monsters"] || [];
 const monstersMap = new Map(monstersData.map((m: any) => [m.index, m]));
 const DND_API_BASE = "https://www.dnd5eapi.co";
 
