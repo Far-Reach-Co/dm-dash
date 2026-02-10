@@ -24,25 +24,25 @@ const tableImages_js_1 = require("../queries/tableImages.js");
 const users_js_1 = require("../queries/users.js");
 const enums_js_1 = require("../../lib/enums.js");
 const eventLogger_1 = require("../../lib/eventLogger");
+const authz_1 = require("../../lib/authz");
 function addProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (!req.session.user)
-                throw new Error("User is not logged in");
-            const projectsByUserData = yield (0, projects_js_1.getProjectsQuery)(req.session.user);
+            const userId = (0, authz_1.requireUser)(req);
+            const projectsByUserData = yield (0, projects_js_1.getProjectsQuery)(userId);
             if (projectsByUserData.rows.length >= 2) {
-                const userData = yield (0, users_js_1.getUserByIdQuery)(req.session.user);
+                const userData = yield (0, users_js_1.getUserByIdQuery)(userId);
                 if (!userData.rows[0].is_pro)
                     throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
             }
-            req.body.user_id = req.session.user;
+            req.body.user_id = userId;
             const data = yield (0, projects_js_1.addProjectQuery)(req.body);
             yield (0, tableViews_js_1.addTableViewByProjectQuery)({
                 project_id: data.rows[0].id,
                 title: "First Wyrld Table",
             });
             (0, eventLogger_1.logEventAsync)({
-                userId: req.session.user,
+                userId,
                 projectId: data.rows[0].id,
                 eventType: eventLogger_1.EventType.PROJECT_CREATED,
                 eventData: { title: data.rows[0].title },
@@ -62,9 +62,8 @@ function getProject(req, res, next) {
         try {
             const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.id);
             const project = projectData.rows[0];
-            if (!req.session.user)
-                throw new Error("User is not logged in");
-            const projectUsersData = yield (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id);
+            const userId = (0, authz_1.requireUser)(req);
+            const projectUsersData = yield (0, projectUsers_js_1.getProjectUserByUserAndProjectQuery)(userId, project.id);
             if (projectUsersData.rows.length) {
                 const projectUser = projectUsersData.rows[0];
                 project.was_joined = true;
@@ -82,33 +81,48 @@ function getProject(req, res, next) {
 function getProjects(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (!req.session.user)
-                throw new Error("User is not logged in");
-            const projectsData = yield (0, projects_js_1.getProjectsQuery)(req.session.user);
-            const projectUserData = yield (0, projectUsers_js_1.getProjectUsersQuery)(req.session.user);
-            if (projectUserData &&
-                projectUserData.rows &&
-                projectUserData.rows.length) {
-                for (var projectUser of projectUserData.rows) {
-                    const projectData = yield (0, projects_js_1.getProjectQuery)(projectUser.project_id);
-                    if (projectData && projectData.rows && projectData.rows.length) {
-                        const project = projectData.rows[0];
+            const userId = (0, authz_1.requireUser)(req);
+            const projectsData = yield (0, projects_js_1.getProjectsQuery)(userId);
+            const ownedProjects = projectsData.rows;
+            const ownedIds = new Set(ownedProjects.map((p) => String(p.id)));
+            const projectUserData = yield (0, projectUsers_js_1.getProjectUsersQuery)(userId);
+            const projectUsers = (projectUserData === null || projectUserData === void 0 ? void 0 : projectUserData.rows) || [];
+            const joinedProjectIds = projectUsers
+                .map((pu) => pu.project_id)
+                .filter((id) => !ownedIds.has(String(id)));
+            let joinedProjects = [];
+            if (joinedProjectIds.length) {
+                const joinedProjectsData = yield (0, projects_js_1.getProjectsByIdsQuery)(joinedProjectIds);
+                joinedProjects = joinedProjectsData.rows;
+                const projectUserByProjectId = new Map(projectUsers.map((pu) => [String(pu.project_id), pu]));
+                for (const project of joinedProjects) {
+                    const projectUser = projectUserByProjectId.get(String(project.id));
+                    if (projectUser) {
                         project.was_joined = true;
                         project.project_user_id = projectUser.id;
                         project.date_joined =
                             projectUser.date_joined;
                         project.is_editor = projectUser.is_editor;
-                        projectsData.rows.push(project);
                     }
                 }
             }
-            for (var project of projectsData.rows) {
-                const projectInvites = yield (0, projectInvites_js_1.getProjectInviteByProjectQuery)(project.id);
-                if (projectInvites && projectInvites.rows && projectInvites.rows.length)
-                    project.project_invite =
-                        projectInvites.rows[0];
+            const allProjects = ownedProjects.concat(joinedProjects);
+            if (allProjects.length) {
+                const inviteData = yield (0, projectInvites_js_1.getProjectInvitesByProjectIdsQuery)(allProjects.map((p) => p.id));
+                const inviteByProjectId = new Map();
+                for (const invite of inviteData.rows) {
+                    const key = String(invite.project_id);
+                    if (!inviteByProjectId.has(key)) {
+                        inviteByProjectId.set(key, invite);
+                    }
+                }
+                for (const project of allProjects) {
+                    const invite = inviteByProjectId.get(String(project.id));
+                    if (invite)
+                        project.project_invite = invite;
+                }
             }
-            res.send(projectsData.rows);
+            res.send(allProjects);
         }
         catch (err) {
             next(err);
@@ -118,12 +132,7 @@ function getProjects(req, res, next) {
 function removeProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (!req.session.user)
-                throw new Error("User is not logged in");
-            const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.id);
-            const project = projectData.rows[0];
-            if (req.session.user != project.user_id)
-                throw new Error("User is not owner");
+            yield (0, authz_1.requireProjectOwner)(req, req.params.id);
             const tableImages = yield (0, tableImages_js_1.getTableImagesByProjectQuery)(req.params.id);
             for (const tableImage of tableImages.rows) {
                 const imageData = yield (0, images_js_1.getImageQuery)(tableImage.image_id);
@@ -147,12 +156,7 @@ function removeProject(req, res, next) {
 function editProjectTitle(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (!req.session.user)
-                throw new Error("User is not logged in");
-            const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.id);
-            const project = projectData.rows[0];
-            if (req.session.user != project.user_id)
-                throw new Error("User is not owner");
+            yield (0, authz_1.requireProjectOwner)(req, req.params.id);
             yield (0, projects_js_1.editProjectQuery)(req.params.id, {
                 title: req.body.title,
             });

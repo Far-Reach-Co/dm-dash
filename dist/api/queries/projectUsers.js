@@ -20,6 +20,7 @@ exports.removeProjectUserQuery = removeProjectUserQuery;
 exports.editProjectUserQuery = editProjectUserQuery;
 exports.getProjectUserByUserAndProjectQuery = getProjectUserByUserAndProjectQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
+const utils_1 = require("./utils");
 function addProjectUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -80,20 +81,7 @@ function removeProjectUserQuery(id) {
 }
 function editProjectUserQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        let edits = ``;
-        let values = [];
-        let iterator = 1;
-        for (const [key, value] of Object.entries(data)) {
-            edits += `${key} = $${iterator}, `;
-            values.push(value);
-            iterator++;
-        }
-        edits = edits.slice(0, -2);
-        values.push(id);
-        const query = {
-            text: `update public."ProjectUser" set ${edits} where id = $${iterator} returning *`,
-            values: values,
-        };
+        const query = (0, utils_1.buildUpdateQuery)("ProjectUser", data, id);
         return yield dbconfig_1.default.query(query);
     });
 }

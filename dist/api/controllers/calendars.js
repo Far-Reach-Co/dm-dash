@@ -77,13 +77,9 @@ function removeCalendar(req, res, next) {
         try {
             yield (0, calendars_js_1.removeCalendarQuery)(req.params.id);
             const monthsData = yield (0, months_js_1.getMonthsQuery)(req.params.id);
-            monthsData.rows.forEach((month) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, months_js_1.removeMonthQuery)(month.id);
-            }));
+            yield Promise.all(monthsData.rows.map((month) => (0, months_js_1.removeMonthQuery)(month.id)));
             const daysData = yield (0, days_js_1.getDaysQuery)(req.params.id);
-            daysData.rows.forEach((day) => __awaiter(this, void 0, void 0, function* () {
-                yield (0, days_js_1.removeDayQuery)(day.id);
-            }));
+            yield Promise.all(daysData.rows.map((day) => (0, days_js_1.removeDayQuery)(day.id)));
             res.status(204).send();
         }
         catch (err) {

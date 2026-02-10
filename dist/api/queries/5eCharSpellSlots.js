@@ -20,6 +20,7 @@ exports.edit5eCharSpellSlotInfoQuery = edit5eCharSpellSlotInfoQuery;
 exports.duplicate5eCharSpellSlotsQuery = duplicate5eCharSpellSlotsQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
+const utils_2 = require("./utils");
 function add5eCharSpellSlotInfoQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -34,7 +35,7 @@ function add5eCharSpellSlotInfoQuery(data) {
 function duplicate5eCharSpellSlotsQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_spell_slots";
-        const columnNames = yield (0, utils_1.columnNamesQuery)(tableName);
+        const columnNames = yield (0, utils_2.columnNamesQuery)(tableName);
         const columnStr = columnNames.join(", ");
         const selectStr = columnNames.map(col => {
             if (col === "general_id")
@@ -85,20 +86,7 @@ function remove5eCharSpellSlotInfoQuery(id) {
 }
 function edit5eCharSpellSlotInfoQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        let edits = ``;
-        let values = [];
-        let iterator = 1;
-        for (const [key, value] of Object.entries(data)) {
-            edits += `${key} = $${iterator}, `;
-            values.push(value);
-            iterator++;
-        }
-        edits = edits.slice(0, -2);
-        values.push(id);
-        const query = {
-            text: `update public."dnd_5e_spell_slots" set ${edits} where id = $${iterator} returning *`,
-            values: values,
-        };
+        const query = (0, utils_1.buildUpdateQuery)("dnd_5e_spell_slots", data, id);
         return yield dbconfig_1.default.query(query);
     });
 }

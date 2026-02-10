@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 
 export interface Project {
   id: number;
@@ -47,32 +48,24 @@ async function getProjectsQuery(userId: string | number) {
   return await db.query<Project>(query)
 }
 
-async function editProjectQuery(id: string | number, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
+async function getProjectsByIdsQuery(projectIds: (string | number)[]) {
   const query = {
-    text: /*sql*/ `update public."Project" set ${edits} where id = $${iterator} returning *`,
-    values: values,
+    text: /*sql*/ `select * from public."Project" where id = ANY($1) order by id`,
+    values: [projectIds],
   }
-
   return await db.query<Project>(query)
+}
+
+async function editProjectQuery(id: string | number, data: any) {
+  const query = buildUpdateQuery("Project", data, id);
+  return await db.query<Project>(query);
 }
 
 export {
   addProjectQuery,
   getProjectQuery,
   getProjectsQuery,
+  getProjectsByIdsQuery,
   removeProjectQuery,
   editProjectQuery
 }

@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 import { columnNamesQuery } from "./utils";
 
 interface DndFiveEOtherProLang {
@@ -76,25 +77,8 @@ async function remove5eCharOtherProLangQuery(id: string | number) {
 }
 
 async function edit5eCharOtherProLangQuery(id: string, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
-  const query = {
-    text: /*sql*/ `update public."dnd_5e_character_other_pro_lang" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<DndFiveEOtherProLang>(query)
+  const query = buildUpdateQuery("dnd_5e_character_other_pro_lang", data, id);
+  return await db.query<DndFiveEOtherProLang>(query);
 }
 
 export {

@@ -2,13 +2,14 @@ import {
   addProjectQuery,
   getProjectQuery,
   getProjectsQuery,
+  getProjectsByIdsQuery,
   removeProjectQuery,
   editProjectQuery,
   Project,
 } from "../queries/projects.js";
 import {
   ProjectInvite,
-  getProjectInviteByProjectQuery,
+  getProjectInvitesByProjectIdsQuery,
 } from "../queries/projectInvites.js";
 import {
   getProjectUsersQuery,
@@ -29,6 +30,7 @@ import { Request, Response, NextFunction } from "express";
 import { getUserByIdQuery } from "../queries/users.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import { requireProjectOwner, requireUser } from "../../lib/authz";
 
 interface addProjectRequest extends Request {
   body: {
@@ -43,16 +45,16 @@ async function addProject(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = requireUser(req);
     // check if user is pro, hard limit project creation to 2
-    const projectsByUserData = await getProjectsQuery(req.session.user);
+    const projectsByUserData = await getProjectsQuery(userId);
 
     if (projectsByUserData.rows.length >= 2) {
-      const userData = await getUserByIdQuery(req.session.user);
+      const userData = await getUserByIdQuery(userId);
       if (!userData.rows[0].is_pro)
         throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
     }
-    req.body.user_id = req.session.user;
+    req.body.user_id = userId;
     const data = await addProjectQuery(req.body);
     // add first project table view
     await addTableViewByProjectQuery({
@@ -61,7 +63,7 @@ async function addProject(
     });
     // Log project creation event
     logEventAsync({
-      userId: req.session.user,
+      userId,
       projectId: data.rows[0].id,
       eventType: EventType.PROJECT_CREATED,
       eventData: { title: data.rows[0].title },
@@ -87,9 +89,9 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
   try {
     const projectData = await getProjectQuery(req.params.id);
     const project = projectData.rows[0];
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = requireUser(req);
     const projectUsersData = await getProjectUserByUserAndProjectQuery(
-      req.session.user,
+      userId,
       project.id
     );
     if (projectUsersData.rows.length) {
@@ -107,37 +109,61 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
 
 async function getProjects(req: Request, res: Response, next: NextFunction) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    const projectsData = await getProjectsQuery(req.session.user);
-    // get joined projects
-    const projectUserData = await getProjectUsersQuery(req.session.user);
-    if (
-      projectUserData &&
-      projectUserData.rows &&
-      projectUserData.rows.length
-    ) {
-      for (var projectUser of projectUserData.rows) {
-        const projectData = await getProjectQuery(projectUser.project_id);
-        if (projectData && projectData.rows && projectData.rows.length) {
-          const project = projectData.rows[0];
+    const userId = requireUser(req);
+    const projectsData = await getProjectsQuery(userId);
+    const ownedProjects = projectsData.rows;
+    const ownedIds = new Set(ownedProjects.map((p) => String(p.id)));
+
+    // get joined projects in a single query
+    const projectUserData = await getProjectUsersQuery(userId);
+    const projectUsers = projectUserData?.rows || [];
+    const joinedProjectIds = projectUsers
+      .map((pu) => pu.project_id)
+      .filter((id) => !ownedIds.has(String(id)));
+
+    let joinedProjects: Project[] = [];
+    if (joinedProjectIds.length) {
+      const joinedProjectsData = await getProjectsByIdsQuery(joinedProjectIds);
+      joinedProjects = joinedProjectsData.rows;
+
+      const projectUserByProjectId = new Map(
+        projectUsers.map((pu) => [String(pu.project_id), pu]),
+      );
+
+      for (const project of joinedProjects) {
+        const projectUser = projectUserByProjectId.get(String(project.id));
+        if (projectUser) {
           (project as GetProjectResponseData).was_joined = true;
           (project as GetProjectResponseData).project_user_id = projectUser.id;
           (project as GetProjectResponseData).date_joined =
             projectUser.date_joined;
           (project as GetProjectResponseData).is_editor = projectUser.is_editor;
-          projectsData.rows.push(project);
         }
       }
     }
-    // get project invites
-    for (var project of projectsData.rows) {
-      const projectInvites = await getProjectInviteByProjectQuery(project.id);
-      if (projectInvites && projectInvites.rows && projectInvites.rows.length)
-        (project as GetProjectResponseData).project_invite =
-          projectInvites.rows[0];
+
+    const allProjects = ownedProjects.concat(joinedProjects);
+
+    // batch fetch project invites
+    if (allProjects.length) {
+      const inviteData = await getProjectInvitesByProjectIdsQuery(
+        allProjects.map((p) => p.id),
+      );
+      const inviteByProjectId = new Map<string, ProjectInvite>();
+      for (const invite of inviteData.rows) {
+        const key = String(invite.project_id);
+        if (!inviteByProjectId.has(key)) {
+          inviteByProjectId.set(key, invite);
+        }
+      }
+      for (const project of allProjects) {
+        const invite = inviteByProjectId.get(String(project.id));
+        if (invite)
+          (project as GetProjectResponseData).project_invite = invite;
+      }
     }
 
-    res.send(projectsData.rows);
+    res.send(allProjects);
   } catch (err) {
     next(err);
   }
@@ -145,11 +171,7 @@ async function getProjects(req: Request, res: Response, next: NextFunction) {
 
 async function removeProject(req: Request, res: Response, next: NextFunction) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    const projectData = await getProjectQuery(req.params.id);
-    const project = projectData.rows[0];
-    if (req.session.user != project.user_id)
-      throw new Error("User is not owner");
+    await requireProjectOwner(req, req.params.id);
 
     // Clean up table images (S3 + database) - project_id is optional so no cascade
     const tableImages = await getTableImagesByProjectQuery(req.params.id);
@@ -182,11 +204,7 @@ async function editProjectTitle(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    const projectData = await getProjectQuery(req.params.id);
-    const project = projectData.rows[0];
-    if (req.session.user != project.user_id)
-      throw new Error("User is not owner");
+    await requireProjectOwner(req, req.params.id);
 
     await editProjectQuery(req.params.id, {
       title: req.body.title,

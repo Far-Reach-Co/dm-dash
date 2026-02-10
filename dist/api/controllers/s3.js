@@ -8,6 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getSignedUrls = getSignedUrls;
 exports.getSignedUrlsHandler = getSignedUrlsHandler;
@@ -36,6 +39,7 @@ const recordImage_1 = require("../queries/recordImage");
 const record_1 = require("../queries/record");
 const eventLogger_1 = require("../../lib/eventLogger");
 const socketUsers_1 = require("../../lib/socketUsers");
+const logger_js_1 = __importDefault(require("../../lib/logger.js"));
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -68,7 +72,7 @@ function generateSignedUrl(fileName) {
 function cacheSignedUrl(imageId, url) {
     socketUsers_1.redisClient
         .setEx(getSignedUrlCacheKey(imageId), SIGNED_URL_CACHE_TTL_SECONDS, url)
-        .catch((err) => console.error("Failed to cache signed URL:", err));
+        .catch((err) => logger_js_1.default.warn({ err, imageId }, "Failed to cache signed URL"));
 }
 function uploadToS3(params) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -112,9 +116,13 @@ function getSignedUrls(images) {
     return __awaiter(this, void 0, void 0, function* () {
         const urls = {};
         const uncachedImages = [];
-        for (const imageData of images) {
-            const cacheKey = getSignedUrlCacheKey(imageData.id);
-            const cachedUrl = yield socketUsers_1.redisClient.get(cacheKey);
+        const cacheKeys = images.map((imageData) => getSignedUrlCacheKey(imageData.id));
+        const cachedUrls = cacheKeys.length
+            ? yield socketUsers_1.redisClient.mGet(...cacheKeys)
+            : [];
+        for (let i = 0; i < images.length; i++) {
+            const imageData = images[i];
+            const cachedUrl = cachedUrls[i];
             if (cachedUrl) {
                 urls[imageData.id] = cachedUrl;
             }
@@ -124,8 +132,10 @@ function getSignedUrls(images) {
                 uncachedImages.push({ id: imageData.id, url: signedUrl });
             }
         }
-        for (const { id, url } of uncachedImages) {
-            cacheSignedUrl(id, url);
+        if (uncachedImages.length) {
+            Promise.all(uncachedImages.map(({ id, url }) => socketUsers_1.redisClient
+                .setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url)
+                .catch((err) => logger_js_1.default.warn({ err, imageId: id }, "Failed to cache signed URL"))));
         }
         return urls;
     });
@@ -332,7 +342,7 @@ function getImage(req, res, next) {
             res.send(image);
         }
         catch (err) {
-            console.log(err);
+            logger_js_1.default.error({ err, imageId: req.params.id }, "Failed to get image");
             next(err);
         }
     });
@@ -344,7 +354,7 @@ function removeImageByProject(req, res, next) {
             const image = imageData.rows[0];
             yield deleteFromS3("wyrld/images", image.file_name);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
-            invalidateSignedUrlCache(req.params.image_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
+            invalidateSignedUrlCache(req.params.image_id).catch((err) => logger_js_1.default.warn({ err, imageId: req.params.image_id }, "Failed to invalidate signed URL cache"));
             const projectData = yield (0, projects_1.getProjectQuery)(req.params.project_id);
             const project = projectData.rows[0];
             yield (0, projects_1.editProjectQuery)(project.id, {
@@ -364,7 +374,7 @@ function removeImageByProject(req, res, next) {
             res.status(204).send();
         }
         catch (err) {
-            console.log(err);
+            logger_js_1.default.error({ err, imageId: req.params.image_id, projectId: req.params.project_id }, "Failed to remove image by project");
             next(err);
         }
     });
@@ -376,7 +386,7 @@ function removeImageByTableUser(req, res, next) {
             const image = imageData.rows[0];
             yield deleteFromS3("wyrld/images", image.file_name);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
-            invalidateSignedUrlCache(req.params.image_id).catch((err) => console.error("Failed to invalidate signed URL cache:", err));
+            invalidateSignedUrlCache(req.params.image_id).catch((err) => logger_js_1.default.warn({ err, imageId: req.params.image_id }, "Failed to invalidate signed URL cache"));
             const tableData = yield (0, tableViews_js_1.getTableViewQuery)(req.params.table_id);
             const table = tableData.rows[0];
             const userData = yield (0, users_1.getUserByIdQuery)(table.user_id);
@@ -397,7 +407,7 @@ function removeImageByTableUser(req, res, next) {
             res.status(204).send();
         }
         catch (err) {
-            console.log(err);
+            logger_js_1.default.error({ err, imageId: req.params.image_id, tableId: req.params.table_id }, "Failed to remove image by table user");
             next(err);
         }
     });
@@ -408,7 +418,7 @@ function removeImageFromBucket(bucket, image) {
             yield deleteFromS3(bucket, image.file_name);
         }
         catch (err) {
-            console.log(err);
+            logger_js_1.default.error({ err, bucket, fileName: image.file_name }, "Failed to remove image from bucket");
         }
     });
 }
