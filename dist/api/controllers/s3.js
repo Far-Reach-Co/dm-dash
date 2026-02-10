@@ -112,9 +112,11 @@ function getSignedUrls(images) {
     return __awaiter(this, void 0, void 0, function* () {
         const urls = {};
         const uncachedImages = [];
-        for (const imageData of images) {
-            const cacheKey = getSignedUrlCacheKey(imageData.id);
-            const cachedUrl = yield socketUsers_1.redisClient.get(cacheKey);
+        const cacheKeys = images.map((imageData) => getSignedUrlCacheKey(imageData.id));
+        const cachedUrls = yield socketUsers_1.redisClient.mGet(cacheKeys);
+        for (let i = 0; i < images.length; i++) {
+            const imageData = images[i];
+            const cachedUrl = cachedUrls[i];
             if (cachedUrl) {
                 urls[imageData.id] = cachedUrl;
             }
@@ -124,8 +126,10 @@ function getSignedUrls(images) {
                 uncachedImages.push({ id: imageData.id, url: signedUrl });
             }
         }
-        for (const { id, url } of uncachedImages) {
-            cacheSignedUrl(id, url);
+        if (uncachedImages.length) {
+            Promise.all(uncachedImages.map(({ id, url }) => socketUsers_1.redisClient
+                .setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url)
+                .catch((err) => console.error("Failed to cache signed URL:", err))));
         }
         return urls;
     });

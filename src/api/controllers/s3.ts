@@ -126,11 +126,15 @@ async function getSignedUrls(images: Image[]) {
   const urls: { [key: string]: string } = {};
   const uncachedImages: { id: number | string; url: string }[] = [];
 
-  // Check cache first for all images
-  for (const imageData of images) {
-    const cacheKey = getSignedUrlCacheKey(imageData.id);
-    const cachedUrl = await redisClient.get(cacheKey);
+  // Batch check cache for all images
+  const cacheKeys = images.map((imageData) =>
+    getSignedUrlCacheKey(imageData.id),
+  );
+  const cachedUrls = await redisClient.mGet(cacheKeys);
 
+  for (let i = 0; i < images.length; i++) {
+    const imageData = images[i];
+    const cachedUrl = cachedUrls[i];
     if (cachedUrl) {
       urls[imageData.id] = cachedUrl;
     } else {
@@ -141,8 +145,16 @@ async function getSignedUrls(images: Image[]) {
   }
 
   // Cache new URLs in background (don't await)
-  for (const { id, url } of uncachedImages) {
-    cacheSignedUrl(id, url);
+  if (uncachedImages.length) {
+    Promise.all(
+      uncachedImages.map(({ id, url }) =>
+        redisClient
+          .setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url)
+          .catch((err) =>
+            console.error("Failed to cache signed URL:", err),
+          ),
+      ),
+    );
   }
 
   return urls;
