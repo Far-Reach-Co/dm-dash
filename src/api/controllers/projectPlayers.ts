@@ -7,6 +7,8 @@ import {
 } from "../queries/projectPlayers";
 import { Request, Response, NextFunction } from "express";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import { getProjectQuery } from "../queries/projects";
+import { userSubscriptionStatus } from "../../lib/enums";
 
 async function addProjectPlayer(
   req: Request,
@@ -14,6 +16,16 @@ async function addProjectPlayer(
   next: NextFunction
 ) {
   try {
+    const projectPlayersData = await getProjectPlayersByProjectQuery(
+      req.body.project_id
+    );
+    if (projectPlayersData.rows.length >= 5) {
+      const projectData = await getProjectQuery(req.body.project_id);
+      if (!projectData.rows[0].is_pro) {
+        throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+      }
+    }
+
     const data = await addProjectPlayerQuery(req.body);
     const projectPlayer = data.rows[0];
     // Log project player creation event

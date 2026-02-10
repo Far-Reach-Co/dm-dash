@@ -27,6 +27,8 @@ const _5eCharFeats_1 = require("../queries/5eCharFeats");
 const _5eCharSpells_1 = require("../queries/5eCharSpells");
 const _5eCharOtherProLang_1 = require("../queries/5eCharOtherProLang");
 const projectPlayers_1 = require("../queries/projectPlayers");
+const enums_js_1 = require("../../lib/enums.js");
+const projects_1 = require("../queries/projects");
 const playerUsers_1 = require("../queries/playerUsers");
 const playerInvites_1 = require("../queries/playerInvites");
 const _5eCharClasses_1 = require("../queries/5eCharClasses");
@@ -47,6 +49,16 @@ function add5eChar(req, res, next) {
                 req,
             });
             if (req.body.wyrld_id) {
+                const projectPlayersData = yield (0, projectPlayers_1.getProjectPlayersByProjectQuery)(req.body.wyrld_id);
+                if (projectPlayersData.rows.length >= 5) {
+                    const projectData = yield (0, projects_1.getProjectQuery)(req.body.wyrld_id);
+                    if (!projectData.rows[0].is_pro) {
+                        throw {
+                            status: 402,
+                            message: enums_js_1.userSubscriptionStatus.projectIsNotPro,
+                        };
+                    }
+                }
                 yield (0, projectPlayers_1.addProjectPlayerQuery)({
                     project_id: req.body.wyrld_id,
                     player_id: String(generalId),

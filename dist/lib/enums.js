@@ -8,5 +8,5 @@ var userSubscriptionStatus;
 })(userSubscriptionStatus || (exports.userSubscriptionStatus = userSubscriptionStatus = {}));
 var megabytesInBytes;
 (function (megabytesInBytes) {
-    megabytesInBytes[megabytesInBytes["oneHundred"] = 104857600] = "oneHundred";
+    megabytesInBytes[megabytesInBytes["fifty"] = 52428800] = "fifty";
 })(megabytesInBytes || (exports.megabytesInBytes = megabytesInBytes = {}));

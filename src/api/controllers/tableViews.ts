@@ -11,6 +11,7 @@ import {
 import { Request, Response, NextFunction } from "express";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { getUserByIdQuery } from "../queries/users.js";
+import { getProjectQuery } from "../queries/projects.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 
 async function addTableViewByProject(
@@ -20,6 +21,16 @@ async function addTableViewByProject(
 ) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
+
+    const tableViewsData = await getTableViewsByProjectQuery(
+      req.params.project_id
+    );
+    if (tableViewsData.rows.length >= 10) {
+      const projectData = await getProjectQuery(req.params.project_id);
+      if (!projectData.rows[0].is_pro) {
+        throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+      }
+    }
 
     const data = await addTableViewByProjectQuery({
       title: req.body.title,
@@ -48,6 +59,13 @@ async function addTableViewByUser(
 ) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
+    const tableViewsData = await getTableViewsByUserQuery(req.session.user);
+    if (tableViewsData.rows.length >= 10) {
+      const userData = await getUserByIdQuery(req.session.user);
+      if (!userData.rows[0].is_pro) {
+        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+      }
+    }
     req.body.user_id = req.session.user;
     const data = await addTableViewByUserQuery(req.body);
     // Log table creation event

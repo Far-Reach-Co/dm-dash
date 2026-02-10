@@ -5,7 +5,7 @@ enum userSubscriptionStatus {
 }
 
 enum megabytesInBytes {
-  oneHundred = 104857600,
+  fifty = 52428800,
 }
 
 export { userSubscriptionStatus, megabytesInBytes };
