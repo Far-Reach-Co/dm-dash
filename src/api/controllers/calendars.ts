@@ -75,13 +75,13 @@ async function removeCalendar(req: Request, res: Response, next: NextFunction) {
     await removeCalendarQuery(req.params.id);
     // remove months and days associated
     const monthsData = await getMonthsQuery(req.params.id);
-    monthsData.rows.forEach(async (month: { id: any }) => {
-      await removeMonthQuery(month.id);
-    });
+    await Promise.all(
+      monthsData.rows.map((month: { id: any }) => removeMonthQuery(month.id)),
+    );
     const daysData = await getDaysQuery(req.params.id);
-    daysData.rows.forEach(async (day: { id: any }) => {
-      await removeDayQuery(day.id);
-    });
+    await Promise.all(
+      daysData.rows.map((day: { id: any }) => removeDayQuery(day.id)),
+    );
 
     res.status(204).send();
   } catch (err) {
