@@ -36,10 +36,11 @@ import {
   getProjectPlayersByPlayerQuery,
   removeProjectPlayerQuery,
   addProjectPlayerQuery,
+  getProjectPlayersByProjectQuery,
 } from "../queries/projectPlayers";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { Request, Response, NextFunction } from "express";
-import { getUserByIdQuery } from "../queries/users";
+import { getProjectQuery } from "../queries/projects";
 import {
   getPlayerUsersByPlayerQuery,
   removePlayerUserQuery,
@@ -81,6 +82,19 @@ async function add5eChar(
 
     // If wyrld_id is provided, link the character to the Wyrld
     if (req.body.wyrld_id) {
+      const projectPlayersData = await getProjectPlayersByProjectQuery(
+        req.body.wyrld_id
+      );
+      if (projectPlayersData.rows.length >= 5) {
+        const projectData = await getProjectQuery(req.body.wyrld_id);
+        if (!projectData.rows[0].is_pro) {
+          throw {
+            status: 402,
+            message: userSubscriptionStatus.projectIsNotPro,
+          };
+        }
+      }
+
       await addProjectPlayerQuery({
         project_id: req.body.wyrld_id,
         player_id: String(generalId),

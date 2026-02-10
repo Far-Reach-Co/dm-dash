@@ -45,8 +45,17 @@ async function postThing(endpoint, body) {
       return data;
     } else if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
       renderTierLimitWarning(
-        'You have reached the image data limit for this project. Please subscribe to our "Pro" package to increase the limit.'
+        'You have reached the limit for this feature on your account. Please subscribe to our "Pro User" package to increase the limit.'
       );
+      return null;
+    } else if (
+      res.status === 402 &&
+      data.error.message === "PROJECT_IS_NOT_PRO"
+    ) {
+      renderTierLimitWarning(
+        'This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.'
+      );
+      return null;
     } else {
       let error = new Error();
       if (data && data.error) error = data.error;

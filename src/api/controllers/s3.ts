@@ -227,7 +227,7 @@ async function checkUserProLimitReachedAndAuth(
   const user = userData.rows[0];
   const userDataCount = user.used_data_in_bytes;
 
-  if (userDataCount >= megabytesInBytes.oneHundred) {
+  if (userDataCount >= megabytesInBytes.fifty) {
     if (!user.is_pro)
       throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
   }
@@ -254,7 +254,7 @@ async function checkProjectProLimitReachedAndAuth(
 
   const projectDataCount = project.used_data_in_bytes;
 
-  if (projectDataCount >= megabytesInBytes.oneHundred) {
+  if (projectDataCount >= megabytesInBytes.fifty) {
     if (!project.is_pro) {
       throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
     }

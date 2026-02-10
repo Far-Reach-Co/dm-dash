@@ -10,6 +10,7 @@
   <%- include('./partials/icons') %>
   <script src="/lib/MobileNavHandler.js" defer></script>
   <script src="/lib/htmx.min.js"></script>
+  <script src="/components/renderTierLimitWarning.js" type="module"></script>
 </head>
 <%- include('./partials/google') %>
 
@@ -34,5 +35,15 @@
     </form>
   </div>
 </body>
+<script>
+  document.body.addEventListener("htmx:responseError", function (event) {
+    var errorText = JSON.parse(event.detail.xhr.responseText).error.message;
+    if (errorText === "PROJECT_IS_NOT_PRO") {
+      renderTierLimitWarning(
+        'This Wyrld has reached the character connections limit (5). Please subscribe to our "Pro Wyrld" package to increase the limit.'
+      );
+    }
+  });
+</script>
 
 </html>
