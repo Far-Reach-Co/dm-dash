@@ -24,9 +24,24 @@ function getLibraryImagesByUser(req, res, next) {
                 throw new Error("User is not logged in");
             const limit = Math.min(parseInt(req.query.limit) || 50, 100);
             const offset = parseInt(req.query.offset) || 0;
+            const q = req.query.q || null;
+            const sort = req.query.sort || "name";
+            const folderParam = req.query.folder_id;
+            const parsedFolderId = folderParam ? parseInt(folderParam) : NaN;
+            const folderId = typeof folderParam === "undefined"
+                ? undefined
+                : folderParam === "unsorted" || Number.isNaN(parsedFolderId)
+                    ? null
+                    : parsedFolderId;
             const [data, countData] = yield Promise.all([
-                (0, tableImages_1.getTableImagesWithImageByUserPaginatedQuery)(req.session.user, limit, offset),
-                (0, tableImages_1.getTableImageCountByUserQuery)(req.session.user),
+                (0, tableImages_1.getTableImagesWithImageByUserPaginatedQuery)(req.session.user, {
+                    limit,
+                    offset,
+                    q,
+                    sort: sort,
+                    folderId,
+                }),
+                (0, tableImages_1.getTableImageCountByUserFilteredQuery)(req.session.user, { q, folderId }),
             ]);
             const images = data.rows.map((row) => ({
                 id: row.image_id,
@@ -57,9 +72,27 @@ function getLibraryImagesByProject(req, res, next) {
                 throw new Error("User is not logged in");
             const limit = Math.min(parseInt(req.query.limit) || 50, 100);
             const offset = parseInt(req.query.offset) || 0;
+            const q = req.query.q || null;
+            const sort = req.query.sort || "name";
+            const folderParam = req.query.folder_id;
+            const parsedFolderId = folderParam ? parseInt(folderParam) : NaN;
+            const folderId = typeof folderParam === "undefined"
+                ? undefined
+                : folderParam === "unsorted" || Number.isNaN(parsedFolderId)
+                    ? null
+                    : parsedFolderId;
             const [data, countData] = yield Promise.all([
-                (0, tableImages_1.getTableImagesWithImageByProjectPaginatedQuery)(req.params.project_id, limit, offset),
-                (0, tableImages_1.getTableImageCountByProjectQuery)(req.params.project_id),
+                (0, tableImages_1.getTableImagesWithImageByProjectPaginatedQuery)(req.params.project_id, {
+                    limit,
+                    offset,
+                    q,
+                    sort: sort,
+                    folderId,
+                }),
+                (0, tableImages_1.getTableImageCountByProjectFilteredQuery)(req.params.project_id, {
+                    q,
+                    folderId,
+                }),
             ]);
             const images = data.rows.map((row) => ({
                 id: row.image_id,

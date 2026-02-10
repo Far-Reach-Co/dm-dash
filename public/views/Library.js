@@ -53,7 +53,16 @@ class Library {
     const base = this.projectId
       ? `/api/get_library_images_by_project/${this.projectId}`
       : "/api/get_library_images_by_user";
-    return `${base}?limit=${limit}&offset=${offset}`;
+    const params = new URLSearchParams();
+    params.set("limit", String(limit));
+    params.set("offset", String(offset));
+    if (this.grid?.searchQuery) {
+      params.set("q", this.grid.searchQuery);
+    }
+    if (this.grid?.sortKey) {
+      params.set("sort", this.grid.sortKey);
+    }
+    return `${base}?${params.toString()}`;
   };
 
   getFolderImagesEndpoint = (folderId) => {

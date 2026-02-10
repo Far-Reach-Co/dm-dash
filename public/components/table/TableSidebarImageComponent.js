@@ -150,13 +150,19 @@ export default class TableSidebarImageComponent {
     let imageElems = currentImageData.map((image) => {
       return image.elem;
     });
-    // filter by search query
+    // filter by search query (name + notes)
     imageElems = imageElems.filter((elem) => {
       if (this.tableImageSearchQuery && this.tableImageSearchQuery !== "") {
-        return elem.children[0].children[1].value
-          .toLowerCase()
-          .includes(this.tableImageSearchQuery.toLowerCase());
-      } else return elem;
+        const item = this.imageDataAndElems.find((i) => i.elem === elem);
+        const name = item?.imageData?.original_name || "";
+        const notes = item?.imageData?.notes || "";
+        const query = this.tableImageSearchQuery.toLowerCase();
+        return (
+          name.toLowerCase().includes(query) ||
+          notes.toLowerCase().includes(query)
+        );
+      }
+      return elem;
     });
     // sort
     imageElems = imageElems.sort((a, b) => {
