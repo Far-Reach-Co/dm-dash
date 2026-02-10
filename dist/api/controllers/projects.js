@@ -84,31 +84,48 @@ function getProjects(req, res, next) {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
-            const projectsData = yield (0, projects_js_1.getProjectsQuery)(req.session.user);
-            const projectUserData = yield (0, projectUsers_js_1.getProjectUsersQuery)(req.session.user);
-            if (projectUserData &&
-                projectUserData.rows &&
-                projectUserData.rows.length) {
-                for (var projectUser of projectUserData.rows) {
-                    const projectData = yield (0, projects_js_1.getProjectQuery)(projectUser.project_id);
-                    if (projectData && projectData.rows && projectData.rows.length) {
-                        const project = projectData.rows[0];
+            const userId = req.session.user;
+            const projectsData = yield (0, projects_js_1.getProjectsQuery)(userId);
+            const ownedProjects = projectsData.rows;
+            const ownedIds = new Set(ownedProjects.map((p) => String(p.id)));
+            const projectUserData = yield (0, projectUsers_js_1.getProjectUsersQuery)(userId);
+            const projectUsers = (projectUserData === null || projectUserData === void 0 ? void 0 : projectUserData.rows) || [];
+            const joinedProjectIds = projectUsers
+                .map((pu) => pu.project_id)
+                .filter((id) => !ownedIds.has(String(id)));
+            let joinedProjects = [];
+            if (joinedProjectIds.length) {
+                const joinedProjectsData = yield (0, projects_js_1.getProjectsByIdsQuery)(joinedProjectIds);
+                joinedProjects = joinedProjectsData.rows;
+                const projectUserByProjectId = new Map(projectUsers.map((pu) => [String(pu.project_id), pu]));
+                for (const project of joinedProjects) {
+                    const projectUser = projectUserByProjectId.get(String(project.id));
+                    if (projectUser) {
                         project.was_joined = true;
                         project.project_user_id = projectUser.id;
                         project.date_joined =
                             projectUser.date_joined;
                         project.is_editor = projectUser.is_editor;
-                        projectsData.rows.push(project);
                     }
                 }
             }
-            for (var project of projectsData.rows) {
-                const projectInvites = yield (0, projectInvites_js_1.getProjectInviteByProjectQuery)(project.id);
-                if (projectInvites && projectInvites.rows && projectInvites.rows.length)
-                    project.project_invite =
-                        projectInvites.rows[0];
+            const allProjects = ownedProjects.concat(joinedProjects);
+            if (allProjects.length) {
+                const inviteData = yield (0, projectInvites_js_1.getProjectInvitesByProjectIdsQuery)(allProjects.map((p) => p.id));
+                const inviteByProjectId = new Map();
+                for (const invite of inviteData.rows) {
+                    const key = String(invite.project_id);
+                    if (!inviteByProjectId.has(key)) {
+                        inviteByProjectId.set(key, invite);
+                    }
+                }
+                for (const project of allProjects) {
+                    const invite = inviteByProjectId.get(String(project.id));
+                    if (invite)
+                        project.project_invite = invite;
+                }
             }
-            res.send(projectsData.rows);
+            res.send(allProjects);
         }
         catch (err) {
             next(err);

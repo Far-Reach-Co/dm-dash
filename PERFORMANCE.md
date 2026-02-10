@@ -2,7 +2,7 @@
 
 This document identifies the heaviest API endpoints and provides guidance for performance testing.
 
-**Last Updated**: 2026-01-23
+**Last Updated**: 2026-02-10
 
 ---
 
@@ -107,14 +107,16 @@ curl -X POST http://localhost:4000/api/new_image_for_user \
 
 ### 3. Get All Projects - `GET /api/get_projects`
 
-**Location**: `src/api/controllers/projects.ts:109`
+**Status**: ✅ Optimized (2026-02-10)
+
+**Location**: `src/api/controllers/projects.ts`
 
 **Why it's heavy**:
 
 - Queries user's owned projects
 - Queries all shared projects (project_user join)
-- For each shared project, fetches full project details (N+1 query)
-- For each project, fetches project invites
+- Batch fetches project details for joined projects
+- Batch fetches project invites
 - No pagination
 
 **Test setup**:
@@ -128,15 +130,13 @@ curl -X GET http://localhost:4000/api/get_projects \
 
 **Watch for**:
 
-- N+1 query problem with shared projects
 - Slow response with users in 10+ projects
 - Missing indexes on project_user table
 
 **Performance improvement ideas**:
 
 - Add pagination
-- Use JOIN instead of loop for shared projects
-- Batch fetch invites with IN query
+- Consider JOIN-based aggregation to reduce round trips further
 
 ---
 

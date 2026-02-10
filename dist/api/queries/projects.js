@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.addProjectQuery = addProjectQuery;
 exports.getProjectQuery = getProjectQuery;
 exports.getProjectsQuery = getProjectsQuery;
+exports.getProjectsByIdsQuery = getProjectsByIdsQuery;
 exports.removeProjectQuery = removeProjectQuery;
 exports.editProjectQuery = editProjectQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
@@ -53,6 +54,15 @@ function getProjectsQuery(userId) {
         const query = {
             text: `select * from public."Project" where user_id = $1 order by id`,
             values: [userId]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getProjectsByIdsQuery(projectIds) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `select * from public."Project" where id = ANY($1) order by id`,
+            values: [projectIds],
         };
         return yield dbconfig_1.default.query(query);
     });

@@ -2,13 +2,14 @@ import {
   addProjectQuery,
   getProjectQuery,
   getProjectsQuery,
+  getProjectsByIdsQuery,
   removeProjectQuery,
   editProjectQuery,
   Project,
 } from "../queries/projects.js";
 import {
   ProjectInvite,
-  getProjectInviteByProjectQuery,
+  getProjectInvitesByProjectIdsQuery,
 } from "../queries/projectInvites.js";
 import {
   getProjectUsersQuery,
@@ -108,36 +109,61 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
 async function getProjects(req: Request, res: Response, next: NextFunction) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
-    const projectsData = await getProjectsQuery(req.session.user);
-    // get joined projects
-    const projectUserData = await getProjectUsersQuery(req.session.user);
-    if (
-      projectUserData &&
-      projectUserData.rows &&
-      projectUserData.rows.length
-    ) {
-      for (var projectUser of projectUserData.rows) {
-        const projectData = await getProjectQuery(projectUser.project_id);
-        if (projectData && projectData.rows && projectData.rows.length) {
-          const project = projectData.rows[0];
+    const userId = req.session.user;
+    const projectsData = await getProjectsQuery(userId);
+    const ownedProjects = projectsData.rows;
+    const ownedIds = new Set(ownedProjects.map((p) => String(p.id)));
+
+    // get joined projects in a single query
+    const projectUserData = await getProjectUsersQuery(userId);
+    const projectUsers = projectUserData?.rows || [];
+    const joinedProjectIds = projectUsers
+      .map((pu) => pu.project_id)
+      .filter((id) => !ownedIds.has(String(id)));
+
+    let joinedProjects: Project[] = [];
+    if (joinedProjectIds.length) {
+      const joinedProjectsData = await getProjectsByIdsQuery(joinedProjectIds);
+      joinedProjects = joinedProjectsData.rows;
+
+      const projectUserByProjectId = new Map(
+        projectUsers.map((pu) => [String(pu.project_id), pu]),
+      );
+
+      for (const project of joinedProjects) {
+        const projectUser = projectUserByProjectId.get(String(project.id));
+        if (projectUser) {
           (project as GetProjectResponseData).was_joined = true;
           (project as GetProjectResponseData).project_user_id = projectUser.id;
           (project as GetProjectResponseData).date_joined =
             projectUser.date_joined;
           (project as GetProjectResponseData).is_editor = projectUser.is_editor;
-          projectsData.rows.push(project);
         }
       }
     }
-    // get project invites
-    for (var project of projectsData.rows) {
-      const projectInvites = await getProjectInviteByProjectQuery(project.id);
-      if (projectInvites && projectInvites.rows && projectInvites.rows.length)
-        (project as GetProjectResponseData).project_invite =
-          projectInvites.rows[0];
+
+    const allProjects = ownedProjects.concat(joinedProjects);
+
+    // batch fetch project invites
+    if (allProjects.length) {
+      const inviteData = await getProjectInvitesByProjectIdsQuery(
+        allProjects.map((p) => p.id),
+      );
+      const inviteByProjectId = new Map<string, ProjectInvite>();
+      for (const invite of inviteData.rows) {
+        const key = String(invite.project_id);
+        if (!inviteByProjectId.has(key)) {
+          inviteByProjectId.set(key, invite);
+        }
+      }
+      for (const project of allProjects) {
+        const invite = inviteByProjectId.get(String(project.id));
+        if (invite)
+          (project as GetProjectResponseData).project_invite = invite;
+      }
     }
 
-    res.send(projectsData.rows);
+    res.send(allProjects);
   } catch (err) {
     next(err);
   }

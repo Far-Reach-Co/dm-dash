@@ -33,6 +33,14 @@ async function getProjectInviteByProjectQuery(projectId: string | number) {
   return await db.query<ProjectInvite>(query)
 }
 
+async function getProjectInvitesByProjectIdsQuery(projectIds: (string | number)[]) {
+  const query = {
+    text: /*sql*/ `select * from public."ProjectInvite" where project_id = ANY($1) order by project_id, id`,
+    values: [projectIds],
+  }
+  return await db.query<ProjectInvite>(query)
+}
+
 async function getProjectInviteByUUIDQuery(uuid: string) {
   const query = {
     text: /*sql*/ `select * from public."ProjectInvite" where uuid = $1`,
@@ -55,5 +63,6 @@ export {
   getProjectInviteQuery,
   getProjectInviteByUUIDQuery,
   getProjectInviteByProjectQuery,
+  getProjectInvitesByProjectIdsQuery,
   removeProjectInviteQuery
 }

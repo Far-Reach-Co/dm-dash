@@ -16,6 +16,7 @@ exports.addProjectInviteQuery = addProjectInviteQuery;
 exports.getProjectInviteQuery = getProjectInviteQuery;
 exports.getProjectInviteByUUIDQuery = getProjectInviteByUUIDQuery;
 exports.getProjectInviteByProjectQuery = getProjectInviteByProjectQuery;
+exports.getProjectInvitesByProjectIdsQuery = getProjectInvitesByProjectIdsQuery;
 exports.removeProjectInviteQuery = removeProjectInviteQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
 function addProjectInviteQuery(data) {
@@ -44,6 +45,15 @@ function getProjectInviteByProjectQuery(projectId) {
         const query = {
             text: `select * from public."ProjectInvite" where project_id = $1`,
             values: [projectId]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getProjectInvitesByProjectIdsQuery(projectIds) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `select * from public."ProjectInvite" where project_id = ANY($1) order by project_id, id`,
+            values: [projectIds],
         };
         return yield dbconfig_1.default.query(query);
     });

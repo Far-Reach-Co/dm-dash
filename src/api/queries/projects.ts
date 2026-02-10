@@ -47,6 +47,14 @@ async function getProjectsQuery(userId: string | number) {
   return await db.query<Project>(query)
 }
 
+async function getProjectsByIdsQuery(projectIds: (string | number)[]) {
+  const query = {
+    text: /*sql*/ `select * from public."Project" where id = ANY($1) order by id`,
+    values: [projectIds],
+  }
+  return await db.query<Project>(query)
+}
+
 async function editProjectQuery(id: string | number, data: any) {
   let edits = ``
   let values = []
@@ -73,6 +81,7 @@ export {
   addProjectQuery,
   getProjectQuery,
   getProjectsQuery,
+  getProjectsByIdsQuery,
   removeProjectQuery,
   editProjectQuery
 }
