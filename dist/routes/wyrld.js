@@ -22,18 +22,28 @@ const utils_1 = require("../lib/utils");
 const tableImages_1 = require("../api/queries/tableImages");
 const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
-router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    try {
-        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
-        if (!userId)
-            return;
-        if (!req.query.id)
-            return res.redirect("/dash");
-        const projectId = req.query.id;
+const RECENT_LIMIT = 5;
+const sortByDateDesc = (items, getDate) => {
+    return [...items].sort((a, b) => {
+        const aTime = getDate(a) ? new Date(getDate(a)).getTime() : 0;
+        const bTime = getDate(b) ? new Date(getDate(b)).getTime() : 0;
+        return bTime - aTime;
+    });
+};
+const sortByTitle = (items, getTitle) => {
+    return [...items].sort((a, b) => {
+        var _a, _b;
+        const aTitle = ((_a = getTitle(a)) !== null && _a !== void 0 ? _a : "").toLowerCase();
+        const bTitle = ((_b = getTitle(b)) !== null && _b !== void 0 ? _b : "").toLowerCase();
+        return aTitle.localeCompare(bTitle);
+    });
+};
+function loadWyrldData(req, res, userId, projectId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         const project = yield (0, authz_1.requireProjectMemberOrRedirect)(req, res, projectId, "/forbidden");
         if (!project)
-            return;
+            return null;
         let projectAuth = true;
         if (userId != project.user_id) {
             const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(userId, projectId);
@@ -43,7 +53,7 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const tableData = yield (0, tableViews_1.getTableViewsByProjectQuery)(projectId);
         const players = [];
         const projectPlayers = yield (0, projectPlayers_1.getProjectPlayersByProjectQuery)(projectId);
-        for (var player of projectPlayers.rows) {
+        for (const player of projectPlayers.rows) {
             const charData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(player.player_id);
             players.push(charData.rows[0]);
         }
@@ -62,19 +72,66 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
                 inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
             }
         }
-        res.render("wyrld", {
-            auth: userId,
+        const tables = tableData.rows;
+        const records = recordsData.rows;
+        const sheets = players.filter(Boolean);
+        const calendarsList = calendars.rows;
+        const recentTables = sortByDateDesc(tables, (table) => table.date_created).slice(0, RECENT_LIMIT);
+        const recentRecords = sortByDateDesc(records, (record) => record.created_at).slice(0, RECENT_LIMIT);
+        const recentSheets = sortByDateDesc(sheets, (sheet) => sheet.created_at).slice(0, RECENT_LIMIT);
+        const recentCalendars = sortByDateDesc(calendarsList, (calendar) => calendar.created_at).slice(0, RECENT_LIMIT);
+        return {
             projectAuth,
-            project: project,
-            tables: tableData.rows,
-            sheets: players,
-            calendars: calendars.rows,
-            records: recordsData.rows,
+            project,
+            tables,
+            sheets,
+            calendars: calendarsList,
+            records,
             imageCount,
             usedDataFormatted,
             inviteLink,
             inviteId,
-        });
+            recentTables,
+            recentRecords,
+            recentSheets,
+            recentCalendars,
+            tablesSorted: sortByTitle(tables, (table) => table.title),
+            recordsSorted: sortByTitle(records, (record) => record.title),
+            sheetsSorted: sortByTitle(sheets, (sheet) => sheet.name),
+            calendarsSorted: sortByTitle(calendarsList, (calendar) => calendar.title),
+        };
+    });
+}
+router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
+            return;
+        if (!req.query.id)
+            return res.redirect("/dash");
+        const projectId = req.query.id;
+        const data = yield loadWyrldData(req, res, userId, projectId);
+        if (!data)
+            return;
+        res.render("wyrld", Object.assign({ auth: userId, section: "overview" }, data));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get(["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendars"], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
+            return;
+        if (!req.query.id)
+            return res.redirect("/dash");
+        const projectId = req.query.id;
+        const section = req.path.split("/")[2];
+        const data = yield loadWyrldData(req, res, userId, projectId);
+        if (!data)
+            return;
+        res.render("wyrld", Object.assign({ auth: userId, section }, data));
     }
     catch (err) {
         next(err);

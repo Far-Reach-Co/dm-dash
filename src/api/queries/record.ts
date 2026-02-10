@@ -8,6 +8,7 @@ export interface Record {
   project_id: number
   user_id: number
   is_public: boolean
+  created_at: string
 }
 
 async function addRecordByProjectQuery(data: {

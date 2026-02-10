@@ -19,11 +19,24 @@ const record_1 = require("../api/queries/record");
 const tableImages_1 = require("../api/queries/tableImages");
 const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
-router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
-        if (!userId)
-            return;
+const RECENT_LIMIT = 5;
+const sortByDateDesc = (items, getDate) => {
+    return [...items].sort((a, b) => {
+        const aTime = getDate(a) ? new Date(getDate(a)).getTime() : 0;
+        const bTime = getDate(b) ? new Date(getDate(b)).getTime() : 0;
+        return bTime - aTime;
+    });
+};
+const sortByTitle = (items, getTitle) => {
+    return [...items].sort((a, b) => {
+        var _a, _b;
+        const aTitle = ((_a = getTitle(a)) !== null && _a !== void 0 ? _a : "").toLowerCase();
+        const bTitle = ((_b = getTitle(b)) !== null && _b !== void 0 ? _b : "").toLowerCase();
+        return aTitle.localeCompare(bTitle);
+    });
+};
+function loadDashData(userId) {
+    return __awaiter(this, void 0, void 0, function* () {
         const tableData = yield (0, tableViews_1.getTableViewsByUserQuery)(userId);
         const charData = yield (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(userId);
         const sharedCharData = [];
@@ -44,16 +57,57 @@ router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, functi
         const recordsData = yield (0, record_1.getRecordsByUserQuery)(userId);
         const imageCountData = yield (0, tableImages_1.getTableImageCountByUserQuery)(userId);
         const imageCount = parseInt(imageCountData.rows[0].count);
-        res.render("dash", {
-            auth: userId,
-            tables: tableData.rows,
-            sheets: charData.rows,
-            sharedSheets: sharedCharData,
-            projects: projectData.rows,
-            sharedProjects: sharedProjectList,
-            records: recordsData.rows,
+        const tables = tableData.rows;
+        const records = recordsData.rows;
+        const createdSheets = charData.rows;
+        const sharedSheets = sharedCharData.filter(Boolean);
+        const createdWyrlds = projectData.rows;
+        const sharedWyrlds = sharedProjectList.filter(Boolean);
+        const recentTables = sortByDateDesc(tables, (table) => table.date_created).slice(0, RECENT_LIMIT);
+        const recentRecords = sortByDateDesc(records, (record) => record.created_at).slice(0, RECENT_LIMIT);
+        const recentSheets = sortByDateDesc([...createdSheets, ...sharedSheets], (sheet) => sheet.created_at).slice(0, RECENT_LIMIT);
+        const recentWyrlds = sortByDateDesc([...createdWyrlds, ...sharedWyrlds], (project) => project.date_created).slice(0, RECENT_LIMIT);
+        return {
+            tables,
+            records,
+            sheets: createdSheets,
+            sharedSheets,
+            projects: createdWyrlds,
+            sharedProjects: sharedWyrlds,
             imageCount,
-        });
+            recentTables,
+            recentRecords,
+            recentSheets,
+            recentWyrlds,
+            tablesSorted: sortByTitle(tables, (table) => table.title),
+            recordsSorted: sortByTitle(records, (record) => record.title),
+            sheetsSorted: sortByTitle(createdSheets, (sheet) => sheet.name),
+            sharedSheetsSorted: sortByTitle(sharedSheets, (sheet) => sheet.name),
+            projectsSorted: sortByTitle(createdWyrlds, (project) => project.title),
+            sharedProjectsSorted: sortByTitle(sharedWyrlds, (project) => project.title),
+        };
+    });
+}
+router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
+            return;
+        const data = yield loadDashData(userId);
+        res.render("dash", Object.assign({ auth: userId, section: "overview" }, data));
+    }
+    catch (err) {
+        next(err);
+    }
+}));
+router.get(["/dash/tables", "/dash/records", "/dash/sheets", "/dash/wyrlds"], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
+            return;
+        const section = req.path.split("/")[2];
+        const data = yield loadDashData(userId);
+        res.render("dash", Object.assign({ auth: userId, section }, data));
     }
     catch (err) {
         next(err);

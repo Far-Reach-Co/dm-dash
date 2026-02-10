@@ -7,6 +7,206 @@
 }
 
 /* ==========================================================================
+   Dashboard Shell Layout
+   ========================================================================== */
+
+.dashboard-shell {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: flex-start;
+}
+
+.dashboard-sidebar {
+  width: 240px;
+  flex: 0 0 240px;
+  position: sticky;
+  top: 88px;
+}
+
+.dashboard-sidebar-card {
+  background-color: var(--surface-1);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-sidebar-card-spaced {
+  margin-top: var(--space-md);
+}
+
+.dashboard-sidebar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.dashboard-nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.dashboard-nav-link {
+  display: block;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  color: var(--light-gray);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+.dashboard-nav-link:hover {
+  background-color: var(--surface-2);
+  color: var(--bright-white);
+}
+
+.dashboard-nav-link.active {
+  background-color: var(--surface-2);
+  color: var(--orange3);
+  border: 1px solid rgba(116, 167, 215, 0.25);
+}
+
+.dashboard-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dashboard-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-lg);
+  margin: var(--space-sm);
+}
+
+.dashboard-card {
+  background-color: var(--surface-1);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
+  margin: var(--space-sm);
+}
+
+.dashboard-highlights .dashboard-card {
+  margin: 0;
+}
+
+.dashboard-card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.dashboard-card h2 {
+  margin-bottom: var(--space-sm);
+  font-size: 1.35rem;
+}
+
+.dashboard-card h3 {
+  color: var(--orange2);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+  font-size: 1rem;
+}
+
+.dashboard-card small {
+  color: var(--light-gray);
+  line-height: 1.6;
+}
+
+.dashboard-card hr {
+  border-color: var(--blue4);
+  margin: var(--space-md) 0;
+}
+
+.dashboard-list {
+  margin-top: var(--space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.dash-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  background-color: var(--surface-2);
+  cursor: pointer;
+  transition: background-color var(--transition-normal), transform var(--transition-fast);
+}
+
+.dash-detail-row:hover {
+  background-color: rgba(116, 167, 215, 0.12);
+}
+
+.dash-detail-row:active {
+  transform: scale(0.99);
+}
+
+.dash-detail-title {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-detail-meta {
+  color: var(--light-gray);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.dash-detail-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}
+
+.dash-inline-action {
+  border: 1px solid var(--surface-border);
+  background: transparent;
+  color: var(--light-gray);
+  padding: 2px 8px;
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color var(--transition-normal), border-color var(--transition-normal), background-color var(--transition-normal);
+}
+
+.dash-inline-action:hover {
+  color: var(--bright-white);
+  border-color: rgba(116, 167, 215, 0.35);
+  background-color: var(--surface-2);
+}
+
+@media (max-width: 900px) {
+  .dashboard-shell {
+    flex-direction: column;
+  }
+
+  .dashboard-sidebar {
+    width: 100%;
+    flex: 1 1 auto;
+    position: static;
+  }
+
+  .dashboard-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .dashboard-nav-link {
+    flex: 1 1 45%;
+    text-align: center;
+  }
+}
+
+/* ==========================================================================
    Dashboard Columns - Responsive Grid
    ========================================================================== */
 

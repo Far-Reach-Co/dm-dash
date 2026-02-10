@@ -21,80 +21,164 @@ import {
 
 const router = Router();
 
+const RECENT_LIMIT = 5;
+
+const sortByDateDesc = <T>(
+  items: T[],
+  getDate: (item: T) => string | undefined,
+) => {
+  return [...items].sort((a, b) => {
+    const aTime = getDate(a) ? new Date(getDate(a) as string).getTime() : 0;
+    const bTime = getDate(b) ? new Date(getDate(b) as string).getTime() : 0;
+    return bTime - aTime;
+  });
+};
+
+const sortByTitle = <T>(
+  items: T[],
+  getTitle: (item: T) => string | undefined,
+) => {
+  return [...items].sort((a, b) => {
+    const aTitle = (getTitle(a) ?? "").toLowerCase();
+    const bTitle = (getTitle(b) ?? "").toLowerCase();
+    return aTitle.localeCompare(bTitle);
+  });
+};
+
+async function loadWyrldData(
+  req: Request,
+  res: Response,
+  userId: string | number,
+  projectId: string,
+) {
+  const project = await requireProjectMemberOrRedirect(
+    req,
+    res,
+    projectId,
+    "/forbidden",
+  );
+  if (!project) return null;
+
+  let projectAuth = true;
+  if (userId != project.user_id) {
+    const projectUserData = await getProjectUserByUserAndProjectQuery(
+      userId,
+      projectId,
+    );
+    const projectUser = projectUserData.rows[0];
+    projectAuth = projectUser?.is_editor ?? false;
+  }
+
+  // get table views by project
+  const tableData = await getTableViewsByProjectQuery(projectId);
+  // get all character sheets by project
+  const players = [];
+  const projectPlayers = await getProjectPlayersByProjectQuery(projectId);
+  for (const player of projectPlayers.rows) {
+    const charData = await get5eCharGeneralQuery(player.player_id);
+    players.push(charData.rows[0]);
+  }
+
+  // calendars
+  const calendars = await getCalendarsQuery(projectId);
+
+  // records
+  const recordsData = await getRecordsByProjectQuery(project.id);
+
+  // image count
+  const imageCountData = await getTableImageCountByProjectQuery(project.id);
+  const imageCount = parseInt(imageCountData.rows[0].count);
+
+  // calculate used data formatted
+  const usedDataFormatted = humanFileSize(project.used_data_in_bytes);
+
+  // get invite link if exists (only needed for owners/managers)
+  let inviteLink = null;
+  let inviteId = null;
+  if (projectAuth) {
+    const inviteData = await getProjectInviteByProjectQuery(projectId);
+    if (inviteData.rows.length > 0) {
+      const invite = inviteData.rows[0];
+      inviteId = invite.id;
+      inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
+    }
+  }
+
+  const tables = tableData.rows;
+  const records = recordsData.rows;
+  const sheets = players.filter(Boolean);
+  const calendarsList = calendars.rows;
+
+  const recentTables = sortByDateDesc(tables, (table) => (table as any).date_created).slice(0, RECENT_LIMIT);
+  const recentRecords = sortByDateDesc(records, (record) => (record as any).created_at).slice(0, RECENT_LIMIT);
+  const recentSheets = sortByDateDesc(sheets, (sheet) => (sheet as any).created_at).slice(0, RECENT_LIMIT);
+  const recentCalendars = sortByDateDesc(
+    calendarsList,
+    (calendar) => (calendar as any).created_at,
+  ).slice(0, RECENT_LIMIT);
+
+  return {
+    projectAuth,
+    project,
+    tables,
+    sheets,
+    calendars: calendarsList,
+    records,
+    imageCount,
+    usedDataFormatted,
+    inviteLink,
+    inviteId,
+    recentTables,
+    recentRecords,
+    recentSheets,
+    recentCalendars,
+    tablesSorted: sortByTitle(tables, (table) => (table as any).title),
+    recordsSorted: sortByTitle(records, (record) => (record as any).title),
+    sheetsSorted: sortByTitle(sheets, (sheet) => (sheet as any).name),
+    calendarsSorted: sortByTitle(calendarsList, (calendar) => (calendar as any).title),
+  };
+}
+
 router.get(
   "/wyrld",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = requireUserOrRedirect(req, res, "/login");
       if (!userId) return;
-      // get project id
       if (!req.query.id) return res.redirect("/dash");
       const projectId = req.query.id as string;
-      const project = await requireProjectMemberOrRedirect(
-        req,
-        res,
-        projectId,
-        "/forbidden",
-      );
-      if (!project) return;
 
-      let projectAuth = true;
-      if (userId != project.user_id) {
-        const projectUserData = await getProjectUserByUserAndProjectQuery(
-          userId,
-          projectId,
-        );
-        const projectUser = projectUserData.rows[0];
-        projectAuth = projectUser?.is_editor ?? false;
-      }
-
-      // get table views by project
-      const tableData = await getTableViewsByProjectQuery(projectId);
-      // get all character sheets by project
-      const players = [];
-      const projectPlayers = await getProjectPlayersByProjectQuery(projectId);
-      for (var player of projectPlayers.rows) {
-        const charData = await get5eCharGeneralQuery(player.player_id);
-        players.push(charData.rows[0]);
-      }
-
-      // calendars
-      const calendars = await getCalendarsQuery(projectId);
-
-      // records
-      const recordsData = await getRecordsByProjectQuery(project.id);
-
-      // image count
-      const imageCountData = await getTableImageCountByProjectQuery(project.id);
-      const imageCount = parseInt(imageCountData.rows[0].count);
-
-      // calculate used data formatted
-      const usedDataFormatted = humanFileSize(project.used_data_in_bytes);
-
-      // get invite link if exists (only needed for owners/managers)
-      let inviteLink = null;
-      let inviteId = null;
-      if (projectAuth) {
-        const inviteData = await getProjectInviteByProjectQuery(projectId);
-        if (inviteData.rows.length > 0) {
-          const invite = inviteData.rows[0];
-          inviteId = invite.id;
-          inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
-        }
-      }
+      const data = await loadWyrldData(req, res, userId, projectId);
+      if (!data) return;
 
       res.render("wyrld", {
         auth: userId,
-        projectAuth,
-        project: project,
-        tables: tableData.rows,
-        sheets: players,
-        calendars: calendars.rows,
-        records: recordsData.rows,
-        imageCount,
-        usedDataFormatted,
-        inviteLink,
-        inviteId,
+        section: "overview",
+        ...data,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  ["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendars"],
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = requireUserOrRedirect(req, res, "/login");
+      if (!userId) return;
+      if (!req.query.id) return res.redirect("/dash");
+      const projectId = req.query.id as string;
+      const section = req.path.split("/")[2];
+
+      const data = await loadWyrldData(req, res, userId, projectId);
+      if (!data) return;
+
+      res.render("wyrld", {
+        auth: userId,
+        section,
+        ...data,
       });
     } catch (err) {
       next(err);
