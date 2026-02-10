@@ -117,7 +117,9 @@ function getSignedUrls(images) {
         const urls = {};
         const uncachedImages = [];
         const cacheKeys = images.map((imageData) => getSignedUrlCacheKey(imageData.id));
-        const cachedUrls = yield socketUsers_1.redisClient.mGet(cacheKeys);
+        const cachedUrls = cacheKeys.length
+            ? yield socketUsers_1.redisClient.mGet(...cacheKeys)
+            : [];
         for (let i = 0; i < images.length; i++) {
             const imageData = images[i];
             const cachedUrl = cachedUrls[i];
