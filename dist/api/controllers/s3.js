@@ -160,7 +160,7 @@ function checkUserProLimitReachedAndAuth(sessionUser) {
         const userData = yield (0, users_1.getUserByIdQuery)(sessionUser);
         const user = userData.rows[0];
         const userDataCount = user.used_data_in_bytes;
-        if (userDataCount >= enums_2.megabytesInBytes.oneHundred) {
+        if (userDataCount >= enums_2.megabytesInBytes.fifty) {
             if (!user.is_pro)
                 throw { status: 402, message: enums_1.userSubscriptionStatus.userIsNotPro };
         }
@@ -180,7 +180,7 @@ function checkProjectProLimitReachedAndAuth(projectId, sessionUser) {
                 throw new Error("Not authorized to update this resource");
         }
         const projectDataCount = project.used_data_in_bytes;
-        if (projectDataCount >= enums_2.megabytesInBytes.oneHundred) {
+        if (projectDataCount >= enums_2.megabytesInBytes.fifty) {
             if (!project.is_pro) {
                 throw { status: 402, message: enums_1.userSubscriptionStatus.projectIsNotPro };
             }

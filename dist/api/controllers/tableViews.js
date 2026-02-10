@@ -19,12 +19,22 @@ exports.removeTableView = removeTableView;
 exports.editTableViewData = editTableViewData;
 exports.editTableView = editTableView;
 const tableViews_js_1 = require("../queries/tableViews.js");
+const enums_js_1 = require("../../lib/enums.js");
+const users_js_1 = require("../queries/users.js");
+const projects_js_1 = require("../queries/projects.js");
 const eventLogger_1 = require("../../lib/eventLogger");
 function addTableViewByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
+            const tableViewsData = yield (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.project_id);
+            if (tableViewsData.rows.length >= 10) {
+                const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.project_id);
+                if (!projectData.rows[0].is_pro) {
+                    throw { status: 402, message: enums_js_1.userSubscriptionStatus.projectIsNotPro };
+                }
+            }
             const data = yield (0, tableViews_js_1.addTableViewByProjectQuery)({
                 title: req.body.title,
                 project_id: req.params.project_id,
@@ -50,6 +60,13 @@ function addTableViewByUser(req, res, next) {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
+            const tableViewsData = yield (0, tableViews_js_1.getTableViewsByUserQuery)(req.session.user);
+            if (tableViewsData.rows.length >= 10) {
+                const userData = yield (0, users_js_1.getUserByIdQuery)(req.session.user);
+                if (!userData.rows[0].is_pro) {
+                    throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
+                }
+            }
             req.body.user_id = req.session.user;
             const data = yield (0, tableViews_js_1.addTableViewByUserQuery)(req.body);
             (0, eventLogger_1.logEventAsync)({
