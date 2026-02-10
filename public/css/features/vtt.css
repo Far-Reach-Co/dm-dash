@@ -356,6 +356,40 @@
   font-size: 0.8rem;
 }
 
+.table-sidebar-load-more-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm) var(--space-sm);
+}
+
+.table-sidebar-load-more-count {
+  color: var(--main-gray);
+  font-size: 11px;
+}
+
+.table-sidebar-load-more {
+  padding: 6px 10px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  background: rgba(31, 37, 49, 0.9);
+  color: var(--main-white);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+}
+
+.table-sidebar-load-more:hover {
+  background: rgba(45, 52, 66, 0.95);
+  border-color: rgba(116, 167, 215, 0.35);
+}
+
+.table-sidebar-load-more:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* ==========================================================================
    Chat box — frosted glass, bottom-left
    ========================================================================== */
