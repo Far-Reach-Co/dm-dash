@@ -55,6 +55,15 @@
       </div>
       <% } %>
     </div>
+    <% if (projectAuth) { %>
+    <div class="p-3 wyrld-status mx-2 mb-3">
+      <h2>Image Library</h2>
+      <small>Browse, organize, and manage all your uploaded images in one place. Create folders, rename images, add notes, and link images to records.</small>
+      <div class="mt-2">
+        <a href="/library?wyrld=<%= project.id %>">Open Library (<%= imageCount %> images) →</a>
+      </div>
+    </div>
+    <% } %>
     <div class="d-flex flex-wrap">
       <div class="d-flex flex-column p-3 dash-column">
         <h2>Wyrld Tables</h2>

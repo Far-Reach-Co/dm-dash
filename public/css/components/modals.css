@@ -114,3 +114,30 @@
   margin-top: var(--space-sm);
   margin-bottom: var(--space-sm);
 }
+
+.modal-subtitle {
+  display: block;
+  color: var(--main-gray);
+  font-size: 0.85rem;
+  margin-top: -4px;
+  margin-bottom: var(--space-sm);
+}
+
+.modal-divider {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(116, 167, 215, 0.2),
+    transparent
+  );
+  margin: var(--space-md) 0;
+}
+
+.modal-record-actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+  margin-top: var(--space-sm);
+}

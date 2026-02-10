@@ -8,6 +8,7 @@ import { getPlayerUsersQuery } from "../api/queries/playerUsers";
 import { getProjectsQuery, getProjectQuery } from "../api/queries/projects";
 import { getProjectUsersQuery } from "../api/queries/projectUsers";
 import { getRecordsByUserQuery } from "../api/queries/record";
+import { getTableImageCountByUserQuery } from "../api/queries/tableImages";
 import { requireUserOrRedirect } from "../lib/authz";
 
 const router = Router();
@@ -43,6 +44,10 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
     // records
     const recordsData = await getRecordsByUserQuery(userId);
 
+    // image count
+    const imageCountData = await getTableImageCountByUserQuery(userId);
+    const imageCount = parseInt(imageCountData.rows[0].count);
+
     res.render("dash", {
       auth: userId,
       tables: tableData.rows,
@@ -51,6 +56,7 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
       projects: projectData.rows,
       sharedProjects: sharedProjectList,
       records: recordsData.rows,
+      imageCount,
     });
   } catch (err) {
     next(err);

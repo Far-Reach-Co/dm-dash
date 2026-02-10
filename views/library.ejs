@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Library | Far Reach Co.</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/library.css" />
+  <%- include('./partials/icons') %>
+  <script>
+    const USERID = "<%= auth %>";
+    <% if (projectId) { %>
+    const PROJECTID = "<%= projectId %>";
+    <% } else { %>
+    const PROJECTID = null;
+    <% } %>
+  </script>
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/dist/bundleLibrary.js" defer type="module"></script>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="library-page">
+    <div id="app">
+      <div id="initial-spinner" class="lds-dual-ring initial-spinner"></div>
+    </div>
+  </div>
+</body>
+
+</html>

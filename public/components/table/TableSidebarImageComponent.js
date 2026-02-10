@@ -4,9 +4,8 @@ import renderLoadingWithMessage from "../loadingWithMessage.js";
 import imageFollowingCursor from "../imageFollowingCursor.js";
 import detectMob from "../../lib/detectMobile.js";
 import modal from "../../components/modal.js";
-import renderFolderSelect from "./folderSelect.js";
-import renderRecordSelect from "./recordSelect.js";
-import parseUrlTextContent from "../../components/parseUrlTextContent.js";
+import renderImageSettingsModal from "../shared/imageSettingsModal.js";
+import { buildCountsFromImages } from "../shared/folderTreeUtils.js";
 
 export default class TableSidebarImageComponent {
   constructor(props) {
@@ -15,6 +14,8 @@ export default class TableSidebarImageComponent {
     this.tableView = props.tableView;
     this.tableApp = props.tableApp;
     this.getCurrentFolder = props.getCurrentFolder;
+    this.getFolderScope = props.getFolderScope;
+    this.onCountsUpdated = props.onCountsUpdated;
     // project
     const searchParams = new URLSearchParams(window.location.search);
     this.projectId = searchParams.get("project");
@@ -24,6 +25,7 @@ export default class TableSidebarImageComponent {
     this.downloadedImageSourceList = {};
     this.tableImageSearchQuery = null;
     this.imageDataAndElems = null;
+    this.sortKey = "newest";
     // Set From Canvas Layer
   }
 
@@ -103,92 +105,47 @@ export default class TableSidebarImageComponent {
     }
     delete this.downloadedImageSourceList[image.id];
     elem.remove();
+    this.updateCountsFromCache();
   };
 
   renderImageSettings = async (tableImage, image, imageElem) => {
-    const folderSelectElem = await renderFolderSelect(
-      tableImage,
-      this.projectId,
-    );
-    folderSelectElem.addEventListener("change", async (e) => {
-      const value = e.target.value;
-      if (value === 0) {
-        // set to null
-        tableImage.folder_id = null;
-      } else {
-        tableImage.folder_id = value;
-      }
-      postThing(`/api/edit_table_image/${tableImage.id}`, { folder_id: value });
-
-      // re-render
-      this.render();
-    });
-
-    const associatedRecordsComponent = new AssociatedRecordsComponent({
-      domComponent: createElement("div"),
-      image: image,
+    return await renderImageSettingsModal({
+      image,
       projectId: this.projectId,
+      tableImageId: tableImage.id,
+      onDelete: () => {
+        this.removeImageFromTableAndSidebar(image, imageElem);
+        modal.hide();
+      },
+      onUpdate: () => {
+        this.updateCountsFromCache();
+        this.render();
+      },
     });
-
-    return createElement("div", { class: "help-content" }, [
-      createElement("h1", {}, image.original_name),
-      createElement("hr"),
-      createElement("h2", {}, "Associated Record"),
-      associatedRecordsComponent.domComponent,
-      createElement("hr"),
-      createElement("h2", {}, "Change Folder"),
-      folderSelectElem,
-      createElement("hr"),
-      createElement("h2", {}, "Notes"),
-      createElement(
-        "div",
-        {
-          contenteditable: true,
-          class: "image-notes",
-          name: "notes",
-        },
-        image.notes ? parseUrlTextContent(image.notes) : "Placeholder text...",
-        {
-          type: "focusout",
-          event: (e) => {
-            e.preventDefault();
-            // local
-            image.notes = e.target.textContent;
-            // db
-            postThing(`/api/edit_image_notes/${image.id}`, {
-              notes: e.target.textContent,
-            });
-          },
-        },
-      ),
-      createElement("hr"),
-      createElement("button", { class: "btn-red" }, "Delete Image", {
-        type: "click",
-        event: (e) => {
-          this.removeImageFromTableAndSidebar(image, imageElem);
-          modal.hide();
-        },
-      }),
-    ]);
   };
 
   renderImageElems = () => {
     // copy so as not to use state
     let currentImageData = this.imageDataAndElems;
     // filter based on current folder view
-    const currentFolder = this.getCurrentFolder();
-    currentImageData = currentImageData.filter((obj) => {
-      if (currentFolder) {
-        if (
-          obj.tableData.folder_id &&
-          obj.tableData.folder_id == currentFolder.id
-        ) {
-          return obj;
+    const scope = this.getFolderScope
+      ? this.getFolderScope()
+      : { showAllImages: false, currentFolder: this.getCurrentFolder() };
+    const currentFolder = scope.currentFolder;
+    if (!scope.showAllImages) {
+      currentImageData = currentImageData.filter((obj) => {
+        if (currentFolder) {
+          if (
+            obj.tableData.folder_id &&
+            obj.tableData.folder_id == currentFolder.id
+          ) {
+            return obj;
+          }
+        } else {
+          if (!obj.tableData.folder_id) return obj;
         }
-      } else {
-        if (!obj.tableData.folder_id) return obj;
-      }
-    });
+      });
+    }
     // extract just the elems
     let imageElems = currentImageData.map((image) => {
       return image.elem;
@@ -201,13 +158,26 @@ export default class TableSidebarImageComponent {
           .includes(this.tableImageSearchQuery.toLowerCase());
       } else return elem;
     });
-    // sort alpha
+    // sort
     imageElems = imageElems.sort((a, b) => {
-      if (
-        a.children[0].children[1].value.toLowerCase() <
-        b.children[0].children[1].value.toLowerCase()
-      )
-        return -1;
+      const aItem = this.imageDataAndElems.find((i) => i.elem === a);
+      const bItem = this.imageDataAndElems.find((i) => i.elem === b);
+      if (this.sortKey === "size") {
+        return (bItem?.imageData.size || 0) - (aItem?.imageData.size || 0);
+      }
+      if (this.sortKey === "name") {
+        const aName = a.children[0].children[1].value.toLowerCase();
+        const bName = b.children[0].children[1].value.toLowerCase();
+        return aName.localeCompare(bName);
+      }
+      const aTime = aItem?.tableData?.created_at
+        ? new Date(aItem.tableData.created_at).getTime()
+        : 0;
+      const bTime = bItem?.tableData?.created_at
+        ? new Date(bItem.tableData.created_at).getTime()
+        : 0;
+      if (aTime && bTime && aTime !== bTime) return bTime - aTime;
+      return (bItem?.imageData.id || 0) - (aItem?.imageData.id || 0);
     });
     if (imageElems.length) return imageElems;
     else return [createElement("small", {}, "No images in this folder yet...")];
@@ -238,7 +208,14 @@ export default class TableSidebarImageComponent {
     this.tempLoadingSpinner.remove();
 
     if (!tableImages.length) {
+      if (this.onCountsUpdated) {
+        this.onCountsUpdated({ total: 0, unsorted: 0, by_folder: {} });
+      }
       return [createElement("small", {}, "None...")];
+    }
+
+    if (this.onCountsUpdated) {
+      this.onCountsUpdated(buildCountsFromImages(tableImages));
     }
 
     const imageList = await Promise.all(
@@ -327,7 +304,19 @@ export default class TableSidebarImageComponent {
       this.imageDataAndElems = [];
     }
     this.imageDataAndElems.push(item);
+    this.updateCountsFromCache();
     this.updateImagesList();
+  };
+
+  updateCountsFromCache = () => {
+    if (!this.onCountsUpdated || !this.imageDataAndElems) return;
+    const tableImages = this.imageDataAndElems.map((item) => item.tableData);
+    this.onCountsUpdated(buildCountsFromImages(tableImages));
+  };
+
+  refreshFromServer = () => {
+    this.imageDataAndElems = null;
+    this.render();
   };
 
   updateImagesList = () => {
@@ -364,13 +353,12 @@ export default class TableSidebarImageComponent {
       [...imageElems],
     );
 
-    this.domComponent.append(
+    const filters = createElement("div", { class: "table-sidebar-filters" }, [
       createElement(
         "input",
         {
-          placeHolder: "Search Images",
-          style:
-            "padding: 10px; border-left-width: 0px; border-right-width: 0px",
+          placeholder: "Search Images",
+          class: "table-sidebar-search",
         },
         null,
         {
@@ -382,110 +370,24 @@ export default class TableSidebarImageComponent {
           },
         },
       ),
-      this.imagesListContainer,
-    );
-  };
-}
-
-class AssociatedRecordsComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.image = props.image;
-    this.projectId = props.projectId;
-
-    this.render();
-  }
-
-  getRecordHref = (recordId) => {
-    const base = `/record?id=${recordId}`;
-    return this.projectId ? `${base}&project_id=${this.projectId}` : base;
-  };
-
-  getAddRecordEndpoint = () => {
-    return this.projectId
-      ? `/api/add_record_by_project/${this.projectId}`
-      : "/api/add_record_by_user";
-  };
-
-  getTitleFromImageName = () => {
-    const name = this.image.original_name;
-    return name.includes(".") ? name.split(".")[0] : name;
-  };
-
-  updateImageRecord = (record) => {
-    this.image.record_id = record.id;
-    this.image.record_title = record.title;
-    this.image.record_desc = record.description;
-    this.render();
-  };
-
-  linkRecordToImage = async (recordId) => {
-    await postThing("/api/add_record_image", {
-      record_id: recordId,
-      image_id: this.image.id,
-    });
-  };
-
-  createNewRecord = async () => {
-    const data = {
-      title: this.getTitleFromImageName(),
-      description: this.image.description || "Placeholder text...",
-      is_public: false,
-    };
-
-    const newRecord = await postThing(this.getAddRecordEndpoint(), data);
-
-    if (newRecord) {
-      await this.linkRecordToImage(newRecord.id);
-      this.updateImageRecord(newRecord);
-    }
-  };
-
-  handleRecordSelect = async (e) => {
-    const recordId = e.target.value;
-    if (recordId == 0) return;
-
-    await this.linkRecordToImage(recordId);
-    const record = await getThings(`/api/get_record/${recordId}`);
-    this.updateImageRecord(record);
-  };
-
-  renderExistingRecord = () => {
-    return createElement(
-      "a",
-      {
-        href: this.getRecordHref(this.image.record_id),
-        rel: "noopener noreferrer",
-        target: "_blank",
-      },
-      this.image.record_title
-    );
-  };
-
-  renderCreateOrSelectRecord = async () => {
-    const recordSelectElem = await renderRecordSelect(this.projectId);
-    recordSelectElem.addEventListener("change", this.handleRecordSelect);
-
-    return createElement("div", {}, [
-      createElement("div", {}, "None..."),
-      createElement("div", { class: "d-flex flex-row" }, [
-        createElement("button", { class: "me-1 btn-green" }, "Create Record", {
-          type: "click",
-          event: () => this.createNewRecord(),
-        }),
-        createElement("div", { class: "me-1" }, "Or"),
-        recordSelectElem,
-      ]),
+      createElement(
+        "select",
+        { class: "library-sort-select", title: "Sort images" },
+        [
+          createElement("option", { value: "newest" }, "Newest"),
+          createElement("option", { value: "name" }, "Name"),
+          createElement("option", { value: "size" }, "Size"),
+        ],
+        {
+          type: "change",
+          event: (e) => {
+            this.sortKey = e.target.value;
+            this.updateImagesList();
+          },
+        },
+      ),
     ]);
-  };
 
-  render = async () => {
-    this.domComponent.innerHTML = "";
-
-    const content = this.image.record_id
-      ? this.renderExistingRecord()
-      : await this.renderCreateOrSelectRecord();
-
-    this.domComponent.append(content);
+    this.domComponent.append(filters, this.imagesListContainer);
   };
 }

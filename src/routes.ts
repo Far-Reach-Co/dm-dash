@@ -9,6 +9,7 @@ import wyrldRoutes from "./routes/wyrld";
 import recordRoutes from "./routes/records";
 import tableRoutes from "./routes/tables";
 import vttRoutes from "./routes/vtt";
+import libraryRoutes from "./routes/library";
 import miscRoutes from "./routes/misc";
 
 const router = Router();
@@ -23,6 +24,7 @@ router.use(wyrldRoutes);
 router.use(recordRoutes);
 router.use(tableRoutes);
 router.use(vttRoutes);
+router.use(libraryRoutes);
 router.use(miscRoutes);
 
 export default router;

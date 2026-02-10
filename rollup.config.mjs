@@ -23,4 +23,14 @@ export default [
       },
     ],
   },
+  {
+    input: "public/views/Library.js",
+    plugins: [
+      isProduction && (await import("@rollup/plugin-terser")).default(),
+    ],
+    output: {
+      file: "public/dist/bundleLibrary.js",
+      format: "es",
+    },
+  },
 ];
