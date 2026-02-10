@@ -20,6 +20,7 @@ const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
 const compression_1 = __importDefault(require("compression"));
 const pino_http_1 = __importDefault(require("pino-http"));
+const crypto_1 = require("crypto");
 const logger_js_1 = __importDefault(require("./lib/logger.js"));
 const routes_js_1 = __importDefault(require("./api/routes.js"));
 const routes_js_2 = __importDefault(require("./routes.js"));
@@ -63,7 +64,22 @@ app.use((0, cors_1.default)({
     credentials: true,
 }));
 app.use((0, compression_1.default)());
-app.use((0, pino_http_1.default)({ logger: logger_js_1.default }));
+app.use((0, pino_http_1.default)({
+    logger: logger_js_1.default,
+    genReqId: (req) => {
+        const headerId = req.headers["x-request-id"];
+        if (typeof headerId === "string" && headerId.length > 0) {
+            return headerId;
+        }
+        return (0, crypto_1.randomUUID)();
+    },
+    customProps: (req) => ({ requestId: req.id }),
+}));
+app.use((req, res, next) => {
+    if (req.id)
+        res.setHeader("x-request-id", String(req.id));
+    next();
+});
 app.set("view engine", "ejs");
 app.use(body_parser_1.default.json({ limit: "10mb" }));
 app.use(body_parser_1.default.urlencoded({
@@ -118,7 +134,7 @@ app.use((req, res) => {
     res.status(404).render("404", { auth: req.session.user });
 });
 app.use((error, req, res, next) => {
-    logger_js_1.default.error({ err: error, url: req.url, method: req.method }, "Request error");
+    logger_js_1.default.error({ err: error, url: req.url, method: req.method, requestId: req.id }, "Request error");
     if (error.code === "EBADCSRFTOKEN") {
         error.status = 403;
         error.message = "Form has expired or was tampered with.";

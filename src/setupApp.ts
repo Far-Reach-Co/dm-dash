@@ -14,6 +14,7 @@ import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import pinoHttp from "pino-http";
+import { randomUUID } from "crypto";
 import logger from "./lib/logger.js";
 
 import apiRoutes from "./api/routes.js";
@@ -70,7 +71,23 @@ app.use(
 app.use(compression());
 
 // Structured request logging
-app.use(pinoHttp({ logger }));
+app.use(
+  pinoHttp({
+    logger,
+    genReqId: (req) => {
+      const headerId = req.headers["x-request-id"];
+      if (typeof headerId === "string" && headerId.length > 0) {
+        return headerId;
+      }
+      return randomUUID();
+    },
+    customProps: (req) => ({ requestId: req.id }),
+  }),
+);
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if (req.id) res.setHeader("x-request-id", String(req.id));
+  next();
+});
 
 // Set view engine to EJS
 app.set("view engine", "ejs");
@@ -150,7 +167,10 @@ app.use((req: Request, res: Response) => {
 
 //Error
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
-  logger.error({ err: error, url: req.url, method: req.method }, "Request error");
+  logger.error(
+    { err: error, url: req.url, method: req.method, requestId: req.id },
+    "Request error",
+  );
   if (error.code === "EBADCSRFTOKEN") {
     // CSRF token validation failed
     error.status = 403;

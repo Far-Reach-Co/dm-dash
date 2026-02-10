@@ -39,6 +39,7 @@ import {
 import { getRecordImagesByRecordQuery } from "./api/queries/recordImage";
 import { getImagesQuery, Image } from "./api/queries/images";
 import { getSignedUrls } from "./api/controllers/s3";
+import logger from "./lib/logger.js";
 
 // CSRF protection using base csrf package (same as csurf used internally)
 import Tokens from "csrf";
@@ -728,7 +729,7 @@ router.get(
         const imageDataList = await getImagesQuery(imageIds);
         imagesFromRecordImages = imageDataList.rows;
         imageUrls = await getSignedUrls(imagesFromRecordImages);
-        console.log(imageUrls);
+        logger.debug({ recordId, imageCount: imageIds.length }, "Loaded record image URLs");
       }
 
       // render non wyrld public or not
@@ -774,7 +775,7 @@ router.get(
         const imageDataList = await getImagesQuery(imageIds);
         imagesFromRecordImages = imageDataList.rows;
         imageUrls = await getSignedUrls(imagesFromRecordImages);
-        console.log(imageUrls);
+        logger.debug({ recordId, imageCount: imageIds.length }, "Loaded record image URLs");
       }
 
       // render non wyrld public or not
@@ -1075,7 +1076,8 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
 router.get("/logout", (req: Request, res: Response, next: NextFunction) => {
   req.session.destroy((err) => {
     if (err) {
-      return console.log(err);
+      logger.error({ err }, "Failed to destroy session");
+      return next(err);
     }
     res.redirect("/");
   });

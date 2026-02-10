@@ -29,6 +29,7 @@ const record_1 = require("./api/queries/record");
 const recordImage_1 = require("./api/queries/recordImage");
 const images_1 = require("./api/queries/images");
 const s3_1 = require("./api/controllers/s3");
+const logger_js_1 = __importDefault(require("./lib/logger.js"));
 const csrf_1 = __importDefault(require("csrf"));
 const tokens = new csrf_1.default();
 const CSRF_COOKIE = "_csrf_secret";
@@ -563,7 +564,7 @@ router.get("/editrecord", (req, res, next) => __awaiter(void 0, void 0, void 0, 
             const imageDataList = yield (0, images_1.getImagesQuery)(imageIds);
             imagesFromRecordImages = imageDataList.rows;
             imageUrls = yield (0, s3_1.getSignedUrls)(imagesFromRecordImages);
-            console.log(imageUrls);
+            logger_js_1.default.debug({ recordId, imageCount: imageIds.length }, "Loaded record image URLs");
         }
         if (!req.query.project_id) {
             let is_author = Number(userId) == Number(record.user_id);
@@ -604,7 +605,7 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             const imageDataList = yield (0, images_1.getImagesQuery)(imageIds);
             imagesFromRecordImages = imageDataList.rows;
             imageUrls = yield (0, s3_1.getSignedUrls)(imagesFromRecordImages);
-            console.log(imageUrls);
+            logger_js_1.default.debug({ recordId, imageCount: imageIds.length }, "Loaded record image URLs");
         }
         if (!req.query.project_id) {
             let is_author = Number(userId) == Number(record.user_id);
@@ -872,7 +873,8 @@ router.get("/vtt", (req, res, next) => __awaiter(void 0, void 0, void 0, functio
 router.get("/logout", (req, res, next) => {
     req.session.destroy((err) => {
         if (err) {
-            return console.log(err);
+            logger_js_1.default.error({ err }, "Failed to destroy session");
+            return next(err);
         }
         res.redirect("/");
     });

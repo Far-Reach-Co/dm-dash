@@ -23,6 +23,7 @@ import { getRecordImagesByImageQuery } from "../queries/recordImage";
 import { getRecordQuery, Record } from "../queries/record";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { redisClient } from "../../lib/socketUsers";
+import logger from "../../lib/logger.js";
 
 config.update({
   signatureVersion: "v4",
@@ -76,7 +77,9 @@ function generateSignedUrl(fileName: string): string {
 function cacheSignedUrl(imageId: number | string, url: string): void {
   redisClient
     .setEx(getSignedUrlCacheKey(imageId), SIGNED_URL_CACHE_TTL_SECONDS, url)
-    .catch((err) => console.error("Failed to cache signed URL:", err));
+    .catch((err) =>
+      logger.warn({ err, imageId }, "Failed to cache signed URL"),
+    );
 }
 
 async function uploadToS3(params: S3.PutObjectRequest): Promise<string> {
@@ -151,7 +154,7 @@ async function getSignedUrls(images: Image[]) {
         redisClient
           .setEx(getSignedUrlCacheKey(id), SIGNED_URL_CACHE_TTL_SECONDS, url)
           .catch((err) =>
-            console.error("Failed to cache signed URL:", err),
+            logger.warn({ err, imageId: id }, "Failed to cache signed URL"),
           ),
       ),
     );
@@ -457,7 +460,7 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
     image.records = recordsData;
     res.send(image);
   } catch (err) {
-    console.log(err);
+    logger.error({ err, imageId: req.params.id }, "Failed to get image");
     next(err);
   }
 }
@@ -475,7 +478,10 @@ async function removeImageByProject(
     await removeImageQuery(req.params.image_id);
 
     invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-      console.error("Failed to invalidate signed URL cache:", err),
+      logger.warn(
+        { err, imageId: req.params.image_id },
+        "Failed to invalidate signed URL cache",
+      ),
     );
 
     const projectData = await getProjectQuery(req.params.project_id);
@@ -497,7 +503,10 @@ async function removeImageByProject(
     });
     res.status(204).send();
   } catch (err) {
-    console.log(err);
+    logger.error(
+      { err, imageId: req.params.image_id, projectId: req.params.project_id },
+      "Failed to remove image by project",
+    );
     next(err);
   }
 }
@@ -515,7 +524,10 @@ async function removeImageByTableUser(
     await removeImageQuery(req.params.image_id);
 
     invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-      console.error("Failed to invalidate signed URL cache:", err),
+      logger.warn(
+        { err, imageId: req.params.image_id },
+        "Failed to invalidate signed URL cache",
+      ),
     );
 
     const tableData = await getTableViewQuery(req.params.table_id);
@@ -539,7 +551,10 @@ async function removeImageByTableUser(
     });
     res.status(204).send();
   } catch (err) {
-    console.log(err);
+    logger.error(
+      { err, imageId: req.params.image_id, tableId: req.params.table_id },
+      "Failed to remove image by table user",
+    );
     next(err);
   }
 }
@@ -551,7 +566,10 @@ async function removeImageFromBucket(
   try {
     await deleteFromS3(bucket, image.file_name);
   } catch (err) {
-    console.log(err);
+    logger.error(
+      { err, bucket, fileName: image.file_name },
+      "Failed to remove image from bucket",
+    );
   }
 }
 
