@@ -5,7 +5,6 @@ import imageFollowingCursor from "../imageFollowingCursor.js";
 import detectMob from "../../lib/detectMobile.js";
 import modal from "../../components/modal.js";
 import renderImageSettingsModal from "../shared/imageSettingsModal.js";
-import { buildCountsFromImages } from "../shared/folderTreeUtils.js";
 
 export default class TableSidebarImageComponent {
   constructor(props) {
@@ -26,6 +25,13 @@ export default class TableSidebarImageComponent {
     this.tableImageSearchQuery = null;
     this.imageDataAndElems = null;
     this.sortKey = "newest";
+    this.pageLimit = 60;
+    this.pageOffset = 0;
+    this.totalAvailable = 0;
+    this.loadingPage = false;
+    this.activeQueryKey = null;
+    this.searchDebounceId = null;
+    this.searchDebounceMs = 300;
     // Set From Canvas Layer
   }
 
@@ -105,7 +111,11 @@ export default class TableSidebarImageComponent {
     }
     delete this.downloadedImageSourceList[image.id];
     elem.remove();
-    this.updateCountsFromCache();
+    if (this.totalAvailable > 0) {
+      this.totalAvailable = Math.max(0, this.totalAvailable - 1);
+    }
+    this.updateCountsFromServer();
+    this.renderListContents();
   };
 
   renderImageSettings = async (tableImage, image, imageElem) => {
@@ -118,82 +128,17 @@ export default class TableSidebarImageComponent {
         modal.hide();
       },
       onUpdate: () => {
-        this.updateCountsFromCache();
+        this.updateCountsFromServer();
         this.render();
       },
     });
   };
 
   renderImageElems = () => {
-    // copy so as not to use state
-    let currentImageData = this.imageDataAndElems;
-    // filter based on current folder view
-    const scope = this.getFolderScope
-      ? this.getFolderScope()
-      : { showAllImages: false, currentFolder: this.getCurrentFolder() };
-    const currentFolder = scope.currentFolder;
-    if (!scope.showAllImages) {
-      currentImageData = currentImageData.filter((obj) => {
-        if (currentFolder) {
-          if (
-            obj.tableData.folder_id &&
-            obj.tableData.folder_id == currentFolder.id
-          ) {
-            return obj;
-          }
-        } else {
-          if (!obj.tableData.folder_id) return obj;
-        }
-      });
+    if (this.imageDataAndElems && this.imageDataAndElems.length) {
+      return this.imageDataAndElems.map((image) => image.elem);
     }
-    // extract just the elems
-    let imageElems = currentImageData.map((image) => {
-      return image.elem;
-    });
-    // filter by search query (name + notes)
-    imageElems = imageElems.filter((elem) => {
-      if (this.tableImageSearchQuery && this.tableImageSearchQuery !== "") {
-        const item = this.imageDataAndElems.find((i) => i.elem === elem);
-        const name = item?.imageData?.original_name || "";
-        const notes = item?.imageData?.notes || "";
-        const query = this.tableImageSearchQuery.toLowerCase();
-        return (
-          name.toLowerCase().includes(query) ||
-          notes.toLowerCase().includes(query)
-        );
-      }
-      return elem;
-    });
-    // sort
-    imageElems = imageElems.sort((a, b) => {
-      const aItem = this.imageDataAndElems.find((i) => i.elem === a);
-      const bItem = this.imageDataAndElems.find((i) => i.elem === b);
-      if (this.sortKey === "size") {
-        return (bItem?.imageData.size || 0) - (aItem?.imageData.size || 0);
-      }
-      if (this.sortKey === "name") {
-        const aName = a.children[0].children[1].value.toLowerCase();
-        const bName = b.children[0].children[1].value.toLowerCase();
-        return aName.localeCompare(bName);
-      }
-      const aTime = aItem?.tableData?.created_at
-        ? new Date(aItem.tableData.created_at).getTime()
-        : 0;
-      const bTime = bItem?.tableData?.created_at
-        ? new Date(bItem.tableData.created_at).getTime()
-        : 0;
-      if (aTime && bTime && aTime !== bTime) return bTime - aTime;
-      return (bItem?.imageData.id || 0) - (aItem?.imageData.id || 0);
-    });
-    if (imageElems.length) return imageElems;
-    else return [createElement("small", {}, "No images in this folder yet...")];
-  };
-
-  getTableImagesEndpoint = () => {
-    const base = this.projectId
-      ? "/api/get_table_images_with_urls_by_table_project"
-      : "/api/get_table_images_with_urls_by_table_user";
-    return `${base}/${this.tableView.id}`;
+    return [createElement("small", {}, "No images found.")];
   };
 
   extractImageFromTableImage = (tableImage) => ({
@@ -208,31 +153,157 @@ export default class TableSidebarImageComponent {
     record_desc: tableImage.record_desc,
   });
 
-  renderCurrentImages = async () => {
-    const tableImages = await getThings(this.getTableImagesEndpoint());
+  getCountsEndpoint = () => {
+    return this.projectId
+      ? `/api/get_library_image_counts_by_project/${this.projectId}`
+      : "/api/get_library_image_counts_by_user";
+  };
 
-    this.tempLoadingSpinner.remove();
+  getQueryScope = () => {
+    return this.getFolderScope
+      ? this.getFolderScope()
+      : { showAllImages: false, currentFolder: this.getCurrentFolder() };
+  };
 
-    if (!tableImages.length) {
-      if (this.onCountsUpdated) {
-        this.onCountsUpdated({ total: 0, unsorted: 0, by_folder: {} });
+  getQueryKey = () => {
+    const scope = this.getQueryScope();
+    const folderKey = scope.showAllImages
+      ? "all"
+      : scope.currentFolder
+        ? `folder:${scope.currentFolder.id}`
+        : "unsorted";
+    return JSON.stringify({
+      projectId: this.projectId || "user",
+      sort: this.sortKey,
+      q: this.tableImageSearchQuery || "",
+      folder: folderKey,
+    });
+  };
+
+  getPaginatedImagesEndpoint = (offset = 0) => {
+    const base = this.projectId
+      ? `/api/get_library_images_by_project/${this.projectId}`
+      : "/api/get_library_images_by_user";
+    const params = new URLSearchParams();
+    params.set("limit", String(this.pageLimit));
+    params.set("offset", String(offset));
+    params.set("sort", this.sortKey);
+    if (this.tableImageSearchQuery) {
+      params.set("q", this.tableImageSearchQuery);
+    }
+    const scope = this.getQueryScope();
+    if (!scope.showAllImages) {
+      if (scope.currentFolder) {
+        params.set("folder_id", String(scope.currentFolder.id));
+      } else {
+        params.set("folder_id", "unsorted");
       }
-      return [createElement("small", {}, "None...")];
+    }
+    return `${base}?${params.toString()}`;
+  };
+
+  updateCountsFromServer = async () => {
+    if (!this.onCountsUpdated) return;
+    const counts = await getThings(this.getCountsEndpoint());
+    if (counts) {
+      this.onCountsUpdated(counts);
+    }
+  };
+
+  resetPagination = () => {
+    this.pageOffset = 0;
+    this.totalAvailable = 0;
+  };
+
+  shouldShowLoadMore = () => {
+    return (
+      this.totalAvailable > 0 &&
+      (this.imageDataAndElems?.length || 0) < this.totalAvailable
+    );
+  };
+
+  renderLoadMore = () => {
+    if (!this.loadMoreContainer) return;
+    this.loadMoreContainer.innerHTML = "";
+
+    const loadedCount = this.imageDataAndElems?.length || 0;
+    const total = this.totalAvailable || 0;
+    const countLabel = createElement(
+      "small",
+      { class: "table-sidebar-load-more-count" },
+      total > 0 ? `Showing ${loadedCount} of ${total}` : "",
+    );
+
+    if (!this.shouldShowLoadMore()) {
+      this.loadMoreContainer.append(countLabel);
+      return;
     }
 
-    if (this.onCountsUpdated) {
-      this.onCountsUpdated(buildCountsFromImages(tableImages));
+    const attrs = { class: "table-sidebar-load-more" };
+    if (this.loadingPage) {
+      attrs.disabled = "true";
+    }
+    const btn = createElement(
+      "button",
+      attrs,
+      this.loadingPage ? "Loading..." : "Load more",
+      {
+        type: "click",
+        event: (e) => {
+          e.preventDefault();
+          this.loadMoreImages();
+        },
+      },
+    );
+    this.loadMoreContainer.append(countLabel, btn);
+  };
+
+  renderListContents = () => {
+    if (!this.imagesListContainer) return;
+    this.imagesListContainer.innerHTML = "";
+    const elems = this.renderImageElems();
+    for (const elem of elems) {
+      this.imagesListContainer.appendChild(elem);
+    }
+    this.renderLoadMore();
+  };
+
+  fetchImagesPage = async ({ offset = 0, append = false } = {}) => {
+    if (this.loadingPage) return;
+    this.loadingPage = true;
+
+    const requestKey = this.getQueryKey();
+    if (!append) {
+      this.activeQueryKey = requestKey;
+    }
+
+    const data = await getThings(this.getPaginatedImagesEndpoint(offset));
+    this.loadingPage = false;
+
+    if (!data || this.activeQueryKey !== requestKey) {
+      return;
     }
 
     const imageList = await Promise.all(
-      tableImages.map(async (tableImage) => {
+      (data.images || []).map(async (tableImage) => {
         const image = this.extractImageFromTableImage(tableImage);
         return this.createImageListItem(tableImage, image);
-      })
+      }),
     );
 
-    this.imageDataAndElems = imageList;
-    return this.renderImageElems();
+    if (append && this.imageDataAndElems) {
+      this.imageDataAndElems = [...this.imageDataAndElems, ...imageList];
+    } else {
+      this.imageDataAndElems = imageList;
+    }
+    this.pageOffset = data.offset || 0;
+    this.totalAvailable = data.total || 0;
+    this.pageLimit = data.limit || this.pageLimit;
+    this.renderListContents();
+  };
+
+  renderCurrentImages = async () => {
+    await Promise.all([this.updateCountsFromServer(), this.fetchImagesPage()]);
   };
 
   createImageListItem = async (tableImage, image) => {
@@ -283,54 +354,31 @@ export default class TableSidebarImageComponent {
   };
 
   appendImage = async (imageData, tableImageData) => {
-    const image = {
-      id: imageData.id,
-      original_name: imageData.original_name,
-      size: imageData.size,
-      file_name: imageData.file_name,
-      notes: imageData.notes || null,
-      src: imageData.src,
-      record_id: tableImageData.record_id,
-      record_title: tableImageData.record_title,
-      record_desc: tableImageData.record_desc,
-    };
-    const tableImage = {
-      ...tableImageData,
-      image_id: imageData.id,
-      original_name: imageData.original_name,
-      size: imageData.size,
-      file_name: imageData.file_name,
-      notes: imageData.notes || null,
-      src: imageData.src,
-    };
-
-    const item = await this.createImageListItem(tableImage, image);
-
-    if (!this.imageDataAndElems) {
-      this.imageDataAndElems = [];
-    }
-    this.imageDataAndElems.push(item);
-    this.updateCountsFromCache();
-    this.updateImagesList();
-  };
-
-  updateCountsFromCache = () => {
-    if (!this.onCountsUpdated || !this.imageDataAndElems) return;
-    const tableImages = this.imageDataAndElems.map((item) => item.tableData);
-    this.onCountsUpdated(buildCountsFromImages(tableImages));
+    this.refreshFromServer();
   };
 
   refreshFromServer = () => {
     this.imageDataAndElems = null;
+    this.resetPagination();
     this.render();
   };
 
   updateImagesList = () => {
-    this.imagesListContainer.innerHTML = "";
-    const elems = this.renderImageElems();
-    for (var elem of elems) {
-      this.imagesListContainer.appendChild(elem);
+    this.imageDataAndElems = null;
+    this.resetPagination();
+    if (this.imagesListContainer) {
+      this.imagesListContainer.innerHTML = "";
+      this.tempLoadingSpinner = renderLoadingWithMessage("");
+      this.imagesListContainer.append(this.tempLoadingSpinner);
+      this.renderCurrentImages();
+      return;
     }
+    this.render();
+  };
+
+  loadMoreImages = async () => {
+    const offset = this.imageDataAndElems?.length || 0;
+    await this.fetchImagesPage({ offset, append: true });
   };
 
   render = async () => {
@@ -340,60 +388,72 @@ export default class TableSidebarImageComponent {
       return this.domComponent.append(renderLoadingWithMessage(""));
     }
 
-    // Determine what to render
-    let imageElems;
-    if (this.imageDataAndElems) {
-      // Render from memory
-      imageElems = this.renderImageElems();
-    } else {
-      // Fetch and populate memory
-      this.tempLoadingSpinner = renderLoadingWithMessage("");
-      this.domComponent.append(this.tempLoadingSpinner);
-      imageElems = await this.renderCurrentImages();
-    }
+    this.imagesListContainer = createElement("div", {
+      id: "table-sidebar-images",
+      style: "padding: 3px;",
+    });
+    this.loadMoreContainer = createElement("div", {
+      class: "table-sidebar-load-more-wrap",
+    });
 
-    // create and save imagesListContainer
-    this.imagesListContainer = createElement(
-      "div",
-      { id: "table-sidebar-images", style: "padding: 3px;" },
-      [...imageElems],
+    const searchInput = createElement(
+      "input",
+      {
+        placeholder: "Search Images",
+        class: "table-sidebar-search",
+        value: this.tableImageSearchQuery || "",
+      },
+      null,
+      {
+        type: "input",
+        event: (e) => {
+          e.preventDefault();
+          this.tableImageSearchQuery = e.target.value;
+          if (this.searchDebounceId) {
+            clearTimeout(this.searchDebounceId);
+          }
+          this.searchDebounceId = setTimeout(() => {
+            this.updateImagesList();
+          }, this.searchDebounceMs);
+        },
+      },
     );
 
+    const sortSelect = createElement(
+      "select",
+      {
+        class: "library-sort-select",
+        title: "Sort images",
+      },
+      [
+        createElement("option", { value: "newest" }, "Newest"),
+        createElement("option", { value: "name" }, "Name"),
+        createElement("option", { value: "size" }, "Size"),
+      ],
+      {
+        type: "change",
+        event: (e) => {
+          this.sortKey = e.target.value;
+          this.updateImagesList();
+        },
+      },
+    );
+    sortSelect.value = this.sortKey;
+
     const filters = createElement("div", { class: "table-sidebar-filters" }, [
-      createElement(
-        "input",
-        {
-          placeholder: "Search Images",
-          class: "table-sidebar-search",
-        },
-        null,
-        {
-          type: "input",
-          event: (e) => {
-            e.preventDefault();
-            this.tableImageSearchQuery = e.target.value;
-            this.updateImagesList();
-          },
-        },
-      ),
-      createElement(
-        "select",
-        { class: "library-sort-select", title: "Sort images" },
-        [
-          createElement("option", { value: "newest" }, "Newest"),
-          createElement("option", { value: "name" }, "Name"),
-          createElement("option", { value: "size" }, "Size"),
-        ],
-        {
-          type: "change",
-          event: (e) => {
-            this.sortKey = e.target.value;
-            this.updateImagesList();
-          },
-        },
-      ),
+      searchInput,
+      sortSelect,
     ]);
 
-    this.domComponent.append(filters, this.imagesListContainer);
+    this.domComponent.append(filters, this.imagesListContainer, this.loadMoreContainer);
+
+    if (this.imageDataAndElems) {
+      this.renderListContents();
+      return;
+    }
+
+    this.tempLoadingSpinner = renderLoadingWithMessage("");
+    this.imagesListContainer.append(this.tempLoadingSpinner);
+    await this.renderCurrentImages();
   };
 }
