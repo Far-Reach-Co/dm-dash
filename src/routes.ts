@@ -37,7 +37,7 @@ import {
   getRecordsByUserQuery,
 } from "./api/queries/record";
 import { getRecordImagesByRecordQuery } from "./api/queries/recordImage";
-import { getImageQuery, Image } from "./api/queries/images";
+import { getImagesQuery, Image } from "./api/queries/images";
 import { getSignedUrls } from "./api/controllers/s3";
 
 // CSRF protection using base csrf package (same as csurf used internally)
@@ -724,12 +724,9 @@ router.get(
       let imagesFromRecordImages: Image[] = [];
       let imageUrls: { [key: string]: string } = {};
       if (recordImageData.rows.length) {
-        imagesFromRecordImages = await Promise.all(
-          recordImageData.rows.map(async (ri) => {
-            const imageData = await getImageQuery(ri.image_id);
-            return imageData.rows[0];
-          })
-        );
+        const imageIds = recordImageData.rows.map((ri) => ri.image_id);
+        const imageDataList = await getImagesQuery(imageIds);
+        imagesFromRecordImages = imageDataList.rows;
         imageUrls = await getSignedUrls(imagesFromRecordImages);
         console.log(imageUrls);
       }
@@ -773,12 +770,9 @@ router.get(
       let imagesFromRecordImages: Image[] = [];
       let imageUrls: { [key: string]: string } = {};
       if (recordImageData.rows.length) {
-        imagesFromRecordImages = await Promise.all(
-          recordImageData.rows.map(async (ri) => {
-            const imageData = await getImageQuery(ri.image_id);
-            return imageData.rows[0];
-          })
-        );
+        const imageIds = recordImageData.rows.map((ri) => ri.image_id);
+        const imageDataList = await getImagesQuery(imageIds);
+        imagesFromRecordImages = imageDataList.rows;
         imageUrls = await getSignedUrls(imagesFromRecordImages);
         console.log(imageUrls);
       }

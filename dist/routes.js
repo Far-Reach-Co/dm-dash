@@ -559,10 +559,9 @@ router.get("/editrecord", (req, res, next) => __awaiter(void 0, void 0, void 0, 
         let imagesFromRecordImages = [];
         let imageUrls = {};
         if (recordImageData.rows.length) {
-            imagesFromRecordImages = yield Promise.all(recordImageData.rows.map((ri) => __awaiter(void 0, void 0, void 0, function* () {
-                const imageData = yield (0, images_1.getImageQuery)(ri.image_id);
-                return imageData.rows[0];
-            })));
+            const imageIds = recordImageData.rows.map((ri) => ri.image_id);
+            const imageDataList = yield (0, images_1.getImagesQuery)(imageIds);
+            imagesFromRecordImages = imageDataList.rows;
             imageUrls = yield (0, s3_1.getSignedUrls)(imagesFromRecordImages);
             console.log(imageUrls);
         }
@@ -601,10 +600,9 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
         let imagesFromRecordImages = [];
         let imageUrls = {};
         if (recordImageData.rows.length) {
-            imagesFromRecordImages = yield Promise.all(recordImageData.rows.map((ri) => __awaiter(void 0, void 0, void 0, function* () {
-                const imageData = yield (0, images_1.getImageQuery)(ri.image_id);
-                return imageData.rows[0];
-            })));
+            const imageIds = recordImageData.rows.map((ri) => ri.image_id);
+            const imageDataList = yield (0, images_1.getImagesQuery)(imageIds);
+            imagesFromRecordImages = imageDataList.rows;
             imageUrls = yield (0, s3_1.getSignedUrls)(imagesFromRecordImages);
             console.log(imageUrls);
         }
