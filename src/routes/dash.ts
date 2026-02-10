@@ -14,14 +14,15 @@ const router = Router();
 
 router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!requireUserOrRedirect(req, res, "/login")) return;
+    const userId = requireUserOrRedirect(req, res, "/login");
+    if (!userId) return;
     // get table views by user
-    const tableData = await getTableViewsByUserQuery(req.session.user);
+    const tableData = await getTableViewsByUserQuery(userId);
     // get all character sheets by user
-    const charData = await get5eCharsGeneralByUserQuery(req.session.user);
+    const charData = await get5eCharsGeneralByUserQuery(userId);
     // get shared character sheets by playerUser
     const sharedCharData = [];
-    const playerUsersData = await getPlayerUsersQuery(req.session.user);
+    const playerUsersData = await getPlayerUsersQuery(userId);
     if (playerUsersData.rows.length) {
       for (const playerUser of playerUsersData.rows) {
         const puCharData = await get5eCharGeneralQuery(playerUser.player_id);
@@ -30,20 +31,20 @@ router.get("/dash", async (req: Request, res: Response, next: NextFunction) => {
     }
 
     // created wyrlds
-    const projectData = await getProjectsQuery(req.session.user);
+    const projectData = await getProjectsQuery(userId);
     // join wyrlds
     const sharedProjectList = [];
-    const projectUserData = await getProjectUsersQuery(req.session.user);
+    const projectUserData = await getProjectUsersQuery(userId);
     for (const projectUser of projectUserData.rows) {
       const sharedProjectData = await getProjectQuery(projectUser.project_id);
       sharedProjectList.push(sharedProjectData.rows[0]);
     }
 
     // records
-    const recordsData = await getRecordsByUserQuery(req.session.user);
+    const recordsData = await getRecordsByUserQuery(userId);
 
     res.render("dash", {
-      auth: req.session.user,
+      auth: userId,
       tables: tableData.rows,
       sheets: charData.rows,
       sharedSheets: sharedCharData,

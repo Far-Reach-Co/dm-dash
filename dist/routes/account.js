@@ -17,13 +17,14 @@ const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 router.get("/account", csrf_1.csrfMiddleware, (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/login"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
             return;
         const csrfToken = res.locals.csrfToken;
-        const { rows } = yield (0, users_1.getUserByIdQuery)(req.session.user);
+        const { rows } = yield (0, users_1.getUserByIdQuery)(userId);
         const usedDataFormatted = (0, utils_1.humanFileSize)(rows[0].used_data_in_bytes);
         res.render("account", {
-            auth: req.session.user,
+            auth: userId,
             user: rows[0],
             usedDataFormatted,
             csrfToken,

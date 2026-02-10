@@ -24,7 +24,8 @@ const router = (0, express_1.Router)();
 router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/login"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -33,8 +34,8 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         if (!project)
             return;
         let projectAuth = true;
-        if (req.session.user != project.user_id) {
-            const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId);
+        if (userId != project.user_id) {
+            const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(userId, projectId);
             const projectUser = projectUserData.rows[0];
             projectAuth = (_a = projectUser === null || projectUser === void 0 ? void 0 : projectUser.is_editor) !== null && _a !== void 0 ? _a : false;
         }
@@ -59,7 +60,7 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             }
         }
         res.render("wyrld", {
-            auth: req.session.user,
+            auth: userId,
             projectAuth,
             project: project,
             tables: tableData.rows,
@@ -77,7 +78,8 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
 }));
 router.get("/wyrldsettings", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -105,7 +107,7 @@ router.get("/wyrldsettings", (req, res, next) => __awaiter(void 0, void 0, void 
             usersList.push(user);
         }
         return res.render("wyrldsettings", {
-            auth: req.session.user,
+            auth: userId,
             inviteLink,
             inviteId,
             project,
@@ -119,7 +121,8 @@ router.get("/wyrldsettings", (req, res, next) => __awaiter(void 0, void 0, void 
 }));
 router.get("/sharedwyrldsettings", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -127,12 +130,12 @@ router.get("/sharedwyrldsettings", (req, res, next) => __awaiter(void 0, void 0,
         const project = yield (0, authz_1.requireProjectMemberOrRedirect)(req, res, projectId, "/forbidden");
         if (!project)
             return;
-        const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id);
+        const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(userId, project.id);
         if (!projectUserData.rows.length)
             return res.redirect("/forbidden");
         const projectUser = projectUserData.rows[0];
         return res.render("sharedwyrldsettings", {
-            auth: req.session.user,
+            auth: userId,
             projectUserId: projectUser.id,
             project,
         });
@@ -143,7 +146,8 @@ router.get("/sharedwyrldsettings", (req, res, next) => __awaiter(void 0, void 0,
 }));
 router.get("/newwyrldtable", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -152,7 +156,7 @@ router.get("/newwyrldtable", (req, res, next) => __awaiter(void 0, void 0, void 
         if (!project)
             return;
         res.render("newwyrldtable", {
-            auth: req.session.user,
+            auth: userId,
             projectId: project.id,
         });
     }
@@ -162,7 +166,8 @@ router.get("/newwyrldtable", (req, res, next) => __awaiter(void 0, void 0, void 
 }));
 router.get("/newwyrldcalendar", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -171,7 +176,7 @@ router.get("/newwyrldcalendar", (req, res, next) => __awaiter(void 0, void 0, vo
         if (!project)
             return;
         res.render("newwyrldcalendar", {
-            auth: req.session.user,
+            auth: userId,
             projectId: project.id,
         });
     }
@@ -181,7 +186,8 @@ router.get("/newwyrldcalendar", (req, res, next) => __awaiter(void 0, void 0, vo
 }));
 router.get("/newwyrldrecord", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -190,7 +196,7 @@ router.get("/newwyrldrecord", (req, res, next) => __awaiter(void 0, void 0, void
         if (!project)
             return;
         res.render("newwyrldrecord", {
-            auth: req.session.user,
+            auth: userId,
             projectId: project.id,
         });
     }
@@ -200,9 +206,10 @@ router.get("/newwyrldrecord", (req, res, next) => __awaiter(void 0, void 0, void
 }));
 router.get("/newwyrld", (req, res, next) => {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
+        if (!userId)
             return;
-        res.render("newwyrld", { auth: req.session.user });
+        res.render("newwyrld", { auth: userId });
     }
     catch (err) {
         next(err);

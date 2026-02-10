@@ -19,42 +19,43 @@ const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 router.get("/invite", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "forbidden");
+        if (!userId)
             return;
         if (!req.query.invite)
             return res.render("invite", {
-                auth: req.session.user,
+                auth: userId,
                 error: "Can't find invite",
             });
         const inviteUUID = req.query.invite;
         const inviteData = yield (0, projectInvites_1.getProjectInviteByUUIDQuery)(inviteUUID);
         if (!inviteData.rows.length)
             return res.render("invite", {
-                auth: req.session.user,
+                auth: userId,
                 error: "Can't find invite",
             });
         const invite = inviteData.rows[0];
         const projectData = yield (0, projects_1.getProjectQuery)(invite.project_id);
         if (!projectData.rows.length)
             return res.render("invite", {
-                auth: req.session.user,
+                auth: userId,
                 error: "Can't find the wyrld related to this invite",
             });
         const project = projectData.rows[0];
-        if (project.user_id == req.session.user)
+        if (project.user_id == userId)
             return res.render("invite", {
-                auth: req.session.user,
+                auth: userId,
                 error: "You already own this wyrld",
             });
-        const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, project.id);
+        const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(userId, project.id);
         if (projectUserData.rows.length)
             return res.render("invite", {
-                auth: req.session.user,
+                auth: userId,
                 error: "You already joined this wyrld",
             });
         yield (0, projectUsers_1.addProjectUserQuery)({
             project_id: invite.project_id,
-            user_id: req.session.user,
+            user_id: userId,
             is_editor: false,
         });
         res.redirect(`/wyrld-welcome?id=${project.id}`);
@@ -65,7 +66,8 @@ router.get("/invite", (req, res, next) => __awaiter(void 0, void 0, void 0, func
 }));
 router.get("/wyrld-welcome", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/login"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -74,12 +76,12 @@ router.get("/wyrld-welcome", (req, res, next) => __awaiter(void 0, void 0, void 
         if (!projectData.rows.length)
             return res.redirect("/dash");
         const project = projectData.rows[0];
-        const userSheets = yield (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user);
+        const userSheets = yield (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(userId);
         const projectPlayers = yield (0, projectPlayers_1.getProjectPlayersByProjectQuery)(projectId);
         const linkedSheetIds = new Set(projectPlayers.rows.map((pp) => pp.player_id));
         const unlinkedSheets = userSheets.rows.filter((sheet) => !linkedSheetIds.has(sheet.id));
         res.render("wyrld-welcome", {
-            auth: req.session.user,
+            auth: userId,
             project,
             unlinkedSheets,
         });

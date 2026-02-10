@@ -15,7 +15,8 @@ router.get(
   "/5eplayer",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/login")) return;
+      const userId = requireUserOrRedirect(req, res, "/login");
+      if (!userId) return;
       if (!req.query.id) return res.redirect("/dash");
       const playerSheetid = req.query.id as string;
       // get id
@@ -27,10 +28,10 @@ router.get(
       const playerSheetNameData = await get5eCharNamesQuery([playerSheetid]);
       const playerSheetName = playerSheetNameData.rows[0].name;
       // if not owner
-      if (playerSheetUserId != req.session.user) {
+      if (playerSheetUserId != userId) {
         // check if is a playerUser (added by invite)
         const playerUserData = await getPlayerUserByUserAndPlayerQuery(
-          req.session.user,
+          userId,
           playerSheetid,
         );
         if (!playerUserData.rows.length) {
@@ -39,14 +40,14 @@ router.get(
             // check if there is no valid invite
             const invite = req.query.invite as string;
             if (!invite) {
-              return res.render("forbidden", { auth: req.session.user });
+              return res.render("forbidden", { auth: userId });
             }
             const inviteData = await getPlayerInviteByUUIDQuery(invite);
             if (!inviteData.rows.length) {
-              return res.render("forbidden", { auth: req.session.user });
+              return res.render("forbidden", { auth: userId });
             } else {
               return res.render("5eplayer", {
-                auth: req.session.user,
+                auth: userId,
                 playerSheetName: playerSheetName,
               });
             }
@@ -54,39 +55,39 @@ router.get(
           const projectId = req.query.project as string;
           const projectData = await getProjectQuery(projectId);
           if (!projectData.rows.length)
-            return res.render("forbidden", { auth: req.session.user });
+            return res.render("forbidden", { auth: userId });
           const project = projectData.rows[0];
-          if (req.session.user != project.user_id) {
+          if (userId != project.user_id) {
             const projectUserData = await getProjectUserByUserAndProjectQuery(
-              req.session.user,
+              userId,
               projectId,
             );
             if (!projectUserData.rows.length)
-              return res.render("forbidden", { auth: req.session.user });
+              return res.render("forbidden", { auth: userId });
             const projectUser = projectUserData.rows[0];
             if (!projectUser.is_editor) {
-              return res.render("forbidden", { auth: req.session.user });
+              return res.render("forbidden", { auth: userId });
             } else {
               return res.render("5eplayer", {
-                auth: req.session.user,
+                auth: userId,
                 playerSheetName: playerSheetName,
               });
             }
           } else {
             return res.render("5eplayer", {
-              auth: req.session.user,
+              auth: userId,
               playerSheetName: playerSheetName,
             });
           }
         } else {
           return res.render("5eplayer", {
-            auth: req.session.user,
+            auth: userId,
             playerSheetName: playerSheetName,
           });
         }
       } else {
         return res.render("5eplayer", {
-          auth: req.session.user,
+          auth: userId,
           playerSheetName: playerSheetName,
         });
       }
@@ -98,9 +99,10 @@ router.get(
 
 router.get("/newsheet", (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!requireUserOrRedirect(req, res, "/forbidden")) return;
+    const userId = requireUserOrRedirect(req, res, "/forbidden");
+    if (!userId) return;
     res.render("newsheet", {
-      auth: req.session.user,
+      auth: userId,
       wyrld_id: req.query.wyrld_id || null,
       wyrld_title: req.query.wyrld_title || null,
     });

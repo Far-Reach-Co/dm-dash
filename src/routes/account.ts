@@ -11,15 +11,16 @@ router.get(
   csrfMiddleware,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/login")) return;
+      const userId = requireUserOrRedirect(req, res, "/login");
+      if (!userId) return;
       const csrfToken = res.locals.csrfToken;
-      const { rows } = await getUserByIdQuery(req.session.user);
+      const { rows } = await getUserByIdQuery(userId);
 
       // calculate used data formatted
       const usedDataFormatted = humanFileSize(rows[0].used_data_in_bytes);
 
       res.render("account", {
-        auth: req.session.user,
+        auth: userId,
         user: rows[0],
         usedDataFormatted,
         csrfToken,

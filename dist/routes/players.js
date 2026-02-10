@@ -19,7 +19,8 @@ const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/login"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
             return;
         if (!req.query.id)
             return res.redirect("/dash");
@@ -28,21 +29,21 @@ router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         const playerSheetUserId = playerSheetUserIdData.rows[0].user_id;
         const playerSheetNameData = yield (0, _5eCharGeneral_1.get5eCharNamesQuery)([playerSheetid]);
         const playerSheetName = playerSheetNameData.rows[0].name;
-        if (playerSheetUserId != req.session.user) {
-            const playerUserData = yield (0, playerUsers_1.getPlayerUserByUserAndPlayerQuery)(req.session.user, playerSheetid);
+        if (playerSheetUserId != userId) {
+            const playerUserData = yield (0, playerUsers_1.getPlayerUserByUserAndPlayerQuery)(userId, playerSheetid);
             if (!playerUserData.rows.length) {
                 if (!req.query.project) {
                     const invite = req.query.invite;
                     if (!invite) {
-                        return res.render("forbidden", { auth: req.session.user });
+                        return res.render("forbidden", { auth: userId });
                     }
                     const inviteData = yield (0, playerInvites_1.getPlayerInviteByUUIDQuery)(invite);
                     if (!inviteData.rows.length) {
-                        return res.render("forbidden", { auth: req.session.user });
+                        return res.render("forbidden", { auth: userId });
                     }
                     else {
                         return res.render("5eplayer", {
-                            auth: req.session.user,
+                            auth: userId,
                             playerSheetName: playerSheetName,
                         });
                     }
@@ -50,40 +51,40 @@ router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
                 const projectId = req.query.project;
                 const projectData = yield (0, projects_1.getProjectQuery)(projectId);
                 if (!projectData.rows.length)
-                    return res.render("forbidden", { auth: req.session.user });
+                    return res.render("forbidden", { auth: userId });
                 const project = projectData.rows[0];
-                if (req.session.user != project.user_id) {
-                    const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(req.session.user, projectId);
+                if (userId != project.user_id) {
+                    const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(userId, projectId);
                     if (!projectUserData.rows.length)
-                        return res.render("forbidden", { auth: req.session.user });
+                        return res.render("forbidden", { auth: userId });
                     const projectUser = projectUserData.rows[0];
                     if (!projectUser.is_editor) {
-                        return res.render("forbidden", { auth: req.session.user });
+                        return res.render("forbidden", { auth: userId });
                     }
                     else {
                         return res.render("5eplayer", {
-                            auth: req.session.user,
+                            auth: userId,
                             playerSheetName: playerSheetName,
                         });
                     }
                 }
                 else {
                     return res.render("5eplayer", {
-                        auth: req.session.user,
+                        auth: userId,
                         playerSheetName: playerSheetName,
                     });
                 }
             }
             else {
                 return res.render("5eplayer", {
-                    auth: req.session.user,
+                    auth: userId,
                     playerSheetName: playerSheetName,
                 });
             }
         }
         else {
             return res.render("5eplayer", {
-                auth: req.session.user,
+                auth: userId,
                 playerSheetName: playerSheetName,
             });
         }
@@ -94,10 +95,11 @@ router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
 }));
 router.get("/newsheet", (req, res, next) => {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/forbidden"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
+        if (!userId)
             return;
         res.render("newsheet", {
-            auth: req.session.user,
+            auth: userId,
             wyrld_id: req.query.wyrld_id || null,
             wyrld_title: req.query.wyrld_title || null,
         });
