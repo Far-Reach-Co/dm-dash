@@ -41,12 +41,21 @@ import {
   getImage,
   removeImageByTableUser,
   removeImageByProject,
+  removeImageByUser,
   newImageForProject,
   newImageForUser,
   editImageName,
   getSignedUrlsHandler,
   editImageNotes,
 } from "./controllers/s3.js";
+import {
+  getLibraryImagesByUser,
+  getLibraryImagesByProject,
+  getLibraryImagesByUserInFolder,
+  getLibraryImagesByProjectInFolder,
+  getLibraryImageCountsByUser,
+  getLibraryImageCountsByProject,
+} from "./controllers/library.js";
 // for uploading files
 import {
   get5eCharsByUser,
@@ -220,6 +229,27 @@ router.delete(
 router.delete(
   "/remove_image_by_project/:image_id/:project_id",
   removeImageByProject
+);
+router.delete("/remove_image_by_user/:image_id", removeImageByUser);
+
+// library
+router.get("/get_library_images_by_user", getLibraryImagesByUser);
+router.get(
+  "/get_library_images_by_project/:project_id",
+  getLibraryImagesByProject
+);
+router.get("/get_library_image_counts_by_user", getLibraryImageCountsByUser);
+router.get(
+  "/get_library_image_counts_by_project/:project_id",
+  getLibraryImageCountsByProject
+);
+router.get(
+  "/get_library_images_by_user_in_folder/:folder_id",
+  getLibraryImagesByUserInFolder
+);
+router.get(
+  "/get_library_images_by_project_in_folder/:project_id/:folder_id",
+  getLibraryImagesByProjectInFolder
 );
 
 // records

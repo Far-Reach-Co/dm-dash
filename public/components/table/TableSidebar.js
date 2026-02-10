@@ -39,13 +39,20 @@ export default class TableSidebar {
       getCurrentFolder: () => {
         return this.tableSidebarFolderComponent.currentFolder;
       },
+      getFolderScope: () => {
+        return {
+          showAllImages: this.tableSidebarFolderComponent.showAllImages,
+          currentFolder: this.tableSidebarFolderComponent.currentFolder,
+        };
+      },
+      onCountsUpdated: (data) => this.tableSidebarFolderComponent.setCounts(data),
     });
 
     // setup functions to allow folder component to call render on images
     this.tableSidebarFolderComponent.updateImagesList =
       this.tableSidebarImageComponent.updateImagesList;
-    this.tableSidebarFolderComponent.imagesRender =
-      this.tableSidebarImageComponent.render;
+    this.tableSidebarFolderComponent.refreshImages =
+      this.tableSidebarImageComponent.refreshFromServer;
 
   }
 
@@ -157,10 +164,13 @@ export default class TableSidebar {
   };
 
   renderCreatingImageInFolderNotice = () => {
-    if (this.tableSidebarFolderComponent.currentFolder) {
+    if (
+      !this.tableSidebarFolderComponent.showAllImages &&
+      this.tableSidebarFolderComponent.currentFolder
+    ) {
       return createElement(
         "small",
-        {},
+        { class: "modal-subtitle" },
         `Creating image in folder: "${this.tableSidebarFolderComponent.currentFolder.title}"`,
       );
     } else return createElement("div", { class: "d-none" });
@@ -174,7 +184,7 @@ export default class TableSidebar {
       {
         type: "change",
         event: (e) => {
-          this.makeImageSmall = e.target.value;
+          this.makeImageSmall = e.target.checked;
         },
       },
     );
@@ -183,7 +193,6 @@ export default class TableSidebar {
     return createElement("div", { class: "help-content" }, [
       createElement("h1", {}, "Add new Image"),
       this.renderCreatingImageInFolderNotice(),
-      createElement("br"),
       createElement("h2", {}, "Options:"),
       createElement(
         "div",
@@ -234,10 +243,13 @@ export default class TableSidebar {
   };
 
   renderCreatingSubFolderNotice = () => {
-    if (this.tableSidebarFolderComponent.currentFolder) {
+    if (
+      !this.tableSidebarFolderComponent.showAllImages &&
+      this.tableSidebarFolderComponent.currentFolder
+    ) {
       return createElement(
         "small",
-        {},
+        { class: "modal-subtitle" },
         `Creating sub-folder in: "${this.tableSidebarFolderComponent.currentFolder.title}"`,
       );
     } else return createElement("div", { class: "d-none" });
@@ -279,7 +291,8 @@ export default class TableSidebar {
             const parentFolderId = this.getCurrentFolderId();
 
             modal.hide();
-            this.tableSidebarFolderComponent.toggleFolderLoading();
+            this.tableSidebarFolderComponent.folderLoading = true;
+            this.tableSidebarFolderComponent.render();
 
             try {
               await this.postByContext(
@@ -291,12 +304,13 @@ export default class TableSidebar {
                   parent_folder_id: parentFolderId,
                 }
               );
-              this.tableSidebarFolderComponent.clearFolders();
+              await this.tableSidebarFolderComponent.loadFolders();
             } catch (err) {
               console.log(err);
               window.alert("Something went wrong when creating a new folder");
             } finally {
-              this.tableSidebarFolderComponent.toggleFolderLoading();
+              this.tableSidebarFolderComponent.folderLoading = false;
+              this.tableSidebarFolderComponent.render();
             }
           },
         },
@@ -506,4 +520,3 @@ export default class TableSidebar {
     return this.domComponent.append(container);
   };
 }
-

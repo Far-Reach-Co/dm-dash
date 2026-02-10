@@ -71,12 +71,13 @@ interface TableImageWithImage extends TableImage {
   file_name: string;
   notes: string;
   is_blocked: boolean;
+  created_at?: Date;
 }
 
 async function getTableImagesWithImageByProjectQuery(project_id: string | number) {
   const query = {
     text: /*sql*/ `
-      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, ri.record_id, r.title, r.description
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title, r.description
       FROM public."TableImage" ti
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
@@ -91,7 +92,7 @@ async function getTableImagesWithImageByProjectQuery(project_id: string | number
 async function getTableImagesWithImageByUserQuery(user_id: string | number) {
   const query = {
     text: /*sql*/ `
-      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, ri.record_id, r.title AS record_title, r.description AS record_desc
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title AS record_title, r.description AS record_desc
       FROM public."TableImage" ti
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
@@ -117,6 +118,118 @@ async function editTableImageQuery(id: string | number, data: any) {
   return await db.query<TableImage>(query);
 }
 
+async function getTableImageCountByUserQuery(user_id: string | number) {
+  const query = {
+    text: /*sql*/ `SELECT COUNT(*) FROM public."TableImage" WHERE user_id = $1`,
+    values: [user_id]
+  }
+  return await db.query<{ count: string }>(query)
+}
+
+async function getTableImageCountByProjectQuery(project_id: string | number) {
+  const query = {
+    text: /*sql*/ `SELECT COUNT(*) FROM public."TableImage" WHERE project_id = $1`,
+    values: [project_id]
+  }
+  return await db.query<{ count: string }>(query)
+}
+
+async function getTableImagesWithImageByUserPaginatedQuery(user_id: string | number, limit: number, offset: number) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title AS record_title, r.description AS record_desc
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.user_id = $1 AND i.is_blocked = false
+      ORDER BY i.original_name ASC
+      LIMIT $2 OFFSET $3
+    `,
+    values: [user_id, limit, offset]
+  }
+  return await db.query<TableImageWithImage>(query)
+}
+
+async function getTableImagesWithImageByProjectPaginatedQuery(project_id: string | number, limit: number, offset: number) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title, r.description
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.project_id = $1 AND i.is_blocked = false
+      ORDER BY i.original_name ASC
+      LIMIT $2 OFFSET $3
+    `,
+    values: [project_id, limit, offset]
+  }
+  return await db.query<TableImageWithImage>(query)
+}
+
+async function getTableImagesWithImageByUserInFolderQuery(user_id: string | number, folder_id: string | number | null) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title AS record_title, r.description AS record_desc
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.user_id = $1 AND i.is_blocked = false
+        AND ti.folder_id IS NOT DISTINCT FROM $2
+      ORDER BY i.original_name ASC
+    `,
+    values: [user_id, folder_id]
+  }
+  return await db.query<TableImageWithImage>(query)
+}
+
+async function getTableImageCountsByUserQuery(user_id: string | number) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.folder_id, COUNT(*)::int AS count
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.user_id = $1 AND i.is_blocked = false
+      GROUP BY ti.folder_id
+    `,
+    values: [user_id]
+  }
+  return await db.query<{ folder_id: number | null; count: number }>(query)
+}
+
+async function getTableImageCountsByProjectQuery(project_id: string | number) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.folder_id, COUNT(*)::int AS count
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.project_id = $1 AND i.is_blocked = false
+      GROUP BY ti.folder_id
+    `,
+    values: [project_id]
+  }
+  return await db.query<{ folder_id: number | null; count: number }>(query)
+}
+
+async function getTableImagesWithImageByProjectInFolderQuery(project_id: string | number, folder_id: string | number | null) {
+  const query = {
+    text: /*sql*/ `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title, r.description
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.project_id = $1 AND i.is_blocked = false
+        AND ti.folder_id IS NOT DISTINCT FROM $2
+      ORDER BY i.original_name ASC
+    `,
+    values: [project_id, folder_id]
+  }
+  return await db.query<TableImageWithImage>(query)
+}
+
 export {
   addTableImageByProjectQuery,
   addTableImageByUserQuery,
@@ -128,5 +241,13 @@ export {
   editTableImageQuery,
   getTableImagesWithImageByProjectQuery,
   getTableImagesWithImageByUserQuery,
+  getTableImageCountByUserQuery,
+  getTableImageCountByProjectQuery,
+  getTableImagesWithImageByUserPaginatedQuery,
+  getTableImagesWithImageByProjectPaginatedQuery,
+  getTableImagesWithImageByUserInFolderQuery,
+  getTableImagesWithImageByProjectInFolderQuery,
+  getTableImageCountsByUserQuery,
+  getTableImageCountsByProjectQuery,
   TableImageWithImage
 }

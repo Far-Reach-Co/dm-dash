@@ -561,6 +561,53 @@ async function removeImageByTableUser(
   }
 }
 
+async function removeImageByUser(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!req.session.user) throw new Error("User is not logged in");
+
+    const imageData = await getImageQuery(req.params.image_id);
+    const image = imageData.rows[0];
+
+    await deleteFromS3("wyrld/images", image.file_name);
+    await removeImageQuery(req.params.image_id);
+
+    invalidateSignedUrlCache(req.params.image_id).catch((err) =>
+      logger.warn(
+        { err, imageId: req.params.image_id },
+        "Failed to invalidate signed URL cache",
+      ),
+    );
+
+    const userData = await getUserByIdQuery(req.session.user);
+    const user = userData.rows[0];
+    await editUserQuery(user.id, {
+      used_data_in_bytes: user.used_data_in_bytes - image.size,
+    });
+
+    logEventAsync({
+      userId: req.session.user,
+      eventType: EventType.IMAGE_DELETED,
+      eventData: {
+        imageId: req.params.image_id,
+        fileName: image.original_name,
+        fileSize: image.size,
+      },
+      req,
+    });
+    res.status(204).send();
+  } catch (err) {
+    logger.error(
+      { err, imageId: req.params.image_id },
+      "Failed to remove image by user",
+    );
+    next(err);
+  }
+}
+
 async function removeImageFromBucket(
   bucket: string,
   image: { file_name: string },
@@ -607,5 +654,6 @@ export {
   removeImageFromBucket,
   removeImageByProject,
   removeImageByTableUser,
+  removeImageByUser,
   editImageNotes,
 };

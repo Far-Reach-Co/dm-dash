@@ -1,0 +1,90 @@
+/* ==========================================================================
+   Shared Folder Tree Styles
+   ========================================================================== */
+
+.library-folder-tree {
+  border-bottom: 1px solid var(--surface-border);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-md);
+  max-height: 280px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(116, 167, 215, 0.15) transparent;
+}
+
+.library-folder-tree::-webkit-scrollbar {
+  width: 4px;
+}
+
+.library-folder-tree::-webkit-scrollbar-thumb {
+  background: rgba(116, 167, 215, 0.2);
+  border-radius: 2px;
+}
+
+.library-folder-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  border-left: 2px solid transparent;
+  font-size: 0.85rem;
+  color: var(--main-white);
+  transition:
+    background var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+.library-folder-item:hover {
+  background: rgba(116, 167, 215, 0.08);
+}
+
+.library-folder-item-active {
+  border-left-color: var(--orange2);
+  color: var(--bright-white);
+  background: rgba(116, 167, 215, 0.06);
+}
+
+.library-folder-toggle {
+  display: inline-block;
+  width: 14px;
+  font-size: 0.6rem;
+  color: var(--main-gray);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.library-folder-toggle.expanded {
+  transform: rotate(90deg);
+}
+
+.library-folder-children {
+  /* Nested items are already indented via padding-left */
+}
+
+.library-folder-count {
+  font-size: 0.72rem;
+  color: var(--main-gray);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.library-folder-actions {
+  font-size: 1rem;
+  color: var(--main-gray);
+  opacity: 0;
+  cursor: pointer;
+  padding: 0 4px;
+  transition:
+    opacity var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.library-folder-item:hover .library-folder-actions {
+  opacity: 1;
+}
+
+.library-folder-actions:hover {
+  color: var(--red);
+}

@@ -21,6 +21,7 @@ exports.newImageForUser = newImageForUser;
 exports.removeImageFromBucket = removeImageFromBucket;
 exports.removeImageByProject = removeImageByProject;
 exports.removeImageByTableUser = removeImageByTableUser;
+exports.removeImageByUser = removeImageByUser;
 exports.editImageNotes = editImageNotes;
 const aws_sdk_1 = require("aws-sdk");
 const fs_1 = require("fs");
@@ -408,6 +409,39 @@ function removeImageByTableUser(req, res, next) {
         }
         catch (err) {
             logger_js_1.default.error({ err, imageId: req.params.image_id, tableId: req.params.table_id }, "Failed to remove image by table user");
+            next(err);
+        }
+    });
+}
+function removeImageByUser(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const imageData = yield (0, images_1.getImageQuery)(req.params.image_id);
+            const image = imageData.rows[0];
+            yield deleteFromS3("wyrld/images", image.file_name);
+            yield (0, images_1.removeImageQuery)(req.params.image_id);
+            invalidateSignedUrlCache(req.params.image_id).catch((err) => logger_js_1.default.warn({ err, imageId: req.params.image_id }, "Failed to invalidate signed URL cache"));
+            const userData = yield (0, users_1.getUserByIdQuery)(req.session.user);
+            const user = userData.rows[0];
+            yield (0, users_1.editUserQuery)(user.id, {
+                used_data_in_bytes: user.used_data_in_bytes - image.size,
+            });
+            (0, eventLogger_1.logEventAsync)({
+                userId: req.session.user,
+                eventType: eventLogger_1.EventType.IMAGE_DELETED,
+                eventData: {
+                    imageId: req.params.image_id,
+                    fileName: image.original_name,
+                    fileSize: image.size,
+                },
+                req,
+            });
+            res.status(204).send();
+        }
+        catch (err) {
+            logger_js_1.default.error({ err, imageId: req.params.image_id }, "Failed to remove image by user");
             next(err);
         }
     });

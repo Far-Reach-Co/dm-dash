@@ -11,6 +11,7 @@ import { getCalendarsQuery } from "../api/queries/calendars";
 import { getRecordsByProjectQuery } from "../api/queries/record";
 import { getUserByIdQuery, User } from "../api/queries/users";
 import { humanFileSize } from "../lib/utils";
+import { getTableImageCountByProjectQuery } from "../api/queries/tableImages";
 import {
   requireProjectEditorOrRedirect,
   requireProjectMemberOrRedirect,
@@ -63,6 +64,10 @@ router.get(
       // records
       const recordsData = await getRecordsByProjectQuery(project.id);
 
+      // image count
+      const imageCountData = await getTableImageCountByProjectQuery(project.id);
+      const imageCount = parseInt(imageCountData.rows[0].count);
+
       // calculate used data formatted
       const usedDataFormatted = humanFileSize(project.used_data_in_bytes);
 
@@ -86,6 +91,7 @@ router.get(
         sheets: players,
         calendars: calendars.rows,
         records: recordsData.rows,
+        imageCount,
         usedDataFormatted,
         inviteLink,
         inviteId,

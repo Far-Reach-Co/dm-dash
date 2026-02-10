@@ -16,6 +16,7 @@ const playerUsers_1 = require("../api/queries/playerUsers");
 const projects_1 = require("../api/queries/projects");
 const projectUsers_1 = require("../api/queries/projectUsers");
 const record_1 = require("../api/queries/record");
+const tableImages_1 = require("../api/queries/tableImages");
 const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -41,6 +42,8 @@ router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             sharedProjectList.push(sharedProjectData.rows[0]);
         }
         const recordsData = yield (0, record_1.getRecordsByUserQuery)(userId);
+        const imageCountData = yield (0, tableImages_1.getTableImageCountByUserQuery)(userId);
+        const imageCount = parseInt(imageCountData.rows[0].count);
         res.render("dash", {
             auth: userId,
             tables: tableData.rows,
@@ -49,6 +52,7 @@ router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, functi
             projects: projectData.rows,
             sharedProjects: sharedProjectList,
             records: recordsData.rows,
+            imageCount,
         });
     }
     catch (err) {

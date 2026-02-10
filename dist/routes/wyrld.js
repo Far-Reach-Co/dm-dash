@@ -19,6 +19,7 @@ const calendars_1 = require("../api/queries/calendars");
 const record_1 = require("../api/queries/record");
 const users_1 = require("../api/queries/users");
 const utils_1 = require("../lib/utils");
+const tableImages_1 = require("../api/queries/tableImages");
 const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,6 +49,8 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         }
         const calendars = yield (0, calendars_1.getCalendarsQuery)(projectId);
         const recordsData = yield (0, record_1.getRecordsByProjectQuery)(project.id);
+        const imageCountData = yield (0, tableImages_1.getTableImageCountByProjectQuery)(project.id);
+        const imageCount = parseInt(imageCountData.rows[0].count);
         const usedDataFormatted = (0, utils_1.humanFileSize)(project.used_data_in_bytes);
         let inviteLink = null;
         let inviteId = null;
@@ -67,6 +70,7 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
             sheets: players,
             calendars: calendars.rows,
             records: recordsData.rows,
+            imageCount,
             usedDataFormatted,
             inviteLink,
             inviteId,

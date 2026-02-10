@@ -1,3 +1,5 @@
+@import url("/css/components/folder-tree.css");
+
 * {
   user-select: none;
   -moz-user-select: none;
@@ -337,21 +339,21 @@
   flex-shrink: 0;
 }
 
-.folder-item {
-  width: 100%;
+.table-sidebar-filters {
+  display: flex;
+  gap: var(--space-sm);
   padding: var(--space-xs) var(--space-sm);
+  align-items: center;
+}
+
+.table-sidebar-search {
+  flex: 1;
+  padding: 8px var(--space-sm);
+  background: rgba(31, 37, 49, 0.85);
+  border: 1px solid var(--surface-border);
   border-radius: var(--border-radius);
-  transition: background-color var(--transition-fast);
-}
-
-.folder-item:hover {
-  background-color: var(--blue3);
-  cursor: pointer;
-}
-
-.folder-item-selected {
-  background-color: var(--blue3);
-  color: var(--green);
+  color: var(--main-white);
+  font-size: 0.8rem;
 }
 
 /* ==========================================================================

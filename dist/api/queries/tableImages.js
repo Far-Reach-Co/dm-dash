@@ -22,6 +22,14 @@ exports.removeTableImageQuery = removeTableImageQuery;
 exports.editTableImageQuery = editTableImageQuery;
 exports.getTableImagesWithImageByProjectQuery = getTableImagesWithImageByProjectQuery;
 exports.getTableImagesWithImageByUserQuery = getTableImagesWithImageByUserQuery;
+exports.getTableImageCountByUserQuery = getTableImageCountByUserQuery;
+exports.getTableImageCountByProjectQuery = getTableImageCountByProjectQuery;
+exports.getTableImagesWithImageByUserPaginatedQuery = getTableImagesWithImageByUserPaginatedQuery;
+exports.getTableImagesWithImageByProjectPaginatedQuery = getTableImagesWithImageByProjectPaginatedQuery;
+exports.getTableImagesWithImageByUserInFolderQuery = getTableImagesWithImageByUserInFolderQuery;
+exports.getTableImagesWithImageByProjectInFolderQuery = getTableImagesWithImageByProjectInFolderQuery;
+exports.getTableImageCountsByUserQuery = getTableImageCountsByUserQuery;
+exports.getTableImageCountsByProjectQuery = getTableImageCountsByProjectQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
 function addTableImageByProjectQuery(data) {
@@ -90,7 +98,7 @@ function getTableImagesWithImageByProjectQuery(project_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
             text: `
-      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, ri.record_id, r.title, r.description
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title, r.description
       FROM public."TableImage" ti
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
@@ -106,7 +114,7 @@ function getTableImagesWithImageByUserQuery(user_id) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
             text: `
-      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, ri.record_id, r.title AS record_title, r.description AS record_desc
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title AS record_title, r.description AS record_desc
       FROM public."TableImage" ti
       JOIN public."Image" i ON ti.image_id = i.id
       LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
@@ -130,6 +138,126 @@ function removeTableImageQuery(id) {
 function editTableImageQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = (0, utils_1.buildUpdateQuery)("TableImage", data, id);
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImageCountByUserQuery(user_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `SELECT COUNT(*) FROM public."TableImage" WHERE user_id = $1`,
+            values: [user_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImageCountByProjectQuery(project_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `SELECT COUNT(*) FROM public."TableImage" WHERE project_id = $1`,
+            values: [project_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImagesWithImageByUserPaginatedQuery(user_id, limit, offset) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title AS record_title, r.description AS record_desc
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.user_id = $1 AND i.is_blocked = false
+      ORDER BY i.original_name ASC
+      LIMIT $2 OFFSET $3
+    `,
+            values: [user_id, limit, offset]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImagesWithImageByProjectPaginatedQuery(project_id, limit, offset) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title, r.description
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.project_id = $1 AND i.is_blocked = false
+      ORDER BY i.original_name ASC
+      LIMIT $2 OFFSET $3
+    `,
+            values: [project_id, limit, offset]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImagesWithImageByUserInFolderQuery(user_id, folder_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title AS record_title, r.description AS record_desc
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.user_id = $1 AND i.is_blocked = false
+        AND ti.folder_id IS NOT DISTINCT FROM $2
+      ORDER BY i.original_name ASC
+    `,
+            values: [user_id, folder_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImageCountsByUserQuery(user_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.folder_id, COUNT(*)::int AS count
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.user_id = $1 AND i.is_blocked = false
+      GROUP BY ti.folder_id
+    `,
+            values: [user_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImageCountsByProjectQuery(project_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.folder_id, COUNT(*)::int AS count
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      WHERE ti.project_id = $1 AND i.is_blocked = false
+      GROUP BY ti.folder_id
+    `,
+            values: [project_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImagesWithImageByProjectInFolderQuery(project_id, folder_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `
+      SELECT ti.*, i.original_name, i.size, i.file_name, i.notes, i.created_at, ri.record_id, r.title, r.description
+      FROM public."TableImage" ti
+      JOIN public."Image" i ON ti.image_id = i.id
+      LEFT JOIN public."RecordImage" ri ON i.id = ri.image_id
+      LEFT JOIN public."Record" r ON ri.record_id = r.id
+      WHERE ti.project_id = $1 AND i.is_blocked = false
+        AND ti.folder_id IS NOT DISTINCT FROM $2
+      ORDER BY i.original_name ASC
+    `,
+            values: [project_id, folder_id]
+        };
         return yield dbconfig_1.default.query(query);
     });
 }
