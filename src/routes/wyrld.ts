@@ -24,7 +24,8 @@ router.get(
   "/wyrld",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/login")) return;
+      const userId = requireUserOrRedirect(req, res, "/login");
+      if (!userId) return;
       // get project id
       if (!req.query.id) return res.redirect("/dash");
       const projectId = req.query.id as string;
@@ -37,9 +38,9 @@ router.get(
       if (!project) return;
 
       let projectAuth = true;
-      if (req.session.user != project.user_id) {
+      if (userId != project.user_id) {
         const projectUserData = await getProjectUserByUserAndProjectQuery(
-          req.session.user,
+          userId,
           projectId,
         );
         const projectUser = projectUserData.rows[0];
@@ -78,7 +79,7 @@ router.get(
       }
 
       res.render("wyrld", {
-        auth: req.session.user,
+        auth: userId,
         projectAuth,
         project: project,
         tables: tableData.rows,
@@ -104,7 +105,8 @@ router.get(
   "/wyrldsettings",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/forbidden")) return;
+      const userId = requireUserOrRedirect(req, res, "/forbidden");
+      if (!userId) return;
       // get project id
       if (!req.query.id) return res.redirect("/dash");
       const projectId = req.query.id as string;
@@ -146,7 +148,7 @@ router.get(
       }
 
       return res.render("wyrldsettings", {
-        auth: req.session.user,
+        auth: userId,
         inviteLink,
         inviteId,
         project,
@@ -163,7 +165,8 @@ router.get(
   "/sharedwyrldsettings",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/forbidden")) return;
+      const userId = requireUserOrRedirect(req, res, "/forbidden");
+      if (!userId) return;
       // get project id
       if (!req.query.id) return res.redirect("/dash");
       const projectId = req.query.id as string;
@@ -176,14 +179,14 @@ router.get(
       if (!project) return;
 
       const projectUserData = await getProjectUserByUserAndProjectQuery(
-        req.session.user,
+        userId,
         project.id,
       );
       if (!projectUserData.rows.length) return res.redirect("/forbidden");
       const projectUser = projectUserData.rows[0];
 
       return res.render("sharedwyrldsettings", {
-        auth: req.session.user,
+        auth: userId,
         projectUserId: projectUser.id,
         project,
       });
@@ -197,7 +200,8 @@ router.get(
   "/newwyrldtable",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/forbidden")) return;
+      const userId = requireUserOrRedirect(req, res, "/forbidden");
+      if (!userId) return;
       // get project id
       if (!req.query.id) return res.redirect("/dash");
       const projectId = req.query.id as string;
@@ -209,7 +213,7 @@ router.get(
       );
       if (!project) return;
       res.render("newwyrldtable", {
-        auth: req.session.user,
+        auth: userId,
         projectId: project.id,
       });
     } catch (err) {
@@ -222,7 +226,8 @@ router.get(
   "/newwyrldcalendar",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/forbidden")) return;
+      const userId = requireUserOrRedirect(req, res, "/forbidden");
+      if (!userId) return;
       // get project id
       if (!req.query.id) return res.redirect("/dash");
       const projectId = req.query.id as string;
@@ -234,7 +239,7 @@ router.get(
       );
       if (!project) return;
       res.render("newwyrldcalendar", {
-        auth: req.session.user,
+        auth: userId,
         projectId: project.id,
       });
     } catch (err) {
@@ -247,7 +252,8 @@ router.get(
   "/newwyrldrecord",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/forbidden")) return;
+      const userId = requireUserOrRedirect(req, res, "/forbidden");
+      if (!userId) return;
       // get project id
       if (!req.query.id) return res.redirect("/dash");
       const projectId = req.query.id as string;
@@ -259,7 +265,7 @@ router.get(
       );
       if (!project) return;
       res.render("newwyrldrecord", {
-        auth: req.session.user,
+        auth: userId,
         projectId: project.id,
       });
     } catch (err) {
@@ -270,8 +276,9 @@ router.get(
 
 router.get("/newwyrld", (req: Request, res: Response, next: NextFunction) => {
   try {
-    if (!requireUserOrRedirect(req, res, "/forbidden")) return;
-    res.render("newwyrld", { auth: req.session.user });
+    const userId = requireUserOrRedirect(req, res, "/forbidden");
+    if (!userId) return;
+    res.render("newwyrld", { auth: userId });
   } catch (err) {
     next(err);
   }

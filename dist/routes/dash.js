@@ -20,28 +20,29 @@ const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 router.get("/dash", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (!(0, authz_1.requireUserOrRedirect)(req, res, "/login"))
+        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
+        if (!userId)
             return;
-        const tableData = yield (0, tableViews_1.getTableViewsByUserQuery)(req.session.user);
-        const charData = yield (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(req.session.user);
+        const tableData = yield (0, tableViews_1.getTableViewsByUserQuery)(userId);
+        const charData = yield (0, _5eCharGeneral_1.get5eCharsGeneralByUserQuery)(userId);
         const sharedCharData = [];
-        const playerUsersData = yield (0, playerUsers_1.getPlayerUsersQuery)(req.session.user);
+        const playerUsersData = yield (0, playerUsers_1.getPlayerUsersQuery)(userId);
         if (playerUsersData.rows.length) {
             for (const playerUser of playerUsersData.rows) {
                 const puCharData = yield (0, _5eCharGeneral_1.get5eCharGeneralQuery)(playerUser.player_id);
                 sharedCharData.push(puCharData.rows[0]);
             }
         }
-        const projectData = yield (0, projects_1.getProjectsQuery)(req.session.user);
+        const projectData = yield (0, projects_1.getProjectsQuery)(userId);
         const sharedProjectList = [];
-        const projectUserData = yield (0, projectUsers_1.getProjectUsersQuery)(req.session.user);
+        const projectUserData = yield (0, projectUsers_1.getProjectUsersQuery)(userId);
         for (const projectUser of projectUserData.rows) {
             const sharedProjectData = yield (0, projects_1.getProjectQuery)(projectUser.project_id);
             sharedProjectList.push(sharedProjectData.rows[0]);
         }
-        const recordsData = yield (0, record_1.getRecordsByUserQuery)(req.session.user);
+        const recordsData = yield (0, record_1.getRecordsByUserQuery)(userId);
         res.render("dash", {
-            auth: req.session.user,
+            auth: userId,
             tables: tableData.rows,
             sheets: charData.rows,
             sharedSheets: sharedCharData,

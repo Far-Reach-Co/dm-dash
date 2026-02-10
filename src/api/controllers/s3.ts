@@ -134,7 +134,7 @@ async function getSignedUrls(images: Image[]) {
     getSignedUrlCacheKey(imageData.id),
   );
   const cachedUrls = cacheKeys.length
-    ? await redisClient.mGet(...cacheKeys)
+    ? await redisClient.mGet(cacheKeys)
     : [];
 
   for (let i = 0; i < images.length; i++) {

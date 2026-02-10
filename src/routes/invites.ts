@@ -15,11 +15,12 @@ router.get(
   "/invite",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "forbidden")) return;
+      const userId = requireUserOrRedirect(req, res, "forbidden");
+      if (!userId) return;
       // if no invite uuid in params
       if (!req.query.invite)
         return res.render("invite", {
-          auth: req.session.user,
+          auth: userId,
           error: "Can't find invite",
         });
       // if no invite
@@ -27,7 +28,7 @@ router.get(
       const inviteData = await getProjectInviteByUUIDQuery(inviteUUID);
       if (!inviteData.rows.length)
         return res.render("invite", {
-          auth: req.session.user,
+          auth: userId,
           error: "Can't find invite",
         });
       // if no project
@@ -35,31 +36,31 @@ router.get(
       const projectData = await getProjectQuery(invite.project_id);
       if (!projectData.rows.length)
         return res.render("invite", {
-          auth: req.session.user,
+          auth: userId,
           error: "Can't find the wyrld related to this invite",
         });
       // if are the owner/creator
       const project = projectData.rows[0];
-      if (project.user_id == req.session.user)
+      if (project.user_id == userId)
         return res.render("invite", {
-          auth: req.session.user,
+          auth: userId,
           error: "You already own this wyrld",
         });
       // if already a member
       const projectUserData = await getProjectUserByUserAndProjectQuery(
-        req.session.user,
+        userId,
         project.id,
       );
       if (projectUserData.rows.length)
         return res.render("invite", {
-          auth: req.session.user,
+          auth: userId,
           error: "You already joined this wyrld",
         });
 
       // safe
       await addProjectUserQuery({
         project_id: invite.project_id,
-        user_id: req.session.user,
+        user_id: userId,
         is_editor: false,
       });
 
@@ -75,7 +76,8 @@ router.get(
   "/wyrld-welcome",
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!requireUserOrRedirect(req, res, "/login")) return;
+      const userId = requireUserOrRedirect(req, res, "/login");
+      if (!userId) return;
       if (!req.query.id) return res.redirect("/dash");
 
       const projectId = req.query.id as string;
@@ -85,7 +87,7 @@ router.get(
       const project = projectData.rows[0];
 
       // Get user's character sheets
-      const userSheets = await get5eCharsGeneralByUserQuery(req.session.user);
+      const userSheets = await get5eCharsGeneralByUserQuery(userId);
 
       // Get sheets already linked to this wyrld
       const projectPlayers = await getProjectPlayersByProjectQuery(projectId);
@@ -99,7 +101,7 @@ router.get(
       );
 
       res.render("wyrld-welcome", {
-        auth: req.session.user,
+        auth: userId,
         project,
         unlinkedSheets,
       });
