@@ -19,6 +19,7 @@ exports.getProjectsByIdsQuery = getProjectsByIdsQuery;
 exports.removeProjectQuery = removeProjectQuery;
 exports.editProjectQuery = editProjectQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
+const utils_1 = require("./utils");
 function addProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -69,20 +70,7 @@ function getProjectsByIdsQuery(projectIds) {
 }
 function editProjectQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        let edits = ``;
-        let values = [];
-        let iterator = 1;
-        for (const [key, value] of Object.entries(data)) {
-            edits += `${key} = $${iterator}, `;
-            values.push(value);
-            iterator++;
-        }
-        edits = edits.slice(0, -2);
-        values.push(id);
-        const query = {
-            text: `update public."Project" set ${edits} where id = $${iterator} returning *`,
-            values: values,
-        };
+        const query = (0, utils_1.buildUpdateQuery)("Project", data, id);
         return yield dbconfig_1.default.query(query);
     });
 }

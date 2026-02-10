@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 
 export interface Image {
   id: number,
@@ -53,25 +54,8 @@ async function removeImageQuery(id: string | number) {
 }
 
 async function editImageQuery(id: string, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
-  const query = {
-    text: /*sql*/ `update public."Image" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<Image>(query)
+  const query = buildUpdateQuery("Image", data, id);
+  return await db.query<Image>(query);
 }
 
 export {

@@ -18,6 +18,7 @@ exports.getCalendarQuery = getCalendarQuery;
 exports.removeCalendarQuery = removeCalendarQuery;
 exports.editCalendarQuery = editCalendarQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
+const utils_1 = require("./utils");
 function addCalendarQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -60,20 +61,7 @@ function removeCalendarQuery(id) {
 }
 function editCalendarQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        let edits = ``;
-        let values = [];
-        let iterator = 1;
-        for (const [key, value] of Object.entries(data)) {
-            edits += `${key} = $${iterator}, `;
-            values.push(value);
-            iterator++;
-        }
-        edits = edits.slice(0, -2);
-        values.push(id);
-        const query = {
-            text: `update public."Calendar" set ${edits} where id = $${iterator} returning *`,
-            values: values,
-        };
+        const query = (0, utils_1.buildUpdateQuery)("Calendar", data, id);
         return yield dbconfig_1.default.query(query);
     });
 }

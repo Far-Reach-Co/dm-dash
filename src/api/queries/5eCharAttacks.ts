@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 import { columnNamesQuery } from "./utils";
 
 interface DndFiveEAttack {
@@ -80,25 +81,8 @@ async function remove5eCharAttackQuery(id: string | number) {
 }
 
 async function edit5eCharAttackQuery(id: string, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
-  const query = {
-    text: /*sql*/ `update public."dnd_5e_character_attack" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<DndFiveEAttack>(query)
+  const query = buildUpdateQuery("dnd_5e_character_attack", data, id);
+  return await db.query<DndFiveEAttack>(query);
 }
 
 export {

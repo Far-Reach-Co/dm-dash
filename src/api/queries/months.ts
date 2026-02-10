@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 
 export interface Month {
   id: number,
@@ -52,25 +53,8 @@ async function removeMonthQuery(id: string | number) {
 }
 
 async function editMonthQuery(id: string, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
-  const query = {
-    text: /*sql*/ `update public."Month" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<Month>(query)
+  const query = buildUpdateQuery("Month", data, id);
+  return await db.query<Month>(query);
 }
 
 export {

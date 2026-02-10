@@ -1,5 +1,6 @@
 import { QueryResult } from "pg";
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 import { columnNamesQuery } from "./utils";
 
 export interface DndFiveEGeneral {
@@ -131,24 +132,8 @@ async function remove5eCharGeneralQuery(id: string | number) {
 }
 
 async function edit5eCharGeneralQuery(id: string, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-  const query = {
-    text: /*sql*/ `update public."dnd_5e_character_general" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<DndFiveEGeneral>(query)
+  const query = buildUpdateQuery("dnd_5e_character_general", data, id);
+  return await db.query<DndFiveEGeneral>(query);
 }
 
 export {

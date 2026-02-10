@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 
 interface Clock {
   id: number,
@@ -49,25 +50,8 @@ async function removeClockQuery(id: string) {
 }
 
 async function editClockQuery(id: string, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
-  const query = {
-    text: /*sql*/ `update public."Clock" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<Clock>(query)
+  const query = buildUpdateQuery("Clock", data, id);
+  return await db.query<Clock>(query);
 }
 
 export {

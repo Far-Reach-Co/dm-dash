@@ -22,6 +22,7 @@ exports.get5eCharNamesQuery = get5eCharNamesQuery;
 exports.duplicate5eCharGeneralQuery = duplicate5eCharGeneralQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
 const utils_1 = require("./utils");
+const utils_2 = require("./utils");
 function add5eCharGeneralQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
@@ -37,7 +38,7 @@ function add5eCharGeneralQuery(data) {
 function duplicate5eCharGeneralQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableName = "dnd_5e_character_general";
-        const columnNames = yield (0, utils_1.columnNamesQuery)(tableName);
+        const columnNames = yield (0, utils_2.columnNamesQuery)(tableName);
         const columnStr = columnNames.join(", ");
         const selectStr = columnNames.map(col => {
             if (col === "name")
@@ -107,20 +108,7 @@ function remove5eCharGeneralQuery(id) {
 }
 function edit5eCharGeneralQuery(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
-        let edits = ``;
-        let values = [];
-        let iterator = 1;
-        for (const [key, value] of Object.entries(data)) {
-            edits += `${key} = $${iterator}, `;
-            values.push(value);
-            iterator++;
-        }
-        edits = edits.slice(0, -2);
-        values.push(id);
-        const query = {
-            text: `update public."dnd_5e_character_general" set ${edits} where id = $${iterator} returning *`,
-            values: values,
-        };
+        const query = (0, utils_1.buildUpdateQuery)("dnd_5e_character_general", data, id);
         return yield dbconfig_1.default.query(query);
     });
 }

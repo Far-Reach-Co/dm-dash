@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 
 export interface Project {
   id: number;
@@ -56,25 +57,8 @@ async function getProjectsByIdsQuery(projectIds: (string | number)[]) {
 }
 
 async function editProjectQuery(id: string | number, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
-  const query = {
-    text: /*sql*/ `update public."Project" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<Project>(query)
+  const query = buildUpdateQuery("Project", data, id);
+  return await db.query<Project>(query);
 }
 
 export {

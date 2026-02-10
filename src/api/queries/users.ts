@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { buildUpdateQuery } from "./utils";
 
 export interface User {
   id: number,
@@ -48,25 +49,8 @@ async function registerUserQuery({email , username, password}: {email: string, u
 }
 
 async function editUserQuery(id: string | number, data: any) {
-  let edits = ``
-  let values = []
-  let iterator = 1
-
-  for(const [key, value] of Object.entries(data)) {
-    edits += `${key} = $${iterator}, `;
-    values.push(value)
-    iterator++
-  }
-
-  edits = edits.slice(0, -2)
-  values.push(id)
-
-  const query = {
-    text: /*sql*/ `update public."User" set ${edits} where id = $${iterator} returning *`,
-    values: values,
-  }
-
-  return await db.query<User>(query)
+  const query = buildUpdateQuery("User", data, id);
+  return await db.query<User>(query);
 }
 
 async function editUserPasswordQuery(id: string | number, password: string) {

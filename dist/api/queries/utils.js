@@ -13,7 +13,28 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.columnNamesQuery = columnNamesQuery;
+exports.buildUpdateQuery = buildUpdateQuery;
 const dbconfig_1 = __importDefault(require("../dbconfig"));
+function buildUpdateQuery(tableName, data, id, options) {
+    let edits = ``;
+    const values = [];
+    let iterator = 1;
+    const idColumn = (options === null || options === void 0 ? void 0 : options.idColumn) || "id";
+    for (const [key, value] of Object.entries(data)) {
+        edits += `${key} = $${iterator}, `;
+        values.push(value);
+        iterator++;
+    }
+    if (!edits) {
+        throw new Error("No fields provided for update");
+    }
+    edits = edits.slice(0, -2);
+    values.push(id);
+    return {
+        text: `update public."${tableName}" set ${edits} where ${idColumn} = $${iterator} returning *`,
+        values,
+    };
+}
 function columnNamesQuery(tableName) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
