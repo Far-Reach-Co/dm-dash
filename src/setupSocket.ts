@@ -112,6 +112,20 @@ export default function setupSocketHandlers(
       }
     );
 
+    socket.on(
+      "pin-added",
+      ({ table, pin }: { table: string; pin: any }) => {
+        socket.broadcast.to(table).emit("pin-add", pin);
+      }
+    );
+
+    socket.on(
+      "location-pins-updated",
+      ({ table }: { table: string }) => {
+        socket.broadcast.to(table).emit("reload-location-pins");
+      }
+    );
+
     // when a user disconnects
     socket.on("disconnect", async () => {
       const user = await userLeave(socket.id);

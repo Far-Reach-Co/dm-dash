@@ -123,6 +123,12 @@ import {
   editTableView,
 } from "./controllers/tableViews.js";
 import {
+  getLocationPinsByTableView,
+  addLocationPin,
+  removeLocationPin,
+  updateLocationPin,
+} from "./controllers/locationPins.js";
+import {
   addPlayerInvite,
   getPlayerInviteByPlayer,
   getPlayerInviteByUUID,
@@ -292,6 +298,10 @@ router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view_data/:id", editTableViewData);
 router.post("/edit_table_view/:id", editTableView);
+router.get("/get_location_pins/:table_view_id", getLocationPinsByTableView);
+router.post("/add_location_pin", addLocationPin);
+router.delete("/remove_location_pin/:id", removeLocationPin);
+router.post("/edit_location_pin/:id", updateLocationPin);
 
 // table images
 router.get(

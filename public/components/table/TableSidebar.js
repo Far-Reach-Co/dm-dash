@@ -340,9 +340,7 @@ export default class TableSidebar {
             const formProps = Object.fromEntries(formData);
             const tableUUID = formProps.table_uuid;
             if (tableUUID != 0) {
-              // push all viewers
               socketIntegration.tableChanged(tableUUID);
-              this.tableApp.reloadTableByUUID(tableUUID, { historyMode: "push" });
             }
           },
         },
@@ -423,7 +421,6 @@ export default class TableSidebar {
           class: "success-message",
           id: "title-update-success",
         }),
-
         createElement("hr"),
         createElement("button", { class: "btn-red" }, "Delete Table", {
           type: "click",
@@ -443,6 +440,7 @@ export default class TableSidebar {
       ]),
     ]);
   };
+
 
   renderShareBtn = () => {
     // Static SVG string — safe, no user input

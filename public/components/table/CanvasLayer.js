@@ -5,6 +5,9 @@ import GridManager from "./GridManager.js";
 import throttle from "../../lib/throttle.js";
 import detectMob from "../../lib/detectMobile.js";
 
+const LOCATION_PIN_PATH =
+  "M 0 -28 C -12 -28 -24 -16 -24 -3 C -24 12 -10 36 0 56 C 10 36 24 12 24 -3 C 24 -16 12 -28 0 -28 Z M 0 -12 A 6 6 0 1 0 0 -12.01 Z";
+
 export default class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
@@ -78,6 +81,64 @@ export default class CanvasLayer {
 
     // overwrite the brush width
     this.canvas.freeDrawingBrush.width = 10;
+  };
+
+  getViewportCenter = () => {
+    if (!this.canvas) return { left: 0, top: 0 };
+    const width = this.canvas.getWidth();
+    const height = this.canvas.getHeight();
+    const viewport = this.canvas.viewportTransform;
+    if (!viewport) {
+      return { left: width / 2, top: height / 2 };
+    }
+    const point = new fabric.Point(width / 2, height / 2);
+    const inverted = fabric.util.invertTransform(viewport);
+    const transformed = fabric.util.transformPoint(point, inverted);
+    return { left: transformed.x, top: transformed.y };
+  };
+
+  createLocationPinMarker = ({ broadcast = true } = {}) => {
+    const coords = this.getViewportCenter();
+    const pin = this.createLocationPinShape({
+      left: coords.left,
+      top: coords.top,
+      layer: this.tableApp.currentLayer,
+    });
+    this.canvas.add(pin);
+    this.placeObjectOnLayer(pin);
+    this.canvas.setActiveObject(pin);
+    this.canvas.requestRenderAll();
+    this.setupObjectEventListeners(pin);
+    return pin;
+  };
+
+  createLocationPinShape = (props = {}) => {
+    const centerX = props.left ?? this.canvas.getWidth() / 2;
+    const centerY = props.top ?? this.canvas.getHeight() / 2;
+    const pin = new fabric.Path(LOCATION_PIN_PATH, {
+      id: props.id ?? uuidv4(),
+      left: centerX,
+      top: centerY,
+      originX: props.originX ?? "center",
+      originY: props.originY ?? "center",
+      fill: props.fill ?? "rgba(246, 211, 101, 0.95)",
+      stroke: props.stroke ?? "#f4c430",
+      strokeWidth:
+        typeof props.strokeWidth === "number" ? props.strokeWidth : 3,
+      scaleX: typeof props.scaleX === "number" ? props.scaleX : 1,
+      scaleY: typeof props.scaleY === "number" ? props.scaleY : 1,
+      angle: props.angle ?? 0,
+      layer: props.layer ?? "Object",
+      selectable: true,
+      evented: true,
+      hasControls: false,
+      lockScalingX: true,
+      lockScalingY: true,
+      lockRotation: true,
+    });
+    pin.isLocationPin = true;
+    this.tableApp.enforceLocationPinConstraints(pin);
+    return pin;
   };
 
   createNewOrSetupSaved = async () => {
@@ -579,6 +640,30 @@ export default class CanvasLayer {
         resolve();
       });
     });
+  };
+
+  addLocationPinFromSocket = (pinData) => {
+    if (!pinData || !pinData.id) return;
+    if (this.canvas.getObjects().some((obj) => obj.id === pinData.id)) return;
+    const pin = this.createLocationPinShape({
+      left: pinData.left,
+      top: pinData.top,
+      originX: pinData.originX,
+      originY: pinData.originY,
+      fill: pinData.fill,
+      stroke: pinData.stroke,
+      strokeWidth: pinData.strokeWidth,
+      scaleX: pinData.scaleX,
+      scaleY: pinData.scaleY,
+      angle: pinData.angle,
+      layer: pinData.layer,
+      id: pinData.id,
+    });
+    this.canvas.add(pin);
+    this.placeObjectOnLayer(pin);
+    this.setupObjectEventListeners(pin);
+    this.tableApp.enforceLocationPinConstraints(pin);
+    this.canvas.renderAll();
   };
 
   hideGrid = () => {

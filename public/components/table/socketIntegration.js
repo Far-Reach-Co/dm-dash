@@ -13,19 +13,8 @@ class SocketIntegration {
 
     // TABLE CHANGE
     this.socket.on("table-change", (newTableUUID) => {
-      const searchParams = new URLSearchParams(window.location.search);
-      searchParams.set("uuid", newTableUUID);
-      const newSearchParamsString = searchParams.toString();
-
-      const newUrl = window.location.pathname + "?" + newSearchParamsString;
-      // Prompt the user
-      if (
-        confirm(
-          "The GM has requested that you migrate to a new virtual table location, would you like to proceed?"
-        )
-      ) {
-        window.location.href = newUrl;
-      }
+      if (!newTableUUID) return;
+      this.tableApp.reloadTableByUUID(newTableUUID, { historyMode: "push" });
     });
     // ERROR
     this.socket.on("connect_error", (error) => {
@@ -155,6 +144,16 @@ class SocketIntegration {
       });
       //
     });
+
+    this.socket.on("pin-add", (pinData) => {
+      if (this.tableApp?.canvasLayer) {
+        this.tableApp.canvasLayer.addLocationPinFromSocket(pinData);
+      }
+    });
+
+    this.socket.on("reload-location-pins", () => {
+      this.tableApp.reloadLocationPins();
+    });
   };
 
   socketJoined = () => {
@@ -182,6 +181,7 @@ class SocketIntegration {
       table: `table-${this.tableApp.tableId}`,
       newTableUUID,
     });
+    this.tableApp.reloadTableByUUID(newTableUUID, { historyMode: "push" });
   };
 
   // GRID
@@ -209,6 +209,29 @@ class SocketIntegration {
     });
   };
 
+  pinAdded = (pinObject) => {
+    if (!pinObject) return;
+    const pinData = pinObject.toObject([
+      "left",
+      "top",
+      "fill",
+      "stroke",
+      "strokeWidth",
+      "scaleX",
+      "scaleY",
+      "angle",
+      "originX",
+      "originY",
+      "id",
+      "layer",
+      "path",
+    ]);
+    this.socket.emit("pin-added", {
+      table: `table-${this.tableApp.tableId}`,
+      pin: pinData,
+    });
+  };
+
   imageRemoved = (id) => {
     this.socket.emit("image-removed", {
       table: `table-${this.tableApp.tableId}`,
@@ -220,6 +243,12 @@ class SocketIntegration {
     this.socket.emit("image-moved", {
       table: `table-${this.tableApp.tableId}`,
       image,
+    });
+  };
+
+  locationPinsUpdated = () => {
+    this.socket.emit("location-pins-updated", {
+      table: `table-${this.tableApp.tableId}`,
     });
   };
 
