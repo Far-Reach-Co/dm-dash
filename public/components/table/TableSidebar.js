@@ -342,15 +342,7 @@ export default class TableSidebar {
             if (tableUUID != 0) {
               // push all viewers
               socketIntegration.tableChanged(tableUUID);
-              // push current user
-              const searchParams = new URLSearchParams(window.location.search);
-              searchParams.set("uuid", tableUUID);
-              const newSearchParamsString = searchParams.toString();
-
-              const newUrl =
-                window.location.pathname + "?" + newSearchParamsString;
-
-              window.location.href = newUrl;
+              this.tableApp.reloadTableByUUID(tableUUID, { historyMode: "push" });
             }
           },
         },

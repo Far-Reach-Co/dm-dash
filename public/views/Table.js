@@ -18,9 +18,13 @@ class Table {
     this.sidebar = null;
     this.hamburger = null;
     this.topLayer = null;
+    this.chatBoxComponent = null;
 
     this.currentLayer = "Object";
     this.currentSelectedObject = null;
+    this.isReloading = false;
+    this.socketListenersReady = false;
+    this.documentListeners = [];
 
     // Socket needs to control other components from table
     socketIntegration.tableApp = this;
@@ -30,7 +34,15 @@ class Table {
 
   init = async () => {
     const searchParams = new URLSearchParams(window.location.search);
-    this.tableId = searchParams.get("uuid");
+    const tableUUID = searchParams.get("uuid");
+    await this.loadTable(tableUUID, { historyMode: "replace" });
+  };
+
+  loadTable = async (tableUUID, { historyMode = "replace" } = {}) => {
+    if (!tableUUID) return;
+
+    this.updateUrl(tableUUID, historyMode);
+    this.tableId = tableUUID;
 
     const tableView = await getThings(
       `/api/get_table_view_by_uuid/${this.tableId}`
@@ -38,14 +50,19 @@ class Table {
     // TODO: error handling no table view by id
 
     // Handle user or anonymous
-    let user = await getThings("/api/get_user");
-    if (!user) {
-      const randomNumber = Math.floor(100000 + Math.random() * 900000); // random six digit number
-      user = { username: `user-${randomNumber}` };
+    if (!this.user) {
+      let user = await getThings("/api/get_user");
+      if (!user) {
+        const randomNumber = Math.floor(100000 + Math.random() * 900000); // random six digit number
+        user = { username: `user-${randomNumber}` };
+      }
+      this.user = user;
     }
-    this.user = user;
 
-    socketIntegration.setupListeners();
+    if (!this.socketListenersReady) {
+      socketIntegration.setupListeners();
+      this.socketListenersReady = true;
+    }
     socketIntegration.socketJoined();
 
     // Init elements
@@ -84,6 +101,45 @@ class Table {
     if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
       // USERID and IS_MANAGER_OR_OWNER is injected from template; check vtt.ejs
       this.renderSidebarAndHamburger();
+  };
+
+  updateUrl = (tableUUID, historyMode) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("uuid", tableUUID);
+    const newUrl = window.location.pathname + "?" + searchParams.toString();
+
+    if (historyMode === "push") {
+      history.pushState({}, "", newUrl);
+    } else {
+      history.replaceState({}, "", newUrl);
+    }
+  };
+
+  teardown = () => {
+    this.removeDocumentEventListeners();
+
+    if (this.canvasLayer?.canvas) {
+      this.canvasLayer.canvas.dispose();
+    }
+
+    this.currentSelectedObject = null;
+    this.canvasLayer = null;
+    this.sidebar = null;
+    this.hamburger = null;
+    this.topLayer = null;
+    this.chatBoxComponent = null;
+
+    this.domComponent.replaceChildren();
+  };
+
+  reloadTableByUUID = async (tableUUID, { historyMode = "replace" } = {}) => {
+    if (!tableUUID || tableUUID === this.tableId) return;
+    if (this.isReloading) return;
+
+    this.isReloading = true;
+    this.teardown();
+    await this.loadTable(tableUUID, { historyMode });
+    this.isReloading = false;
   };
 
   canvasRenderAll = () => {
@@ -129,7 +185,7 @@ class Table {
 
   setupDocumentEventListeners = () => {
     // KEYS
-    document.addEventListener("keydown", (e) => {
+    const onKeydown = (e) => {
       // alt key change cursor
       if (e.altKey) {
         this.canvasLayer.setCursorCrosshair();
@@ -144,35 +200,37 @@ class Table {
       if (e.ctrlKey && e.key == "t") {
         this.canvasLayer.moveObjectToTop();
       }
-    });
+    };
+    document.addEventListener("keydown", onKeydown);
+    this.documentListeners.push({ type: "keydown", handler: onKeydown });
 
-    document.addEventListener("keyup", (e) => {
+    const onKeyup = (e) => {
       var key = e.key;
 
       if (key === "Backspace" || key === "Delete") {
         this.canvasLayer.removeObjects();
       }
       this.canvasLayer.setCursorDefault();
-    });
+    };
+    document.addEventListener("keyup", onKeyup);
+    this.documentListeners.push({ type: "keyup", handler: onKeyup });
 
     // DOCUMENT MOUSE UP HACKS
     // save data in db after mouse up
-    document.addEventListener(
-      "mouseup",
-      throttle(async () => {
-        await this.canvasLayer.saveToDatabase();
-      }, 3000)
-    );
+    const onMouseupSave = throttle(async () => {
+      await this.canvasLayer.saveToDatabase();
+    }, 3000);
+    document.addEventListener("mouseup", onMouseupSave);
+    this.documentListeners.push({ type: "mouseup", handler: onMouseupSave });
     // save data on touch screen up
-    document.addEventListener(
-      "touchend",
-      throttle(async () => {
-        await this.canvasLayer.saveToDatabase();
-      }, 3000)
-    );
+    const onTouchendSave = throttle(async () => {
+      await this.canvasLayer.saveToDatabase();
+    }, 3000);
+    document.addEventListener("touchend", onTouchendSave);
+    this.documentListeners.push({ type: "touchend", handler: onTouchendSave });
 
     // Allow for drag image to canvas
-    document.addEventListener("mouseup", (e) => {
+    const onMouseupDrop = (e) => {
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
         // Drop succeeds unless mouse is still over the sidebar
@@ -182,7 +240,17 @@ class Table {
           );
       }
       imageFollowingCursor.remove();
-    });
+    };
+    document.addEventListener("mouseup", onMouseupDrop);
+    this.documentListeners.push({ type: "mouseup", handler: onMouseupDrop });
+  };
+
+  removeDocumentEventListeners = () => {
+    if (!this.documentListeners.length) return;
+    for (const listener of this.documentListeners) {
+      document.removeEventListener(listener.type, listener.handler);
+    }
+    this.documentListeners = [];
   };
 
   render = async () => {
