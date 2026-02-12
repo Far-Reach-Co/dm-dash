@@ -33,7 +33,7 @@ async function addTableViewByUserQuery(data: {user_id: string | number, title: s
   return await db.query<TableView>(query)
 }
 
-async function getTableViewQuery(id: string) {
+async function getTableViewQuery(id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."TableView" where id = $1`,
     values: [id]

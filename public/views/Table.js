@@ -1,5 +1,6 @@
 import createElement from "../components/createElement.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import { getPresignedUrlsForImages } from "../lib/imageUtils.js";
 import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/table/TableSidebar.js";
 import CanvasLayer from "../components/table/CanvasLayer.js";
@@ -8,6 +9,7 @@ import TopLayer from "../components/table/TopLayer.js";
 import ChatBoxComponent from "../components/table/ChatBox.js";
 import imageFollowingCursor from "../components/imageFollowingCursor.js";
 import throttle from "../lib/throttle.js";
+import showLocationPinModal from "../components/table/locationPinModal.js";
 
 class Table {
   constructor() {
@@ -18,9 +20,18 @@ class Table {
     this.sidebar = null;
     this.hamburger = null;
     this.topLayer = null;
+    this.chatBoxComponent = null;
 
     this.currentLayer = "Object";
     this.currentSelectedObject = null;
+    this.isReloading = false;
+    this.socketListenersReady = false;
+    this.documentListeners = [];
+    this.locationPins = [];
+    this.locationPinsByObjectId = new Map();
+    this.canManagePins = false;
+    this.tableView = null;
+    this.lastHighlightedPinObject = null;
 
     // Socket needs to control other components from table
     socketIntegration.tableApp = this;
@@ -30,22 +41,39 @@ class Table {
 
   init = async () => {
     const searchParams = new URLSearchParams(window.location.search);
-    this.tableId = searchParams.get("uuid");
+    const tableUUID = searchParams.get("uuid");
+    await this.loadTable(tableUUID, { historyMode: "replace" });
+  };
+
+  loadTable = async (tableUUID, { historyMode = "replace" } = {}) => {
+    if (!tableUUID) return;
+
+    this.updateUrl(tableUUID, historyMode);
+    this.tableId = tableUUID;
 
     const tableView = await getThings(
-      `/api/get_table_view_by_uuid/${this.tableId}`
+      `/api/get_table_view_by_uuid/${this.tableId}`,
     );
     // TODO: error handling no table view by id
 
-    // Handle user or anonymous
-    let user = await getThings("/api/get_user");
-    if (!user) {
-      const randomNumber = Math.floor(100000 + Math.random() * 900000); // random six digit number
-      user = { username: `user-${randomNumber}` };
-    }
-    this.user = user;
+    this.tableView = tableView;
+    this.canManagePins =
+      String(USERID) === String(tableView.user_id) || IS_MANAGER_OR_OWNER;
 
-    socketIntegration.setupListeners();
+    // Handle user or anonymous
+    if (!this.user) {
+      let user = await getThings("/api/get_user");
+      if (!user) {
+        const randomNumber = Math.floor(100000 + Math.random() * 900000); // random six digit number
+        user = { username: `user-${randomNumber}` };
+      }
+      this.user = user;
+    }
+
+    if (!this.socketListenersReady) {
+      socketIntegration.setupListeners();
+      this.socketListenersReady = true;
+    }
     socketIntegration.socketJoined();
 
     // Init elements
@@ -75,6 +103,7 @@ class Table {
     // Rendering
     this.render();
     await this.canvasLayer.init();
+    await this.reloadLocationPins();
     this.setupDocumentEventListeners();
     this.topLayer.render();
     this.chatBoxComponent.render();
@@ -84,6 +113,127 @@ class Table {
     if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
       // USERID and IS_MANAGER_OR_OWNER is injected from template; check vtt.ejs
       this.renderSidebarAndHamburger();
+  };
+
+  loadLocationPins = async (tableViewId) => {
+    if (!tableViewId) return;
+    this.locationPins = [];
+    this.locationPinsByObjectId = new Map();
+
+    const pins = await getThings(`/api/get_location_pins/${tableViewId}`);
+    if (!pins?.length) {
+      this.applyLocationPinMetadata();
+      return;
+    }
+
+    const imageIds = [
+      ...new Set(
+        pins
+          .map((pin) => Number(pin.image_id))
+          .filter((id) => !Number.isNaN(id) && Boolean(id)),
+      ),
+    ];
+
+    const signedUrls =
+      imageIds.length > 0 ? await getPresignedUrlsForImages(imageIds) : null;
+    const urlMap = signedUrls?.urls || {};
+
+    this.locationPins = pins.map((pin) => {
+      const imageId = Number(pin.image_id);
+      const pinWithSrc = {
+        ...pin,
+        image_id: Number.isNaN(imageId) ? null : imageId,
+        image_src: !Number.isNaN(imageId) ? urlMap[imageId] : null,
+      };
+      this.locationPinsByObjectId.set(pin.canvas_object_id, pinWithSrc);
+      return pinWithSrc;
+    });
+
+    this.applyLocationPinMetadata();
+    this.displayLocationPinForObject(this.currentSelectedObject);
+  };
+
+  reloadLocationPins = async () => {
+    if (!this.tableView?.id) return;
+    await this.loadLocationPins(this.tableView.id);
+  };
+
+  applyLocationPinMetadata = () => {
+    if (!this.canvasLayer?.canvas) return;
+    this.canvasLayer.canvas.getObjects().forEach((object) => {
+      const pin = this.locationPinsByObjectId.get(object.id);
+      if (pin) {
+        object.isLocationPin = true;
+        object.pinId = pin.id;
+        object.pinInfo = pin;
+        this.enforceLocationPinConstraints(object);
+      } else {
+        object.isLocationPin = false;
+        delete object.pinId;
+        delete object.pinInfo;
+      }
+    });
+  };
+
+  enforceLocationPinConstraints = (object) => {
+    if (!object) return;
+    object.set({
+      hasControls: false,
+      hasBorders: false,
+      lockScalingX: true,
+      lockScalingY: true,
+      lockRotation: true,
+    });
+  };
+
+  handleLocationPinPortal = (target) => {
+    if (!target?.uuid) return;
+    socketIntegration.tableChanged(target.uuid);
+  };
+
+  updateUrl = (tableUUID, historyMode) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    searchParams.set("uuid", tableUUID);
+    const newUrl = window.location.pathname + "?" + searchParams.toString();
+
+    if (historyMode === "push") {
+      history.pushState({}, "", newUrl);
+    } else {
+      history.replaceState({}, "", newUrl);
+    }
+  };
+
+  teardown = () => {
+    this.removeDocumentEventListeners();
+
+    this.resetLocationPinHighlight();
+
+    if (this.canvasLayer?.canvas) {
+      this.canvasLayer.canvas.dispose();
+    }
+
+    this.currentSelectedObject = null;
+    this.canvasLayer = null;
+    this.sidebar = null;
+    this.hamburger = null;
+    this.topLayer = null;
+    this.chatBoxComponent = null;
+    this.locationPins = [];
+    this.locationPinsByObjectId = new Map();
+    this.tableView = null;
+    this.canManagePins = false;
+
+    this.domComponent.replaceChildren();
+  };
+
+  reloadTableByUUID = async (tableUUID, { historyMode = "replace" } = {}) => {
+    if (!tableUUID || tableUUID === this.tableId) return;
+    if (this.isReloading) return;
+
+    this.isReloading = true;
+    this.teardown();
+    await this.loadTable(tableUUID, { historyMode });
+    this.isReloading = false;
   };
 
   canvasRenderAll = () => {
@@ -96,10 +246,174 @@ class Table {
 
     // update only the object-related toolbar slots
     this.topLayer.updateObjectSelection();
+    this.displayLocationPinForObject(obj);
   };
 
   getCurrentSelectedObject = () => {
     return this.currentSelectedObject;
+  };
+
+  displayLocationPinForObject = (object) => {
+    if (!object) {
+      this.resetLocationPinHighlight();
+      return;
+    }
+
+    const pin = this.locationPinsByObjectId.get(object.id);
+    if (!pin) {
+      this.resetLocationPinHighlight();
+      return;
+    }
+
+    this.applyLocationPinHighlight(object);
+  };
+
+  removeLocationPinObject = (object) => {
+    if (!object || !this.canvasLayer?.canvas) return;
+    this.canvasLayer.canvas.remove(object);
+    this.canvasLayer.canvas.discardActiveObject();
+    this.resetLocationPinHighlight();
+    if (this.canvasLayer.canvas.contextContainer) {
+      this.canvasLayer.canvas.renderAll();
+    }
+  };
+
+  deleteLocationPin = async (object) => {
+    if (!this.canManagePins || !object) return;
+    const pin = this.locationPinsByObjectId.get(object.id);
+    if (!pin?.id) return;
+    const confirmed = window.confirm(
+      "Delete this location pin?",
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/remove_location_pin/${pin.id}`, {
+        method: "DELETE",
+      });
+      if (res.status !== 204) throw new Error("delete failed");
+      this.removeLocationPinObject(object);
+      socketIntegration.imageRemoved(object.id);
+      await this.canvasLayer.saveToDatabase();
+      this.setCurrentSelectedObject(null);
+      await this.reloadLocationPins();
+      socketIntegration.locationPinsUpdated();
+    } catch (err) {
+      console.error(err);
+      window.alert("Failed to delete the location pin.");
+    }
+  };
+
+  applyLocationPinHighlight = (object) => {
+    if (
+      this.lastHighlightedPinObject &&
+      this.lastHighlightedPinObject !== object
+    ) {
+      this.resetLocationPinHighlight();
+    }
+
+    if (!object.pinHighlightBackup) {
+      object.pinHighlightBackup = {
+        stroke: object.stroke,
+        strokeWidth: object.strokeWidth,
+        strokeLineJoin: object.strokeLineJoin,
+      };
+    }
+
+    object.set({
+      stroke: "#f6d365",
+      strokeWidth: 4,
+      strokeLineJoin: "round",
+    });
+    this.lastHighlightedPinObject = object;
+    if (this.canvasLayer?.canvas && this.canvasLayer.canvas.contextContainer) {
+      this.canvasLayer.canvas.renderAll();
+    }
+  };
+
+  resetLocationPinHighlight = () => {
+    if (!this.lastHighlightedPinObject) return;
+    const object = this.lastHighlightedPinObject;
+    if (object.pinHighlightBackup) {
+      object.set({
+        stroke: object.pinHighlightBackup.stroke,
+        strokeWidth: object.pinHighlightBackup.strokeWidth,
+        strokeLineJoin: object.pinHighlightBackup.strokeLineJoin,
+      });
+      delete object.pinHighlightBackup;
+    }
+    this.lastHighlightedPinObject = null;
+    const canvas = this.canvasLayer?.canvas;
+    if (canvas && canvas.contextContainer) {
+      canvas.renderAll();
+    }
+  };
+
+  getAttachmentTables = async () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const projectId = searchParams.get("project");
+    const endpoint = projectId
+      ? `/api/get_table_views_by_project/${projectId}`
+      : `/api/get_table_views_by_user`;
+    const tables = await getThings(endpoint);
+    return (tables || []).filter((table) => table.id !== this.tableView?.id);
+  };
+
+  createLocationPinMarker = (options) => {
+    return this.canvasLayer?.createLocationPinMarker(options);
+  };
+
+  openLocationPinModal = async (object, { isNew = false } = {}) => {
+    if (!this.canManagePins || !object || !this.tableView) {
+      if (isNew) {
+        this.removeLocationPinObject(object);
+      }
+      return;
+    }
+    const attachments = await this.getAttachmentTables();
+    const pinData = this.locationPinsByObjectId.get(object.id);
+    const formValues = await showLocationPinModal({
+      pin: pinData,
+      attachments,
+      templates: isNew ? this.locationPins : [],
+    });
+    if (!formValues) {
+      if (isNew) {
+        this.removeLocationPinObject(object);
+      }
+      return;
+    }
+
+    const payload = {
+      title: formValues.title,
+      description: formValues.description,
+      portal_table_view_ids: formValues.portal_table_view_ids,
+    };
+    let response = null;
+    if (pinData) {
+      response = await postThing(
+        `/api/edit_location_pin/${pinData.id}`,
+        payload,
+      );
+    } else {
+      response = await postThing("/api/add_location_pin", {
+        ...payload,
+        table_view_id: this.tableView.id,
+        canvas_object_id: object.id,
+      });
+    }
+    if (!response) return;
+
+    if (!pinData && response.id) {
+      object.pinId = response.id;
+    }
+    await this.reloadLocationPins();
+    if (isNew) {
+      socketIntegration.pinAdded(object);
+    }
+    socketIntegration.locationPinsUpdated();
+    this.displayLocationPinForObject(object);
+    this.topLayer?.updateObjectSelection();
   };
 
   renderSidebarAndHamburger = () => {
@@ -129,7 +443,7 @@ class Table {
 
   setupDocumentEventListeners = () => {
     // KEYS
-    document.addEventListener("keydown", (e) => {
+    const onKeydown = (e) => {
       // alt key change cursor
       if (e.altKey) {
         this.canvasLayer.setCursorCrosshair();
@@ -144,52 +458,64 @@ class Table {
       if (e.ctrlKey && e.key == "t") {
         this.canvasLayer.moveObjectToTop();
       }
-    });
+    };
+    document.addEventListener("keydown", onKeydown);
+    this.documentListeners.push({ type: "keydown", handler: onKeydown });
 
-    document.addEventListener("keyup", (e) => {
+    const onKeyup = (e) => {
       var key = e.key;
 
       if (key === "Backspace" || key === "Delete") {
         this.canvasLayer.removeObjects();
       }
       this.canvasLayer.setCursorDefault();
-    });
+    };
+    document.addEventListener("keyup", onKeyup);
+    this.documentListeners.push({ type: "keyup", handler: onKeyup });
 
     // DOCUMENT MOUSE UP HACKS
     // save data in db after mouse up
-    document.addEventListener(
-      "mouseup",
-      throttle(async () => {
-        await this.canvasLayer.saveToDatabase();
-      }, 3000)
-    );
+    const onMouseupSave = throttle(async () => {
+      await this.canvasLayer.saveToDatabase();
+    }, 3000);
+    document.addEventListener("mouseup", onMouseupSave);
+    this.documentListeners.push({ type: "mouseup", handler: onMouseupSave });
     // save data on touch screen up
-    document.addEventListener(
-      "touchend",
-      throttle(async () => {
-        await this.canvasLayer.saveToDatabase();
-      }, 3000)
-    );
+    const onTouchendSave = throttle(async () => {
+      await this.canvasLayer.saveToDatabase();
+    }, 3000);
+    document.addEventListener("touchend", onTouchendSave);
+    this.documentListeners.push({ type: "touchend", handler: onTouchendSave });
 
     // Allow for drag image to canvas
-    document.addEventListener("mouseup", (e) => {
+    const onMouseupDrop = (e) => {
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
         // Drop succeeds unless mouse is still over the sidebar
         if (!e.target.closest(".sidebar"))
           this.canvasLayer.addImageToTable(
-            this.sidebar.tableSidebarImageComponent.currentMouseDownImage
+            this.sidebar.tableSidebarImageComponent.currentMouseDownImage,
           );
       }
       imageFollowingCursor.remove();
-    });
+    };
+    document.addEventListener("mouseup", onMouseupDrop);
+    this.documentListeners.push({ type: "mouseup", handler: onMouseupDrop });
+  };
+
+  removeDocumentEventListeners = () => {
+    if (!this.documentListeners.length) return;
+    for (const listener of this.documentListeners) {
+      document.removeEventListener(listener.type, listener.handler);
+    }
+    this.documentListeners = [];
   };
 
   render = async () => {
     this.domComponent.append(
       this.topLayer.domComponent,
       this.chatBoxComponent.domComponent,
-      this.canvasElem
+      this.canvasElem,
     );
   };
 }

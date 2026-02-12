@@ -13,6 +13,7 @@ const ICONS = {
   trash: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
   chevronUp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
   sidebar: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
+  pin: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-8.5-7-13a7 7 0 0 1 14 0c0 4.5-7 13-7 13z"/><circle cx="12" cy="8" r="2.5"/></svg>`,
 };
 
 export default class Toolbar {
@@ -535,6 +536,19 @@ export default class Toolbar {
     ]);
   };
 
+  renderLocationPinButton = () => {
+    if (!this.tableApp.canManagePins) return this.hiddenElement();
+    return this.renderToolbarButton(ICONS.pin, "Add a location pin", {
+      onClick: async () => {
+        this.clearSelection();
+        const pinObject = this.tableApp.createLocationPinMarker({ broadcast: false });
+        if (pinObject) {
+          await this.tableApp.openLocationPinModal(pinObject, { isNew: true });
+        }
+      },
+    });
+  };
+
   // ---------------------------------------------------------------------------
   // Sidebar toggle (far-right of toolbar)
   // ---------------------------------------------------------------------------
@@ -565,7 +579,7 @@ export default class Toolbar {
 
   renderImageOptionButtons = () => {
     const obj = this.tableApp.getCurrentSelectedObject();
-    if (!obj) return [];
+    if (!obj || obj.isLocationPin) return [];
 
     return [
       createElement("div", { class: "vtt-toolbar-sep" }),
@@ -586,6 +600,141 @@ export default class Toolbar {
   renderSelectedObjectBar = async () => {
     const obj = this.tableApp.getCurrentSelectedObject();
     if (!obj) return this.hiddenElement();
+
+    if (obj.isLocationPin) {
+      const pin = this.tableApp.locationPinsByObjectId.get(obj.id);
+      if (!pin) return this.hiddenElement();
+
+      const iconElem = pin.image_src
+        ? createElement("img", {
+            class: "location-pin-icon location-pin-icon-img",
+            src: pin.image_src,
+            alt: pin.title || "Location pin image",
+            loading: "lazy",
+          })
+        : createElement(
+            "div",
+            { class: "location-pin-icon" },
+            ICONS.pin,
+          );
+
+      const infoChildren = [
+        createElement(
+          "small",
+          { class: "location-pin-id" },
+          `PIN-${pin.id ?? "new"}`,
+        ),
+        createElement(
+          "h3",
+          { class: "location-pin-title" },
+          pin.title || "Location pin",
+        ),
+        createElement(
+          "p",
+          { class: "location-pin-description" },
+          pin.description || "No description",
+        ),
+      ];
+
+      if (this.tableApp.canManagePins) {
+        infoChildren.push(
+          createElement(
+            "div",
+            { class: "location-pin-actions" },
+            [
+              createElement(
+                "button",
+                { class: "location-pin-edit-btn", type: "button" },
+                "Edit pin",
+                {
+                  type: "click",
+                  event: () => this.tableApp.openLocationPinModal(obj),
+                },
+              ),
+              createElement(
+                "button",
+                { class: "location-pin-delete-btn", type: "button" },
+                "Delete",
+                {
+                  type: "click",
+                  event: () => this.tableApp.deleteLocationPin(obj),
+                },
+              ),
+            ],
+          ),
+        );
+      }
+
+      const infoBlock = createElement("div", { class: "location-pin-info" }, infoChildren);
+
+      const headerRowChildren = [iconElem, infoBlock];
+
+      const attachments = pin.attachments || [];
+      const attachmentsContent =
+        attachments.length > 0
+          ? attachments.map((target) => {
+              const label = target.title || target.uuid;
+              if (this.tableApp.canManagePins) {
+                return createElement(
+                  "button",
+                  {
+                    class: "location-pin-attachment-link",
+                    type: "button",
+                    title: `Open ${label}`,
+                  },
+                  label,
+                  {
+                    type: "click",
+                    event: () => this.tableApp.handleLocationPinPortal(target),
+                  },
+                );
+              }
+              return createElement(
+                "div",
+                { class: "location-pin-attachment" },
+                createElement(
+                  "span",
+                  { class: "location-pin-attachment-title" },
+                  label,
+                ),
+              );
+            })
+          : [
+              createElement(
+                "span",
+                { class: "location-pin-attachment-note" },
+                "No portals mapped to this location yet.",
+              ),
+            ];
+
+      const attachmentsBlockChildren = [
+        createElement("h3", { class: "location-pin-attachments-heading" }, "Portals"),
+        createElement("div", { class: "location-pin-attachments" }, attachmentsContent),
+      ];
+      if (!this.tableApp.canManagePins) {
+        attachmentsBlockChildren.push(
+          createElement(
+            "small",
+            { class: "location-pin-attachment-note" },
+            "Portals are manager-only controls.",
+          ),
+        );
+      }
+      const attachmentsBlock = createElement(
+        "div",
+        { class: "location-pin-attachments-block" },
+        attachmentsBlockChildren,
+      );
+
+      return createElement(
+        "div",
+        { class: "vtt-draw-bar location-pin-draw-bar" },
+        [
+          createElement("div", { class: "location-pin-selected-row" }, headerRowChildren),
+          attachmentsBlock,
+        ],
+      );
+    }
 
     const { idPrefix, displayName, imageSrc, recordTitle, recordHref } =
       await this.getSelectedObjectInfo(obj);
@@ -786,6 +935,7 @@ export default class Toolbar {
       this.renderInfoMenu(),
       this._drawToggleSlot,
       createElement("div", { class: "vtt-toolbar-sep" }),
+      this.renderLocationPinButton(),
       this._layersAnchorSlot,
       this._gridAnchorSlot,
       this._objectActionsSlot,

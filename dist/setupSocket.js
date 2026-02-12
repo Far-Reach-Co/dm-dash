@@ -56,6 +56,12 @@ function setupSocketHandlers(server) {
         socket.on("indicator-animation", ({ table, x, y, }) => {
             socket.broadcast.to(table).emit("run-indicator-animation", { x, y });
         });
+        socket.on("pin-added", ({ table, pin }) => {
+            socket.broadcast.to(table).emit("pin-add", pin);
+        });
+        socket.on("location-pins-updated", ({ table }) => {
+            socket.broadcast.to(table).emit("reload-location-pins");
+        });
         socket.on("disconnect", () => __awaiter(this, void 0, void 0, function* () {
             const user = yield (0, socketUsers_js_1.userLeave)(socket.id);
             if (user) {

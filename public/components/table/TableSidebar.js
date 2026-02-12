@@ -340,17 +340,7 @@ export default class TableSidebar {
             const formProps = Object.fromEntries(formData);
             const tableUUID = formProps.table_uuid;
             if (tableUUID != 0) {
-              // push all viewers
               socketIntegration.tableChanged(tableUUID);
-              // push current user
-              const searchParams = new URLSearchParams(window.location.search);
-              searchParams.set("uuid", tableUUID);
-              const newSearchParamsString = searchParams.toString();
-
-              const newUrl =
-                window.location.pathname + "?" + newSearchParamsString;
-
-              window.location.href = newUrl;
             }
           },
         },
@@ -431,7 +421,6 @@ export default class TableSidebar {
           class: "success-message",
           id: "title-update-success",
         }),
-
         createElement("hr"),
         createElement("button", { class: "btn-red" }, "Delete Table", {
           type: "click",
@@ -451,6 +440,7 @@ export default class TableSidebar {
       ]),
     ]);
   };
+
 
   renderShareBtn = () => {
     // Static SVG string — safe, no user input
