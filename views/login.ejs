@@ -31,13 +31,33 @@
       </fieldset>
     </form>
     <div class="auth-links">
-      <p>Don't have an account? <a href="/register">Register</a></p>
+      <p>Don't have an account? <a id="register-link" href="/register">Register</a></p>
       <p>Forgot your password? <a href="/forgotpassword">Reset it</a></p>
     </div>
   </div>
   <%- include('./partials/footer') %>
 </body>
 <script>
+  function isAllowedRedirect(url) {
+    try {
+      var parsed = new URL(url, window.location.origin);
+      if (parsed.origin === window.location.origin) return true;
+      if (parsed.hostname === "farreachco.com" || parsed.hostname.endsWith(".farreachco.com")) {
+        return parsed.protocol === "https:";
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    params.delete("_csrf");
+    var qs = params.toString();
+    if (qs) document.getElementById("register-link").href = "/register?" + qs;
+  })();
+
   document.getElementById("login-form").addEventListener("submit", login);
   async function login(e) {
     e.preventDefault();
@@ -54,13 +74,15 @@
       const resData = await res.json();
       if (res.status === 200) {
         if (resData.message) console.log(resData.message);
-        // if invite UUID in params push to invite page
         var searchParams = new URLSearchParams(window.location.search);
         var inviteUUID = searchParams.get("invite");
+        var redirectUrl = searchParams.get("redirect");
         if (inviteUUID) {
           return (window.location.pathname = "/invite");
         }
-        // else push to account page
+        if (redirectUrl && isAllowedRedirect(redirectUrl)) {
+          return (window.location.href = redirectUrl);
+        }
         window.location.pathname = "/dash";
       } else if (res.status === 400) {
         alert(resData.message);
