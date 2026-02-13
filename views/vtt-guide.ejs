@@ -46,6 +46,11 @@
         },
         {
           "@type": "HowToStep",
+          "name": "Using Location Pins",
+          "text": "Place location pins to mark points of interest, add descriptions, and create portal links between tables"
+        },
+        {
+          "@type": "HowToStep",
           "name": "Sharing with Players",
           "text": "Copy the share link from the sidebar and send it to your players"
         }
@@ -78,6 +83,7 @@
       <a href="#layers">Layers</a>
       <a href="#grid">Grid Controls</a>
       <a href="#drawing">Drawing Tools</a>
+      <a href="#pins">Location Pins</a>
       <a href="#chat">Chat & Dice</a>
       <a href="#sharing">Sharing</a>
       <a href="#shortcuts">Keyboard Shortcuts</a>
@@ -187,7 +193,43 @@
       </ul>
     </section>
 
-    <!-- 8. Chat & Dice Rolling -->
+    <!-- 8. Location Pins -->
+    <section id="pins">
+      <h2>Location Pins (GM)</h2>
+      <p>Location pins are markers you place on the canvas to label points of interest, link descriptions, and create portals between tables.</p>
+      <h3>Creating a Pin</h3>
+      <ul>
+        <li>Click the <strong>Pin</strong> button (map-marker icon) on the toolbar. A new pin appears at the center of your current view.</li>
+        <li>The pin is created immediately with the default title "New Pin". It turns <strong>red</strong> when selected so you can easily spot the active pin.</li>
+        <li>The pin's info panel appears below the toolbar with the pin's title, description, and action buttons.</li>
+      </ul>
+      <h3>Editing a Pin</h3>
+      <ul>
+        <li>Select a pin on the canvas, then click <strong>Edit pin</strong> in the info panel.</li>
+        <li>In the edit dialog you can set the <strong>title</strong>, <strong>description</strong>, and attach <strong>portal links</strong> to other tables.</li>
+        <li>Click <strong>Save</strong> to apply your changes. The info panel updates immediately.</li>
+      </ul>
+      <h3>Portals</h3>
+      <ul>
+        <li>When editing a pin, you can attach one or more tables as portal destinations.</li>
+        <li>Once saved, the info panel shows clickable portal links. Clicking a portal link transports <strong>all connected users</strong> to that table in real time.</li>
+        <li>Use portals to connect dungeon rooms, move between world maps and encounter maps, or link any set of tables together.</li>
+      </ul>
+      <h3>Deleting a Pin</h3>
+      <ul>
+        <li>Select a pin and click <strong>Delete</strong> in the info panel. You will be asked to confirm.</li>
+        <li>The keyboard Delete/Backspace shortcut does <strong>not</strong> remove pins &mdash; this prevents accidental deletion. Use the Delete button in the info panel instead.</li>
+      </ul>
+      <h3>Managing Pins</h3>
+      <ul>
+        <li>Click the <strong>Manage Pins</strong> button (list icon) on the toolbar to open the pin manager.</li>
+        <li>The manager lists every pin on the current table with its status: <strong>Active</strong> (visible on canvas) or <strong>Missing from canvas</strong> (orphaned).</li>
+        <li>For active pins, click <strong>Locate</strong> to pan the canvas directly to that pin, or <strong>Delete</strong> to remove it.</li>
+        <li>For orphaned pins (created but no longer visible), click <strong>Restore</strong> to recreate the pin shape at the center of your view, or <strong>Delete</strong> to remove the record.</li>
+      </ul>
+    </section>
+
+    <!-- 9. Chat & Dice Rolling -->
     <section id="chat">
       <h2>Chat & Dice Rolling</h2>
       <p>The chat box is located at the bottom-left of the VTT. All connected users can send messages and roll dice.</p>
@@ -275,6 +317,7 @@
         <li><strong>Pings</strong> &mdash; Double-click on empty canvas space to send a ping animation visible to all users. Use this to draw attention to a specific spot.</li>
         <li><strong>Canvas Log</strong> &mdash; Open the info modal and click <strong>Open Log</strong> to view a list of every object on the canvas. Click an entry to select it, useful for finding hidden or overlapping objects.</li>
         <li><strong>Linking Records</strong> &mdash; If an image is associated with a Record that has "Make Public" enabled, selecting that token on the canvas will show a link to the record. This is great for linking character sheets or monster stat blocks to their tokens.</li>
+        <li><strong>Pin Portals</strong> &mdash; Chain pins with portals to build interconnected dungeons. Place a pin on a doorway, attach the destination table as a portal, and your players can hop between rooms with a single click.</li>
         <li><strong>Folder Organization</strong> &mdash; Use folders to separate maps from tokens. Create sub-folders per session or encounter for quick access during play.</li>
         <li><strong>Small Images</strong> &mdash; When uploading many tokens, enable "Make image small" to reduce file size and speed up loading for all users.</li>
       </ul>

@@ -158,6 +158,8 @@ async function updateLocationPin(
     await ensureTableViewEditable(req, tableView);
 
     const payload: Partial<typeof pin> = {};
+    if (typeof req.body.canvas_object_id !== "undefined")
+      payload.canvas_object_id = req.body.canvas_object_id;
     if (typeof req.body.title !== "undefined") payload.title = req.body.title;
     if (typeof req.body.description !== "undefined")
       payload.description = req.body.description;
