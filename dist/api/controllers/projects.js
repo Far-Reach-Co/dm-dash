@@ -143,8 +143,7 @@ function removeProject(req, res, next) {
                 yield (0, tableViews_js_1.removeTableViewQuery)(tableView.id);
             }
             yield (0, projects_js_1.removeProjectQuery)(req.params.id);
-            res.setHeader("HX-Redirect", "/dash");
-            res.send();
+            res.status(200).json({ redirect: "/dash" });
         }
         catch (err) {
             next(err);

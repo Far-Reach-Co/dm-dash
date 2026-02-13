@@ -189,8 +189,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
     // Remove project - CASCADE handles Calendar, Month, Day, ProjectInvite, ProjectUser, ProjectPlayer
     await removeProjectQuery(req.params.id);
 
-    res.setHeader("HX-Redirect", "/dash");
-    res.send();
+    res.status(200).json({ redirect: "/dash" });
   } catch (err) {
     next(err);
   }

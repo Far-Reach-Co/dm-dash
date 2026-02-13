@@ -15,7 +15,6 @@ import { getTableImageCountByProjectQuery } from "../api/queries/tableImages";
 import {
   requireProjectEditorOrRedirect,
   requireProjectMemberOrRedirect,
-  requireProjectOwnerOrRedirect,
   requireUserOrRedirect,
 } from "../lib/authz";
 import { upsertRecentlyViewed, getRecentlyViewedByUserForIds } from "../api/queries/recentlyViewed";
@@ -68,6 +67,11 @@ function buildRecents<T>(
     }
   }
   return recent;
+}
+
+interface GetProjectUsersByProjectReturnUser extends User {
+  project_user_id: number;
+  is_editor: boolean;
 }
 
 async function loadWyrldData(
@@ -129,6 +133,21 @@ async function loadWyrldData(
     }
   }
 
+  // load project users for settings (owner only)
+  let settingsUsers: GetProjectUsersByProjectReturnUser[] = [];
+  if (userId == project.user_id) {
+    const projectUsersData = await getProjectUsersByProjectQuery(project.id);
+    for (const projectUser of projectUsersData.rows) {
+      const userData = await getUserByIdQuery(projectUser.user_id);
+      const user = userData.rows[0];
+      (user as GetProjectUsersByProjectReturnUser).project_user_id =
+        projectUser.id;
+      (user as GetProjectUsersByProjectReturnUser).is_editor =
+        projectUser.is_editor;
+      settingsUsers.push(user as GetProjectUsersByProjectReturnUser);
+    }
+  }
+
   const tables = tableData.rows;
   const records = recordsData.rows;
   const sheets = players.filter(Boolean);
@@ -156,7 +175,9 @@ async function loadWyrldData(
 
   return {
     projectAuth,
+    isOwner: userId == project.user_id,
     project,
+    settingsUsers,
     tables,
     sheets,
     calendars: calendarsList,
@@ -202,7 +223,7 @@ router.get(
 );
 
 router.get(
-  ["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendars"],
+  ["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendars", "/wyrld/settings"],
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = requireUserOrRedirect(req, res, "/login");
@@ -225,105 +246,15 @@ router.get(
   },
 );
 
-interface GetProjectUsersByProjectReturnUser extends User {
-  project_user_id: number;
-  is_editor: boolean;
-}
+router.get("/wyrldsettings", (req: Request, res: Response) => {
+  const id = req.query.id;
+  res.redirect(id ? `/wyrld/settings?id=${id}` : "/dash");
+});
 
-router.get(
-  "/wyrldsettings",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = requireUserOrRedirect(req, res, "/forbidden");
-      if (!userId) return;
-      // get project id
-      if (!req.query.id) return res.redirect("/dash");
-      const projectId = req.query.id as string;
-      const project = await requireProjectOwnerOrRedirect(
-        req,
-        res,
-        projectId,
-        "/forbidden",
-      );
-      if (!project) return;
-
-      const projectInviteData = await getProjectInviteByProjectQuery(
-        project.id,
-      );
-      // invite
-      let inviteLink = null;
-      let inviteId = null;
-      if (projectInviteData.rows.length) {
-        const invite = projectInviteData.rows[0];
-        inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${
-          invite.uuid
-        }`;
-        inviteId = invite.id;
-      }
-
-      // project users
-      const projectUsersData = await getProjectUsersByProjectQuery(project.id);
-
-      const usersList = [];
-
-      for (const projectUser of projectUsersData.rows) {
-        const userData = await getUserByIdQuery(projectUser.user_id);
-        const user = userData.rows[0];
-        (user as GetProjectUsersByProjectReturnUser).project_user_id =
-          projectUser.id;
-        (user as GetProjectUsersByProjectReturnUser).is_editor =
-          projectUser.is_editor;
-        usersList.push(user);
-      }
-
-      return res.render("wyrldsettings", {
-        auth: userId,
-        inviteLink,
-        inviteId,
-        project,
-        users: usersList,
-        projectId: project.id,
-      });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
-
-router.get(
-  "/sharedwyrldsettings",
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = requireUserOrRedirect(req, res, "/forbidden");
-      if (!userId) return;
-      // get project id
-      if (!req.query.id) return res.redirect("/dash");
-      const projectId = req.query.id as string;
-      const project = await requireProjectMemberOrRedirect(
-        req,
-        res,
-        projectId,
-        "/forbidden",
-      );
-      if (!project) return;
-
-      const projectUserData = await getProjectUserByUserAndProjectQuery(
-        userId,
-        project.id,
-      );
-      if (!projectUserData.rows.length) return res.redirect("/forbidden");
-      const projectUser = projectUserData.rows[0];
-
-      return res.render("sharedwyrldsettings", {
-        auth: userId,
-        projectUserId: projectUser.id,
-        project,
-      });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
+router.get("/sharedwyrldsettings", (req: Request, res: Response) => {
+  const id = req.query.id;
+  res.redirect(id ? `/wyrld?id=${id}` : "/dash");
+});
 
 router.get(
   "/newwyrldtable",

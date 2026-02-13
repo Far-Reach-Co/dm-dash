@@ -32,6 +32,9 @@
           <a class="dashboard-nav-link <%= section === 'records' ? 'active' : '' %>" href="/wyrld/records?id=<%= project.id %>">Records</a>
           <a class="dashboard-nav-link <%= section === 'sheets' ? 'active' : '' %>" href="/wyrld/sheets?id=<%= project.id %>">Character Sheets</a>
           <a class="dashboard-nav-link <%= section === 'calendars' ? 'active' : '' %>" href="/wyrld/calendars?id=<%= project.id %>">Calendars</a>
+          <% if (isOwner) { %>
+          <a class="dashboard-nav-link <%= section === 'settings' ? 'active' : '' %>" href="/wyrld/settings?id=<%= project.id %>">Settings</a>
+          <% } %>
         </div>
       </div>
       <% if (projectAuth) { %>
@@ -260,6 +263,131 @@
         </div>
         <% } %>
       </section>
+      <% } %>
+
+      <% if (section === 'settings' && isOwner) { %>
+      <div class="settings-grid">
+        <section class="dashboard-card settings-card">
+          <h2>Edit Title</h2>
+          <small>Change the name of your wyrld.</small>
+          <hr />
+          <div class="settings-form-row">
+            <input type="text" id="settings-title-input" class="settings-input" value="<%= project.title %>" placeholder="Wyrld Title" />
+            <button class="modal-form-button" id="settings-title-save">Save</button>
+          </div>
+          <small class="success-message" id="settings-title-msg"></small>
+        </section>
+
+        <section class="dashboard-card settings-card">
+          <h2>Manage Users</h2>
+          <small>Give an invited user access to edit wyrld resources by making them a manager.</small>
+          <hr />
+          <div id="settings-users-list">
+            <% if (settingsUsers.length === 0) { %>
+            <small>No users have joined yet...</small>
+            <% } else { %>
+            <div class="settings-users-header">
+              <small>Username</small>
+              <small>Manager</small>
+            </div>
+            <% settingsUsers.forEach(function(user) { %>
+            <div class="settings-user-row" id="settings-user-<%= user.project_user_id %>">
+              <div class="settings-user-info">
+                <span><%= user.username %></span>
+                <button class="settings-remove-btn" data-id="<%= user.project_user_id %>" data-name="<%= user.username %>" title="Remove user">&times;</button>
+              </div>
+              <label class="settings-toggle">
+                <input type="checkbox" data-id="<%= user.project_user_id %>" class="settings-editor-toggle" <%= user.is_editor ? 'checked' : '' %> />
+                <span class="settings-toggle-slider"></span>
+              </label>
+            </div>
+            <% }); %>
+            <% } %>
+          </div>
+        </section>
+
+        <section class="dashboard-card settings-card settings-danger-zone">
+          <h2>Danger Zone</h2>
+          <small>Permanently delete this wyrld and all associated data.</small>
+          <hr />
+          <button class="btn-red" id="settings-delete-wyrld">Delete Wyrld</button>
+        </section>
+      </div>
+
+      <script>
+        (function() {
+          var projectId = '<%= project.id %>';
+          var projectTitle = '<%= project.title.replace(/\x27/g, "\\x27") %>';
+
+          // Edit Title
+          document.getElementById('settings-title-save').addEventListener('click', async function() {
+            var title = document.getElementById('settings-title-input').value.trim();
+            if (!title) return;
+            var res = await fetch('/api/edit_project_title/' + projectId, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title: title })
+            });
+            var msg = document.getElementById('settings-title-msg');
+            if (res.ok) {
+              msg.textContent = 'Saved';
+              msg.style.color = 'var(--green)';
+              setTimeout(function() { msg.textContent = ''; }, 3000);
+            } else {
+              msg.textContent = 'Error saving title';
+              msg.style.color = 'var(--red)';
+            }
+          });
+
+          // Manage Users — toggle editor
+          document.querySelectorAll('.settings-editor-toggle').forEach(function(cb) {
+            cb.addEventListener('change', async function() {
+              var id = cb.dataset.id;
+              await fetch('/api/edit_project_user_is_editor/' + id, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ is_editor: cb.checked })
+              });
+            });
+          });
+
+          // Manage Users — remove
+          document.querySelectorAll('.settings-remove-btn').forEach(function(btn) {
+            btn.addEventListener('click', async function() {
+              var id = btn.dataset.id;
+              var name = btn.dataset.name;
+              if (!confirm('Are you sure you want to remove ' + name + '?')) return;
+              var res = await fetch('/api/remove_project_user/' + id, {
+                method: 'DELETE'
+              });
+              if (res.ok) {
+                var row = document.getElementById('settings-user-' + id);
+                if (row) row.remove();
+                var remaining = document.querySelectorAll('.settings-user-row');
+                if (remaining.length === 0) {
+                  var list = document.getElementById('settings-users-list');
+                  list.textContent = '';
+                  var empty = document.createElement('small');
+                  empty.textContent = 'No users have joined yet...';
+                  list.appendChild(empty);
+                }
+              }
+            });
+          });
+
+          // Delete Wyrld
+          document.getElementById('settings-delete-wyrld').addEventListener('click', async function() {
+            if (!confirm('Are you sure you want to delete ' + projectTitle + '? This cannot be undone.')) return;
+            var res = await fetch('/api/remove_project/' + projectId, {
+              method: 'DELETE'
+            });
+            if (res.ok) {
+              var data = await res.json();
+              window.location.href = data.redirect || '/dash';
+            }
+          });
+        })();
+      </script>
       <% } %>
     </main>
   </div>
