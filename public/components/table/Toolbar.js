@@ -14,6 +14,7 @@ const ICONS = {
   chevronUp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`,
   sidebar: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
   pin: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-8.5-7-13a7 7 0 0 1 14 0c0 4.5-7 13-7 13z"/><circle cx="12" cy="8" r="2.5"/></svg>`,
+  list: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
 };
 
 export default class Toolbar {
@@ -220,6 +221,39 @@ export default class Toolbar {
               "small",
               {},
               " \u2014 Remove selected object or bring it to front of its layer.",
+            ),
+            createElement("br"),
+            createElement("br"),
+
+            // Location Pins (GM)
+            createElement("h2", {}, "Location Pins (GM)"),
+            createElement("hr"),
+            createElement("b", {}, "Add Pin"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Click the pin icon to place a new pin at the center of your view. Pins are created instantly with a default title.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Edit Pin"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Select a pin (it turns red) and click Edit in the info panel to set its title, description, and portal links.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Portals"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Attach other tables to a pin. Clicking a portal link transports all connected users to that table.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Manage Pins"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Click the list icon to see all pins, locate them on the canvas, or clean up orphaned pins.",
             ),
             createElement("br"),
             createElement("br"),
@@ -541,12 +575,131 @@ export default class Toolbar {
     return this.renderToolbarButton(ICONS.pin, "Add a location pin", {
       onClick: async () => {
         this.clearSelection();
-        const pinObject = this.tableApp.createLocationPinMarker({ broadcast: false });
-        if (pinObject) {
-          await this.tableApp.openLocationPinModal(pinObject, { isNew: true });
-        }
+        await this.tableApp.createLocationPin();
       },
     });
+  };
+
+  renderManagePinsButton = () => {
+    if (!this.tableApp.canManagePins) return this.hiddenElement();
+    return this.renderToolbarButton(ICONS.list, "Manage location pins", {
+      onClick: () => {
+        this.clearSelection();
+        this.showManagePinsModal();
+      },
+    });
+  };
+
+  showManagePinsModal = () => {
+    const pins = this.tableApp.locationPins;
+    const canvasIds = this.tableApp.getCanvasObjectIdSet();
+
+    if (!pins.length) {
+      modal.show(
+        createElement("div", { class: "help-content" }, [
+          createElement("h2", {}, "Manage Pins"),
+          createElement("p", {}, "No location pins on this table."),
+        ]),
+      );
+      return;
+    }
+
+    const rows = pins.map((pin) => {
+      const isActive = canvasIds.has(pin.canvas_object_id);
+      const statusLabel = isActive ? "Active" : "Missing from canvas";
+      const statusClass = isActive
+        ? "location-pin-status-active"
+        : "location-pin-status-orphan";
+
+      const actions = [];
+
+      if (isActive) {
+        actions.push(
+          createElement(
+            "button",
+            { class: "location-pin-edit-btn", type: "button" },
+            "Locate",
+            {
+              type: "click",
+              event: () => {
+                modal.hide();
+                this.tableApp.canvasLayer.selectObjectById(
+                  pin.canvas_object_id,
+                );
+              },
+            },
+          ),
+        );
+      } else {
+        actions.push(
+          createElement(
+            "button",
+            { class: "location-pin-edit-btn", type: "button" },
+            "Restore",
+            {
+              type: "click",
+              event: async () => {
+                await this.tableApp.restoreOrphanedPin(pin);
+                modal.hide();
+              },
+            },
+          ),
+        );
+      }
+
+      actions.push(
+        createElement(
+          "button",
+          { class: "location-pin-delete-btn", type: "button" },
+          "Delete",
+          {
+            type: "click",
+            event: async () => {
+              const confirmed = window.confirm(
+                `Delete pin "${pin.title || "Untitled"}"?`,
+              );
+              if (!confirmed) return;
+              try {
+                if (isActive) {
+                  const obj = this.tableApp.canvasLayer.canvas
+                    .getObjects()
+                    .find((o) => o.id === pin.canvas_object_id);
+                  if (obj) {
+                    await this.tableApp.deleteLocationPin(obj);
+                  }
+                } else {
+                  await this.tableApp.deleteOrphanedPin(pin.id);
+                }
+                this.showManagePinsModal();
+              } catch (err) {
+                console.error(err);
+                window.alert("Failed to delete pin.");
+              }
+            },
+          },
+        ),
+      );
+
+      return createElement("div", { class: "manage-pins-row" }, [
+        createElement("div", { class: "manage-pins-info" }, [
+          createElement("small", { class: "location-pin-id" }, `PIN-${pin.id}`),
+          createElement(
+            "span",
+            { class: "manage-pins-title" },
+            pin.title || "Untitled",
+          ),
+          createElement("span", { class: statusClass }, statusLabel),
+        ]),
+        createElement("div", { class: "manage-pins-actions" }, actions),
+      ]);
+    });
+
+    modal.show(
+      createElement("div", { class: "help-content" }, [
+        createElement("h2", {}, "Manage Pins"),
+        createElement("div", { class: "manage-pins-list" }, rows),
+      ]),
+    );
   };
 
   // ---------------------------------------------------------------------------
@@ -936,6 +1089,7 @@ export default class Toolbar {
       this._drawToggleSlot,
       createElement("div", { class: "vtt-toolbar-sep" }),
       this.renderLocationPinButton(),
+      this.renderManagePinsButton(),
       this._layersAnchorSlot,
       this._gridAnchorSlot,
       this._objectActionsSlot,

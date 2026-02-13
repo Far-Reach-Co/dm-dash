@@ -97,7 +97,7 @@ export default class CanvasLayer {
     return { left: transformed.x, top: transformed.y };
   };
 
-  createLocationPinMarker = ({ broadcast = true } = {}) => {
+  createLocationPinMarker = ({ broadcast = true, autoSelect = true } = {}) => {
     const coords = this.getViewportCenter();
     const pin = this.createLocationPinShape({
       left: coords.left,
@@ -106,7 +106,9 @@ export default class CanvasLayer {
     });
     this.canvas.add(pin);
     this.placeObjectOnLayer(pin);
-    this.canvas.setActiveObject(pin);
+    if (autoSelect) {
+      this.canvas.setActiveObject(pin);
+    }
     this.canvas.requestRenderAll();
     this.setupObjectEventListeners(pin);
     return pin;
@@ -466,8 +468,10 @@ export default class CanvasLayer {
   removeObjects = () => {
     if (this.canvas.getActiveObjects().length) {
       this.canvas.getActiveObjects().forEach((object) => {
+        if (object.isLocationPin) return;
         if (object.hasOwnProperty("_objects")) {
           for (var subObj of object._objects) {
+            if (subObj.isLocationPin) continue;
             this.canvas.remove(subObj);
             socketIntegration.imageRemoved(subObj.id);
           }

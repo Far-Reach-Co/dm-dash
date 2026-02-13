@@ -793,3 +793,54 @@
   flex-direction: column;
   gap: var(--space-xs);
 }
+
+/* Manage Pins modal */
+.manage-pins-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.manage-pins-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.manage-pins-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 0;
+  flex: 1;
+}
+
+.manage-pins-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.manage-pins-actions {
+  display: flex;
+  gap: var(--space-xs);
+  flex-shrink: 0;
+}
+
+.location-pin-status-active {
+  font-size: 11px;
+  color: var(--green);
+}
+
+.location-pin-status-orphan {
+  font-size: 11px;
+  color: var(--orange3);
+}

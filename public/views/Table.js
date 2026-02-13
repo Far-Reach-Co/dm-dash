@@ -179,7 +179,9 @@ class Table {
     if (!object) return;
     object.set({
       hasControls: false,
-      hasBorders: false,
+      hasBorders: true,
+      borderColor: "#e74c3c",
+      borderScaleFactor: 2.5,
       lockScalingX: true,
       lockScalingY: true,
       lockRotation: true,
@@ -321,7 +323,7 @@ class Table {
     }
 
     object.set({
-      stroke: "#f6d365",
+      stroke: "#e74c3c",
       strokeWidth: 4,
       strokeLineJoin: "round",
     });
@@ -363,54 +365,60 @@ class Table {
     return this.canvasLayer?.createLocationPinMarker(options);
   };
 
-  openLocationPinModal = async (object, { isNew = false } = {}) => {
-    if (!this.canManagePins || !object || !this.tableView) {
-      if (isNew) {
-        this.removeLocationPinObject(object);
-      }
+  createLocationPin = async () => {
+    if (!this.canManagePins || !this.tableView) return;
+    const object = this.createLocationPinMarker({ broadcast: false, autoSelect: false });
+    if (!object) return;
+
+    const response = await postThing("/api/add_location_pin", {
+      title: "New Pin",
+      description: "",
+      portal_table_view_ids: [],
+      table_view_id: this.tableView.id,
+      canvas_object_id: object.id,
+    });
+
+    if (!response) {
+      this.removeLocationPinObject(object);
       return;
     }
+
+    object.pinId = response.id;
+    await this.reloadLocationPins();
+    await this.canvasLayer.saveToDatabase();
+    socketIntegration.pinAdded(object);
+    socketIntegration.locationPinsUpdated();
+    this.canvasLayer.canvas.setActiveObject(object);
+    this.canvasLayer.canvas.requestRenderAll();
+    this.setCurrentSelectedObject(object);
+  };
+
+  openLocationPinModal = async (object) => {
+    if (!this.canManagePins || !object || !this.tableView) return;
     const attachments = await this.getAttachmentTables();
     const pinData = this.locationPinsByObjectId.get(object.id);
+    if (!pinData) return;
+
     const formValues = await showLocationPinModal({
       pin: pinData,
       attachments,
-      templates: isNew ? this.locationPins : [],
+      templates: [],
     });
-    if (!formValues) {
-      if (isNew) {
-        this.removeLocationPinObject(object);
-      }
-      return;
-    }
+    if (!formValues) return;
 
     const payload = {
       title: formValues.title,
       description: formValues.description,
       portal_table_view_ids: formValues.portal_table_view_ids,
     };
-    let response = null;
-    if (pinData) {
-      response = await postThing(
-        `/api/edit_location_pin/${pinData.id}`,
-        payload,
-      );
-    } else {
-      response = await postThing("/api/add_location_pin", {
-        ...payload,
-        table_view_id: this.tableView.id,
-        canvas_object_id: object.id,
-      });
-    }
+    const response = await postThing(
+      `/api/edit_location_pin/${pinData.id}`,
+      payload,
+    );
     if (!response) return;
 
-    if (!pinData && response.id) {
-      object.pinId = response.id;
-    }
     await this.reloadLocationPins();
-    if (isNew) {
-      socketIntegration.pinAdded(object);
-    }
+    await this.canvasLayer.saveToDatabase();
     socketIntegration.locationPinsUpdated();
     this.displayLocationPinForObject(object);
     this.topLayer?.updateObjectSelection();
@@ -509,6 +517,56 @@ class Table {
       document.removeEventListener(listener.type, listener.handler);
     }
     this.documentListeners = [];
+  };
+
+  getCanvasObjectIdSet = () => {
+    const ids = new Set();
+    if (!this.canvasLayer?.canvas) return ids;
+    for (const obj of this.canvasLayer.canvas.getObjects()) {
+      if (obj.id) ids.add(obj.id);
+    }
+    return ids;
+  };
+
+  getOrphanedPins = () => {
+    const canvasIds = this.getCanvasObjectIdSet();
+    return this.locationPins.filter(
+      (pin) => pin.canvas_object_id && !canvasIds.has(pin.canvas_object_id),
+    );
+  };
+
+  getPinStatus = (pin) => {
+    const canvasIds = this.getCanvasObjectIdSet();
+    return canvasIds.has(pin.canvas_object_id) ? "active" : "orphan";
+  };
+
+  deleteOrphanedPin = async (pinId) => {
+    const res = await fetch(`/api/remove_location_pin/${pinId}`, {
+      method: "DELETE",
+    });
+    if (res.status !== 204) throw new Error("delete failed");
+    await this.reloadLocationPins();
+    socketIntegration.locationPinsUpdated();
+  };
+
+  restoreOrphanedPin = async (pin) => {
+    const marker = this.canvasLayer.createLocationPinMarker({ broadcast: false, autoSelect: false });
+    if (!marker) return;
+    marker.pinId = pin.id;
+    marker.isLocationPin = true;
+
+    const res = await postThing(`/api/edit_location_pin/${pin.id}`, {
+      title: pin.title,
+      description: pin.description,
+      portal_table_view_ids: (pin.attachments || []).map((a) => a.id),
+      canvas_object_id: marker.id,
+    });
+    if (!res) return;
+
+    await this.reloadLocationPins();
+    await this.canvasLayer.saveToDatabase();
+    socketIntegration.pinAdded(marker);
+    socketIntegration.locationPinsUpdated();
   };
 
   render = async () => {
