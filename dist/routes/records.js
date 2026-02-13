@@ -20,6 +20,7 @@ const s3_1 = require("../api/controllers/s3");
 const projects_1 = require("../api/queries/projects");
 const logger_js_1 = __importDefault(require("../lib/logger.js"));
 const authz_1 = require("../lib/authz");
+const recentlyViewed_1 = require("../api/queries/recentlyViewed");
 const router = (0, express_1.Router)();
 router.get("/newrecord", (req, res, next) => {
     try {
@@ -94,6 +95,9 @@ router.get("/record", (req, res, next) => __awaiter(void 0, void 0, void 0, func
             imagesFromRecordImages = imageDataList.rows;
             imageUrls = yield (0, s3_1.getSignedUrls)(imagesFromRecordImages);
             logger_js_1.default.debug({ recordId, imageCount: imageIds.length }, "Loaded record image URLs");
+        }
+        if (userId) {
+            (0, recentlyViewed_1.upsertRecentlyViewed)(userId, "record", recordId);
         }
         if (!req.query.project_id) {
             const access = yield (0, authz_1.requireRecordAccessOrRedirect)(req, res, record, {

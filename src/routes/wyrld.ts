@@ -18,6 +18,7 @@ import {
   requireProjectOwnerOrRedirect,
   requireUserOrRedirect,
 } from "../lib/authz";
+import { upsertRecentlyViewed, getRecentlyViewedByUserForIds } from "../api/queries/recentlyViewed";
 
 const router = Router();
 
@@ -44,6 +45,30 @@ const sortByTitle = <T>(
     return aTitle.localeCompare(bTitle);
   });
 };
+
+function buildRecents<T>(
+  items: T[],
+  viewedIds: number[],
+  getId: (item: T) => number,
+  getDate: (item: T) => string | undefined,
+  limit: number,
+): T[] {
+  const itemMap = new Map(items.map((item) => [getId(item), item]));
+  const recent: T[] = [];
+  for (const id of viewedIds) {
+    const item = itemMap.get(id);
+    if (item) recent.push(item);
+  }
+  if (recent.length < limit) {
+    const recentIds = new Set(recent.map(getId));
+    const fallback = sortByDateDesc(items, getDate);
+    for (const item of fallback) {
+      if (recent.length >= limit) break;
+      if (!recentIds.has(getId(item))) recent.push(item);
+    }
+  }
+  return recent;
+}
 
 async function loadWyrldData(
   req: Request,
@@ -109,9 +134,21 @@ async function loadWyrldData(
   const sheets = players.filter(Boolean);
   const calendarsList = calendars.rows;
 
-  const recentTables = sortByDateDesc(tables, (table) => (table as any).date_created).slice(0, RECENT_LIMIT);
-  const recentRecords = sortByDateDesc(records, (record) => (record as any).created_at).slice(0, RECENT_LIMIT);
-  const recentSheets = sortByDateDesc(sheets, (sheet) => (sheet as any).created_at).slice(0, RECENT_LIMIT);
+  // query recently viewed entity_ids scoped to this project's items
+  const tableIds = tables.map((t: any) => t.id);
+  const recordIds = records.map((r: any) => r.id);
+  const sheetIds = sheets.map((s: any) => s.id);
+
+  const [rvTables, rvRecords, rvSheets] = await Promise.all([
+    tableIds.length ? getRecentlyViewedByUserForIds(userId, "table", tableIds, RECENT_LIMIT) : { rows: [] },
+    recordIds.length ? getRecentlyViewedByUserForIds(userId, "record", recordIds, RECENT_LIMIT) : { rows: [] },
+    sheetIds.length ? getRecentlyViewedByUserForIds(userId, "sheet", sheetIds, RECENT_LIMIT) : { rows: [] },
+  ]);
+
+  const recentTables = buildRecents(tables, rvTables.rows.map((r: any) => r.entity_id), (t: any) => t.id, (t: any) => t.date_created, RECENT_LIMIT);
+  const recentRecords = buildRecents(records, rvRecords.rows.map((r: any) => r.entity_id), (r: any) => r.id, (r: any) => r.created_at, RECENT_LIMIT);
+  const recentSheets = buildRecents(sheets, rvSheets.rows.map((r: any) => r.entity_id), (s: any) => s.id, (s: any) => s.created_at, RECENT_LIMIT);
+  // calendars have no dedicated page route — keep creation-date sorting
   const recentCalendars = sortByDateDesc(
     calendarsList,
     (calendar) => (calendar as any).created_at,
@@ -150,6 +187,8 @@ router.get(
 
       const data = await loadWyrldData(req, res, userId, projectId);
       if (!data) return;
+
+      upsertRecentlyViewed(userId, "wyrld", projectId);
 
       res.render("wyrld", {
         auth: userId,

@@ -16,6 +16,7 @@ const playerInvites_1 = require("../api/queries/playerInvites");
 const projects_1 = require("../api/queries/projects");
 const projectUsers_1 = require("../api/queries/projectUsers");
 const authz_1 = require("../lib/authz");
+const recentlyViewed_1 = require("../api/queries/recentlyViewed");
 const router = (0, express_1.Router)();
 router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -25,6 +26,7 @@ router.get("/5eplayer", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
         if (!req.query.id)
             return res.redirect("/dash");
         const playerSheetid = req.query.id;
+        (0, recentlyViewed_1.upsertRecentlyViewed)(userId, "sheet", playerSheetid);
         const playerSheetUserIdData = yield (0, _5eCharGeneral_1.get5eCharGeneralUserIdQuery)(playerSheetid);
         const playerSheetUserId = playerSheetUserIdData.rows[0].user_id;
         const playerSheetNameData = yield (0, _5eCharGeneral_1.get5eCharNamesQuery)([playerSheetid]);
