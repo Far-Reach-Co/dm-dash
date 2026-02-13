@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/style.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
   <script src="/lib/searchDashElements.js" defer></script>
+  <script src="/components/modal.js" type="module"></script>
+  <script src="/lib/newResourceModals.js" type="module"></script>
   <%- include('./partials/icons') %>
 </head>
 <%- include('./partials/google') %>
@@ -28,12 +30,14 @@
           <a class="dashboard-nav-link <%= section === 'wyrlds' ? 'active' : '' %>" href="/dash/wyrlds">Wyrlds</a>
         </div>
       </div>
-      <div class="dashboard-sidebar-card dashboard-sidebar-card-spaced">
+      <div class="dashboard-sidebar-card dashboard-sidebar-card-spaced library-card">
         <div class="dashboard-sidebar-title">Image Library</div>
         <small>Browse, organize, and manage all your uploaded images in one place.</small>
-        <div class="mt-2">
-          <a href="/library">Open Library (<%= imageCount %> images) -></a>
-        </div>
+        <a class="library-link" href="/library">
+          <span class="library-link-text">Open Library</span>
+          <span class="library-link-count"><%= imageCount %> images</span>
+          <span class="library-link-arrow">&rarr;</span>
+        </a>
       </div>
     </aside>
     <main class="dashboard-main">
@@ -121,7 +125,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Tables</h2>
-          <a href="/newtable" title="Create a new virtual table">+ New Table</a>
+          <a onclick="openNewTableModal()" title="Create a new virtual table" style="cursor:pointer">+ New Table</a>
         </div>
         <small>Real-time virtual tables that support images and drawing. Invite others to join your table by copying the share link.</small>
         <hr />
@@ -169,7 +173,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Player Character Sheets</h2>
-          <a href="/newsheet" title="Create a new player character sheet">+ New Sheet</a>
+          <a onclick="openNewSheetModal()" title="Create a new player character sheet" style="cursor:pointer">+ New Sheet</a>
         </div>
         <small>We currently offer Dungeons and Dragons 5e sheets. You can invite others to view/edit your character sheet from the settings tab.</small>
         <hr />
@@ -206,7 +210,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Wyrlds</h2>
-          <a href="/newwyrld" title="Create a new wyrld">+ Wyrld</a>
+          <a onclick="openNewWyrldModal()" title="Create a new wyrld" style="cursor:pointer">+ Wyrld</a>
         </div>
         <small>A Wyrld is a contained environment that associates tables and character sheets to create a more organized experience.</small>
         <hr />
@@ -265,11 +269,11 @@
   }
 
   function handleWyrldSettingsClick(id) {
-    window.location.href = `/wyrldsettings?id=${id}`;
+    window.location.href = `/wyrld/settings?id=${id}`;
   }
 
   function handleSharedWyrldSettingsClick(id) {
-    window.location.href = `/sharedwyrldsettings?id=${id}`;
+    window.location.href = `/wyrld?id=${id}`;
   }
 </script>
 

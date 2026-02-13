@@ -23,6 +23,10 @@ function addProjectInvite(req, res, next) {
             const invite = data.rows[0];
             const inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
             const inviteId = invite.id;
+            if (req.body.source === "settings") {
+                res.status(201).json({ inviteLink, inviteId });
+                return;
+            }
             const partial = req.body.source === "wyrld"
                 ? "partials/wyrld_invite_display"
                 : "partials/wyrld_settings/invite";
@@ -52,6 +56,10 @@ function removeProjectInvite(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield (0, projectInvites_js_1.removeProjectInviteQuery)(req.params.id);
+            if (req.body.source === "settings") {
+                res.status(200).json({ success: true });
+                return;
+            }
             const partial = req.body.source === "wyrld"
                 ? "partials/wyrld_invite_button"
                 : "partials/wyrld_settings/invitebutton";

@@ -17,6 +17,7 @@ const projects_1 = require("../api/queries/projects");
 const projectUsers_1 = require("../api/queries/projectUsers");
 const record_1 = require("../api/queries/record");
 const tableImages_1 = require("../api/queries/tableImages");
+const recentlyViewed_1 = require("../api/queries/recentlyViewed");
 const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 const RECENT_LIMIT = 5;
@@ -35,6 +36,26 @@ const sortByTitle = (items, getTitle) => {
         return aTitle.localeCompare(bTitle);
     });
 };
+function buildRecents(items, viewedIds, getId, getDate, limit) {
+    const itemMap = new Map(items.map((item) => [getId(item), item]));
+    const recent = [];
+    for (const id of viewedIds) {
+        const item = itemMap.get(id);
+        if (item)
+            recent.push(item);
+    }
+    if (recent.length < limit) {
+        const recentIds = new Set(recent.map(getId));
+        const fallback = sortByDateDesc(items, getDate);
+        for (const item of fallback) {
+            if (recent.length >= limit)
+                break;
+            if (!recentIds.has(getId(item)))
+                recent.push(item);
+        }
+    }
+    return recent;
+}
 function loadDashData(userId) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableData = yield (0, tableViews_1.getTableViewsByUserQuery)(userId);
@@ -63,10 +84,18 @@ function loadDashData(userId) {
         const sharedSheets = sharedCharData.filter(Boolean);
         const createdWyrlds = projectData.rows;
         const sharedWyrlds = sharedProjectList.filter(Boolean);
-        const recentTables = sortByDateDesc(tables, (table) => table.date_created).slice(0, RECENT_LIMIT);
-        const recentRecords = sortByDateDesc(records, (record) => record.created_at).slice(0, RECENT_LIMIT);
-        const recentSheets = sortByDateDesc([...createdSheets, ...sharedSheets], (sheet) => sheet.created_at).slice(0, RECENT_LIMIT);
-        const recentWyrlds = sortByDateDesc([...createdWyrlds, ...sharedWyrlds], (project) => project.date_created).slice(0, RECENT_LIMIT);
+        const [rvTables, rvRecords, rvSheets, rvWyrlds] = yield Promise.all([
+            (0, recentlyViewed_1.getRecentlyViewedByUser)(userId, "table", RECENT_LIMIT),
+            (0, recentlyViewed_1.getRecentlyViewedByUser)(userId, "record", RECENT_LIMIT),
+            (0, recentlyViewed_1.getRecentlyViewedByUser)(userId, "sheet", RECENT_LIMIT),
+            (0, recentlyViewed_1.getRecentlyViewedByUser)(userId, "wyrld", RECENT_LIMIT),
+        ]);
+        const allSheets = [...createdSheets, ...sharedSheets];
+        const allWyrlds = [...createdWyrlds, ...sharedWyrlds];
+        const recentTables = buildRecents(tables, rvTables.rows.map(r => r.entity_id), (t) => t.id, (t) => t.date_created, RECENT_LIMIT);
+        const recentRecords = buildRecents(records, rvRecords.rows.map(r => r.entity_id), (r) => r.id, (r) => r.created_at, RECENT_LIMIT);
+        const recentSheets = buildRecents(allSheets, rvSheets.rows.map(r => r.entity_id), (s) => s.id, (s) => s.created_at, RECENT_LIMIT);
+        const recentWyrlds = buildRecents(allWyrlds, rvWyrlds.rows.map(r => r.entity_id), (w) => w.id, (w) => w.date_created, RECENT_LIMIT);
         return {
             tables,
             records,

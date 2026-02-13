@@ -9,6 +9,7 @@ import { getProjectsQuery, getProjectQuery } from "../api/queries/projects";
 import { getProjectUsersQuery } from "../api/queries/projectUsers";
 import { getRecordsByUserQuery } from "../api/queries/record";
 import { getTableImageCountByUserQuery } from "../api/queries/tableImages";
+import { getRecentlyViewedByUser } from "../api/queries/recentlyViewed";
 import { requireUserOrRedirect } from "../lib/authz";
 
 const router = Router();
@@ -36,6 +37,32 @@ const sortByTitle = <T>(
     return aTitle.localeCompare(bTitle);
   });
 };
+
+function buildRecents<T>(
+  items: T[],
+  viewedIds: number[],
+  getId: (item: T) => number,
+  getDate: (item: T) => string | undefined,
+  limit: number,
+): T[] {
+  const itemMap = new Map(items.map((item) => [getId(item), item]));
+  // map viewed ids to items, preserving view order
+  const recent: T[] = [];
+  for (const id of viewedIds) {
+    const item = itemMap.get(id);
+    if (item) recent.push(item);
+  }
+  // backfill with creation-date-sorted items if under limit
+  if (recent.length < limit) {
+    const recentIds = new Set(recent.map(getId));
+    const fallback = sortByDateDesc(items, getDate);
+    for (const item of fallback) {
+      if (recent.length >= limit) break;
+      if (!recentIds.has(getId(item))) recent.push(item);
+    }
+  }
+  return recent;
+}
 
 async function loadDashData(userId: string | number) {
   // get table views by user
@@ -76,16 +103,21 @@ async function loadDashData(userId: string | number) {
   const createdWyrlds = projectData.rows;
   const sharedWyrlds = sharedProjectList.filter(Boolean);
 
-  const recentTables = sortByDateDesc(tables, (table) => (table as any).date_created).slice(0, RECENT_LIMIT);
-  const recentRecords = sortByDateDesc(records, (record) => (record as any).created_at).slice(0, RECENT_LIMIT);
-  const recentSheets = sortByDateDesc(
-    [...createdSheets, ...sharedSheets],
-    (sheet) => (sheet as any).created_at,
-  ).slice(0, RECENT_LIMIT);
-  const recentWyrlds = sortByDateDesc(
-    [...createdWyrlds, ...sharedWyrlds],
-    (project) => (project as any).date_created,
-  ).slice(0, RECENT_LIMIT);
+  // query recently viewed entity_ids for each type in parallel
+  const [rvTables, rvRecords, rvSheets, rvWyrlds] = await Promise.all([
+    getRecentlyViewedByUser(userId, "table", RECENT_LIMIT),
+    getRecentlyViewedByUser(userId, "record", RECENT_LIMIT),
+    getRecentlyViewedByUser(userId, "sheet", RECENT_LIMIT),
+    getRecentlyViewedByUser(userId, "wyrld", RECENT_LIMIT),
+  ]);
+
+  const allSheets = [...createdSheets, ...sharedSheets];
+  const allWyrlds = [...createdWyrlds, ...sharedWyrlds];
+
+  const recentTables = buildRecents(tables, rvTables.rows.map(r => r.entity_id), (t: any) => t.id, (t: any) => t.date_created, RECENT_LIMIT);
+  const recentRecords = buildRecents(records, rvRecords.rows.map(r => r.entity_id), (r: any) => r.id, (r: any) => r.created_at, RECENT_LIMIT);
+  const recentSheets = buildRecents(allSheets, rvSheets.rows.map(r => r.entity_id), (s: any) => s.id, (s: any) => s.created_at, RECENT_LIMIT);
+  const recentWyrlds = buildRecents(allWyrlds, rvWyrlds.rows.map(r => r.entity_id), (w: any) => w.id, (w: any) => w.date_created, RECENT_LIMIT);
 
   return {
     tables,

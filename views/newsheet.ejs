@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="/style.css" />
   <%- include('./partials/icons') %>
   <script src="/lib/MobileNavHandler.js" defer></script>
-  <script src="/lib/htmx.min.js"></script>
   <script src="/components/renderTierLimitWarning.js" type="module"></script>
 </head>
 <%- include('./partials/google') %>
@@ -21,7 +20,7 @@
     <% if (wyrld_title) { %>
     <p>Creating character for <strong><%= wyrld_title %></strong></p>
     <% } %>
-    <form hx-post="/api/add_5e_character">
+    <form>
       <fieldset>
         <% if (wyrld_id) { %>
         <input type="hidden" name="wyrld_id" value="<%= wyrld_id %>" />
@@ -36,12 +35,25 @@
   </div>
 </body>
 <script>
-  document.body.addEventListener("htmx:responseError", function (event) {
-    var errorText = JSON.parse(event.detail.xhr.responseText).error.message;
-    if (errorText === "PROJECT_IS_NOT_PRO") {
-      renderTierLimitWarning(
-        'This Wyrld has reached the character connections limit (5). Please subscribe to our "Pro Wyrld" package to increase the limit.'
-      );
+  document.querySelector("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const body = Object.fromEntries(formData);
+    const res = await fetch("/api/add_5e_character", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      window.location.href = data.redirect;
+    } else {
+      const err = await res.json();
+      if (err.error?.message === "PROJECT_IS_NOT_PRO") {
+        renderTierLimitWarning(
+          'This Wyrld has reached the character connections limit (5). Please subscribe to our "Pro Wyrld" package to increase the limit.'
+        );
+      }
     }
   });
 </script>

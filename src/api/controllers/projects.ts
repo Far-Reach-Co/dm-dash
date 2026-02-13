@@ -69,9 +69,7 @@ async function addProject(
       eventData: { title: data.rows[0].title },
       req,
     });
-    res
-      .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)
-      .send("Form submission was successful.");
+    res.status(201).json({ redirect: `/wyrld?id=${data.rows[0].id}` });
   } catch (err) {
     next(err);
   }
@@ -191,8 +189,7 @@ async function removeProject(req: Request, res: Response, next: NextFunction) {
     // Remove project - CASCADE handles Calendar, Month, Day, ProjectInvite, ProjectUser, ProjectPlayer
     await removeProjectQuery(req.params.id);
 
-    res.setHeader("HX-Redirect", "/dash");
-    res.send();
+    res.status(200).json({ redirect: "/dash" });
   } catch (err) {
     next(err);
   }

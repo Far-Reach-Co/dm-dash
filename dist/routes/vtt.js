@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const tableViews_1 = require("../api/queries/tableViews");
+const recentlyViewed_1 = require("../api/queries/recentlyViewed");
 const authz_1 = require("../lib/authz");
 const router = (0, express_1.Router)();
 router.get("/vtt", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
@@ -26,6 +27,9 @@ router.get("/vtt", (req, res, next) => __awaiter(void 0, void 0, void 0, functio
         const access = yield (0, authz_1.requireTableAccessOrRedirect)(req, res, table, "/forbidden");
         if (!access)
             return;
+        if (req.session.user) {
+            (0, recentlyViewed_1.upsertRecentlyViewed)(req.session.user, "table", table.id);
+        }
         return res.render("vtt", {
             auth: req.session.user,
             projectAuth: access.projectAuth,

@@ -8,6 +8,7 @@ import { getPlayerInviteByUUIDQuery } from "../api/queries/playerInvites";
 import { getProjectQuery } from "../api/queries/projects";
 import { getProjectUserByUserAndProjectQuery } from "../api/queries/projectUsers";
 import { requireUserOrRedirect } from "../lib/authz";
+import { upsertRecentlyViewed } from "../api/queries/recentlyViewed";
 
 const router = Router();
 
@@ -19,6 +20,7 @@ router.get(
       if (!userId) return;
       if (!req.query.id) return res.redirect("/dash");
       const playerSheetid = req.query.id as string;
+      upsertRecentlyViewed(userId, "sheet", playerSheetid);
       // get id
       const playerSheetUserIdData = await get5eCharGeneralUserIdQuery(
         playerSheetid,

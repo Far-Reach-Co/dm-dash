@@ -48,9 +48,7 @@ function addProject(req, res, next) {
                 eventData: { title: data.rows[0].title },
                 req,
             });
-            res
-                .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)
-                .send("Form submission was successful.");
+            res.status(201).json({ redirect: `/wyrld?id=${data.rows[0].id}` });
         }
         catch (err) {
             next(err);
@@ -145,8 +143,7 @@ function removeProject(req, res, next) {
                 yield (0, tableViews_js_1.removeTableViewQuery)(tableView.id);
             }
             yield (0, projects_js_1.removeProjectQuery)(req.params.id);
-            res.setHeader("HX-Redirect", "/dash");
-            res.send();
+            res.status(200).json({ redirect: "/dash" });
         }
         catch (err) {
             next(err);

@@ -21,6 +21,7 @@ const users_1 = require("../api/queries/users");
 const utils_1 = require("../lib/utils");
 const tableImages_1 = require("../api/queries/tableImages");
 const authz_1 = require("../lib/authz");
+const recentlyViewed_1 = require("../api/queries/recentlyViewed");
 const router = (0, express_1.Router)();
 const RECENT_LIMIT = 5;
 const sortByDateDesc = (items, getDate) => {
@@ -38,6 +39,26 @@ const sortByTitle = (items, getTitle) => {
         return aTitle.localeCompare(bTitle);
     });
 };
+function buildRecents(items, viewedIds, getId, getDate, limit) {
+    const itemMap = new Map(items.map((item) => [getId(item), item]));
+    const recent = [];
+    for (const id of viewedIds) {
+        const item = itemMap.get(id);
+        if (item)
+            recent.push(item);
+    }
+    if (recent.length < limit) {
+        const recentIds = new Set(recent.map(getId));
+        const fallback = sortByDateDesc(items, getDate);
+        for (const item of fallback) {
+            if (recent.length >= limit)
+                break;
+            if (!recentIds.has(getId(item)))
+                recent.push(item);
+        }
+    }
+    return recent;
+}
 function loadWyrldData(req, res, userId, projectId) {
     return __awaiter(this, void 0, void 0, function* () {
         var _a;
@@ -72,17 +93,40 @@ function loadWyrldData(req, res, userId, projectId) {
                 inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
             }
         }
+        let settingsUsers = [];
+        if (userId == project.user_id) {
+            const projectUsersData = yield (0, projectUsers_1.getProjectUsersByProjectQuery)(project.id);
+            for (const projectUser of projectUsersData.rows) {
+                const userData = yield (0, users_1.getUserByIdQuery)(projectUser.user_id);
+                const user = userData.rows[0];
+                user.project_user_id =
+                    projectUser.id;
+                user.is_editor =
+                    projectUser.is_editor;
+                settingsUsers.push(user);
+            }
+        }
         const tables = tableData.rows;
         const records = recordsData.rows;
         const sheets = players.filter(Boolean);
         const calendarsList = calendars.rows;
-        const recentTables = sortByDateDesc(tables, (table) => table.date_created).slice(0, RECENT_LIMIT);
-        const recentRecords = sortByDateDesc(records, (record) => record.created_at).slice(0, RECENT_LIMIT);
-        const recentSheets = sortByDateDesc(sheets, (sheet) => sheet.created_at).slice(0, RECENT_LIMIT);
+        const tableIds = tables.map((t) => t.id);
+        const recordIds = records.map((r) => r.id);
+        const sheetIds = sheets.map((s) => s.id);
+        const [rvTables, rvRecords, rvSheets] = yield Promise.all([
+            tableIds.length ? (0, recentlyViewed_1.getRecentlyViewedByUserForIds)(userId, "table", tableIds, RECENT_LIMIT) : { rows: [] },
+            recordIds.length ? (0, recentlyViewed_1.getRecentlyViewedByUserForIds)(userId, "record", recordIds, RECENT_LIMIT) : { rows: [] },
+            sheetIds.length ? (0, recentlyViewed_1.getRecentlyViewedByUserForIds)(userId, "sheet", sheetIds, RECENT_LIMIT) : { rows: [] },
+        ]);
+        const recentTables = buildRecents(tables, rvTables.rows.map((r) => r.entity_id), (t) => t.id, (t) => t.date_created, RECENT_LIMIT);
+        const recentRecords = buildRecents(records, rvRecords.rows.map((r) => r.entity_id), (r) => r.id, (r) => r.created_at, RECENT_LIMIT);
+        const recentSheets = buildRecents(sheets, rvSheets.rows.map((r) => r.entity_id), (s) => s.id, (s) => s.created_at, RECENT_LIMIT);
         const recentCalendars = sortByDateDesc(calendarsList, (calendar) => calendar.created_at).slice(0, RECENT_LIMIT);
         return {
             projectAuth,
+            isOwner: userId == project.user_id,
             project,
+            settingsUsers,
             tables,
             sheets,
             calendars: calendarsList,
@@ -113,13 +157,14 @@ router.get("/wyrld", (req, res, next) => __awaiter(void 0, void 0, void 0, funct
         const data = yield loadWyrldData(req, res, userId, projectId);
         if (!data)
             return;
+        (0, recentlyViewed_1.upsertRecentlyViewed)(userId, "wyrld", projectId);
         res.render("wyrld", Object.assign({ auth: userId, section: "overview" }, data));
     }
     catch (err) {
         next(err);
     }
 }));
-router.get(["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendars"], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+router.get(["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendars", "/wyrld/settings"], (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/login");
         if (!userId)
@@ -137,74 +182,14 @@ router.get(["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendar
         next(err);
     }
 }));
-router.get("/wyrldsettings", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
-        if (!userId)
-            return;
-        if (!req.query.id)
-            return res.redirect("/dash");
-        const projectId = req.query.id;
-        const project = yield (0, authz_1.requireProjectOwnerOrRedirect)(req, res, projectId, "/forbidden");
-        if (!project)
-            return;
-        const projectInviteData = yield (0, projectInvites_1.getProjectInviteByProjectQuery)(project.id);
-        let inviteLink = null;
-        let inviteId = null;
-        if (projectInviteData.rows.length) {
-            const invite = projectInviteData.rows[0];
-            inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${invite.uuid}`;
-            inviteId = invite.id;
-        }
-        const projectUsersData = yield (0, projectUsers_1.getProjectUsersByProjectQuery)(project.id);
-        const usersList = [];
-        for (const projectUser of projectUsersData.rows) {
-            const userData = yield (0, users_1.getUserByIdQuery)(projectUser.user_id);
-            const user = userData.rows[0];
-            user.project_user_id =
-                projectUser.id;
-            user.is_editor =
-                projectUser.is_editor;
-            usersList.push(user);
-        }
-        return res.render("wyrldsettings", {
-            auth: userId,
-            inviteLink,
-            inviteId,
-            project,
-            users: usersList,
-            projectId: project.id,
-        });
-    }
-    catch (err) {
-        next(err);
-    }
-}));
-router.get("/sharedwyrldsettings", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");
-        if (!userId)
-            return;
-        if (!req.query.id)
-            return res.redirect("/dash");
-        const projectId = req.query.id;
-        const project = yield (0, authz_1.requireProjectMemberOrRedirect)(req, res, projectId, "/forbidden");
-        if (!project)
-            return;
-        const projectUserData = yield (0, projectUsers_1.getProjectUserByUserAndProjectQuery)(userId, project.id);
-        if (!projectUserData.rows.length)
-            return res.redirect("/forbidden");
-        const projectUser = projectUserData.rows[0];
-        return res.render("sharedwyrldsettings", {
-            auth: userId,
-            projectUserId: projectUser.id,
-            project,
-        });
-    }
-    catch (err) {
-        next(err);
-    }
-}));
+router.get("/wyrldsettings", (req, res) => {
+    const id = req.query.id;
+    res.redirect(id ? `/wyrld/settings?id=${id}` : "/dash");
+});
+router.get("/sharedwyrldsettings", (req, res) => {
+    const id = req.query.id;
+    res.redirect(id ? `/wyrld?id=${id}` : "/dash");
+});
 router.get("/newwyrldtable", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = (0, authz_1.requireUserOrRedirect)(req, res, "/forbidden");

@@ -6,6 +6,7 @@ import { getSignedUrls } from "../api/controllers/s3";
 import { getProjectQuery } from "../api/queries/projects";
 import logger from "../lib/logger.js";
 import { requireRecordAccessOrRedirect, requireUserOrRedirect } from "../lib/authz";
+import { upsertRecentlyViewed } from "../api/queries/recentlyViewed";
 
 const router = Router();
 
@@ -94,6 +95,10 @@ router.get(
           { recordId, imageCount: imageIds.length },
           "Loaded record image URLs",
         );
+      }
+
+      if (userId) {
+        upsertRecentlyViewed(userId, "record", recordId);
       }
 
       // render non wyrld public or not

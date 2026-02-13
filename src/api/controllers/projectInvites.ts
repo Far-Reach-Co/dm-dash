@@ -23,6 +23,11 @@ async function addProjectInvite(
     }`;
     const inviteId = invite.id;
 
+    if (req.body.source === "settings") {
+      res.status(201).json({ inviteLink, inviteId });
+      return;
+    }
+
     // Render different partial based on source
     const partial = req.body.source === "wyrld"
       ? "partials/wyrld_invite_display"
@@ -58,6 +63,11 @@ async function removeProjectInvite(
 ) {
   try {
     const data = await removeProjectInviteQuery(req.params.id);
+
+    if (req.body.source === "settings") {
+      res.status(200).json({ success: true });
+      return;
+    }
 
     // Render different partial based on source
     const partial = req.body.source === "wyrld"

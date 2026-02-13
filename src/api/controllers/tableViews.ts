@@ -44,9 +44,7 @@ async function addTableViewByProject(
       eventData: { tableId: data.rows[0].id, title: req.body.title },
       req,
     });
-    res
-      .set("HX-Redirect", `/wyrld?id=${req.params.project_id}`)
-      .send("Form submission was successful.");
+    res.status(201).json({ redirect: `/wyrld?id=${req.params.project_id}` });
   } catch (err) {
     next(err);
   }
@@ -75,7 +73,7 @@ async function addTableViewByUser(
       eventData: { tableId: data.rows[0].id, title: req.body.title },
       req,
     });
-    res.set("HX-Redirect", `/dash`).send("Form submission was successful.");
+    res.status(201).json({ redirect: "/dash" });
   } catch (err) {
     next(err);
   }

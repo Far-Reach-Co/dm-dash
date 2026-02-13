@@ -70,14 +70,10 @@ function add5eChar(req, res, next) {
                     eventData: { playerId: generalId, projectId: req.body.wyrld_id },
                     req,
                 });
-                res
-                    .set("HX-Redirect", `/wyrld?id=${req.body.wyrld_id}`)
-                    .send("Form submission was successful.");
+                res.status(201).json({ redirect: `/wyrld?id=${req.body.wyrld_id}` });
             }
             else {
-                res
-                    .set("HX-Redirect", `/5eplayer?id=${generalId}`)
-                    .send("Form submission was successful.");
+                res.status(201).json({ redirect: `/5eplayer?id=${generalId}` });
             }
         }
         catch (err) {
