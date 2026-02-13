@@ -34,12 +34,14 @@
         </div>
       </div>
       <% if (projectAuth) { %>
-      <div class="dashboard-sidebar-card dashboard-sidebar-card-spaced">
+      <div class="dashboard-sidebar-card dashboard-sidebar-card-spaced library-card">
         <div class="dashboard-sidebar-title">Image Library</div>
         <small>Browse, organize, and manage all your uploaded images in one place.</small>
-        <div class="mt-2">
-          <a href="/library?wyrld=<%= project.id %>">Open Library (<%= imageCount %> images) -></a>
-        </div>
+        <a class="library-link" href="/library?wyrld=<%= project.id %>">
+          <span class="library-link-text">Open Library</span>
+          <span class="library-link-count"><%= imageCount %> images</span>
+          <span class="library-link-arrow">&rarr;</span>
+        </a>
       </div>
       <% } %>
     </aside>
