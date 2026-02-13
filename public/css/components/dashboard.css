@@ -863,3 +863,82 @@
 .library-link:hover .library-link-arrow {
   transform: translateX(3px);
 }
+
+/* ==========================================================================
+   Modal Form Styles
+   ========================================================================== */
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  min-width: 280px;
+}
+
+.modal-form h2 {
+  font-family: YoungSerif, Georgia, serif;
+  font-size: 1.3rem;
+  color: var(--orange3);
+  margin: 0;
+}
+
+.modal-form-input {
+  display: block;
+  width: 100%;
+  background-color: var(--main-dark);
+  border: 1px solid var(--border-ornate);
+  color: var(--bright-white);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.modal-form-input::placeholder {
+  color: var(--main-gray);
+  letter-spacing: 0.2px;
+}
+
+.modal-form-input:focus {
+  outline: none;
+  border-color: var(--orange2);
+  box-shadow: 0 0 12px rgba(209, 158, 116, 0.08);
+}
+
+.modal-form-button {
+  align-self: flex-end;
+  background: linear-gradient(135deg,
+      rgba(165, 79, 4, 0.2) 0%,
+      rgba(209, 158, 116, 0.12) 100%);
+  border: 1px solid var(--border-ornate);
+  color: var(--orange3);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition:
+    background var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.modal-form-button:hover {
+  background: linear-gradient(135deg,
+      rgba(165, 79, 4, 0.3) 0%,
+      rgba(209, 158, 116, 0.18) 100%);
+  border-color: var(--border-ornate-hover);
+  color: var(--bright-white);
+  box-shadow: 0 0 12px rgba(209, 158, 116, 0.1);
+}
+
+.modal-form-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

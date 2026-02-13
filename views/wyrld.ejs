@@ -10,6 +10,7 @@
   <script src="/lib/MobileNavHandler.js" defer></script>
   <script type="module" src="/components/Calendar.js" defer></script>
   <script src="/components/modal.js" type="module"></script>
+  <script src="/lib/newResourceModals.js" type="module"></script>
   <script type="module" src="/components/loadingWithMessage.js"></script>
   <script src="/lib/searchDashElements.js" defer></script>
   <script src="/lib/htmx.min.js"></script>
@@ -166,7 +167,7 @@
         <div class="dashboard-card-header">
           <h2>Wyrld Tables</h2>
           <% if (projectAuth) { %>
-          <a href="/newwyrldtable?id=<%= project.id %>" title="Create a new virtual table">+ New Wyrld Table</a>
+          <a onclick="openNewWyrldTableModal('<%= project.id %>')" title="Create a new virtual table" style="cursor:pointer">+ New Wyrld Table</a>
           <% } %>
         </div>
         <small>These tables are shared by the members of the wyrld. Wyrld managers can upload images and manage the map layer.</small>
@@ -217,7 +218,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Player Character Sheets</h2>
-          <a href="/newsheet?wyrld_id=<%= project.id %>&wyrld_title=<%= encodeURIComponent(project.title) %>" title="Create a new character sheet for this wyrld">+ New Character Sheet</a>
+          <a onclick="openNewSheetModal('<%= project.id %>', '<%= encodeURIComponent(project.title) %>')" title="Create a new character sheet for this wyrld" style="cursor:pointer">+ New Character Sheet</a>
         </div>
         <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator of the sheet and the wyrld managers are allowed to view these sheets.</small>
         <hr />

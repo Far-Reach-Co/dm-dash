@@ -106,15 +106,9 @@ async function add5eChar(
         eventData: { playerId: generalId, projectId: req.body.wyrld_id },
         req,
       });
-      // Redirect to Wyrld view instead of character sheet
-      res
-        .set("HX-Redirect", `/wyrld?id=${req.body.wyrld_id}`)
-        .send("Form submission was successful.");
+      res.status(201).json({ redirect: `/wyrld?id=${req.body.wyrld_id}` });
     } else {
-      // HTMX redirect to character sheet
-      res
-        .set("HX-Redirect", `/5eplayer?id=${generalId}`)
-        .send("Form submission was successful.");
+      res.status(201).json({ redirect: `/5eplayer?id=${generalId}` });
     }
   } catch (err) {
     next(err);

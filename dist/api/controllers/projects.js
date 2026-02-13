@@ -48,9 +48,7 @@ function addProject(req, res, next) {
                 eventData: { title: data.rows[0].title },
                 req,
             });
-            res
-                .set("HX-Redirect", `/wyrld?id=${data.rows[0].id}`)
-                .send("Form submission was successful.");
+            res.status(201).json({ redirect: `/wyrld?id=${data.rows[0].id}` });
         }
         catch (err) {
             next(err);

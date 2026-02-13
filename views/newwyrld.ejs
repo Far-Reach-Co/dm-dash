@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="/style.css" />
   <%- include('./partials/icons') %>
   <script src="/lib/MobileNavHandler.js" defer></script>
-  <script src="/lib/htmx.min.js"></script>
   <script src="/components/renderTierLimitWarning.js" type="module"></script>
 </head>
 <%- include('./partials/google') %>
@@ -18,7 +17,7 @@
   <%- include('./partials/nav') %>
   <div class="container-fluid info-container page-form p-3">
     <h1>Create Wyrld</h1>
-    <form hx-post="/api/add_project">
+    <form>
       <fieldset>
         <div class="input-container">
           <label for="title">Title</label>
@@ -30,14 +29,25 @@
   </div>
 </body>
 <script>
-  // handle htmx:responseError event
-  document.body.addEventListener("htmx:responseError", function(event) {
-    // event.detail contains details about the htmx request
-    var errorText = JSON.parse(event.detail.xhr.responseText).error.message; // get the response text
-    if (errorText === "USER_IS_NOT_PRO") {
-      renderTierLimitWarning(
-        'You have reached the Wyrlds limit for this account. Please subscribe to our "Pro User" package to increase the limit.'
-      );
+  document.querySelector("form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const body = Object.fromEntries(formData);
+    const res = await fetch("/api/add_project", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      window.location.href = data.redirect;
+    } else {
+      const err = await res.json();
+      if (err.error?.message === "USER_IS_NOT_PRO") {
+        renderTierLimitWarning(
+          'You have reached the Wyrlds limit for this account. Please subscribe to our "Pro User" package to increase the limit.'
+        );
+      }
     }
   });
 </script>
