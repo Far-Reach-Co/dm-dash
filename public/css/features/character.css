@@ -1,34 +1,70 @@
+/* ==========================================================================
+   Character Sheet — Page Wrapper
+   ========================================================================== */
+
+.cp-page-wrapper {
+  padding: var(--space-xl) var(--space-lg);
+  margin-top: var(--space-2xl);
+}
+
+/* Add gap to flex-wrap layouts within the sheet */
+.cp-page-wrapper .d-flex.flex-wrap {
+  gap: var(--space-sm);
+}
+
+/* ==========================================================================
+   Global Input Override (character sheet scope)
+   ========================================================================== */
+
 input {
   height: 35px;
 }
 
+/* ==========================================================================
+   Section Title Font
+   ========================================================================== */
+
 .special-font {
-  font-size: 1.2rem;
-  font-family: Brookshire;
+  font-size: 1.1rem;
+  font-family: YoungSerif, Georgia, serif;
+  color: var(--orange3);
+  letter-spacing: 0.3px;
 }
+
+/* ==========================================================================
+   Character Sheet Navigation
+   ========================================================================== */
 
 .cp-nav {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: space-evenly;
-  gap: var(--space-md);
+  justify-content: center;
+  gap: var(--space-xs);
   margin-bottom: var(--space-xl);
   width: 100%;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-ornate);
 }
 
 .cp-nav-item {
   cursor: pointer;
-  color: var(--link-blue);
-  padding: var(--space-sm) var(--space-md);
+  color: var(--light-gray);
+  padding: var(--space-sm) var(--space-lg);
   border-bottom: 2px solid transparent;
-  transition: color var(--transition-fast), border-color var(--transition-fast);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  font-size: 0.92rem;
+  letter-spacing: 0.2px;
+  transition:
+    color var(--transition-normal),
+    border-color var(--transition-normal),
+    background-color var(--transition-normal);
 }
 
 .cp-nav-item:hover {
   text-decoration: none;
-  border-bottom-color: var(--main-gray);
   color: var(--orange3);
+  background-color: var(--glow-warm);
 }
 
 .cp-nav-item:active {
@@ -38,7 +74,14 @@ input {
 .cp-nav-item-active {
   border-bottom-color: var(--orange3);
   color: var(--orange3);
+  background: linear-gradient(135deg,
+      rgba(165, 79, 4, 0.08) 0%,
+      rgba(209, 158, 116, 0.04) 100%);
 }
+
+/* ==========================================================================
+   Inputs — General
+   ========================================================================== */
 
 .cp-input-gen {
   color: var(--main-white);
@@ -50,12 +93,12 @@ input {
 }
 
 .cp-input-gen:hover {
-  border-color: var(--blue2);
+  border-color: var(--border-ornate-hover);
 }
 
 .cp-input-gen:focus {
-  border-color: var(--blue6);
-  box-shadow: var(--focus-ring);
+  border-color: var(--orange2);
+  box-shadow: 0 0 8px rgba(209, 158, 116, 0.12);
 }
 
 .cp-input-gen-short {
@@ -68,12 +111,12 @@ input {
 }
 
 .cp-input-gen-short:hover {
-  border-color: var(--blue2);
+  border-color: var(--border-ornate-hover);
 }
 
 .cp-input-gen-short:focus {
-  border-color: var(--blue6);
-  box-shadow: var(--focus-ring);
+  border-color: var(--orange2);
+  box-shadow: 0 0 8px rgba(209, 158, 116, 0.12);
 }
 
 .input-small {
@@ -83,6 +126,10 @@ input {
 .select-option-small {
   font-size: 16px;
 }
+
+/* ==========================================================================
+   Inputs — No Border / Small
+   ========================================================================== */
 
 .cp-input-no-border {
   background-color: inherit;
@@ -108,14 +155,18 @@ input {
 
 .cp-input-no-border:hover,
 .cp-input-no-border-small:hover {
-  border-color: var(--purple);
+  border-color: var(--border-ornate);
 }
 
 .cp-input-no-border:focus,
 .cp-input-no-border-small:focus {
-  border-color: var(--pink);
-  box-shadow: 0 0 0 2px var(--purple);
+  border-color: var(--orange2);
+  box-shadow: 0 0 8px rgba(209, 158, 116, 0.12);
 }
+
+/* ==========================================================================
+   Inputs — Large & Regular
+   ========================================================================== */
 
 .cp-input-large {
   font-size: 1.5rem;
@@ -127,23 +178,33 @@ input {
   max-width: 130px;
   border: 1px solid transparent;
   padding: var(--space-xs) var(--space-sm);
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .cp-input-regular:hover {
-  border-color: var(--blue2);
+  border-color: var(--border-ornate-hover);
 }
 
 .cp-input-regular:focus {
-  border-color: var(--blue6);
-  box-shadow: var(--focus-ring);
+  border-color: var(--orange2);
+  box-shadow: 0 0 8px rgba(209, 158, 116, 0.12);
 }
+
+/* ==========================================================================
+   Content Containers
+   ========================================================================== */
 
 .cp-content-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   margin: var(--space-sm);
+}
+
+.cp-content-container small {
+  color: var(--light-gray);
+  font-size: 0.78rem;
+  letter-spacing: 0.2px;
 }
 
 .cp-content-container-row {
@@ -155,6 +216,10 @@ input {
   margin-bottom: var(--space-xs);
 }
 
+/* ==========================================================================
+   Ability Score Boxes
+   ========================================================================== */
+
 .cp-content-container-center {
   width: 140px;
   padding: var(--space-sm);
@@ -164,25 +229,49 @@ input {
   justify-content: center;
   margin: var(--space-sm);
   position: relative;
-  background-color: var(--blue3);
-  border-radius: var(--border-radius);
+  background: linear-gradient(160deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.5) 100%);
+  border: 1px solid var(--border-ornate);
+  border-radius: var(--border-radius-lg);
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.cp-content-container-center:hover {
+  border-color: var(--border-ornate-hover);
+  box-shadow: var(--shadow-warm-sm);
 }
 
 .border-rounded {
-  border: 2px solid var(--blue5);
-  border-radius: var(--border-radius);
+  border: 1px solid var(--border-ornate);
+  border-radius: var(--border-radius-lg);
 }
+
+/* ==========================================================================
+   Info Containers (Section Panels)
+   ========================================================================== */
 
 .cp-info-container-row {
   display: flex;
   justify-content: center;
   gap: var(--space-sm);
   height: fit-content;
-  padding: var(--space-md);
-  margin-right: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
   margin-bottom: var(--space-md);
-  background-color: var(--blue5);
+  background: linear-gradient(168deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.4) 100%);
+  border: 1px solid var(--border-ornate);
   border-radius: var(--border-radius-lg);
+  transition:
+    border-color var(--transition-smooth),
+    box-shadow var(--transition-smooth);
+}
+
+.cp-info-container-row:hover {
+  border-color: var(--border-ornate-hover);
 }
 
 .cp-info-container-column {
@@ -190,46 +279,63 @@ input {
   flex-direction: column;
   justify-content: center;
   gap: var(--space-sm);
-  min-width: 270px;
+  min-width: 250px;
   height: fit-content;
   padding: var(--space-md);
-  margin-right: var(--space-md);
   margin-bottom: var(--space-md);
-  background-color: var(--blue5);
+  background: linear-gradient(168deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.4) 100%);
+  border: 1px solid var(--border-ornate);
   border-radius: var(--border-radius-lg);
+  position: relative;
+  transition:
+    border-color var(--transition-smooth),
+    box-shadow var(--transition-smooth);
 }
 
+.cp-info-container-column:hover {
+  border-color: var(--border-ornate-hover);
+}
+
+/* Pulsate animation */
 .cp-info-container-pulsate {
   animation: pulsate 1s infinite;
 }
 
 @keyframes pulsate {
   0% {
-    background-color: var(--blue5);
+    border-color: var(--border-ornate);
   }
 
   50% {
-    background-color: var(--blue2);
+    border-color: var(--border-ornate-hover);
+    box-shadow: var(--shadow-warm-sm);
   }
 
   100% {
-    background-color: var(--blue5);
+    border-color: var(--border-ornate);
   }
 }
+
+/* ==========================================================================
+   Boolean / Checkbox Inputs
+   ========================================================================== */
 
 .boolean-input {
   height: 40px;
   width: 40px;
   margin: var(--space-sm);
-  border: 1px solid var(--blue);
+  border: 1px solid var(--border-ornate);
   cursor: pointer;
   background-color: var(--main-dark);
   border-radius: var(--border-radius);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .boolean-input:hover {
-  border-color: var(--blue6);
+  border-color: var(--border-ornate-hover);
+  box-shadow: 0 0 8px rgba(209, 158, 116, 0.08);
 }
 
 .boolean-input-active {
@@ -243,7 +349,10 @@ input {
   transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
-/* Shared circle input styles */
+/* ==========================================================================
+   Circle Radio Inputs (Proficiency, Death Saves)
+   ========================================================================== */
+
 .small-boolean-input,
 .small-boolean-input-checked,
 .small-boolean-input-checked-red,
@@ -251,10 +360,10 @@ input {
 .proficiency-item-radio-checked {
   width: 25px;
   height: 25px;
-  border: 2px solid var(--blue);
+  border: 2px solid var(--border-ornate-hover);
   border-radius: 50%;
   cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .small-boolean-input:hover,
@@ -262,7 +371,8 @@ input {
 .small-boolean-input-checked-red:hover,
 .proficiency-item-radio:hover,
 .proficiency-item-radio-checked:hover {
-  border-color: var(--blue6);
+  border-color: var(--orange2);
+  box-shadow: 0 0 6px rgba(209, 158, 116, 0.15);
 }
 
 /* Death saves margin */
@@ -285,6 +395,10 @@ input {
   background-color: var(--red1);
 }
 
+/* ==========================================================================
+   HP Edit & Gear Icons
+   ========================================================================== */
+
 .edit-hp {
   z-index: 4;
   height: 20px;
@@ -293,6 +407,7 @@ input {
   top: 0;
   right: 0;
   cursor: pointer;
+  transition: opacity var(--transition-fast);
 }
 
 .edit-hp:hover {
@@ -301,32 +416,52 @@ input {
 
 .gear-gen {
   cursor: pointer;
+  transition: opacity var(--transition-fast);
 }
 
 .gear-gen:hover {
   opacity: 0.7;
 }
 
+/* ==========================================================================
+   Ability Score Modifier Badge
+   ========================================================================== */
+
 .ability-score-modifier {
-  color: var(--blue6);
+  color: var(--orange3);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: -7px;
   padding: 1px;
   width: 40px;
-  border: 2px solid var(--blue5);
+  border: 1px solid var(--border-ornate);
   border-radius: 40px;
+  background-color: var(--surface-1);
+  font-weight: 600;
 }
+
+/* ==========================================================================
+   Pill Containers (AC, Initiative, Speed, etc.)
+   ========================================================================== */
 
 .cp-content-container-long {
   display: flex;
   align-items: center;
-  border: 2px solid var(--blue5);
+  border: 1px solid var(--border-ornate);
   border-radius: 30px;
-  background-color: var(--blue5);
-  margin: var(--main-distance);
+  background: linear-gradient(135deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.5) 100%);
+  margin: var(--space-sm);
   padding: 3px;
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.cp-content-container-long:hover {
+  border-color: var(--border-ornate-hover);
 }
 
 .cp-content-long-title {
@@ -339,30 +474,36 @@ input {
 .cp-content-long-number {
   min-width: 40px;
   min-height: 45px;
-  color: var(--blue6);
-  padding: var(--main-distance);
+  color: var(--orange3);
+  padding: var(--space-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--blue5);
+  border: 1px solid var(--border-ornate);
   border-radius: 30px;
-  background-color: var(--blue3);
+  background-color: var(--surface-1);
+  font-weight: 600;
 }
 
 .cp-content-short-number {
   width: 35px;
   height: 25px;
-  color: var(--blue6);
+  color: var(--orange3);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 30px;
-  background-color: var(--blue3);
+  background-color: var(--surface-1);
+  font-weight: 600;
 }
 
 .cp-content-container-long input[type="number"] {
   padding-left: 13px;
 }
+
+/* ==========================================================================
+   Proficiency / Skills List
+   ========================================================================== */
 
 .proficiency-item {
   display: flex;
@@ -370,7 +511,7 @@ input {
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
-  min-width: 230px;
+  min-width: 210px;
   margin: 4px;
 }
 
@@ -379,34 +520,48 @@ input {
 }
 
 .proficiency-item-number {
-  color: var(--blue6);
+  color: var(--orange3);
+  font-weight: 600;
 }
 
 /* Proficiency/skills margin */
 .proficiency-item-radio,
 .proficiency-item-radio-checked {
-  margin-right: 20px;
+  margin-right: var(--space-md);
 }
+
+/* ==========================================================================
+   Spell Slot Radios
+   ========================================================================== */
 
 .expended-slot-radio {
   width: 25px;
   height: 25px;
   margin-right: 2px;
-  border: 2px solid var(--blue);
+  border: 2px solid var(--border-ornate);
   border-radius: var(--border-radius);
   background-color: var(--main-dark);
   cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.expended-slot-radio:hover {
+  border-color: var(--border-ornate-hover);
 }
 
 .expended-slot-radio-checked {
   width: 25px;
   height: 25px;
   margin-right: 2px;
-  border: 2px solid var(--blue);
+  border: 2px solid var(--red1);
   border-radius: var(--border-radius);
   background-color: var(--red1);
   cursor: pointer;
 }
+
+/* ==========================================================================
+   Equipment Notes
+   ========================================================================== */
 
 .equipment-notes {
   color: var(--main-white);
@@ -414,11 +569,17 @@ input {
   height: 300px;
   max-width: 90vw;
   max-height: 90vh;
-  border-radius: var(--border-radius);
-  border: 1px solid var(--blue4);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--border-ornate);
+  background-color: var(--main-dark);
   outline: none;
   font-size: 16px;
-  padding: 5px;
-  /* resize: none; */
+  padding: var(--space-md);
   cursor: text;
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.equipment-notes:focus {
+  border-color: var(--orange2);
+  box-shadow: 0 0 12px rgba(209, 158, 116, 0.08);
 }
