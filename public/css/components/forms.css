@@ -41,6 +41,14 @@ input {
   transition: border-color var(--transition-normal), box-shadow var(--transition-normal), background-color var(--transition-normal);
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--main-dark) inset;
+  -webkit-text-fill-color: var(--main-white);
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 input:hover {
   border-color: var(--blue2);
 }
@@ -268,38 +276,196 @@ textarea:focus {
    Centered card container for auth forms
    ========================================================================== */
 
+@keyframes authReveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .auth-card {
-  background-color: var(--surface-1);
-  border: 1px solid var(--surface-border);
+  background: linear-gradient(175deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.35) 100%);
+  border: 1px solid var(--border-ornate);
   border-radius: var(--border-radius-lg);
   padding: var(--space-2xl);
   max-width: 420px;
-  margin: 80px auto 0 auto;
+  margin: 100px auto var(--space-2xl) auto;
+  position: relative;
+  box-shadow: var(--shadow-md), var(--shadow-warm-sm);
+  animation: authReveal 0.5s ease both;
+}
+
+/* Ornate top edge accent */
+.auth-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--orange2) 25%,
+      var(--orange3) 50%,
+      var(--orange2) 75%,
+      transparent 100%);
+  opacity: 0.5;
 }
 
 .auth-card legend {
   width: 100%;
   text-align: center;
   padding-bottom: var(--space-lg);
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--border-ornate);
   margin-bottom: var(--space-xl);
+  color: var(--orange3);
 }
 
 .auth-card fieldset {
   margin-top: 0;
 }
 
+.auth-card fieldset > small {
+  display: block;
+  text-align: center;
+  color: var(--light-gray);
+  margin-bottom: var(--space-md);
+}
+
 .auth-card button[type="submit"] {
   width: 100%;
   padding: var(--space-sm) var(--space-lg);
-  margin-top: var(--space-sm);
+  margin-top: var(--space-md);
+  background: linear-gradient(135deg,
+      rgba(165, 79, 4, 0.2) 0%,
+      rgba(209, 158, 116, 0.12) 100%);
+  border: 1px solid var(--border-ornate);
+  color: var(--orange3);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition:
+    background var(--transition-normal),
+    border-color var(--transition-normal),
+    color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.auth-card button[type="submit"]:hover {
+  background: linear-gradient(135deg,
+      rgba(165, 79, 4, 0.3) 0%,
+      rgba(209, 158, 116, 0.18) 100%);
+  border-color: var(--border-ornate-hover);
+  color: var(--bright-white);
+  box-shadow: 0 0 12px rgba(209, 158, 116, 0.1);
+}
+
+.auth-card button[type="submit"]:active {
+  transform: scale(0.98);
 }
 
 .auth-card .auth-links {
   text-align: center;
   margin-top: var(--space-xl);
   padding-top: var(--space-lg);
-  border-top: 1px solid var(--surface-border);
+  border-top: 1px solid var(--border-ornate);
+}
+
+.auth-card .auth-links p {
+  margin: 0 0 var(--space-xs) 0;
+  font-size: 0.9rem;
+  color: var(--light-gray);
+}
+
+.auth-card .auth-links p:last-child {
+  margin-bottom: 0;
+}
+
+.auth-card .auth-links a {
+  color: var(--orange3);
+  cursor: pointer;
+  font-weight: 600;
+  transition: color var(--transition-normal);
+}
+
+.auth-card .auth-links a:hover {
+  color: var(--bright-white);
+}
+
+/* ==========================================================================
+   Account Card (account page)
+   Wider centered card with the same ornate style as auth-card
+   ========================================================================== */
+
+.account-card {
+  background: linear-gradient(175deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.35) 100%);
+  border: 1px solid var(--border-ornate);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-2xl);
+  max-width: 520px;
+  margin: 100px auto var(--space-2xl) auto;
+  position: relative;
+  box-shadow: var(--shadow-md), var(--shadow-warm-sm);
+  animation: authReveal 0.5s ease both;
+}
+
+.account-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--orange2) 25%,
+      var(--orange3) 50%,
+      var(--orange2) 75%,
+      transparent 100%);
+  opacity: 0.5;
+}
+
+.account-title {
+  font-family: YoungSerif, Georgia, serif;
+  color: var(--orange3);
+  text-align: center;
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border-ornate);
+  margin-bottom: var(--space-xl);
+  font-size: 1.5rem;
+}
+
+/* Inputs fill width inside account card */
+.account-card .input-container {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--space-lg);
+}
+
+.account-card input:not([type="hidden"]):not([type="checkbox"]):not([type="file"]):not([type="color"]) {
+  width: 100%;
+  float: none;
+}
+
+.account-card .input-container label {
+  background: var(--surface-1);
+}
+
+.account-card .form-section {
+  border-bottom-color: var(--border-ornate);
+}
+
+.account-card h2 {
+  color: var(--orange3);
+  font-size: 1.2rem;
 }
 
 /* ==========================================================================
@@ -310,7 +476,7 @@ textarea:focus {
 .form-section {
   margin-bottom: var(--space-2xl);
   padding-bottom: var(--space-xl);
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--border-ornate);
 }
 
 .form-section:last-child {

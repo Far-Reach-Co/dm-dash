@@ -15,8 +15,8 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container page-form p-3">
-    <h1>Account Details</h1>
+  <div class="account-card">
+    <h1 class="account-title">Account Details</h1>
 
     <div class="form-section">
       <form hx-post="/api/update_email" hx-target="#email-update-success">
@@ -53,7 +53,7 @@
     </div>
 
     <div class="form-section">
-      <h1>Subscriptions</h1>
+      <h2>Subscriptions</h2>
       <small>-- Under Construction --</small>
       <div>
         <small>User subscriptions will allow more image data usage for your virtual tables and the creation of more "Wyrlds". However each "Wyrld" has its own subscription independent of any individual member.</small>
