@@ -79,6 +79,36 @@ input {
       rgba(209, 158, 116, 0.04) 100%);
 }
 
+/* Reduce button hover/render workload inside character sheet pages */
+.cp-page-wrapper button {
+  background: var(--blue);
+  border-color: rgba(116, 167, 215, 0.2);
+  box-shadow: none;
+  text-shadow: none;
+  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.cp-page-wrapper button:hover {
+  background: var(--blue2);
+  border-color: rgba(116, 167, 215, 0.35);
+  box-shadow: none;
+}
+
+.cp-page-wrapper button:active {
+  transform: none;
+  box-shadow: none;
+}
+
+.cp-page-wrapper .btn-red {
+  background: var(--red2);
+  border-color: rgba(206, 101, 101, 0.3);
+}
+
+.cp-page-wrapper .btn-red:hover {
+  background: var(--red1);
+  border-color: rgba(241, 143, 143, 0.4);
+}
+
 /* ==========================================================================
    Inputs — General
    ========================================================================== */
@@ -234,14 +264,11 @@ input {
       rgba(43, 64, 83, 0.5) 100%);
   border: 1px solid var(--border-ornate);
   border-radius: var(--border-radius-lg);
-  transition:
-    border-color var(--transition-normal),
-    box-shadow var(--transition-normal);
+  transition: border-color var(--transition-fast);
 }
 
 .cp-content-container-center:hover {
   border-color: var(--border-ornate-hover);
-  box-shadow: var(--shadow-warm-sm);
 }
 
 .border-rounded {
@@ -265,9 +292,7 @@ input {
       rgba(43, 64, 83, 0.4) 100%);
   border: 1px solid var(--border-ornate);
   border-radius: var(--border-radius-lg);
-  transition:
-    border-color var(--transition-smooth),
-    box-shadow var(--transition-smooth);
+  transition: border-color var(--transition-fast);
 }
 
 .cp-info-container-row:hover {
@@ -289,9 +314,7 @@ input {
   border: 1px solid var(--border-ornate);
   border-radius: var(--border-radius-lg);
   position: relative;
-  transition:
-    border-color var(--transition-smooth),
-    box-shadow var(--transition-smooth);
+  transition: border-color var(--transition-fast);
 }
 
 .cp-info-container-column:hover {
@@ -330,12 +353,11 @@ input {
   cursor: pointer;
   background-color: var(--main-dark);
   border-radius: var(--border-radius);
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .boolean-input:hover {
   border-color: var(--border-ornate-hover);
-  box-shadow: 0 0 8px rgba(209, 158, 116, 0.08);
 }
 
 .boolean-input-active {
@@ -372,7 +394,6 @@ input {
 .proficiency-item-radio:hover,
 .proficiency-item-radio-checked:hover {
   border-color: var(--orange2);
-  box-shadow: 0 0 6px rgba(209, 158, 116, 0.15);
 }
 
 /* Death saves margin */
@@ -455,9 +476,7 @@ input {
       rgba(43, 64, 83, 0.5) 100%);
   margin: var(--space-sm);
   padding: 3px;
-  transition:
-    border-color var(--transition-normal),
-    box-shadow var(--transition-normal);
+  transition: border-color var(--transition-fast);
 }
 
 .cp-content-container-long:hover {
@@ -517,6 +536,15 @@ input {
 
 .proficiency-item-title {
   margin-left: auto;
+}
+
+/* Respect OS reduced-motion preference inside character sheet */
+@media (prefers-reduced-motion: reduce) {
+  .cp-page-wrapper *,
+  .cp-page-wrapper *::before,
+  .cp-page-wrapper *::after {
+    transition: none !important;
+  }
 }
 
 .proficiency-item-number {
