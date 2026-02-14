@@ -22,7 +22,7 @@
       <form hx-post="/api/update_email" hx-target="#email-update-success">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <div class="input-container">
-          <label for="email">Email</label>
+          <h3>Email</h3>
           <input type="email" id="email" name="email" value="<%= user.email %>" required />
         </div>
         <div class="form-actions">
@@ -36,7 +36,7 @@
       <form hx-post="/api/update_username" hx-target="#username-update-success">
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <div class="input-container">
-          <label for="username">Username</label>
+          <h3>Username</h3>
           <input type="username" id="username" name="username" value="<%= user.username %>" required />
         </div>
         <div class="form-actions">
@@ -51,22 +51,37 @@
         <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
         <h2>Email Notifications</h2>
         <div class="input-container">
-          <label>
-            <input type="checkbox" name="notify_wyrld_join" <%= user.notify_wyrld_join ? "checked" : "" %> />
-            Wyrld member joined
-          </label>
-          <label>
-            <input type="checkbox" name="notify_sheet_link" <%= user.notify_sheet_link ? "checked" : "" %> />
-            Character sheet linked in wyrld
-          </label>
-          <label>
-            <input type="checkbox" name="notify_product_updates" <%= user.notify_product_updates ? "checked" : "" %> />
-            Product updates
-          </label>
-          <label>
-            <input type="checkbox" name="email_unsubscribed_all" <%= user.email_unsubscribed_all ? "checked" : "" %> />
-            Unsubscribe from all non-essential emails
-          </label>
+          <div class="email-pref-option">
+            <h3>Wyrld Member Joined</h3>
+            <div class="email-pref-toggle">
+              <input type="checkbox" name="notify_wyrld_join" <%= user.notify_wyrld_join ? "checked" : "" %> />
+              <small>Email me when someone joins a Wyrld I manage.</small>
+            </div>
+          </div>
+
+          <div class="email-pref-option">
+            <h3>Character Sheet Linked</h3>
+            <div class="email-pref-toggle">
+              <input type="checkbox" name="notify_sheet_link" <%= user.notify_sheet_link ? "checked" : "" %> />
+              <small>Email me when a character sheet is linked in a Wyrld I manage.</small>
+            </div>
+          </div>
+
+          <div class="email-pref-option">
+            <h3>Product Updates</h3>
+            <div class="email-pref-toggle">
+              <input type="checkbox" name="notify_product_updates" <%= user.notify_product_updates ? "checked" : "" %> />
+              <small>Email me about product updates and release summaries.</small>
+            </div>
+          </div>
+
+          <div class="email-pref-option">
+            <h3>Unsubscribe</h3>
+            <div class="email-pref-toggle">
+              <input type="checkbox" name="email_unsubscribed_all" <%= user.email_unsubscribed_all ? "checked" : "" %> />
+              <small>Unsubscribe from all non-essential emails.</small>
+            </div>
+          </div>
         </div>
         <div class="form-actions">
           <button type="submit">Save</button>
