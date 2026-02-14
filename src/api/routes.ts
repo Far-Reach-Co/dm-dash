@@ -14,6 +14,7 @@ import {
   getUserBySession,
   editEmail,
   editUsername,
+  editEmailPreferences,
 } from "./controllers/users.js";
 import {
   getCalendars,
@@ -495,5 +496,6 @@ router.post(
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
   editEmail
 );
+router.post("/update_email_preferences", csrfProtection, editEmailPreferences);
 
 export default router;

@@ -9,6 +9,7 @@ import { Request, Response, NextFunction } from "express";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { getProjectQuery } from "../queries/projects";
 import { userSubscriptionStatus } from "../../lib/enums";
+import { notifySheetLinkedAsync } from "../../lib/emailNotifications";
 
 async function addProjectPlayer(
   req: Request,
@@ -39,6 +40,13 @@ async function addProjectPlayer(
       },
       req,
     });
+    if (req.session.user) {
+      notifySheetLinkedAsync({
+        actorUserId: req.session.user,
+        projectId: req.body.project_id,
+        playerId: req.body.player_id,
+      });
+    }
 
     // If HTMX request, redirect to wyrld page
     if (req.headers["hx-request"]) {

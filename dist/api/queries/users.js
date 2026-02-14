@@ -15,6 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllUsersQuery = getAllUsersQuery;
 exports.getUserByIdQuery = getUserByIdQuery;
 exports.getUserByEmailQuery = getUserByEmailQuery;
+exports.getUsersByIdsQuery = getUsersByIdsQuery;
+exports.getProductUpdateRecipientsQuery = getProductUpdateRecipientsQuery;
 exports.registerUserQuery = registerUserQuery;
 exports.editUserQuery = editUserQuery;
 exports.editUserPasswordQuery = editUserPasswordQuery;
@@ -42,6 +44,43 @@ function getUserByEmailQuery(email) {
         const query = {
             text: `select * from public."User" where email = $1`,
             values: [email],
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getUsersByIdsQuery(ids) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `select * from public."User" where id = ANY($1::int[])`,
+            values: [ids.map((id) => Number(id))],
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getProductUpdateRecipientsQuery(opts) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const values = [];
+        let limitOffsetClause = "";
+        if (typeof (opts === null || opts === void 0 ? void 0 : opts.limit) === "number") {
+            values.push(opts.limit);
+            limitOffsetClause += ` LIMIT $${values.length}`;
+        }
+        if (typeof (opts === null || opts === void 0 ? void 0 : opts.offset) === "number") {
+            values.push(opts.offset);
+            limitOffsetClause += ` OFFSET $${values.length}`;
+        }
+        const query = {
+            text: `
+      select *
+      from public."User"
+      where notify_product_updates = true
+        and email_unsubscribed_all = false
+        and email is not null
+        and length(trim(email)) > 0
+      order by id
+      ${limitOffsetClause}
+    `,
+            values,
         };
         return yield dbconfig_1.default.query(query);
     });

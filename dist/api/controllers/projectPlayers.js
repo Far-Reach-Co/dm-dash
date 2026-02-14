@@ -18,6 +18,7 @@ const projectPlayers_1 = require("../queries/projectPlayers");
 const eventLogger_1 = require("../../lib/eventLogger");
 const projects_1 = require("../queries/projects");
 const enums_1 = require("../../lib/enums");
+const emailNotifications_1 = require("../../lib/emailNotifications");
 function addProjectPlayer(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -40,6 +41,13 @@ function addProjectPlayer(req, res, next) {
                 },
                 req,
             });
+            if (req.session.user) {
+                (0, emailNotifications_1.notifySheetLinkedAsync)({
+                    actorUserId: req.session.user,
+                    projectId: req.body.project_id,
+                    playerId: req.body.player_id,
+                });
+            }
             if (req.headers["hx-request"]) {
                 res
                     .set("HX-Redirect", `/wyrld?id=${req.body.project_id}`)

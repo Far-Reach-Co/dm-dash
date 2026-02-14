@@ -202,4 +202,5 @@ router.post("/request_reset_email", routes_js_1.csrfProtection, requestResetLimi
 router.post("/user/reset_password", routes_js_1.csrfProtection, users_js_1.resetPassword);
 router.post("/update_username", routes_js_1.csrfProtection, users_js_1.editUsername);
 router.post("/update_email", routes_js_1.csrfProtection, (0, express_validator_1.body)("email").isEmail().withMessage("Invalid email format").normalizeEmail(), users_js_1.editEmail);
+router.post("/update_email_preferences", routes_js_1.csrfProtection, users_js_1.editEmailPreferences);
 exports.default = router;

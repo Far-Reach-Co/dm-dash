@@ -8,6 +8,7 @@ export enum EventType {
 
   // Project events
   PROJECT_CREATED = "project.created",
+  PROJECT_USER_CREATED = "project_user.created",
   PROJECT_PLAYER_CREATED = "project_player.created",
 
   // Character events

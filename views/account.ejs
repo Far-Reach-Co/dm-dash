@@ -47,6 +47,35 @@
     </div>
 
     <div class="form-section">
+      <form hx-post="/api/update_email_preferences" hx-target="#preferences-update-success">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <h2>Email Notifications</h2>
+        <div class="input-container">
+          <label>
+            <input type="checkbox" name="notify_wyrld_join" <%= user.notify_wyrld_join ? "checked" : "" %> />
+            Wyrld member joined
+          </label>
+          <label>
+            <input type="checkbox" name="notify_sheet_link" <%= user.notify_sheet_link ? "checked" : "" %> />
+            Character sheet linked in wyrld
+          </label>
+          <label>
+            <input type="checkbox" name="notify_product_updates" <%= user.notify_product_updates ? "checked" : "" %> />
+            Product updates
+          </label>
+          <label>
+            <input type="checkbox" name="email_unsubscribed_all" <%= user.email_unsubscribed_all ? "checked" : "" %> />
+            Unsubscribe from all non-essential emails
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="submit">Save</button>
+          <small class="success-message" id="preferences-update-success"></small>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-section">
       <button class="btn-red" onclick="window.location.pathname = '/logout'">
         Logout
       </button>
@@ -96,6 +125,12 @@
       );
       if (emailUpdateMessage) {
         emailUpdateMessage.innerText = "";
+      }
+      const preferencesUpdateMessage = document.querySelector(
+        "#preferences-update-success"
+      );
+      if (preferencesUpdateMessage) {
+        preferencesUpdateMessage.innerText = "";
       }
     }, 3000); // 10seconds
   });

@@ -18,6 +18,7 @@ import {
 } from "../queries/tableViews.js";
 import { validationResult } from "express-validator";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import { getEmailPreferenceLinks, getPublicAppUrl } from "../../lib/emailPreferences";
 
 // I had to put this somewhere
 declare module "express-session" {
@@ -32,11 +33,25 @@ function generateAccessToken(id: string | number, expires: string | number) {
   } as SignOptions);
 }
 
-function sendResetEmail(user: { email: string }, token: string) {
+function buildPreferencesFooter(userId: string | number) {
+  const { managePreferencesUrl, unsubscribeUrl } = getEmailPreferenceLinks(userId);
+  return /*html*/ `
+    <p>
+      Manage your email settings:
+      <a href="${managePreferencesUrl}">Preferences</a><br />
+      Unsubscribe from non-essential emails:
+      <a href="${unsubscribeUrl}">Unsubscribe</a>
+    </p>
+  `;
+}
+
+function sendResetEmail(user: { id: string | number; email: string }, token: string) {
+  const resetUrl = `${getPublicAppUrl()}/resetpassword?token=${encodeURIComponent(token)}`;
   mail.sendMessage({
     user: user,
     title: "Reset Password",
-    message: `Visit the following link to reset your password: <a href="https://farreachco.com/resetpassword?token=${token}">Reset Password</a>`,
+    message: `Visit the following link to reset your password: <a href="${resetUrl}">Reset Password</a>`,
+    footerHtml: buildPreferencesFooter(user.id),
   });
 }
 interface UserPayload {
@@ -153,6 +168,7 @@ async function registerUser(
       user: data,
       title: "Welcome",
       message: `Hi friend, our team would like to welcome you aboard our ship as we sail into our next adventure together with courage and strength!\nIf you find yourself in need of any assistance feel free to reach out to us at farreachco@gmail.com<br>Thanks for joining us, have a wonderful day.<br> - Far Reach Co.`,
+      footerHtml: buildPreferencesFooter(data.id),
     });
   } catch (err) {
     return next(err);
@@ -274,6 +290,44 @@ async function editEmail(
   }
 }
 
+function parseCheckbox(value: unknown): boolean {
+  if (Array.isArray(value)) return parseCheckbox(value[value.length - 1]);
+  return value === true || value === "true" || value === "on" || value === "1";
+}
+
+interface EditEmailPreferencesRequestObject extends Request {
+  body: {
+    _csrf: string;
+    notify_wyrld_join?: string;
+    notify_sheet_link?: string;
+    notify_product_updates?: string;
+    email_unsubscribed_all?: string;
+  };
+}
+
+async function editEmailPreferences(
+  req: EditEmailPreferencesRequestObject,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    if (!req.session.user) throw new Error("User is not logged in");
+    const emailUnsubscribedAll = parseCheckbox(req.body.email_unsubscribed_all);
+
+    await editUserQuery(req.session.user, {
+      notify_wyrld_join: parseCheckbox(req.body.notify_wyrld_join),
+      notify_sheet_link: parseCheckbox(req.body.notify_sheet_link),
+      notify_product_updates: parseCheckbox(req.body.notify_product_updates),
+      email_unsubscribed_all: emailUnsubscribedAll,
+      email_unsubscribed_at: emailUnsubscribedAll ? new Date().toISOString() : null,
+    });
+
+    res.send("Saved!");
+  } catch (err) {
+    next(err);
+  }
+}
+
 interface ResetPasswordRequestObject extends Request {
   body: {
     _csrf: string;
@@ -363,6 +417,7 @@ export {
   verifyJwt,
   editEmail,
   editUsername,
+  editEmailPreferences,
   resetPassword,
   requestResetEmail,
 };
