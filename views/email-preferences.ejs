@@ -32,48 +32,52 @@
       <form method="post" action="/email/preferences">
         <input type="hidden" name="token" value="<%= token %>" />
 
-        <div class="my-2">
-          <label>
+        <div class="email-pref-option">
+          <h3>Wyrld Member Joined</h3>
+          <div class="email-pref-toggle">
             <input
               type="checkbox"
               name="notify_wyrld_join"
               <%= user.notify_wyrld_join ? "checked" : "" %>
             />
-            Email me when someone joins a Wyrld I manage
-          </label>
+            <small>Email me when someone joins a Wyrld I manage.</small>
+          </div>
         </div>
 
-        <div class="my-2">
-          <label>
+        <div class="email-pref-option">
+          <h3>Character Sheet Linked</h3>
+          <div class="email-pref-toggle">
             <input
               type="checkbox"
               name="notify_sheet_link"
               <%= user.notify_sheet_link ? "checked" : "" %>
             />
-            Email me when a character sheet is linked in a Wyrld I manage
-          </label>
+            <small>Email me when a character sheet is linked in a Wyrld I manage.</small>
+          </div>
         </div>
 
-        <div class="my-2">
-          <label>
+        <div class="email-pref-option">
+          <h3>Product Updates</h3>
+          <div class="email-pref-toggle">
             <input
               type="checkbox"
               name="notify_product_updates"
               <%= user.notify_product_updates ? "checked" : "" %>
             />
-            Email me about product updates
-          </label>
+            <small>Email me about product updates and release summaries.</small>
+          </div>
         </div>
 
-        <div class="my-2">
-          <label>
+        <div class="email-pref-option">
+          <h3>Unsubscribe</h3>
+          <div class="email-pref-toggle">
             <input
               type="checkbox"
               name="email_unsubscribed_all"
               <%= user.email_unsubscribed_all ? "checked" : "" %>
             />
-            Unsubscribe from all non-essential emails
-          </label>
+            <small>Unsubscribe from all non-essential emails.</small>
+          </div>
         </div>
 
         <div class="d-flex gap-2 align-items-center mt-3">
