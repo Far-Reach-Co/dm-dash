@@ -6,14 +6,14 @@
   visibility: hidden;
   opacity: 0;
   /* transform: translate(-50%, -12px); */
-  transition: opacity var(--transition-normal), transform var(--transition-smooth), visibility 0s linear var(--transition-normal);
+  transition: opacity var(--transition-normal), visibility 0s linear var(--transition-normal);
 }
 
 #toast-custom.visible {
   visibility: visible;
   opacity: 1;
   /* transform: translate(-50%, 0); */
-  transition: opacity var(--transition-normal), transform var(--transition-smooth), visibility 0s linear 0s;
+  transition: opacity var(--transition-normal), visibility 0s linear 0s;
 }
 
 .toast-custom {
@@ -32,8 +32,6 @@
   border: 1px solid rgba(161, 190, 128, 0.25);
   box-shadow: var(--shadow-lg);
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .toast-custom:hover {

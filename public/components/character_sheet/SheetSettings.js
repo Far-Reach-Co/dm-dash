@@ -69,8 +69,20 @@ export default class SheetSettings {
       const inviteLink = `${window.location.origin}/5eplayer?id=${this.generalData.id}&invite=${playerInvite.uuid}`;
 
       const inviteLinkButton = createElement("button", {}, "Copy Link");
-      inviteLinkButton.addEventListener("click", () => {
+      inviteLinkButton.addEventListener("click", (e) => {
+        e.preventDefault();
         copyTextToClipboard(inviteLink);
+      });
+
+      const inviteLinkInput = createElement("input", {
+        class: "invite-link-input",
+        type: "text",
+        value: inviteLink,
+        readonly: true,
+        spellcheck: false,
+      });
+      inviteLinkInput.addEventListener("click", () => {
+        inviteLinkInput.select();
       });
 
       const removeInviteButton = createElement(
@@ -89,11 +101,14 @@ export default class SheetSettings {
 
       return createElement("div", { class: "form-section" }, [
         createElement("h2", { class: "text-orange" }, "Share Invite Link"),
-        createElement(
-          "small",
-          { class: "text-blue6", style: "word-break: break-all;" },
-          inviteLink,
-        ),
+        createElement("div", { class: "invite-link-display" }, [
+          createElement(
+            "small",
+            { class: "text-blue6" },
+            "Invite URL",
+          ),
+          inviteLinkInput,
+        ]),
         createElement("div", { class: "form-actions" }, [
           inviteLinkButton,
           removeInviteButton,
