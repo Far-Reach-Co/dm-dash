@@ -8,6 +8,8 @@ import { getProjectInviteByUUIDQuery } from "../api/queries/projectInvites";
 import { get5eCharsGeneralByUserQuery } from "../api/queries/5eCharGeneral";
 import { getProjectPlayersByProjectQuery } from "../api/queries/projectPlayers";
 import { requireUserOrRedirect } from "../lib/authz";
+import { logEventAsync, EventType } from "../lib/eventLogger";
+import { notifyWyrldJoinAsync } from "../lib/emailNotifications";
 
 const router = Router();
 
@@ -58,10 +60,22 @@ router.get(
         });
 
       // safe
-      await addProjectUserQuery({
+      const addProjectUserData = await addProjectUserQuery({
         project_id: invite.project_id,
         user_id: userId,
         is_editor: false,
+      });
+      const projectUser = addProjectUserData.rows[0];
+      logEventAsync({
+        userId,
+        projectId: project.id,
+        eventType: EventType.PROJECT_USER_CREATED,
+        eventData: { projectUserId: projectUser.id },
+        req,
+      });
+      notifyWyrldJoinAsync({
+        projectId: project.id,
+        joiningUserId: userId,
       });
 
       // redirect to welcome page to set up character

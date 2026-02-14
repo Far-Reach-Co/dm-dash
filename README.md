@@ -41,6 +41,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/database_name
 ```
 SERVER_ENV=dev                              # Options: dev, prod
 SECRET_KEY=your_random_secret_key           # Used for session encryption
+PUBLIC_BASE_URL=http://localhost:4000       # Base URL used in email preference/unsubscribe links
 ```
 
 ### Email Configuration (Gmail SMTP)
@@ -137,6 +138,36 @@ Before starting the server for the first time, or after creating new migrations,
 npm run migrate:up       # Apply all pending migrations
 npm run migrate:down     # Rollback the last migration
 npm run migrate:redo     # Rollback and reapply the last migration
+```
+
+## Product Update Emails
+
+You can send release/update emails to users who opted into product updates (`notify_product_updates = true`) and have not unsubscribed.
+Sends are idempotent per campaign slug (each user receives a given campaign once).
+
+List available campaigns:
+```bash
+npm run email:product-update -- --list
+```
+
+Preview recipients without sending:
+```bash
+npm run email:product-update -- --campaign 2026-02-feature-roundup --dry-run
+```
+
+Send campaign:
+```bash
+npm run email:product-update -- --campaign 2026-02-feature-roundup
+```
+
+Optional limit for small/batched sends:
+```bash
+npm run email:product-update -- --campaign 2026-02-feature-roundup --limit 100
+```
+
+Example weekly cron (every Monday at 09:00 server time):
+```cron
+0 9 * * 1 cd /path/to/dm-dash && npm run email:product-update -- --campaign 2026-02-feature-roundup >> /var/log/dm-dash-email.log 2>&1
 ```
 
 ### Analytics View

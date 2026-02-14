@@ -11,6 +11,7 @@ import tableRoutes from "./routes/tables";
 import vttRoutes from "./routes/vtt";
 import libraryRoutes from "./routes/library";
 import miscRoutes from "./routes/misc";
+import emailRoutes from "./routes/email";
 
 const router = Router();
 
@@ -26,6 +27,7 @@ router.use(tableRoutes);
 router.use(vttRoutes);
 router.use(libraryRoutes);
 router.use(miscRoutes);
+router.use(emailRoutes);
 
 export default router;
 export { csrfProtection } from "./routes/csrf";

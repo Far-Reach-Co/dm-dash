@@ -21,6 +21,7 @@ var EventType;
     EventType["USER_REGISTERED"] = "user.registered";
     EventType["USER_LOGIN"] = "user.login";
     EventType["PROJECT_CREATED"] = "project.created";
+    EventType["PROJECT_USER_CREATED"] = "project_user.created";
     EventType["PROJECT_PLAYER_CREATED"] = "project_player.created";
     EventType["DND_5E_CHARACTER_CREATED"] = "dnd_5e_character.created";
     EventType["PLAYER_USER_CREATED"] = "player_user.created";

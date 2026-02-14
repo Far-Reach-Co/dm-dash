@@ -16,6 +16,8 @@ const projectInvites_1 = require("../api/queries/projectInvites");
 const _5eCharGeneral_1 = require("../api/queries/5eCharGeneral");
 const projectPlayers_1 = require("../api/queries/projectPlayers");
 const authz_1 = require("../lib/authz");
+const eventLogger_1 = require("../lib/eventLogger");
+const emailNotifications_1 = require("../lib/emailNotifications");
 const router = (0, express_1.Router)();
 router.get("/invite", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -53,10 +55,22 @@ router.get("/invite", (req, res, next) => __awaiter(void 0, void 0, void 0, func
                 auth: userId,
                 error: "You already joined this wyrld",
             });
-        yield (0, projectUsers_1.addProjectUserQuery)({
+        const addProjectUserData = yield (0, projectUsers_1.addProjectUserQuery)({
             project_id: invite.project_id,
             user_id: userId,
             is_editor: false,
+        });
+        const projectUser = addProjectUserData.rows[0];
+        (0, eventLogger_1.logEventAsync)({
+            userId,
+            projectId: project.id,
+            eventType: eventLogger_1.EventType.PROJECT_USER_CREATED,
+            eventData: { projectUserId: projectUser.id },
+            req,
+        });
+        (0, emailNotifications_1.notifyWyrldJoinAsync)({
+            projectId: project.id,
+            joiningUserId: userId,
         });
         res.redirect(`/wyrld-welcome?id=${project.id}`);
     }

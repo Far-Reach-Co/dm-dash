@@ -12,15 +12,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const nodemailer_1 = require("nodemailer");
 class Mail {
     constructor() {
-        this.sendMessage = (_a) => __awaiter(this, [_a], void 0, function* ({ user, title, message, }) {
+        this.sendMessage = (_a) => __awaiter(this, [_a], void 0, function* ({ user, title, message, footerHtml, headers }) {
+            const normalizedMessage = message.replace(/\n/g, "<br>");
             yield this.transporter.sendMail({
                 from: '"Far Reach Co." <wyrld.dashboard@gmail.com>',
                 to: user.email,
                 subject: title,
+                headers,
                 html: `
         <div>
           <h2>Hello from the Far Reach Co. team!</h2>
-          <p>${message}</p>
+          <div>${normalizedMessage}</div>
+          ${footerHtml ? `<hr />${footerHtml}` : ""}
         </div>
       `,
             });

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Far Reach Co. | Email Preferences</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/lib/MobileNavHandler.js" defer></script>
+    <%- include('./partials/icons') %>
+  </head>
+  <%- include('./partials/google') %>
+  <body>
+    <%- include('./partials/nav') %>
+    <div class="container-fluid p-3">
+      <h1>Email Preferences</h1>
+
+      <% if (error) { %>
+      <p class="text-red"><strong>Error:</strong> <%= error %></p>
+      <% } %>
+
+      <% if (saved) { %>
+      <p><strong>Saved.</strong> Your preferences have been updated.</p>
+      <% } %>
+
+      <% if (unsubscribed) { %>
+      <p><strong>You are unsubscribed.</strong> You can re-enable notifications below anytime.</p>
+      <% } %>
+
+      <% if (user) { %>
+      <p>Updating email preferences for: <strong><%= user.email %></strong></p>
+      <form method="post" action="/email/preferences">
+        <input type="hidden" name="token" value="<%= token %>" />
+
+        <div class="my-2">
+          <label>
+            <input
+              type="checkbox"
+              name="notify_wyrld_join"
+              <%= user.notify_wyrld_join ? "checked" : "" %>
+            />
+            Email me when someone joins a Wyrld I manage
+          </label>
+        </div>
+
+        <div class="my-2">
+          <label>
+            <input
+              type="checkbox"
+              name="notify_sheet_link"
+              <%= user.notify_sheet_link ? "checked" : "" %>
+            />
+            Email me when a character sheet is linked in a Wyrld I manage
+          </label>
+        </div>
+
+        <div class="my-2">
+          <label>
+            <input
+              type="checkbox"
+              name="notify_product_updates"
+              <%= user.notify_product_updates ? "checked" : "" %>
+            />
+            Email me about product updates
+          </label>
+        </div>
+
+        <div class="my-2">
+          <label>
+            <input
+              type="checkbox"
+              name="email_unsubscribed_all"
+              <%= user.email_unsubscribed_all ? "checked" : "" %>
+            />
+            Unsubscribe from all non-essential emails
+          </label>
+        </div>
+
+        <div class="d-flex gap-2 align-items-center mt-3">
+          <button type="submit">Save Preferences</button>
+          <a href="/email/unsubscribe?token=<%= encodeURIComponent(token) %>">
+            One-click unsubscribe
+          </a>
+        </div>
+      </form>
+      <% } %>
+    </div>
+    <%- include('./partials/footer') %>
+  </body>
+</html>

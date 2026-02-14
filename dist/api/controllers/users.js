@@ -21,6 +21,7 @@ exports.loginUser = loginUser;
 exports.verifyJwt = verifyJwt;
 exports.editEmail = editEmail;
 exports.editUsername = editUsername;
+exports.editEmailPreferences = editEmailPreferences;
 exports.resetPassword = resetPassword;
 exports.requestResetEmail = requestResetEmail;
 const bcrypt_1 = require("bcrypt");
@@ -31,16 +32,30 @@ const projects_1 = require("../queries/projects");
 const tableViews_js_1 = require("../queries/tableViews.js");
 const express_validator_1 = require("express-validator");
 const eventLogger_1 = require("../../lib/eventLogger");
+const emailPreferences_1 = require("../../lib/emailPreferences");
 function generateAccessToken(id, expires) {
     return (0, jsonwebtoken_1.sign)({ id }, process.env.SECRET_KEY, {
         expiresIn: expires,
     });
 }
+function buildPreferencesFooter(userId) {
+    const { managePreferencesUrl, unsubscribeUrl } = (0, emailPreferences_1.getEmailPreferenceLinks)(userId);
+    return `
+    <p>
+      Manage your email settings:
+      <a href="${managePreferencesUrl}">Preferences</a><br />
+      Unsubscribe from non-essential emails:
+      <a href="${unsubscribeUrl}">Unsubscribe</a>
+    </p>
+  `;
+}
 function sendResetEmail(user, token) {
+    const resetUrl = `${(0, emailPreferences_1.getPublicAppUrl)()}/resetpassword?token=${encodeURIComponent(token)}`;
     index_js_1.default.sendMessage({
         user: user,
         title: "Reset Password",
-        message: `Visit the following link to reset your password: <a href="https://farreachco.com/resetpassword?token=${token}">Reset Password</a>`,
+        message: `Visit the following link to reset your password: <a href="${resetUrl}">Reset Password</a>`,
+        footerHtml: buildPreferencesFooter(user.id),
     });
 }
 function verifyUserByToken(token) {
@@ -120,6 +135,7 @@ function registerUser(req, res, next) {
                 user: data,
                 title: "Welcome",
                 message: `Hi friend, our team would like to welcome you aboard our ship as we sail into our next adventure together with courage and strength!\nIf you find yourself in need of any assistance feel free to reach out to us at farreachco@gmail.com<br>Thanks for joining us, have a wonderful day.<br> - Far Reach Co.`,
+                footerHtml: buildPreferencesFooter(data.id),
             });
         }
         catch (err) {
@@ -196,6 +212,31 @@ function editEmail(req, res, next) {
             }
             yield (0, users_1.editUserQuery)(req.session.user, {
                 email: req.body.email,
+            });
+            res.send("Saved!");
+        }
+        catch (err) {
+            next(err);
+        }
+    });
+}
+function parseCheckbox(value) {
+    if (Array.isArray(value))
+        return parseCheckbox(value[value.length - 1]);
+    return value === true || value === "true" || value === "on" || value === "1";
+}
+function editEmailPreferences(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            if (!req.session.user)
+                throw new Error("User is not logged in");
+            const emailUnsubscribedAll = parseCheckbox(req.body.email_unsubscribed_all);
+            yield (0, users_1.editUserQuery)(req.session.user, {
+                notify_wyrld_join: parseCheckbox(req.body.notify_wyrld_join),
+                notify_sheet_link: parseCheckbox(req.body.notify_sheet_link),
+                notify_product_updates: parseCheckbox(req.body.notify_product_updates),
+                email_unsubscribed_all: emailUnsubscribedAll,
+                email_unsubscribed_at: emailUnsubscribedAll ? new Date().toISOString() : null,
             });
             res.send("Saved!");
         }
