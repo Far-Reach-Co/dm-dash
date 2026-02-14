@@ -14,7 +14,8 @@
     "sitemap": "npx tsx tools/generate-sitemap.ts",
     "backfill:equipment-desc": "dotenv -e .env -- npx tsx tools/backfill-equipment-descriptions.ts",
     "srd:download": "npx tsx tools/download-5e-srd.ts",
-    "email:product-update": "dotenv -e .env -- tsx src/tools/sendProductUpdateEmail.ts"
+    "email:product-update": "dotenv -e .env -- tsx src/tools/sendProductUpdateEmail.ts",
+    "backup:db": "dotenv -e .env -- tsx src/lib/db_backups/pgBackup.ts"
   },
   "author": "Julian Ranieri",
   "license": "ISC",

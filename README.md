@@ -56,8 +56,17 @@ AWS_ACCESS_KEY_ID=your_aws_access_key
 AWS_SECRET_ACCESS_KEY=your_aws_secret_key
 CLOUDFRONT_DISTRIBUTION_DOMAIN=your_cloudfront_domain.cloudfront.net
 CLOUDFRONT_KEY_ID=your_cloudfront_key_id
+AWS_REGION=us-east-1
 ```
 Note: You'll also need a `private_frc_cloudfront_key.pem` file in the root directory for CloudFront signed URLs.
+
+### Database Backup Configuration
+```
+DB_BACKUP_S3_BUCKET=your-s3-bucket-or-bucket/path-prefix
+DB_BACKUP_S3_PREFIX=optional-extra-prefix
+DB_BACKUP_INTERVAL_MS=86400000             # Optional, defaults to 24 hours
+DB_BACKUP_ALERT_EMAIL=ops@yourcompany.com  # Severe backup failures are emailed here
+```
 
 ### Stripe Configuration
 ```
@@ -139,6 +148,18 @@ npm run migrate:up       # Apply all pending migrations
 npm run migrate:down     # Rollback the last migration
 npm run migrate:redo     # Rollback and reapply the last migration
 ```
+
+## Database Backups
+
+Run the backup worker:
+```bash
+npm run backup:db
+```
+
+Behavior:
+- Runs one backup immediately, then repeats on `DB_BACKUP_INTERVAL_MS`.
+- Uses `pg_dump --data-only --no-acl`, uploads to S3 with timestamped filenames.
+- Sends email alerts only for severe failures (dump/upload/config issues).
 
 ## Product Update Emails
 
