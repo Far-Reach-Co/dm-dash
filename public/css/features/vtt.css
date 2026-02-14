@@ -689,6 +689,72 @@
   color: rgba(255, 255, 255, 0.7);
 }
 
+.vtt-lock-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.vtt-lock-status.is-locked {
+  border-color: rgba(222, 199, 174, 0.45);
+  color: var(--orange3);
+  background: rgba(222, 199, 174, 0.14);
+}
+
+.vtt-lock-status.is-unlocked {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--main-gray);
+}
+
+.vtt-lock-status-icon,
+.vtt-lock-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vtt-lock-status-icon svg,
+.vtt-lock-toggle-icon svg {
+  width: 13px;
+  height: 13px;
+}
+
+.vtt-lock-toggle-btn {
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  padding: 4px 8px;
+  font-size: 11px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition:
+    border-color var(--transition-fast),
+    background-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.vtt-lock-toggle-btn.is-locked {
+  border-color: rgba(222, 199, 174, 0.5);
+  background: rgba(222, 199, 174, 0.12);
+  color: var(--orange3);
+}
+
+.vtt-lock-toggle-btn:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.14);
+}
+
 .location-pin-edit-btn {
   border-radius: var(--border-radius);
   border: 1px solid rgba(255, 255, 255, 0.25);

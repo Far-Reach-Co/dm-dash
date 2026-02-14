@@ -45,6 +45,7 @@ export default class CanvasLayer {
           layer: this.layer,
           selectable: this.selectable,
           evented: this.evented,
+          lockInPosition: this.lockInPosition,
         });
       };
     })(fabric.Object.prototype.toObject);
@@ -137,6 +138,8 @@ export default class CanvasLayer {
       lockScalingX: true,
       lockScalingY: true,
       lockRotation: true,
+      lockInPosition:
+        typeof props.lockInPosition === "boolean" ? props.lockInPosition : true,
     });
     pin.isLocationPin = true;
     this.tableApp.enforceLocationPinConstraints(pin);
@@ -346,11 +349,13 @@ export default class CanvasLayer {
     const path = opt.path;
     path.set("id", uuidv4());
     path.set("layer", this.tableApp.currentLayer);
+    path.set("lockInPosition", false);
 
     // Re-add to canvas on correct layer
     this.canvas.remove(path);
     this.canvas.add(path);
     this.placeObjectOnLayer(path);
+    this.updateObjectProperties(path);
     this.setupObjectEventListeners(path);
     socketIntegration.imageAdded(path);
   };
@@ -382,6 +387,9 @@ export default class CanvasLayer {
         const id = uuidv4();
         clone.set("id", id);
         clone.set("layer", object.layer);
+        if (typeof clone.lockInPosition !== "boolean") {
+          clone.set("lockInPosition", !!object.lockInPosition);
+        }
 
         // place close to the original
         if (object.group) {
@@ -399,6 +407,7 @@ export default class CanvasLayer {
 
         // add to canvas on correct layer
         this.placeObjectOnLayer(object);
+        this.updateObjectProperties(clone);
 
         // add event listeners
         this.setupObjectEventListeners(clone);
@@ -417,6 +426,7 @@ export default class CanvasLayer {
         newImg.set("id", id);
         newImg.set("imageId", image.id);
         newImg.set("layer", this.tableApp.currentLayer);
+        newImg.set("lockInPosition", false);
 
         // add to canvas on correct layer
         this.canvas.add(newImg);
@@ -579,9 +589,14 @@ export default class CanvasLayer {
     const currentLayer = this.tableApp.currentLayer;
     const objectLayer = object.layer;
     const isActiveLayer = objectLayer === currentLayer;
+    if (typeof object.lockInPosition !== "boolean") {
+      object.lockInPosition = false;
+    }
 
     object.selectable = isActiveLayer;
     object.evented = isActiveLayer;
+    object.lockMovementX = !!object.lockInPosition;
+    object.lockMovementY = !!object.lockInPosition;
 
     // Map layer is fully visible unless viewing Fog layer
     // Object and Fog layers are dimmed when not active
@@ -662,6 +677,10 @@ export default class CanvasLayer {
       angle: pinData.angle,
       layer: pinData.layer,
       id: pinData.id,
+      lockInPosition:
+        typeof pinData.lockInPosition === "boolean"
+          ? pinData.lockInPosition
+          : true,
     });
     this.canvas.add(pin);
     this.placeObjectOnLayer(pin);
