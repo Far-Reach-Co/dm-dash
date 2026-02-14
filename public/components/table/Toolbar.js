@@ -15,6 +15,8 @@ const ICONS = {
   sidebar: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>`,
   pin: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-8.5-7-13a7 7 0 0 1 14 0c0 4.5-7 13-7 13z"/><circle cx="12" cy="8" r="2.5"/></svg>`,
   list: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+  lock: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`,
+  unlock: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-2"/></svg>`,
 };
 
 export default class Toolbar {
@@ -103,6 +105,83 @@ export default class Toolbar {
     canvas.requestRenderAll();
   };
 
+  setObjectLockInPosition = async (obj, shouldLock) => {
+    if (!obj || !this.isOwnerOrManager()) return;
+    obj.set("lockInPosition", !!shouldLock);
+    this.tableApp.canvasLayer.updateObjectProperties(obj);
+    if (obj.isLocationPin) {
+      this.tableApp.enforceLocationPinConstraints(obj);
+    }
+    this.tableApp.canvasRenderAll();
+    socketIntegration.imageMoved(obj);
+    await this.tableApp.canvasLayer.saveToDatabase();
+    await this.updateObjectSelection();
+  };
+
+  renderObjectLockControls = (
+    obj,
+    { withSeparator = false, includeStatus = true, includeButton = true } = {},
+  ) => {
+    if (!obj) return [];
+    const isLocked = !!obj.lockInPosition;
+    const icon = isLocked ? ICONS.lock : ICONS.unlock;
+    const controls = [];
+
+    if (withSeparator) {
+      controls.push(createElement("div", { class: "vtt-toolbar-sep" }));
+    }
+
+    if (includeStatus) {
+      controls.push(
+        createElement(
+          "div",
+          {
+            class: `vtt-lock-status ${isLocked ? "is-locked" : "is-unlocked"}`,
+          },
+          [
+            createElement("span", { class: "vtt-lock-status-icon" }, icon),
+            createElement(
+              "span",
+              { class: "vtt-lock-status-text" },
+              isLocked ? "Locked" : "Unlocked",
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (this.isOwnerOrManager() && includeButton) {
+      controls.push(
+        createElement(
+          "button",
+          {
+            class: `vtt-lock-toggle-btn ${isLocked ? "is-locked" : "is-unlocked"}`,
+            type: "button",
+            title: isLocked
+              ? "Allow this object to move on the canvas"
+              : "Lock this object in place on the canvas",
+          },
+          [
+            createElement("span", { class: "vtt-lock-toggle-icon" }, icon),
+            createElement(
+              "span",
+              { class: "vtt-lock-toggle-label" },
+              isLocked ? "Unlock" : "Lock",
+            ),
+          ],
+          {
+            type: "click",
+            event: async () => {
+              await this.setObjectLockInPosition(obj, !isLocked);
+            },
+          },
+        ),
+      );
+    }
+
+    return controls;
+  };
+
   renderToolbarButton = (
     iconSvg,
     title,
@@ -177,6 +256,13 @@ export default class Toolbar {
             createElement("b", {}, "Select"),
             createElement("small", {}, " \u2014 Click an object"),
             createElement("br"),
+            createElement("b", {}, "Lock Position (Manager)"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Use the lock/unlock control in the selected object panel to freeze or allow movement.",
+            ),
+            createElement("br"),
             createElement("b", {}, "Multi-select"),
             createElement("small", {}, " \u2014 Shift+click or Alt+drag a box"),
             createElement("br"),
@@ -240,6 +326,13 @@ export default class Toolbar {
               "small",
               {},
               " \u2014 Select a pin (it turns red) and click Edit in the info panel to set its title, description, and portal links.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Pin Position Lock"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Pins start locked in place. Managers can unlock/re-lock from the pin info panel.",
             ),
             createElement("br"),
             createElement("b", {}, "Portals"),
@@ -787,6 +880,7 @@ export default class Toolbar {
           { class: "location-pin-description" },
           pin.description || "No description",
         ),
+        ...this.renderObjectLockControls(obj, { includeButton: false }),
       ];
 
       if (this.tableApp.canManagePins) {
@@ -813,6 +907,7 @@ export default class Toolbar {
                   event: () => this.tableApp.deleteLocationPin(obj),
                 },
               ),
+              ...this.renderObjectLockControls(obj, { includeStatus: false }),
             ],
           ),
         );
@@ -925,6 +1020,7 @@ export default class Toolbar {
       createElement("div", { class: "vtt-toolbar-sep" }),
       createElement("small", {}, "Aura"),
       this.renderAuraColorPicker(obj),
+      ...this.renderObjectLockControls(obj, { withSeparator: true }),
     ]);
   };
 

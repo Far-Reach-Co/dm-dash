@@ -166,7 +166,11 @@ class Table {
         object.isLocationPin = true;
         object.pinId = pin.id;
         object.pinInfo = pin;
+        if (typeof object.lockInPosition !== "boolean") {
+          object.lockInPosition = true;
+        }
         this.enforceLocationPinConstraints(object);
+        this.canvasLayer.updateObjectProperties(object);
       } else {
         object.isLocationPin = false;
         delete object.pinId;
@@ -177,6 +181,10 @@ class Table {
 
   enforceLocationPinConstraints = (object) => {
     if (!object) return;
+    if (typeof object.lockInPosition !== "boolean") {
+      object.lockInPosition = true;
+    }
+    const isLocked = !!object.lockInPosition;
     object.set({
       hasControls: false,
       hasBorders: true,
@@ -185,6 +193,8 @@ class Table {
       lockScalingX: true,
       lockScalingY: true,
       lockRotation: true,
+      lockMovementX: isLocked,
+      lockMovementY: isLocked,
     });
   };
 

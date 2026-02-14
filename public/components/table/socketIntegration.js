@@ -225,6 +225,7 @@ class SocketIntegration {
       "id",
       "layer",
       "path",
+      "lockInPosition",
     ]);
     this.socket.emit("pin-added", {
       table: `table-${this.tableApp.tableId}`,
