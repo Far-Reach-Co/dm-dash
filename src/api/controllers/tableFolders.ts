@@ -89,7 +89,20 @@ async function addTableFolderByProject(
   next: NextFunction
 ) {
   try {
-    await getOptionalTableAuthForFolderMutation(req);
+    const tableAuth = await getOptionalTableAuthForFolderMutation(req);
+    if (tableAuth) {
+      if (!tableAuth.table.project_id) {
+        throw badRequestError("table_view_id is not a project table");
+      }
+      if (
+        typeof req.body.project_id !== "undefined" &&
+        String(req.body.project_id) !== String(tableAuth.table.project_id)
+      ) {
+        throw badRequestError("table_view_id/project_id mismatch");
+      }
+      req.body.project_id = tableAuth.table.project_id;
+    }
+
     await ensureProjectEditor(req, req.body.project_id);
     const data = await addTableFolderByProjectQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -104,9 +117,16 @@ async function addTableFolderByUser(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw { message: "User is not logged in" };
-    await getOptionalTableAuthForFolderMutation(req);
-    req.body.user_id = req.session.user;
+    const userId = requireUser(req);
+    const tableAuth = await getOptionalTableAuthForFolderMutation(req);
+    if (tableAuth) {
+      if (!tableAuth.table.user_id) {
+        throw badRequestError("table_view_id is not a user table");
+      }
+      req.body.user_id = tableAuth.table.user_id;
+    } else {
+      req.body.user_id = userId;
+    }
 
     const data = await addTableFolderByUserQuery(req.body);
     res.status(201).json(data.rows[0]);

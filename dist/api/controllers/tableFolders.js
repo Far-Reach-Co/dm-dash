@@ -94,7 +94,17 @@ function getOptionalTableAuthForFolderMutation(req) {
 function addTableFolderByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield getOptionalTableAuthForFolderMutation(req);
+            const tableAuth = yield getOptionalTableAuthForFolderMutation(req);
+            if (tableAuth) {
+                if (!tableAuth.table.project_id) {
+                    throw badRequestError("table_view_id is not a project table");
+                }
+                if (typeof req.body.project_id !== "undefined" &&
+                    String(req.body.project_id) !== String(tableAuth.table.project_id)) {
+                    throw badRequestError("table_view_id/project_id mismatch");
+                }
+                req.body.project_id = tableAuth.table.project_id;
+            }
             yield ensureProjectEditor(req, req.body.project_id);
             const data = yield (0, tableFolders_1.addTableFolderByProjectQuery)(req.body);
             res.status(201).json(data.rows[0]);
@@ -107,10 +117,17 @@ function addTableFolderByProject(req, res, next) {
 function addTableFolderByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (!req.session.user)
-                throw { message: "User is not logged in" };
-            yield getOptionalTableAuthForFolderMutation(req);
-            req.body.user_id = req.session.user;
+            const userId = (0, authz_1.requireUser)(req);
+            const tableAuth = yield getOptionalTableAuthForFolderMutation(req);
+            if (tableAuth) {
+                if (!tableAuth.table.user_id) {
+                    throw badRequestError("table_view_id is not a user table");
+                }
+                req.body.user_id = tableAuth.table.user_id;
+            }
+            else {
+                req.body.user_id = userId;
+            }
             const data = yield (0, tableFolders_1.addTableFolderByUserQuery)(req.body);
             res.status(201).json(data.rows[0]);
         }
