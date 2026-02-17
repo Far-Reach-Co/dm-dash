@@ -476,6 +476,7 @@ export default class CanvasLayer {
   };
 
   removeObjects = () => {
+    if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
     if (this.canvas.getActiveObjects().length) {
       this.canvas.getActiveObjects().forEach((object) => {
         if (object.isLocationPin) return;
@@ -496,6 +497,7 @@ export default class CanvasLayer {
   };
 
   moveObjectToTop = () => {
+    if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
     if (this.canvas.getActiveObjects().length) {
       this.canvas.getActiveObjects().forEach((object) => {
         // if (object.hasOwnProperty("_objects")) {

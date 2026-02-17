@@ -19,6 +19,7 @@ export default class TableSidebar {
     this.isVisible = false;
     this.navigate = props.navigate;
     this.tableApp = props.tableApp;
+    this.capabilities = this.tableApp?.capabilities || {};
 
     // project
     const searchParams = new URLSearchParams(window.location.search);
@@ -29,6 +30,8 @@ export default class TableSidebar {
     // table folders component
     this.tableSidebarFolderComponent = new TableSidebarFolderComponent({
       domComponent: createElement("div"),
+      tableView: this.tableView,
+      capabilities: this.capabilities,
     });
 
     // table sidebar component
@@ -46,6 +49,7 @@ export default class TableSidebar {
         };
       },
       onCountsUpdated: (data) => this.tableSidebarFolderComponent.setCounts(data),
+      capabilities: this.capabilities,
     });
 
     // setup functions to allow folder component to call render on images
@@ -66,6 +70,9 @@ export default class TableSidebar {
   };
 
   renderSettingsBtn = () => {
+    if (!this.capabilities.canManageTableSettings) {
+      return createElement("div", { class: "d-none" });
+    }
     return createElement(
       "div",
       { class: "sidebar-panel-btn", title: "Table Settings" },
@@ -107,15 +114,24 @@ export default class TableSidebar {
 
   uploadTableImage = async (file) => {
     const newImage = this.projectId
-      ? await uploadProjectImage(file, this.projectId, this.makeImageSmall)
-      : await uploadUserImage(file, this.makeImageSmall);
+      ? await uploadProjectImage(
+          file,
+          this.projectId,
+          this.makeImageSmall,
+          this.tableView?.id,
+        )
+      : await uploadUserImage(file, this.makeImageSmall, this.tableView?.id);
 
     if (!newImage) return null;
 
     const tableImage = await this.postByContext(
       "/api/add_table_image_by_project",
       "/api/add_table_image_by_user",
-      { image_id: newImage.id, folder_id: this.getCurrentFolderId() }
+      {
+        image_id: newImage.id,
+        folder_id: this.getCurrentFolderId(),
+        table_view_id: this.tableView?.id,
+      }
     );
 
     return { image: newImage, tableImage };
@@ -302,6 +318,7 @@ export default class TableSidebar {
                   title: formProps.title,
                   is_sub: Boolean(parentFolderId),
                   parent_folder_id: parentFolderId,
+                  table_view_id: this.tableView?.id,
                 }
               );
               await this.tableSidebarFolderComponent.loadFolders();
@@ -319,32 +336,40 @@ export default class TableSidebar {
   };
 
   renderTableSettings = async () => {
-    return createElement("div", { class: "help-content" }, [
+    const sections = [
       createElement("h1", {}, "Table Settings"),
-      createElement("hr"),
-      createElement("h2", {}, "Change Table"),
-      createElement(
-        "small",
-        {},
-        "This will move everyone viewing this table to another table",
-      ),
-      createElement(
-        "form",
-        {},
-        [await tableSelect(), createElement("Button", { class: "ms-2" }, "Go")],
-        {
-          type: "submit",
-          event: (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const formProps = Object.fromEntries(formData);
-            const tableUUID = formProps.table_uuid;
-            if (tableUUID != 0) {
-              socketIntegration.tableChanged(tableUUID);
-            }
+    ];
+
+    if (this.capabilities.canChangeTable) {
+      sections.push(
+        createElement("hr"),
+        createElement("h2", {}, "Change Table"),
+        createElement(
+          "small",
+          {},
+          "This will move everyone viewing this table to another table",
+        ),
+        createElement(
+          "form",
+          {},
+          [await tableSelect(), createElement("Button", { class: "ms-2" }, "Go")],
+          {
+            type: "submit",
+            event: (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              const formProps = Object.fromEntries(formData);
+              const tableUUID = formProps.table_uuid;
+              if (tableUUID != 0) {
+                socketIntegration.tableChanged(tableUUID);
+              }
+            },
           },
-        },
-      ),
+        ),
+      );
+    }
+
+    sections.push(
       createElement("hr"),
       createElement("h2", {}, "Details"),
       createElement("div", {}, [
@@ -438,7 +463,9 @@ export default class TableSidebar {
           },
         }),
       ]),
-    ]);
+    );
+
+    return createElement("div", { class: "help-content" }, sections);
   };
 
 
@@ -471,30 +498,44 @@ export default class TableSidebar {
 
     // Action buttons
     const actions = createElement("div", { class: "sidebar-actions" }, [
-      createElement(
-        "div",
-        { class: "sidebar-action-btn", title: "Upload image to be used on virtual table" },
-        "+ Image",
-        {
-          type: "click",
-          event: () => {
-            if (this.tableSidebarImageComponent.imageLoading) return;
-            modal.show(this.renderUploadImage());
-          },
-        },
-      ),
-      createElement(
-        "div",
-        { class: "sidebar-action-btn", title: "Create a new folder space for your images" },
-        "+ Folder",
-        {
-          type: "click",
-          event: () => {
-            if (this.tableSidebarFolderComponent.folderLoading) return;
-            modal.show(this.renderCreateFolder());
-          },
-        },
-      ),
+      ...(this.capabilities.canManageImageAssets
+        ? [
+            createElement(
+              "div",
+              {
+                class: "sidebar-action-btn",
+                title: "Upload image to be used on virtual table",
+              },
+              "+ Image",
+              {
+                type: "click",
+                event: () => {
+                  if (this.tableSidebarImageComponent.imageLoading) return;
+                  modal.show(this.renderUploadImage());
+                },
+              },
+            ),
+          ]
+        : []),
+      ...(this.capabilities.canManageFolders
+        ? [
+            createElement(
+              "div",
+              {
+                class: "sidebar-action-btn",
+                title: "Create a new folder space for your images",
+              },
+              "+ Folder",
+              {
+                type: "click",
+                event: () => {
+                  if (this.tableSidebarFolderComponent.folderLoading) return;
+                  modal.show(this.renderCreateFolder());
+                },
+              },
+            ),
+          ]
+        : []),
       this.renderShareBtn(),
     ]);
 

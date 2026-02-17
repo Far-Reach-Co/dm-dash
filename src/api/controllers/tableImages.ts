@@ -1,6 +1,7 @@
 import {
   addTableImageByUserQuery,
   addTableImageByProjectQuery,
+  getTableImageQuery,
   removeTableImageQuery,
   editTableImageQuery,
   getTableImagesWithImageByProjectQuery,
@@ -10,6 +11,107 @@ import {
 import { Request, Response, NextFunction } from "express";
 import { getTableViewQuery } from "../queries/tableViews";
 import { getSignedUrls } from "./s3";
+import { requireProjectEditor, requireUser } from "../../lib/authz";
+import {
+  assertTableCapability,
+  requireTablePermission,
+} from "../../lib/tableAuthz";
+
+function badRequest(message: string) {
+  const err: any = new Error(message);
+  err.status = 400;
+  return err;
+}
+
+function tableNotFoundError() {
+  const err: any = new Error("Table view not found");
+  err.status = 404;
+  return err;
+}
+
+function tableImageNotFoundError() {
+  const err: any = new Error("Table image not found");
+  err.status = 404;
+  return err;
+}
+
+function forbiddenError(message = "Forbidden") {
+  const err: any = new Error(message);
+  err.status = 403;
+  return err;
+}
+
+async function getTableViewByIdOrThrow(id: string | number) {
+  const data = await getTableViewQuery(id);
+  const table = data.rows[0];
+  if (!table) throw tableNotFoundError();
+  return table;
+}
+
+async function getTableImageByIdOrThrow(id: string | number) {
+  const data = await getTableImageQuery(String(id));
+  const tableImage = data.rows[0];
+  if (!tableImage) throw tableImageNotFoundError();
+  return tableImage;
+}
+
+async function getOptionalTableAuthForAssetMutation(req: Request) {
+  const tableViewIdRaw =
+    req.body?.table_view_id ??
+    req.query?.table_view_id;
+  if (typeof tableViewIdRaw === "undefined") return null;
+
+  const tableViewId = Number(tableViewIdRaw);
+  if (Number.isNaN(tableViewId) || tableViewId <= 0) {
+    throw badRequest("table_view_id must be a valid number");
+  }
+  const table = await getTableViewByIdOrThrow(tableViewId);
+  const auth = await requireTablePermission(req, table, "edit");
+  assertTableCapability(auth, "canManageImageAssets");
+  return { table, auth };
+}
+
+async function ensureTableImageEditable(
+  req: Request,
+  tableImage: {
+    project_id?: string | number | null;
+    user_id?: string | number | null;
+  },
+  tableAuth: {
+    table: { project_id?: string | number | null; user_id?: string | number | null };
+  } | null,
+) {
+  if (tableAuth) {
+    if (tableImage.project_id) {
+      if (
+        String(tableImage.project_id) !== String(tableAuth.table.project_id)
+      ) {
+        throw forbiddenError();
+      }
+      return;
+    }
+    if (tableImage.user_id) {
+      if (String(tableImage.user_id) !== String(tableAuth.table.user_id)) {
+        throw forbiddenError();
+      }
+      return;
+    }
+    throw forbiddenError();
+  }
+
+  if (tableImage.project_id) {
+    await requireProjectEditor(req, tableImage.project_id);
+    return;
+  }
+
+  if (tableImage.user_id) {
+    const userId = requireUser(req);
+    if (String(tableImage.user_id) !== String(userId)) throw forbiddenError();
+    return;
+  }
+
+  throw forbiddenError();
+}
 
 async function addTableImageByProject(
   req: Request,
@@ -17,6 +119,16 @@ async function addTableImageByProject(
   next: NextFunction,
 ) {
   try {
+    const tableAuth = await getOptionalTableAuthForAssetMutation(req);
+    if (tableAuth) {
+      if (!tableAuth.table.project_id) {
+        throw badRequest("table_view_id is not a project table");
+      }
+      req.body.project_id = tableAuth.table.project_id;
+    } else {
+      if (!req.body.project_id) throw badRequest("project_id is required");
+      await requireProjectEditor(req, req.body.project_id);
+    }
     const data = await addTableImageByProjectQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -31,7 +143,15 @@ async function addTableImageByUser(
 ) {
   try {
     if (!req.session.user) throw new Error("User is not logged in");
-    req.body.user_id = req.session.user;
+    const tableAuth = await getOptionalTableAuthForAssetMutation(req);
+    if (tableAuth) {
+      if (!tableAuth.table.user_id) {
+        throw badRequest("table_view_id is not a user table");
+      }
+      req.body.user_id = tableAuth.table.user_id;
+    } else {
+      req.body.user_id = req.session.user;
+    }
     const data = await addTableImageByUserQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -49,9 +169,13 @@ async function getTableImagesWithSignedUrlsByTableProject(
   next: NextFunction,
 ) {
   try {
-    const tableData = await getTableViewQuery(req.params.table_id);
+    const tableData = await getTableViewByIdOrThrow(req.params.table_id);
+    await requireTablePermission(req, tableData, "view");
+    if (!tableData.project_id) {
+      throw badRequest("table_id is not a project table");
+    }
     const data = await getTableImagesWithImageByProjectQuery(
-      tableData.rows[0].project_id,
+      tableData.project_id,
     );
 
     // Convert to Image format for getSignedUrls
@@ -85,9 +209,13 @@ async function getTableImagesWithSignedUrlsByTableUser(
   next: NextFunction,
 ) {
   try {
-    const tableData = await getTableViewQuery(req.params.table_id);
+    const tableData = await getTableViewByIdOrThrow(req.params.table_id);
+    await requireTablePermission(req, tableData, "view");
+    if (!tableData.user_id) {
+      throw badRequest("table_id is not a user table");
+    }
     const data = await getTableImagesWithImageByUserQuery(
-      tableData.rows[0].user_id,
+      tableData.user_id,
     );
 
     // Convert to Image format for getSignedUrls
@@ -121,6 +249,9 @@ async function removeTableImage(
   next: NextFunction,
 ) {
   try {
+    const tableImage = await getTableImageByIdOrThrow(req.params.id);
+    const tableAuth = await getOptionalTableAuthForAssetMutation(req);
+    await ensureTableImageEditable(req, tableImage, tableAuth);
     await removeTableImageQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -130,7 +261,17 @@ async function removeTableImage(
 
 async function editTableImage(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await editTableImageQuery(req.params.id, req.body);
+    const tableImage = await getTableImageByIdOrThrow(req.params.id);
+    const tableAuth = await getOptionalTableAuthForAssetMutation(req);
+    await ensureTableImageEditable(req, tableImage, tableAuth);
+    const payload: Record<string, unknown> = {};
+    if (typeof req.body.folder_id !== "undefined") {
+      payload.folder_id = req.body.folder_id;
+    }
+    if (!Object.keys(payload).length) {
+      throw badRequest("No editable fields supplied");
+    }
+    const data = await editTableImageQuery(req.params.id, payload);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);

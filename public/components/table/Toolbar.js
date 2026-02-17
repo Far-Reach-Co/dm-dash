@@ -69,6 +69,10 @@ export default class Toolbar {
     return USERID == this.tableView.user_id || IS_MANAGER_OR_OWNER;
   };
 
+  can = (capability) => {
+    return !!this.tableApp?.capabilities?.[capability];
+  };
+
   hiddenElement = () => createElement("div", { class: "d-none" });
 
   layerStyles = {
@@ -526,6 +530,7 @@ export default class Toolbar {
 
   renderLayersButton = () => {
     if (!this.isOwnerOrManager()) return this.hiddenElement();
+    if (!this.can("canManageLayers")) return this.hiddenElement();
 
     const layerColor = this.layerStyles[this.tableApp.currentLayer]?.color;
     return this.renderToolbarButton(ICONS.layers, "Layers", {
@@ -566,6 +571,7 @@ export default class Toolbar {
 
   renderGridButton = () => {
     if (!this.isOwnerOrManager()) return this.hiddenElement();
+    if (!this.can("canManageGrid")) return this.hiddenElement();
 
     return this.renderToolbarButton(ICONS.grid, "Grid control", {
       active: this.activePanel === "grid",
@@ -664,7 +670,9 @@ export default class Toolbar {
   };
 
   renderLocationPinButton = () => {
-    if (!this.tableApp.canManagePins) return this.hiddenElement();
+    if (!this.tableApp.canManagePins || !this.can("canManagePins")) {
+      return this.hiddenElement();
+    }
     return this.renderToolbarButton(ICONS.pin, "Add a location pin", {
       onClick: async () => {
         this.clearSelection();
@@ -674,7 +682,9 @@ export default class Toolbar {
   };
 
   renderManagePinsButton = () => {
-    if (!this.tableApp.canManagePins) return this.hiddenElement();
+    if (!this.tableApp.canManagePins || !this.can("canManagePins")) {
+      return this.hiddenElement();
+    }
     return this.renderToolbarButton(ICONS.list, "Manage location pins", {
       onClick: () => {
         this.clearSelection();
@@ -824,6 +834,7 @@ export default class Toolbar {
   // ---------------------------------------------------------------------------
 
   renderImageOptionButtons = () => {
+    if (!this.can("canDeleteCanvasObjects")) return [];
     const obj = this.tableApp.getCurrentSelectedObject();
     if (!obj || obj.isLocationPin) return [];
 
@@ -922,7 +933,10 @@ export default class Toolbar {
         attachments.length > 0
           ? attachments.map((target) => {
               const label = target.title || target.uuid;
-              if (this.tableApp.canManagePins) {
+              if (
+                this.tableApp.canManagePins &&
+                this.can("canUsePinPortals")
+              ) {
                 return createElement(
                   "button",
                   {

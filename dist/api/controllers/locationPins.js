@@ -15,7 +15,7 @@ exports.removeLocationPin = removeLocationPin;
 exports.updateLocationPin = updateLocationPin;
 const locationPins_js_1 = require("../queries/locationPins.js");
 const tableViews_js_1 = require("../queries/tableViews.js");
-const authz_js_1 = require("../../lib/authz.js");
+const tableAuthz_1 = require("../../lib/tableAuthz");
 function getTableViewById(tableViewId) {
     return __awaiter(this, void 0, void 0, function* () {
         const data = yield (0, tableViews_js_1.getTableViewQuery)(tableViewId);
@@ -28,57 +28,12 @@ function getTableViewById(tableViewId) {
         return tableView;
     });
 }
-function ensureTableViewVisible(req, tableView) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!tableView.project_id) {
-            if (tableView.is_public)
-                return;
-            const userId = (0, authz_js_1.requireUser)(req);
-            if (String(tableView.user_id) !== String(userId)) {
-                const err = new Error("Forbidden");
-                err.status = 403;
-                throw err;
-            }
-            return;
-        }
-        const access = yield (0, authz_js_1.getProjectAccess)(req, tableView.project_id);
-        if (!access) {
-            const err = new Error("Forbidden");
-            err.status = 403;
-            throw err;
-        }
-        if (!access.isEditor && !tableView.is_public) {
-            const err = new Error("Forbidden");
-            err.status = 403;
-            throw err;
-        }
-    });
-}
-function ensureTableViewEditable(req, tableView) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (tableView.project_id) {
-            const access = yield (0, authz_js_1.getProjectAccess)(req, tableView.project_id);
-            if (!access || !access.isEditor) {
-                const err = new Error("Forbidden");
-                err.status = 403;
-                throw err;
-            }
-            return;
-        }
-        const userId = (0, authz_js_1.requireUser)(req);
-        if (String(tableView.user_id) !== String(userId)) {
-            const err = new Error("Forbidden");
-            err.status = 403;
-            throw err;
-        }
-    });
-}
 function getLocationPinsByTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const tableViewId = Number(req.params.table_view_id);
             const tableView = yield getTableViewById(tableViewId);
-            yield ensureTableViewVisible(req, tableView);
+            yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "view");
             const pins = yield (0, locationPins_js_1.getLocationPinsByTableViewQuery)(tableViewId);
             res.send(pins.rows);
         }
@@ -112,7 +67,8 @@ function addLocationPin(req, res, next) {
                 throw err;
             }
             const tableView = yield getTableViewById(payload.table_view_id);
-            yield ensureTableViewEditable(req, tableView);
+            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
+            (0, tableAuthz_1.assertTableCapability)(auth, "canManagePins");
             const data = yield (0, locationPins_js_1.addLocationPinQuery)(payload);
             res.status(201).send(data.rows[0]);
         }
@@ -133,7 +89,8 @@ function removeLocationPin(req, res, next) {
                 throw err;
             }
             const tableView = yield getTableViewById(pin.table_view_id);
-            yield ensureTableViewEditable(req, tableView);
+            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
+            (0, tableAuthz_1.assertTableCapability)(auth, "canManagePins");
             yield (0, locationPins_js_1.removeLocationPinQuery)(pinId);
             res.status(204).send();
         }
@@ -154,7 +111,8 @@ function updateLocationPin(req, res, next) {
                 throw err;
             }
             const tableView = yield getTableViewById(pin.table_view_id);
-            yield ensureTableViewEditable(req, tableView);
+            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
+            (0, tableAuthz_1.assertTableCapability)(auth, "canManagePins");
             const payload = {};
             if (typeof req.body.canvas_object_id !== "undefined")
                 payload.canvas_object_id = req.body.canvas_object_id;
@@ -166,6 +124,7 @@ function updateLocationPin(req, res, next) {
                 payload.image_id = req.body.image_id ? Number(req.body.image_id) : null;
             }
             if (Array.isArray(req.body.portal_table_view_ids)) {
+                (0, tableAuthz_1.assertTableCapability)(auth, "canUsePinPortals");
                 const portalIds = req.body.portal_table_view_ids.map((value) => Number(value));
                 payload.portal_table_view_ids = portalIds.filter((id) => !Number.isNaN(id));
             }

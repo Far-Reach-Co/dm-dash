@@ -33,6 +33,7 @@ const utils_1 = require("../../lib/utils");
 const users_1 = require("../queries/users");
 const tableViews_js_1 = require("../queries/tableViews.js");
 const projectUsers_1 = require("../queries/projectUsers");
+const tableImages_1 = require("../queries/tableImages");
 const path = require("path");
 const fs = require("fs");
 const enums_2 = require("../../lib/enums");
@@ -41,6 +42,8 @@ const record_1 = require("../queries/record");
 const eventLogger_1 = require("../../lib/eventLogger");
 const socketUsers_1 = require("../../lib/socketUsers");
 const logger_js_1 = __importDefault(require("../../lib/logger.js"));
+const authz_1 = require("../../lib/authz");
+const tableAuthz_1 = require("../../lib/tableAuthz");
 aws_sdk_1.config.update({
     signatureVersion: "v4",
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -61,6 +64,93 @@ function invalidateSignedUrlCache(imageId) {
     return __awaiter(this, void 0, void 0, function* () {
         yield socketUsers_1.redisClient.del(getSignedUrlCacheKey(imageId));
     });
+}
+function badRequestError(message) {
+    const err = new Error(message);
+    err.status = 400;
+    return err;
+}
+function tableNotFoundError() {
+    const err = new Error("Table view not found");
+    err.status = 404;
+    return err;
+}
+function imageNotFoundError(message = "Image not found") {
+    const err = new Error(message);
+    err.status = 404;
+    return err;
+}
+function forbiddenError(message = "Forbidden") {
+    const err = new Error(message);
+    err.status = 403;
+    return err;
+}
+function getOptionalTableAuthForImageMutation(req) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c;
+        const tableViewIdRaw = (_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.table_view_id) !== null && _b !== void 0 ? _b : (_c = req.query) === null || _c === void 0 ? void 0 : _c.table_view_id;
+        if (typeof tableViewIdRaw === "undefined")
+            return null;
+        const tableViewId = Number(tableViewIdRaw);
+        if (Number.isNaN(tableViewId) || tableViewId <= 0) {
+            throw badRequestError("table_view_id must be a valid number");
+        }
+        const tableData = yield (0, tableViews_js_1.getTableViewQuery)(tableViewId);
+        const table = tableData.rows[0];
+        if (!table)
+            throw tableNotFoundError();
+        const auth = yield (0, tableAuthz_1.requireTablePermission)(req, table, "edit");
+        (0, tableAuthz_1.assertTableCapability)(auth, "canManageImageAssets");
+        return { table, auth };
+    });
+}
+function ensureImageLinkedToProject(imageId, projectId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rows = (yield (0, tableImages_1.getTableImagesByProjectQuery)(projectId)).rows;
+        const linked = rows.some((row) => String(row.image_id) === String(imageId));
+        if (!linked)
+            throw imageNotFoundError("Image not found in this project");
+    });
+}
+function ensureImageLinkedToUser(imageId, userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const rows = (yield (0, tableImages_1.getTableImagesByUserQuery)(userId)).rows;
+        const linked = rows.some((row) => String(row.image_id) === String(imageId));
+        if (!linked)
+            throw imageNotFoundError("Image not found in your library");
+    });
+}
+function ensureImageEditableWithoutTableContext(req, imageId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const userId = (0, authz_1.requireUser)(req);
+        const tableImages = (yield (0, tableImages_1.getTableImagesByImageQuery)(imageId)).rows;
+        if (!tableImages.length)
+            throw imageNotFoundError();
+        const checkedProjects = new Map();
+        for (const tableImage of tableImages) {
+            if (tableImage.user_id) {
+                if (String(tableImage.user_id) === String(userId))
+                    return;
+                continue;
+            }
+            if (!tableImage.project_id)
+                continue;
+            const key = String(tableImage.project_id);
+            if (!checkedProjects.has(key)) {
+                const access = yield (0, authz_1.getProjectAccess)(req, tableImage.project_id);
+                checkedProjects.set(key, Boolean(access === null || access === void 0 ? void 0 : access.isEditor));
+            }
+            if (checkedProjects.get(key))
+                return;
+        }
+        throw forbiddenError();
+    });
+}
+function getImageOrThrow(imageData) {
+    const image = imageData.rows[0];
+    if (!image)
+        throw imageNotFoundError();
+    return image;
 }
 function generateSignedUrl(fileName) {
     const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${fileName}`;
@@ -211,6 +301,13 @@ function newImageForProject(req, res, next) {
             return next();
         let filePath = `file_uploads/${req.file.filename}`;
         try {
+            const tableAuth = yield getOptionalTableAuthForImageMutation(req);
+            if (tableAuth) {
+                if (!tableAuth.table.project_id) {
+                    throw badRequestError("table_view_id is not a project table");
+                }
+                req.body.project_id = Number(tableAuth.table.project_id);
+            }
             yield checkProjectProLimitReachedAndAuth(req.body.project_id, req.session.user);
             const params = computeAwsImageParamsFromRequest(req, filePath);
             let fileSize = req.file.size;
@@ -270,6 +367,10 @@ function newImageForUser(req, res, next) {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
+            const tableAuth = yield getOptionalTableAuthForImageMutation(req);
+            if (tableAuth && !tableAuth.table.user_id) {
+                throw badRequestError("table_view_id is not a user table");
+            }
             yield checkUserProLimitReachedAndAuth(req.session.user);
             const params = computeAwsImageParamsFromRequest(req, filePath);
             let fileSize = req.file.size;
@@ -351,8 +452,19 @@ function getImage(req, res, next) {
 function removeImageByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            yield (0, authz_1.requireProjectEditor)(req, req.params.project_id);
+            const tableAuth = yield getOptionalTableAuthForImageMutation(req);
+            if (tableAuth) {
+                if (!tableAuth.table.project_id) {
+                    throw badRequestError("table_view_id is not a project table");
+                }
+                if (String(tableAuth.table.project_id) !== String(req.params.project_id)) {
+                    throw badRequestError("table_view_id/project_id mismatch");
+                }
+            }
+            yield ensureImageLinkedToProject(req.params.image_id, req.params.project_id);
             const imageData = yield (0, images_1.getImageQuery)(req.params.image_id);
-            const image = imageData.rows[0];
+            const image = getImageOrThrow(imageData);
             yield deleteFromS3("wyrld/images", image.file_name);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
             invalidateSignedUrlCache(req.params.image_id).catch((err) => logger_js_1.default.warn({ err, imageId: req.params.image_id }, "Failed to invalidate signed URL cache"));
@@ -383,14 +495,19 @@ function removeImageByProject(req, res, next) {
 function removeImageByTableUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const tableDataForAuth = yield (0, tableViews_js_1.getTableViewQuery)(req.params.table_id);
+            const tableForAuth = tableDataForAuth.rows[0];
+            if (!tableForAuth)
+                throw tableNotFoundError();
+            const tableAuth = yield (0, tableAuthz_1.requireTablePermission)(req, tableForAuth, "edit");
+            (0, tableAuthz_1.assertTableCapability)(tableAuth, "canManageImageAssets");
+            yield ensureImageLinkedToUser(req.params.image_id, tableForAuth.user_id);
             const imageData = yield (0, images_1.getImageQuery)(req.params.image_id);
-            const image = imageData.rows[0];
+            const image = getImageOrThrow(imageData);
             yield deleteFromS3("wyrld/images", image.file_name);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
             invalidateSignedUrlCache(req.params.image_id).catch((err) => logger_js_1.default.warn({ err, imageId: req.params.image_id }, "Failed to invalidate signed URL cache"));
-            const tableData = yield (0, tableViews_js_1.getTableViewQuery)(req.params.table_id);
-            const table = tableData.rows[0];
-            const userData = yield (0, users_1.getUserByIdQuery)(table.user_id);
+            const userData = yield (0, users_1.getUserByIdQuery)(tableForAuth.user_id);
             const user = userData.rows[0];
             yield (0, users_1.editUserQuery)(user.id, {
                 used_data_in_bytes: user.used_data_in_bytes - image.size,
@@ -416,14 +533,18 @@ function removeImageByTableUser(req, res, next) {
 function removeImageByUser(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            if (!req.session.user)
-                throw new Error("User is not logged in");
+            const userId = (0, authz_1.requireUser)(req);
+            const tableAuth = yield getOptionalTableAuthForImageMutation(req);
+            if (tableAuth && !tableAuth.table.user_id) {
+                throw badRequestError("table_view_id is not a user table");
+            }
+            yield ensureImageLinkedToUser(req.params.image_id, userId);
             const imageData = yield (0, images_1.getImageQuery)(req.params.image_id);
-            const image = imageData.rows[0];
+            const image = getImageOrThrow(imageData);
             yield deleteFromS3("wyrld/images", image.file_name);
             yield (0, images_1.removeImageQuery)(req.params.image_id);
             invalidateSignedUrlCache(req.params.image_id).catch((err) => logger_js_1.default.warn({ err, imageId: req.params.image_id }, "Failed to invalidate signed URL cache"));
-            const userData = yield (0, users_1.getUserByIdQuery)(req.session.user);
+            const userData = yield (0, users_1.getUserByIdQuery)(userId);
             const user = userData.rows[0];
             yield (0, users_1.editUserQuery)(user.id, {
                 used_data_in_bytes: user.used_data_in_bytes - image.size,
@@ -459,6 +580,22 @@ function removeImageFromBucket(bucket, image) {
 function editImageName(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            (0, authz_1.requireUser)(req);
+            const tableAuth = yield getOptionalTableAuthForImageMutation(req);
+            if (tableAuth) {
+                if (tableAuth.table.project_id) {
+                    yield ensureImageLinkedToProject(req.params.id, tableAuth.table.project_id);
+                }
+                else if (tableAuth.table.user_id) {
+                    yield ensureImageLinkedToUser(req.params.id, tableAuth.table.user_id);
+                }
+                else {
+                    throw forbiddenError();
+                }
+            }
+            else {
+                yield ensureImageEditableWithoutTableContext(req, req.params.id);
+            }
             const data = yield (0, images_1.editImageQuery)(req.params.id, {
                 original_name: req.body.original_name,
             });
@@ -472,6 +609,22 @@ function editImageName(req, res, next) {
 function editImageNotes(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            (0, authz_1.requireUser)(req);
+            const tableAuth = yield getOptionalTableAuthForImageMutation(req);
+            if (tableAuth) {
+                if (tableAuth.table.project_id) {
+                    yield ensureImageLinkedToProject(req.params.id, tableAuth.table.project_id);
+                }
+                else if (tableAuth.table.user_id) {
+                    yield ensureImageLinkedToUser(req.params.id, tableAuth.table.user_id);
+                }
+                else {
+                    throw forbiddenError();
+                }
+            }
+            else {
+                yield ensureImageEditableWithoutTableContext(req, req.params.id);
+            }
             const data = yield (0, images_1.editImageQuery)(req.params.id, {
                 notes: req.body.notes,
             });

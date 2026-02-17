@@ -25,10 +25,11 @@ const utils_1 = require("./utils");
 function addTableViewByProjectQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
-            text: `insert into public."TableView" (project_id, title) values($1,$2) returning *`,
+            text: `insert into public."TableView" (project_id, title, mode) values($1,$2,$3) returning *`,
             values: [
                 data.project_id,
-                data.title
+                data.title,
+                data.mode
             ]
         };
         return yield dbconfig_1.default.query(query);
@@ -37,10 +38,11 @@ function addTableViewByProjectQuery(data) {
 function addTableViewByUserQuery(data) {
     return __awaiter(this, void 0, void 0, function* () {
         const query = {
-            text: `insert into public."TableView" (user_id, title) values($1,$2) returning *`,
+            text: `insert into public."TableView" (user_id, title, mode) values($1,$2,$3) returning *`,
             values: [
                 data.user_id,
-                data.title
+                data.title,
+                data.mode
             ]
         };
         return yield dbconfig_1.default.query(query);

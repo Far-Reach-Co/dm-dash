@@ -9,7 +9,10 @@ import {
 import {
   getTableViewQuery,
 } from "../queries/tableViews.js";
-import { getProjectAccess, requireUser } from "../../lib/authz.js";
+import {
+  assertTableCapability,
+  requireTablePermission,
+} from "../../lib/tableAuthz";
 
 async function getTableViewById(tableViewId: number) {
   const data = await getTableViewQuery(tableViewId);
@@ -22,48 +25,6 @@ async function getTableViewById(tableViewId: number) {
   return tableView;
 }
 
-async function ensureTableViewVisible(req: Request, tableView: any) {
-  if (!tableView.project_id) {
-    if (tableView.is_public) return;
-    const userId = requireUser(req);
-    if (String(tableView.user_id) !== String(userId)) {
-      const err: any = new Error("Forbidden");
-      err.status = 403;
-      throw err;
-    }
-    return;
-  }
-  const access = await getProjectAccess(req, tableView.project_id);
-  if (!access) {
-    const err: any = new Error("Forbidden");
-    err.status = 403;
-    throw err;
-  }
-  if (!access.isEditor && !tableView.is_public) {
-    const err: any = new Error("Forbidden");
-    err.status = 403;
-    throw err;
-  }
-}
-
-async function ensureTableViewEditable(req: Request, tableView: any) {
-  if (tableView.project_id) {
-    const access = await getProjectAccess(req, tableView.project_id);
-    if (!access || !access.isEditor) {
-      const err: any = new Error("Forbidden");
-      err.status = 403;
-      throw err;
-    }
-    return;
-  }
-  const userId = requireUser(req);
-  if (String(tableView.user_id) !== String(userId)) {
-    const err: any = new Error("Forbidden");
-    err.status = 403;
-    throw err;
-  }
-}
-
 async function getLocationPinsByTableView(
   req: Request,
   res: Response,
@@ -72,7 +33,7 @@ async function getLocationPinsByTableView(
   try {
     const tableViewId = Number(req.params.table_view_id);
     const tableView = await getTableViewById(tableViewId);
-    await ensureTableViewVisible(req, tableView);
+    await requireTablePermission(req, tableView, "view");
     const pins = await getLocationPinsByTableViewQuery(tableViewId);
     res.send(pins.rows);
   } catch (err) {
@@ -105,7 +66,8 @@ async function addLocationPin(req: Request, res: Response, next: NextFunction) {
     }
 
     const tableView = await getTableViewById(payload.table_view_id);
-    await ensureTableViewEditable(req, tableView);
+    const auth = await requireTablePermission(req, tableView, "edit");
+    assertTableCapability(auth, "canManagePins");
 
     const data = await addLocationPinQuery(payload);
     res.status(201).send(data.rows[0]);
@@ -130,7 +92,8 @@ async function removeLocationPin(
     }
 
     const tableView = await getTableViewById(pin.table_view_id);
-    await ensureTableViewEditable(req, tableView);
+    const auth = await requireTablePermission(req, tableView, "edit");
+    assertTableCapability(auth, "canManagePins");
 
     await removeLocationPinQuery(pinId);
     res.status(204).send();
@@ -155,7 +118,8 @@ async function updateLocationPin(
     }
 
     const tableView = await getTableViewById(pin.table_view_id);
-    await ensureTableViewEditable(req, tableView);
+    const auth = await requireTablePermission(req, tableView, "edit");
+    assertTableCapability(auth, "canManagePins");
 
     const payload: Partial<typeof pin> = {};
     if (typeof req.body.canvas_object_id !== "undefined")
@@ -167,6 +131,7 @@ async function updateLocationPin(
       payload.image_id = req.body.image_id ? Number(req.body.image_id) : null;
     }
     if (Array.isArray(req.body.portal_table_view_ids)) {
+      assertTableCapability(auth, "canUsePinPortals");
       const portalIds = (req.body.portal_table_view_ids as Array<
         string | number
       >).map((value) => Number(value));

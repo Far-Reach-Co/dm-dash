@@ -49,6 +49,14 @@ async function getTableImagesByFolderQuery(folder_id: string | number) {
   return await db.query<TableImage>(query)
 }
 
+async function getTableImagesByImageQuery(image_id: string | number) {
+  const query = {
+    text: /*sql*/ `select * from public."TableImage" where image_id = $1`,
+    values: [image_id]
+  }
+  return await db.query<TableImage>(query)
+}
+
 async function getTableImagesByProjectQuery(project_id: string | number) {
   const query = {
     text: /*sql*/ `select * from public."TableImage" where project_id = $1`,
@@ -342,6 +350,7 @@ async function getTableImagesWithImageByProjectInFolderQuery(project_id: string 
 export {
   addTableImageByProjectQuery,
   addTableImageByUserQuery,
+  getTableImagesByImageQuery,
   getTableImagesByProjectQuery,
   getTableImagesByUserQuery,
   getTableImagesByFolderQuery,

@@ -9,25 +9,36 @@ interface TableView {
   date_created: string
   title: string
   is_public: boolean
+  mode: string
 }
 
-async function addTableViewByProjectQuery(data: {project_id: string | number, title: string}) {
+async function addTableViewByProjectQuery(data: {
+  project_id: string | number,
+  title: string,
+  mode: string
+}) {
   const query = {
-    text: /*sql*/ `insert into public."TableView" (project_id, title) values($1,$2) returning *`,
+    text: /*sql*/ `insert into public."TableView" (project_id, title, mode) values($1,$2,$3) returning *`,
     values: [
       data.project_id,
-      data.title
+      data.title,
+      data.mode
     ]
   }
   return await db.query<TableView>(query)
 }
 
-async function addTableViewByUserQuery(data: {user_id: string | number, title: string}) {
+async function addTableViewByUserQuery(data: {
+  user_id: string | number,
+  title: string,
+  mode: string
+}) {
   const query = {
-    text: /*sql*/ `insert into public."TableView" (user_id, title) values($1,$2) returning *`,
+    text: /*sql*/ `insert into public."TableView" (user_id, title, mode) values($1,$2,$3) returning *`,
     values: [
       data.user_id,
-      data.title
+      data.title,
+      data.mode
     ]
   }
   return await db.query<TableView>(query)

@@ -184,7 +184,7 @@
           <% tablesSorted.forEach(function(table) { %>
           <div class="dash-detail-row" onclick="handleTableClick('<%= table.uuid %>', '<%= project.id %>')" title="Open table in new tab">
             <div class="dash-detail-title"><%= table.title %></div>
-            <div class="dash-detail-meta"><%= table.is_public ? 'Public' : 'Private' %> - <%= formatDate(table.date_created) %></div>
+            <div class="dash-detail-meta"><%= table.mode === 'sandbox' ? 'Sandbox' : 'Standard' %> - <%= table.is_public ? 'Public' : 'Private' %> - <%= formatDate(table.date_created) %></div>
           </div>
           <% }); %>
         </div>

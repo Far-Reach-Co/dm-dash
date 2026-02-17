@@ -15,6 +15,7 @@ export default class TableSidebarImageComponent {
     this.getCurrentFolder = props.getCurrentFolder;
     this.getFolderScope = props.getFolderScope;
     this.onCountsUpdated = props.onCountsUpdated;
+    this.capabilities = props.capabilities || {};
     // project
     const searchParams = new URLSearchParams(window.location.search);
     this.projectId = searchParams.get("project");
@@ -91,12 +92,17 @@ export default class TableSidebarImageComponent {
   };
 
   getDeleteImageEndpoint = (imageId) => {
-    return this.projectId
-      ? `/api/remove_image_by_project/${imageId}/${this.projectId}`
-      : `/api/remove_image_by_table_user/${imageId}/${this.tableView.id}`;
+    if (this.projectId) {
+      const suffix = this.tableView?.id
+        ? `?table_view_id=${this.tableView.id}`
+        : "";
+      return `/api/remove_image_by_project/${imageId}/${this.projectId}${suffix}`;
+    }
+    return `/api/remove_image_by_table_user/${imageId}/${this.tableView.id}`;
   };
 
   removeImageFromTableAndSidebar = (image, elem) => {
+    if (!this.capabilities.canManageImageAssets) return;
     if (!window.confirm(`Are you sure you want to delete ${image.original_name}`)) {
       return;
     }
@@ -131,6 +137,8 @@ export default class TableSidebarImageComponent {
         this.updateCountsFromServer();
         this.render();
       },
+      tableViewId: this.tableView?.id,
+      capabilities: this.capabilities,
     });
   };
 
@@ -307,6 +315,34 @@ export default class TableSidebarImageComponent {
   };
 
   createImageListItem = async (tableImage, image) => {
+    const editableNameInput = this.capabilities.canEditImageMetadata
+      ? createElement(
+          "input",
+          {
+            class: "image-name",
+            value: image.original_name,
+            title: "Click to edit image name",
+          },
+          null,
+          {
+            type: "focusout",
+            event: (e) => {
+              postThing(`/api/edit_image_name/${image.id}`, {
+                original_name: e.target.value,
+                table_view_id: this.tableView?.id,
+              });
+            },
+          },
+        )
+      : createElement(
+          "small",
+          {
+            class: "image-name image-name-readonly",
+            title: image.original_name,
+          },
+          image.original_name,
+        );
+
     const elem = createElement("div", { class: "sidebar-image-item" }, [
       createElement(
         "div",
@@ -315,23 +351,7 @@ export default class TableSidebarImageComponent {
         },
         [
           await this.renderImage(image),
-          createElement(
-            "input",
-            {
-              class: "image-name",
-              value: image.original_name,
-              title: "Click to edit image name",
-            },
-            null,
-            {
-              type: "focusout",
-              event: (e) => {
-                postThing(`/api/edit_image_name/${image.id}`, {
-                  original_name: e.target.value,
-                });
-              },
-            },
-          ),
+          editableNameInput,
         ],
       ),
       createElement(

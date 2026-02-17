@@ -32,8 +32,17 @@ export default async function renderImageSettingsModal({
   tableImageId,
   onDelete,
   onUpdate,
+  tableViewId = null,
+  capabilities = null,
 }) {
   const imageId = image.image_id ?? image.id;
+  const canEditImageMetadata = capabilities
+    ? !!capabilities.canEditImageMetadata
+    : true;
+  const canManageFolders = capabilities ? !!capabilities.canManageFolders : true;
+  const canManageImageAssets = capabilities
+    ? !!capabilities.canManageImageAssets
+    : true;
 
   const thumb = image.src
     ? createElement("img", {
@@ -46,20 +55,26 @@ export default async function renderImageSettingsModal({
   const nameInput = createElement("input", {
     value: image.original_name,
     class: "library-search-input",
+    ...(canEditImageMetadata ? {} : { disabled: true }),
   });
   const renameField = createElement("div", { class: "library-detail-field" }, [
     createElement("h3", {}, "Name"),
     nameInput,
-    createElement("button", { class: "new-btn mt-1" }, "Save Name", {
-      type: "click",
-      event: () => {
-        image.original_name = nameInput.value;
-        postThing(`/api/edit_image_name/${imageId}`, {
-          original_name: nameInput.value,
-        });
-        if (onUpdate) onUpdate();
-      },
-    }),
+    ...(canEditImageMetadata
+      ? [
+          createElement("button", { class: "new-btn mt-1" }, "Save Name", {
+            type: "click",
+            event: () => {
+              image.original_name = nameInput.value;
+              postThing(`/api/edit_image_name/${imageId}`, {
+                original_name: nameInput.value,
+                ...(tableViewId ? { table_view_id: tableViewId } : {}),
+              });
+              if (onUpdate) onUpdate();
+            },
+          }),
+        ]
+      : []),
   ]);
 
   const notesElem = createElement(
@@ -69,17 +84,25 @@ export default async function renderImageSettingsModal({
       class: "image-notes",
     },
     image.notes ? parseUrlTextContent(image.notes) : "Placeholder text...",
-    {
-      type: "focusout",
-      event: (e) => {
-        image.notes = e.target.textContent;
-        postThing(`/api/edit_image_notes/${imageId}`, {
-          notes: e.target.textContent,
-        });
-        if (onUpdate) onUpdate();
-      },
-    },
+    ...(canEditImageMetadata
+      ? [
+          {
+            type: "focusout",
+            event: (e) => {
+              image.notes = e.target.textContent;
+              postThing(`/api/edit_image_notes/${imageId}`, {
+                notes: e.target.textContent,
+                ...(tableViewId ? { table_view_id: tableViewId } : {}),
+              });
+              if (onUpdate) onUpdate();
+            },
+          },
+        ]
+      : []),
   );
+  if (!canEditImageMetadata) {
+    notesElem.setAttribute("contenteditable", "false");
+  }
   const notesField = createElement("div", { class: "library-detail-field" }, [
     createElement("h3", {}, "Notes"),
     notesElem,
@@ -89,31 +112,38 @@ export default async function renderImageSettingsModal({
     { id: tableImageId, folder_id: image.folder_id },
     projectId,
   );
-  folderSelectElem.addEventListener("change", async (e) => {
-    const value = e.target.value;
-    image.folder_id = value == 0 ? null : value;
-    await postThing(`/api/edit_table_image/${tableImageId}`, {
-      folder_id: value,
+  if (canManageFolders) {
+    folderSelectElem.addEventListener("change", async (e) => {
+      const value = e.target.value;
+      image.folder_id = value == 0 ? null : value;
+      await postThing(`/api/edit_table_image/${tableImageId}`, {
+        folder_id: value,
+        ...(tableViewId ? { table_view_id: tableViewId } : {}),
+      });
+      if (onUpdate) onUpdate();
     });
-    if (onUpdate) onUpdate();
-  });
+  } else {
+    folderSelectElem.disabled = true;
+  }
   const folderField = createElement("div", { class: "library-detail-field" }, [
     createElement("h3", {}, "Folder"),
     folderSelectElem,
   ]);
 
   const recordContent = createElement("div");
-  if (image.record_id) {
+  if (image.record_id || !canEditImageMetadata) {
     recordContent.append(
-      createElement(
-        "a",
-        {
-          href: buildRecordHref(image.record_id, projectId),
-          target: "_blank",
-          rel: "noopener noreferrer",
-        },
-        image.record_title || "View Record",
-      ),
+      image.record_id
+        ? createElement(
+            "a",
+            {
+              href: buildRecordHref(image.record_id, projectId),
+              target: "_blank",
+              rel: "noopener noreferrer",
+            },
+            image.record_title || "View Record",
+          )
+        : createElement("small", {}, "None"),
     );
   } else {
     const recordSelectElem = await renderRecordSelect(projectId);
@@ -205,12 +235,14 @@ export default async function renderImageSettingsModal({
     createElement("small", {}, formatFileSize(image.size)),
   ]);
 
-  const deleteBtn = createElement("button", { class: "btn-red" }, "Delete Image", {
-    type: "click",
-    event: () => {
-      if (onDelete) onDelete();
-    },
-  });
+  const deleteBtn = canManageImageAssets
+    ? createElement("button", { class: "btn-red" }, "Delete Image", {
+        type: "click",
+        event: () => {
+          if (onDelete) onDelete();
+        },
+      })
+    : createElement("div");
 
   return createElement("div", { class: "help-content library-detail-modal" }, [
     thumb,

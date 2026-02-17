@@ -24,7 +24,8 @@ export async function getPresignedUrlsForImages(imageIds) {
 export async function uploadProjectImage(
   image,
   currentProjectId,
-  makeImageSmall
+  makeImageSmall,
+  tableViewId = null,
 ) {
   try {
     const formData = new FormData();
@@ -32,6 +33,7 @@ export async function uploadProjectImage(
     formData.append("bucket_name", "wyrld");
     formData.append("folder_name", "images");
     formData.append("project_id", currentProjectId);
+    if (tableViewId) formData.append("table_view_id", tableViewId);
     if (makeImageSmall) formData.append("make_image_small", makeImageSmall);
 
     const res = await fetch(`${window.origin}/api/new_image_for_project`, {
@@ -57,13 +59,14 @@ export async function uploadProjectImage(
   }
 }
 
-export async function uploadUserImage(image, makeImageSmall) {
+export async function uploadUserImage(image, makeImageSmall, tableViewId = null) {
   // (file, boolean)
   try {
     const formData = new FormData();
     formData.append("file", image);
     formData.append("bucket_name", "wyrld");
     formData.append("folder_name", "images");
+    if (tableViewId) formData.append("table_view_id", tableViewId);
     if (makeImageSmall) formData.append("make_image_small", makeImageSmall);
 
     const res = await fetch(`${window.origin}/api/new_image_for_user`, {
