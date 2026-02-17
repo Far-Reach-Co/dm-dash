@@ -1,6 +1,6 @@
 export default class GridManager {
-  constructor(canvas, config = {}) {
-    this.canvas = canvas;
+  constructor(canvasEngine, config = {}) {
+    this.canvasEngine = canvasEngine;
 
     // Size of each square in pixels (e.g. 100 = 100px x 100px per cell)
     this.gridSize = config.gridSize || 100;
@@ -27,7 +27,7 @@ export default class GridManager {
     for (let i = 0; i <= cols; i++) {
       const x = i * this.gridSize + 0.5;
       lines.push(
-        new fabric.Line([x, 0, x, this.height], {
+        this.canvasEngine.createLine([x, 0, x, this.height], {
           stroke: "#ccc",
           strokeWidth: 1,
           selectable: false,
@@ -38,7 +38,7 @@ export default class GridManager {
     for (let j = 0; j <= rows; j++) {
       const y = j * this.gridSize + 0.5;
       lines.push(
-        new fabric.Line([0, y, this.width, y], {
+        this.canvasEngine.createLine([0, y, this.width, y], {
           stroke: "#ccc",
           strokeWidth: 1,
           selectable: false,
@@ -46,14 +46,14 @@ export default class GridManager {
       );
     }
 
-    this.gridGroup = new fabric.Group(lines, {
+    this.gridGroup = this.canvasEngine.createGroup(lines, {
       left: 0,
       top: 0,
       selectable: false,
       evented: false,
     });
 
-    this.canvas.add(this.gridGroup);
+    this.canvasEngine.addObject(this.gridGroup);
   }
 
   snapPosition(pos) {
@@ -68,7 +68,7 @@ export default class GridManager {
     if (!this.gridGroup) return;
     this.gridGroup.set("visible", visible);
     this.snapToGrid = visible;
-    this.canvas.renderAll();
+    this.canvasEngine.render();
   }
 
   rebuildGrid(squaresWide, squaresHigh) {
@@ -76,7 +76,7 @@ export default class GridManager {
 
     if (this.gridGroup) {
       index = this.getIndexInCanvas();
-      this.canvas.remove(this.gridGroup);
+      this.canvasEngine.removeObject(this.gridGroup);
       this.gridGroup = null;
     }
 
@@ -86,13 +86,13 @@ export default class GridManager {
     this.renderGrid();
 
     if (index >= 0) {
-      this.gridGroup.moveTo(index);
+      this.canvasEngine.moveObjectTo(this.gridGroup, index);
     }
   }
 
   getIndexInCanvas() {
     if (!this.gridGroup) return -1;
-    return this.canvas.getObjects().indexOf(this.gridGroup);
+    return this.canvasEngine.getObjects().indexOf(this.gridGroup);
   }
 
   hideGrid() {

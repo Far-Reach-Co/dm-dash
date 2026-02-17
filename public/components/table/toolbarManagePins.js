@@ -70,9 +70,9 @@ export function showManagePinsModal(toolbar) {
             if (!confirmed) return;
             try {
               if (isActive) {
-                const obj = toolbar.tableApp.canvasLayer.canvas
-                  .getObjects()
-                  .find((o) => o.id === pin.canvas_object_id);
+                const obj = toolbar.tableApp.canvasLayer.getObjectById(
+                  pin.canvas_object_id,
+                );
                 if (obj) {
                   await toolbar.tableApp.deleteLocationPin(obj);
                 }

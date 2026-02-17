@@ -5,11 +5,11 @@ export function getCanvasSaveEndpoint(tableView) {
   );
 }
 
-export async function saveCanvasState(canvas, tableView) {
+export async function saveCanvasState(canvasEngine, tableView) {
   const saveEndpoint = getCanvasSaveEndpoint(tableView);
-  if (!saveEndpoint || !canvas) return null;
+  if (!saveEndpoint || !canvasEngine) return null;
 
-  const jsonCanvas = canvas.toJSON();
+  const jsonCanvas = canvasEngine.toJSON();
   try {
     const res = await fetch(saveEndpoint, {
       method: "POST",
@@ -32,13 +32,13 @@ export async function saveCanvasState(canvas, tableView) {
   }
 }
 
-export function loadCanvasFromData(canvas, data, onObjectLoaded) {
+export function loadCanvasFromData(canvasEngine, data, onObjectLoaded) {
   return new Promise((resolve) => {
-    canvas.loadFromJSON(data, () => {
-      canvas.getObjects().forEach((object) => {
+    canvasEngine.loadFromJSON(data, () => {
+      canvasEngine.getObjects().forEach((object) => {
         onObjectLoaded?.(object);
       });
-      canvas.renderAll();
+      canvasEngine.render();
       resolve();
     });
   });

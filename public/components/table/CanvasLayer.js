@@ -16,6 +16,7 @@ import {
   normalizeGridObjectVisuals,
   updateCanvasObjectProperties,
 } from "./canvasLayering.js";
+import CanvasEngineService from "./canvasEngineService.js";
 import LayerStackService from "./layerStackService.js";
 import { loadCanvasFromData, saveCanvasState } from "./canvasPersistence.js";
 import {
@@ -37,6 +38,7 @@ export default class CanvasLayer {
     this.tableApp = props.tableApp;
 
     this.gridManager = null;
+    this.canvasEngine = null;
     this.layerStack = null;
 
     this.throttleImageMoved = throttle((obj) => {
@@ -47,11 +49,11 @@ export default class CanvasLayer {
   init = async () => {
     this.setupCanvasConfig();
 
-    this.gridManager = new GridManager(this.canvas, {
+    this.gridManager = new GridManager(this.canvasEngine, {
       gridSize: 100,
     });
     this.layerStack = new LayerStackService({
-      canvas: this.canvas,
+      canvasEngine: this.canvasEngine,
       gridManager: this.gridManager,
     });
 
@@ -64,19 +66,20 @@ export default class CanvasLayer {
   setupCanvasConfig = () => {
     configureFabricDefaults();
     this.canvas = createFabricCanvas("canvas-layer");
+    this.canvasEngine = new CanvasEngineService(this.canvas);
   };
 
   getViewportCenter = () => {
-    if (!this.canvas) return { left: 0, top: 0 };
-    const width = this.canvas.getWidth();
-    const height = this.canvas.getHeight();
-    const viewport = this.canvas.viewportTransform;
+    if (!this.canvasEngine) return { left: 0, top: 0 };
+    const width = this.canvasEngine.getWidth();
+    const height = this.canvasEngine.getHeight();
+    const viewport = this.canvasEngine.getViewportTransform();
     if (!viewport) {
       return { left: width / 2, top: height / 2 };
     }
-    const point = new fabric.Point(width / 2, height / 2);
-    const inverted = fabric.util.invertTransform(viewport);
-    const transformed = fabric.util.transformPoint(point, inverted);
+    const point = this.canvasEngine.createPoint(width / 2, height / 2);
+    const inverted = this.canvasEngine.invertTransform(viewport);
+    const transformed = this.canvasEngine.transformPoint(point, inverted);
     return { left: transformed.x, top: transformed.y };
   };
 
@@ -87,20 +90,20 @@ export default class CanvasLayer {
       top: coords.top,
       layer: this.tableApp.currentLayer,
     });
-    this.canvas.add(pin);
+    this.canvasEngine.addObject(pin);
     this.placeObjectOnLayer(pin);
     if (autoSelect) {
-      this.canvas.setActiveObject(pin);
+      this.canvasEngine.setActiveObject(pin);
     }
-    this.canvas.requestRenderAll();
+    this.canvasEngine.requestRender();
     this.setupObjectEventListeners(pin);
     return pin;
   };
 
   createLocationPinShape = (props = {}) => {
-    const centerX = props.left ?? this.canvas.getWidth() / 2;
-    const centerY = props.top ?? this.canvas.getHeight() / 2;
-    const pin = new fabric.Path(LOCATION_PIN_PATH, {
+    const centerX = props.left ?? this.canvasEngine.getWidth() / 2;
+    const centerY = props.top ?? this.canvasEngine.getHeight() / 2;
+    const pin = this.canvasEngine.createPath(LOCATION_PIN_PATH, {
       id: props.id ?? uuidv4(),
       left: centerX,
       top: centerY,
@@ -146,22 +149,22 @@ export default class CanvasLayer {
     this.lastTouchTime = 0;
 
     // Object manipulation
-    this.canvas.on("object:moving", this.handleObjectMoving);
-    this.canvas.on("object:rotating", this.handleObjectTransform);
-    this.canvas.on("object:scaling", this.handleObjectTransform);
+    this.canvasEngine.on("object:moving", this.handleObjectMoving);
+    this.canvasEngine.on("object:rotating", this.handleObjectTransform);
+    this.canvasEngine.on("object:scaling", this.handleObjectTransform);
 
     // Zoom and pan
-    this.canvas.on("mouse:wheel", this.handleMouseWheel);
-    this.canvas.on("touch:gesture", this.handlePinchZoom);
-    this.canvas.on("mouse:down", this.handleMouseDown);
-    this.canvas.on("mouse:move", this.handleMouseMove);
-    this.canvas.on("mouse:up", this.handleMouseUp);
-    this.canvas.on("touch:drag", this.handleTouchDrag);
+    this.canvasEngine.on("mouse:wheel", this.handleMouseWheel);
+    this.canvasEngine.on("touch:gesture", this.handlePinchZoom);
+    this.canvasEngine.on("mouse:down", this.handleMouseDown);
+    this.canvasEngine.on("mouse:move", this.handleMouseMove);
+    this.canvasEngine.on("mouse:up", this.handleMouseUp);
+    this.canvasEngine.on("touch:drag", this.handleTouchDrag);
 
     // Interactions
-    this.canvas.on("mouse:dblclick", this.handleDoubleClick);
-    this.canvas.on("path:created", this.handlePathCreated);
-    this.canvas.on("selection:cleared", () => {
+    this.canvasEngine.on("mouse:dblclick", this.handleDoubleClick);
+    this.canvasEngine.on("path:created", this.handlePathCreated);
+    this.canvasEngine.on("selection:cleared", () => {
       this.tableApp.setCurrentSelectedObject(null);
     });
   };
@@ -169,21 +172,22 @@ export default class CanvasLayer {
   destroy = () => {
     if (!this.canvas) return;
 
-    this.canvas.off("object:moving", this.handleObjectMoving);
-    this.canvas.off("object:rotating", this.handleObjectTransform);
-    this.canvas.off("object:scaling", this.handleObjectTransform);
-    this.canvas.off("mouse:wheel", this.handleMouseWheel);
-    this.canvas.off("touch:gesture", this.handlePinchZoom);
-    this.canvas.off("mouse:down", this.handleMouseDown);
-    this.canvas.off("mouse:move", this.handleMouseMove);
-    this.canvas.off("mouse:up", this.handleMouseUp);
-    this.canvas.off("touch:drag", this.handleTouchDrag);
-    this.canvas.off("mouse:dblclick", this.handleDoubleClick);
-    this.canvas.off("path:created", this.handlePathCreated);
-    this.canvas.off("selection:cleared");
+    this.canvasEngine.off("object:moving", this.handleObjectMoving);
+    this.canvasEngine.off("object:rotating", this.handleObjectTransform);
+    this.canvasEngine.off("object:scaling", this.handleObjectTransform);
+    this.canvasEngine.off("mouse:wheel", this.handleMouseWheel);
+    this.canvasEngine.off("touch:gesture", this.handlePinchZoom);
+    this.canvasEngine.off("mouse:down", this.handleMouseDown);
+    this.canvasEngine.off("mouse:move", this.handleMouseMove);
+    this.canvasEngine.off("mouse:up", this.handleMouseUp);
+    this.canvasEngine.off("touch:drag", this.handleTouchDrag);
+    this.canvasEngine.off("mouse:dblclick", this.handleDoubleClick);
+    this.canvasEngine.off("path:created", this.handlePathCreated);
+    this.canvasEngine.off("selection:cleared");
 
-    this.canvas.dispose();
+    this.canvasEngine.dispose();
     this.canvas = null;
+    this.canvasEngine = null;
     this.gridManager = null;
     this.layerStack = null;
   };
@@ -222,11 +226,11 @@ export default class CanvasLayer {
   };
 
   handleMouseWheel = (opt) => {
-    handleMouseWheelZoom(this.canvas, opt);
+    handleMouseWheelZoom(this.canvasEngine, opt);
   };
 
   handlePinchZoom = (opt) => {
-    handlePinchZoomGesture(this.canvas, opt);
+    handlePinchZoomGesture(this.canvasEngine, opt);
   };
 
   handleMouseDown = (opt) => {
@@ -237,7 +241,7 @@ export default class CanvasLayer {
       this.handleMobileDoubleTap(evt);
     }
 
-    if (evt.altKey || this.canvas.isDrawingMode) return;
+    if (evt.altKey || this.canvasEngine.isDrawingMode()) return;
 
     // Begin drag if empty space or unselectable object
     if (!opt.target || !opt.target.selectable) {
@@ -248,7 +252,7 @@ export default class CanvasLayer {
   handleMobileDoubleTap = (evt) => {
     const now = Date.now();
     if (now - this.lastTouchTime < 300) {
-      const pointer = this.canvas.getPointer(evt);
+      const pointer = this.canvasEngine.getPointer(evt);
       this.triggerIndicatorAnimation(pointer.x, pointer.y);
       this.lastTouchTime = 0;
     } else {
@@ -257,7 +261,7 @@ export default class CanvasLayer {
   };
 
   handleDoubleClick = (e) => {
-    const pointer = this.canvas.getPointer(e.e);
+    const pointer = this.canvasEngine.getPointer(e.e);
     this.triggerIndicatorAnimation(pointer.x, pointer.y);
   };
 
@@ -267,21 +271,21 @@ export default class CanvasLayer {
   };
 
   startDragging = (x, y) => {
-    startCanvasDrag(this.canvas, x, y);
+    startCanvasDrag(this.canvasEngine, x, y);
   };
 
   handleMouseMove = (opt) => {
-    if (detectMob() || !this.canvas.isDragging) return;
-    handleMousePan(this.canvas, opt);
+    if (detectMob() || !this.canvasEngine.isDragging()) return;
+    handleMousePan(this.canvasEngine, opt);
   };
 
   handleTouchDrag = (opt) => {
-    if (!detectMob() || !this.canvas.isDragging) return;
-    handleTouchPan(this.canvas, opt);
+    if (!detectMob() || !this.canvasEngine.isDragging()) return;
+    handleTouchPan(this.canvasEngine, opt);
   };
 
   handleMouseUp = () => {
-    endCanvasDrag(this.canvas);
+    endCanvasDrag(this.canvasEngine);
   };
 
   handlePathCreated = (opt) => {
@@ -291,8 +295,8 @@ export default class CanvasLayer {
     path.set("lockInPosition", false);
 
     // Re-add to canvas on correct layer
-    this.canvas.remove(path);
-    this.canvas.add(path);
+    this.canvasEngine.removeObject(path);
+    this.canvasEngine.addObject(path);
     this.placeObjectOnLayer(path);
     this.updateObjectProperties(path);
     this.setupObjectEventListeners(path);
@@ -309,17 +313,76 @@ export default class CanvasLayer {
   };
 
   setCursorCrosshair = () => {
-    this.canvas.defaultCursor = "crosshair";
-    this.canvas.setCursor("crosshair");
+    this.canvasEngine.setDefaultCursor("crosshair");
+    this.canvasEngine.setCursor("crosshair");
   };
 
   setCursorDefault = () => {
-    this.canvas.defaultCursor = "grab";
-    this.canvas.setCursor("grab");
+    this.canvasEngine.setDefaultCursor("grab");
+    this.canvasEngine.setCursor("grab");
+  };
+
+  isDrawingMode = () => {
+    return this.canvasEngine?.isDrawingMode?.() || false;
+  };
+
+  setDrawingMode = (enabled) => {
+    if (!this.canvas) return;
+    this.canvas.isDrawingMode = !!enabled;
+  };
+
+  getDrawingBrushColor = () => {
+    return this.canvas?.freeDrawingBrush?.color || "#ffffff";
+  };
+
+  setDrawingBrushColor = (color) => {
+    if (!this.canvas?.freeDrawingBrush) return;
+    this.canvas.freeDrawingBrush.color = color;
+  };
+
+  getDrawingBrushWidth = () => {
+    return this.canvas?.freeDrawingBrush?.width || 10;
+  };
+
+  setDrawingBrushWidth = (width) => {
+    if (!this.canvas?.freeDrawingBrush) return;
+    this.canvas.freeDrawingBrush.width = width;
+  };
+
+  getObjects = () => {
+    return this.canvasEngine?.getObjects?.() || [];
+  };
+
+  getObjectById = (id) => {
+    return this.getObjects().find((obj) => obj.id === id) || null;
+  };
+
+  removeObject = (object) => {
+    this.canvasEngine?.removeObject?.(object);
+  };
+
+  discardActiveObject = () => {
+    this.canvasEngine?.discardActiveObject?.();
+  };
+
+  setActiveObject = (object) => {
+    this.canvasEngine?.setActiveObject?.(object);
+  };
+
+  requestRender = () => {
+    this.canvasEngine?.requestRender?.();
+  };
+
+  render = () => {
+    this.canvasEngine?.render?.();
+  };
+
+  hasRenderContext = () => {
+    return !!this.canvas?.contextContainer;
   };
 
   duplicateObject = () => {
-    const activeObjects = this.canvas.getActiveObjects();
+    const activeObjects = this.canvasEngine.getActiveObjects();
     for (var object of activeObjects) {
       object.clone((clone) => {
         // new id
@@ -342,7 +405,7 @@ export default class CanvasLayer {
           clone.set("left", object.left + 50);
           clone.set("top", object.top + 50);
         }
-        this.canvas.add(clone);
+        this.canvasEngine.addObject(clone);
 
         // add to canvas on correct layer
         this.placeObjectOnLayer(clone);
@@ -370,7 +433,12 @@ export default class CanvasLayer {
         return;
       }
 
-      fabric.Image.fromURL(image.src, (newImg) => {
+      this.canvasEngine.loadImageFromURL(image.src).then((newImg) => {
+        if (!this.canvasEngine) {
+          resolve(null);
+          return;
+        }
+
         // create new image
         const id = uuidv4();
         newImg.set("id", id);
@@ -379,19 +447,19 @@ export default class CanvasLayer {
         newImg.set("lockInPosition", false);
 
         // add to canvas on correct layer
-        this.canvas.add(newImg);
+        this.canvasEngine.addObject(newImg);
         if (
           typeof options.left === "number" &&
           typeof options.top === "number"
         ) {
           newImg.set({ left: options.left, top: options.top });
         } else if (options.centerInViewport !== false) {
-          this.canvas.viewportCenterObject(newImg);
+          this.canvasEngine.viewportCenterObject(newImg);
         }
         // Place image on layer
         this.placeObjectOnLayer(newImg);
         this.updateObjectProperties(newImg);
-        this.canvas.requestRenderAll();
+        this.canvasEngine.requestRender();
 
         // add event listeners
         this.setupObjectEventListeners(newImg);
@@ -407,7 +475,7 @@ export default class CanvasLayer {
   };
 
   runIndicatorAnimation = (x, y) => {
-    const ripple = new fabric.Circle({
+    const ripple = this.canvasEngine.createCircle({
       left: x,
       top: y,
       originX: "center",
@@ -418,16 +486,16 @@ export default class CanvasLayer {
       evented: false,
     });
 
-    this.canvas.add(ripple);
+    this.canvasEngine.addObject(ripple);
 
     ripple.animate("radius", 150, {
       duration: 500,
-      onChange: this.canvas.renderAll.bind(this.canvas),
+      onChange: this.canvasEngine.render,
       onComplete: () => {
         ripple.animate("opacity", 0, {
           duration: 500,
-          onChange: this.canvas.renderAll.bind(this.canvas),
-          onComplete: () => this.canvas.remove(ripple),
+          onChange: this.canvasEngine.render,
+          onComplete: () => this.canvasEngine.removeObject(ripple),
         });
       },
     });
@@ -435,18 +503,18 @@ export default class CanvasLayer {
 
   removeObjects = () => {
     if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
-    if (this.canvas.getActiveObjects().length) {
-      this.canvas.getActiveObjects().forEach((object) => {
+    if (this.canvasEngine.getActiveObjects().length) {
+      this.canvasEngine.getActiveObjects().forEach((object) => {
         if (object.isLocationPin) return;
         if (object.hasOwnProperty("_objects")) {
           for (var subObj of object._objects) {
             if (subObj.isLocationPin) continue;
-            this.canvas.remove(subObj);
+            this.canvasEngine.removeObject(subObj);
             socketIntegration.imageRemoved(subObj.id);
           }
           return this.saveToDatabase();
         } else {
-          this.canvas.remove(object);
+          this.canvasEngine.removeObject(object);
           socketIntegration.imageRemoved(object.id);
           return this.saveToDatabase();
         }
@@ -456,8 +524,8 @@ export default class CanvasLayer {
 
   moveObjectToTop = () => {
     if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
-    if (this.canvas.getActiveObjects().length) {
-      this.canvas.getActiveObjects().forEach((object) => {
+    if (this.canvasEngine.getActiveObjects().length) {
+      this.canvasEngine.getActiveObjects().forEach((object) => {
         // if (object.hasOwnProperty("_objects")) {
         //   for (var subObj of object._objects) {
         //     //
@@ -472,25 +540,25 @@ export default class CanvasLayer {
 
   centerViewOnObject = (obj) => {
     const canvasCenter = {
-      x: this.canvas.getWidth() / 2,
-      y: this.canvas.getHeight() / 2,
+      x: this.canvasEngine.getWidth() / 2,
+      y: this.canvasEngine.getHeight() / 2,
     };
 
-    const zoom = this.canvas.getZoom();
+    const zoom = this.canvasEngine.getZoom();
     const objCenter = obj.getCenterPoint();
 
     const panX = canvasCenter.x - objCenter.x * zoom;
     const panY = canvasCenter.y - objCenter.y * zoom;
 
-    this.canvas.setViewportTransform([zoom, 0, 0, zoom, panX, panY]);
-    this.canvas.renderAll();
+    this.canvasEngine.setViewportTransform([zoom, 0, 0, zoom, panX, panY]);
+    this.canvasEngine.render();
   };
 
   selectObjectById = (id) => {
-    this.canvas.getObjects().forEach((obj) => {
+    this.canvasEngine.getObjects().forEach((obj) => {
       if (id == obj.id) {
-        this.canvas.discardActiveObject();
-        this.canvas.setActiveObject(obj);
+        this.canvasEngine.discardActiveObject();
+        this.canvasEngine.setActiveObject(obj);
         this.centerViewOnObject(obj);
       }
     });
@@ -519,11 +587,11 @@ export default class CanvasLayer {
   };
 
   changeLayer = () => {
-    this.canvas.getObjects().forEach((object, index) => {
+    this.canvasEngine.getObjects().forEach((object) => {
       this.updateObjectProperties(object);
     });
     this.normalizeGridVisuals();
-    this.canvas.renderAll();
+    this.canvasEngine.render();
   };
 
   normalizeGridVisuals = () => {
@@ -540,7 +608,7 @@ export default class CanvasLayer {
   };
 
   saveToDatabase = async () => {
-    return saveCanvasState(this.canvas, this.tableView);
+    return saveCanvasState(this.canvasEngine, this.tableView);
   };
 
   restoreGridFromObject = (gridObject) => {
@@ -554,7 +622,7 @@ export default class CanvasLayer {
   };
 
   renderSavedData = async () => {
-    await loadCanvasFromData(this.canvas, this.tableView.data, (object) => {
+    await loadCanvasFromData(this.canvasEngine, this.tableView.data, (object) => {
       if (object.type === "group") {
         this.restoreGridFromObject(object);
         return;
@@ -565,12 +633,12 @@ export default class CanvasLayer {
     });
     this.layerStack?.reconcile({ render: false });
     this.normalizeGridVisuals();
-    this.canvas.renderAll();
+    this.canvasEngine.render();
   };
 
   addLocationPinFromSocket = (pinData) => {
     if (!pinData || !pinData.id) return;
-    if (this.canvas.getObjects().some((obj) => obj.id === pinData.id)) return;
+    if (this.canvasEngine.getObjects().some((obj) => obj.id === pinData.id)) return;
     const pin = this.createLocationPinShape({
       left: pinData.left,
       top: pinData.top,
@@ -589,11 +657,11 @@ export default class CanvasLayer {
           ? pinData.lockInPosition
           : true,
     });
-    this.canvas.add(pin);
+    this.canvasEngine.addObject(pin);
     this.placeObjectOnLayer(pin);
     this.setupObjectEventListeners(pin);
     this.tableApp.enforceLocationPinConstraints(pin);
-    this.canvas.renderAll();
+    this.canvasEngine.render();
   };
 
   hideGrid = () => {

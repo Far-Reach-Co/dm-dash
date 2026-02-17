@@ -210,7 +210,7 @@ class Table {
   };
 
   canvasRenderAll = () => {
-    this.canvasLayer.canvas.renderAll();
+    this.canvasLayer.render();
   };
 
   can = (capability) => {

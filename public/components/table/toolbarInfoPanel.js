@@ -276,7 +276,7 @@ export function renderInfoMenu(toolbar) {
           createElement("button", {}, "Open Log", {
             type: "click",
             event: () => {
-              const canvasObjectsList = toolbar.tableApp.canvasLayer.canvas.getObjects();
+              const canvasObjectsList = toolbar.tableApp.canvasLayer.getObjects();
               modal.show(
                 createElement("div", { class: "help-content" }, [
                   createElement("h1", {}, "Canvas Log"),

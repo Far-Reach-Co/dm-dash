@@ -26,11 +26,12 @@ export function buildSocketEventHandlers(integration) {
     },
 
     "object-change-layer": (id) => {
-      const canvas = integration.tableApp?.canvasLayer?.canvas;
-      if (!canvas) return;
-      canvas.getObjects().forEach((object) => {
+      const canvasLayer = integration.tableApp?.canvasLayer;
+      const canvasEngine = canvasLayer?.canvasEngine;
+      if (!canvasLayer || !canvasEngine) return;
+      canvasEngine.getObjects().forEach((object) => {
         if (object.id === id) {
-          integration.tableApp.canvasLayer.placeObjectOnLayer(object);
+          canvasLayer.placeObjectOnLayer(object);
         }
       });
     },
@@ -75,11 +76,11 @@ export function buildSocketEventHandlers(integration) {
 
     "image-add": (newImg) => {
       const canvasLayer = integration.tableApp?.canvasLayer;
-      const canvas = canvasLayer?.canvas;
-      if (!canvasLayer || !canvas) return;
+      const canvasEngine = canvasLayer?.canvasEngine;
+      if (!canvasLayer || !canvasEngine) return;
 
       if (!newImg.src) {
-        const newPath = new fabric.Path(newImg.path);
+        const newPath = canvasEngine.createPath(newImg.path);
         newPath.set({
           id: newImg.id,
           left: newImg.left,
@@ -90,18 +91,18 @@ export function buildSocketEventHandlers(integration) {
           layer: newImg.layer,
         });
 
-        canvas.add(newPath);
+        canvasEngine.addObject(newPath);
         canvasLayer.placeObjectOnLayer(newPath);
         canvasLayer.updateObjectProperties(newPath);
         canvasLayer.setupObjectEventListeners(newPath);
         return;
       }
 
-      fabric.Image.fromURL(newImg.src, (img) => {
+      canvasEngine.loadImageFromURL(newImg.src).then((img) => {
         for (const [key, value] of Object.entries(newImg)) {
           img[key] = value;
         }
-        canvas.add(img);
+        canvasEngine.addObject(img);
         canvasLayer.placeObjectOnLayer(img);
         canvasLayer.updateObjectProperties(img);
         canvasLayer.setupObjectEventListeners(img);
@@ -109,11 +110,11 @@ export function buildSocketEventHandlers(integration) {
     },
 
     "image-remove": (id) => {
-      const canvas = integration.tableApp?.canvasLayer?.canvas;
-      if (!canvas) return;
-      canvas.getObjects().forEach((object) => {
+      const canvasEngine = integration.tableApp?.canvasLayer?.canvasEngine;
+      if (!canvasEngine) return;
+      canvasEngine.getObjects().forEach((object) => {
         if (object.id === id) {
-          canvas.remove(object);
+          canvasEngine.removeObject(object);
         }
       });
     },
@@ -124,15 +125,15 @@ export function buildSocketEventHandlers(integration) {
 
     "image-move": (image) => {
       const canvasLayer = integration.tableApp?.canvasLayer;
-      const canvas = canvasLayer?.canvas;
-      if (!canvasLayer || !canvas) return;
-      canvas.getObjects().forEach((object) => {
+      const canvasEngine = canvasLayer?.canvasEngine;
+      if (!canvasLayer || !canvasEngine) return;
+      canvasEngine.getObjects().forEach((object) => {
         if (object.id === image.id) {
           for (const [key, value] of Object.entries(image)) {
             object[key] = value;
           }
           canvasLayer.updateObjectProperties(object);
-          canvas.renderAll();
+          canvasEngine.render();
         }
       });
     },

@@ -1,13 +1,13 @@
 const KNOWN_LAYERS = new Set(["Map", "Object", "Fog"]);
 
 export default class LayerStackService {
-  constructor({ canvas, gridManager }) {
-    this.canvas = canvas;
+  constructor({ canvasEngine, gridManager }) {
+    this.canvasEngine = canvasEngine;
     this.gridManager = gridManager;
   }
 
-  setCanvas = (canvas) => {
-    this.canvas = canvas;
+  setCanvasEngine = (canvasEngine) => {
+    this.canvasEngine = canvasEngine;
   };
 
   setGridManager = (gridManager) => {
@@ -27,7 +27,7 @@ export default class LayerStackService {
   };
 
   buildContext = (obj) => {
-    const all = this.canvas?.getObjects?.() ?? [];
+    const all = this.canvasEngine?.getObjects?.() ?? [];
     const withoutObj = all.filter((item) => item !== obj);
     const gridObject = this.getGridObject();
     const gridIndex = withoutObj.indexOf(gridObject);
@@ -125,15 +125,15 @@ export default class LayerStackService {
   };
 
   moveObject = (obj, { position = "top", render = true } = {}) => {
-    if (!this.canvas || !obj) return;
+    if (!this.canvasEngine || !obj) return;
     const layer = this.getLayerForObject(obj);
     const ctx = this.buildContext(obj);
     const bounds = this.computeBounds(ctx, layer);
     const desired = position === "bottom" ? bounds.bottom : bounds.top;
     const targetIndex = this.clampToBounds(desired, bounds);
-    obj.moveTo(targetIndex);
+    this.canvasEngine.moveObjectTo(obj, targetIndex);
     if (render) {
-      this.canvas.requestRenderAll();
+      this.canvasEngine.requestRender();
     }
   };
 
@@ -152,9 +152,9 @@ export default class LayerStackService {
   };
 
   reconcile = ({ render = true } = {}) => {
-    if (!this.canvas) return;
+    if (!this.canvasEngine) return;
     const gridObject = this.getGridObject();
-    const allObjects = this.canvas.getObjects();
+    const allObjects = this.canvasEngine.getObjects();
     const stack = allObjects.filter((obj) => obj !== gridObject);
 
     const mapObjects = [];
@@ -176,26 +176,26 @@ export default class LayerStackService {
     });
 
     let index = 0;
-    mapObjects.forEach((obj) => obj.moveTo(index++));
+    mapObjects.forEach((obj) => this.canvasEngine.moveObjectTo(obj, index++));
     if (gridObject) {
-      gridObject.moveTo(index++);
+      this.canvasEngine.moveObjectTo(gridObject, index++);
     }
-    objectObjects.forEach((obj) => obj.moveTo(index++));
-    fogObjects.forEach((obj) => obj.moveTo(index++));
+    objectObjects.forEach((obj) => this.canvasEngine.moveObjectTo(obj, index++));
+    fogObjects.forEach((obj) => this.canvasEngine.moveObjectTo(obj, index++));
 
     if (render) {
-      this.canvas.requestRenderAll();
+      this.canvasEngine.requestRender();
     }
   };
 
   assertInvariants = () => {
-    if (!this.canvas) {
+    if (!this.canvasEngine) {
       return { ok: true, violations: [] };
     }
 
     const violations = [];
     const gridObject = this.getGridObject();
-    const all = this.canvas.getObjects();
+    const all = this.canvasEngine.getObjects();
     const gridIndex = all.indexOf(gridObject);
 
     all.forEach((obj, index) => {

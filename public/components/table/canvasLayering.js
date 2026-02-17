@@ -1,7 +1,17 @@
 import LayerStackService from "./layerStackService.js";
+import CanvasEngineService from "./canvasEngineService.js";
 
-export function placeObjectOnCanvasLayer({ canvas, gridManager, obj }) {
-  const stackService = new LayerStackService({ canvas, gridManager });
+export function placeObjectOnCanvasLayer({
+  canvasEngine,
+  canvas,
+  gridManager,
+  obj,
+}) {
+  const resolvedEngine = canvasEngine || new CanvasEngineService(canvas);
+  const stackService = new LayerStackService({
+    canvasEngine: resolvedEngine,
+    gridManager,
+  });
   stackService.bringToTopOfLayer(obj);
 }
 

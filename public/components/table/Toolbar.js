@@ -115,10 +115,10 @@ export default class Toolbar {
   };
 
   clearSelection = () => {
-    const canvas = this.tableApp.canvasLayer?.canvas;
-    if (!canvas) return;
-    canvas.discardActiveObject();
-    canvas.requestRenderAll();
+    const canvasLayer = this.tableApp.canvasLayer;
+    if (!canvasLayer) return;
+    canvasLayer.discardActiveObject();
+    canvasLayer.requestRender();
   };
 
   setObjectLockInPosition = async (obj, shouldLock) => {

@@ -2,12 +2,12 @@ import createElement from "../createElement.js";
 import { ICONS } from "./toolbarConfig.js";
 
 export function renderDrawModeToggle(toolbar) {
-  const isDrawing = toolbar.tableApp.canvasLayer.canvas.isDrawingMode;
+  const isDrawing = toolbar.tableApp.canvasLayer.isDrawingMode();
   return toolbar.renderToolbarButton(ICONS.pencil, "Toggle draw mode", {
     active: isDrawing,
     onClick: () => {
       toolbar.clearSelection();
-      toolbar.tableApp.canvasLayer.canvas.isDrawingMode = !isDrawing;
+      toolbar.tableApp.canvasLayer.setDrawingMode(!isDrawing);
       toolbar._updateDrawToggle();
       toolbar._updateDrawBar();
     },
@@ -15,7 +15,7 @@ export function renderDrawModeToggle(toolbar) {
 }
 
 export function renderDrawBar(toolbar) {
-  if (!toolbar.tableApp.canvasLayer.canvas.isDrawingMode) {
+  if (!toolbar.tableApp.canvasLayer.isDrawingMode()) {
     return toolbar.hiddenElement();
   }
 
@@ -25,7 +25,7 @@ export function renderDrawBar(toolbar) {
       "input",
       {
         type: "color",
-        value: toolbar.tableApp.canvasLayer.canvas.freeDrawingBrush.color,
+        value: toolbar.tableApp.canvasLayer.getDrawingBrushColor(),
         style:
           "cursor: pointer; height: 26px; width: 32px; border: none; border-radius: var(--border-radius); padding: 0;",
       },
@@ -33,8 +33,7 @@ export function renderDrawBar(toolbar) {
       {
         type: "input",
         event: (e) => {
-          toolbar.tableApp.canvasLayer.canvas.freeDrawingBrush.color =
-            e.target.value;
+          toolbar.tableApp.canvasLayer.setDrawingBrushColor(e.target.value);
         },
       },
     ),
@@ -47,7 +46,7 @@ export function renderDrawBar(toolbar) {
       "input",
       {
         type: "number",
-        value: toolbar.tableApp.canvasLayer.canvas.freeDrawingBrush.width,
+        value: toolbar.tableApp.canvasLayer.getDrawingBrushWidth(),
         min: 1,
         style: "width: 44px; height: 26px; padding: 2px 4px;",
       },
@@ -55,8 +54,7 @@ export function renderDrawBar(toolbar) {
       {
         type: "input",
         event: (e) => {
-          toolbar.tableApp.canvasLayer.canvas.freeDrawingBrush.width =
-            e.target.valueAsNumber;
+          toolbar.tableApp.canvasLayer.setDrawingBrushWidth(e.target.valueAsNumber);
         },
       },
     ),

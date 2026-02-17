@@ -59,8 +59,8 @@ export default class LocationPinController {
   };
 
   applyLocationPinMetadata = () => {
-    if (!this.tableApp.canvasLayer?.canvas) return;
-    this.tableApp.canvasLayer.canvas.getObjects().forEach((object) => {
+    if (!this.tableApp.canvasLayer) return;
+    this.tableApp.canvasLayer.getObjects().forEach((object) => {
       const pin = this.tableApp.locationPinsByObjectId.get(object.id);
       if (pin) {
         object.isLocationPin = true;
@@ -121,12 +121,12 @@ export default class LocationPinController {
   };
 
   removeLocationPinObject = (object) => {
-    if (!object || !this.tableApp.canvasLayer?.canvas) return;
-    this.tableApp.canvasLayer.canvas.remove(object);
-    this.tableApp.canvasLayer.canvas.discardActiveObject();
+    if (!object || !this.tableApp.canvasLayer) return;
+    this.tableApp.canvasLayer.removeObject(object);
+    this.tableApp.canvasLayer.discardActiveObject();
     this.resetLocationPinHighlight();
-    if (this.tableApp.canvasLayer.canvas.contextContainer) {
-      this.tableApp.canvasLayer.canvas.renderAll();
+    if (this.tableApp.canvasLayer.hasRenderContext()) {
+      this.tableApp.canvasLayer.render();
     }
   };
 
@@ -176,11 +176,8 @@ export default class LocationPinController {
       strokeLineJoin: "round",
     });
     this.tableApp.lastHighlightedPinObject = object;
-    if (
-      this.tableApp.canvasLayer?.canvas &&
-      this.tableApp.canvasLayer.canvas.contextContainer
-    ) {
-      this.tableApp.canvasLayer.canvas.renderAll();
+    if (this.tableApp.canvasLayer?.hasRenderContext()) {
+      this.tableApp.canvasLayer.render();
     }
   };
 
@@ -196,9 +193,9 @@ export default class LocationPinController {
       delete object.pinHighlightBackup;
     }
     this.tableApp.lastHighlightedPinObject = null;
-    const canvas = this.tableApp.canvasLayer?.canvas;
-    if (canvas && canvas.contextContainer) {
-      canvas.renderAll();
+    const canvasLayer = this.tableApp.canvasLayer;
+    if (canvasLayer?.hasRenderContext()) {
+      canvasLayer.render();
     }
   };
 
@@ -238,8 +235,8 @@ export default class LocationPinController {
     await this.tableApp.canvasLayer.saveToDatabase();
     socketIntegration.pinAdded(object);
     socketIntegration.locationPinsUpdated();
-    this.tableApp.canvasLayer.canvas.setActiveObject(object);
-    this.tableApp.canvasLayer.canvas.requestRenderAll();
+    this.tableApp.canvasLayer.setActiveObject(object);
+    this.tableApp.canvasLayer.requestRender();
     this.tableApp.setCurrentSelectedObject(object);
   };
 
@@ -279,8 +276,8 @@ export default class LocationPinController {
 
   getCanvasObjectIdSet = () => {
     const ids = new Set();
-    if (!this.tableApp.canvasLayer?.canvas) return ids;
-    for (const obj of this.tableApp.canvasLayer.canvas.getObjects()) {
+    if (!this.tableApp.canvasLayer) return ids;
+    for (const obj of this.tableApp.canvasLayer.getObjects()) {
       if (obj.id) ids.add(obj.id);
     }
     return ids;
