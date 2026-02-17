@@ -24,6 +24,7 @@ const projectPlayers_js_1 = require("./controllers/projectPlayers.js");
 const tableImages_js_1 = require("./controllers/tableImages.js");
 const tableViews_js_1 = require("./controllers/tableViews.js");
 const locationPins_js_1 = require("./controllers/locationPins.js");
+const guestSandbox_js_1 = require("./controllers/guestSandbox.js");
 const playerInvites_js_1 = require("./controllers/playerInvites.js");
 const playerUsers_js_1 = require("./controllers/playerUsers.js");
 const express_validator_1 = require("express-validator");
@@ -48,6 +49,15 @@ const apiLimiter = (0, express_rate_limit_1.rateLimit)({
     },
 });
 router.use(apiLimiter);
+const guestSandboxStartLimiter = (0, express_rate_limit_1.rateLimit)({
+    windowMs: 10 * 60 * 1000,
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: "Too many guest sandbox requests, please try again shortly",
+    },
+});
 router.get("/bot/get_all_commands", discordBot_js_1.getCommands);
 router.post("/bot/interactions", (0, express_1.raw)({ type: "application/json" }), (0, discord_interactions_1.verifyKeyMiddleware)(process.env.BOT_PUBLIC_KEY), discordBot_js_1.interactionsController);
 router.get("/get_image/:id", s3_js_1.getImage);
@@ -92,6 +102,11 @@ router.post("/add_table_view_by_user", tableViews_js_1.addTableViewByUser);
 router.delete("/remove_table_view/:id", tableViews_js_1.removeTableView);
 router.post("/edit_table_view_data/:id", tableViews_js_1.editTableViewData);
 router.post("/edit_table_view/:id", tableViews_js_1.editTableView);
+router.post("/start_guest_sandbox", guestSandboxStartLimiter, guestSandbox_js_1.startGuestSandbox);
+router.get("/get_guest_sandbox/:uuid", guestSandbox_js_1.getGuestSandboxView);
+router.post("/edit_guest_sandbox_data/:uuid", guestSandbox_js_1.editGuestSandboxData);
+router.get("/get_guest_sandbox_images/:uuid", guestSandbox_js_1.getGuestSandboxImages);
+router.get("/get_guest_sandbox_image_counts/:uuid", guestSandbox_js_1.getGuestSandboxImageCounts);
 router.get("/get_location_pins/:table_view_id", locationPins_js_1.getLocationPinsByTableView);
 router.post("/add_location_pin", locationPins_js_1.addLocationPin);
 router.delete("/remove_location_pin/:id", locationPins_js_1.removeLocationPin);

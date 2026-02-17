@@ -116,8 +116,13 @@ function registerUser(req, res, next) {
             yield (0, tableViews_js_1.addTableViewByProjectQuery)({
                 project_id: projectData.rows[0].id,
                 title: "First Wyrld Table",
+                mode: "standard",
             });
-            yield (0, tableViews_js_1.addTableViewByUserQuery)({ user_id: data.id, title: "First Table" });
+            yield (0, tableViews_js_1.addTableViewByUserQuery)({
+                user_id: data.id,
+                title: "First Table",
+                mode: "standard",
+            });
             req.session.user = data.id;
             req.session.save((err) => {
                 if (err) {

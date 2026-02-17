@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addTableImageByProjectQuery = addTableImageByProjectQuery;
 exports.addTableImageByUserQuery = addTableImageByUserQuery;
+exports.getTableImagesByImageQuery = getTableImagesByImageQuery;
 exports.getTableImagesByProjectQuery = getTableImagesByProjectQuery;
 exports.getTableImagesByUserQuery = getTableImagesByUserQuery;
 exports.getTableImagesByFolderQuery = getTableImagesByFolderQuery;
@@ -74,6 +75,15 @@ function getTableImagesByFolderQuery(folder_id) {
         const query = {
             text: `select * from public."TableImage" where folder_id = $1`,
             values: [folder_id]
+        };
+        return yield dbconfig_1.default.query(query);
+    });
+}
+function getTableImagesByImageQuery(image_id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const query = {
+            text: `select * from public."TableImage" where image_id = $1`,
+            values: [image_id]
         };
         return yield dbconfig_1.default.query(query);
     });

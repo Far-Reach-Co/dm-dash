@@ -40,6 +40,7 @@ function addProject(req, res, next) {
             yield (0, tableViews_js_1.addTableViewByProjectQuery)({
                 project_id: data.rows[0].id,
                 title: "First Wyrld Table",
+                mode: "standard",
             });
             (0, eventLogger_1.logEventAsync)({
                 userId,

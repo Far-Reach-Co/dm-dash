@@ -145,8 +145,13 @@ async function registerUser(
     await addTableViewByProjectQuery({
       project_id: projectData.rows[0].id,
       title: "First Wyrld Table",
+      mode: "standard",
     });
-    await addTableViewByUserQuery({ user_id: data.id, title: "First Table" });
+    await addTableViewByUserQuery({
+      user_id: data.id,
+      title: "First Table",
+      mode: "standard",
+    });
 
     // login
     req.session.user = data.id;

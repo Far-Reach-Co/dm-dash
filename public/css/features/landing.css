@@ -397,6 +397,10 @@ p {
   z-index: 2;
 }
 
+.world-map .vtt-try-btn {
+  margin-top: var(--space-md);
+}
+
 
 /* ==========================================================================
    CHARACTERS / DICE

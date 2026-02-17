@@ -23,11 +23,55 @@ const enums_js_1 = require("../../lib/enums.js");
 const users_js_1 = require("../queries/users.js");
 const projects_js_1 = require("../queries/projects.js");
 const eventLogger_1 = require("../../lib/eventLogger");
+const tableAuthz_1 = require("../../lib/tableAuthz");
+const authz_1 = require("../../lib/authz");
+function getTitle(value) {
+    if (typeof value === "string" && value.trim())
+        return value.trim();
+    return "New Campaign";
+}
+function parseIsPublic(value) {
+    if (typeof value === "boolean")
+        return value;
+    if (value === "on" || value === "true")
+        return true;
+    if (value === "off" || value === "false")
+        return false;
+    return null;
+}
+function tableNotFoundError() {
+    const err = new Error("Table view not found");
+    err.status = 404;
+    return err;
+}
+function getTableViewOrThrow(id) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableViewData = yield (0, tableViews_js_1.getTableViewQuery)(id);
+        const tableView = tableViewData.rows[0];
+        if (!tableView)
+            throw tableNotFoundError();
+        return tableView;
+    });
+}
+function sanitizeTablePatch(body) {
+    const payload = {};
+    if (typeof body.title === "string" && body.title.trim()) {
+        payload.title = body.title.trim();
+    }
+    const isPublic = parseIsPublic(body.is_public);
+    if (isPublic !== null)
+        payload.is_public = isPublic;
+    if (typeof body.mode !== "undefined") {
+        payload.mode = (0, tableAuthz_1.parseRequestedTableMode)(body.mode);
+    }
+    return payload;
+}
 function addTableViewByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             if (!req.session.user)
                 throw new Error("User is not logged in");
+            yield (0, authz_1.requireProjectEditor)(req, req.params.project_id);
             const tableViewsData = yield (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.project_id);
             if (tableViewsData.rows.length >= 10) {
                 const projectData = yield (0, projects_js_1.getProjectQuery)(req.params.project_id);
@@ -35,18 +79,21 @@ function addTableViewByProject(req, res, next) {
                     throw { status: 402, message: enums_js_1.userSubscriptionStatus.projectIsNotPro };
                 }
             }
+            const title = getTitle(req.body.title);
+            const mode = (0, tableAuthz_1.parseRequestedTableMode)(req.body.mode);
             const data = yield (0, tableViews_js_1.addTableViewByProjectQuery)({
-                title: req.body.title,
+                title,
                 project_id: req.params.project_id,
+                mode,
             });
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
                 projectId: req.params.project_id,
                 eventType: eventLogger_1.EventType.TABLE_CREATED,
-                eventData: { tableId: data.rows[0].id, title: req.body.title },
+                eventData: { tableId: data.rows[0].id, title },
                 req,
             });
-            res.status(201).json({ redirect: `/wyrld?id=${req.params.project_id}` });
+            res.status(201).json({ redirect: `/vtt?uuid=${data.rows[0].uuid}` });
         }
         catch (err) {
             next(err);
@@ -65,15 +112,20 @@ function addTableViewByUser(req, res, next) {
                     throw { status: 402, message: enums_js_1.userSubscriptionStatus.userIsNotPro };
                 }
             }
-            req.body.user_id = req.session.user;
-            const data = yield (0, tableViews_js_1.addTableViewByUserQuery)(req.body);
+            const title = getTitle(req.body.title);
+            const mode = (0, tableAuthz_1.parseRequestedTableMode)(req.body.mode);
+            const data = yield (0, tableViews_js_1.addTableViewByUserQuery)({
+                user_id: req.session.user,
+                title,
+                mode,
+            });
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
                 eventType: eventLogger_1.EventType.TABLE_CREATED,
-                eventData: { tableId: data.rows[0].id, title: req.body.title },
+                eventData: { tableId: data.rows[0].id, title },
                 req,
             });
-            res.status(201).json({ redirect: "/dash" });
+            res.status(201).json({ redirect: `/vtt?uuid=${data.rows[0].uuid}` });
         }
         catch (err) {
             next(err);
@@ -83,8 +135,18 @@ function addTableViewByUser(req, res, next) {
 function getTableViewsByProject(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const access = yield (0, authz_1.getProjectAccess)(req, req.params.project_id);
+            if (!access) {
+                const err = new Error("Forbidden");
+                err.status = 403;
+                throw err;
+            }
             const data = yield (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.project_id);
-            res.send(data.rows);
+            const tableRows = access.isEditor
+                ? data.rows
+                : data.rows.filter((row) => row.is_public);
+            const response = tableRows.map((row) => (0, tableAuthz_1.withTableCapabilities)(row, (0, tableAuthz_1.buildTableCapabilities)((0, tableAuthz_1.normalizeTableMode)(row.mode), access.isEditor)));
+            res.send(response);
         }
         catch (err) {
             next(err);
@@ -97,7 +159,8 @@ function getTableViewsByUser(req, res, next) {
             if (!req.session.user)
                 throw new Error("User is not logged in");
             const data = yield (0, tableViews_js_1.getTableViewsByUserQuery)(req.session.user);
-            res.send(data.rows);
+            const response = data.rows.map((row) => (0, tableAuthz_1.withTableCapabilities)(row, (0, tableAuthz_1.buildTableCapabilities)((0, tableAuthz_1.normalizeTableMode)(row.mode), true)));
+            res.send(response);
         }
         catch (err) {
             next(err);
@@ -107,9 +170,9 @@ function getTableViewsByUser(req, res, next) {
 function getTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tableViewData = yield (0, tableViews_js_1.getTableViewQuery)(req.params.id);
-            const tableView = tableViewData.rows[0];
-            res.send(tableView);
+            const tableView = yield getTableViewOrThrow(req.params.id);
+            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "view");
+            res.send((0, tableAuthz_1.withTableCapabilities)(tableView, auth.capabilities));
         }
         catch (err) {
             next(err);
@@ -121,7 +184,10 @@ function getTableViewByUUID(req, res, next) {
         try {
             const tableViewData = yield (0, tableViews_js_1.getTableViewByUUIDQuery)(req.params.uuid);
             const tableView = tableViewData.rows[0];
-            res.send(tableView);
+            if (!tableView)
+                throw tableNotFoundError();
+            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "view");
+            res.send((0, tableAuthz_1.withTableCapabilities)(tableView, auth.capabilities));
         }
         catch (err) {
             next(err);
@@ -131,6 +197,8 @@ function getTableViewByUUID(req, res, next) {
 function removeTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const tableView = yield getTableViewOrThrow(req.params.id);
+            yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
             yield (0, tableViews_js_1.removeTableViewQuery)(req.params.id);
             res.status(204).send();
         }
@@ -142,6 +210,8 @@ function removeTableView(req, res, next) {
 function editTableViewData(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const tableView = yield getTableViewOrThrow(req.params.id);
+            yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
             const data = yield (0, tableViews_js_1.editTableViewQuery)(req.params.id, {
                 data: req.body.data,
             });
@@ -155,8 +225,17 @@ function editTableViewData(req, res, next) {
 function editTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = yield (0, tableViews_js_1.editTableViewQuery)(req.params.id, req.body);
-            res.status(200).send(data.rows[0]);
+            const tableView = yield getTableViewOrThrow(req.params.id);
+            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
+            const payload = sanitizeTablePatch(req.body);
+            if (!Object.keys(payload).length) {
+                res.status(200).send((0, tableAuthz_1.withTableCapabilities)(tableView, auth.capabilities));
+                return;
+            }
+            const data = yield (0, tableViews_js_1.editTableViewQuery)(req.params.id, payload);
+            const updatedMode = (0, tableAuthz_1.normalizeTableMode)(data.rows[0].mode);
+            const updatedCapabilities = (0, tableAuthz_1.buildTableCapabilities)(updatedMode, auth.canEdit);
+            res.status(200).send((0, tableAuthz_1.withTableCapabilities)(data.rows[0], updatedCapabilities));
         }
         catch (err) {
             next(err);

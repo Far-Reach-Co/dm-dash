@@ -31,7 +31,13 @@ async function submitResourceForm(url, body) {
   }
 }
 
-function buildModalForm({ heading, inputName, inputPlaceholder, onSubmit }) {
+function buildModalForm({
+  heading,
+  inputName,
+  inputPlaceholder,
+  onSubmit,
+  modeOptions = null,
+}) {
   const input = createElement("input", {
     type: "text",
     name: inputName,
@@ -45,9 +51,27 @@ function buildModalForm({ heading, inputName, inputPlaceholder, onSubmit }) {
     class: "modal-form-button",
   }, "Create");
 
+  const modeSelect = modeOptions
+    ? createElement(
+        "select",
+        {
+          name: "mode",
+          class: "modal-form-input",
+        },
+        modeOptions.map((option) =>
+          createElement(
+            "option",
+            { value: option.value },
+            option.label,
+          ),
+        ),
+      )
+    : null;
+
   const form = createElement("form", { class: "modal-form" }, [
     createElement("h2", {}, heading),
     input,
+    ...(modeSelect ? [modeSelect] : []),
     button,
   ], [{ type: "submit", event: (e) => {
     e.preventDefault();
@@ -55,7 +79,7 @@ function buildModalForm({ heading, inputName, inputPlaceholder, onSubmit }) {
     if (!value) return;
     button.disabled = true;
     button.textContent = "Creating...";
-    onSubmit(value);
+    onSubmit(value, modeSelect ? modeSelect.value : undefined);
   }}]);
 
   modal.show(form);
@@ -67,7 +91,12 @@ function openNewTableModal() {
     heading: "Create New Table",
     inputName: "title",
     inputPlaceholder: "Table Title",
-    onSubmit: (title) => submitResourceForm("/api/add_table_view_by_user", { title }),
+    modeOptions: [
+      { value: "standard", label: "Standard Table" },
+      { value: "sandbox", label: "Sandbox Table" },
+    ],
+    onSubmit: (title, mode) =>
+      submitResourceForm("/api/add_table_view_by_user", { title, mode }),
   });
 }
 
@@ -101,7 +130,15 @@ function openNewWyrldTableModal(projectId) {
     heading: "Create New Wyrld Table",
     inputName: "title",
     inputPlaceholder: "Table Title",
-    onSubmit: (title) => submitResourceForm(`/api/add_table_view_by_project/${projectId}`, { title }),
+    modeOptions: [
+      { value: "standard", label: "Standard Table" },
+      { value: "sandbox", label: "Sandbox Table" },
+    ],
+    onSubmit: (title, mode) =>
+      submitResourceForm(`/api/add_table_view_by_project/${projectId}`, {
+        title,
+        mode,
+      }),
   });
 }
 

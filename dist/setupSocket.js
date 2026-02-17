@@ -16,6 +16,32 @@ const dice_js_1 = require("./lib/dice.js");
 const mistral_js_1 = require("./dnd/srd/mistral.js");
 const markdownToChat_js_1 = require("./lib/markdownToChat.js");
 const setupApp_1 = require("./setupApp");
+const tableViews_1 = require("./api/queries/tableViews");
+const tableAuthz_1 = require("./lib/tableAuthz");
+function parseTableRoomToUUID(tableRoom) {
+    if (typeof tableRoom !== "string")
+        return "";
+    return tableRoom.replace(/^table-/, "").trim();
+}
+function authorizeSocketTable(socket, tableUUID, mode, capability) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b;
+        if (!tableUUID)
+            return false;
+        const userId = (_b = (_a = socket.request) === null || _a === void 0 ? void 0 : _a.session) === null || _b === void 0 ? void 0 : _b.user;
+        if (!userId)
+            return false;
+        const tableData = yield (0, tableViews_1.getTableViewByUUIDQuery)(tableUUID);
+        const table = tableData.rows[0];
+        if (!table)
+            return false;
+        const reqForAuth = { session: { user: userId } };
+        const auth = yield (0, tableAuthz_1.requireTablePermission)(reqForAuth, table, mode);
+        if (capability)
+            (0, tableAuthz_1.assertTableCapability)(auth, capability);
+        return true;
+    });
+}
 function setupSocketHandlers(server) {
     const io = new socket_io_1.Server(server);
     io.use((socket, next) => {
@@ -42,9 +68,25 @@ function setupSocketHandlers(server) {
         socket.on("grid-resized", ({ table, gridState, }) => {
             socket.broadcast.to(table).emit("grid-resize", gridState);
         });
-        socket.on("table-changed", ({ table, newTableUUID }) => {
-            socket.broadcast.to(table).emit("table-change", newTableUUID);
-        });
+        socket.on("table-changed", (_a) => __awaiter(this, [_a], void 0, function* ({ table, newTableUUID }) {
+            try {
+                if (!table || !newTableUUID)
+                    return;
+                const currentTableUUID = parseTableRoomToUUID(table);
+                if (!currentTableUUID)
+                    return;
+                const canChangeCurrentTable = yield authorizeSocketTable(socket, currentTableUUID, "edit", "canChangeTable");
+                if (!canChangeCurrentTable)
+                    return;
+                const canViewTargetTable = yield authorizeSocketTable(socket, String(newTableUUID), "view");
+                if (!canViewTargetTable)
+                    return;
+                socket.broadcast.to(table).emit("table-change", newTableUUID);
+            }
+            catch (err) {
+                console.log("Blocked unauthorized table-changed event", err);
+            }
+        }));
         socket.on("image-added", ({ table, image }) => {
             socket.broadcast.to(table).emit("image-add", image);
         });

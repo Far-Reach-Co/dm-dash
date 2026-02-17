@@ -30,6 +30,8 @@ class Table {
     this.locationPins = [];
     this.locationPinsByObjectId = new Map();
     this.canManagePins = false;
+    this.capabilities = this.getDefaultCapabilities("standard", false);
+    this.isGuestSandbox = false;
     this.tableView = null;
     this.lastHighlightedPinObject = null;
 
@@ -39,26 +41,100 @@ class Table {
     this.init();
   }
 
+  getDefaultCapabilities = (mode = "standard", canEdit = false) => {
+    if (!canEdit) {
+      return {
+        mode,
+        canManagePins: false,
+        canUsePinPortals: false,
+        canChangeTable: false,
+        canManageLayers: false,
+        canManageGrid: false,
+        canManageImageAssets: false,
+        canManageFolders: false,
+        canEditImageMetadata: false,
+        canDeleteCanvasObjects: false,
+        canManageTableSettings: false,
+      };
+    }
+
+    if (mode === "sandbox") {
+      return {
+        mode,
+        canManagePins: false,
+        canUsePinPortals: false,
+        canChangeTable: false,
+        canManageLayers: true,
+        canManageGrid: true,
+        canManageImageAssets: false,
+        canManageFolders: false,
+        canEditImageMetadata: false,
+        canDeleteCanvasObjects: false,
+        canManageTableSettings: true,
+      };
+    }
+
+    return {
+      mode,
+      canManagePins: true,
+      canUsePinPortals: true,
+      canChangeTable: true,
+      canManageLayers: true,
+      canManageGrid: true,
+      canManageImageAssets: true,
+      canManageFolders: true,
+      canEditImageMetadata: true,
+      canDeleteCanvasObjects: true,
+      canManageTableSettings: true,
+    };
+  };
+
+  normalizeCapabilities = (tableView) => {
+    const mode = tableView?.mode === "sandbox" ? "sandbox" : "standard";
+    const isEditorLike =
+      String(USERID) === String(tableView?.user_id) || IS_MANAGER_OR_OWNER;
+    const fallback = this.getDefaultCapabilities(mode, isEditorLike);
+    return {
+      ...fallback,
+      ...(tableView?.capabilities || {}),
+      mode,
+    };
+  };
+
   init = async () => {
     const searchParams = new URLSearchParams(window.location.search);
     const tableUUID = searchParams.get("uuid");
-    await this.loadTable(tableUUID, { historyMode: "replace" });
+    const guestUUID = searchParams.get("guest_uuid");
+    const isGuestSandbox = !tableUUID && !!guestUUID;
+    await this.loadTable(tableUUID || guestUUID, {
+      historyMode: "replace",
+      isGuestSandbox,
+    });
   };
 
-  loadTable = async (tableUUID, { historyMode = "replace" } = {}) => {
+  loadTable = async (
+    tableUUID,
+    { historyMode = "replace", isGuestSandbox = false } = {},
+  ) => {
     if (!tableUUID) return;
 
+    this.isGuestSandbox = !!isGuestSandbox;
     this.updateUrl(tableUUID, historyMode);
     this.tableId = tableUUID;
 
-    const tableView = await getThings(
-      `/api/get_table_view_by_uuid/${this.tableId}`,
-    );
+    const tableEndpoint = this.isGuestSandbox
+      ? `/api/get_guest_sandbox/${this.tableId}`
+      : `/api/get_table_view_by_uuid/${this.tableId}`;
+    const tableView = await getThings(tableEndpoint);
+    if (!tableView) {
+      window.location.href = "/forbidden";
+      return;
+    }
     // TODO: error handling no table view by id
 
     this.tableView = tableView;
-    this.canManagePins =
-      String(USERID) === String(tableView.user_id) || IS_MANAGER_OR_OWNER;
+    this.capabilities = this.normalizeCapabilities(tableView);
+    this.canManagePins = this.capabilities.canManagePins;
 
     // Handle user or anonymous
     if (!this.user) {
@@ -103,6 +179,7 @@ class Table {
     // Rendering
     this.render();
     await this.canvasLayer.init();
+    await this.seedGuestSandboxImagesIfNeeded();
     await this.reloadLocationPins();
     this.setupDocumentEventListeners();
     this.topLayer.render();
@@ -110,9 +187,54 @@ class Table {
     socketIntegration.getMessages();
 
     // Only render the sidebar for owner or managers
-    if (USERID == tableView.user_id || IS_MANAGER_OR_OWNER)
+    if (
+      USERID == tableView.user_id ||
+      IS_MANAGER_OR_OWNER ||
+      tableView.is_guest_sandbox
+    )
       // USERID and IS_MANAGER_OR_OWNER is injected from template; check vtt.ejs
       this.renderSidebarAndHamburger();
+  };
+
+  seedGuestSandboxImagesIfNeeded = async () => {
+    if (!this.tableView?.is_guest_sandbox) return;
+    const starterImageIds = Array.isArray(this.tableView.starter_image_ids)
+      ? this.tableView.starter_image_ids
+      : [];
+    const existingObjects = Array.isArray(this.tableView?.data?.objects)
+      ? this.tableView.data.objects.length
+      : 0;
+    if (!starterImageIds.length || existingObjects > 0) return;
+
+    const presigned = await getPresignedUrlsForImages(starterImageIds);
+    const signedUrls = presigned?.urls || {};
+    const columns = 4;
+    const spacingX = 180;
+    const spacingY = 180;
+    const startX = 180;
+    const startY = 160;
+
+    for (let i = 0; i < starterImageIds.length; i++) {
+      const imageId = starterImageIds[i];
+      const src = signedUrls[imageId];
+      if (!src) continue;
+      const col = i % columns;
+      const row = Math.floor(i / columns);
+      await this.canvasLayer.addImageToTable(
+        { id: imageId, src },
+        {
+          broadcast: false,
+          centerInViewport: false,
+          left: startX + col * spacingX,
+          top: startY + row * spacingY,
+        },
+      );
+    }
+
+    await this.canvasLayer.saveToDatabase();
+    if (this.canvasLayer?.canvas) {
+      this.tableView.data = this.canvasLayer.canvas.toJSON();
+    }
   };
 
   loadLocationPins = async (tableViewId) => {
@@ -154,7 +276,7 @@ class Table {
   };
 
   reloadLocationPins = async () => {
-    if (!this.tableView?.id) return;
+    if (!this.tableView?.id || this.tableView?.is_guest_sandbox) return;
     await this.loadLocationPins(this.tableView.id);
   };
 
@@ -199,13 +321,21 @@ class Table {
   };
 
   handleLocationPinPortal = (target) => {
+    if (!this.capabilities.canUsePinPortals) return;
+    if (!this.capabilities.canChangeTable) return;
     if (!target?.uuid) return;
     socketIntegration.tableChanged(target.uuid);
   };
 
   updateUrl = (tableUUID, historyMode) => {
     const searchParams = new URLSearchParams(window.location.search);
-    searchParams.set("uuid", tableUUID);
+    if (this.isGuestSandbox) {
+      searchParams.delete("uuid");
+      searchParams.set("guest_uuid", tableUUID);
+    } else {
+      searchParams.delete("guest_uuid");
+      searchParams.set("uuid", tableUUID);
+    }
     const newUrl = window.location.pathname + "?" + searchParams.toString();
 
     if (historyMode === "push") {
@@ -234,6 +364,8 @@ class Table {
     this.locationPinsByObjectId = new Map();
     this.tableView = null;
     this.canManagePins = false;
+    this.capabilities = this.getDefaultCapabilities("standard", false);
+    this.isGuestSandbox = false;
 
     this.domComponent.replaceChildren();
   };
@@ -291,7 +423,7 @@ class Table {
   };
 
   deleteLocationPin = async (object) => {
-    if (!this.canManagePins || !object) return;
+    if (!this.capabilities.canManagePins || !object) return;
     const pin = this.locationPinsByObjectId.get(object.id);
     if (!pin?.id) return;
     const confirmed = window.confirm(
@@ -376,7 +508,7 @@ class Table {
   };
 
   createLocationPin = async () => {
-    if (!this.canManagePins || !this.tableView) return;
+    if (!this.capabilities.canManagePins || !this.tableView) return;
     const object = this.createLocationPinMarker({ broadcast: false, autoSelect: false });
     if (!object) return;
 
@@ -404,7 +536,7 @@ class Table {
   };
 
   openLocationPinModal = async (object) => {
-    if (!this.canManagePins || !object || !this.tableView) return;
+    if (!this.capabilities.canManagePins || !object || !this.tableView) return;
     const attachments = await this.getAttachmentTables();
     const pinData = this.locationPinsByObjectId.get(object.id);
     if (!pinData) return;
@@ -440,6 +572,7 @@ class Table {
   };
 
   changeLayer = () => {
+    if (!this.capabilities.canManageLayers) return;
     switch (this.currentLayer) {
       case "Map":
         this.currentLayer = "Object";
@@ -474,7 +607,9 @@ class Table {
 
       // move to top
       if (e.ctrlKey && e.key == "t") {
-        this.canvasLayer.moveObjectToTop();
+        if (this.capabilities.canDeleteCanvasObjects) {
+          this.canvasLayer.moveObjectToTop();
+        }
       }
     };
     document.addEventListener("keydown", onKeydown);
@@ -484,7 +619,9 @@ class Table {
       var key = e.key;
 
       if (key === "Backspace" || key === "Delete") {
-        this.canvasLayer.removeObjects();
+        if (this.capabilities.canDeleteCanvasObjects) {
+          this.canvasLayer.removeObjects();
+        }
       }
       this.canvasLayer.setCursorDefault();
     };

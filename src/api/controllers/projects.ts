@@ -60,6 +60,7 @@ async function addProject(
     await addTableViewByProjectQuery({
       project_id: data.rows[0].id,
       title: "First Wyrld Table",
+      mode: "standard",
     });
     // Log project creation event
     logEventAsync({

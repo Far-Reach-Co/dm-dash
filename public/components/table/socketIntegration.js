@@ -14,6 +14,7 @@ class SocketIntegration {
     // TABLE CHANGE
     this.socket.on("table-change", (newTableUUID) => {
       if (!newTableUUID) return;
+      if (!this.tableApp?.capabilities?.canChangeTable) return;
       this.tableApp.reloadTableByUUID(newTableUUID, { historyMode: "push" });
     });
     // ERROR
@@ -177,6 +178,7 @@ class SocketIntegration {
   };
 
   tableChanged = (newTableUUID) => {
+    if (!this.tableApp?.capabilities?.canChangeTable) return;
     this.socket.emit("table-changed", {
       table: `table-${this.tableApp.tableId}`,
       newTableUUID,

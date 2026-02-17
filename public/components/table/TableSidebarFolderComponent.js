@@ -9,6 +9,9 @@ export default class TableSidebarFolderComponent {
     this.domComponent.className = "table-sidebar-folder-component";
     this.updateImagesList = props.updateImagesList;
     this.refreshImages = props.refreshImages;
+    this.tableView = props.tableView;
+    this.guestSandboxId = this.tableView?.guest_sandbox_id || null;
+    this.capabilities = props.capabilities || {};
 
     // project
     const searchParams = new URLSearchParams(window.location.search);
@@ -44,6 +47,12 @@ export default class TableSidebarFolderComponent {
   };
 
   loadFolders = async () => {
+    if (this.guestSandboxId) {
+      this.folders = [];
+      this.pruneExpandedFolderIds(this.folders);
+      return;
+    }
+
     let foldersData;
     if (this.projectId) {
       foldersData = await getThings(
@@ -76,7 +85,10 @@ export default class TableSidebarFolderComponent {
     this.folderLoading = true;
     this.render();
 
-    await deleteThing(`/api/remove_table_folder/${folder.id}`);
+    const suffix = this.tableView?.id
+      ? `?table_view_id=${this.tableView.id}`
+      : "";
+    await deleteThing(`/api/remove_table_folder/${folder.id}${suffix}`);
 
     if (this.currentFolder && this.currentFolder.id == folder.id) {
       if (folder.parent_folder_id) {
@@ -145,7 +157,12 @@ export default class TableSidebarFolderComponent {
           (isActive ? " library-folder-item-active" : ""),
         style: `padding-left: ${12 + depth * 18}px`,
       },
-      [toggle, name, count, deleteBtn],
+      [
+        toggle,
+        name,
+        count,
+        ...(this.capabilities.canManageFolders ? [deleteBtn] : []),
+      ],
       {
         type: "click",
         event: () => {
