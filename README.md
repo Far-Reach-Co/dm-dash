@@ -9,7 +9,7 @@ A comprehensive web application for Far Reach Co., featuring a dashboard, player
 - **Database**: PostgreSQL with node-pg-migrate for migrations
 - **Real-time**: Socket.io with Redis adapter for WebSocket connections
 - **Cloud Services**: AWS S3 and CloudFront for image storage and delivery
-- **Authentication**: Express sessions with PostgreSQL store
+- **Authentication**: Express sessions with Redis store
 - **Payment**: Stripe integration
 - **Bot**: Discord bot using discord-interactions
 - **AI**: Mistral AI (`@mistralai/mistralai`) for SRD search
@@ -42,6 +42,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/database_name
 SERVER_ENV=dev                              # Options: dev, prod
 SECRET_KEY=your_random_secret_key           # Used for session encryption
 PUBLIC_BASE_URL=http://localhost:4000       # Base URL used in email preference/unsubscribe links
+REDIS_URL=redis://localhost:6379            # Redis connection URL for session + cache
 ```
 
 ### Email Configuration (Gmail SMTP)

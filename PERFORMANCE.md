@@ -215,7 +215,7 @@ curl -X POST http://localhost:4000/api/register \
 **Why it's heavy**:
 
 - bcrypt password comparison (CPU intensive)
-- Session creation and save to PostgreSQL
+- Session creation and save to Redis
 - Rate limited to 10 requests per hour per IP
 
 **Test setup**:
