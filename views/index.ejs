@@ -93,22 +93,28 @@
 
   <!-- WORLD MAP -->
   <section class="section world-map">
-    <div class="map-small">
-      <img class="scroll-icon" src="/assets/landing/scroll.svg" alt="" />
-      <h1>Virtual Table Top</h1>
-      <p>
+    <!-- <img class="scroll-icon" src="/assets/landing/scroll.svg" alt="" /> -->
+    <h1>Virtual Table Top</h1>
+    <!-- <p>
         Take your team on an adventure by using our virtual tabletop system.
         Our service is fast and simple and allows you to keep everything
         organized and accessible without cluttering up the screen for your
         players!
-      </p>
+      </p> -->
 
-      <a class="about-btn vtt-try-btn" href="/vtt/guest/start">
-        Try VTT Sandbox (No Signup)
-      </a>
+    <div class="vtt-showcase animate-scale-on-scroll">
+      <div class="vtt-showcase__frame">
+        <div class="vtt-showcase__toolbar">
+          <span class="vtt-showcase__dot"></span>
+          <span class="vtt-showcase__dot"></span>
+          <span class="vtt-showcase__dot"></span>
+        </div>
+        <img class="vtt-showcase__img" src="/assets/landing/vtt_screenshot.png" alt="Far Reach Co. Virtual Tabletop — tokens, maps, dice rolls, and asset management" loading="lazy" />
+      </div>
     </div>
-
-    <img class="map-large" src="/assets/landing/large_map_bg.webp" alt="" />
+    <a class="about-btn vtt-try-btn" href="/vtt/guest/start">
+      Try VTT Sandbox (No Signup)
+    </a>
   </section>
 
   <!-- CHARACTERS -->
@@ -118,17 +124,8 @@
       <h1>Character Sheets</h1>
       <p>
         Manage your D&D 5E character sheet with a fresh and intuitive
-        approach.
+        approach. Our character sheets are designed to be user-friendly and visually appealing, making it easy for players to keep track of their stats, abilities, and inventory.
       </p>
-
-      <div class="d-flex align-items-center justify-content-center">
-        <img class="me-2" src="/assets/discord_icon.webp" width="30" height="30" alt="Discord" />
-        <h2>Join us on Discord</h2>
-      </div>
-
-      <a href="https://discord.gg/Yzw3xZysxe">
-        https://discord.gg/Yzw3xZysxe
-      </a>
     </div>
 
     <img class="character-image" src="/assets/landing/character.png" alt="" />
@@ -160,6 +157,26 @@
   </section>
 
   <%- include('./partials/footer') %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var els = document.querySelectorAll('.animate-on-scroll, .animate-scale-on-scroll, .animate-left-on-scroll, .animate-right-on-scroll');
+      if (!els.length) return;
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        threshold: 0.15
+      });
+      els.forEach(function(el) {
+        observer.observe(el);
+      });
+    });
+  </script>
 </body>
 
 

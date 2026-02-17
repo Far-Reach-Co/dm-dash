@@ -390,15 +390,73 @@ p {
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
 }
 
-.world-map .map-large {
-  width: 100%;
-  height: auto;
+.world-map .vtt-try-btn {
+  margin-top: var(--space-md);
+}
+
+/* ==========================================================================
+   VTT Screenshot Showcase
+   ========================================================================== */
+
+.vtt-showcase {
+  width: 70%;
+  max-width: 1100px;
+  margin: 40px auto 20px;
   position: relative;
   z-index: 2;
 }
 
-.world-map .vtt-try-btn {
-  margin-top: var(--space-md);
+.vtt-showcase__frame {
+  border-radius: 10px;
+  overflow: hidden;
+  background: #1a1a2e;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.3),
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 80px rgba(116, 167, 215, 0.08);
+  border: 1px solid rgba(116, 167, 215, 0.15);
+  transition: box-shadow 0.5s ease, transform 0.5s var(--anim-easing);
+}
+
+.vtt-showcase__frame:hover {
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.3),
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    0 0 100px rgba(255, 255, 255, 0.348);
+}
+
+.vtt-showcase__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, #1e2a3a, #162030);
+  border-bottom: 1px solid rgba(116, 167, 215, 0.1);
+}
+
+.vtt-showcase__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(116, 167, 215, 0.25);
+}
+
+.vtt-showcase__dot:first-child {
+  background: rgba(222, 120, 100, 0.6);
+}
+
+.vtt-showcase__dot:nth-child(2) {
+  background: rgba(222, 199, 120, 0.6);
+}
+
+.vtt-showcase__dot:nth-child(3) {
+  background: rgba(120, 200, 140, 0.6);
+}
+
+.vtt-showcase__img {
+  width: 100%;
+  height: auto;
+  display: block;
 }
 
 
@@ -509,6 +567,12 @@ p {
   }
 }
 
+@media (max-width: 900px) {
+  .vtt-showcase {
+    width: 94%;
+  }
+}
+
 @media (max-width: 600px) {
   .hero p {
     padding: 0 var(--space-md);
@@ -535,6 +599,21 @@ p {
 
   .world-map .scroll-icon {
     width: 15%;
+  }
+
+  .vtt-showcase {
+    width: 96%;
+    margin-top: 24px;
+  }
+
+  .vtt-showcase__toolbar {
+    padding: 7px 10px;
+    gap: 5px;
+  }
+
+  .vtt-showcase__dot {
+    width: 8px;
+    height: 8px;
   }
 
   .characters p {
