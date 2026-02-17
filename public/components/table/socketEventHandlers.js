@@ -1,0 +1,150 @@
+export function buildSocketEventHandlers(integration) {
+  return {
+    "table-join": (message) => {
+      console.log("User Joined:\n", message);
+    },
+
+    "table-change": (newTableUUID) => {
+      const app = integration.tableApp;
+      if (!newTableUUID) return;
+      if (!app?.capabilities?.canChangeTable) return;
+      app.reloadTableByUUID(newTableUUID, { historyMode: "push" });
+    },
+
+    connect_error: (error) => {
+      console.log(error);
+      if (window.confirm("There was a connection error, refresh the page?")) {
+        history.go();
+      }
+    },
+
+    disconnect: (error) => {
+      console.log(error);
+      if (window.confirm("There was a connection error, refresh the page?")) {
+        history.go();
+      }
+    },
+
+    "object-change-layer": (id) => {
+      const canvas = integration.tableApp?.canvasLayer?.canvas;
+      if (!canvas) return;
+      canvas.getObjects().forEach((object) => {
+        if (object.id === id) {
+          integration.tableApp.canvasLayer.placeObjectOnLayer(object);
+        }
+      });
+    },
+
+    "current-users": (list) => {
+      const onlineUsers = integration.tableApp?.chatBoxComponent?.onlineUsersComponent;
+      if (!onlineUsers) return;
+      onlineUsers.usersList = list;
+      onlineUsers.render();
+    },
+
+    "table-messages": (messages) => {
+      const chatMessages = integration.tableApp?.chatBoxComponent?.chatBoxMessagesComponent;
+      if (!chatMessages) return;
+      chatMessages.chatBoxMessages = messages;
+      chatMessages.render();
+      chatMessages.scrollDown();
+    },
+
+    message: (message) => {
+      const chatMessages = integration.tableApp?.chatBoxComponent?.chatBoxMessagesComponent;
+      if (!chatMessages) return;
+      chatMessages.chatBoxMessages.push(message);
+      chatMessages.render();
+      chatMessages.scrollDown();
+    },
+
+    "grid-toggle": (gridState) => {
+      const canvasLayer = integration.tableApp?.canvasLayer;
+      if (!canvasLayer) return;
+      gridState ? canvasLayer.showGrid() : canvasLayer.hideGrid();
+      if (integration.tableApp?.topLayer) {
+        integration.tableApp.topLayer.render();
+      }
+    },
+
+    "grid-resize": (gridState) => {
+      const canvasLayer = integration.tableApp?.canvasLayer;
+      if (!canvasLayer) return;
+      canvasLayer.resizeGrid(gridState);
+    },
+
+    "image-add": (newImg) => {
+      const canvasLayer = integration.tableApp?.canvasLayer;
+      const canvas = canvasLayer?.canvas;
+      if (!canvasLayer || !canvas) return;
+
+      if (!newImg.src) {
+        const newPath = new fabric.Path(newImg.path);
+        newPath.set({
+          id: newImg.id,
+          left: newImg.left,
+          top: newImg.top,
+          fill: false,
+          stroke: newImg.stroke,
+          strokeWidth: newImg.strokeWidth,
+          layer: newImg.layer,
+        });
+
+        canvas.add(newPath);
+        canvasLayer.placeObjectOnLayer(newPath);
+        canvasLayer.updateObjectProperties(newPath);
+        canvasLayer.setupObjectEventListeners(newPath);
+        return;
+      }
+
+      fabric.Image.fromURL(newImg.src, (img) => {
+        for (const [key, value] of Object.entries(newImg)) {
+          img[key] = value;
+        }
+        canvas.add(img);
+        canvasLayer.placeObjectOnLayer(img);
+        canvasLayer.updateObjectProperties(img);
+        canvasLayer.setupObjectEventListeners(img);
+      });
+    },
+
+    "image-remove": (id) => {
+      const canvas = integration.tableApp?.canvasLayer?.canvas;
+      if (!canvas) return;
+      canvas.getObjects().forEach((object) => {
+        if (object.id === id) {
+          canvas.remove(object);
+        }
+      });
+    },
+
+    "run-indicator-animation": (coords) => {
+      integration.tableApp?.canvasLayer?.runIndicatorAnimation(coords.x, coords.y);
+    },
+
+    "image-move": (image) => {
+      const canvasLayer = integration.tableApp?.canvasLayer;
+      const canvas = canvasLayer?.canvas;
+      if (!canvasLayer || !canvas) return;
+      canvas.getObjects().forEach((object) => {
+        if (object.id === image.id) {
+          for (const [key, value] of Object.entries(image)) {
+            object[key] = value;
+          }
+          canvasLayer.updateObjectProperties(object);
+          canvas.renderAll();
+        }
+      });
+    },
+
+    "pin-add": (pinData) => {
+      if (integration.tableApp?.canvasLayer) {
+        integration.tableApp.canvasLayer.addLocationPinFromSocket(pinData);
+      }
+    },
+
+    "reload-location-pins": () => {
+      integration.tableApp?.reloadLocationPins?.();
+    },
+  };
+}

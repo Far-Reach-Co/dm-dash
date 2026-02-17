@@ -1,5 +1,6 @@
 import createElement from "../createElement.js";
 import { getThings } from "../../lib/apiUtils.js";
+import { getRecordsEndpoint } from "./tableApi.js";
 
 async function renderRecordSelectOptions(recordsData) {
   const elemsList = [];
@@ -13,12 +14,7 @@ async function renderRecordSelectOptions(recordsData) {
 }
 
 export default async function renderRecordSelect(projectId) {
-  let recordsData;
-  if (projectId) {
-    recordsData = await getThings(`/api/get_records_by_project/${projectId}`);
-  } else {
-    recordsData = await getThings("/api/get_records_by_user");
-  }
+  const recordsData = (await getThings(getRecordsEndpoint(projectId))) || [];
 
   // populate options
   const optionsElems = await renderRecordSelectOptions(recordsData);

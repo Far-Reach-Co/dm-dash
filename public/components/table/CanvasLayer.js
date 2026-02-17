@@ -1,17 +1,38 @@
 import { getPresignedUrlsForImages } from "../../lib/imageUtils.js";
 import socketIntegration from "./socketIntegration.js";
 import GridManager from "./GridManager.js";
+import {
+  LOCATION_PIN_PATH,
+  configureFabricDefaults,
+  createFabricCanvas,
+} from "./canvasConfig.js";
+import {
+  getCanvasImageIds,
+  getCanvasObjects,
+  hasCanvasObjects,
+  hydrateCanvasImageSources,
+} from "./canvasDataUtils.js";
+import {
+  normalizeGridObjectVisuals,
+  placeObjectOnCanvasLayer,
+  updateCanvasObjectProperties,
+} from "./canvasLayering.js";
+import { loadCanvasFromData, saveCanvasState } from "./canvasPersistence.js";
+import {
+  endCanvasDrag,
+  handleMousePan,
+  handleMouseWheelZoom,
+  handlePinchZoomGesture,
+  handleTouchPan,
+  startCanvasDrag,
+} from "./canvasViewportHandlers.js";
 
 import throttle from "../../lib/throttle.js";
 import detectMob from "../../lib/detectMobile.js";
 
-const LOCATION_PIN_PATH =
-  "M 0 -28 C -12 -28 -24 -16 -24 -3 C -24 12 -10 36 0 56 C 10 36 24 12 24 -3 C 24 -16 12 -28 0 -28 Z M 0 -12 A 6 6 0 1 0 0 -12.01 Z";
-
 export default class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
-    this.currentTableView = props.tableView;
     this.tableView = props.tableView;
     this.tableApp = props.tableApp;
 
@@ -36,52 +57,8 @@ export default class CanvasLayer {
   };
 
   setupCanvasConfig = () => {
-    //EXTEND THE PROPS FABRIC WILL EXPORT TO JSON
-    fabric.Object.prototype.toObject = (function (toObject) {
-      return function () {
-        return fabric.util.object.extend(toObject.call(this), {
-          id: this.id,
-          imageId: this.imageId,
-          layer: this.layer,
-          selectable: this.selectable,
-          evented: this.evented,
-          lockInPosition: this.lockInPosition,
-        });
-      };
-    })(fabric.Object.prototype.toObject);
-
-    // UPDATE THE CORNER SIZES
-    fabric.Object.prototype.cornerSize = 20; // default is 13
-    fabric.Object.prototype.transparentCorners = false; // makes corners solid, easier to see
-    fabric.Object.prototype.cornerStyle = "circle"; // 'rect' or 'circle'
-
-    // OVERWRITE GROUP TO DISABLE PROPERTIES
-    fabric.Group.prototype.hasControls = false;
-    fabric.Group.prototype.lockScalingX = true;
-    fabric.Group.prototype.lockScalingY = true;
-    fabric.Group.prototype.lockRotation = true;
-
-    // init fabric canvas
-    this.canvas = new fabric.Canvas("canvas-layer", {
-      containerClass: "canvas-layer",
-      height: window.innerHeight,
-      width: window.innerWidth,
-      preserveObjectStacking: true,
-      isDrawingMode: false,
-      backgroundColor: "black",
-      fireRightClick: true, // <-- enable firing of right click events
-      fireMiddleClick: true, // <-- enable firing of middle click events
-      stopContextMenu: true, // <--  prevent context menu from showing
-      defaultCursor: "grab",
-      hoverCursor: "pointer",
-      freeDrawingCursor: "cell",
-    });
-
-    // overwrite the brush color
-    this.canvas.freeDrawingBrush.color = "#ffffff";
-
-    // overwrite the brush width
-    this.canvas.freeDrawingBrush.width = 10;
+    configureFabricDefaults();
+    this.canvas = createFabricCanvas("canvas-layer");
   };
 
   getViewportCenter = () => {
@@ -98,7 +75,7 @@ export default class CanvasLayer {
     return { left: transformed.x, top: transformed.y };
   };
 
-  createLocationPinMarker = ({ broadcast = true, autoSelect = true } = {}) => {
+  createLocationPinMarker = ({ autoSelect = true } = {}) => {
     const coords = this.getViewportCenter();
     const pin = this.createLocationPinShape({
       left: coords.left,
@@ -147,37 +124,17 @@ export default class CanvasLayer {
   };
 
   createNewOrSetupSaved = async () => {
-    // write new grid if there isn't objects in previous data
-    if (!this.currentTableView.data.objects) {
+    if (!hasCanvasObjects(this.tableView)) {
       this.gridManager.renderGrid();
       this.normalizeGridVisuals();
-    } else {
-      if (!this.currentTableView.data.objects.length) {
-        this.gridManager.renderGrid();
-        this.normalizeGridVisuals();
-      } else {
-        // update image links
-        const imageIds = [
-          ...new Set(
-            this.currentTableView.data.objects
-              .filter((object) => Boolean(object.imageId))
-              .map((object) => object.imageId),
-          ),
-        ];
-        const presignedUrls = await getPresignedUrlsForImages(imageIds);
-        for (let object of this.currentTableView.data.objects) {
-          if (object.imageId) {
-            if (presignedUrls.urls[object.imageId]) {
-              object.src = presignedUrls.urls[object.imageId];
-            } else {
-              delete this.currentTableView.data.objects[object];
-            }
-          }
-        }
-        // render the saved data for the current table view
-        await this.renderSavedData();
-      }
+      return;
     }
+
+    const objects = getCanvasObjects(this.tableView);
+    const imageIds = getCanvasImageIds(objects);
+    const presignedUrls = await getPresignedUrlsForImages(imageIds);
+    hydrateCanvasImageSources(objects, presignedUrls);
+    await this.renderSavedData();
   };
 
   setupCanvasEventListeners = () => {
@@ -202,6 +159,27 @@ export default class CanvasLayer {
     this.canvas.on("selection:cleared", () => {
       this.tableApp.setCurrentSelectedObject(null);
     });
+  };
+
+  destroy = () => {
+    if (!this.canvas) return;
+
+    this.canvas.off("object:moving", this.handleObjectMoving);
+    this.canvas.off("object:rotating", this.handleObjectTransform);
+    this.canvas.off("object:scaling", this.handleObjectTransform);
+    this.canvas.off("mouse:wheel", this.handleMouseWheel);
+    this.canvas.off("touch:gesture", this.handlePinchZoom);
+    this.canvas.off("mouse:down", this.handleMouseDown);
+    this.canvas.off("mouse:move", this.handleMouseMove);
+    this.canvas.off("mouse:up", this.handleMouseUp);
+    this.canvas.off("touch:drag", this.handleTouchDrag);
+    this.canvas.off("mouse:dblclick", this.handleDoubleClick);
+    this.canvas.off("path:created", this.handlePathCreated);
+    this.canvas.off("selection:cleared");
+
+    this.canvas.dispose();
+    this.canvas = null;
+    this.gridManager = null;
   };
 
   handleObjectMoving = (options) => {
@@ -238,36 +216,11 @@ export default class CanvasLayer {
   };
 
   handleMouseWheel = (opt) => {
-    const delta = opt.e.deltaY;
-    const newZoom = this.calculateZoom(this.canvas.getZoom(), delta, 0.25, 20);
-    this.canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, newZoom);
-    opt.e.preventDefault();
-    opt.e.stopPropagation();
+    handleMouseWheelZoom(this.canvas, opt);
   };
 
   handlePinchZoom = (opt) => {
-    if (!opt.e.touches || opt.e.touches.length !== 2) return;
-
-    this.canvas.isDragging = false;
-    const pt = new fabric.Point(opt.self.x, opt.self.y);
-    const zoom = this.canvas.getZoom();
-
-    // Invert scale: pinch (scale < 1) → zoom in, spread (scale > 1) → zoom out
-    const delta = 1 - opt.self.scale;
-    const sensitivity = 0.1;
-    const newZoom = Math.max(
-      0.2,
-      Math.min(5, zoom + zoom * delta * sensitivity),
-    );
-
-    this.canvas.zoomToPoint(pt, newZoom);
-    opt.e.preventDefault();
-    opt.e.stopPropagation();
-  };
-
-  calculateZoom = (currentZoom, delta, min, max) => {
-    let zoom = currentZoom * 0.999 ** delta;
-    return Math.max(min, Math.min(max, zoom));
+    handlePinchZoomGesture(this.canvas, opt);
   };
 
   handleMouseDown = (opt) => {
@@ -308,43 +261,21 @@ export default class CanvasLayer {
   };
 
   startDragging = (x, y) => {
-    this.canvas.isDragging = true;
-    this.canvas.selection = false;
-    this.canvas.lastPosX = x;
-    this.canvas.lastPosY = y;
+    startCanvasDrag(this.canvas, x, y);
   };
 
   handleMouseMove = (opt) => {
     if (detectMob() || !this.canvas.isDragging) return;
-
-    const e = opt.e;
-    const vpt = this.canvas.viewportTransform;
-    vpt[4] += e.clientX - this.canvas.lastPosX;
-    vpt[5] += e.clientY - this.canvas.lastPosY;
-    this.canvas.requestRenderAll();
-    this.canvas.lastPosX = e.clientX;
-    this.canvas.lastPosY = e.clientY;
+    handleMousePan(this.canvas, opt);
   };
 
   handleTouchDrag = (opt) => {
     if (!detectMob() || !this.canvas.isDragging) return;
-
-    const xChange = opt.self.x - this.canvas.lastPosTouchX;
-    const yChange = opt.self.y - this.canvas.lastPosTouchY;
-
-    const isSmallMovement = Math.abs(xChange) <= 50 && Math.abs(yChange) <= 50;
-    if (isSmallMovement) {
-      this.canvas.relativePan(new fabric.Point(xChange, yChange));
-    }
-
-    this.canvas.lastPosTouchX = opt.self.x;
-    this.canvas.lastPosTouchY = opt.self.y;
+    handleTouchPan(this.canvas, opt);
   };
 
   handleMouseUp = () => {
-    this.canvas.setViewportTransform(this.canvas.viewportTransform);
-    this.canvas.isDragging = false;
-    this.canvas.selection = true;
+    endCanvasDrag(this.canvas);
   };
 
   handlePathCreated = (opt) => {
@@ -561,43 +492,11 @@ export default class CanvasLayer {
 
   // Also can be used to place image at top of layer
   placeObjectOnLayer = (obj) => {
-    const all = this.canvas.getObjects();
-    const gridIndex = this.gridManager.getIndexInCanvas();
-
-    switch (obj.layer) {
-      case "Map": {
-        // Map objects always live below the grid
-        obj.moveTo(Math.max(0, gridIndex - 1));
-        break;
-      }
-
-      case "Object": {
-        // Objects must live ABOVE the grid
-        const topObjectIndex = all.reduce(
-          (max, o, i) =>
-            i > gridIndex && o !== obj && o.layer === "Object"
-              ? Math.max(max, i)
-              : max,
-          -1,
-        );
-
-        if (topObjectIndex !== -1) {
-          obj.moveTo(topObjectIndex + 1);
-        } else {
-          obj.moveTo(gridIndex + 1);
-        }
-
-        break;
-      }
-
-      case "Fog": {
-        // Fog is always on top
-        obj.moveTo(all.length - 1);
-        break;
-      }
-    }
-
-    this.canvas.requestRenderAll();
+    placeObjectOnCanvasLayer({
+      canvas: this.canvas,
+      gridManager: this.gridManager,
+      obj,
+    });
   };
 
   changeLayer = () => {
@@ -609,82 +508,20 @@ export default class CanvasLayer {
   };
 
   normalizeGridVisuals = () => {
-    const gridObject = this.gridManager?.getGroup?.();
-    if (!gridObject) return;
-
-    gridObject.opacity = 1;
-    gridObject.selectable = false;
-    gridObject.evented = false;
-
-    if (Array.isArray(gridObject._objects)) {
-      gridObject._objects.forEach((line) => {
-        line.opacity = 1;
-        line.selectable = false;
-        line.evented = false;
-        if (!line.stroke) {
-          line.stroke = "#ccc";
-        }
-      });
-    }
+    normalizeGridObjectVisuals(this.gridManager);
   };
 
   // Function to update object properties based on current layer
   updateObjectProperties = (object) => {
-    const gridObject = this.gridManager?.getGroup?.();
-    if (gridObject && object === gridObject) {
-      object.selectable = false;
-      object.evented = false;
-      object.opacity = 1;
-      return;
-    }
-
-    const currentLayer = this.tableApp.currentLayer;
-    const objectLayer = object.layer;
-    const isActiveLayer = objectLayer === currentLayer;
-    if (typeof object.lockInPosition !== "boolean") {
-      object.lockInPosition = false;
-    }
-
-    object.selectable = isActiveLayer;
-    object.evented = isActiveLayer;
-    object.lockMovementX = !!object.lockInPosition;
-    object.lockMovementY = !!object.lockInPosition;
-
-    // Map layer is fully visible unless viewing Fog layer
-    // Object and Fog layers are dimmed when not active
-    if (objectLayer === "Map") {
-      object.opacity = currentLayer === "Fog" ? "0.5" : "1";
-    } else {
-      object.opacity = isActiveLayer ? "1" : "0.5";
-    }
+    updateCanvasObjectProperties({
+      object,
+      gridManager: this.gridManager,
+      currentLayer: this.tableApp.currentLayer,
+    });
   };
 
   saveToDatabase = async () => {
-    const saveEndpoint =
-      this.currentTableView?.data_save_url ||
-      (this.currentTableView?.id
-        ? `/api/edit_table_view_data/${this.currentTableView.id}`
-        : null);
-    if (!saveEndpoint) return null;
-
-    const jsonCanvas = this.canvas.toJSON();
-    try {
-      const res = await fetch(saveEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ data: jsonCanvas }),
-      });
-      // const data = await res.json();
-      // if (res.status === 200 || res.status === 201) {
-      //   return data;
-      // } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save note...");
-      console.log(err);
-      return null;
-    }
+    return saveCanvasState(this.canvas, this.tableView);
   };
 
   restoreGridFromObject = (gridObject) => {
@@ -698,23 +535,17 @@ export default class CanvasLayer {
   };
 
   renderSavedData = async () => {
-    return new Promise((resolve) => {
-      this.canvas.loadFromJSON(this.currentTableView.data, () => {
-        this.canvas.getObjects().forEach((object) => {
-          if (object.type === "group") {
-            this.restoreGridFromObject(object);
-            return;
-          }
+    await loadCanvasFromData(this.canvas, this.tableView.data, (object) => {
+      if (object.type === "group") {
+        this.restoreGridFromObject(object);
+        return;
+      }
 
-          this.updateObjectProperties(object);
-          this.setupObjectEventListeners(object);
-        });
-
-        this.normalizeGridVisuals();
-        this.canvas.renderAll();
-        resolve();
-      });
+      this.updateObjectProperties(object);
+      this.setupObjectEventListeners(object);
     });
+    this.normalizeGridVisuals();
+    this.canvas.renderAll();
   };
 
   addLocationPinFromSocket = (pinData) => {

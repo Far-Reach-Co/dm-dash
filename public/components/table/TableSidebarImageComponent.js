@@ -1,10 +1,17 @@
 import createElement from "../createElement.js";
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import { getThings, postThing } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import imageFollowingCursor from "../imageFollowingCursor.js";
 import detectMob from "../../lib/detectMobile.js";
 import modal from "../../components/modal.js";
 import renderImageSettingsModal from "../shared/imageSettingsModal.js";
+import {
+  getCurrentProjectId,
+  getGuestSandboxId,
+  getImageCountsEndpoint,
+  getImageDeleteEndpoint,
+  getLibraryImagesEndpoint,
+} from "./tableApi.js";
 
 export default class TableSidebarImageComponent {
   constructor(props) {
@@ -12,15 +19,11 @@ export default class TableSidebarImageComponent {
     this.domComponent.className = "table-sidebar-image-component";
     this.tableView = props.tableView;
     this.tableApp = props.tableApp;
-    this.guestSandboxId = this.tableView?.guest_sandbox_id || null;
     this.getCurrentFolder = props.getCurrentFolder;
     this.getFolderScope = props.getFolderScope;
     this.onCountsUpdated = props.onCountsUpdated;
     this.capabilities = props.capabilities || {};
-    // project
-    const searchParams = new URLSearchParams(window.location.search);
-    this.projectId = searchParams.get("project");
-    // utilities
+
     this.currentMouseDownImage = null;
     this.imageLoading = false;
     this.downloadedImageSourceList = {};
@@ -28,14 +31,34 @@ export default class TableSidebarImageComponent {
     this.imageDataAndElems = null;
     this.sortKey = "newest";
     this.pageLimit = 60;
-    this.pageOffset = 0;
     this.totalAvailable = 0;
     this.loadingPage = false;
     this.activeQueryKey = null;
     this.searchDebounceId = null;
     this.searchDebounceMs = 300;
-    // Set From Canvas Layer
   }
+
+  get guestSandboxId() {
+    return getGuestSandboxId(this.tableView);
+  }
+
+  get projectId() {
+    return getCurrentProjectId();
+  }
+
+  can = (capability) => {
+    return !!this.capabilities?.[capability];
+  };
+
+  destroy = () => {
+    if (this.searchDebounceId) {
+      clearTimeout(this.searchDebounceId);
+      this.searchDebounceId = null;
+    }
+    this.imageDataAndElems = null;
+    this.imagesListContainer = null;
+    this.loadMoreContainer = null;
+  };
 
   showLoading = () => {
     this.imageLoading = true;
@@ -93,25 +116,32 @@ export default class TableSidebarImageComponent {
   };
 
   getDeleteImageEndpoint = (imageId) => {
-    if (this.guestSandboxId) return null;
-    if (this.projectId) {
-      const suffix = this.tableView?.id
-        ? `?table_view_id=${this.tableView.id}`
-        : "";
-      return `/api/remove_image_by_project/${imageId}/${this.projectId}${suffix}`;
-    }
-    return `/api/remove_image_by_table_user/${imageId}/${this.tableView.id}`;
+    return getImageDeleteEndpoint({
+      imageId,
+      tableViewId: this.tableView?.id,
+      projectId: this.projectId,
+      guestSandboxId: this.guestSandboxId,
+    });
   };
 
-  removeImageFromTableAndSidebar = (image, elem) => {
-    if (!this.capabilities.canManageImageAssets) return;
+  removeImageFromTableAndSidebar = async (image, elem) => {
+    if (!this.can("canManageImageAssets")) return;
     if (!window.confirm(`Are you sure you want to delete ${image.original_name}`)) {
       return;
     }
 
     const endpoint = this.getDeleteImageEndpoint(image.id);
     if (!endpoint) return;
-    deleteThing(endpoint);
+    try {
+      const res = await fetch(endpoint, { method: "DELETE" });
+      if (res.status !== 204) {
+        throw new Error(`remove image failed with status ${res.status}`);
+      }
+    } catch (err) {
+      console.log(err);
+      window.alert("Failed to delete image.");
+      return;
+    }
 
     // Remove from local caches
     if (this.imageDataAndElems) {
@@ -133,17 +163,46 @@ export default class TableSidebarImageComponent {
       image,
       projectId: this.projectId,
       tableImageId: tableImage.id,
-      onDelete: () => {
-        this.removeImageFromTableAndSidebar(image, imageElem);
+      onDelete: async () => {
+        await this.removeImageFromTableAndSidebar(image, imageElem);
         modal.hide();
       },
-      onUpdate: () => {
+      onUpdate: (update) => {
+        if (
+          update?.type === "name" &&
+          update.imageId &&
+          typeof update.originalName === "string"
+        ) {
+          this.updateImageNameInList(update.imageId, update.originalName);
+          return;
+        }
         this.updateCountsFromServer();
         this.render();
       },
       tableViewId: this.tableView?.id,
       capabilities: this.capabilities,
     });
+  };
+
+  updateImageNameInList = (imageId, nextName) => {
+    if (!this.imageDataAndElems?.length) return;
+    const match = this.imageDataAndElems.find(
+      (item) => Number(item?.imageData?.id) === Number(imageId),
+    );
+    if (!match) return;
+
+    match.imageData.original_name = nextName;
+    const nameElem = match.elem?.querySelector?.(".image-name");
+    if (!nameElem) return;
+
+    if (nameElem.tagName?.toLowerCase() === "input") {
+      nameElem.value = nextName;
+      nameElem.title = "Click to edit image name";
+      return;
+    }
+
+    nameElem.textContent = nextName;
+    nameElem.title = nextName;
   };
 
   renderImageElems = () => {
@@ -166,12 +225,10 @@ export default class TableSidebarImageComponent {
   });
 
   getCountsEndpoint = () => {
-    if (this.guestSandboxId) {
-      return `/api/get_guest_sandbox_image_counts/${this.guestSandboxId}`;
-    }
-    return this.projectId
-      ? `/api/get_library_image_counts_by_project/${this.projectId}`
-      : "/api/get_library_image_counts_by_user";
+    return getImageCountsEndpoint({
+      projectId: this.projectId,
+      guestSandboxId: this.guestSandboxId,
+    });
   };
 
   getQueryScope = () => {
@@ -198,36 +255,15 @@ export default class TableSidebarImageComponent {
   };
 
   getPaginatedImagesEndpoint = (offset = 0) => {
-    if (this.guestSandboxId) {
-      const params = new URLSearchParams();
-      params.set("limit", String(this.pageLimit));
-      params.set("offset", String(offset));
-      params.set("sort", this.sortKey);
-      if (this.tableImageSearchQuery) {
-        params.set("q", this.tableImageSearchQuery);
-      }
-      return `/api/get_guest_sandbox_images/${this.guestSandboxId}?${params.toString()}`;
-    }
-
-    const base = this.projectId
-      ? `/api/get_library_images_by_project/${this.projectId}`
-      : "/api/get_library_images_by_user";
-    const params = new URLSearchParams();
-    params.set("limit", String(this.pageLimit));
-    params.set("offset", String(offset));
-    params.set("sort", this.sortKey);
-    if (this.tableImageSearchQuery) {
-      params.set("q", this.tableImageSearchQuery);
-    }
-    const scope = this.getQueryScope();
-    if (!scope.showAllImages) {
-      if (scope.currentFolder) {
-        params.set("folder_id", String(scope.currentFolder.id));
-      } else {
-        params.set("folder_id", "unsorted");
-      }
-    }
-    return `${base}?${params.toString()}`;
+    return getLibraryImagesEndpoint({
+      projectId: this.projectId,
+      guestSandboxId: this.guestSandboxId,
+      limit: this.pageLimit,
+      offset,
+      sort: this.sortKey,
+      query: this.tableImageSearchQuery || "",
+      folderScope: this.getQueryScope(),
+    });
   };
 
   updateCountsFromServer = async () => {
@@ -239,7 +275,6 @@ export default class TableSidebarImageComponent {
   };
 
   resetPagination = () => {
-    this.pageOffset = 0;
     this.totalAvailable = 0;
   };
 
@@ -324,7 +359,6 @@ export default class TableSidebarImageComponent {
     } else {
       this.imageDataAndElems = imageList;
     }
-    this.pageOffset = data.offset || 0;
     this.totalAvailable = data.total || 0;
     this.pageLimit = data.limit || this.pageLimit;
     this.renderListContents();
@@ -335,7 +369,7 @@ export default class TableSidebarImageComponent {
   };
 
   createImageListItem = async (tableImage, image) => {
-    const editableNameInput = this.capabilities.canEditImageMetadata
+    const editableNameInput = this.can("canEditImageMetadata")
       ? createElement(
           "input",
           {
@@ -346,11 +380,20 @@ export default class TableSidebarImageComponent {
           null,
           {
             type: "focusout",
-            event: (e) => {
-              postThing(`/api/edit_image_name/${image.id}`, {
+            event: async (e) => {
+              const nextName = e.target.value;
+              const prevName = image.original_name;
+              const response = await postThing(`/api/edit_image_name/${image.id}`, {
                 original_name: e.target.value,
                 table_view_id: this.tableView?.id,
               });
+              if (!response) {
+                image.original_name = prevName;
+                e.target.value = prevName;
+                return;
+              }
+              image.original_name = nextName;
+              e.target.title = "Click to edit image name";
             },
           },
         )
@@ -393,7 +436,7 @@ export default class TableSidebarImageComponent {
     return { elem, tableData: tableImage, imageData: image };
   };
 
-  appendImage = async (imageData, tableImageData) => {
+  appendImage = async () => {
     this.refreshFromServer();
   };
 
@@ -408,8 +451,8 @@ export default class TableSidebarImageComponent {
     this.resetPagination();
     if (this.imagesListContainer) {
       this.imagesListContainer.innerHTML = "";
-      this.tempLoadingSpinner = renderLoadingWithMessage("");
-      this.imagesListContainer.append(this.tempLoadingSpinner);
+      const spinner = renderLoadingWithMessage("");
+      this.imagesListContainer.append(spinner);
       this.renderCurrentImages();
       return;
     }
@@ -492,8 +535,8 @@ export default class TableSidebarImageComponent {
       return;
     }
 
-    this.tempLoadingSpinner = renderLoadingWithMessage("");
-    this.imagesListContainer.append(this.tempLoadingSpinner);
+    const spinner = renderLoadingWithMessage("");
+    this.imagesListContainer.append(spinner);
     await this.renderCurrentImages();
   };
 }

@@ -1,7 +1,15 @@
 import createElement from "../createElement.js";
-import { deleteThing, getThings } from "../../lib/apiUtils.js";
+import { getThings } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import { buildFolderTree } from "../shared/folderTreeUtils.js";
+import {
+  getCurrentProjectId,
+  getGuestSandboxId,
+  getTableFoldersEndpoint,
+} from "./tableApi.js";
+import {
+  buildTableViewQuerySuffix,
+} from "./tableContext.js";
 
 export default class TableSidebarFolderComponent {
   constructor(props) {
@@ -10,17 +18,11 @@ export default class TableSidebarFolderComponent {
     this.updateImagesList = props.updateImagesList;
     this.refreshImages = props.refreshImages;
     this.tableView = props.tableView;
-    this.guestSandboxId = this.tableView?.guest_sandbox_id || null;
     this.capabilities = props.capabilities || {};
 
-    // project
-    const searchParams = new URLSearchParams(window.location.search);
-    this.projectId = searchParams.get("project");
-
     this.folderLoading = false;
-    this.currentFolder = null;
+    this.currentScope = { type: "all", folder: null };
     this.folders = [];
-    this.showAllImages = true;
     this.expandedFolderIds = new Set();
     this.imageCountsByFolder = {};
     this.unsortedCount = null;
@@ -28,6 +30,52 @@ export default class TableSidebarFolderComponent {
 
     this.render();
   }
+
+  get guestSandboxId() {
+    return getGuestSandboxId(this.tableView);
+  }
+
+  get projectId() {
+    return getCurrentProjectId();
+  }
+
+  can = (capability) => {
+    return !!this.capabilities?.[capability];
+  };
+
+  get showAllImages() {
+    return this.currentScope.type === "all";
+  }
+
+  get currentFolder() {
+    return this.currentScope.type === "folder" ? this.currentScope.folder : null;
+  }
+
+  setScopeAllImages = () => {
+    this.currentScope = { type: "all", folder: null };
+  };
+
+  setScopeUnsorted = () => {
+    this.currentScope = { type: "unsorted", folder: null };
+  };
+
+  setScopeFolder = (folder) => {
+    this.currentScope = { type: "folder", folder };
+  };
+
+  getScope = () => {
+    return {
+      showAllImages: this.showAllImages,
+      currentFolder: this.currentFolder,
+    };
+  };
+
+  destroy = () => {
+    this.folders = [];
+    this.folderTreeContainer = null;
+    this.expandedFolderIds.clear();
+    this.setScopeAllImages();
+  };
 
   setCounts = (data) => {
     this.imageCountsByFolder = data.by_folder || {};
@@ -53,14 +101,9 @@ export default class TableSidebarFolderComponent {
       return;
     }
 
-    let foldersData;
-    if (this.projectId) {
-      foldersData = await getThings(
-        `/api/get_table_folders_by_project/${this.projectId}`,
-      );
-    } else {
-      foldersData = await getThings("/api/get_table_folders_by_user");
-    }
+    const foldersData = await getThings(
+      getTableFoldersEndpoint({ projectId: this.projectId }),
+    );
     this.folders = foldersData || [];
     this.pruneExpandedFolderIds(this.folders);
   };
@@ -74,6 +117,7 @@ export default class TableSidebarFolderComponent {
   };
 
   removeFolder = async (folder) => {
+    if (!this.can("canManageFolders") || this.guestSandboxId) return;
     if (
       !window.confirm(
         `Are you sure you want to remove folder: "${folder.title}"? All the images in this folder and it's sub-folders will be moved to the parent folder.`,
@@ -85,19 +129,34 @@ export default class TableSidebarFolderComponent {
     this.folderLoading = true;
     this.render();
 
-    const suffix = this.tableView?.id
-      ? `?table_view_id=${this.tableView.id}`
-      : "";
-    await deleteThing(`/api/remove_table_folder/${folder.id}${suffix}`);
+    const suffix = buildTableViewQuerySuffix(this.tableView?.id);
+    try {
+      const res = await fetch(`/api/remove_table_folder/${folder.id}${suffix}`, {
+        method: "DELETE",
+      });
+      if (res.status !== 204) {
+        throw new Error(`remove folder failed with status ${res.status}`);
+      }
+    } catch (err) {
+      console.log(err);
+      window.alert("Failed to remove folder.");
+      this.folderLoading = false;
+      this.render();
+      return;
+    }
 
     if (this.currentFolder && this.currentFolder.id == folder.id) {
       if (folder.parent_folder_id) {
         const parent = this.folders.find(
           (f) => f.id == folder.parent_folder_id,
         );
-        this.currentFolder = parent || null;
+        if (parent) {
+          this.setScopeFolder(parent);
+        } else {
+          this.setScopeUnsorted();
+        }
       } else {
-        this.currentFolder = null;
+        this.setScopeUnsorted();
       }
     }
 
@@ -114,10 +173,7 @@ export default class TableSidebarFolderComponent {
   renderFolderTreeItem = (folder, depth = 0) => {
     const hasChildren = folder.children && folder.children.length > 0;
     const isExpanded = this.expandedFolderIds.has(folder.id);
-    const isActive =
-      !this.showAllImages &&
-      this.currentFolder &&
-      this.currentFolder.id == folder.id;
+    const isActive = this.currentFolder && this.currentFolder.id == folder.id;
     const imgCount = this.countImagesInFolder(folder.id);
 
     const toggle = createElement(
@@ -161,7 +217,7 @@ export default class TableSidebarFolderComponent {
         toggle,
         name,
         count,
-        ...(this.capabilities.canManageFolders ? [deleteBtn] : []),
+        ...(this.can("canManageFolders") ? [deleteBtn] : []),
       ],
       {
         type: "click",
@@ -173,8 +229,7 @@ export default class TableSidebarFolderComponent {
               this.expandedFolderIds.add(folder.id);
             }
           }
-          this.showAllImages = false;
-          this.currentFolder = folder;
+          this.setScopeFolder(folder);
           this.renderFolderTree();
           if (this.updateImagesList) {
             this.updateImagesList();
@@ -234,8 +289,7 @@ export default class TableSidebarFolderComponent {
       {
         type: "click",
         event: () => {
-          this.showAllImages = true;
-          this.currentFolder = null;
+          this.setScopeAllImages();
           this.renderFolderTree();
           if (this.updateImagesList) {
             this.updateImagesList();
@@ -244,7 +298,7 @@ export default class TableSidebarFolderComponent {
       },
     );
 
-    const unsortedActive = !this.showAllImages && !this.currentFolder;
+    const unsortedActive = this.currentScope.type === "unsorted";
     const unsortedItem = createElement(
       "div",
       {
@@ -265,8 +319,7 @@ export default class TableSidebarFolderComponent {
       {
         type: "click",
         event: () => {
-          this.showAllImages = false;
-          this.currentFolder = null;
+          this.setScopeUnsorted();
           this.renderFolderTree();
           if (this.updateImagesList) {
             this.updateImagesList();
@@ -293,12 +346,10 @@ export default class TableSidebarFolderComponent {
     }
 
     if (!this.folders.length) {
-      this.tempLoadingSpinner = renderLoadingWithMessage("");
-      this.domComponent.append(this.tempLoadingSpinner);
+      const loadingSpinner = renderLoadingWithMessage("");
+      this.domComponent.append(loadingSpinner);
       await this.loadFolders();
-      if (this.tempLoadingSpinner) {
-        this.tempLoadingSpinner.remove();
-      }
+      loadingSpinner.remove();
     }
 
     this.folderTreeContainer = createElement("div", {

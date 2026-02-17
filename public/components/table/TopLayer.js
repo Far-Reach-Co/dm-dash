@@ -4,17 +4,11 @@ export default class TopLayer {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.tableApp = props.tableApp;
-    this.tableView = props.tableView;
-
-    const searchParams = new URLSearchParams(window.location.search);
-    this.projectId = searchParams.get("project");
 
     this._initialized = false;
 
     this.toolbar = new Toolbar({
       tableApp: this.tableApp,
-      tableView: this.tableView,
-      projectId: this.projectId,
     });
   }
 
@@ -29,5 +23,11 @@ export default class TopLayer {
       this.domComponent.replaceChildren(this.toolbar.build());
     }
     await this.toolbar.render();
+  };
+
+  destroy = () => {
+    this.toolbar?.destroy?.();
+    this._initialized = false;
+    this.domComponent.replaceChildren();
   };
 }
