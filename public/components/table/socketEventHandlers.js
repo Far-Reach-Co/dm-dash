@@ -7,7 +7,6 @@ export function buildSocketEventHandlers(integration) {
     "table-change": (newTableUUID) => {
       const app = integration.tableApp;
       if (!newTableUUID) return;
-      if (!app?.capabilities?.canChangeTable) return;
       app.reloadTableByUUID(newTableUUID, { historyMode: "push" });
     },
 

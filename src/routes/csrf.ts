@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import Tokens from "csrf";
+import { createHttpError } from "../lib/httpErrors";
 
 const tokens = new Tokens();
 const CSRF_COOKIE = "_csrf_secret";
@@ -38,9 +39,9 @@ export const csrfProtection = (
   const token = req.body?._csrf || req.headers["x-csrf-token"];
 
   if (!secret || !token || !tokens.verify(secret, token)) {
-    const err: any = new Error("Invalid CSRF token");
-    err.code = "EBADCSRFTOKEN";
-    err.status = 403;
+    const err = createHttpError(403, "Invalid CSRF token", {
+      code: "EBADCSRFTOKEN",
+    });
     return next(err);
   }
   next();

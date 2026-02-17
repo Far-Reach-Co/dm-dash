@@ -3,6 +3,8 @@ import { randomUUID } from "crypto";
 import { createClient } from "redis";
 import logger from "./logger.js";
 import db from "../api/dbconfig";
+import { badRequestError, notFoundError } from "./httpErrors";
+import { buildGuestSandboxCapabilities } from "./tableAuthz";
 
 declare module "express-session" {
   export interface SessionData {
@@ -23,6 +25,7 @@ export interface GuestSandboxRecord {
 }
 
 const GUEST_SANDBOX_PREFIX = "frc:guest:sandbox:";
+const DEFAULT_GUEST_SANDBOX_TITLE = "Sandbox Demo";
 const GUEST_SANDBOX_TTL_SECONDS = Math.max(
   60,
   Number(process.env.GUEST_SANDBOX_TTL_SECONDS || 12 * 60 * 60),
@@ -80,27 +83,30 @@ async function loadCuratedGuestImageIds() {
 }
 
 function sanitizeTitle(title: unknown) {
-  if (typeof title !== "string") return "Sandbox Demo";
+  if (typeof title !== "string") return DEFAULT_GUEST_SANDBOX_TITLE;
   const trimmed = title.trim();
-  return trimmed.length ? trimmed.slice(0, 120) : "Sandbox Demo";
+  return trimmed.length ? trimmed.slice(0, 120) : DEFAULT_GUEST_SANDBOX_TITLE;
 }
 
-function badRequest(message: string) {
-  const err: any = new Error(message);
-  err.status = 400;
-  return err;
+function guestSandboxNotFoundError() {
+  return notFoundError("Guest sandbox not found");
 }
 
-function forbidden() {
-  const err: any = new Error("Forbidden");
-  err.status = 403;
-  return err;
+async function writeGuestSandbox(record: GuestSandboxRecord) {
+  await ensureGuestSandboxRedisReady();
+  await guestSandboxRedisClient.setEx(
+    getGuestSandboxKey(record.id),
+    GUEST_SANDBOX_TTL_SECONDS,
+    JSON.stringify(record),
+  );
 }
 
-function notFound() {
-  const err: any = new Error("Guest sandbox not found");
-  err.status = 404;
-  return err;
+async function resolveStarterImageIds(input: unknown) {
+  const requestedStarterIds = normalizeStarterImageIds(input);
+  if (requestedStarterIds.length) {
+    return requestedStarterIds;
+  }
+  return await loadCuratedGuestImageIds();
 }
 
 export function ensureGuestId(req: Request): string {
@@ -114,21 +120,7 @@ export function getGuestSandboxTtlSeconds() {
   return GUEST_SANDBOX_TTL_SECONDS;
 }
 
-export function buildGuestSandboxCapabilities() {
-  return {
-    mode: "sandbox",
-    canManagePins: false,
-    canUsePinPortals: false,
-    canChangeTable: false,
-    canManageLayers: true,
-    canManageGrid: true,
-    canManageImageAssets: false,
-    canManageFolders: false,
-    canEditImageMetadata: false,
-    canDeleteCanvasObjects: true,
-    canManageTableSettings: false,
-  };
-}
+export { buildGuestSandboxCapabilities };
 
 export async function createGuestSandbox(
   req: Request,
@@ -145,14 +137,9 @@ export async function createGuestSandbox(
 
   const id = randomUUID();
   const now = new Date().toISOString();
-  const requestedStarterIds = normalizeStarterImageIds(
-    options?.starter_image_ids,
-  );
-  const starterImageIds = requestedStarterIds.length
-    ? requestedStarterIds
-    : await loadCuratedGuestImageIds();
+  const starterImageIds = await resolveStarterImageIds(options?.starter_image_ids);
   if (!starterImageIds.length) {
-    throw badRequest("Guest sandbox has no curated images available");
+    throw badRequestError("Guest sandbox has no curated images available");
   }
 
   const record: GuestSandboxRecord = {
@@ -166,12 +153,7 @@ export async function createGuestSandbox(
     updated_at: now,
   };
 
-  await ensureGuestSandboxRedisReady();
-  await guestSandboxRedisClient.setEx(
-    getGuestSandboxKey(id),
-    GUEST_SANDBOX_TTL_SECONDS,
-    JSON.stringify(record),
-  );
+  await writeGuestSandbox(record);
   req.session.guest_sandbox_id = id;
 
   return record;
@@ -189,13 +171,9 @@ export async function getGuestSandbox(id: string) {
   }
 }
 
-export async function requireGuestSandboxAccess(req: Request, id: string) {
+export async function requireGuestSandboxAccess(_req: Request, id: string) {
   const record = await getGuestSandbox(id);
-  if (!record) throw notFound();
-  const guestId = req.session.guest_id;
-  if (!guestId || String(record.guest_id) !== String(guestId)) {
-    throw forbidden();
-  }
+  if (!record) throw guestSandboxNotFoundError();
   return record;
 }
 
@@ -209,26 +187,21 @@ export async function touchGuestSandbox(id: string) {
 
 export async function saveGuestSandboxData(id: string, data: unknown) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
-    throw badRequest("Invalid sandbox data");
+    throw badRequestError("Invalid sandbox data");
   }
   const dataJson = JSON.stringify(data);
   if (Buffer.byteLength(dataJson, "utf8") > GUEST_SANDBOX_MAX_DATA_BYTES) {
-    throw badRequest("Sandbox data exceeds size limit");
+    throw badRequestError("Sandbox data exceeds size limit");
   }
 
   const record = await getGuestSandbox(id);
-  if (!record) throw notFound();
+  if (!record) throw guestSandboxNotFoundError();
   const updated: GuestSandboxRecord = {
     ...record,
     data: JSON.parse(dataJson),
     updated_at: new Date().toISOString(),
   };
 
-  await ensureGuestSandboxRedisReady();
-  await guestSandboxRedisClient.setEx(
-    getGuestSandboxKey(id),
-    GUEST_SANDBOX_TTL_SECONDS,
-    JSON.stringify(updated),
-  );
+  await writeGuestSandbox(updated);
   return updated;
 }

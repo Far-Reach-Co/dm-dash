@@ -188,7 +188,12 @@ export async function getProjectAccess(
 export async function requireTableAccessOrRedirect(
   req: Request,
   res: Response,
-  table: { project_id?: number | null; user_id?: number | null; is_public?: boolean },
+  table: {
+    project_id?: number | null;
+    user_id?: number | null;
+    is_public?: boolean;
+    mode?: string | null;
+  },
   redirectTo = "/forbidden",
 ): Promise<{ projectAuth: boolean } | null> {
   if (!table.project_id) {
@@ -207,7 +212,8 @@ export async function requireTableAccessOrRedirect(
     res.redirect(redirectTo);
     return null;
   }
-  if (!access.isEditor && !table.is_public) {
+
+  if (!table.is_public && !access.isEditor) {
     res.redirect(redirectTo);
     return null;
   }

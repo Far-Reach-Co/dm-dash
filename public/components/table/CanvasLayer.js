@@ -523,7 +523,7 @@ export default class CanvasLayer {
   };
 
   moveObjectToTop = () => {
-    if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
+    if (!this.tableApp?.capabilities?.canManageLayers) return;
     if (this.canvasEngine.getActiveObjects().length) {
       this.canvasEngine.getActiveObjects().forEach((object) => {
         // if (object.hasOwnProperty("_objects")) {

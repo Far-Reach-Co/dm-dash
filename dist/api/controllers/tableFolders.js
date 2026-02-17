@@ -17,78 +17,20 @@ exports.removeTableFolder = removeTableFolder;
 exports.editTableFolderTitle = editTableFolderTitle;
 const tableFolders_1 = require("../queries/tableFolders");
 const tableImages_1 = require("../queries/tableImages");
-const tableViews_1 = require("../queries/tableViews");
 const authz_1 = require("../../lib/authz");
-const tableAuthz_1 = require("../../lib/tableAuthz");
-function forbiddenError() {
-    const err = new Error("Forbidden");
-    err.status = 403;
-    return err;
-}
-function badRequestError(message) {
-    const err = new Error(message);
-    err.status = 400;
-    return err;
-}
-function notFoundError(message) {
-    const err = new Error(message);
-    err.status = 404;
-    return err;
-}
-function getTableViewByIdOrThrow(id) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const tableData = yield (0, tableViews_1.getTableViewQuery)(id);
-        const table = tableData.rows[0];
-        if (!table)
-            throw notFoundError("Table view not found");
-        return table;
-    });
-}
+const tableResourceUtils_1 = require("./tableResourceUtils");
 function getFolderByIdOrThrow(id) {
     return __awaiter(this, void 0, void 0, function* () {
         const folderData = yield (0, tableFolders_1.getTableFolderQuery)(String(id));
         const folder = folderData.rows[0];
         if (!folder)
-            throw notFoundError("Folder not found");
+            throw (0, tableResourceUtils_1.notFoundError)("Folder not found");
         return folder;
-    });
-}
-function ensureFolderEditable(req, folder) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (folder.project_id) {
-            const access = yield (0, authz_1.getProjectAccess)(req, folder.project_id);
-            if (!(access === null || access === void 0 ? void 0 : access.isEditor))
-                throw forbiddenError();
-            return;
-        }
-        const userId = (0, authz_1.requireUser)(req);
-        if (String(folder.user_id) !== String(userId))
-            throw forbiddenError();
-    });
-}
-function ensureProjectEditor(req, projectId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!projectId)
-            throw badRequestError("project_id is required");
-        const access = yield (0, authz_1.getProjectAccess)(req, projectId);
-        if (!(access === null || access === void 0 ? void 0 : access.isEditor))
-            throw forbiddenError();
     });
 }
 function getOptionalTableAuthForFolderMutation(req) {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c;
-        const tableViewIdRaw = (_b = (_a = req.body) === null || _a === void 0 ? void 0 : _a.table_view_id) !== null && _b !== void 0 ? _b : (_c = req.query) === null || _c === void 0 ? void 0 : _c.table_view_id;
-        if (typeof tableViewIdRaw === "undefined")
-            return null;
-        const tableViewId = Number(tableViewIdRaw);
-        if (Number.isNaN(tableViewId) || tableViewId <= 0) {
-            throw badRequestError("table_view_id must be a valid number");
-        }
-        const table = yield getTableViewByIdOrThrow(tableViewId);
-        const auth = yield (0, tableAuthz_1.requireTablePermission)(req, table, "edit");
-        (0, tableAuthz_1.assertTableCapability)(auth, "canManageFolders");
-        return { table, auth };
+        return yield (0, tableResourceUtils_1.getOptionalTableEditAuth)(req, "canManageFolders");
     });
 }
 function addTableFolderByProject(req, res, next) {
@@ -96,16 +38,17 @@ function addTableFolderByProject(req, res, next) {
         try {
             const tableAuth = yield getOptionalTableAuthForFolderMutation(req);
             if (tableAuth) {
-                if (!tableAuth.table.project_id) {
-                    throw badRequestError("table_view_id is not a project table");
+                const tableProjectId = (0, tableResourceUtils_1.requireProjectIdFromTable)(tableAuth.table);
+                if (typeof req.body.project_id !== "undefined") {
+                    (0, tableResourceUtils_1.assertProjectIdMatchesTable)(req.body.project_id, tableProjectId);
                 }
-                if (typeof req.body.project_id !== "undefined" &&
-                    String(req.body.project_id) !== String(tableAuth.table.project_id)) {
-                    throw badRequestError("table_view_id/project_id mismatch");
-                }
-                req.body.project_id = tableAuth.table.project_id;
+                req.body.project_id = tableProjectId;
             }
-            yield ensureProjectEditor(req, req.body.project_id);
+            else {
+                if (!req.body.project_id)
+                    throw (0, tableResourceUtils_1.badRequestError)("project_id is required");
+                yield (0, authz_1.requireProjectEditor)(req, req.body.project_id);
+            }
             const data = yield (0, tableFolders_1.addTableFolderByProjectQuery)(req.body);
             res.status(201).json(data.rows[0]);
         }
@@ -120,10 +63,7 @@ function addTableFolderByUser(req, res, next) {
             const userId = (0, authz_1.requireUser)(req);
             const tableAuth = yield getOptionalTableAuthForFolderMutation(req);
             if (tableAuth) {
-                if (!tableAuth.table.user_id) {
-                    throw badRequestError("table_view_id is not a user table");
-                }
-                req.body.user_id = tableAuth.table.user_id;
+                req.body.user_id = (0, tableResourceUtils_1.requireUserIdFromTable)(tableAuth.table);
             }
             else {
                 req.body.user_id = userId;
@@ -141,7 +81,7 @@ function getTableFoldersByProject(req, res, next) {
         try {
             const access = yield (0, authz_1.getProjectAccess)(req, req.params.project_id);
             if (!access)
-                throw forbiddenError();
+                throw (0, tableResourceUtils_1.forbiddenError)();
             const data = yield (0, tableFolders_1.getTableFoldersByProjectQuery)(req.params.project_id);
             res.send(data.rows);
         }
@@ -165,9 +105,9 @@ function getTableFoldersByUser(req, res, next) {
 function removeTableFolder(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield getOptionalTableAuthForFolderMutation(req);
+            const tableAuth = yield getOptionalTableAuthForFolderMutation(req);
             const folder = yield getFolderByIdOrThrow(req.params.id);
-            yield ensureFolderEditable(req, folder);
+            yield (0, tableResourceUtils_1.ensureScopedResourceEditable)(req, folder, tableAuth);
             const tableImages = yield (0, tableImages_1.getTableImagesByFolderQuery)(req.params.id);
             for (const tableImage of tableImages.rows) {
                 yield (0, tableImages_1.editTableImageQuery)(tableImage.id, {
@@ -195,9 +135,9 @@ function removeTableFolder(req, res, next) {
 function editTableFolderTitle(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield getOptionalTableAuthForFolderMutation(req);
+            const tableAuth = yield getOptionalTableAuthForFolderMutation(req);
             const folder = yield getFolderByIdOrThrow(req.params.id);
-            yield ensureFolderEditable(req, folder);
+            yield (0, tableResourceUtils_1.ensureScopedResourceEditable)(req, folder, tableAuth);
             const data = yield (0, tableFolders_1.editTableFolderQuery)(req.params.id, {
                 title: req.body.title,
             });

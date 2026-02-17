@@ -7,23 +7,14 @@ import {
   updateLocationPinQuery,
 } from "../queries/locationPins.js";
 import {
-  getTableViewQuery,
-} from "../queries/tableViews.js";
-import {
   assertTableCapability,
-  requireTablePermission,
 } from "../../lib/tableAuthz";
-
-async function getTableViewById(tableViewId: number) {
-  const data = await getTableViewQuery(tableViewId);
-  const tableView = data.rows[0];
-  if (!tableView) {
-    const err: any = new Error("Table view not found");
-    err.status = 404;
-    throw err;
-  }
-  return tableView;
-}
+import {
+  badRequestError,
+  notFoundError,
+  parsePositiveInt,
+  requireTablePermissionById,
+} from "./tableResourceUtils";
 
 async function getLocationPinsByTableView(
   req: Request,
@@ -31,9 +22,8 @@ async function getLocationPinsByTableView(
   next: NextFunction
 ) {
   try {
-    const tableViewId = Number(req.params.table_view_id);
-    const tableView = await getTableViewById(tableViewId);
-    await requireTablePermission(req, tableView, "view");
+    const tableViewId = parsePositiveInt(req.params.table_view_id, "table_view_id");
+    await requireTablePermissionById(req, tableViewId, "view");
     const pins = await getLocationPinsByTableViewQuery(tableViewId);
     res.send(pins.rows);
   } catch (err) {
@@ -44,7 +34,7 @@ async function getLocationPinsByTableView(
 async function addLocationPin(req: Request, res: Response, next: NextFunction) {
   try {
     const payload = {
-      table_view_id: Number(req.body.table_view_id),
+      table_view_id: parsePositiveInt(req.body.table_view_id, "table_view_id"),
       canvas_object_id: req.body.canvas_object_id,
       title: req.body.title,
       description: req.body.description ?? "",
@@ -55,19 +45,18 @@ async function addLocationPin(req: Request, res: Response, next: NextFunction) {
     };
 
     if (!payload.canvas_object_id) {
-      const err: any = new Error("canvas_object_id is required");
-      err.status = 400;
-      throw err;
+      throw badRequestError("canvas_object_id is required");
     }
     if (!payload.title) {
-      const err: any = new Error("title is required");
-      err.status = 400;
-      throw err;
+      throw badRequestError("title is required");
     }
 
-    const tableView = await getTableViewById(payload.table_view_id);
-    const auth = await requireTablePermission(req, tableView, "edit");
-    assertTableCapability(auth, "canManagePins");
+    await requireTablePermissionById(
+      req,
+      payload.table_view_id,
+      "edit",
+      "canManagePins",
+    );
 
     const data = await addLocationPinQuery(payload);
     res.status(201).send(data.rows[0]);
@@ -82,18 +71,14 @@ async function removeLocationPin(
   next: NextFunction
 ) {
   try {
-    const pinId = Number(req.params.id);
+    const pinId = parsePositiveInt(req.params.id, "id");
     const pinData = await getLocationPinByIdQuery(pinId);
     const pin = pinData.rows[0];
     if (!pin) {
-      const err: any = new Error("Location pin not found");
-      err.status = 404;
-      throw err;
+      throw notFoundError("Location pin not found");
     }
 
-    const tableView = await getTableViewById(pin.table_view_id);
-    const auth = await requireTablePermission(req, tableView, "edit");
-    assertTableCapability(auth, "canManagePins");
+    await requireTablePermissionById(req, pin.table_view_id, "edit", "canManagePins");
 
     await removeLocationPinQuery(pinId);
     res.status(204).send();
@@ -108,18 +93,19 @@ async function updateLocationPin(
   next: NextFunction
 ) {
   try {
-    const pinId = Number(req.params.id);
+    const pinId = parsePositiveInt(req.params.id, "id");
     const pinData = await getLocationPinByIdQuery(pinId);
     const pin = pinData.rows[0];
     if (!pin) {
-      const err: any = new Error("Location pin not found");
-      err.status = 404;
-      throw err;
+      throw notFoundError("Location pin not found");
     }
 
-    const tableView = await getTableViewById(pin.table_view_id);
-    const auth = await requireTablePermission(req, tableView, "edit");
-    assertTableCapability(auth, "canManagePins");
+    const { auth } = await requireTablePermissionById(
+      req,
+      pin.table_view_id,
+      "edit",
+      "canManagePins",
+    );
 
     const payload: Partial<typeof pin> = {};
     if (typeof req.body.canvas_object_id !== "undefined")

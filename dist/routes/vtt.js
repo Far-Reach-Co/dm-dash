@@ -43,7 +43,6 @@ router.get("/vtt", (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             }
             return res.render("vtt", {
                 auth: req.session.user,
-                projectAuth: false,
             });
         }
         if (!req.query.uuid)
@@ -54,15 +53,14 @@ router.get("/vtt", (req, res, next) => __awaiter(void 0, void 0, void 0, functio
             return res.render("404", { auth: req.session.user });
         }
         const table = tableData.rows[0];
-        const access = yield (0, authz_1.requireTableAccessOrRedirect)(req, res, table, "/forbidden");
-        if (!access)
+        const hasAccess = yield (0, authz_1.requireTableAccessOrRedirect)(req, res, table, "/forbidden");
+        if (!hasAccess)
             return;
         if (req.session.user) {
             (0, recentlyViewed_1.upsertRecentlyViewed)(req.session.user, "table", table.id);
         }
         return res.render("vtt", {
             auth: req.session.user,
-            projectAuth: access.projectAuth,
         });
     }
     catch (err) {
