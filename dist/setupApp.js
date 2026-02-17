@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.server = exports.app = void 0;
+exports.sessionMiddleware = exports.server = exports.app = void 0;
 const config_1 = require("./config");
 const express_1 = __importDefault(require("express"));
 const http_1 = __importDefault(require("http"));
@@ -102,8 +102,8 @@ const redisSessionStore = new redisSessionStore_js_1.default({
     prefix: "frc:sess:",
     ttlSeconds: 30 * 24 * 60 * 60,
 });
-if (config_1.isProd) {
-    app.use((0, express_session_1.default)({
+const sessionMiddleware = config_1.isProd
+    ? (0, express_session_1.default)({
         store: redisSessionStore,
         secret: config_1.SECRET_KEY || "",
         name: "frc_session",
@@ -116,10 +116,8 @@ if (config_1.isProd) {
             domain: ".farreachco.com",
             secure: true,
         },
-    }));
-}
-else {
-    app.use((0, express_session_1.default)({
+    })
+    : (0, express_session_1.default)({
         store: redisSessionStore,
         secret: config_1.SECRET_KEY || "",
         name: "frcsession",
@@ -131,8 +129,9 @@ else {
             sameSite: "lax",
             secure: false,
         },
-    }));
-}
+    });
+exports.sessionMiddleware = sessionMiddleware;
+app.use(sessionMiddleware);
 app.use("/api", routes_js_1.default);
 app.use("/", routes_js_2.default);
 app.use("/dnd", routes_js_3.default);

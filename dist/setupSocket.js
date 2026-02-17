@@ -15,8 +15,12 @@ const socketUsers_js_1 = require("./lib/socketUsers.js");
 const dice_js_1 = require("./lib/dice.js");
 const mistral_js_1 = require("./dnd/srd/mistral.js");
 const markdownToChat_js_1 = require("./lib/markdownToChat.js");
+const setupApp_1 = require("./setupApp");
 function setupSocketHandlers(server) {
     const io = new socket_io_1.Server(server);
+    io.use((socket, next) => {
+        (0, setupApp_1.sessionMiddleware)(socket.request, {}, next);
+    });
     io.on("connection", (socket) => {
         socket.on("table-joined", (_a) => __awaiter(this, [_a], void 0, function* ({ table, username }) {
             try {

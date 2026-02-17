@@ -11,11 +11,16 @@ import {
 import { calculateDiceRollResponse } from "./lib/dice.js";
 import { searchSrd } from "./dnd/srd/mistral.js";
 import { markdownToChat } from "./lib/markdownToChat.js";
+import { sessionMiddleware } from "./setupApp";
 
 export default function setupSocketHandlers(
   server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>
 ): any {
   const io = new Server(server);
+
+  io.use((socket, next) => {
+    sessionMiddleware(socket.request as any, {} as any, next as any);
+  });
 
   io.on("connection", (socket: any) => {
     // testing
