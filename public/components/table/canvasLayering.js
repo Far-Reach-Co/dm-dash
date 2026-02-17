@@ -1,37 +1,8 @@
+import LayerStackService from "./layerStackService.js";
+
 export function placeObjectOnCanvasLayer({ canvas, gridManager, obj }) {
-  const all = canvas.getObjects();
-  const gridIndex = gridManager.getIndexInCanvas();
-
-  switch (obj.layer) {
-    case "Map": {
-      obj.moveTo(Math.max(0, gridIndex - 1));
-      break;
-    }
-
-    case "Object": {
-      const topObjectIndex = all.reduce(
-        (max, item, i) =>
-          i > gridIndex && item !== obj && item.layer === "Object"
-            ? Math.max(max, i)
-            : max,
-        -1,
-      );
-
-      if (topObjectIndex !== -1) {
-        obj.moveTo(topObjectIndex + 1);
-      } else {
-        obj.moveTo(gridIndex + 1);
-      }
-      break;
-    }
-
-    case "Fog": {
-      obj.moveTo(all.length - 1);
-      break;
-    }
-  }
-
-  canvas.requestRenderAll();
+  const stackService = new LayerStackService({ canvas, gridManager });
+  stackService.bringToTopOfLayer(obj);
 }
 
 export function normalizeGridObjectVisuals(gridManager) {

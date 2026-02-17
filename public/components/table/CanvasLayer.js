@@ -14,9 +14,9 @@ import {
 } from "./canvasDataUtils.js";
 import {
   normalizeGridObjectVisuals,
-  placeObjectOnCanvasLayer,
   updateCanvasObjectProperties,
 } from "./canvasLayering.js";
+import LayerStackService from "./layerStackService.js";
 import { loadCanvasFromData, saveCanvasState } from "./canvasPersistence.js";
 import {
   endCanvasDrag,
@@ -37,6 +37,7 @@ export default class CanvasLayer {
     this.tableApp = props.tableApp;
 
     this.gridManager = null;
+    this.layerStack = null;
 
     this.throttleImageMoved = throttle((obj) => {
       socketIntegration.imageMoved(obj);
@@ -48,6 +49,10 @@ export default class CanvasLayer {
 
     this.gridManager = new GridManager(this.canvas, {
       gridSize: 100,
+    });
+    this.layerStack = new LayerStackService({
+      canvas: this.canvas,
+      gridManager: this.gridManager,
     });
 
     await this.createNewOrSetupSaved();
@@ -180,6 +185,7 @@ export default class CanvasLayer {
     this.canvas.dispose();
     this.canvas = null;
     this.gridManager = null;
+    this.layerStack = null;
   };
 
   handleObjectMoving = (options) => {
@@ -339,7 +345,7 @@ export default class CanvasLayer {
         this.canvas.add(clone);
 
         // add to canvas on correct layer
-        this.placeObjectOnLayer(object);
+        this.placeObjectOnLayer(clone);
         this.updateObjectProperties(clone);
 
         // add event listeners
@@ -492,11 +498,24 @@ export default class CanvasLayer {
 
   // Also can be used to place image at top of layer
   placeObjectOnLayer = (obj) => {
-    placeObjectOnCanvasLayer({
-      canvas: this.canvas,
-      gridManager: this.gridManager,
-      obj,
-    });
+    this.layerStack?.bringToTopOfLayer(obj);
+  };
+
+  sendObjectToBottomOfLayer = (obj) => {
+    this.layerStack?.sendToBottomOfLayer(obj);
+  };
+
+  setObjectLayer = (obj, layer, { position = "top" } = {}) => {
+    this.layerStack?.setObjectLayer(obj, layer, { position });
+    this.updateObjectProperties(obj);
+  };
+
+  reconcileLayerStack = () => {
+    this.layerStack?.reconcile();
+  };
+
+  validateLayerStack = () => {
+    return this.layerStack?.assertInvariants() ?? { ok: true, violations: [] };
   };
 
   changeLayer = () => {
@@ -544,6 +563,7 @@ export default class CanvasLayer {
       this.updateObjectProperties(object);
       this.setupObjectEventListeners(object);
     });
+    this.layerStack?.reconcile({ render: false });
     this.normalizeGridVisuals();
     this.canvas.renderAll();
   };
@@ -588,6 +608,7 @@ export default class CanvasLayer {
 
   resizeGrid = (gridState) => {
     this.gridManager.rebuildGrid(gridState.width, gridState.height);
+    this.layerStack?.reconcile({ render: false });
     this.normalizeGridVisuals();
   };
 }
