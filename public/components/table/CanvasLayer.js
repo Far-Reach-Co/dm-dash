@@ -150,9 +150,11 @@ export default class CanvasLayer {
     // write new grid if there isn't objects in previous data
     if (!this.currentTableView.data.objects) {
       this.gridManager.renderGrid();
+      this.normalizeGridVisuals();
     } else {
       if (!this.currentTableView.data.objects.length) {
         this.gridManager.renderGrid();
+        this.normalizeGridVisuals();
       } else {
         // update image links
         const imageIds = [
@@ -418,8 +420,19 @@ export default class CanvasLayer {
     }
   };
 
-  addImageToTable = async (image) => {
-    if (image.src) {
+  addImageToTable = async (
+    image,
+    options = { broadcast: true, centerInViewport: true, left: null, top: null },
+  ) => {
+    return await new Promise((resolve) => {
+      if (!image?.src) {
+        console.error(
+          "Failed to create new fabric image from URL. SRC URL missing.",
+        );
+        resolve(null);
+        return;
+      }
+
       fabric.Image.fromURL(image.src, (newImg) => {
         // create new image
         const id = uuidv4();
@@ -430,22 +443,30 @@ export default class CanvasLayer {
 
         // add to canvas on correct layer
         this.canvas.add(newImg);
-        // Center the new image in the viewport
-        this.canvas.viewportCenterObject(newImg);
+        if (
+          typeof options.left === "number" &&
+          typeof options.top === "number"
+        ) {
+          newImg.set({ left: options.left, top: options.top });
+        } else if (options.centerInViewport !== false) {
+          this.canvas.viewportCenterObject(newImg);
+        }
         // Place image on layer
         this.placeObjectOnLayer(newImg);
         this.updateObjectProperties(newImg);
+        this.canvas.requestRenderAll();
 
         // add event listeners
         this.setupObjectEventListeners(newImg);
 
         // emit through through socket
-        socketIntegration.imageAdded(newImg);
+        if (options.broadcast !== false) {
+          socketIntegration.imageAdded(newImg);
+        }
+
+        resolve(newImg);
       });
-    } else
-      console.error(
-        "Failed to create new fabric image from URL. SRC URL missing.",
-      );
+    });
   };
 
   runIndicatorAnimation = (x, y) => {
@@ -583,11 +604,40 @@ export default class CanvasLayer {
     this.canvas.getObjects().forEach((object, index) => {
       this.updateObjectProperties(object);
     });
+    this.normalizeGridVisuals();
     this.canvas.renderAll();
+  };
+
+  normalizeGridVisuals = () => {
+    const gridObject = this.gridManager?.getGroup?.();
+    if (!gridObject) return;
+
+    gridObject.opacity = 1;
+    gridObject.selectable = false;
+    gridObject.evented = false;
+
+    if (Array.isArray(gridObject._objects)) {
+      gridObject._objects.forEach((line) => {
+        line.opacity = 1;
+        line.selectable = false;
+        line.evented = false;
+        if (!line.stroke) {
+          line.stroke = "#ccc";
+        }
+      });
+    }
   };
 
   // Function to update object properties based on current layer
   updateObjectProperties = (object) => {
+    const gridObject = this.gridManager?.getGroup?.();
+    if (gridObject && object === gridObject) {
+      object.selectable = false;
+      object.evented = false;
+      object.opacity = 1;
+      return;
+    }
+
     const currentLayer = this.tableApp.currentLayer;
     const objectLayer = object.layer;
     const isActiveLayer = objectLayer === currentLayer;
@@ -610,18 +660,22 @@ export default class CanvasLayer {
   };
 
   saveToDatabase = async () => {
+    const saveEndpoint =
+      this.currentTableView?.data_save_url ||
+      (this.currentTableView?.id
+        ? `/api/edit_table_view_data/${this.currentTableView.id}`
+        : null);
+    if (!saveEndpoint) return null;
+
     const jsonCanvas = this.canvas.toJSON();
     try {
-      const res = await fetch(
-        `/api/edit_table_view_data/${this.currentTableView.id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ data: jsonCanvas }),
+      const res = await fetch(saveEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({ data: jsonCanvas }),
+      });
       // const data = await res.json();
       // if (res.status === 200 || res.status === 201) {
       //   return data;
@@ -640,8 +694,7 @@ export default class CanvasLayer {
     if (!gridObject.visible) {
       this.gridManager.snapToGrid = false;
     }
-    gridObject.selectable = false;
-    gridObject.evented = false;
+    this.normalizeGridVisuals();
   };
 
   renderSavedData = async () => {
@@ -657,6 +710,7 @@ export default class CanvasLayer {
           this.setupObjectEventListeners(object);
         });
 
+        this.normalizeGridVisuals();
         this.canvas.renderAll();
         resolve();
       });
@@ -693,13 +747,16 @@ export default class CanvasLayer {
 
   hideGrid = () => {
     this.gridManager.hideGrid();
+    this.normalizeGridVisuals();
   };
 
   showGrid = () => {
     this.gridManager.showGrid();
+    this.normalizeGridVisuals();
   };
 
   resizeGrid = (gridState) => {
     this.gridManager.rebuildGrid(gridState.width, gridState.height);
+    this.normalizeGridVisuals();
   };
 }

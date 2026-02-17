@@ -3,6 +3,7 @@ import { buildUpdateQuery } from "./utils";
 
 interface TableView {
   id: number
+  uuid: string
   project_id: number
   user_id: number
   data: {[key: string]: any}
@@ -10,6 +11,12 @@ interface TableView {
   title: string
   is_public: boolean
   mode: string
+}
+
+function isMissingModeColumnError(err: unknown) {
+  if (!err || typeof err !== "object") return false;
+  const dbErr = err as { code?: string; message?: string };
+  return dbErr.code === "42703" && dbErr.message?.includes(`"mode"`) === true;
 }
 
 async function addTableViewByProjectQuery(data: {
@@ -25,7 +32,19 @@ async function addTableViewByProjectQuery(data: {
       data.mode
     ]
   }
-  return await db.query<TableView>(query)
+  try {
+    return await db.query<TableView>(query)
+  } catch (err) {
+    if (!isMissingModeColumnError(err)) throw err;
+    const fallbackQuery = {
+      text: /*sql*/ `insert into public."TableView" (project_id, title) values($1,$2) returning *`,
+      values: [
+        data.project_id,
+        data.title
+      ]
+    };
+    return await db.query<TableView>(fallbackQuery)
+  }
 }
 
 async function addTableViewByUserQuery(data: {
@@ -41,7 +60,19 @@ async function addTableViewByUserQuery(data: {
       data.mode
     ]
   }
-  return await db.query<TableView>(query)
+  try {
+    return await db.query<TableView>(query)
+  } catch (err) {
+    if (!isMissingModeColumnError(err)) throw err;
+    const fallbackQuery = {
+      text: /*sql*/ `insert into public."TableView" (user_id, title) values($1,$2) returning *`,
+      values: [
+        data.user_id,
+        data.title
+      ]
+    };
+    return await db.query<TableView>(fallbackQuery)
+  }
 }
 
 async function getTableViewQuery(id: string | number) {
@@ -87,7 +118,21 @@ async function removeTableViewQuery(id: string | number) {
 
 async function editTableViewQuery(id: string, data: any) {
   const query = buildUpdateQuery("TableView", data, id);
-  return await db.query<TableView>(query);
+  try {
+    return await db.query<TableView>(query);
+  } catch (err) {
+    if (!isMissingModeColumnError(err) || typeof data.mode === "undefined") {
+      throw err;
+    }
+
+    const { mode, ...fallbackData } = data;
+    if (!Object.keys(fallbackData).length) {
+      return await getTableViewQuery(id);
+    }
+
+    const fallbackQuery = buildUpdateQuery("TableView", fallbackData, id);
+    return await db.query<TableView>(fallbackQuery);
+  }
 }
 
 export {

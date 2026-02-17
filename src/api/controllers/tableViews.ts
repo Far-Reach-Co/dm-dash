@@ -94,7 +94,7 @@ async function addTableViewByProject(
       eventData: { tableId: data.rows[0].id, title },
       req,
     });
-    res.status(201).json({ redirect: `/wyrld?id=${req.params.project_id}` });
+    res.status(201).json({ redirect: `/vtt?uuid=${data.rows[0].uuid}` });
   } catch (err) {
     next(err);
   }
@@ -128,7 +128,7 @@ async function addTableViewByUser(
       eventData: { tableId: data.rows[0].id, title },
       req,
     });
-    res.status(201).json({ redirect: "/dash" });
+    res.status(201).json({ redirect: `/vtt?uuid=${data.rows[0].uuid}` });
   } catch (err) {
     next(err);
   }

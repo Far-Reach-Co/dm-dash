@@ -130,6 +130,13 @@ import {
   updateLocationPin,
 } from "./controllers/locationPins.js";
 import {
+  editGuestSandboxData,
+  getGuestSandboxImageCounts,
+  getGuestSandboxImages,
+  getGuestSandboxView,
+  startGuestSandbox,
+} from "./controllers/guestSandbox.js";
+import {
   addPlayerInvite,
   getPlayerInviteByPlayer,
   getPlayerInviteByUUID,
@@ -206,6 +213,16 @@ const apiLimiter = rateLimit({
   },
 });
 router.use(apiLimiter);
+
+const guestSandboxStartLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    message: "Too many guest sandbox requests, please try again shortly",
+  },
+});
 
 // discord bot
 router.get("/bot/get_all_commands", getCommands);
@@ -299,6 +316,18 @@ router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view_data/:id", editTableViewData);
 router.post("/edit_table_view/:id", editTableView);
+router.post(
+  "/start_guest_sandbox",
+  guestSandboxStartLimiter,
+  startGuestSandbox,
+);
+router.get("/get_guest_sandbox/:uuid", getGuestSandboxView);
+router.post("/edit_guest_sandbox_data/:uuid", editGuestSandboxData);
+router.get("/get_guest_sandbox_images/:uuid", getGuestSandboxImages);
+router.get(
+  "/get_guest_sandbox_image_counts/:uuid",
+  getGuestSandboxImageCounts,
+);
 router.get("/get_location_pins/:table_view_id", getLocationPinsByTableView);
 router.post("/add_location_pin", addLocationPin);
 router.delete("/remove_location_pin/:id", removeLocationPin);

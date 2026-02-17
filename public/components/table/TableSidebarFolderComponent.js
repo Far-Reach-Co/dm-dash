@@ -10,6 +10,7 @@ export default class TableSidebarFolderComponent {
     this.updateImagesList = props.updateImagesList;
     this.refreshImages = props.refreshImages;
     this.tableView = props.tableView;
+    this.guestSandboxId = this.tableView?.guest_sandbox_id || null;
     this.capabilities = props.capabilities || {};
 
     // project
@@ -46,6 +47,12 @@ export default class TableSidebarFolderComponent {
   };
 
   loadFolders = async () => {
+    if (this.guestSandboxId) {
+      this.folders = [];
+      this.pruneExpandedFolderIds(this.folders);
+      return;
+    }
+
     let foldersData;
     if (this.projectId) {
       foldersData = await getThings(

@@ -12,6 +12,7 @@ export default class TableSidebarImageComponent {
     this.domComponent.className = "table-sidebar-image-component";
     this.tableView = props.tableView;
     this.tableApp = props.tableApp;
+    this.guestSandboxId = this.tableView?.guest_sandbox_id || null;
     this.getCurrentFolder = props.getCurrentFolder;
     this.getFolderScope = props.getFolderScope;
     this.onCountsUpdated = props.onCountsUpdated;
@@ -92,6 +93,7 @@ export default class TableSidebarImageComponent {
   };
 
   getDeleteImageEndpoint = (imageId) => {
+    if (this.guestSandboxId) return null;
     if (this.projectId) {
       const suffix = this.tableView?.id
         ? `?table_view_id=${this.tableView.id}`
@@ -107,7 +109,9 @@ export default class TableSidebarImageComponent {
       return;
     }
 
-    deleteThing(this.getDeleteImageEndpoint(image.id));
+    const endpoint = this.getDeleteImageEndpoint(image.id);
+    if (!endpoint) return;
+    deleteThing(endpoint);
 
     // Remove from local caches
     if (this.imageDataAndElems) {
@@ -162,6 +166,9 @@ export default class TableSidebarImageComponent {
   });
 
   getCountsEndpoint = () => {
+    if (this.guestSandboxId) {
+      return `/api/get_guest_sandbox_image_counts/${this.guestSandboxId}`;
+    }
     return this.projectId
       ? `/api/get_library_image_counts_by_project/${this.projectId}`
       : "/api/get_library_image_counts_by_user";
@@ -181,7 +188,9 @@ export default class TableSidebarImageComponent {
         ? `folder:${scope.currentFolder.id}`
         : "unsorted";
     return JSON.stringify({
-      projectId: this.projectId || "user",
+      projectId: this.guestSandboxId
+        ? `guest:${this.guestSandboxId}`
+        : this.projectId || "user",
       sort: this.sortKey,
       q: this.tableImageSearchQuery || "",
       folder: folderKey,
@@ -189,6 +198,17 @@ export default class TableSidebarImageComponent {
   };
 
   getPaginatedImagesEndpoint = (offset = 0) => {
+    if (this.guestSandboxId) {
+      const params = new URLSearchParams();
+      params.set("limit", String(this.pageLimit));
+      params.set("offset", String(offset));
+      params.set("sort", this.sortKey);
+      if (this.tableImageSearchQuery) {
+        params.set("q", this.tableImageSearchQuery);
+      }
+      return `/api/get_guest_sandbox_images/${this.guestSandboxId}?${params.toString()}`;
+    }
+
     const base = this.projectId
       ? `/api/get_library_images_by_project/${this.projectId}`
       : "/api/get_library_images_by_user";

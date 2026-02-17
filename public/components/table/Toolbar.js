@@ -315,6 +315,31 @@ export default class Toolbar {
             createElement("br"),
             createElement("br"),
 
+            // Sandbox Mode
+            createElement("h2", {}, "Sandbox Mode"),
+            createElement("hr"),
+            createElement(
+              "small",
+              {},
+              "Sandbox keeps core map interaction tools while limiting campaign-management features.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Available"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Layers and Grid controls are enabled.",
+            ),
+            createElement("br"),
+            createElement("b", {}, "Restricted"),
+            createElement(
+              "small",
+              {},
+              " \u2014 Image/folder management, location pins/portals, and Change Table are disabled.",
+            ),
+            createElement("br"),
+            createElement("br"),
+
             // Location Pins (GM)
             createElement("h2", {}, "Location Pins (GM)"),
             createElement("hr"),
@@ -529,7 +554,8 @@ export default class Toolbar {
   };
 
   renderLayersButton = () => {
-    if (!this.isOwnerOrManager()) return this.hiddenElement();
+    const isGuestSandbox = !!this.tableView?.is_guest_sandbox;
+    if (!this.isOwnerOrManager() && !isGuestSandbox) return this.hiddenElement();
     if (!this.can("canManageLayers")) return this.hiddenElement();
 
     const layerColor = this.layerStyles[this.tableApp.currentLayer]?.color;
@@ -570,7 +596,8 @@ export default class Toolbar {
   // ---------------------------------------------------------------------------
 
   renderGridButton = () => {
-    if (!this.isOwnerOrManager()) return this.hiddenElement();
+    const isGuestSandbox = !!this.tableView?.is_guest_sandbox;
+    if (!this.isOwnerOrManager() && !isGuestSandbox) return this.hiddenElement();
     if (!this.can("canManageGrid")) return this.hiddenElement();
 
     return this.renderToolbarButton(ICONS.grid, "Grid control", {
@@ -810,7 +837,8 @@ export default class Toolbar {
   // ---------------------------------------------------------------------------
 
   renderSidebarToggle = () => {
-    if (!this.isOwnerOrManager()) return this.hiddenElement();
+    const isGuestSandbox = !!this.tableView?.is_guest_sandbox;
+    if (!this.isOwnerOrManager() && !isGuestSandbox) return this.hiddenElement();
 
     const sidebar = this.tableApp.sidebar;
     if (!sidebar) return this.hiddenElement();
