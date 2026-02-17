@@ -12,9 +12,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildGuestSandboxCapabilities = void 0;
 exports.ensureGuestId = ensureGuestId;
 exports.getGuestSandboxTtlSeconds = getGuestSandboxTtlSeconds;
-exports.buildGuestSandboxCapabilities = buildGuestSandboxCapabilities;
 exports.createGuestSandbox = createGuestSandbox;
 exports.getGuestSandbox = getGuestSandbox;
 exports.requireGuestSandboxAccess = requireGuestSandboxAccess;
@@ -24,7 +24,11 @@ const crypto_1 = require("crypto");
 const redis_1 = require("redis");
 const logger_js_1 = __importDefault(require("./logger.js"));
 const dbconfig_1 = __importDefault(require("../api/dbconfig"));
+const httpErrors_1 = require("./httpErrors");
+const tableAuthz_1 = require("./tableAuthz");
+Object.defineProperty(exports, "buildGuestSandboxCapabilities", { enumerable: true, get: function () { return tableAuthz_1.buildGuestSandboxCapabilities; } });
 const GUEST_SANDBOX_PREFIX = "frc:guest:sandbox:";
+const DEFAULT_GUEST_SANDBOX_TITLE = "Sandbox Demo";
 const GUEST_SANDBOX_TTL_SECONDS = Math.max(60, Number(process.env.GUEST_SANDBOX_TTL_SECONDS || 12 * 60 * 60));
 const GUEST_SANDBOX_MAX_IMAGES = Math.max(1, Number(process.env.GUEST_SANDBOX_MAX_IMAGES || 30));
 const GUEST_SANDBOX_MAX_DATA_BYTES = Math.max(1024, Number(process.env.GUEST_SANDBOX_MAX_DATA_BYTES || 2 * 1024 * 1024));
@@ -72,24 +76,27 @@ function loadCuratedGuestImageIds() {
 }
 function sanitizeTitle(title) {
     if (typeof title !== "string")
-        return "Sandbox Demo";
+        return DEFAULT_GUEST_SANDBOX_TITLE;
     const trimmed = title.trim();
-    return trimmed.length ? trimmed.slice(0, 120) : "Sandbox Demo";
+    return trimmed.length ? trimmed.slice(0, 120) : DEFAULT_GUEST_SANDBOX_TITLE;
 }
-function badRequest(message) {
-    const err = new Error(message);
-    err.status = 400;
-    return err;
+function guestSandboxNotFoundError() {
+    return (0, httpErrors_1.notFoundError)("Guest sandbox not found");
 }
-function forbidden() {
-    const err = new Error("Forbidden");
-    err.status = 403;
-    return err;
+function writeGuestSandbox(record) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield ensureGuestSandboxRedisReady();
+        yield guestSandboxRedisClient.setEx(getGuestSandboxKey(record.id), GUEST_SANDBOX_TTL_SECONDS, JSON.stringify(record));
+    });
 }
-function notFound() {
-    const err = new Error("Guest sandbox not found");
-    err.status = 404;
-    return err;
+function resolveStarterImageIds(input) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const requestedStarterIds = normalizeStarterImageIds(input);
+        if (requestedStarterIds.length) {
+            return requestedStarterIds;
+        }
+        return yield loadCuratedGuestImageIds();
+    });
 }
 function ensureGuestId(req) {
     if (!req.session.guest_id) {
@@ -99,21 +106,6 @@ function ensureGuestId(req) {
 }
 function getGuestSandboxTtlSeconds() {
     return GUEST_SANDBOX_TTL_SECONDS;
-}
-function buildGuestSandboxCapabilities() {
-    return {
-        mode: "sandbox",
-        canManagePins: false,
-        canUsePinPortals: false,
-        canChangeTable: false,
-        canManageLayers: true,
-        canManageGrid: true,
-        canManageImageAssets: false,
-        canManageFolders: false,
-        canEditImageMetadata: false,
-        canDeleteCanvasObjects: true,
-        canManageTableSettings: false,
-    };
 }
 function createGuestSandbox(req, options) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -127,12 +119,9 @@ function createGuestSandbox(req, options) {
         }
         const id = (0, crypto_1.randomUUID)();
         const now = new Date().toISOString();
-        const requestedStarterIds = normalizeStarterImageIds(options === null || options === void 0 ? void 0 : options.starter_image_ids);
-        const starterImageIds = requestedStarterIds.length
-            ? requestedStarterIds
-            : yield loadCuratedGuestImageIds();
+        const starterImageIds = yield resolveStarterImageIds(options === null || options === void 0 ? void 0 : options.starter_image_ids);
         if (!starterImageIds.length) {
-            throw badRequest("Guest sandbox has no curated images available");
+            throw (0, httpErrors_1.badRequestError)("Guest sandbox has no curated images available");
         }
         const record = {
             id,
@@ -144,8 +133,7 @@ function createGuestSandbox(req, options) {
             created_at: now,
             updated_at: now,
         };
-        yield ensureGuestSandboxRedisReady();
-        yield guestSandboxRedisClient.setEx(getGuestSandboxKey(id), GUEST_SANDBOX_TTL_SECONDS, JSON.stringify(record));
+        yield writeGuestSandbox(record);
         req.session.guest_sandbox_id = id;
         return record;
     });
@@ -165,15 +153,11 @@ function getGuestSandbox(id) {
         }
     });
 }
-function requireGuestSandboxAccess(req, id) {
+function requireGuestSandboxAccess(_req, id) {
     return __awaiter(this, void 0, void 0, function* () {
         const record = yield getGuestSandbox(id);
         if (!record)
-            throw notFound();
-        const guestId = req.session.guest_id;
-        if (!guestId || String(record.guest_id) !== String(guestId)) {
-            throw forbidden();
-        }
+            throw guestSandboxNotFoundError();
         return record;
     });
 }
@@ -186,18 +170,17 @@ function touchGuestSandbox(id) {
 function saveGuestSandboxData(id, data) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!data || typeof data !== "object" || Array.isArray(data)) {
-            throw badRequest("Invalid sandbox data");
+            throw (0, httpErrors_1.badRequestError)("Invalid sandbox data");
         }
         const dataJson = JSON.stringify(data);
         if (Buffer.byteLength(dataJson, "utf8") > GUEST_SANDBOX_MAX_DATA_BYTES) {
-            throw badRequest("Sandbox data exceeds size limit");
+            throw (0, httpErrors_1.badRequestError)("Sandbox data exceeds size limit");
         }
         const record = yield getGuestSandbox(id);
         if (!record)
-            throw notFound();
+            throw guestSandboxNotFoundError();
         const updated = Object.assign(Object.assign({}, record), { data: JSON.parse(dataJson), updated_at: new Date().toISOString() });
-        yield ensureGuestSandboxRedisReady();
-        yield guestSandboxRedisClient.setEx(getGuestSandboxKey(id), GUEST_SANDBOX_TTL_SECONDS, JSON.stringify(updated));
+        yield writeGuestSandbox(updated);
         return updated;
     });
 }

@@ -15,9 +15,12 @@ import { sessionMiddleware } from "./setupApp";
 import { getTableViewByUUIDQuery } from "./api/queries/tableViews";
 import {
   assertTableCapability,
+  assertTableCapabilities,
+  buildGuestSandboxCapabilities,
   requireTablePermission,
 } from "./lib/tableAuthz";
 import type { TableCapabilities } from "./lib/tableAuthz";
+import { requireGuestSandboxAccess } from "./lib/guestSandbox";
 
 function parseTableRoomToUUID(tableRoom: unknown): string {
   if (typeof tableRoom !== "string") return "";
@@ -26,22 +29,51 @@ function parseTableRoomToUUID(tableRoom: unknown): string {
 
 async function authorizeSocketTable(
   socket: any,
-  tableUUID: string,
+  tableRoomOrUUID: string,
   mode: "view" | "edit",
   capability?: keyof TableCapabilities,
 ) {
+  const tableUUID = parseTableRoomToUUID(tableRoomOrUUID);
   if (!tableUUID) return false;
-  const userId = socket.request?.session?.user;
-  if (!userId) return false;
 
-  const tableData = await getTableViewByUUIDQuery(tableUUID);
-  const table = tableData.rows[0];
-  if (!table) return false;
+  try {
+    const reqForAuth = socket.request as any;
+    const tableData = await getTableViewByUUIDQuery(tableUUID);
+    const table = tableData.rows[0];
 
-  const reqForAuth = { session: { user: userId } } as any;
-  const auth = await requireTablePermission(reqForAuth, table, mode);
-  if (capability) assertTableCapability(auth, capability);
-  return true;
+    if (table) {
+      const auth = await requireTablePermission(reqForAuth, table, mode);
+      if (capability) assertTableCapability(auth, capability);
+      return true;
+    }
+
+    await requireGuestSandboxAccess(reqForAuth, tableUUID);
+    const guestCapabilities = buildGuestSandboxCapabilities();
+    assertTableCapabilities(guestCapabilities, mode, capability);
+    return true;
+  } catch (_err) {
+    return false;
+  }
+}
+
+async function broadcastTableChangeToAuthorizedSockets(
+  io: any,
+  sourceTableRoom: string,
+  targetTableUUID: string,
+  excludeSocketId?: string,
+) {
+  if (!sourceTableRoom || !targetTableUUID) return;
+  const socketsInRoom = await io.in(sourceTableRoom).fetchSockets();
+  for (const roomSocket of socketsInRoom) {
+    if (excludeSocketId && roomSocket.id === excludeSocketId) continue;
+    const canViewTargetTable = await authorizeSocketTable(
+      roomSocket,
+      String(targetTableUUID),
+      "view",
+    );
+    if (!canViewTargetTable) continue;
+    roomSocket.emit("table-change", targetTableUUID);
+  }
 }
 
 export default function setupSocketHandlers(
@@ -59,6 +91,9 @@ export default function setupSocketHandlers(
       "table-joined",
       async ({ table, username }: { table: string; username: string }) => {
         try {
+          const canViewTable = await authorizeSocketTable(socket, table, "view");
+          if (!canViewTable) return;
+
           const user = await userJoin(socket.id, username, table);
           socket.join(table);
 
@@ -74,26 +109,42 @@ export default function setupSocketHandlers(
     );
 
     socket.on("get-messages", async ({ table }: { table: string }) => {
+      const canViewTable = await authorizeSocketTable(socket, table, "view");
+      if (!canViewTable) return;
       io.to(table).emit("table-messages", await getChatLog(table));
     });
 
     // grid
     socket.on(
       "grid-toggled",
-      ({ table, gridState }: { table: string; gridState: boolean }) => {
+      async ({ table, gridState }: { table: string; gridState: boolean }) => {
+        const canManageGrid = await authorizeSocketTable(
+          socket,
+          table,
+          "edit",
+          "canManageGrid",
+        );
+        if (!canManageGrid) return;
         socket.broadcast.to(table).emit("grid-toggle", gridState);
       }
     );
 
     socket.on(
       "grid-resized",
-      ({
+      async ({
         table,
         gridState,
       }: {
         table: string;
         gridState: { width: string | number; height: string | number };
       }) => {
+        const canManageGrid = await authorizeSocketTable(
+          socket,
+          table,
+          "edit",
+          "canManageGrid",
+        );
+        if (!canManageGrid) return;
         socket.broadcast.to(table).emit("grid-resize", gridState);
       }
     );
@@ -121,7 +172,12 @@ export default function setupSocketHandlers(
           );
           if (!canViewTargetTable) return;
 
-          socket.broadcast.to(table).emit("table-change", newTableUUID);
+          await broadcastTableChangeToAuthorizedSockets(
+            io,
+            table,
+            String(newTableUUID),
+            socket.id,
+          );
         } catch (err) {
           console.log("Blocked unauthorized table-changed event", err);
         }
@@ -130,35 +186,63 @@ export default function setupSocketHandlers(
     // update images
     socket.on(
       "image-added",
-      ({ table, image }: { table: string; image: any }) => {
+      async ({ table, image }: { table: string; image: any }) => {
+        const canEditTableData = await authorizeSocketTable(
+          socket,
+          table,
+          "view",
+          "canEditTableData",
+        );
+        if (!canEditTableData) return;
         socket.broadcast.to(table).emit("image-add", image);
       }
     );
 
     socket.on(
       "image-removed",
-      ({ table, id }: { table: string; id: string }) => {
+      async ({ table, id }: { table: string; id: string }) => {
+        const canDeleteObjects = await authorizeSocketTable(
+          socket,
+          table,
+          "edit",
+          "canDeleteCanvasObjects",
+        );
+        if (!canDeleteObjects) return;
         socket.broadcast.to(table).emit("image-remove", id);
       }
     );
 
     socket.on(
       "image-moved",
-      ({ table, image }: { table: string; image: any }) => {
+      async ({ table, image }: { table: string; image: any }) => {
+        const canEditTableData = await authorizeSocketTable(
+          socket,
+          table,
+          "view",
+          "canEditTableData",
+        );
+        if (!canEditTableData) return;
         socket.broadcast.to(table).emit("image-move", image);
       }
     );
 
     socket.on(
       "object-changed-layer",
-      ({ table, id }: { table: string; id: string }) => {
+      async ({ table, id }: { table: string; id: string }) => {
+        const canManageLayers = await authorizeSocketTable(
+          socket,
+          table,
+          "edit",
+          "canManageLayers",
+        );
+        if (!canManageLayers) return;
         socket.broadcast.to(table).emit("object-change-layer", id);
       }
     );
 
     socket.on(
       "indicator-animation",
-      ({
+      async ({
         table,
         x,
         y,
@@ -167,20 +251,36 @@ export default function setupSocketHandlers(
         x: string | number;
         y: string | number;
       }) => {
+        const canViewTable = await authorizeSocketTable(socket, table, "view");
+        if (!canViewTable) return;
         socket.broadcast.to(table).emit("run-indicator-animation", { x, y });
       }
     );
 
     socket.on(
       "pin-added",
-      ({ table, pin }: { table: string; pin: any }) => {
+      async ({ table, pin }: { table: string; pin: any }) => {
+        const canManagePins = await authorizeSocketTable(
+          socket,
+          table,
+          "edit",
+          "canManagePins",
+        );
+        if (!canManagePins) return;
         socket.broadcast.to(table).emit("pin-add", pin);
       }
     );
 
     socket.on(
       "location-pins-updated",
-      ({ table }: { table: string }) => {
+      async ({ table }: { table: string }) => {
+        const canManagePins = await authorizeSocketTable(
+          socket,
+          table,
+          "edit",
+          "canManagePins",
+        );
+        if (!canManagePins) return;
         socket.broadcast.to(table).emit("reload-location-pins");
       }
     );
@@ -202,6 +302,9 @@ export default function setupSocketHandlers(
       "new-message",
       async ({ table, content }: { table: string; content: string }) => {
         try {
+          const canViewTable = await authorizeSocketTable(socket, table, "view");
+          if (!canViewTable) return;
+
           // Fetch the user details from Redis or your user management system
           const user = await getCurrentUser(socket.id);
           if (!user) {

@@ -9,12 +9,12 @@ import {
   saveGuestSandboxData,
   touchGuestSandbox,
 } from "../../lib/guestSandbox.js";
+import { badRequestError } from "../../lib/httpErrors";
 
-function badRequest(message: string) {
-  const err: any = new Error(message);
-  err.status = 400;
-  return err;
-}
+const DEFAULT_LIMIT = 60;
+const MIN_LIMIT = 1;
+const MAX_LIMIT = 120;
+const MIN_OFFSET = 0;
 
 function parsePaginationInt(
   raw: unknown,
@@ -27,15 +27,33 @@ function parsePaginationInt(
   return Math.max(min, Math.min(max, Math.trunc(value)));
 }
 
+type GuestImageSort = "newest" | "name" | "size";
+
+function parseImageSort(raw: unknown): GuestImageSort {
+  if (raw === "name" || raw === "size") return raw;
+  return "newest";
+}
+
+function parseImageLibraryQuery(query: Request["query"]) {
+  return {
+    limit: parsePaginationInt(query.limit, DEFAULT_LIMIT, MIN_LIMIT, MAX_LIMIT),
+    offset: parsePaginationInt(
+      query.offset,
+      0,
+      MIN_OFFSET,
+      Number.MAX_SAFE_INTEGER,
+    ),
+    search: normalizeSearch(query.q),
+    sort: parseImageSort(query.sort),
+  };
+}
+
 function normalizeSearch(raw: unknown) {
   if (typeof raw !== "string") return "";
   return raw.trim().toLowerCase();
 }
 
-function sortImages(
-  images: Image[],
-  sort: string,
-) {
+function sortImages(images: Image[], sort: GuestImageSort) {
   if (sort === "name") {
     return [...images].sort((a, b) =>
       a.original_name.localeCompare(b.original_name),
@@ -47,6 +65,34 @@ function sortImages(
   return [...images].sort((a, b) => b.id - a.id);
 }
 
+function getStarterImageIds(record: { starter_image_ids?: unknown }) {
+  if (!Array.isArray(record.starter_image_ids)) return [];
+  return record.starter_image_ids
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .map((value) => Math.trunc(value));
+}
+
+function mapGuestTableImages(
+  sandboxId: string,
+  page: Image[],
+  signedUrls: Record<string, string>,
+) {
+  return page.map((img) => ({
+    id: `guest-table-image-${sandboxId}-${img.id}`,
+    image_id: img.id,
+    original_name: img.original_name,
+    size: img.size,
+    file_name: img.file_name,
+    notes: img.notes,
+    src: signedUrls[img.id],
+    folder_id: null,
+    record_id: null,
+    record_title: null,
+    record_desc: null,
+  }));
+}
+
 async function startGuestSandbox(
   req: Request,
   res: Response,
@@ -54,7 +100,7 @@ async function startGuestSandbox(
 ) {
   try {
     if (typeof req.body?.image_ids !== "undefined") {
-      throw badRequest("image_ids is not allowed for guest sandboxes");
+      throw badRequestError("image_ids is not allowed for guest sandboxes");
     }
     const record = await createGuestSandbox(req, {
       title: req.body?.title,
@@ -77,6 +123,7 @@ async function getGuestSandboxView(
   try {
     const record = await requireGuestSandboxAccess(req, req.params.uuid);
     await touchGuestSandbox(record.id);
+    const starterImageIds = getStarterImageIds(record);
     res.send({
       id: record.id,
       uuid: record.id,
@@ -88,7 +135,7 @@ async function getGuestSandboxView(
       user_id: null,
       is_guest_sandbox: true,
       guest_sandbox_id: record.id,
-      starter_image_ids: record.starter_image_ids || [],
+      starter_image_ids: starterImageIds,
       data_save_url: `/api/edit_guest_sandbox_data/${record.id}`,
       capabilities: buildGuestSandboxCapabilities(),
     });
@@ -105,7 +152,7 @@ async function editGuestSandboxData(
   try {
     const record = await requireGuestSandboxAccess(req, req.params.uuid);
     if (typeof req.body?.data === "undefined") {
-      throw badRequest("Missing sandbox data");
+      throw badRequestError("Missing sandbox data");
     }
     await saveGuestSandboxData(record.id, req.body.data);
     res.status(200).send({ message: "Saved" });
@@ -122,24 +169,19 @@ async function getGuestSandboxImages(
   try {
     const record = await requireGuestSandboxAccess(req, req.params.uuid);
     await touchGuestSandbox(record.id);
-
-    const imageIds = Array.isArray(record.starter_image_ids)
-      ? record.starter_image_ids
-      : [];
+    const { limit, offset, search, sort } = parseImageLibraryQuery(req.query);
+    const imageIds = getStarterImageIds(record);
     if (!imageIds.length) {
       res.send({
         images: [],
         total: 0,
-        limit: parsePaginationInt(req.query.limit, 60, 1, 120),
+        limit,
         offset: 0,
       });
       return;
     }
 
     const allImages = (await getImagesQuery(imageIds)).rows;
-    const search = normalizeSearch(req.query.q);
-    const sort = typeof req.query.sort === "string" ? req.query.sort : "newest";
-
     const filtered = search
       ? allImages.filter((img) =>
           String(img.original_name || "").toLowerCase().includes(search),
@@ -147,26 +189,11 @@ async function getGuestSandboxImages(
       : allImages;
     const sorted = sortImages(filtered, sort);
 
-    const limit = parsePaginationInt(req.query.limit, 60, 1, 120);
-    const start = parsePaginationInt(req.query.offset, 0, 0, Number.MAX_SAFE_INTEGER);
-    const page = sorted.slice(start, start + limit);
-    const nextOffset = start + page.length;
+    const page = sorted.slice(offset, offset + limit);
+    const nextOffset = offset + page.length;
 
-    const signedUrls = await getSignedUrls(page as any);
-
-    const responseImages = page.map((img) => ({
-      id: `guest-table-image-${record.id}-${img.id}`,
-      image_id: img.id,
-      original_name: img.original_name,
-      size: img.size,
-      file_name: img.file_name,
-      notes: img.notes,
-      src: signedUrls[img.id],
-      folder_id: null,
-      record_id: null,
-      record_title: null,
-      record_desc: null,
-    }));
+    const signedUrls = await getSignedUrls(page);
+    const responseImages = mapGuestTableImages(record.id, page, signedUrls);
 
     res.send({
       images: responseImages,
@@ -187,9 +214,7 @@ async function getGuestSandboxImageCounts(
   try {
     const record = await requireGuestSandboxAccess(req, req.params.uuid);
     await touchGuestSandbox(record.id);
-    const total = Array.isArray(record.starter_image_ids)
-      ? record.starter_image_ids.length
-      : 0;
+    const total = getStarterImageIds(record).length;
     res.send({
       total,
       unsorted: total,

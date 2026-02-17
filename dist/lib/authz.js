@@ -199,7 +199,7 @@ function requireTableAccessOrRedirect(req_1, res_1, table_1) {
             res.redirect(redirectTo);
             return null;
         }
-        if (!access.isEditor && !table.is_public) {
+        if (!table.is_public && !access.isEditor) {
             res.redirect(redirectTo);
             return null;
         }

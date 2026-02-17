@@ -25,6 +25,7 @@ const projects_js_1 = require("../queries/projects.js");
 const eventLogger_1 = require("../../lib/eventLogger");
 const tableAuthz_1 = require("../../lib/tableAuthz");
 const authz_1 = require("../../lib/authz");
+const tableResourceUtils_1 = require("./tableResourceUtils");
 function getTitle(value) {
     if (typeof value === "string" && value.trim())
         return value.trim();
@@ -38,20 +39,6 @@ function parseIsPublic(value) {
     if (value === "off" || value === "false")
         return false;
     return null;
-}
-function tableNotFoundError() {
-    const err = new Error("Table view not found");
-    err.status = 404;
-    return err;
-}
-function getTableViewOrThrow(id) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const tableViewData = yield (0, tableViews_js_1.getTableViewQuery)(id);
-        const tableView = tableViewData.rows[0];
-        if (!tableView)
-            throw tableNotFoundError();
-        return tableView;
-    });
 }
 function sanitizeTablePatch(body) {
     const payload = {};
@@ -137,9 +124,7 @@ function getTableViewsByProject(req, res, next) {
         try {
             const access = yield (0, authz_1.getProjectAccess)(req, req.params.project_id);
             if (!access) {
-                const err = new Error("Forbidden");
-                err.status = 403;
-                throw err;
+                throw (0, tableResourceUtils_1.forbiddenError)();
             }
             const data = yield (0, tableViews_js_1.getTableViewsByProjectQuery)(req.params.project_id);
             const tableRows = access.isEditor
@@ -170,8 +155,7 @@ function getTableViewsByUser(req, res, next) {
 function getTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tableView = yield getTableViewOrThrow(req.params.id);
-            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "view");
+            const { table: tableView, auth } = yield (0, tableResourceUtils_1.requireTablePermissionById)(req, req.params.id, "view");
             res.send((0, tableAuthz_1.withTableCapabilities)(tableView, auth.capabilities));
         }
         catch (err) {
@@ -182,10 +166,7 @@ function getTableView(req, res, next) {
 function getTableViewByUUID(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tableViewData = yield (0, tableViews_js_1.getTableViewByUUIDQuery)(req.params.uuid);
-            const tableView = tableViewData.rows[0];
-            if (!tableView)
-                throw tableNotFoundError();
+            const tableView = yield (0, tableResourceUtils_1.getTableViewByUUIDOrThrow)(req.params.uuid);
             const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "view");
             res.send((0, tableAuthz_1.withTableCapabilities)(tableView, auth.capabilities));
         }
@@ -197,8 +178,7 @@ function getTableViewByUUID(req, res, next) {
 function removeTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tableView = yield getTableViewOrThrow(req.params.id);
-            yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
+            yield (0, tableResourceUtils_1.requireTablePermissionById)(req, req.params.id, "edit");
             yield (0, tableViews_js_1.removeTableViewQuery)(req.params.id);
             res.status(204).send();
         }
@@ -210,8 +190,8 @@ function removeTableView(req, res, next) {
 function editTableViewData(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tableView = yield getTableViewOrThrow(req.params.id);
-            yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
+            const { auth } = yield (0, tableResourceUtils_1.requireTablePermissionById)(req, req.params.id, "view");
+            (0, tableAuthz_1.assertTableCapability)(auth, "canEditTableData");
             const data = yield (0, tableViews_js_1.editTableViewQuery)(req.params.id, {
                 data: req.body.data,
             });
@@ -225,8 +205,7 @@ function editTableViewData(req, res, next) {
 function editTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tableView = yield getTableViewOrThrow(req.params.id);
-            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
+            const { table: tableView, auth } = yield (0, tableResourceUtils_1.requireTablePermissionById)(req, req.params.id, "edit");
             const payload = sanitizeTablePatch(req.body);
             if (!Object.keys(payload).length) {
                 res.status(200).send((0, tableAuthz_1.withTableCapabilities)(tableView, auth.capabilities));

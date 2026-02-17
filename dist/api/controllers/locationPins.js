@@ -14,26 +14,13 @@ exports.addLocationPin = addLocationPin;
 exports.removeLocationPin = removeLocationPin;
 exports.updateLocationPin = updateLocationPin;
 const locationPins_js_1 = require("../queries/locationPins.js");
-const tableViews_js_1 = require("../queries/tableViews.js");
 const tableAuthz_1 = require("../../lib/tableAuthz");
-function getTableViewById(tableViewId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const data = yield (0, tableViews_js_1.getTableViewQuery)(tableViewId);
-        const tableView = data.rows[0];
-        if (!tableView) {
-            const err = new Error("Table view not found");
-            err.status = 404;
-            throw err;
-        }
-        return tableView;
-    });
-}
+const tableResourceUtils_1 = require("./tableResourceUtils");
 function getLocationPinsByTableView(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tableViewId = Number(req.params.table_view_id);
-            const tableView = yield getTableViewById(tableViewId);
-            yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "view");
+            const tableViewId = (0, tableResourceUtils_1.parsePositiveInt)(req.params.table_view_id, "table_view_id");
+            yield (0, tableResourceUtils_1.requireTablePermissionById)(req, tableViewId, "view");
             const pins = yield (0, locationPins_js_1.getLocationPinsByTableViewQuery)(tableViewId);
             res.send(pins.rows);
         }
@@ -47,7 +34,7 @@ function addLocationPin(req, res, next) {
         var _a;
         try {
             const payload = {
-                table_view_id: Number(req.body.table_view_id),
+                table_view_id: (0, tableResourceUtils_1.parsePositiveInt)(req.body.table_view_id, "table_view_id"),
                 canvas_object_id: req.body.canvas_object_id,
                 title: req.body.title,
                 description: (_a = req.body.description) !== null && _a !== void 0 ? _a : "",
@@ -57,18 +44,12 @@ function addLocationPin(req, res, next) {
                     : [],
             };
             if (!payload.canvas_object_id) {
-                const err = new Error("canvas_object_id is required");
-                err.status = 400;
-                throw err;
+                throw (0, tableResourceUtils_1.badRequestError)("canvas_object_id is required");
             }
             if (!payload.title) {
-                const err = new Error("title is required");
-                err.status = 400;
-                throw err;
+                throw (0, tableResourceUtils_1.badRequestError)("title is required");
             }
-            const tableView = yield getTableViewById(payload.table_view_id);
-            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
-            (0, tableAuthz_1.assertTableCapability)(auth, "canManagePins");
+            yield (0, tableResourceUtils_1.requireTablePermissionById)(req, payload.table_view_id, "edit", "canManagePins");
             const data = yield (0, locationPins_js_1.addLocationPinQuery)(payload);
             res.status(201).send(data.rows[0]);
         }
@@ -80,17 +61,13 @@ function addLocationPin(req, res, next) {
 function removeLocationPin(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const pinId = Number(req.params.id);
+            const pinId = (0, tableResourceUtils_1.parsePositiveInt)(req.params.id, "id");
             const pinData = yield (0, locationPins_js_1.getLocationPinByIdQuery)(pinId);
             const pin = pinData.rows[0];
             if (!pin) {
-                const err = new Error("Location pin not found");
-                err.status = 404;
-                throw err;
+                throw (0, tableResourceUtils_1.notFoundError)("Location pin not found");
             }
-            const tableView = yield getTableViewById(pin.table_view_id);
-            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
-            (0, tableAuthz_1.assertTableCapability)(auth, "canManagePins");
+            yield (0, tableResourceUtils_1.requireTablePermissionById)(req, pin.table_view_id, "edit", "canManagePins");
             yield (0, locationPins_js_1.removeLocationPinQuery)(pinId);
             res.status(204).send();
         }
@@ -102,17 +79,13 @@ function removeLocationPin(req, res, next) {
 function updateLocationPin(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const pinId = Number(req.params.id);
+            const pinId = (0, tableResourceUtils_1.parsePositiveInt)(req.params.id, "id");
             const pinData = yield (0, locationPins_js_1.getLocationPinByIdQuery)(pinId);
             const pin = pinData.rows[0];
             if (!pin) {
-                const err = new Error("Location pin not found");
-                err.status = 404;
-                throw err;
+                throw (0, tableResourceUtils_1.notFoundError)("Location pin not found");
             }
-            const tableView = yield getTableViewById(pin.table_view_id);
-            const auth = yield (0, tableAuthz_1.requireTablePermission)(req, tableView, "edit");
-            (0, tableAuthz_1.assertTableCapability)(auth, "canManagePins");
+            const { auth } = yield (0, tableResourceUtils_1.requireTablePermissionById)(req, pin.table_view_id, "edit", "canManagePins");
             const payload = {};
             if (typeof req.body.canvas_object_id !== "undefined")
                 payload.canvas_object_id = req.body.canvas_object_id;

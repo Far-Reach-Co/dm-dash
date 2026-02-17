@@ -39,7 +39,6 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
       }
       return res.render("vtt", {
         auth: req.session.user,
-        projectAuth: false,
       });
     }
 
@@ -53,14 +52,13 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
     }
 
     const table = tableData.rows[0];
-    const access = await requireTableAccessOrRedirect(req, res, table, "/forbidden");
-    if (!access) return;
+    const hasAccess = await requireTableAccessOrRedirect(req, res, table, "/forbidden");
+    if (!hasAccess) return;
     if (req.session.user) {
       upsertRecentlyViewed(req.session.user, "table", table.id);
     }
     return res.render("vtt", {
       auth: req.session.user,
-      projectAuth: access.projectAuth,
     });
   } catch (err) {
     next(err);

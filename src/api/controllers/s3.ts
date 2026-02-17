@@ -14,7 +14,6 @@ import { Request, Response, NextFunction } from "express";
 import { getMetadata, resizeImage } from "../../lib/imageProcessing";
 import { splitAtIndex } from "../../lib/utils";
 import { editUserQuery, getUserByIdQuery } from "../queries/users";
-import { getTableViewQuery } from "../queries/tableViews.js";
 import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers";
 import {
   getTableImagesByImageQuery,
@@ -31,9 +30,14 @@ import { redisClient } from "../../lib/socketUsers";
 import logger from "../../lib/logger.js";
 import { getProjectAccess, requireProjectEditor, requireUser } from "../../lib/authz";
 import {
-  assertTableCapability,
-  requireTablePermission,
-} from "../../lib/tableAuthz";
+  assertProjectIdMatchesTable,
+  forbiddenError,
+  getOptionalTableEditAuth,
+  notFoundError,
+  requireProjectIdFromTable,
+  requireTablePermissionById,
+  requireUserIdFromTable,
+} from "./tableResourceUtils";
 
 config.update({
   signatureVersion: "v4",
@@ -75,47 +79,8 @@ async function invalidateSignedUrlCache(
   await redisClient.del(getSignedUrlCacheKey(imageId));
 }
 
-function badRequestError(message: string) {
-  const err: any = new Error(message);
-  err.status = 400;
-  return err;
-}
-
-function tableNotFoundError() {
-  const err: any = new Error("Table view not found");
-  err.status = 404;
-  return err;
-}
-
-function imageNotFoundError(message = "Image not found") {
-  const err: any = new Error(message);
-  err.status = 404;
-  return err;
-}
-
-function forbiddenError(message = "Forbidden") {
-  const err: any = new Error(message);
-  err.status = 403;
-  return err;
-}
-
 async function getOptionalTableAuthForImageMutation(req: Request) {
-  const tableViewIdRaw =
-    req.body?.table_view_id ??
-    req.query?.table_view_id;
-  if (typeof tableViewIdRaw === "undefined") return null;
-
-  const tableViewId = Number(tableViewIdRaw);
-  if (Number.isNaN(tableViewId) || tableViewId <= 0) {
-    throw badRequestError("table_view_id must be a valid number");
-  }
-
-  const tableData = await getTableViewQuery(tableViewId);
-  const table = tableData.rows[0];
-  if (!table) throw tableNotFoundError();
-  const auth = await requireTablePermission(req, table, "edit");
-  assertTableCapability(auth, "canManageImageAssets");
-  return { table, auth };
+  return await getOptionalTableEditAuth(req, "canManageImageAssets");
 }
 
 async function ensureImageLinkedToProject(
@@ -126,7 +91,7 @@ async function ensureImageLinkedToProject(
   const linked = rows.some(
     (row) => String(row.image_id) === String(imageId),
   );
-  if (!linked) throw imageNotFoundError("Image not found in this project");
+  if (!linked) throw notFoundError("Image not found in this project");
 }
 
 async function ensureImageLinkedToUser(
@@ -137,7 +102,7 @@ async function ensureImageLinkedToUser(
   const linked = rows.some(
     (row) => String(row.image_id) === String(imageId),
   );
-  if (!linked) throw imageNotFoundError("Image not found in your library");
+  if (!linked) throw notFoundError("Image not found in your library");
 }
 
 async function ensureImageEditableWithoutTableContext(
@@ -146,7 +111,7 @@ async function ensureImageEditableWithoutTableContext(
 ) {
   const userId = requireUser(req);
   const tableImages = (await getTableImagesByImageQuery(imageId)).rows;
-  if (!tableImages.length) throw imageNotFoundError();
+  if (!tableImages.length) throw notFoundError("Image not found");
 
   const checkedProjects = new Map<string, boolean>();
   for (const tableImage of tableImages) {
@@ -166,9 +131,32 @@ async function ensureImageEditableWithoutTableContext(
   throw forbiddenError();
 }
 
+async function ensureImageEditableWithOptionalTableContext(
+  req: Request,
+  imageId: string | number,
+) {
+  const tableAuth = await getOptionalTableAuthForImageMutation(req);
+  if (!tableAuth) {
+    await ensureImageEditableWithoutTableContext(req, imageId);
+    return;
+  }
+
+  if (tableAuth.table.project_id) {
+    await ensureImageLinkedToProject(imageId, tableAuth.table.project_id);
+    return;
+  }
+
+  if (tableAuth.table.user_id) {
+    await ensureImageLinkedToUser(imageId, tableAuth.table.user_id);
+    return;
+  }
+
+  throw forbiddenError();
+}
+
 function getImageOrThrow(imageData: { rows: Array<any> }) {
   const image = imageData.rows[0];
-  if (!image) throw imageNotFoundError();
+  if (!image) throw notFoundError("Image not found");
   return image;
 }
 
@@ -403,10 +391,7 @@ async function newImageForProject(
   try {
     const tableAuth = await getOptionalTableAuthForImageMutation(req);
     if (tableAuth) {
-      if (!tableAuth.table.project_id) {
-        throw badRequestError("table_view_id is not a project table");
-      }
-      req.body.project_id = Number(tableAuth.table.project_id);
+      req.body.project_id = Number(requireProjectIdFromTable(tableAuth.table));
     }
     await checkProjectProLimitReachedAndAuth(
       req.body.project_id,
@@ -489,8 +474,8 @@ async function newImageForUser(
   try {
     if (!req.session.user) throw new Error("User is not logged in");
     const tableAuth = await getOptionalTableAuthForImageMutation(req);
-    if (tableAuth && !tableAuth.table.user_id) {
-      throw badRequestError("table_view_id is not a user table");
+    if (tableAuth) {
+      requireUserIdFromTable(tableAuth.table);
     }
 
     await checkUserProLimitReachedAndAuth(req.session.user);
@@ -594,12 +579,8 @@ async function removeImageByProject(
     await requireProjectEditor(req, req.params.project_id);
     const tableAuth = await getOptionalTableAuthForImageMutation(req);
     if (tableAuth) {
-      if (!tableAuth.table.project_id) {
-        throw badRequestError("table_view_id is not a project table");
-      }
-      if (String(tableAuth.table.project_id) !== String(req.params.project_id)) {
-        throw badRequestError("table_view_id/project_id mismatch");
-      }
+      const tableProjectId = requireProjectIdFromTable(tableAuth.table);
+      assertProjectIdMatchesTable(req.params.project_id, tableProjectId);
     }
     await ensureImageLinkedToProject(req.params.image_id, req.params.project_id);
     const imageData = await getImageQuery(req.params.image_id);
@@ -648,13 +629,15 @@ async function removeImageByTableUser(
   next: NextFunction,
 ) {
   try {
-    const tableDataForAuth = await getTableViewQuery(req.params.table_id);
-    const tableForAuth = tableDataForAuth.rows[0];
-    if (!tableForAuth) throw tableNotFoundError();
-    const tableAuth = await requireTablePermission(req, tableForAuth, "edit");
-    assertTableCapability(tableAuth, "canManageImageAssets");
+    const { table: tableForAuth } = await requireTablePermissionById(
+      req,
+      req.params.table_id,
+      "edit",
+      "canManageImageAssets",
+    );
+    const tableUserId = requireUserIdFromTable(tableForAuth, "table_id");
 
-    await ensureImageLinkedToUser(req.params.image_id, tableForAuth.user_id);
+    await ensureImageLinkedToUser(req.params.image_id, tableUserId);
     const imageData = await getImageQuery(req.params.image_id);
     const image = getImageOrThrow(imageData);
 
@@ -668,7 +651,7 @@ async function removeImageByTableUser(
       ),
     );
 
-    const userData = await getUserByIdQuery(tableForAuth.user_id);
+    const userData = await getUserByIdQuery(tableUserId);
     const user = userData.rows[0];
     await editUserQuery(user.id, {
       used_data_in_bytes: user.used_data_in_bytes - image.size,
@@ -702,8 +685,8 @@ async function removeImageByUser(
   try {
     const userId = requireUser(req);
     const tableAuth = await getOptionalTableAuthForImageMutation(req);
-    if (tableAuth && !tableAuth.table.user_id) {
-      throw badRequestError("table_view_id is not a user table");
+    if (tableAuth) {
+      requireUserIdFromTable(tableAuth.table);
     }
 
     await ensureImageLinkedToUser(req.params.image_id, userId);
@@ -763,18 +746,7 @@ async function removeImageFromBucket(
 async function editImageName(req: Request, res: Response, next: NextFunction) {
   try {
     requireUser(req);
-    const tableAuth = await getOptionalTableAuthForImageMutation(req);
-    if (tableAuth) {
-      if (tableAuth.table.project_id) {
-        await ensureImageLinkedToProject(req.params.id, tableAuth.table.project_id);
-      } else if (tableAuth.table.user_id) {
-        await ensureImageLinkedToUser(req.params.id, tableAuth.table.user_id);
-      } else {
-        throw forbiddenError();
-      }
-    } else {
-      await ensureImageEditableWithoutTableContext(req, req.params.id);
-    }
+    await ensureImageEditableWithOptionalTableContext(req, req.params.id);
     const data = await editImageQuery(req.params.id, {
       original_name: req.body.original_name,
     });
@@ -787,18 +759,7 @@ async function editImageName(req: Request, res: Response, next: NextFunction) {
 async function editImageNotes(req: Request, res: Response, next: NextFunction) {
   try {
     requireUser(req);
-    const tableAuth = await getOptionalTableAuthForImageMutation(req);
-    if (tableAuth) {
-      if (tableAuth.table.project_id) {
-        await ensureImageLinkedToProject(req.params.id, tableAuth.table.project_id);
-      } else if (tableAuth.table.user_id) {
-        await ensureImageLinkedToUser(req.params.id, tableAuth.table.user_id);
-      } else {
-        throw forbiddenError();
-      }
-    } else {
-      await ensureImageEditableWithoutTableContext(req, req.params.id);
-    }
+    await ensureImageEditableWithOptionalTableContext(req, req.params.id);
     const data = await editImageQuery(req.params.id, {
       notes: req.body.notes,
     });

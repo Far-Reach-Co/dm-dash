@@ -1,11 +1,9 @@
 import {
   getTableViewsByProjectQuery,
-  getTableViewQuery,
   removeTableViewQuery,
   editTableViewQuery,
   addTableViewByProjectQuery,
   addTableViewByUserQuery,
-  getTableViewByUUIDQuery,
   getTableViewsByUserQuery,
 } from "../queries/tableViews.js";
 import { Request, Response, NextFunction } from "express";
@@ -14,6 +12,7 @@ import { getUserByIdQuery } from "../queries/users.js";
 import { getProjectQuery } from "../queries/projects.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import {
+  assertTableCapability,
   buildTableCapabilities,
   normalizeTableMode,
   parseRequestedTableMode,
@@ -21,6 +20,11 @@ import {
   withTableCapabilities,
 } from "../../lib/tableAuthz";
 import { getProjectAccess, requireProjectEditor } from "../../lib/authz";
+import {
+  forbiddenError,
+  getTableViewByUUIDOrThrow,
+  requireTablePermissionById,
+} from "./tableResourceUtils";
 
 function getTitle(value: unknown) {
   if (typeof value === "string" && value.trim()) return value.trim();
@@ -32,19 +36,6 @@ function parseIsPublic(value: unknown) {
   if (value === "on" || value === "true") return true;
   if (value === "off" || value === "false") return false;
   return null;
-}
-
-function tableNotFoundError() {
-  const err: any = new Error("Table view not found");
-  err.status = 404;
-  return err;
-}
-
-async function getTableViewOrThrow(id: string | number) {
-  const tableViewData = await getTableViewQuery(id);
-  const tableView = tableViewData.rows[0];
-  if (!tableView) throw tableNotFoundError();
-  return tableView;
 }
 
 function sanitizeTablePatch(body: any) {
@@ -142,9 +133,7 @@ async function getTableViewsByProject(
   try {
     const access = await getProjectAccess(req, req.params.project_id);
     if (!access) {
-      const err: any = new Error("Forbidden");
-      err.status = 403;
-      throw err;
+      throw forbiddenError();
     }
     const data = await getTableViewsByProjectQuery(req.params.project_id);
     const tableRows = access.isEditor
@@ -184,8 +173,11 @@ async function getTableViewsByUser(
 
 async function getTableView(req: Request, res: Response, next: NextFunction) {
   try {
-    const tableView = await getTableViewOrThrow(req.params.id);
-    const auth = await requireTablePermission(req, tableView, "view");
+    const { table: tableView, auth } = await requireTablePermissionById(
+      req,
+      req.params.id,
+      "view",
+    );
     res.send(withTableCapabilities(tableView, auth.capabilities));
   } catch (err) {
     next(err);
@@ -198,9 +190,7 @@ async function getTableViewByUUID(
   next: NextFunction
 ) {
   try {
-    const tableViewData = await getTableViewByUUIDQuery(req.params.uuid);
-    const tableView = tableViewData.rows[0];
-    if (!tableView) throw tableNotFoundError();
+    const tableView = await getTableViewByUUIDOrThrow(req.params.uuid);
     const auth = await requireTablePermission(req, tableView, "view");
     res.send(withTableCapabilities(tableView, auth.capabilities));
   } catch (err) {
@@ -214,8 +204,7 @@ async function removeTableView(
   next: NextFunction
 ) {
   try {
-    const tableView = await getTableViewOrThrow(req.params.id);
-    await requireTablePermission(req, tableView, "edit");
+    await requireTablePermissionById(req, req.params.id, "edit");
     await removeTableViewQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -229,8 +218,8 @@ async function editTableViewData(
   next: NextFunction
 ) {
   try {
-    const tableView = await getTableViewOrThrow(req.params.id);
-    await requireTablePermission(req, tableView, "edit");
+    const { auth } = await requireTablePermissionById(req, req.params.id, "view");
+    assertTableCapability(auth, "canEditTableData");
     const data = await editTableViewQuery(req.params.id, {
       data: req.body.data,
     });
@@ -242,8 +231,11 @@ async function editTableViewData(
 
 async function editTableView(req: Request, res: Response, next: NextFunction) {
   try {
-    const tableView = await getTableViewOrThrow(req.params.id);
-    const auth = await requireTablePermission(req, tableView, "edit");
+    const { table: tableView, auth } = await requireTablePermissionById(
+      req,
+      req.params.id,
+      "edit",
+    );
     const payload = sanitizeTablePatch(req.body);
     if (!Object.keys(payload).length) {
       res.status(200).send(withTableCapabilities(tableView, auth.capabilities));

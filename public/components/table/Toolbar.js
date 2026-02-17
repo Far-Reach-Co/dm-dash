@@ -325,20 +325,32 @@ export default class Toolbar {
   // ---------------------------------------------------------------------------
 
   renderImageOptionButtons = () => {
-    if (!this.can("canDeleteCanvasObjects")) return [];
     const obj = this.tableApp.getCurrentSelectedObject();
     if (!obj || obj.isLocationPin) return [];
+    const canDelete = this.can("canDeleteCanvasObjects");
+    const canManageLayers = this.can("canManageLayers");
+    if (!canDelete && !canManageLayers) return [];
 
-    return [
-      createElement("div", { class: "vtt-toolbar-sep" }),
-      this.renderToolbarButton(ICONS.trash, "Remove selected object", {
-        danger: true,
-        onClick: () => this.tableApp.canvasLayer.removeObjects(),
-      }),
-      this.renderToolbarButton(ICONS.chevronUp, "Move to top of layer", {
-        onClick: () => this.tableApp.canvasLayer.moveObjectToTop(),
-      }),
-    ];
+    const actions = [createElement("div", { class: "vtt-toolbar-sep" })];
+
+    if (canDelete) {
+      actions.push(
+        this.renderToolbarButton(ICONS.trash, "Remove selected object", {
+          danger: true,
+          onClick: () => this.tableApp.canvasLayer.removeObjects(),
+        }),
+      );
+    }
+
+    if (canManageLayers) {
+      actions.push(
+        this.renderToolbarButton(ICONS.chevronUp, "Move to top of layer", {
+          onClick: () => this.tableApp.canvasLayer.moveObjectToTop(),
+        }),
+      );
+    }
+
+    return actions;
   };
 
   // ---------------------------------------------------------------------------

@@ -10,7 +10,6 @@ import imageFollowingCursor from "../components/imageFollowingCursor.js";
 import throttle from "../lib/throttle.js";
 import {
   canRenderSidebarForTable,
-  getDefaultTableCapabilities,
   normalizeTableCapabilities,
 } from "./table/capabilities.js";
 import {
@@ -35,11 +34,12 @@ class Table {
     this.currentLayer = "Object";
     this.currentSelectedObject = null;
     this.isReloading = false;
+    this.pendingReloadTableUUID = null;
     this.socketListenersReady = false;
     this.documentListeners = [];
     this.locationPins = [];
     this.locationPinsByObjectId = new Map();
-    this.capabilities = getDefaultTableCapabilities("standard", false);
+    this.capabilities = {};
     this.isGuestSandbox = false;
     this.tableView = null;
     this.lastHighlightedPinObject = null;
@@ -78,10 +78,7 @@ class Table {
     // TODO: error handling no table view by id
 
     this.tableView = tableView;
-    this.capabilities = normalizeTableCapabilities(tableView, {
-      userId: USERID,
-      isManagerOrOwner: IS_MANAGER_OR_OWNER,
-    });
+    this.capabilities = normalizeTableCapabilities(tableView);
 
     // Handle user or anonymous
     if (!this.user) {
@@ -130,14 +127,8 @@ class Table {
     this.chatBoxComponent.render();
     socketIntegration.getMessages();
 
-    // Only render the sidebar for owner or managers
-    if (
-      canRenderSidebarForTable(tableView, {
-        userId: USERID,
-        isManagerOrOwner: IS_MANAGER_OR_OWNER,
-      })
-    )
-      // USERID and IS_MANAGER_OR_OWNER is injected from template; check vtt.ejs
+    // Render sidebar only when backend-granted capabilities require it
+    if (canRenderSidebarForTable(tableView))
       this.renderSidebarAndHamburger();
   };
 
@@ -193,20 +184,32 @@ class Table {
     this.locationPins = [];
     this.locationPinsByObjectId = new Map();
     this.tableView = null;
-    this.capabilities = getDefaultTableCapabilities("standard", false);
+    this.capabilities = {};
     this.isGuestSandbox = false;
+    this.pendingReloadTableUUID = null;
 
     this.domComponent.replaceChildren();
   };
 
   reloadTableByUUID = async (tableUUID, { historyMode = "replace" } = {}) => {
     if (!tableUUID || tableUUID === this.tableId) return;
-    if (this.isReloading) return;
+    if (this.isReloading) {
+      this.pendingReloadTableUUID = tableUUID;
+      return;
+    }
 
     this.isReloading = true;
-    this.teardown();
-    await this.loadTable(tableUUID, { historyMode });
-    this.isReloading = false;
+    try {
+      this.teardown();
+      await this.loadTable(tableUUID, { historyMode });
+    } finally {
+      this.isReloading = false;
+      const queuedUUID = this.pendingReloadTableUUID;
+      this.pendingReloadTableUUID = null;
+      if (queuedUUID && queuedUUID !== this.tableId) {
+        await this.reloadTableByUUID(queuedUUID, { historyMode: "push" });
+      }
+    }
   };
 
   canvasRenderAll = () => {
@@ -307,7 +310,7 @@ class Table {
 
       // move to top
       if (e.ctrlKey && e.key == "t") {
-        if (this.can("canDeleteCanvasObjects")) {
+        if (this.can("canManageLayers")) {
           this.canvasLayer.moveObjectToTop();
         }
       }

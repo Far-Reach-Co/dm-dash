@@ -1,5 +1,6 @@
 import { Request } from "express";
 import { getProjectAccess, requireUser } from "./authz";
+import { forbiddenError } from "./httpErrors";
 
 export type TableMode = "standard" | "sandbox";
 
@@ -13,6 +14,7 @@ export interface TableViewAuthResource {
 
 export interface TableCapabilities {
   mode: TableMode;
+  canEditTableData: boolean;
   canManagePins: boolean;
   canUsePinPortals: boolean;
   canChangeTable: boolean;
@@ -25,6 +27,8 @@ export interface TableCapabilities {
   canManageTableSettings: boolean;
 }
 
+type TableCapabilityOverrides = Partial<Omit<TableCapabilities, "mode">>;
+
 export interface TableAuthContext {
   table: TableViewAuthResource;
   mode: TableMode;
@@ -33,12 +37,6 @@ export interface TableAuthContext {
   isOwner: boolean;
   isEditor: boolean;
   capabilities: TableCapabilities;
-}
-
-function tableAuthError(status: number, message: string) {
-  const err: any = new Error(message);
-  err.status = status;
-  return err;
 }
 
 export function normalizeTableMode(mode: unknown): TableMode {
@@ -53,51 +51,57 @@ export function parseRequestedTableMode(mode: unknown): TableMode {
 export function buildTableCapabilities(
   mode: TableMode,
   canEdit: boolean,
+  overrides: TableCapabilityOverrides = {},
 ): TableCapabilities {
-  if (!canEdit) {
-    return {
-      mode,
-      canManagePins: false,
-      canUsePinPortals: false,
-      canChangeTable: false,
-      canManageLayers: false,
-      canManageGrid: false,
-      canManageImageAssets: false,
-      canManageFolders: false,
-      canEditImageMetadata: false,
-      canDeleteCanvasObjects: false,
-      canManageTableSettings: false,
-    };
-  }
-
-  if (mode === "sandbox") {
-    return {
-      mode,
-      canManagePins: false,
-      canUsePinPortals: false,
-      canChangeTable: false,
-      canManageLayers: true,
-      canManageGrid: true,
-      canManageImageAssets: false,
-      canManageFolders: false,
-      canEditImageMetadata: false,
-      canDeleteCanvasObjects: false,
-      canManageTableSettings: true,
-    };
-  }
+  const baseCapabilities: TableCapabilities = !canEdit
+    ? {
+        mode,
+        canEditTableData: false,
+        canManagePins: false,
+        canUsePinPortals: false,
+        canChangeTable: false,
+        canManageLayers: false,
+        canManageGrid: false,
+        canManageImageAssets: false,
+        canManageFolders: false,
+        canEditImageMetadata: false,
+        canDeleteCanvasObjects: false,
+        canManageTableSettings: false,
+      }
+      : mode === "sandbox"
+      ? {
+          mode,
+          canEditTableData: true,
+          canManagePins: false,
+          canUsePinPortals: false,
+          canChangeTable: false,
+          canManageLayers: true,
+          canManageGrid: true,
+          canManageImageAssets: false,
+          canManageFolders: false,
+          canEditImageMetadata: false,
+          canDeleteCanvasObjects: true,
+          canManageTableSettings: true,
+        }
+      : {
+          mode,
+          canEditTableData: true,
+          canManagePins: true,
+          canUsePinPortals: true,
+          canChangeTable: true,
+          canManageLayers: true,
+          canManageGrid: true,
+          canManageImageAssets: true,
+          canManageFolders: true,
+          canEditImageMetadata: true,
+          canDeleteCanvasObjects: true,
+          canManageTableSettings: true,
+        };
 
   return {
+    ...baseCapabilities,
+    ...overrides,
     mode,
-    canManagePins: true,
-    canUsePinPortals: true,
-    canChangeTable: true,
-    canManageLayers: true,
-    canManageGrid: true,
-    canManageImageAssets: true,
-    canManageFolders: true,
-    canEditImageMetadata: true,
-    canDeleteCanvasObjects: true,
-    canManageTableSettings: true,
   };
 }
 
@@ -111,7 +115,7 @@ export async function resolveTableAuth(
     if (!table.is_public) {
       const userId = requireUser(req);
       const isOwner = String(table.user_id) === String(userId);
-      if (!isOwner) throw tableAuthError(403, "Forbidden");
+      if (!isOwner) throw forbiddenError();
       const capabilities = buildTableCapabilities(mode, true);
       return {
         table,
@@ -129,6 +133,9 @@ export async function resolveTableAuth(
       typeof currentUser !== "undefined" &&
       String(table.user_id) === String(currentUser);
     const capabilities = buildTableCapabilities(mode, !!isOwner);
+    if (!isOwner) {
+      capabilities.canEditTableData = true;
+    }
     return {
       table,
       mode,
@@ -140,15 +147,19 @@ export async function resolveTableAuth(
     };
   }
 
+  const isPublic = !!table.is_public;
   requireUser(req);
   const access = await getProjectAccess(req, table.project_id);
-  if (!access) throw tableAuthError(403, "Forbidden");
+  if (!access) throw forbiddenError();
 
-  const canView = access.isEditor || !!table.is_public;
-  if (!canView) throw tableAuthError(403, "Forbidden");
+  const canView = access.isEditor || isPublic;
+  if (!canView) throw forbiddenError();
 
   const canEdit = access.isEditor;
   const capabilities = buildTableCapabilities(mode, canEdit);
+  if (!canEdit) {
+    capabilities.canEditTableData = true;
+  }
   return {
     table,
     mode,
@@ -167,9 +178,52 @@ export async function requireTablePermission(
 ): Promise<TableAuthContext> {
   const auth = await resolveTableAuth(req, table);
   if (mode === "edit" && !auth.canEdit) {
-    throw tableAuthError(403, "Forbidden");
+    throw forbiddenError();
   }
   return auth;
+}
+
+export function hasTableCapability(
+  capabilities: TableCapabilities,
+  capability: keyof TableCapabilities,
+) {
+  return !!capabilities?.[capability];
+}
+
+export function hasAnyTableEditCapability(capabilities: TableCapabilities) {
+  return (
+    hasTableCapability(capabilities, "canEditTableData") ||
+    hasTableCapability(capabilities, "canManagePins") ||
+    hasTableCapability(capabilities, "canUsePinPortals") ||
+    hasTableCapability(capabilities, "canChangeTable") ||
+    hasTableCapability(capabilities, "canManageLayers") ||
+    hasTableCapability(capabilities, "canManageGrid") ||
+    hasTableCapability(capabilities, "canManageImageAssets") ||
+    hasTableCapability(capabilities, "canManageFolders") ||
+    hasTableCapability(capabilities, "canEditImageMetadata") ||
+    hasTableCapability(capabilities, "canDeleteCanvasObjects") ||
+    hasTableCapability(capabilities, "canManageTableSettings")
+  );
+}
+
+export function assertTableCapabilities(
+  capabilities: TableCapabilities,
+  mode: "view" | "edit",
+  capability?: keyof TableCapabilities,
+) {
+  if (mode === "edit" && !hasAnyTableEditCapability(capabilities)) {
+    throw forbiddenError();
+  }
+  if (capability && !hasTableCapability(capabilities, capability)) {
+    throw forbiddenError("Action is disabled for this table mode");
+  }
+}
+
+export function buildGuestSandboxCapabilities(): TableCapabilities {
+  return buildTableCapabilities("sandbox", true, {
+    canDeleteCanvasObjects: true,
+    canManageTableSettings: false,
+  });
 }
 
 export function assertTableCapability(
@@ -178,7 +232,7 @@ export function assertTableCapability(
   message = "Action is disabled for this table mode",
 ) {
   if (!auth.capabilities[capability]) {
-    throw tableAuthError(403, message);
+    throw forbiddenError(message);
   }
 }
 
