@@ -1,5 +1,6 @@
 import createElement from "../createElement.js";
 import { getThings } from "../../lib/apiUtils.js";
+import { getTableFoldersEndpoint } from "./tableApi.js";
 
 async function renderFolderSelectOptions(foldersData) {
   const elemsList = [];
@@ -13,14 +14,8 @@ async function renderFolderSelectOptions(foldersData) {
 }
 
 export default async function renderFolderSelect(tableImage, projectId) {
-  let foldersData;
-  if (projectId) {
-    foldersData = await getThings(
-      `/api/get_table_folders_by_project/${projectId}`
-    );
-  } else {
-    foldersData = await getThings("/api/get_table_folders_by_user");
-  }
+  const foldersData =
+    (await getThings(getTableFoldersEndpoint({ projectId }))) || [];
 
   // get current value
   let currentFolderValue = 0;

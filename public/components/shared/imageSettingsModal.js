@@ -64,13 +64,26 @@ export default async function renderImageSettingsModal({
       ? [
           createElement("button", { class: "new-btn mt-1" }, "Save Name", {
             type: "click",
-            event: () => {
-              image.original_name = nameInput.value;
-              postThing(`/api/edit_image_name/${imageId}`, {
-                original_name: nameInput.value,
+            event: async () => {
+              const nextName = nameInput.value;
+              const prevName = image.original_name;
+              const response = await postThing(`/api/edit_image_name/${imageId}`, {
+                original_name: nextName,
                 ...(tableViewId ? { table_view_id: tableViewId } : {}),
               });
-              if (onUpdate) onUpdate();
+              if (!response) {
+                image.original_name = prevName;
+                nameInput.value = prevName;
+                return;
+              }
+              image.original_name = nextName;
+              if (onUpdate) {
+                onUpdate({
+                  type: "name",
+                  imageId,
+                  originalName: nextName,
+                });
+              }
             },
           }),
         ]

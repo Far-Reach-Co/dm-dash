@@ -1,15 +1,14 @@
 import createElement from "../createElement.js";
 import TableSidebarImageComponent from "./TableSidebarImageComponent.js";
-import {
-  fallbackCopyTextToClipboard,
-  copyTextToClipboard,
-} from "../../lib/clipboard.js";
+import { copyTextToClipboard } from "../../lib/clipboard.js";
 import modal from "../modal.js";
-import { deleteThing, postThing } from "../../lib/apiUtils.js";
-import tableSelect from "./tableSelect.js";
-import socketIntegration from "./socketIntegration.js";
+import { postThing } from "../../lib/apiUtils.js";
 import { uploadProjectImage, uploadUserImage } from "../../lib/imageUtils.js";
 import TableSidebarFolderComponent from "./TableSidebarFolderComponent.js";
+import { getCurrentProjectId } from "./tableApi.js";
+import { renderUploadImageModal } from "./tableSidebarUploadModal.js";
+import { renderCreateFolderModal } from "./tableSidebarFolderModal.js";
+import { renderTableSettingsModal } from "./tableSidebarSettingsModal.js";
 
 export default class TableSidebar {
   constructor(props) {
@@ -17,13 +16,8 @@ export default class TableSidebar {
     this.domComponent.className = "sidebar";
     this.tableView = props.tableView;
     this.isVisible = false;
-    this.navigate = props.navigate;
     this.tableApp = props.tableApp;
     this.capabilities = this.tableApp?.capabilities || {};
-
-    // project
-    const searchParams = new URLSearchParams(window.location.search);
-    this.projectId = searchParams.get("project");
 
     this.makeImageSmall = false;
 
@@ -43,10 +37,7 @@ export default class TableSidebar {
         return this.tableSidebarFolderComponent.currentFolder;
       },
       getFolderScope: () => {
-        return {
-          showAllImages: this.tableSidebarFolderComponent.showAllImages,
-          currentFolder: this.tableSidebarFolderComponent.currentFolder,
-        };
+        return this.tableSidebarFolderComponent.getScope();
       },
       onCountsUpdated: (data) => this.tableSidebarFolderComponent.setCounts(data),
       capabilities: this.capabilities,
@@ -60,6 +51,14 @@ export default class TableSidebar {
 
   }
 
+  get projectId() {
+    return getCurrentProjectId();
+  }
+
+  can = (capability) => {
+    return !!this.capabilities?.[capability];
+  };
+
   renderCloseBtn = () => {
     return createElement(
       "div",
@@ -70,7 +69,7 @@ export default class TableSidebar {
   };
 
   renderSettingsBtn = () => {
-    if (!this.capabilities.canManageTableSettings) {
+    if (!this.can("canManageTableSettings")) {
       return createElement("div", { class: "d-none" });
     }
     return createElement(
@@ -100,6 +99,14 @@ export default class TableSidebar {
     this.domComponent.innerHTML = "";
   };
 
+  destroy = () => {
+    this.tableSidebarImageComponent?.destroy?.();
+    this.tableSidebarFolderComponent?.destroy?.();
+    this.isVisible = false;
+    this.container = null;
+    this.domComponent.replaceChildren();
+  };
+
   getCurrentFolderId = () => {
     return this.tableSidebarFolderComponent.currentFolder?.id ?? null;
   };
@@ -113,6 +120,8 @@ export default class TableSidebar {
   };
 
   uploadTableImage = async (file) => {
+    if (!this.can("canManageImageAssets")) return null;
+
     const newImage = this.projectId
       ? await uploadProjectImage(
           file,
@@ -138,6 +147,7 @@ export default class TableSidebar {
   };
 
   addImageToSidebar = async (e) => {
+    if (!this.can("canManageImageAssets")) return;
     if (e.target.files.length) {
       modal.hide();
       try {
@@ -179,293 +189,16 @@ export default class TableSidebar {
     }
   };
 
-  renderCreatingImageInFolderNotice = () => {
-    if (
-      !this.tableSidebarFolderComponent.showAllImages &&
-      this.tableSidebarFolderComponent.currentFolder
-    ) {
-      return createElement(
-        "small",
-        { class: "modal-subtitle" },
-        `Creating image in folder: "${this.tableSidebarFolderComponent.currentFolder.title}"`,
-      );
-    } else return createElement("div", { class: "d-none" });
-  };
-
   renderUploadImage = () => {
-    const smallImageCheckboxComponent = createElement(
-      "input",
-      { type: "checkbox" },
-      null,
-      {
-        type: "change",
-        event: (e) => {
-          this.makeImageSmall = e.target.checked;
-        },
-      },
-    );
-    smallImageCheckboxComponent.checked = this.makeImageSmall;
-
-    return createElement("div", { class: "help-content" }, [
-      createElement("h1", {}, "Add new Image"),
-      this.renderCreatingImageInFolderNotice(),
-      createElement("h2", {}, "Options:"),
-      createElement(
-        "div",
-        {
-          class: "d-flex align-items-center justify-content-center ms-1",
-          title:
-            "If image width is larger than 100px this resizes the image width to 100px while maintaining the aspect ratio. It also will prevent long loading time as the image size will be reduced.",
-        },
-        [
-          createElement(
-            "small",
-            { class: "me-3" },
-            "Make image small (100px): ",
-          ),
-          smallImageCheckboxComponent,
-        ],
-      ),
-      createElement("br"),
-      createElement(
-        "input",
-        {
-          id: "image",
-          name: "image",
-          type: "file",
-          accept: "image/*",
-          class: "d-none",
-          style: "display: none;", // Override because class is not working here
-          multiple: true,
-        },
-        null,
-        {
-          type: "change",
-          event: async (e) => {
-            await this.addImageToSidebar(e);
-          },
-        },
-      ),
-      createElement(
-        "label",
-        {
-          for: "image",
-          class: "label-btn",
-          title: "Upload image to be used on virtual table",
-        },
-        "Choose Images",
-      ),
-    ]);
-  };
-
-  renderCreatingSubFolderNotice = () => {
-    if (
-      !this.tableSidebarFolderComponent.showAllImages &&
-      this.tableSidebarFolderComponent.currentFolder
-    ) {
-      return createElement(
-        "small",
-        { class: "modal-subtitle" },
-        `Creating sub-folder in: "${this.tableSidebarFolderComponent.currentFolder.title}"`,
-      );
-    } else return createElement("div", { class: "d-none" });
+    return renderUploadImageModal(this);
   };
 
   renderCreateFolder = () => {
-    return createElement("div", { class: "help-content" }, [
-      createElement("h1", {}, "Create Folder"),
-      this.renderCreatingSubFolderNotice(),
-      createElement(
-        "form",
-        {},
-        [
-          createElement("div", { class: "input-container" }, [
-            createElement(
-              "label",
-              {
-                for: "title",
-                class: "me-1",
-              },
-              "Title",
-            ),
-            createElement("input", {
-              placeholder: "New Folder",
-              name: "title",
-              id: "title",
-              required: true,
-            }),
-          ]),
-          createElement("br"),
-          createElement("button", { class: "new-btn me-1" }, "Create"),
-        ],
-        {
-          type: "submit",
-          event: async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const formProps = Object.fromEntries(formData);
-            const parentFolderId = this.getCurrentFolderId();
-
-            modal.hide();
-            this.tableSidebarFolderComponent.folderLoading = true;
-            this.tableSidebarFolderComponent.render();
-
-            try {
-              await this.postByContext(
-                "/api/add_table_folder_by_project",
-                "/api/add_table_folder_by_user",
-                {
-                  title: formProps.title,
-                  is_sub: Boolean(parentFolderId),
-                  parent_folder_id: parentFolderId,
-                  table_view_id: this.tableView?.id,
-                }
-              );
-              await this.tableSidebarFolderComponent.loadFolders();
-            } catch (err) {
-              console.log(err);
-              window.alert("Something went wrong when creating a new folder");
-            } finally {
-              this.tableSidebarFolderComponent.folderLoading = false;
-              this.tableSidebarFolderComponent.render();
-            }
-          },
-        },
-      ),
-    ]);
+    return renderCreateFolderModal(this);
   };
 
   renderTableSettings = async () => {
-    const sections = [
-      createElement("h1", {}, "Table Settings"),
-    ];
-
-    if (this.capabilities.canChangeTable) {
-      sections.push(
-        createElement("hr"),
-        createElement("h2", {}, "Change Table"),
-        createElement(
-          "small",
-          {},
-          "This will move everyone viewing this table to another table",
-        ),
-        createElement(
-          "form",
-          {},
-          [await tableSelect(), createElement("Button", { class: "ms-2" }, "Go")],
-          {
-            type: "submit",
-            event: (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              const formProps = Object.fromEntries(formData);
-              const tableUUID = formProps.table_uuid;
-              if (tableUUID != 0) {
-                socketIntegration.tableChanged(tableUUID);
-              }
-            },
-          },
-        ),
-      );
-    }
-
-    sections.push(
-      createElement("hr"),
-      createElement("h2", {}, "Details"),
-      createElement("div", {}, [
-        createElement("div", { class: "input-container" }, [
-          createElement(
-            "label",
-            {
-              for: "title",
-              class: "me-1",
-            },
-            "Edit Title",
-          ),
-          createElement("input", {
-            value: this.tableView.title,
-            name: "title",
-            id: "title-input",
-          }),
-        ]),
-        createElement("br"),
-        createElement("div", { class: "d-flex align-items-center" }, [
-          createElement(
-            "small",
-            {
-              class: "text-orange me-1",
-              class: "font-bold",
-            },
-            "Make Public",
-          ),
-          this.tableView.is_public
-            ? createElement("input", {
-                type: "checkbox",
-                name: "is_public",
-                id: "is_public-input",
-                checked: true,
-              })
-            : createElement("input", {
-                type: "checkbox",
-                name: "is_public",
-                id: "is_public-input",
-              }),
-        ]),
-        createElement("br"),
-        createElement("button", { class: "new-btn me-1" }, "Save", {
-          type: "click",
-          event: (e) => {
-            e.preventDefault();
-            const titleInput = document.getElementById("title-input");
-            const is_publicInput = document.getElementById("is_public-input");
-
-            const res = postThing(`/api/edit_table_view/${this.tableView.id}`, {
-              title: titleInput.value,
-              is_public: is_publicInput.checked,
-            });
-            if (res) {
-              // update success message
-              const titleUpdateMessageElem = document.querySelector(
-                "#title-update-success",
-              );
-              titleUpdateMessageElem.innerText = "Saved!";
-              // remove after 3 seconds
-              setTimeout(() => {
-                titleUpdateMessageElem.innerText = "";
-              }, 3000); // 10seconds
-              // update table title on sidebar
-              document.querySelector("#table-display-title").innerText =
-                titleInput.value;
-              // update local tableState just in case
-              this.tableView.title = titleInput.value;
-              this.tableView.is_public = is_publicInput.checked;
-            }
-          },
-        }),
-        createElement("small", {
-          class: "success-message",
-          id: "title-update-success",
-        }),
-        createElement("hr"),
-        createElement("button", { class: "btn-red" }, "Delete Table", {
-          type: "click",
-          event: (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (
-              window.confirm(
-                `Are you sure you want to delete ${this.tableView.title}`,
-              )
-            ) {
-              deleteThing(`/api/remove_table_view/${this.tableView.id}`);
-              window.location.pathname = "/dash";
-            }
-          },
-        }),
-      ]),
-    );
-
-    return createElement("div", { class: "help-content" }, sections);
+    return renderTableSettingsModal(this);
   };
 
 
@@ -498,7 +231,7 @@ export default class TableSidebar {
 
     // Action buttons
     const actions = createElement("div", { class: "sidebar-actions" }, [
-      ...(this.capabilities.canManageImageAssets
+      ...(this.can("canManageImageAssets")
         ? [
             createElement(
               "div",
@@ -517,7 +250,7 @@ export default class TableSidebar {
             ),
           ]
         : []),
-      ...(this.capabilities.canManageFolders
+      ...(this.can("canManageFolders")
         ? [
             createElement(
               "div",

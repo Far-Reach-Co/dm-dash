@@ -1,21 +1,45 @@
 import { getPresignedUrlsForImages } from "../../lib/imageUtils.js";
 import socketIntegration from "./socketIntegration.js";
 import GridManager from "./GridManager.js";
+import {
+  LOCATION_PIN_PATH,
+  configureFabricDefaults,
+  createFabricCanvas,
+} from "./canvasConfig.js";
+import {
+  getCanvasImageIds,
+  getCanvasObjects,
+  hasCanvasObjects,
+  hydrateCanvasImageSources,
+} from "./canvasDataUtils.js";
+import {
+  normalizeGridObjectVisuals,
+  updateCanvasObjectProperties,
+} from "./canvasLayering.js";
+import CanvasEngineService from "./canvasEngineService.js";
+import LayerStackService from "./layerStackService.js";
+import { loadCanvasFromData, saveCanvasState } from "./canvasPersistence.js";
+import {
+  endCanvasDrag,
+  handleMousePan,
+  handleMouseWheelZoom,
+  handlePinchZoomGesture,
+  handleTouchPan,
+  startCanvasDrag,
+} from "./canvasViewportHandlers.js";
 
 import throttle from "../../lib/throttle.js";
 import detectMob from "../../lib/detectMobile.js";
 
-const LOCATION_PIN_PATH =
-  "M 0 -28 C -12 -28 -24 -16 -24 -3 C -24 12 -10 36 0 56 C 10 36 24 12 24 -3 C 24 -16 12 -28 0 -28 Z M 0 -12 A 6 6 0 1 0 0 -12.01 Z";
-
 export default class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
-    this.currentTableView = props.tableView;
     this.tableView = props.tableView;
     this.tableApp = props.tableApp;
 
     this.gridManager = null;
+    this.canvasEngine = null;
+    this.layerStack = null;
 
     this.throttleImageMoved = throttle((obj) => {
       socketIntegration.imageMoved(obj);
@@ -25,8 +49,12 @@ export default class CanvasLayer {
   init = async () => {
     this.setupCanvasConfig();
 
-    this.gridManager = new GridManager(this.canvas, {
+    this.gridManager = new GridManager(this.canvasEngine, {
       gridSize: 100,
+    });
+    this.layerStack = new LayerStackService({
+      canvasEngine: this.canvasEngine,
+      gridManager: this.gridManager,
     });
 
     await this.createNewOrSetupSaved();
@@ -36,89 +64,46 @@ export default class CanvasLayer {
   };
 
   setupCanvasConfig = () => {
-    //EXTEND THE PROPS FABRIC WILL EXPORT TO JSON
-    fabric.Object.prototype.toObject = (function (toObject) {
-      return function () {
-        return fabric.util.object.extend(toObject.call(this), {
-          id: this.id,
-          imageId: this.imageId,
-          layer: this.layer,
-          selectable: this.selectable,
-          evented: this.evented,
-          lockInPosition: this.lockInPosition,
-        });
-      };
-    })(fabric.Object.prototype.toObject);
-
-    // UPDATE THE CORNER SIZES
-    fabric.Object.prototype.cornerSize = 20; // default is 13
-    fabric.Object.prototype.transparentCorners = false; // makes corners solid, easier to see
-    fabric.Object.prototype.cornerStyle = "circle"; // 'rect' or 'circle'
-
-    // OVERWRITE GROUP TO DISABLE PROPERTIES
-    fabric.Group.prototype.hasControls = false;
-    fabric.Group.prototype.lockScalingX = true;
-    fabric.Group.prototype.lockScalingY = true;
-    fabric.Group.prototype.lockRotation = true;
-
-    // init fabric canvas
-    this.canvas = new fabric.Canvas("canvas-layer", {
-      containerClass: "canvas-layer",
-      height: window.innerHeight,
-      width: window.innerWidth,
-      preserveObjectStacking: true,
-      isDrawingMode: false,
-      backgroundColor: "black",
-      fireRightClick: true, // <-- enable firing of right click events
-      fireMiddleClick: true, // <-- enable firing of middle click events
-      stopContextMenu: true, // <--  prevent context menu from showing
-      defaultCursor: "grab",
-      hoverCursor: "pointer",
-      freeDrawingCursor: "cell",
-    });
-
-    // overwrite the brush color
-    this.canvas.freeDrawingBrush.color = "#ffffff";
-
-    // overwrite the brush width
-    this.canvas.freeDrawingBrush.width = 10;
+    configureFabricDefaults();
+    this.canvas = createFabricCanvas("canvas-layer");
+    this.canvasEngine = new CanvasEngineService(this.canvas);
   };
 
   getViewportCenter = () => {
-    if (!this.canvas) return { left: 0, top: 0 };
-    const width = this.canvas.getWidth();
-    const height = this.canvas.getHeight();
-    const viewport = this.canvas.viewportTransform;
+    if (!this.canvasEngine) return { left: 0, top: 0 };
+    const width = this.canvasEngine.getWidth();
+    const height = this.canvasEngine.getHeight();
+    const viewport = this.canvasEngine.getViewportTransform();
     if (!viewport) {
       return { left: width / 2, top: height / 2 };
     }
-    const point = new fabric.Point(width / 2, height / 2);
-    const inverted = fabric.util.invertTransform(viewport);
-    const transformed = fabric.util.transformPoint(point, inverted);
+    const point = this.canvasEngine.createPoint(width / 2, height / 2);
+    const inverted = this.canvasEngine.invertTransform(viewport);
+    const transformed = this.canvasEngine.transformPoint(point, inverted);
     return { left: transformed.x, top: transformed.y };
   };
 
-  createLocationPinMarker = ({ broadcast = true, autoSelect = true } = {}) => {
+  createLocationPinMarker = ({ autoSelect = true } = {}) => {
     const coords = this.getViewportCenter();
     const pin = this.createLocationPinShape({
       left: coords.left,
       top: coords.top,
       layer: this.tableApp.currentLayer,
     });
-    this.canvas.add(pin);
+    this.canvasEngine.addObject(pin);
     this.placeObjectOnLayer(pin);
     if (autoSelect) {
-      this.canvas.setActiveObject(pin);
+      this.canvasEngine.setActiveObject(pin);
     }
-    this.canvas.requestRenderAll();
+    this.canvasEngine.requestRender();
     this.setupObjectEventListeners(pin);
     return pin;
   };
 
   createLocationPinShape = (props = {}) => {
-    const centerX = props.left ?? this.canvas.getWidth() / 2;
-    const centerY = props.top ?? this.canvas.getHeight() / 2;
-    const pin = new fabric.Path(LOCATION_PIN_PATH, {
+    const centerX = props.left ?? this.canvasEngine.getWidth() / 2;
+    const centerY = props.top ?? this.canvasEngine.getHeight() / 2;
+    const pin = this.canvasEngine.createPath(LOCATION_PIN_PATH, {
       id: props.id ?? uuidv4(),
       left: centerX,
       top: centerY,
@@ -147,61 +132,64 @@ export default class CanvasLayer {
   };
 
   createNewOrSetupSaved = async () => {
-    // write new grid if there isn't objects in previous data
-    if (!this.currentTableView.data.objects) {
+    if (!hasCanvasObjects(this.tableView)) {
       this.gridManager.renderGrid();
       this.normalizeGridVisuals();
-    } else {
-      if (!this.currentTableView.data.objects.length) {
-        this.gridManager.renderGrid();
-        this.normalizeGridVisuals();
-      } else {
-        // update image links
-        const imageIds = [
-          ...new Set(
-            this.currentTableView.data.objects
-              .filter((object) => Boolean(object.imageId))
-              .map((object) => object.imageId),
-          ),
-        ];
-        const presignedUrls = await getPresignedUrlsForImages(imageIds);
-        for (let object of this.currentTableView.data.objects) {
-          if (object.imageId) {
-            if (presignedUrls.urls[object.imageId]) {
-              object.src = presignedUrls.urls[object.imageId];
-            } else {
-              delete this.currentTableView.data.objects[object];
-            }
-          }
-        }
-        // render the saved data for the current table view
-        await this.renderSavedData();
-      }
+      return;
     }
+
+    const objects = getCanvasObjects(this.tableView);
+    const imageIds = getCanvasImageIds(objects);
+    const presignedUrls = await getPresignedUrlsForImages(imageIds);
+    hydrateCanvasImageSources(objects, presignedUrls);
+    await this.renderSavedData();
   };
 
   setupCanvasEventListeners = () => {
     this.lastTouchTime = 0;
 
     // Object manipulation
-    this.canvas.on("object:moving", this.handleObjectMoving);
-    this.canvas.on("object:rotating", this.handleObjectTransform);
-    this.canvas.on("object:scaling", this.handleObjectTransform);
+    this.canvasEngine.on("object:moving", this.handleObjectMoving);
+    this.canvasEngine.on("object:rotating", this.handleObjectTransform);
+    this.canvasEngine.on("object:scaling", this.handleObjectTransform);
 
     // Zoom and pan
-    this.canvas.on("mouse:wheel", this.handleMouseWheel);
-    this.canvas.on("touch:gesture", this.handlePinchZoom);
-    this.canvas.on("mouse:down", this.handleMouseDown);
-    this.canvas.on("mouse:move", this.handleMouseMove);
-    this.canvas.on("mouse:up", this.handleMouseUp);
-    this.canvas.on("touch:drag", this.handleTouchDrag);
+    this.canvasEngine.on("mouse:wheel", this.handleMouseWheel);
+    this.canvasEngine.on("touch:gesture", this.handlePinchZoom);
+    this.canvasEngine.on("mouse:down", this.handleMouseDown);
+    this.canvasEngine.on("mouse:move", this.handleMouseMove);
+    this.canvasEngine.on("mouse:up", this.handleMouseUp);
+    this.canvasEngine.on("touch:drag", this.handleTouchDrag);
 
     // Interactions
-    this.canvas.on("mouse:dblclick", this.handleDoubleClick);
-    this.canvas.on("path:created", this.handlePathCreated);
-    this.canvas.on("selection:cleared", () => {
+    this.canvasEngine.on("mouse:dblclick", this.handleDoubleClick);
+    this.canvasEngine.on("path:created", this.handlePathCreated);
+    this.canvasEngine.on("selection:cleared", () => {
       this.tableApp.setCurrentSelectedObject(null);
     });
+  };
+
+  destroy = () => {
+    if (!this.canvas) return;
+
+    this.canvasEngine.off("object:moving", this.handleObjectMoving);
+    this.canvasEngine.off("object:rotating", this.handleObjectTransform);
+    this.canvasEngine.off("object:scaling", this.handleObjectTransform);
+    this.canvasEngine.off("mouse:wheel", this.handleMouseWheel);
+    this.canvasEngine.off("touch:gesture", this.handlePinchZoom);
+    this.canvasEngine.off("mouse:down", this.handleMouseDown);
+    this.canvasEngine.off("mouse:move", this.handleMouseMove);
+    this.canvasEngine.off("mouse:up", this.handleMouseUp);
+    this.canvasEngine.off("touch:drag", this.handleTouchDrag);
+    this.canvasEngine.off("mouse:dblclick", this.handleDoubleClick);
+    this.canvasEngine.off("path:created", this.handlePathCreated);
+    this.canvasEngine.off("selection:cleared");
+
+    this.canvasEngine.dispose();
+    this.canvas = null;
+    this.canvasEngine = null;
+    this.gridManager = null;
+    this.layerStack = null;
   };
 
   handleObjectMoving = (options) => {
@@ -238,36 +226,11 @@ export default class CanvasLayer {
   };
 
   handleMouseWheel = (opt) => {
-    const delta = opt.e.deltaY;
-    const newZoom = this.calculateZoom(this.canvas.getZoom(), delta, 0.25, 20);
-    this.canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, newZoom);
-    opt.e.preventDefault();
-    opt.e.stopPropagation();
+    handleMouseWheelZoom(this.canvasEngine, opt);
   };
 
   handlePinchZoom = (opt) => {
-    if (!opt.e.touches || opt.e.touches.length !== 2) return;
-
-    this.canvas.isDragging = false;
-    const pt = new fabric.Point(opt.self.x, opt.self.y);
-    const zoom = this.canvas.getZoom();
-
-    // Invert scale: pinch (scale < 1) → zoom in, spread (scale > 1) → zoom out
-    const delta = 1 - opt.self.scale;
-    const sensitivity = 0.1;
-    const newZoom = Math.max(
-      0.2,
-      Math.min(5, zoom + zoom * delta * sensitivity),
-    );
-
-    this.canvas.zoomToPoint(pt, newZoom);
-    opt.e.preventDefault();
-    opt.e.stopPropagation();
-  };
-
-  calculateZoom = (currentZoom, delta, min, max) => {
-    let zoom = currentZoom * 0.999 ** delta;
-    return Math.max(min, Math.min(max, zoom));
+    handlePinchZoomGesture(this.canvasEngine, opt);
   };
 
   handleMouseDown = (opt) => {
@@ -278,7 +241,7 @@ export default class CanvasLayer {
       this.handleMobileDoubleTap(evt);
     }
 
-    if (evt.altKey || this.canvas.isDrawingMode) return;
+    if (evt.altKey || this.canvasEngine.isDrawingMode()) return;
 
     // Begin drag if empty space or unselectable object
     if (!opt.target || !opt.target.selectable) {
@@ -289,7 +252,7 @@ export default class CanvasLayer {
   handleMobileDoubleTap = (evt) => {
     const now = Date.now();
     if (now - this.lastTouchTime < 300) {
-      const pointer = this.canvas.getPointer(evt);
+      const pointer = this.canvasEngine.getPointer(evt);
       this.triggerIndicatorAnimation(pointer.x, pointer.y);
       this.lastTouchTime = 0;
     } else {
@@ -298,7 +261,7 @@ export default class CanvasLayer {
   };
 
   handleDoubleClick = (e) => {
-    const pointer = this.canvas.getPointer(e.e);
+    const pointer = this.canvasEngine.getPointer(e.e);
     this.triggerIndicatorAnimation(pointer.x, pointer.y);
   };
 
@@ -308,43 +271,21 @@ export default class CanvasLayer {
   };
 
   startDragging = (x, y) => {
-    this.canvas.isDragging = true;
-    this.canvas.selection = false;
-    this.canvas.lastPosX = x;
-    this.canvas.lastPosY = y;
+    startCanvasDrag(this.canvasEngine, x, y);
   };
 
   handleMouseMove = (opt) => {
-    if (detectMob() || !this.canvas.isDragging) return;
-
-    const e = opt.e;
-    const vpt = this.canvas.viewportTransform;
-    vpt[4] += e.clientX - this.canvas.lastPosX;
-    vpt[5] += e.clientY - this.canvas.lastPosY;
-    this.canvas.requestRenderAll();
-    this.canvas.lastPosX = e.clientX;
-    this.canvas.lastPosY = e.clientY;
+    if (detectMob() || !this.canvasEngine.isDragging()) return;
+    handleMousePan(this.canvasEngine, opt);
   };
 
   handleTouchDrag = (opt) => {
-    if (!detectMob() || !this.canvas.isDragging) return;
-
-    const xChange = opt.self.x - this.canvas.lastPosTouchX;
-    const yChange = opt.self.y - this.canvas.lastPosTouchY;
-
-    const isSmallMovement = Math.abs(xChange) <= 50 && Math.abs(yChange) <= 50;
-    if (isSmallMovement) {
-      this.canvas.relativePan(new fabric.Point(xChange, yChange));
-    }
-
-    this.canvas.lastPosTouchX = opt.self.x;
-    this.canvas.lastPosTouchY = opt.self.y;
+    if (!detectMob() || !this.canvasEngine.isDragging()) return;
+    handleTouchPan(this.canvasEngine, opt);
   };
 
   handleMouseUp = () => {
-    this.canvas.setViewportTransform(this.canvas.viewportTransform);
-    this.canvas.isDragging = false;
-    this.canvas.selection = true;
+    endCanvasDrag(this.canvasEngine);
   };
 
   handlePathCreated = (opt) => {
@@ -354,8 +295,8 @@ export default class CanvasLayer {
     path.set("lockInPosition", false);
 
     // Re-add to canvas on correct layer
-    this.canvas.remove(path);
-    this.canvas.add(path);
+    this.canvasEngine.removeObject(path);
+    this.canvasEngine.addObject(path);
     this.placeObjectOnLayer(path);
     this.updateObjectProperties(path);
     this.setupObjectEventListeners(path);
@@ -372,17 +313,76 @@ export default class CanvasLayer {
   };
 
   setCursorCrosshair = () => {
-    this.canvas.defaultCursor = "crosshair";
-    this.canvas.setCursor("crosshair");
+    this.canvasEngine.setDefaultCursor("crosshair");
+    this.canvasEngine.setCursor("crosshair");
   };
 
   setCursorDefault = () => {
-    this.canvas.defaultCursor = "grab";
-    this.canvas.setCursor("grab");
+    this.canvasEngine.setDefaultCursor("grab");
+    this.canvasEngine.setCursor("grab");
+  };
+
+  isDrawingMode = () => {
+    return this.canvasEngine?.isDrawingMode?.() || false;
+  };
+
+  setDrawingMode = (enabled) => {
+    if (!this.canvas) return;
+    this.canvas.isDrawingMode = !!enabled;
+  };
+
+  getDrawingBrushColor = () => {
+    return this.canvas?.freeDrawingBrush?.color || "#ffffff";
+  };
+
+  setDrawingBrushColor = (color) => {
+    if (!this.canvas?.freeDrawingBrush) return;
+    this.canvas.freeDrawingBrush.color = color;
+  };
+
+  getDrawingBrushWidth = () => {
+    return this.canvas?.freeDrawingBrush?.width || 10;
+  };
+
+  setDrawingBrushWidth = (width) => {
+    if (!this.canvas?.freeDrawingBrush) return;
+    this.canvas.freeDrawingBrush.width = width;
+  };
+
+  getObjects = () => {
+    return this.canvasEngine?.getObjects?.() || [];
+  };
+
+  getObjectById = (id) => {
+    return this.getObjects().find((obj) => obj.id === id) || null;
+  };
+
+  removeObject = (object) => {
+    this.canvasEngine?.removeObject?.(object);
+  };
+
+  discardActiveObject = () => {
+    this.canvasEngine?.discardActiveObject?.();
+  };
+
+  setActiveObject = (object) => {
+    this.canvasEngine?.setActiveObject?.(object);
+  };
+
+  requestRender = () => {
+    this.canvasEngine?.requestRender?.();
+  };
+
+  render = () => {
+    this.canvasEngine?.render?.();
+  };
+
+  hasRenderContext = () => {
+    return !!this.canvas?.contextContainer;
   };
 
   duplicateObject = () => {
-    const activeObjects = this.canvas.getActiveObjects();
+    const activeObjects = this.canvasEngine.getActiveObjects();
     for (var object of activeObjects) {
       object.clone((clone) => {
         // new id
@@ -405,10 +405,10 @@ export default class CanvasLayer {
           clone.set("left", object.left + 50);
           clone.set("top", object.top + 50);
         }
-        this.canvas.add(clone);
+        this.canvasEngine.addObject(clone);
 
         // add to canvas on correct layer
-        this.placeObjectOnLayer(object);
+        this.placeObjectOnLayer(clone);
         this.updateObjectProperties(clone);
 
         // add event listeners
@@ -433,7 +433,12 @@ export default class CanvasLayer {
         return;
       }
 
-      fabric.Image.fromURL(image.src, (newImg) => {
+      this.canvasEngine.loadImageFromURL(image.src).then((newImg) => {
+        if (!this.canvasEngine) {
+          resolve(null);
+          return;
+        }
+
         // create new image
         const id = uuidv4();
         newImg.set("id", id);
@@ -442,19 +447,19 @@ export default class CanvasLayer {
         newImg.set("lockInPosition", false);
 
         // add to canvas on correct layer
-        this.canvas.add(newImg);
+        this.canvasEngine.addObject(newImg);
         if (
           typeof options.left === "number" &&
           typeof options.top === "number"
         ) {
           newImg.set({ left: options.left, top: options.top });
         } else if (options.centerInViewport !== false) {
-          this.canvas.viewportCenterObject(newImg);
+          this.canvasEngine.viewportCenterObject(newImg);
         }
         // Place image on layer
         this.placeObjectOnLayer(newImg);
         this.updateObjectProperties(newImg);
-        this.canvas.requestRenderAll();
+        this.canvasEngine.requestRender();
 
         // add event listeners
         this.setupObjectEventListeners(newImg);
@@ -470,7 +475,7 @@ export default class CanvasLayer {
   };
 
   runIndicatorAnimation = (x, y) => {
-    const ripple = new fabric.Circle({
+    const ripple = this.canvasEngine.createCircle({
       left: x,
       top: y,
       originX: "center",
@@ -481,16 +486,16 @@ export default class CanvasLayer {
       evented: false,
     });
 
-    this.canvas.add(ripple);
+    this.canvasEngine.addObject(ripple);
 
     ripple.animate("radius", 150, {
       duration: 500,
-      onChange: this.canvas.renderAll.bind(this.canvas),
+      onChange: this.canvasEngine.render,
       onComplete: () => {
         ripple.animate("opacity", 0, {
           duration: 500,
-          onChange: this.canvas.renderAll.bind(this.canvas),
-          onComplete: () => this.canvas.remove(ripple),
+          onChange: this.canvasEngine.render,
+          onComplete: () => this.canvasEngine.removeObject(ripple),
         });
       },
     });
@@ -498,18 +503,18 @@ export default class CanvasLayer {
 
   removeObjects = () => {
     if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
-    if (this.canvas.getActiveObjects().length) {
-      this.canvas.getActiveObjects().forEach((object) => {
+    if (this.canvasEngine.getActiveObjects().length) {
+      this.canvasEngine.getActiveObjects().forEach((object) => {
         if (object.isLocationPin) return;
         if (object.hasOwnProperty("_objects")) {
           for (var subObj of object._objects) {
             if (subObj.isLocationPin) continue;
-            this.canvas.remove(subObj);
+            this.canvasEngine.removeObject(subObj);
             socketIntegration.imageRemoved(subObj.id);
           }
           return this.saveToDatabase();
         } else {
-          this.canvas.remove(object);
+          this.canvasEngine.removeObject(object);
           socketIntegration.imageRemoved(object.id);
           return this.saveToDatabase();
         }
@@ -519,8 +524,8 @@ export default class CanvasLayer {
 
   moveObjectToTop = () => {
     if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
-    if (this.canvas.getActiveObjects().length) {
-      this.canvas.getActiveObjects().forEach((object) => {
+    if (this.canvasEngine.getActiveObjects().length) {
+      this.canvasEngine.getActiveObjects().forEach((object) => {
         // if (object.hasOwnProperty("_objects")) {
         //   for (var subObj of object._objects) {
         //     //
@@ -535,25 +540,25 @@ export default class CanvasLayer {
 
   centerViewOnObject = (obj) => {
     const canvasCenter = {
-      x: this.canvas.getWidth() / 2,
-      y: this.canvas.getHeight() / 2,
+      x: this.canvasEngine.getWidth() / 2,
+      y: this.canvasEngine.getHeight() / 2,
     };
 
-    const zoom = this.canvas.getZoom();
+    const zoom = this.canvasEngine.getZoom();
     const objCenter = obj.getCenterPoint();
 
     const panX = canvasCenter.x - objCenter.x * zoom;
     const panY = canvasCenter.y - objCenter.y * zoom;
 
-    this.canvas.setViewportTransform([zoom, 0, 0, zoom, panX, panY]);
-    this.canvas.renderAll();
+    this.canvasEngine.setViewportTransform([zoom, 0, 0, zoom, panX, panY]);
+    this.canvasEngine.render();
   };
 
   selectObjectById = (id) => {
-    this.canvas.getObjects().forEach((obj) => {
+    this.canvasEngine.getObjects().forEach((obj) => {
       if (id == obj.id) {
-        this.canvas.discardActiveObject();
-        this.canvas.setActiveObject(obj);
+        this.canvasEngine.discardActiveObject();
+        this.canvasEngine.setActiveObject(obj);
         this.centerViewOnObject(obj);
       }
     });
@@ -561,130 +566,49 @@ export default class CanvasLayer {
 
   // Also can be used to place image at top of layer
   placeObjectOnLayer = (obj) => {
-    const all = this.canvas.getObjects();
-    const gridIndex = this.gridManager.getIndexInCanvas();
+    this.layerStack?.bringToTopOfLayer(obj);
+  };
 
-    switch (obj.layer) {
-      case "Map": {
-        // Map objects always live below the grid
-        obj.moveTo(Math.max(0, gridIndex - 1));
-        break;
-      }
+  sendObjectToBottomOfLayer = (obj) => {
+    this.layerStack?.sendToBottomOfLayer(obj);
+  };
 
-      case "Object": {
-        // Objects must live ABOVE the grid
-        const topObjectIndex = all.reduce(
-          (max, o, i) =>
-            i > gridIndex && o !== obj && o.layer === "Object"
-              ? Math.max(max, i)
-              : max,
-          -1,
-        );
+  setObjectLayer = (obj, layer, { position = "top" } = {}) => {
+    this.layerStack?.setObjectLayer(obj, layer, { position });
+    this.updateObjectProperties(obj);
+  };
 
-        if (topObjectIndex !== -1) {
-          obj.moveTo(topObjectIndex + 1);
-        } else {
-          obj.moveTo(gridIndex + 1);
-        }
+  reconcileLayerStack = () => {
+    this.layerStack?.reconcile();
+  };
 
-        break;
-      }
-
-      case "Fog": {
-        // Fog is always on top
-        obj.moveTo(all.length - 1);
-        break;
-      }
-    }
-
-    this.canvas.requestRenderAll();
+  validateLayerStack = () => {
+    return this.layerStack?.assertInvariants() ?? { ok: true, violations: [] };
   };
 
   changeLayer = () => {
-    this.canvas.getObjects().forEach((object, index) => {
+    this.canvasEngine.getObjects().forEach((object) => {
       this.updateObjectProperties(object);
     });
     this.normalizeGridVisuals();
-    this.canvas.renderAll();
+    this.canvasEngine.render();
   };
 
   normalizeGridVisuals = () => {
-    const gridObject = this.gridManager?.getGroup?.();
-    if (!gridObject) return;
-
-    gridObject.opacity = 1;
-    gridObject.selectable = false;
-    gridObject.evented = false;
-
-    if (Array.isArray(gridObject._objects)) {
-      gridObject._objects.forEach((line) => {
-        line.opacity = 1;
-        line.selectable = false;
-        line.evented = false;
-        if (!line.stroke) {
-          line.stroke = "#ccc";
-        }
-      });
-    }
+    normalizeGridObjectVisuals(this.gridManager);
   };
 
   // Function to update object properties based on current layer
   updateObjectProperties = (object) => {
-    const gridObject = this.gridManager?.getGroup?.();
-    if (gridObject && object === gridObject) {
-      object.selectable = false;
-      object.evented = false;
-      object.opacity = 1;
-      return;
-    }
-
-    const currentLayer = this.tableApp.currentLayer;
-    const objectLayer = object.layer;
-    const isActiveLayer = objectLayer === currentLayer;
-    if (typeof object.lockInPosition !== "boolean") {
-      object.lockInPosition = false;
-    }
-
-    object.selectable = isActiveLayer;
-    object.evented = isActiveLayer;
-    object.lockMovementX = !!object.lockInPosition;
-    object.lockMovementY = !!object.lockInPosition;
-
-    // Map layer is fully visible unless viewing Fog layer
-    // Object and Fog layers are dimmed when not active
-    if (objectLayer === "Map") {
-      object.opacity = currentLayer === "Fog" ? "0.5" : "1";
-    } else {
-      object.opacity = isActiveLayer ? "1" : "0.5";
-    }
+    updateCanvasObjectProperties({
+      object,
+      gridManager: this.gridManager,
+      currentLayer: this.tableApp.currentLayer,
+    });
   };
 
   saveToDatabase = async () => {
-    const saveEndpoint =
-      this.currentTableView?.data_save_url ||
-      (this.currentTableView?.id
-        ? `/api/edit_table_view_data/${this.currentTableView.id}`
-        : null);
-    if (!saveEndpoint) return null;
-
-    const jsonCanvas = this.canvas.toJSON();
-    try {
-      const res = await fetch(saveEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ data: jsonCanvas }),
-      });
-      // const data = await res.json();
-      // if (res.status === 200 || res.status === 201) {
-      //   return data;
-      // } else throw new Error();
-    } catch (err) {
-      // window.alert("Failed to save note...");
-      console.log(err);
-      return null;
-    }
+    return saveCanvasState(this.canvasEngine, this.tableView);
   };
 
   restoreGridFromObject = (gridObject) => {
@@ -698,28 +622,23 @@ export default class CanvasLayer {
   };
 
   renderSavedData = async () => {
-    return new Promise((resolve) => {
-      this.canvas.loadFromJSON(this.currentTableView.data, () => {
-        this.canvas.getObjects().forEach((object) => {
-          if (object.type === "group") {
-            this.restoreGridFromObject(object);
-            return;
-          }
+    await loadCanvasFromData(this.canvasEngine, this.tableView.data, (object) => {
+      if (object.type === "group") {
+        this.restoreGridFromObject(object);
+        return;
+      }
 
-          this.updateObjectProperties(object);
-          this.setupObjectEventListeners(object);
-        });
-
-        this.normalizeGridVisuals();
-        this.canvas.renderAll();
-        resolve();
-      });
+      this.updateObjectProperties(object);
+      this.setupObjectEventListeners(object);
     });
+    this.layerStack?.reconcile({ render: false });
+    this.normalizeGridVisuals();
+    this.canvasEngine.render();
   };
 
   addLocationPinFromSocket = (pinData) => {
     if (!pinData || !pinData.id) return;
-    if (this.canvas.getObjects().some((obj) => obj.id === pinData.id)) return;
+    if (this.canvasEngine.getObjects().some((obj) => obj.id === pinData.id)) return;
     const pin = this.createLocationPinShape({
       left: pinData.left,
       top: pinData.top,
@@ -738,11 +657,11 @@ export default class CanvasLayer {
           ? pinData.lockInPosition
           : true,
     });
-    this.canvas.add(pin);
+    this.canvasEngine.addObject(pin);
     this.placeObjectOnLayer(pin);
     this.setupObjectEventListeners(pin);
     this.tableApp.enforceLocationPinConstraints(pin);
-    this.canvas.renderAll();
+    this.canvasEngine.render();
   };
 
   hideGrid = () => {
@@ -757,6 +676,7 @@ export default class CanvasLayer {
 
   resizeGrid = (gridState) => {
     this.gridManager.rebuildGrid(gridState.width, gridState.height);
+    this.layerStack?.reconcile({ render: false });
     this.normalizeGridVisuals();
   };
 }

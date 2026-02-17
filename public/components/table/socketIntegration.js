@@ -1,160 +1,20 @@
+import { buildSocketEventHandlers } from "./socketEventHandlers.js";
+
 class SocketIntegration {
   constructor() {
     this.socket = io(window.location.origin);
     this.tableApp = null;
+    this._listenersBound = false;
   }
 
   // Listeners
   setupListeners = () => {
-    // USER JOIN
-    this.socket.on("table-join", (message) => {
-      console.log("User Joined:\n", message);
-    });
-
-    // TABLE CHANGE
-    this.socket.on("table-change", (newTableUUID) => {
-      if (!newTableUUID) return;
-      if (!this.tableApp?.capabilities?.canChangeTable) return;
-      this.tableApp.reloadTableByUUID(newTableUUID, { historyMode: "push" });
-    });
-    // ERROR
-    this.socket.on("connect_error", (error) => {
-      console.log(error);
-      if (window.confirm("There was a connection error, refresh the page?")) {
-        history.go();
-      }
-    });
-
-    this.socket.on("disconnect", (error) => {
-      console.log(error);
-      if (window.confirm("There was a connection error, refresh the page?")) {
-        history.go();
-      }
-    });
-
-    this.socket.on("object-change-layer", (id) => {
-      this.tableApp.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === id) {
-          this.tableApp.canvasLayer.placeObjectOnLayer(object);
-        }
-      });
-    });
-
-    // UPDATE CURRENT USERS
-    this.socket.on("current-users", (list) => {
-      this.tableApp.chatBoxComponent.onlineUsersComponent.usersList = list;
-      this.tableApp.chatBoxComponent.onlineUsersComponent.render();
-    });
-
-    // TABLE MESSAGES
-    this.socket.on("table-messages", (messages) => {
-      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages =
-        messages;
-      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.render();
-      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
-    });
-
-    this.socket.on("message", (message) => {
-      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.chatBoxMessages.push(
-        message
-      );
-      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.render();
-      this.tableApp.chatBoxComponent.chatBoxMessagesComponent.scrollDown();
-    });
-
-    // GRID
-    this.socket.on("grid-toggle", (gridState) => {
-      // console.log("grid toggle", gridState);
-      gridState
-        ? this.tableApp.canvasLayer.showGrid()
-        : this.tableApp.canvasLayer.hideGrid();
-      if (this.tableApp.topLayer) {
-        this.tableApp.topLayer.render(); // re-render UI layer for any users that have grid toggle button available
-      }
-    });
-
-    this.socket.on("grid-resize", (gridState) => {
-      // console.log("grid resize", gridState);
-      this.tableApp.canvasLayer.resizeGrid(gridState);
-    });
-
-    // OBJECTS LISTENERS
-    this.socket.on("image-add", (newImg) => {
-      // console.log("New socket image", newImg);
-      // Path drawing
-      if (!newImg.src) {
-        const newPath = new fabric.Path(newImg.path);
-        newPath.set({
-          id: newImg.id,
-          left: newImg.left,
-          top: newImg.top,
-          fill: false,
-          stroke: newImg.stroke,
-          strokeWidth: newImg.strokeWidth,
-          layer: newImg.layer,
-        });
-
-        this.tableApp.canvasLayer.canvas.add(newPath);
-        this.tableApp.canvasLayer.placeObjectOnLayer(newPath);
-        this.tableApp.canvasLayer.updateObjectProperties(newPath);
-        // event listener
-        this.tableApp.canvasLayer.setupObjectEventListeners(img);
-        return;
-      }
-
-      // uploaded images
-      fabric.Image.fromURL(newImg.src, (img) => {
-        // reconstruct new image
-        for (const [key, value] of Object.entries(newImg)) {
-          img[key] = value;
-        }
-        // add to canvas on correct layer
-        this.tableApp.canvasLayer.canvas.add(img);
-        // Place image on layer
-        this.tableApp.canvasLayer.placeObjectOnLayer(img);
-        this.tableApp.canvasLayer.updateObjectProperties(img);
-        // event listener
-        this.tableApp.canvasLayer.setupObjectEventListeners(img);
-      });
-    });
-
-    this.socket.on("image-remove", (id) => {
-      // console.log("Remove socket image", id);
-
-      this.tableApp.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === id) {
-          this.tableApp.canvasLayer.canvas.remove(object);
-        }
-      });
-    });
-
-    this.socket.on("run-indicator-animation", (coords) => {
-      this.tableApp.canvasLayer.runIndicatorAnimation(coords.x, coords.y);
-    });
-
-    this.socket.on("image-move", (image) => {
-      // console.log("Move socket image", image);
-      this.tableApp.canvasLayer.canvas.getObjects().forEach((object) => {
-        if (object.id === image.id) {
-          for (var [key, value] of Object.entries(image)) {
-            object[key] = value;
-          }
-          this.tableApp.canvasLayer.updateObjectProperties(object);
-          this.tableApp.canvasLayer.canvas.renderAll();
-        }
-      });
-      //
-    });
-
-    this.socket.on("pin-add", (pinData) => {
-      if (this.tableApp?.canvasLayer) {
-        this.tableApp.canvasLayer.addLocationPinFromSocket(pinData);
-      }
-    });
-
-    this.socket.on("reload-location-pins", () => {
-      this.tableApp.reloadLocationPins();
-    });
+    if (this._listenersBound) return;
+    const handlers = buildSocketEventHandlers(this);
+    for (const [eventName, handler] of Object.entries(handlers)) {
+      this.socket.on(eventName, handler);
+    }
+    this._listenersBound = true;
   };
 
   socketJoined = () => {

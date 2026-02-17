@@ -1,16 +1,10 @@
 import createElement from "../createElement.js";
 import { getThings } from "../../lib/apiUtils.js";
+import { getTablesEndpoint } from "./tableApi.js";
 
 export default async function tableSelect() {
   async function renderTableSelectOptions() {
-    const searchParams = new URLSearchParams(window.location.search);
-    const projectId = searchParams.get("project");
-    let tables = [];
-    if (projectId) {
-      tables = await getThings(`/api/get_table_views_by_project/${projectId}`);
-    } else {
-      tables = await getThings(`/api/get_table_views_by_user`);
-    }
+    const tables = (await getThings(getTablesEndpoint())) || [];
 
     const tableElemList = [];
 
