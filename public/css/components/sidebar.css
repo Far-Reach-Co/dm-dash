@@ -157,3 +157,30 @@
 .sidebar-image-item:hover {
   background-color: rgba(116, 167, 215, 0.08);
 }
+
+.sidebar-image-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.sidebar-image-place-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  background: rgba(31, 37, 49, 0.9);
+  color: var(--main-white);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.sidebar-image-place-btn:hover {
+  border-color: rgba(116, 167, 215, 0.45);
+  background: rgba(45, 52, 66, 0.95);
+}
