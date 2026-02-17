@@ -11,11 +11,21 @@ import {
 import { calculateDiceRollResponse } from "./lib/dice.js";
 import { searchSrd } from "./dnd/srd/mistral.js";
 import { markdownToChat } from "./lib/markdownToChat.js";
+import { getTableViewByUUIDQuery } from "./api/queries/tableViews";
+import { sessionMiddleware } from "./setupApp";
+import {
+  assertTableCapability,
+  requireTablePermission,
+} from "./lib/tableAuthz";
 
 export default function setupSocketHandlers(
   server: http.Server<typeof http.IncomingMessage, typeof http.ServerResponse>
 ): any {
   const io = new Server(server);
+
+  io.use((socket, next) => {
+    sessionMiddleware(socket.request as any, {} as any, next as any);
+  });
 
   io.on("connection", (socket: any) => {
     // testing
@@ -64,9 +74,37 @@ export default function setupSocketHandlers(
     // table change
     socket.on(
       "table-changed",
-      ({ table, newTableUUID }: { table: string; newTableUUID: string }) => {
-        socket.broadcast.to(table).emit("table-change", newTableUUID);
-      }
+      async ({ table, newTableUUID }: { table: string; newTableUUID: string }) => {
+        try {
+          if (!table || !newTableUUID) return;
+          const userId = socket.request?.session?.user;
+          if (!userId) return;
+
+          const tableUUID = String(table).replace(/^table-/, "");
+          if (!tableUUID) return;
+
+          const currentTableData = await getTableViewByUUIDQuery(tableUUID);
+          const currentTable = currentTableData.rows[0];
+          if (!currentTable) return;
+
+          const reqForAuth = { session: { user: userId } } as any;
+          const currentAuth = await requireTablePermission(
+            reqForAuth,
+            currentTable,
+            "edit",
+          );
+          assertTableCapability(currentAuth, "canChangeTable");
+
+          const targetTableData = await getTableViewByUUIDQuery(newTableUUID);
+          const targetTable = targetTableData.rows[0];
+          if (!targetTable) return;
+          await requireTablePermission(reqForAuth, targetTable, "view");
+
+          socket.broadcast.to(table).emit("table-change", newTableUUID);
+        } catch (err) {
+          console.log("Blocked unauthorized table-changed event", err);
+        }
+      },
     );
     // update images
     socket.on(

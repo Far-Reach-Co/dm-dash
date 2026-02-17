@@ -125,9 +125,8 @@ const redisSessionStore = new RedisSessionStore({
   ttlSeconds: 30 * 24 * 60 * 60,
 });
 
-if (isProd) {
-  app.use(
-    session({
+const sessionMiddleware = isProd
+  ? session({
       store: redisSessionStore,
       secret: SECRET_KEY || "",
       name: "frc_session",
@@ -141,10 +140,7 @@ if (isProd) {
         secure: true,
       },
     })
-  );
-} else {
-  app.use(
-    session({
+  : session({
       store: redisSessionStore,
       secret: SECRET_KEY || "",
       name: "frcsession",
@@ -156,9 +152,9 @@ if (isProd) {
         sameSite: "lax",
         secure: false,
       },
-    })
-  );
-}
+    });
+
+app.use(sessionMiddleware);
 
 // Routes
 // private
@@ -196,4 +192,4 @@ app.use((error: any, req: Request, res: Response, next: NextFunction) => {
   });
 });
 
-export { app, server };
+export { app, server, sessionMiddleware };
