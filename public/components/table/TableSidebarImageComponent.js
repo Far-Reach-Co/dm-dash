@@ -71,12 +71,28 @@ export default class TableSidebarImageComponent {
     this.render();
   };
 
+  placeImageOnTable = (image) => {
+    if (!image?.src) return;
+    this.tableApp?.addImageToCanvas?.(image);
+  };
+
+  startDesktopImageDrag = (image) => {
+    if (!image?.src) return;
+    imageFollowingCursor.setImageSrc(image.src);
+    imageFollowingCursor.render();
+    this.currentMouseDownImage = image;
+  };
+
+  getImagePlacementHint = (isMobile) => {
+    if (isMobile) return "Tap image to place on table";
+    return "Click to place, click + drag to drop where you want";
+  };
+
   renderImage = async (image) => {
     if (image.src) {
       this.downloadedImageSourceList[image.id] = image.src;
 
       const isMobile = detectMob();
-
       const handlers = [];
 
       if (!isMobile) {
@@ -84,33 +100,47 @@ export default class TableSidebarImageComponent {
         handlers.push({
           type: "mousedown",
           event: () => {
-            imageFollowingCursor.setImageSrc(image.src);
-            imageFollowingCursor.render();
-            this.currentMouseDownImage = image;
-          },
-        });
-      } else {
-        // Mobile: tap to place
-        handlers.push({
-          type: "click",
-          event: () => {
-            this.tableApp.addImageToCanvas(image);
+            this.startDesktopImageDrag(image);
           },
         });
       }
+
+      // Click/tap to place quickly
+      handlers.push({
+        type: "click",
+        event: (e) => {
+          e.preventDefault();
+          this.placeImageOnTable(image);
+        },
+      });
+
+      // Keyboard placement for accessibility
+      handlers.push({
+        type: "keydown",
+        event: (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            this.placeImageOnTable(image);
+          }
+        },
+      });
 
       return createElement(
         "div",
         {
           class: "sidebar-image-container",
-          title: "Click + drag or tap to place image on table",
+          title: this.getImagePlacementHint(isMobile),
+          tabindex: "0",
+          role: "button",
+          "aria-label": `Place image ${image.original_name || image.id} on table`,
         },
         createElement("img", {
           src: image.src,
           height: "38px",
+          draggable: "false",
           style: `${isMobile ? "" : "pointer-events: none;"} max-width: 38px;`, // ✨ Only apply pointer-events:none if NOT mobile
         }),
-        ...handlers,
+        handlers,
       );
     }
   };
@@ -406,7 +436,43 @@ export default class TableSidebarImageComponent {
           image.original_name,
         );
 
-    const elem = createElement("div", { class: "sidebar-image-item" }, [
+    let elem = null;
+
+    const placeImageBtn = createElement(
+      "button",
+      {
+        class: "sidebar-image-place-btn",
+        title: "Add image to table center",
+        type: "button",
+      },
+      "+",
+      {
+        type: "click",
+        event: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.placeImageOnTable(image);
+        },
+      },
+    );
+
+    const settingsBtn = createElement(
+      "img",
+      {
+        class: "icon gear",
+        src: "/assets/gears.svg",
+        title: "Open Image Settings",
+      },
+      null,
+      {
+        type: "click",
+        event: async () => {
+          modal.show(await this.renderImageSettings(tableImage, image, elem));
+        },
+      },
+    );
+
+    elem = createElement("div", { class: "sidebar-image-item" }, [
       createElement(
         "div",
         {
@@ -417,21 +483,10 @@ export default class TableSidebarImageComponent {
           editableNameInput,
         ],
       ),
-      createElement(
-        "img",
-        {
-          class: "icon gear",
-          src: "/assets/gears.svg",
-          title: "Open Image Settings",
-        },
-        null,
-        {
-          type: "click",
-          event: async () => {
-            modal.show(await this.renderImageSettings(tableImage, image, elem));
-          },
-        },
-      ),
+      createElement("div", { class: "sidebar-image-actions" }, [
+        placeImageBtn,
+        settingsBtn,
+      ]),
     ]);
     return { elem, tableData: tableImage, imageData: image };
   };

@@ -42,7 +42,7 @@
         {
           "@type": "HowToStep",
           "name": "Adding Images",
-          "text": "Upload images through the sidebar and drag them onto the canvas to place tokens and maps"
+          "text": "Upload images through the sidebar, then click, tap, or drag them onto the canvas to place tokens and maps"
         },
         {
           "@type": "HowToStep",
@@ -77,6 +77,7 @@
     <!-- Quick Links -->
     <div class="quick-links" aria-label="Page sections">
       <a href="#setup">Setting Up</a>
+      <a href="#permissions">Visibility & Permissions</a>
       <a href="#sandbox">Sandbox Mode</a>
       <a href="#canvas">Canvas Navigation</a>
       <a href="#images">Images & Folders</a>
@@ -103,7 +104,29 @@
       </ul>
     </section>
 
-    <!-- 2. Sandbox Mode -->
+    <!-- 2. Visibility & Permissions -->
+    <section id="permissions">
+      <h2>Visibility & Permissions</h2>
+      <p>The meaning of <strong>Public</strong> depends on where the table was created.</p>
+      <h3>Standalone/User Tables (created from Dashboard)</h3>
+      <ul>
+        <li><strong>Private</strong> &mdash; only the table owner can open the table.</li>
+        <li><strong>Public</strong> &mdash; anyone with the link can open the table (including users without a Wyrld).</li>
+      </ul>
+      <h3>Wyrld Tables (project-backed)</h3>
+      <ul>
+        <li><strong>Private</strong> &mdash; only Wyrld managers/editors can open the table.</li>
+        <li><strong>Public</strong> &mdash; any member of that Wyrld can open the table after logging in. It is not open to the public internet.</li>
+      </ul>
+      <h3>How VTT Permissions Are Assigned</h3>
+      <ul>
+        <li><strong>Managers/Owners</strong> &mdash; full table management tools for the selected mode (Standard or Sandbox).</li>
+        <li><strong>Non-manager participants</strong> &mdash; can move/resize/rotate objects on tables they can access.</li>
+        <li><strong>Non-manager restrictions</strong> &mdash; no image/folder management, table settings, location pin management, grid controls, or layer management unless manager permissions are granted.</li>
+      </ul>
+    </section>
+
+    <!-- 3. Sandbox Mode -->
     <section id="sandbox">
       <h2>Sandbox Mode</h2>
       <p>Sandbox tables are designed for fast map/token rehearsals without advanced campaign tooling.</p>
@@ -121,11 +144,12 @@
       <h3>Guest Sandbox</h3>
       <ul>
         <li>The <strong>Try VTT Sandbox (No Signup)</strong> flow opens a guest sandbox with a curated starter token set.</li>
+        <li>Guest sandbox links are collaborative: anyone with the guest sandbox link can join that temporary sandbox session.</li>
         <li>Guest sandboxes are temporary demo environments intended for quick testing and onboarding.</li>
       </ul>
     </section>
 
-    <!-- 3. Navigating the Canvas -->
+    <!-- 4. Navigating the Canvas -->
     <section id="canvas">
       <h2>Navigating the Canvas</h2>
       <p>The canvas is the main play area where tokens, maps, and drawings live.</p>
@@ -145,7 +169,7 @@
       </ul>
     </section>
 
-    <!-- 4. Adding Images & Organizing with Folders -->
+    <!-- 5. Adding Images & Organizing with Folders -->
     <section id="images">
       <h2>Adding Images & Organizing with Folders</h2>
       <p>The sidebar (GM-only) is where you manage all images for your table.</p>
@@ -164,12 +188,12 @@
       </ul>
     </section>
 
-    <!-- 5. Placing Tokens on the Canvas -->
+    <!-- 6. Placing Tokens on the Canvas -->
     <section id="tokens">
       <h2>Placing Tokens on the Canvas</h2>
       <p>Once images are uploaded to the sidebar, you can place them on the canvas.</p>
       <ul>
-        <li>Click and drag an image from the sidebar to the canvas and it will appear on the canvas in the center of your view. (If click and drag doesn't work then just click on the image)</li>
+        <li>Use any of these methods: click an image thumbnail to place it at the center of your view, click the + button on an image row, or click + drag to drop it in a specific spot.</li>
         <li>Once placed, click on the token to select it. You can then move, resize, or rotate it using the handles.</li>
         <li>Managers can use the <strong>Lock / Unlock</strong> control in the selected object panel to keep objects fixed in place.</li>
         <li>Use the <strong>Delete</strong> toolbar button or the Delete/Backspace key to remove a selected object.</li>
@@ -177,7 +201,7 @@
       </ul>
     </section>
 
-    <!-- 6. Using Layers -->
+    <!-- 7. Using Layers -->
     <section id="layers">
       <h2>Using Layers (Map, Object, Fog)</h2>
       <p>Layers let GMs control the stacking order and visibility of objects. There are three layers:</p>
@@ -195,7 +219,7 @@
       </ul>
     </section>
 
-    <!-- 7. Grid Controls -->
+    <!-- 8. Grid Controls -->
     <section id="grid">
       <h2>Grid Controls</h2>
       <p>The grid helps with tactical movement and positioning. It is a GM-only feature.</p>
@@ -207,7 +231,7 @@
       </ul>
     </section>
 
-    <!-- 8. Drawing Tools -->
+    <!-- 9. Drawing Tools -->
     <section id="drawing">
       <h2>Drawing Tools</h2>
       <p>Draw freehand lines directly on the canvas. Useful for marking paths, highlighting areas, or quick sketches.</p>
@@ -219,7 +243,7 @@
       </ul>
     </section>
 
-    <!-- 9. Location Pins -->
+    <!-- 10. Location Pins -->
     <section id="pins">
       <h2>Location Pins (GM)</h2>
       <p>Location pins are markers you place on the canvas to label points of interest, link descriptions, and create portals between tables.</p>
@@ -256,7 +280,7 @@
       </ul>
     </section>
 
-    <!-- 10. Chat & Dice Rolling -->
+    <!-- 11. Chat & Dice Rolling -->
     <section id="chat">
       <h2>Chat & Dice Rolling</h2>
       <p>The chat box is located at the bottom-left of the VTT. All connected users can send messages and roll dice.</p>
@@ -285,19 +309,19 @@
       </ul>
     </section>
 
-    <!-- 11. Sharing Your Table with Players -->
+    <!-- 12. Sharing Your Table with Players -->
     <section id="sharing">
       <h2>Sharing Your Table with Players</h2>
       <p>Players join your table via a share link.</p>
       <ul>
         <li>Open the sidebar and click the <strong>link icon</strong> to copy the table URL to your clipboard.</li>
-        <li>Send this link to your players. They will need a Far Reach Co. account to access Wyrld-linked tables.</li>
-        <li>For standalone tables, you can toggle <strong>Make Public</strong> in Table Settings so anyone with the link can view it.</li>
+        <li>Send this link to your players. Wyrld tables require login and Wyrld membership; standalone public tables can be opened by anyone with the link.</li>
+        <li>Use <strong>Make Public</strong> in Table Settings to allow broader access based on table context (standalone vs Wyrld).</li>
         <li>The GM can also use Table Settings to <strong>Change Table</strong>, which prompts all connected users to migrate to a different table.</li>
       </ul>
     </section>
 
-    <!-- 12. Keyboard Shortcuts -->
+    <!-- 13. Keyboard Shortcuts -->
     <section id="shortcuts">
       <h2>Keyboard Shortcuts</h2>
       <table>
@@ -336,7 +360,7 @@
       </table>
     </section>
 
-    <!-- 13. Tips & Tricks -->
+    <!-- 14. Tips & Tricks -->
     <section id="tips">
       <h2>Tips & Tricks</h2>
       <ul>
