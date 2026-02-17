@@ -14,18 +14,17 @@ exports.server = server;
 const body_parser_1 = __importDefault(require("body-parser"));
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const express_session_1 = __importDefault(require("express-session"));
-const connect_pg_simple_1 = __importDefault(require("connect-pg-simple"));
-const pgSession = (0, connect_pg_simple_1.default)(express_session_1.default);
+const redis_1 = require("redis");
 const helmet_1 = __importDefault(require("helmet"));
 const cors_1 = __importDefault(require("cors"));
 const compression_1 = __importDefault(require("compression"));
 const pino_http_1 = __importDefault(require("pino-http"));
 const crypto_1 = require("crypto");
 const logger_js_1 = __importDefault(require("./lib/logger.js"));
+const redisSessionStore_js_1 = __importDefault(require("./lib/redisSessionStore.js"));
 const routes_js_1 = __importDefault(require("./api/routes.js"));
 const routes_js_2 = __importDefault(require("./routes.js"));
 const routes_js_3 = __importDefault(require("./dnd/routes.js"));
-const dbconfig_js_1 = require("./api/dbconfig.js");
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: {
         directives: {
@@ -90,12 +89,22 @@ app.use(body_parser_1.default.urlencoded({
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.static("public"));
 app.set("trust proxy", 1);
+const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+const sessionRedisClient = (0, redis_1.createClient)({ url: redisUrl });
+sessionRedisClient.on("error", (err) => {
+    logger_js_1.default.error({ err }, "Redis session client error");
+});
+sessionRedisClient.connect().catch((err) => {
+    logger_js_1.default.error({ err }, "Failed to connect Redis session client");
+});
+const redisSessionStore = new redisSessionStore_js_1.default({
+    client: sessionRedisClient,
+    prefix: "frc:sess:",
+    ttlSeconds: 30 * 24 * 60 * 60,
+});
 if (config_1.isProd) {
     app.use((0, express_session_1.default)({
-        store: new pgSession({
-            pool: dbconfig_js_1.pool,
-            tableName: "session",
-        }),
+        store: redisSessionStore,
         secret: config_1.SECRET_KEY || "",
         name: "frc_session",
         resave: false,
@@ -111,10 +120,7 @@ if (config_1.isProd) {
 }
 else {
     app.use((0, express_session_1.default)({
-        store: new pgSession({
-            pool: dbconfig_js_1.pool,
-            tableName: "session",
-        }),
+        store: redisSessionStore,
         secret: config_1.SECRET_KEY || "",
         name: "frcsession",
         resave: false,

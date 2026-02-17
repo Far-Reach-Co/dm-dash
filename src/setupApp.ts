@@ -8,19 +8,18 @@ const server = http.createServer(app);
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import connectPgSimple from "connect-pg-simple";
-const pgSession = connectPgSimple(session);
+import { createClient } from "redis";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
 import pinoHttp from "pino-http";
 import { randomUUID } from "crypto";
 import logger from "./lib/logger.js";
+import RedisSessionStore from "./lib/redisSessionStore.js";
 
 import apiRoutes from "./api/routes.js";
 import routes from "./routes.js";
 import dndRoutes from "./dnd/routes.js";
-import { pool } from "./api/dbconfig.js";
 
 // Security headers
 app.use(
@@ -111,14 +110,25 @@ app.use(express.static("public"));
 // allow first proxy if there is one
 app.set("trust proxy", 1);
 // sessions
+const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
+const sessionRedisClient = createClient({ url: redisUrl });
+sessionRedisClient.on("error", (err) => {
+  logger.error({ err }, "Redis session client error");
+});
+sessionRedisClient.connect().catch((err) => {
+  logger.error({ err }, "Failed to connect Redis session client");
+});
+
+const redisSessionStore = new RedisSessionStore({
+  client: sessionRedisClient,
+  prefix: "frc:sess:",
+  ttlSeconds: 30 * 24 * 60 * 60,
+});
 
 if (isProd) {
   app.use(
     session({
-      store: new pgSession({
-        pool, // pg pool
-        tableName: "session",
-      }),
+      store: redisSessionStore,
       secret: SECRET_KEY || "",
       name: "frc_session",
       resave: false,
@@ -135,10 +145,7 @@ if (isProd) {
 } else {
   app.use(
     session({
-      store: new pgSession({
-        pool, // pg pool
-        tableName: "session",
-      }),
+      store: redisSessionStore,
       secret: SECRET_KEY || "",
       name: "frcsession",
       resave: false,
