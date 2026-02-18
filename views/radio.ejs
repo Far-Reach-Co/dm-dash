@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FRC Radio - On-Demand Music for Tabletop Sessions | Far Reach Co.</title>
+  <meta name="description" content="FRC Radio streams curated background music for your D&D and tabletop RPG sessions. Create a channel, pick a playlist, share the link. Everyone listens in sync from any browser." />
+  <meta name="keywords" content="FRC Radio, D&D music, tabletop music, RPG background music, session music streaming, DM tools, ambient music, combat music" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/radio" />
+  <meta property="og:title" content="FRC Radio - On-Demand Music for Tabletop Sessions" />
+  <meta property="og:description" content="Stream curated background music for your D&D and tabletop RPG sessions. The DM controls the vibe. Everyone listens in sync." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="FRC Radio - On-Demand Music Streaming for Tabletop RPGs" />
+  <meta name="twitter:description" content="Stream curated background music for your D&D and tabletop RPG sessions. The DM controls the vibe. Everyone listens in sync." />
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "FRC Radio",
+      "description": "On-demand music streaming for tabletop RPG sessions with curated playlists for combat, exploration, taverns, and more",
+      "url": "https://radio.farreachco.com",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Web Browser",
+      "offers": [{
+        "@type": "Offer",
+        "name": "Free",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Standard playlist library access"
+      }, {
+        "@type": "Offer",
+        "name": "Pro",
+        "description": "Full playlist catalog including exclusive pro playlists"
+      }],
+      "creator": {
+        "@type": "Organization",
+        "name": "Far Reach Co.",
+        "url": "https://farreachco.com"
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <link rel="stylesheet" href="/css/features/radio.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+
+    <!-- Hero Section -->
+    <div class="radio-hero">
+      <div class="radio-hero-icon">
+        <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
+          <circle cx="40" cy="40" r="36" stroke="var(--orange2)" stroke-width="1.5" opacity="0.25"/>
+          <circle cx="40" cy="40" r="26" stroke="var(--blue6)" stroke-width="1" opacity="0.35"/>
+          <circle cx="40" cy="40" r="16" stroke="var(--orange3)" stroke-width="1.5" opacity="0.5"/>
+          <circle cx="40" cy="40" r="5" fill="var(--orange2)"/>
+          <!-- Sound waves -->
+          <path d="M52 28a18 18 0 0 1 0 24" stroke="var(--orange3)" stroke-width="2" stroke-linecap="round" class="radio-wave radio-wave-1"/>
+          <path d="M56 22a26 26 0 0 1 0 36" stroke="var(--blue6)" stroke-width="1.5" stroke-linecap="round" class="radio-wave radio-wave-2"/>
+          <path d="M60 16a34 34 0 0 1 0 48" stroke="var(--orange2)" stroke-width="1" stroke-linecap="round" class="radio-wave radio-wave-3"/>
+        </svg>
+      </div>
+      <h1>FRC Radio</h1>
+      <p class="radio-hero-tagline">On-demand music streaming for your tabletop sessions</p>
+      <hr>
+      <a href="https://radio.farreachco.com" target="_blank" rel="noopener" class="radio-cta">
+        <span>Open FRC Radio</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+        </svg>
+      </a>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="quick-links">
+      <a href="#what-is-it">What Is It</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#playlists">Playlists</a>
+      <a href="#hosting">Hosting</a>
+      <a href="#listening">Listening</a>
+      <a href="#pro">Pro Features</a>
+      <a href="#faq">FAQ</a>
+    </div>
+
+    <!-- What Is It -->
+    <section id="what-is-it">
+      <h2>What Is FRC Radio?</h2>
+      <p>
+        FRC Radio is a music streaming service built specifically for tabletop RPG groups. It lets the Dungeon Master (or any host) stream curated background music to their entire group in real time. No downloads, no installs, no complicated setup - just a browser.
+      </p>
+      <p>
+        Think of it like having your own personal radio station for game night. You pick the playlist, your players open a link, and everyone hears the same music at the same time. Transition from a peaceful tavern scene to an intense dragon fight with a single button press.
+      </p>
+      <p>
+        The music library features original compositions and curated tracks organized into playlists designed for specific RPG scenarios - combat encounters, dungeon exploration, town visits, eerie horror sequences, triumphant victories, and more.
+      </p>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works">
+      <h2>How It Works</h2>
+      <p>FRC Radio is designed to be as simple as possible so you can spend more time playing and less time fiddling with tech.</p>
+
+      <h3>1. Create a Channel</h3>
+      <p>
+        Head to <a href="https://radio.farreachco.com" target="_blank" rel="noopener">radio.farreachco.com</a> and enter a channel name. Channel names can include letters, numbers, hyphens, and underscores. This opens your <strong>Host Control Panel</strong>.
+      </p>
+
+      <h3>2. Pick a Playlist</h3>
+      <p>
+        From the host panel, browse the available playlists and select one. Music starts streaming immediately. You can switch playlists at any time during your session - perfect for matching the mood to what's happening in the game.
+      </p>
+
+      <h3>3. Share the Listener Link</h3>
+      <p>
+        The host panel gives you a shareable listener URL. Send it to your players via Discord, text, email, or however you communicate. They click the link, hit play, and they're connected.
+      </p>
+
+      <h3>4. Control the Vibe</h3>
+      <p>
+        As the host, you have full control. Switch playlists to match the scene, skip tracks, or stop playback entirely. The host panel shows you what's currently playing and the active playlist at all times.
+      </p>
+    </section>
+
+    <!-- Playlists -->
+    <section id="playlists">
+      <h2>The Music</h2>
+      <p>
+        FRC Radio's library is organized into named playlists, each curated for a specific type of tabletop RPG scenario. Playlists cycle through their tracks automatically, so you never have to worry about silence mid-session.
+      </p>
+      <p>
+        The playlist catalog includes music for a wide range of moods and scenes:
+      </p>
+      <ul>
+        <li><strong>Combat & Battle</strong> - Intense, high-energy tracks for fights and encounters</li>
+        <li><strong>Exploration & Travel</strong> - Sweeping, adventurous music for overworld and dungeon exploration</li>
+        <li><strong>Tavern & Town</strong> - Warm, lively tunes for social encounters and downtime</li>
+        <li><strong>Horror & Suspense</strong> - Dark, unsettling ambience for tense or creepy scenarios</li>
+        <li><strong>Mystery & Intrigue</strong> - Subtle, layered compositions for investigation scenes</li>
+        <li><strong>Triumph & Celebration</strong> - Grand, uplifting music for victories and story milestones</li>
+        <li><strong>Ambient & Atmospheric</strong> - Texture-heavy soundscapes for immersive background</li>
+      </ul>
+      <p>
+        Tracks are sourced from original compositions and curated selections, all delivered via high-quality MP3 streaming through CloudFront CDN for low-latency playback.
+      </p>
+    </section>
+
+    <!-- Hosting a Channel -->
+    <section id="hosting">
+      <h2>Hosting a Channel</h2>
+      <p>
+        Hosting requires a free <a href="https://farreachco.com/register">Far Reach Co. account</a>. You must be logged in before creating a channel. Once authenticated, you can create as many channels as you need.
+      </p>
+
+      <h3>Host Controls</h3>
+      <p>As a host, your control panel provides:</p>
+      <ul>
+        <li><strong>Playlist selector</strong> - Browse and switch between all available playlists</li>
+        <li><strong>Now playing display</strong> - See the current track name, album, and active playlist</li>
+        <li><strong>Listener link</strong> - One-click copy of the shareable URL for your players</li>
+        <li><strong>Playback controls</strong> - Skip tracks or stop the stream</li>
+      </ul>
+
+      <h3>Channel Behavior</h3>
+      <p>
+        Each channel is an independent stream. When you select a playlist, the server begins streaming tracks from that playlist in order. If no listeners connect for 10 minutes, the stream goes idle to save resources and will restart when a listener reconnects.
+      </p>
+    </section>
+
+    <!-- Listening -->
+    <section id="listening">
+      <h2>Listening</h2>
+      <p>
+        Listeners don't need an account. They just need the listener link from the host. Open it in any modern browser, click the play button, and the stream begins.
+      </p>
+      <ul>
+        <li>Works on desktop, tablet, and mobile browsers</li>
+        <li>Volume control built into the player</li>
+        <li>Now Playing display shows the current track and album</li>
+        <li>No software installation required - pure browser-based streaming</li>
+      </ul>
+      <p>
+        Because the stream is server-side, all listeners hear roughly the same point in the music. There's no sync button to press and no drift over time. If a listener joins late, they simply pick up wherever the current track is.
+      </p>
+    </section>
+
+    <!-- Pro Features -->
+    <section id="pro">
+      <h2>Pro Features</h2>
+      <p>
+        FRC Radio works on a free account with access to the standard playlist library. If you subscribe to <strong>Pro on Far Reach Co.</strong>, you unlock the full catalog of exclusive playlists.
+      </p>
+      <ul>
+        <li><strong>Standard (Free)</strong> - Full access to the core playlist library with a variety of moods and scenes</li>
+        <li><strong>Pro</strong> - Everything in Standard, plus exclusive playlists with additional tracks, deeper genre coverage, and premium compositions</li>
+      </ul>
+      <p>
+        Pro playlists are seamlessly integrated - they appear in the same playlist selector alongside the standard library when you're logged in with a Pro account.
+      </p>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq">
+      <h2>Frequently Asked Questions</h2>
+
+      <h3>Do my players need an account?</h3>
+      <p>No. Only the host needs an account. Listeners can tune in with just the link.</p>
+
+      <h3>Can I use this for in-person games?</h3>
+      <p>Absolutely. Open the listener link on a speaker-connected device and use the host panel on your phone or laptop. It works great for both online and in-person sessions.</p>
+
+      <h3>What audio formats are supported?</h3>
+      <p>The server supports MP3, WAV, OGG, and FLAC files - anything FFmpeg can handle. All audio is transcoded to MP3 for streaming.</p>
+
+      <h3>Does the music keep playing if I close the host panel?</h3>
+      <p>Yes. Once a playlist is started, the server continues streaming. The stream stays active as long as listeners are connected. It goes idle after 10 minutes with no listeners.</p>
+
+      <h3>Can multiple people host on the same channel?</h3>
+      <p>Any logged-in user can send commands to a channel. So if another DM needs to take over music duties, they can open the host panel for the same channel name.</p>
+
+      <h3>Is there a limit to how many listeners can join?</h3>
+      <p>There is no hard listener cap. The stream is designed to handle multiple concurrent listeners per channel.</p>
+    </section>
+
+    <!-- Bottom CTA -->
+    <div class="radio-bottom-cta">
+      <p>Ready to set the mood for your next session?</p>
+      <a href="https://radio.farreachco.com" target="_blank" rel="noopener" class="radio-cta">
+        <span>Open FRC Radio</span>
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+        </svg>
+      </a>
+    </div>
+
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>
