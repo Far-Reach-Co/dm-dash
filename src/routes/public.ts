@@ -42,6 +42,14 @@ router.get("/resources", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get("/radio", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.render("radio", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/vtt-guide", (req: Request, res: Response, next: NextFunction) => {
   try {
     res.render("vtt-guide", { auth: req.session.user });

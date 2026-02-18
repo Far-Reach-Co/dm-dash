@@ -1,0 +1,134 @@
+/* ==========================================================================
+   FRC Radio Landing Page
+   ========================================================================== */
+
+/* ===== Hero ===== */
+.radio-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 1rem 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.radio-hero-icon {
+  margin-bottom: 1.25rem;
+  animation: radioFloat 6s ease-in-out infinite;
+}
+
+.radio-hero h1 {
+  font-size: 3rem;
+  background: linear-gradient(135deg, var(--orange3) 0%, var(--orange2) 40%, var(--blue6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.radio-hero-tagline {
+  color: var(--light-gray);
+  font-size: 1.15rem;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.radio-hero hr {
+  width: 150px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--orange), var(--blue6), var(--purple));
+  border: none;
+  margin: 1.25rem auto;
+  border-radius: 2px;
+}
+
+/* ===== CTA Button ===== */
+.radio-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue4) 100%);
+  border: 1px solid var(--blue2);
+  border-radius: 8px;
+  color: var(--bright-white);
+  font-size: 1.05rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.radio-cta:hover {
+  background: linear-gradient(135deg, var(--blue2) 0%, var(--blue) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.radio-cta:active {
+  transform: translateY(0);
+}
+
+/* ===== Bottom CTA ===== */
+.radio-bottom-cta {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  margin: 1rem 0;
+}
+
+.radio-bottom-cta p {
+  color: var(--light-gray);
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+}
+
+/* ===== Sound Wave Animations ===== */
+.radio-wave {
+  animation: radioPulse 2.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.radio-wave-1 {
+  animation-delay: 0s;
+}
+
+.radio-wave-2 {
+  animation-delay: 0.4s;
+}
+
+.radio-wave-3 {
+  animation-delay: 0.8s;
+}
+
+@keyframes radioPulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes radioFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .radio-hero h1 {
+    font-size: 2.2rem;
+  }
+
+  .radio-hero-tagline {
+    font-size: 1rem;
+  }
+
+  .radio-cta {
+    padding: 10px 22px;
+    font-size: 0.95rem;
+  }
+}

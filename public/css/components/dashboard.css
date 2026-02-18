@@ -865,6 +865,117 @@
 }
 
 /* ==========================================================================
+   Radio Card (Sidebar)
+   ========================================================================== */
+
+.radio-card {
+  background: linear-gradient(155deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.45) 50%,
+      rgba(73, 42, 87, 0.08) 100%);
+  border-color: var(--border-ornate);
+}
+
+.radio-card::before {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--purple) 25%,
+      var(--blue6) 50%,
+      var(--purple) 75%,
+      transparent 100%);
+  opacity: 0.35;
+  animation: softPulse 5s ease-in-out infinite;
+}
+
+.radio-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-ornate);
+  background: linear-gradient(135deg,
+      rgba(73, 42, 87, 0.08) 0%,
+      rgba(116, 167, 215, 0.04) 50%,
+      rgba(73, 42, 87, 0.1) 100%);
+  color: var(--blue6);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color var(--transition-smooth),
+    background var(--transition-smooth),
+    box-shadow var(--transition-smooth),
+    color var(--transition-smooth);
+}
+
+.radio-link::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(116, 167, 215, 0.06) 40%,
+      rgba(150, 120, 200, 0.1) 50%,
+      rgba(116, 167, 215, 0.06) 60%,
+      transparent 100%);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.radio-link:hover::after {
+  left: 100%;
+}
+
+.radio-link:hover {
+  border-color: var(--border-ornate-hover);
+  background: linear-gradient(135deg,
+      rgba(73, 42, 87, 0.12) 0%,
+      rgba(116, 167, 215, 0.07) 50%,
+      rgba(73, 42, 87, 0.14) 100%);
+  box-shadow:
+    0 0 16px rgba(116, 167, 215, 0.08),
+    inset 0 0 20px rgba(116, 167, 215, 0.03);
+  color: var(--bright-white);
+}
+
+.radio-link:active {
+  transform: scale(0.98);
+}
+
+.radio-link-text {
+  flex: 1;
+}
+
+.radio-link-icon {
+  display: flex;
+  align-items: center;
+  color: var(--purple);
+  transition: color var(--transition-normal);
+}
+
+.radio-link:hover .radio-link-icon {
+  color: var(--blue6);
+}
+
+.radio-link-arrow {
+  font-size: 1.1rem;
+  transition: transform var(--transition-smooth);
+  line-height: 1;
+}
+
+.radio-link:hover .radio-link-arrow {
+  transform: translateX(3px);
+}
+
+/* ==========================================================================
    Modal Form Styles
    ========================================================================== */
 
