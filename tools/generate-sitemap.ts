@@ -28,6 +28,7 @@ const staticPages: SitemapEntry[] = [
   { url: "/about-us", priority: 0.9, changefreq: "monthly" },
   { url: "/what-is-frc", priority: 0.9, changefreq: "monthly" },
   { url: "/resources", priority: 0.9, changefreq: "monthly" },
+  { url: "/radio", priority: 0.9, changefreq: "monthly" },
   { url: "/preaethrend", priority: 0.8, changefreq: "monthly" },
   { url: "/aether-bot", priority: 0.8, changefreq: "monthly" },
   { url: "/vtt-guide", priority: 0.8, changefreq: "monthly" },
