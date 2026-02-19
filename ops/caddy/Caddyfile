@@ -1,0 +1,11 @@
+www.farreachco.com {
+    redir https://farreachco.com{uri}
+}
+
+farreachco.com {
+    reverse_proxy localhost:4000
+}
+
+radio.farreachco.com {
+    reverse_proxy localhost:5000
+}

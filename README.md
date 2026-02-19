@@ -174,6 +174,12 @@ Service controls:
 ./scripts/service.sh restart backup
 ```
 
+Ops helpers:
+```bash
+./scripts/caddy_sync.sh       # sync ops/caddy/Caddyfile to /etc/caddy/Caddyfile and reload
+./scripts/firewall_harden.sh  # enforce UFW defaults + allow only SSH/80/443 inbound
+```
+
 ## Database Migrations
 
 ### Create a new migration
