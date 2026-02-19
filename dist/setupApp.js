@@ -46,7 +46,7 @@ app.use((0, helmet_1.default)({
                 "https://www.google-analytics.com",
                 "https://cloudflareinsights.com",
                 "wss://*.farreachco.com",
-                "ws://localhost:*",
+                ...(config_1.isProd ? [] : ["ws://localhost:*", "wss://localhost:*"]),
             ],
             frameSrc: ["'self'"],
             objectSrc: ["'none'"],

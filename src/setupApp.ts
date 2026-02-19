@@ -44,7 +44,7 @@ app.use(
           "https://www.google-analytics.com",
           "https://cloudflareinsights.com",
           "wss://*.farreachco.com",
-          "ws://localhost:*",
+          ...(isProd ? [] : ["ws://localhost:*", "wss://localhost:*"]),
         ],
         frameSrc: ["'self'"],
         objectSrc: ["'none'"],
