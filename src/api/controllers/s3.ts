@@ -1,4 +1,10 @@
-import { S3, config, CloudFront } from "aws-sdk";
+import {
+  DeleteObjectCommand,
+  PutObjectCommand,
+  type PutObjectCommandInput,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl as getCloudFrontSignedUrl } from "@aws-sdk/cloudfront-signer";
 import { createReadStream, statSync, unlinkSync } from "fs";
 import { userSubscriptionStatus } from "../../lib/enums";
 import {
@@ -39,14 +45,20 @@ import {
   requireUserIdFromTable,
 } from "./tableResourceUtils";
 
-config.update({
-  signatureVersion: "v4",
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: "us-east-1",
+const awsRegion = process.env.AWS_REGION || "us-east-1";
+const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
+const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+const s3 = new S3Client({
+  region: awsRegion,
+  ...(awsAccessKeyId && awsSecretAccessKey
+    ? {
+        credentials: {
+          accessKeyId: awsAccessKeyId,
+          secretAccessKey: awsSecretAccessKey,
+        },
+      }
+    : {}),
 });
-
-const s3 = new S3();
 
 // Cache CloudFront signing credentials at module level (read once on startup)
 const cloudFrontPrivateKeyPath = path.join(
@@ -58,10 +70,6 @@ const cloudFrontPrivateKeyPath = path.join(
 );
 const cloudFrontPrivateKey = fs.readFileSync(cloudFrontPrivateKeyPath, "utf8");
 const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
-const cloudFrontSigner = new CloudFront.Signer(
-  cloudFrontKeyId,
-  cloudFrontPrivateKey,
-);
 
 // Signed URL cache settings - cache for 2.5 days (URLs expire in 3 days)
 const SIGNED_URL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 2.5; // 2.5 days
@@ -162,10 +170,12 @@ function getImageOrThrow(imageData: { rows: Array<any> }) {
 
 function generateSignedUrl(fileName: string): string {
   const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${fileName}`;
-  const expiresAt = Math.floor((Date.now() + 60 * 60 * 24 * 3 * 1000) / 1000); // 3 days
-  return cloudFrontSigner.getSignedUrl({
+  const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 3 * 1000); // 3 days
+  return getCloudFrontSignedUrl({
     url: cloudFrontUrl,
-    expires: expiresAt,
+    keyPairId: cloudFrontKeyId,
+    privateKey: cloudFrontPrivateKey,
+    dateLessThan: expiresAt.toISOString(),
   });
 }
 
@@ -177,26 +187,71 @@ function cacheSignedUrl(imageId: number | string, url: string): void {
     );
 }
 
-async function uploadToS3(params: S3.PutObjectRequest): Promise<string> {
-  return new Promise((resolve, reject) => {
-    s3.upload(params, (err: any, data: { Location: string }) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(data.Location);
-    });
+function normalizeS3BucketAndKey(
+  rawBucket: string,
+  rawKey: string,
+): { bucket: string; key: string } {
+  const normalizedBucket = rawBucket.trim().replace(/^\/+|\/+$/g, "");
+  const normalizedKey = rawKey.trim().replace(/^\/+/g, "");
+  if (!normalizedBucket) throw new Error("Missing S3 bucket name");
+  if (!normalizedKey) throw new Error("Missing S3 object key");
+
+  const slashIndex = normalizedBucket.indexOf("/");
+  if (slashIndex === -1) {
+    return { bucket: normalizedBucket, key: normalizedKey };
+  }
+
+  const bucket = normalizedBucket.slice(0, slashIndex).trim();
+  const prefix = normalizedBucket
+    .slice(slashIndex + 1)
+    .trim()
+    .replace(/^\/+|\/+$/g, "");
+  if (!bucket) throw new Error("Invalid S3 bucket configuration");
+  return {
+    bucket,
+    key: prefix ? `${prefix}/${normalizedKey}` : normalizedKey,
+  };
+}
+
+async function uploadToS3(params: PutObjectCommandInput): Promise<void> {
+  if (!params.Bucket || !params.Key) {
+    throw new Error("S3 upload requires Bucket and Key");
+  }
+
+  const { bucket, key } = normalizeS3BucketAndKey(
+    String(params.Bucket),
+    String(params.Key),
+  );
+  await s3.send(new PutObjectCommand({ ...params, Bucket: bucket, Key: key }));
+}
+
+async function uploadFileToS3(
+  params: Omit<PutObjectCommandInput, "Body">,
+  filePath: string,
+): Promise<void> {
+  const bodyStream = createReadStream(filePath);
+  bodyStream.once("error", (err) => {
+    logger.warn({ err, filePath }, "S3 upload file stream error");
   });
+
+  try {
+    await uploadToS3({
+      ...params,
+      Body: bodyStream,
+    });
+  } finally {
+    bodyStream.destroy();
+  }
 }
 
 async function deleteFromS3(bucket: string, key: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    s3.deleteObject({ Bucket: bucket, Key: key }, (err, data) => {
-      if (err) {
-        reject(err);
-      }
-      resolve();
-    });
-  });
+  const normalized = normalizeS3BucketAndKey(bucket, key);
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: normalized.bucket,
+      Key: normalized.key,
+    }),
+  );
 }
 
 interface GetSignedUrlsRequestObject {
@@ -416,10 +471,7 @@ async function newImageForProject(
     });
     const image = imageData.rows[0];
 
-    await uploadToS3({
-      ...(params as S3.PutObjectRequest),
-      Body: createReadStream(filePath),
-    });
+    await uploadFileToS3(params, filePath);
 
     logEventAsync({
       userId: req.session.user,
@@ -500,10 +552,7 @@ async function newImageForUser(
     });
     const image = imageData.rows[0];
 
-    await uploadToS3({
-      ...(params as S3.PutObjectRequest),
-      Body: createReadStream(filePath),
-    });
+    await uploadFileToS3(params, filePath);
 
     logEventAsync({
       userId: req.session.user,
