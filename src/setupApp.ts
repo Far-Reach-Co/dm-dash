@@ -16,6 +16,7 @@ import pinoHttp from "pino-http";
 import { randomUUID } from "crypto";
 import logger from "./lib/logger.js";
 import RedisSessionStore from "./lib/redisSessionStore.js";
+import { getRedisUrl } from "./lib/redisConfig.js";
 
 import apiRoutes from "./api/routes.js";
 import routes from "./routes.js";
@@ -110,8 +111,7 @@ app.use(express.static("public"));
 // allow first proxy if there is one
 app.set("trust proxy", 1);
 // sessions
-const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-const sessionRedisClient = createClient({ url: redisUrl });
+const sessionRedisClient = createClient({ url: getRedisUrl() });
 sessionRedisClient.on("error", (err) => {
   logger.error({ err }, "Redis session client error");
 });
