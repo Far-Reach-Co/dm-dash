@@ -18,7 +18,7 @@ A comprehensive web application for Far Reach Co., featuring a dashboard, player
 
 - Node.js (v14 or higher)
 - PostgreSQL database server
-- Redis server (default: localhost:6379)
+- Redis server accessible via `REDIS_URL`
 - AWS account with S3 and CloudFront configured
 - Discord bot application (for bot features)
 - Mistral AI API key (for SRD AI search)
@@ -30,11 +30,16 @@ Create a `.env` file in the root directory with the following variables:
 
 ### Database Configuration
 ```
+DATABASE_URL=postgres://username:password@db-host:5432/database_name
+PG_SSL=true                              # Optional when using DATABASE_URL
+PG_SSL_REJECT_UNAUTHORIZED=false         # Optional SSL verification toggle
+
+# Backward-compatible fallback if DATABASE_URL is not set:
 PG_USER=your_postgres_username
-PG_HOST=localhost
+PG_HOST=your-db-host
 PG_DB=your_database_name
 PG_PW=your_postgres_password
-DATABASE_URL=postgres://username:password@localhost:5432/database_name
+PG_PORT=5432
 ```
 
 ### Server Configuration
@@ -42,7 +47,7 @@ DATABASE_URL=postgres://username:password@localhost:5432/database_name
 SERVER_ENV=dev                              # Options: dev, prod
 SECRET_KEY=your_random_secret_key           # Used for session encryption
 PUBLIC_BASE_URL=http://localhost:4000       # Base URL used in email preference/unsubscribe links
-REDIS_URL=redis://localhost:6379            # Redis connection URL for session + cache
+REDIS_URL=redis://your-redis-host:6379      # Required Redis connection URL
 ```
 
 ### Email Configuration (Gmail SMTP)
@@ -67,6 +72,7 @@ DB_BACKUP_S3_BUCKET=your-s3-bucket-or-bucket/path-prefix
 DB_BACKUP_S3_PREFIX=optional-extra-prefix
 DB_BACKUP_INTERVAL_MS=86400000             # Optional, used by long-running backup worker mode
 DB_BACKUP_ALERT_EMAIL=ops@yourcompany.com  # Severe backup failures are emailed here
+DB_BACKUP_MODE=data-only                   # Optional: data-only (default) or full
 ```
 
 ### Stripe Configuration
@@ -100,8 +106,7 @@ DISCORD_TOKEN=your_discord_bot_token
    - Ensure PostgreSQL is running and accessible
 
 4. Set up Redis:
-   - Install and start Redis server on localhost:6379
-   - Or modify `src/setupRedisAdapter.ts` to use a different Redis URL
+   - Provide a reachable `REDIS_URL` in `.env`
 
 5. Create your `.env` file with the required environment variables (see above)
 
@@ -193,8 +198,19 @@ npm run backup:db:once
 ```
 
 Behavior:
-- Uses `pg_dump --data-only --no-acl`, uploads to S3 with timestamped filenames.
+- Uses `pg_dump --no-acl`, uploads to S3 with timestamped filenames.
+- Supports `data-only` (default) or `full` mode via `DB_BACKUP_MODE` / `--full`.
 - Sends email alerts only for severe failures (dump/upload/config issues).
+
+Run one full backup immediately:
+```bash
+npm run backup:db:once:full
+```
+
+Run restore verification (creates temp DB, restores a full dump, then cleans up):
+```bash
+npm run backup:db:restore-check
+```
 
 Optional long-running mode (mostly for local/dev testing):
 ```bash

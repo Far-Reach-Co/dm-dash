@@ -17,6 +17,8 @@
     "email:product-update": "dotenv -e .env -- tsx src/tools/sendProductUpdateEmail.ts",
     "backup:db": "dotenv -e .env -- tsx src/lib/db_backups/pgBackup.ts",
     "backup:db:once": "dotenv -e .env -- tsx src/lib/db_backups/pgBackup.ts --once",
+    "backup:db:once:full": "dotenv -e .env -- tsx src/lib/db_backups/pgBackup.ts --once --full",
+    "backup:db:restore-check": "dotenv -e .env -- tsx src/lib/db_backups/restoreCheck.ts",
     "guest-sandbox:import-images": "dotenv -e .env -- npx tsx tools/import-guest-sandbox-images.ts",
     "guest-sandbox:import-images:dry": "dotenv -e .env -- npx tsx tools/import-guest-sandbox-images.ts --dry-run"
   },

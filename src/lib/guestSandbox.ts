@@ -5,6 +5,7 @@ import logger from "./logger.js";
 import db from "../api/dbconfig";
 import { badRequestError, notFoundError } from "./httpErrors";
 import { buildGuestSandboxCapabilities } from "./tableAuthz";
+import { getRedisUrl } from "./redisConfig.js";
 
 declare module "express-session" {
   export interface SessionData {
@@ -39,8 +40,7 @@ const GUEST_SANDBOX_MAX_DATA_BYTES = Math.max(
   Number(process.env.GUEST_SANDBOX_MAX_DATA_BYTES || 2 * 1024 * 1024),
 );
 
-const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-const guestSandboxRedisClient = createClient({ url: redisUrl });
+const guestSandboxRedisClient = createClient({ url: getRedisUrl() });
 guestSandboxRedisClient.on("error", (err) => {
   logger.error({ err }, "Guest sandbox Redis client error");
 });

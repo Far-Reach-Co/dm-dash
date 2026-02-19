@@ -7,6 +7,7 @@ import { tmpdir } from "os";
 import { config as awsConfig, S3 } from "aws-sdk";
 import mail from "../../api/smtp";
 import logger from "../logger";
+import { resolveDatabaseUrlForLibpq } from "../dbConnection";
 
 dotenv.config();
 
@@ -16,6 +17,7 @@ type BucketConfig = {
 };
 
 type BackupResult = {
+  mode: BackupMode;
   filename: string;
   localPath: string;
   s3Key: string;
@@ -25,14 +27,17 @@ type BackupResult = {
   finishedAt: Date;
 };
 
+type BackupMode = "data-only" | "full";
+
 const DEFAULT_COMPANY_EMAIL = "farreachco@gmail.com";
 const DEFAULT_BUCKET_PATH = "wyrld/pg_backups";
 const DEFAULT_INTERVAL_MS = 24 * 60 * 60 * 1000;
 const MIN_BACKUP_FILE_SIZE_BYTES = 50;
+const DEFAULT_BACKUP_MODE: BackupMode = "data-only";
 
 const backupIntervalMs = Number(process.env.DB_BACKUP_INTERVAL_MS || DEFAULT_INTERVAL_MS);
 const companyAlertEmail = process.env.DB_BACKUP_ALERT_EMAIL || DEFAULT_COMPANY_EMAIL;
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = resolveDatabaseUrlForLibpq();
 
 const bucketConfig = resolveBucketConfig(
   process.env.DB_BACKUP_S3_BUCKET || DEFAULT_BUCKET_PATH,
@@ -78,9 +83,35 @@ function getS3Key(filename: string): string {
   return `${bucketConfig.prefix}/${filename}`;
 }
 
+function resolveBackupMode(args = process.argv.slice(2)): BackupMode {
+  const inlineModeArg = args.find((arg) => arg.startsWith("--mode="));
+  const modeFromInlineArg = inlineModeArg?.split("=")[1];
+  const modeFlagIndex = args.findIndex((arg) => arg === "--mode");
+  const modeFromPairArg =
+    modeFlagIndex >= 0 && args[modeFlagIndex + 1] ? args[modeFlagIndex + 1] : undefined;
+  const modeFromFlag = args.includes("--full")
+    ? "full"
+    : args.includes("--data-only")
+      ? "data-only"
+      : undefined;
+
+  const candidate = (
+    modeFromFlag ||
+    modeFromInlineArg ||
+    modeFromPairArg ||
+    process.env.DB_BACKUP_MODE ||
+    DEFAULT_BACKUP_MODE
+  )
+    .toLowerCase()
+    .trim();
+
+  if (candidate === "full" || candidate === "data-only") return candidate;
+  throw new Error('Backup mode must be "data-only" or "full"');
+}
+
 function assertConfig(): void {
   if (!databaseUrl) {
-    throw new Error("DATABASE_URL is required for database backups");
+    throw new Error("DATABASE_URL or PG_* database variables are required for database backups");
   }
 
   if (!Number.isFinite(backupIntervalMs) || backupIntervalMs <= 0) {
@@ -88,9 +119,13 @@ function assertConfig(): void {
   }
 }
 
-function runPgDump(outputPath: string): Promise<string> {
+function runPgDump(outputPath: string, mode: BackupMode): Promise<string> {
   return new Promise((resolve, reject) => {
-    const args = ["--data-only", "--no-acl", databaseUrl as string];
+    const args = ["--no-acl"];
+    if (mode === "data-only") {
+      args.push("--data-only");
+    }
+    args.push(databaseUrl as string);
     const child = spawn("pg_dump", args, { stdio: ["ignore", "pipe", "pipe"] });
     const outputStream = createWriteStream(outputPath, { flags: "w" });
     let stderrOutput = "";
@@ -196,21 +231,23 @@ async function sendSevereIssueEmail(params: {
   });
 }
 
-async function runSingleBackup(): Promise<BackupResult> {
+async function runSingleBackup(mode: BackupMode): Promise<BackupResult> {
   assertConfig();
 
   const startedAt = new Date();
-  const filename = `backup-${formatDateForFilename(startedAt)}.sql`;
+  const modeTag = mode === "full" ? "full" : "data";
+  const filename = `backup-${modeTag}-${formatDateForFilename(startedAt)}.sql`;
   const localPath = join(tmpdir(), filename);
   const s3Key = getS3Key(filename);
 
   try {
-    const warnings = await runPgDump(localPath);
+    const warnings = await runPgDump(localPath, mode);
     await ensureBackupFileLooksValid(localPath);
     const location = await uploadBackupToS3(localPath, s3Key);
 
     const finishedAt = new Date();
     return {
+      mode,
       filename,
       localPath,
       s3Key,
@@ -227,7 +264,7 @@ async function runSingleBackup(): Promise<BackupResult> {
   }
 }
 
-async function executeBackupRun(): Promise<boolean> {
+async function executeBackupRun(mode: BackupMode): Promise<boolean> {
   let localPathForCleanup: string | undefined;
   let startedAt = new Date();
 
@@ -235,19 +272,21 @@ async function executeBackupRun(): Promise<boolean> {
     logger.info(
       {
         intervalMs: backupIntervalMs,
+        mode,
         bucket: bucketConfig.bucket,
         prefix: bucketConfig.prefix || "(none)",
       },
       "Starting database backup run",
     );
 
-    const result = await runSingleBackup();
+    const result = await runSingleBackup(mode);
     localPathForCleanup = result.localPath;
     startedAt = result.startedAt;
 
     logger.info(
       {
         filename: result.filename,
+        mode: result.mode,
         s3Key: result.s3Key,
         location: result.location,
         durationMs: result.finishedAt.getTime() - result.startedAt.getTime(),
@@ -268,7 +307,7 @@ async function executeBackupRun(): Promise<boolean> {
         startedAt,
         failedAt,
         err,
-        context: `S3 bucket: ${bucketConfig.bucket}, prefix: ${bucketConfig.prefix || "(none)"}`,
+        context: `Mode: ${mode}; S3 bucket: ${bucketConfig.bucket}, prefix: ${bucketConfig.prefix || "(none)"}`,
       });
     } catch (emailErr) {
       logger.error({ err: emailErr }, "Failed to send severe backup failure email");
@@ -289,6 +328,7 @@ async function executeBackupRun(): Promise<boolean> {
 }
 
 function startDbBackupScheduler(): void {
+  const mode = resolveBackupMode();
   let inFlight = false;
 
   const runAndHandle = async () => {
@@ -299,7 +339,7 @@ function startDbBackupScheduler(): void {
 
     inFlight = true;
     try {
-      await executeBackupRun();
+      await executeBackupRun(mode);
     } finally {
       inFlight = false;
     }
@@ -318,8 +358,9 @@ function startDbBackupScheduler(): void {
 
 if (require.main === module) {
   const runOnce = process.argv.includes("--once");
+  const mode = resolveBackupMode();
   if (runOnce) {
-    executeBackupRun()
+    executeBackupRun(mode)
       .then((ok) => {
         process.exit(ok ? 0 : 1);
       })

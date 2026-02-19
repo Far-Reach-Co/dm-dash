@@ -1,7 +1,8 @@
 import { createClient } from "redis";
+import { getRedisUrl } from "./redisConfig.js";
 
 // Setup redis
-export const redisClient = createClient();
+export const redisClient = createClient({ url: getRedisUrl() });
 redisClient.connect();
 redisClient.on("error", (err) => console.log("Redis Client Error", err));
 
