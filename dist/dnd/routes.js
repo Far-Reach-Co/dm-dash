@@ -14,6 +14,58 @@ const express_rate_limit_1 = require("express-rate-limit");
 const mistral_js_1 = require("./srd/mistral.js");
 const data_js_1 = require("./srd/data.js");
 var router = (0, express_1.Router)();
+let equipmentDataCache = null;
+let magicItemsDataCache = null;
+let spellsDataCache = null;
+let monstersDataCache = null;
+let equipmentMapCache = null;
+let magicItemsMapCache = null;
+let spellsMapCache = null;
+let monstersMapCache = null;
+function getEquipmentData() {
+    if (!equipmentDataCache)
+        equipmentDataCache = data_js_1.srdData["equipment"] || [];
+    return equipmentDataCache;
+}
+function getMagicItemsData() {
+    if (!magicItemsDataCache)
+        magicItemsDataCache = data_js_1.srdData["magic-items"] || [];
+    return magicItemsDataCache;
+}
+function getSpellsData() {
+    if (!spellsDataCache)
+        spellsDataCache = data_js_1.srdData["spells"] || [];
+    return spellsDataCache;
+}
+function getMonstersData() {
+    if (!monstersDataCache)
+        monstersDataCache = data_js_1.srdData["monsters"] || [];
+    return monstersDataCache;
+}
+function getEquipmentMap() {
+    if (!equipmentMapCache) {
+        equipmentMapCache = new Map(getEquipmentData().map((entry) => [entry.index, entry]));
+    }
+    return equipmentMapCache;
+}
+function getMagicItemsMap() {
+    if (!magicItemsMapCache) {
+        magicItemsMapCache = new Map(getMagicItemsData().map((entry) => [entry.index, entry]));
+    }
+    return magicItemsMapCache;
+}
+function getSpellsMap() {
+    if (!spellsMapCache) {
+        spellsMapCache = new Map(getSpellsData().map((entry) => [entry.index, entry]));
+    }
+    return spellsMapCache;
+}
+function getMonstersMap() {
+    if (!monstersMapCache) {
+        monstersMapCache = new Map(getMonstersData().map((entry) => [entry.index, entry]));
+    }
+    return monstersMapCache;
+}
 router.get("/5e/srd/contents", (req, res, next) => {
     try {
         res.render("dnd/5e/srd/contents", {
@@ -57,13 +109,9 @@ router.get("/5e/srd/backgrounds", (req, res, next) => {
         next(err);
     }
 });
-const equipmentData = data_js_1.srdData["equipment"] || [];
-const magicItemsData = data_js_1.srdData["magic-items"] || [];
-const equipmentMap = new Map(equipmentData.map((e) => [e.index, e]));
-const magicItemsMap = new Map(magicItemsData.map((m) => [m.index, m]));
 router.get("/5e/srd/equipment/:index", (req, res, next) => {
     try {
-        const item = equipmentMap.get(req.params.index);
+        const item = getEquipmentMap().get(req.params.index);
         if (!item) {
             return res.status(404).render("404", { auth: req.session.user });
         }
@@ -80,8 +128,8 @@ router.get("/5e/srd/equipment", (req, res, next) => {
     try {
         res.render("dnd/5e/srd/equipment", {
             auth: req.session.user,
-            equipmentData,
-            magicItemsData,
+            equipmentData: getEquipmentData(),
+            magicItemsData: getMagicItemsData(),
         });
     }
     catch (err) {
@@ -90,7 +138,7 @@ router.get("/5e/srd/equipment", (req, res, next) => {
 });
 router.get("/5e/srd/magic-items/:index", (req, res, next) => {
     try {
-        const item = magicItemsMap.get(req.params.index);
+        const item = getMagicItemsMap().get(req.params.index);
         if (!item) {
             return res.status(404).render("404", { auth: req.session.user });
         }
@@ -178,11 +226,9 @@ router.get("/5e/srd/races", (req, res, next) => {
         next(err);
     }
 });
-const spellsData = data_js_1.srdData["spells"] || [];
-const spellsMap = new Map(spellsData.map((s) => [s.index, s]));
 router.get("/5e/srd/spells/:index", (req, res, next) => {
     try {
-        const spell = spellsMap.get(req.params.index);
+        const spell = getSpellsMap().get(req.params.index);
         if (!spell) {
             return res.status(404).render("404", { auth: req.session.user });
         }
@@ -199,7 +245,7 @@ router.get("/5e/srd/spells", (req, res, next) => {
     try {
         res.render("dnd/5e/srd/spells", {
             auth: req.session.user,
-            spellsData,
+            spellsData: getSpellsData(),
         });
     }
     catch (err) {
@@ -228,12 +274,10 @@ router.get("/5e/srd/weapon-properties", (req, res, next) => {
         next(err);
     }
 });
-const monstersData = data_js_1.srdData["monsters"] || [];
-const monstersMap = new Map(monstersData.map((m) => [m.index, m]));
 const DND_API_BASE = "https://www.dnd5eapi.co";
 router.get("/5e/srd/monsters/:index", (req, res, next) => {
     try {
-        const monster = monstersMap.get(req.params.index);
+        const monster = getMonstersMap().get(req.params.index);
         if (!monster) {
             return res.status(404).render("404", { auth: req.session.user });
         }
@@ -251,7 +295,7 @@ router.get("/5e/srd/monsters", (req, res, next) => {
     try {
         res.render("dnd/5e/srd/monsters", {
             auth: req.session.user,
-            data: monstersData,
+            data: getMonstersData(),
         });
     }
     catch (err) {

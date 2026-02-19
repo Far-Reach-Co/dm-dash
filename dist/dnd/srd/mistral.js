@@ -78,16 +78,24 @@ const LINKABLE_CATEGORIES = {
     equipment: "/dnd/5e/srd/equipment/",
     "magic-items": "/dnd/5e/srd/magic-items/",
 };
-const validPaths = new Set();
-for (const [category, prefix] of Object.entries(LINKABLE_CATEGORIES)) {
-    for (const entry of data_js_1.srdData[category] || []) {
-        if (entry.index)
-            validPaths.add(prefix + entry.index);
+let validPaths = null;
+function getValidPaths() {
+    if (validPaths)
+        return validPaths;
+    const paths = new Set();
+    for (const [category, prefix] of Object.entries(LINKABLE_CATEGORIES)) {
+        for (const entry of data_js_1.srdData[category] || []) {
+            if (entry.index)
+                paths.add(prefix + entry.index);
+        }
     }
+    validPaths = paths;
+    return validPaths;
 }
 function stripInvalidLinks(markdown) {
+    const paths = getValidPaths();
     return markdown.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-        if (validPaths.has(url))
+        if (paths.has(url))
             return match;
         return text;
     });

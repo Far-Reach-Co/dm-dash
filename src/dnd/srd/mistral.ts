@@ -81,18 +81,26 @@ const LINKABLE_CATEGORIES: Record<string, string> = {
   "magic-items": "/dnd/5e/srd/magic-items/",
 };
 
-// Build a set of all valid link paths at startup
-const validPaths = new Set<string>();
-for (const [category, prefix] of Object.entries(LINKABLE_CATEGORIES)) {
-  for (const entry of srdData[category] || []) {
-    if (entry.index) validPaths.add(prefix + entry.index);
+let validPaths: Set<string> | null = null;
+
+function getValidPaths(): Set<string> {
+  if (validPaths) return validPaths;
+
+  const paths = new Set<string>();
+  for (const [category, prefix] of Object.entries(LINKABLE_CATEGORIES)) {
+    for (const entry of srdData[category] || []) {
+      if (entry.index) paths.add(prefix + entry.index);
+    }
   }
+  validPaths = paths;
+  return validPaths;
 }
 
 function stripInvalidLinks(markdown: string): string {
+  const paths = getValidPaths();
   // Match markdown links: [text](url)
   return markdown.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-    if (validPaths.has(url)) return match;
+    if (paths.has(url)) return match;
     // Not a valid page — keep the text, drop the link
     return text;
   });

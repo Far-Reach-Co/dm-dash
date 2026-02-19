@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.srdData = void 0;
+exports.getSrdData = getSrdData;
+exports.getLoadedSrdCategoryCount = getLoadedSrdCategoryCount;
+exports.getLoadedSrdBytesEstimate = getLoadedSrdBytesEstimate;
 exports.detectCategories = detectCategories;
 const path = require("path");
 const fs = require("fs");
@@ -32,14 +35,50 @@ const SRD_FILES = {
     "magic-schools": "5e-srd-magic-schools.json",
     "equipment-categories": "5e-srd-equipment-categories.json",
 };
-exports.srdData = {};
-for (const [key, file] of Object.entries(SRD_FILES)) {
+const srdDataCache = {};
+function loadSrdCategory(key) {
+    if (Object.prototype.hasOwnProperty.call(srdDataCache, key)) {
+        return srdDataCache[key];
+    }
+    const file = SRD_FILES[key];
+    if (!file) {
+        srdDataCache[key] = [];
+        return srdDataCache[key];
+    }
     try {
-        exports.srdData[key] = JSON.parse(fs.readFileSync(path.join(DATA_DIR, file), "utf8"));
+        srdDataCache[key] = JSON.parse(fs.readFileSync(path.join(DATA_DIR, file), "utf8"));
     }
     catch (_a) {
-        exports.srdData[key] = [];
+        srdDataCache[key] = [];
     }
+    return srdDataCache[key];
+}
+exports.srdData = {};
+for (const key of Object.keys(SRD_FILES)) {
+    Object.defineProperty(exports.srdData, key, {
+        enumerable: true,
+        configurable: false,
+        get() {
+            return loadSrdCategory(key);
+        },
+    });
+}
+function getSrdData(key) {
+    return loadSrdCategory(key);
+}
+function getLoadedSrdCategoryCount() {
+    return Object.keys(srdDataCache).length;
+}
+function getLoadedSrdBytesEstimate() {
+    let total = 0;
+    for (const value of Object.values(srdDataCache)) {
+        try {
+            total += Buffer.byteLength(JSON.stringify(value), "utf8");
+        }
+        catch (_a) {
+        }
+    }
+    return total;
 }
 const CATEGORY_KEYWORDS = {
     spells: [

@@ -16,6 +16,7 @@
     "srd:download": "npx tsx tools/download-5e-srd.ts",
     "email:product-update": "dotenv -e .env -- tsx src/tools/sendProductUpdateEmail.ts",
     "backup:db": "dotenv -e .env -- tsx src/lib/db_backups/pgBackup.ts",
+    "backup:db:once": "dotenv -e .env -- tsx src/lib/db_backups/pgBackup.ts --once",
     "guest-sandbox:import-images": "dotenv -e .env -- npx tsx tools/import-guest-sandbox-images.ts",
     "guest-sandbox:import-images:dry": "dotenv -e .env -- npx tsx tools/import-guest-sandbox-images.ts --dry-run"
   },

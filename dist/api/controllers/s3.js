@@ -214,7 +214,7 @@ function getSignedUrls(images) {
         return urls;
     });
 }
-function computeAwsImageParamsFromRequest(req, filePath) {
+function computeAwsImageParamsFromRequest(req) {
     if (!req.file)
         throw new Error("Missing file");
     const name = req.file.originalname;
@@ -224,7 +224,6 @@ function computeAwsImageParamsFromRequest(req, filePath) {
     return {
         Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
         Key: imageRef,
-        Body: (0, fs_1.readFileSync)(filePath),
     };
 }
 function checkUserProLimitReachedAndAuth(sessionUser) {
@@ -289,13 +288,12 @@ function newImageForProject(req, res, next) {
                 req.body.project_id = Number((0, tableResourceUtils_1.requireProjectIdFromTable)(tableAuth.table));
             }
             yield checkProjectProLimitReachedAndAuth(req.body.project_id, req.session.user);
-            const params = computeAwsImageParamsFromRequest(req, filePath);
+            const params = computeAwsImageParamsFromRequest(req);
             let fileSize = req.file.size;
             if (req.body.make_image_small) {
                 const newFilePathFromResizedImage = yield makeImageSmall(filePath);
                 if (newFilePathFromResizedImage) {
                     filePath = newFilePathFromResizedImage;
-                    params.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
                     const stats = (0, fs_1.statSync)(newFilePathFromResizedImage);
                     fileSize = stats.size;
                 }
@@ -306,7 +304,7 @@ function newImageForProject(req, res, next) {
                 file_name: params.Key,
             });
             const image = imageData.rows[0];
-            yield uploadToS3(params);
+            yield uploadToS3(Object.assign(Object.assign({}, params), { Body: (0, fs_1.createReadStream)(filePath) }));
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
                 projectId: req.body.project_id,
@@ -352,13 +350,12 @@ function newImageForUser(req, res, next) {
                 (0, tableResourceUtils_1.requireUserIdFromTable)(tableAuth.table);
             }
             yield checkUserProLimitReachedAndAuth(req.session.user);
-            const params = computeAwsImageParamsFromRequest(req, filePath);
+            const params = computeAwsImageParamsFromRequest(req);
             let fileSize = req.file.size;
             if (req.body.make_image_small) {
                 const newFilePathFromResizedImage = yield makeImageSmall(filePath);
                 if (newFilePathFromResizedImage) {
                     filePath = newFilePathFromResizedImage;
-                    params.Body = (0, fs_1.readFileSync)(newFilePathFromResizedImage);
                     const stats = (0, fs_1.statSync)(newFilePathFromResizedImage);
                     fileSize = stats.size;
                 }
@@ -369,7 +366,7 @@ function newImageForUser(req, res, next) {
                 file_name: params.Key,
             });
             const image = imageData.rows[0];
-            yield uploadToS3(params);
+            yield uploadToS3(Object.assign(Object.assign({}, params), { Body: (0, fs_1.createReadStream)(filePath) }));
             (0, eventLogger_1.logEventAsync)({
                 userId: req.session.user,
                 eventType: eventLogger_1.EventType.IMAGE_UPLOADED,

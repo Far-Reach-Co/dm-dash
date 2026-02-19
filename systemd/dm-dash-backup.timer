@@ -1,0 +1,11 @@
+[Unit]
+Description=Run dm-dash postgres backup daily
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=30m
+Persistent=true
+Unit=dm-dash-backup.service
+
+[Install]
+WantedBy=timers.target

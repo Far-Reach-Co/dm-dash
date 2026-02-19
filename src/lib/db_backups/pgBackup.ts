@@ -227,6 +227,67 @@ async function runSingleBackup(): Promise<BackupResult> {
   }
 }
 
+async function executeBackupRun(): Promise<boolean> {
+  let localPathForCleanup: string | undefined;
+  let startedAt = new Date();
+
+  try {
+    logger.info(
+      {
+        intervalMs: backupIntervalMs,
+        bucket: bucketConfig.bucket,
+        prefix: bucketConfig.prefix || "(none)",
+      },
+      "Starting database backup run",
+    );
+
+    const result = await runSingleBackup();
+    localPathForCleanup = result.localPath;
+    startedAt = result.startedAt;
+
+    logger.info(
+      {
+        filename: result.filename,
+        s3Key: result.s3Key,
+        location: result.location,
+        durationMs: result.finishedAt.getTime() - result.startedAt.getTime(),
+        warnings: result.warnings || undefined,
+      },
+      "Database backup completed",
+    );
+    return true;
+  } catch (err) {
+    logger.error({ err }, "Database backup failed");
+    const detailedError = err as Error & { localPath?: string; startedAt?: Date };
+    if (detailedError.startedAt) startedAt = detailedError.startedAt;
+    localPathForCleanup = detailedError.localPath || localPathForCleanup;
+    const failedAt = new Date();
+
+    try {
+      await sendSevereIssueEmail({
+        startedAt,
+        failedAt,
+        err,
+        context: `S3 bucket: ${bucketConfig.bucket}, prefix: ${bucketConfig.prefix || "(none)"}`,
+      });
+    } catch (emailErr) {
+      logger.error({ err: emailErr }, "Failed to send severe backup failure email");
+    }
+    return false;
+  } finally {
+    if (localPathForCleanup) {
+      try {
+        await fs.unlink(localPathForCleanup);
+      } catch (cleanupErr) {
+        logger.warn(
+          { err: cleanupErr, localPath: localPathForCleanup },
+          "Failed to clean up local backup file",
+        );
+      }
+    }
+  }
+}
+
 function startDbBackupScheduler(): void {
   let inFlight = false;
 
@@ -237,61 +298,9 @@ function startDbBackupScheduler(): void {
     }
 
     inFlight = true;
-    let localPathForCleanup: string | undefined;
-    let startedAt = new Date();
-
     try {
-      logger.info(
-        {
-          intervalMs: backupIntervalMs,
-          bucket: bucketConfig.bucket,
-          prefix: bucketConfig.prefix || "(none)",
-        },
-        "Starting database backup run",
-      );
-
-      const result = await runSingleBackup();
-      localPathForCleanup = result.localPath;
-      startedAt = result.startedAt;
-
-      logger.info(
-        {
-          filename: result.filename,
-          s3Key: result.s3Key,
-          location: result.location,
-          durationMs: result.finishedAt.getTime() - result.startedAt.getTime(),
-          warnings: result.warnings || undefined,
-        },
-        "Database backup completed",
-      );
-    } catch (err) {
-      logger.error({ err }, "Database backup failed");
-      const detailedError = err as Error & { localPath?: string; startedAt?: Date };
-      if (detailedError.startedAt) startedAt = detailedError.startedAt;
-      localPathForCleanup = detailedError.localPath || localPathForCleanup;
-      const failedAt = new Date();
-
-      try {
-        await sendSevereIssueEmail({
-          startedAt,
-          failedAt,
-          err,
-          context: `S3 bucket: ${bucketConfig.bucket}, prefix: ${bucketConfig.prefix || "(none)"}`,
-        });
-      } catch (emailErr) {
-        logger.error({ err: emailErr }, "Failed to send severe backup failure email");
-      }
+      await executeBackupRun();
     } finally {
-      if (localPathForCleanup) {
-        try {
-          await fs.unlink(localPathForCleanup);
-        } catch (cleanupErr) {
-          logger.warn(
-            { err: cleanupErr, localPath: localPathForCleanup },
-            "Failed to clean up local backup file",
-          );
-        }
-      }
       inFlight = false;
     }
   };
@@ -307,6 +316,20 @@ function startDbBackupScheduler(): void {
   }, backupIntervalMs);
 }
 
-startDbBackupScheduler();
+if (require.main === module) {
+  const runOnce = process.argv.includes("--once");
+  if (runOnce) {
+    executeBackupRun()
+      .then((ok) => {
+        process.exit(ok ? 0 : 1);
+      })
+      .catch((err) => {
+        logger.error({ err }, "Unexpected backup runner error");
+        process.exit(1);
+      });
+  } else {
+    startDbBackupScheduler();
+  }
+}
 
 export default startDbBackupScheduler;
