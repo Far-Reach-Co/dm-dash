@@ -10,6 +10,7 @@ import {
 import { getProjectQuery } from "../queries/projects.js";
 import { User, getUserByIdQuery } from "../queries/users.js";
 import { Request, Response, NextFunction } from "express";
+import { requireApiUser, requireProjectOwnerAccess } from "./accessControl";
 
 async function addProjectUserByInvite(
   req: Request,
@@ -17,24 +18,26 @@ async function addProjectUserByInvite(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = requireApiUser(req);
 
     const inviteId = req.body.invite_id;
     const inviteData = await getProjectInviteQuery(inviteId);
     const invite = inviteData.rows[0];
+    if (!invite) throw { status: 404, message: "Invite not found" };
     const projectData = await getProjectQuery(invite.project_id);
     const project = projectData.rows[0];
-    if (project.user_id == req.session.user)
+    if (!project) throw { status: 404, message: "Project not found" };
+    if (project.user_id == userId)
       throw new Error("You already own this wyrld");
     const projectUserData = await getProjectUserByUserAndProjectQuery(
-      req.session.user,
+      userId,
       project.id
     );
     if (projectUserData.rows.length)
       throw new Error("You are already a member of this wyrld");
 
     req.body.is_editor = false;
-    req.body.user_id = req.session.user;
+    req.body.user_id = userId;
     req.body.project_id = project.id;
 
     const data = await addProjectUserQuery(req.body);
@@ -72,6 +75,7 @@ async function getProjectUsersByProject(
   next: NextFunction
 ) {
   try {
+    await requireProjectOwnerAccess(req, req.params.project_id);
     const projectUsersData = await getProjectUsersByProjectQuery(
       req.params.project_id
     );
@@ -100,6 +104,10 @@ async function removeProjectUser(
   next: NextFunction
 ) {
   try {
+    const projectUserData = await getProjectUserQuery(req.params.id);
+    const projectUser = projectUserData.rows[0];
+    if (!projectUser) throw { status: 404, message: "Project user not found" };
+    await requireProjectOwnerAccess(req, projectUser.project_id);
     await removeProjectUserQuery(req.params.id);
     res.status(200).send();
   } catch (err) {
@@ -113,8 +121,14 @@ async function editProjectUserIsEditor(
   next: NextFunction
 ) {
   try {
-    // handle boolean from checkbox
-    let is_editor = req.body.is_editor === "on";
+    const projectUserData = await getProjectUserQuery(req.params.id);
+    const projectUser = projectUserData.rows[0];
+    if (!projectUser) throw { status: 404, message: "Project user not found" };
+    await requireProjectOwnerAccess(req, projectUser.project_id);
+    const is_editor =
+      req.body.is_editor === true ||
+      req.body.is_editor === "true" ||
+      req.body.is_editor === "on";
 
     const data = await editProjectUserQuery(req.params.id, { is_editor });
     res.status(200).send(data.rows[0]);

@@ -138,12 +138,22 @@ async function getTableViewsByProject(
     const data = await getTableViewsByProjectQuery(req.params.project_id);
     const tableRows = access.isEditor
       ? data.rows
-      : data.rows.filter((row) => row.is_public);
+      : data.rows.filter((row) => {
+          const mode = normalizeTableMode(row.mode);
+          return row.is_public || mode === "sandbox";
+        });
     const response = tableRows.map((row) =>
-      withTableCapabilities(
-        row,
-        buildTableCapabilities(normalizeTableMode(row.mode), access.isEditor),
-      ),
+      {
+        const mode = normalizeTableMode(row.mode);
+        const capabilities = buildTableCapabilities(
+          mode,
+          access.isEditor || mode === "sandbox",
+        );
+        if (mode === "sandbox" && !access.isEditor) {
+          capabilities.canManageTableSettings = false;
+        }
+        return withTableCapabilities(row, capabilities);
+      },
     );
     res.send(response);
   } catch (err) {
@@ -241,6 +251,7 @@ async function editTableView(req: Request, res: Response, next: NextFunction) {
       res.status(200).send(withTableCapabilities(tableView, auth.capabilities));
       return;
     }
+    assertTableCapability(auth, "canManageTableSettings");
     const data = await editTableViewQuery(req.params.id, payload);
     const updatedMode = normalizeTableMode(data.rows[0].mode);
     const updatedCapabilities = buildTableCapabilities(updatedMode, auth.canEdit);

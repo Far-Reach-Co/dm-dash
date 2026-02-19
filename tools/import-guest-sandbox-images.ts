@@ -3,7 +3,11 @@ import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import path from "path";
 import { inflateRawSync } from "zlib";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
 import db, { pool } from "../src/api/dbconfig";
 import { addImageQuery } from "../src/api/queries/images";
 
@@ -19,12 +23,35 @@ const IMAGE_EXTENSIONS = new Set([
   ".avif",
 ]);
 
+const CONTENT_TYPE_BY_EXT: Record<string, string> = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+  ".gif": "image/gif",
+  ".avif": "image/avif",
+};
+
 type Args = {
   source: string;
   bucket: string;
   folder: string;
   envFile?: string;
   dryRun: boolean;
+};
+
+type SourceImageEntry = {
+  filePath: string;
+  key: string;
+  ext: string;
+  originalName: string;
+  contentType: string;
+};
+
+type GuestTokenImageRow = {
+  id: number;
+  file_name: string;
+  original_name: string;
 };
 
 function argValue(flag: string) {
@@ -250,7 +277,9 @@ async function walkFiles(dir: string, acc: string[] = []): Promise<string[]> {
       continue;
     }
     const ext = path.extname(entry.name).toLowerCase();
-    if (IMAGE_EXTENSIONS.has(ext)) acc.push(fullPath);
+    const baseName = entry.name.toLowerCase();
+    const isIgnoredFile = baseName.startsWith("._") || baseName === ".ds_store";
+    if (IMAGE_EXTENSIONS.has(ext) && !isIgnoredFile) acc.push(fullPath);
   }
   return acc;
 }
@@ -296,6 +325,106 @@ async function findImageByFileName(fileName: string) {
   };
   const { rows } = await db.query<{ id: number; file_name: string }>(query);
   return rows[0] || null;
+}
+
+async function listGuestTokenImages() {
+  const query = {
+    text: 'select id, file_name, original_name from public."Image" where file_name like $1 and is_blocked = false order by id asc',
+    values: ["guest-token-%"],
+  };
+  const { rows } = await db.query<GuestTokenImageRow>(query);
+  return rows;
+}
+
+async function updateImageOriginalName(imageId: number, originalName: string) {
+  await db.query({
+    text: 'update public."Image" set original_name = $1 where id = $2',
+    values: [originalName, imageId],
+  });
+}
+
+function normalizeOriginalName(value: string) {
+  return path.basename(String(value || "")).trim().toLowerCase();
+}
+
+function isAppleDoubleOriginalName(value: string) {
+  return normalizeOriginalName(value).startsWith("._");
+}
+
+function originalNameCandidates(value: string) {
+  const normalized = normalizeOriginalName(value);
+  if (!normalized) return [];
+
+  const candidates = new Set<string>([normalized]);
+  if (normalized.startsWith("._")) {
+    candidates.add(normalized.slice(2));
+    candidates.add(normalized.slice(1));
+  } else if (normalized.startsWith(".")) {
+    candidates.add(normalized.slice(1));
+  }
+
+  return Array.from(candidates).filter(Boolean);
+}
+
+function pickSourceForGuestTokenRow(
+  row: GuestTokenImageRow,
+  sourceByKey: Map<string, SourceImageEntry>,
+  sourceByOriginalName: Map<string, SourceImageEntry[]>,
+) {
+  const byKey = sourceByKey.get(row.file_name);
+  if (byKey) return byKey;
+
+  const names = originalNameCandidates(row.original_name);
+  if (!names.length) return null;
+
+  for (const name of names) {
+    const candidates = sourceByOriginalName.get(name) || [];
+    if (!candidates.length) continue;
+    if (candidates.length === 1) return candidates[0];
+
+    const fileExt = path.extname(row.file_name).toLowerCase();
+    const extMatch =
+      candidates.find((candidate) => candidate.ext === fileExt) || candidates[0];
+    if (extMatch) return extMatch;
+  }
+
+  return null;
+}
+
+function getContentTypeForExt(ext: string) {
+  return CONTENT_TYPE_BY_EXT[ext.toLowerCase()] || "application/octet-stream";
+}
+
+async function objectExistsInS3(
+  s3: S3Client,
+  bucket: string,
+  key: string,
+) {
+  try {
+    const response = await s3.send(
+      new HeadObjectCommand({
+        Bucket: bucket,
+        Key: key,
+      }),
+    );
+    return response;
+  } catch (err) {
+    const s3Err = err as {
+      name?: string;
+      code?: string;
+      Code?: string;
+      $metadata?: { httpStatusCode?: number };
+    };
+    if (
+      s3Err?.$metadata?.httpStatusCode === 404 ||
+      s3Err?.name === "NotFound" ||
+      s3Err?.code === "NotFound" ||
+      s3Err?.Code === "NotFound"
+    ) {
+      return null;
+    }
+    throw err;
+  }
 }
 
 async function updateEnvFile(envFile: string, idsLine: string) {
@@ -344,6 +473,8 @@ async function run() {
   const createdIds: number[] = [];
   let createdCount = 0;
   let reusedCount = 0;
+  let repairedCount = 0;
+  let unresolvedRepairCount = 0;
 
   try {
     console.log(`Source: ${args.source}`);
@@ -358,16 +489,67 @@ async function run() {
       throw new Error("No image files found in ZIP");
     }
 
+    const sourceEntries: SourceImageEntry[] = [];
+    const sourceByKey = new Map<string, SourceImageEntry>();
+    const sourceByOriginalName = new Map<string, SourceImageEntry[]>();
+
     for (const filePath of files) {
       const ext = path.extname(filePath).toLowerCase();
       const originalName = path.basename(filePath);
       const buffer = await fs.readFile(filePath);
       const key = deterministicKeyFromBuffer(buffer, ext);
+      const contentType = getContentTypeForExt(ext);
+      const sourceEntry: SourceImageEntry = {
+        filePath,
+        key,
+        ext,
+        originalName,
+        contentType,
+      };
+      sourceEntries.push(sourceEntry);
+      sourceByKey.set(key, sourceEntry);
+      const normalizedOriginal = normalizeOriginalName(originalName);
+      const sourceByNameList = sourceByOriginalName.get(normalizedOriginal) || [];
+      sourceByNameList.push(sourceEntry);
+      sourceByOriginalName.set(normalizedOriginal, sourceByNameList);
+    }
+
+    for (const sourceEntry of sourceEntries) {
+      const { filePath, key, contentType, originalName } = sourceEntry;
+      const buffer = await fs.readFile(filePath);
+      const s3Target = normalizeBucketAndKey(args.bucket, args.folder, key);
 
       const existing = await findImageByFileName(key);
       if (existing) {
         createdIds.push(existing.id);
         reusedCount += 1;
+
+        const headObject = await objectExistsInS3(
+          s3,
+          s3Target.bucket,
+          s3Target.key,
+        );
+        const hasImageContentType = String(headObject?.ContentType || "")
+          .toLowerCase()
+          .startsWith("image/");
+        const needsRepair = !headObject || !hasImageContentType;
+        if (needsRepair) {
+          if (args.dryRun) {
+            console.log(
+              `[dry-run] would repair existing DB row object: ${existing.id} -> ${key}`,
+            );
+          } else {
+            await s3.send(
+              new PutObjectCommand({
+                Bucket: s3Target.bucket,
+                Key: s3Target.key,
+                Body: buffer,
+                ContentType: contentType,
+              }),
+            );
+            repairedCount += 1;
+          }
+        }
         continue;
       }
 
@@ -376,12 +558,12 @@ async function run() {
         continue;
       }
 
-      const s3Target = normalizeBucketAndKey(args.bucket, args.folder, key);
       await s3.send(
         new PutObjectCommand({
           Bucket: s3Target.bucket,
           Key: s3Target.key,
           Body: buffer,
+          ContentType: contentType,
         }),
       );
 
@@ -395,12 +577,64 @@ async function run() {
       createdCount += 1;
     }
 
+    const guestTokenRows = await listGuestTokenImages();
+    for (const row of guestTokenRows) {
+      const s3Target = normalizeBucketAndKey(args.bucket, args.folder, row.file_name);
+      const headObject = await objectExistsInS3(s3, s3Target.bucket, s3Target.key);
+      const hasImageContentType = String(headObject?.ContentType || "")
+        .toLowerCase()
+        .startsWith("image/");
+      const needsRepair =
+        !headObject || !hasImageContentType || isAppleDoubleOriginalName(row.original_name);
+      if (!needsRepair) continue;
+
+      const sourceEntry = pickSourceForGuestTokenRow(
+        row,
+        sourceByKey,
+        sourceByOriginalName,
+      );
+      if (!sourceEntry) {
+        unresolvedRepairCount += 1;
+        console.warn(
+          `[warn] missing object without source match: image_id=${row.id} file_name=${row.file_name} original_name=${row.original_name}`,
+        );
+        continue;
+      }
+
+      if (args.dryRun) {
+        console.log(
+          `[dry-run] would repair DB row object: ${row.id} -> ${row.file_name} (source: ${sourceEntry.originalName})`,
+        );
+        continue;
+      }
+
+      const buffer = await fs.readFile(sourceEntry.filePath);
+      const fileExt = path.extname(row.file_name).toLowerCase();
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: s3Target.bucket,
+          Key: s3Target.key,
+          Body: buffer,
+          ContentType: getContentTypeForExt(fileExt) || sourceEntry.contentType,
+        }),
+      );
+      if (
+        isAppleDoubleOriginalName(row.original_name) &&
+        sourceEntry.originalName !== row.original_name
+      ) {
+        await updateImageOriginalName(row.id, sourceEntry.originalName);
+      }
+      repairedCount += 1;
+    }
+
     const uniqueIds = Array.from(new Set(createdIds));
     const idsLine = `GUEST_SANDBOX_IMAGE_IDS=${uniqueIds.join(",")}`;
 
     console.log("");
     console.log(`Processed images: ${files.length}`);
     console.log(`Reused existing: ${reusedCount}`);
+    console.log(`Repaired missing objects: ${repairedCount}`);
+    console.log(`Unresolved missing objects: ${unresolvedRepairCount}`);
     console.log(`Created new: ${createdCount}`);
     console.log(idsLine);
 

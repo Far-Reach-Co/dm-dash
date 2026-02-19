@@ -1,12 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import {
   add5eCharOtherProLangQuery,
+  get5eCharOtherProLangQuery,
   get5eCharOtherProLangsByGeneralQuery,
   remove5eCharOtherProLangQuery,
   edit5eCharOtherProLangQuery,
 } from "../queries/5eCharOtherProLang";
+import { requireSheetEditAccess, requireSheetViewAccess } from "./accessControl";
 
-interface add5eCharOtherProLangRequest {
+interface add5eCharOtherProLangRequest extends Request {
   body: {
     general_id: number | string;
     type: string;
@@ -19,6 +21,7 @@ async function add5eCharOtherProLang(
   next: NextFunction
 ) {
   try {
+    await requireSheetEditAccess(req, req.body.general_id);
     const data = await add5eCharOtherProLangQuery({
       general_id: req.body.general_id,
       type: req.body.type,
@@ -35,6 +38,7 @@ async function get5eCharOtherProLangsByGeneral(
   next: NextFunction
 ) {
   try {
+    await requireSheetViewAccess(req, req.params.general_id);
     const data = await get5eCharOtherProLangsByGeneralQuery(
       req.params.general_id
     );
@@ -51,6 +55,12 @@ async function remove5eCharOtherProLang(
   next: NextFunction
 ) {
   try {
+    const otherProLangData = await get5eCharOtherProLangQuery(req.params.id);
+    const otherProLang = otherProLangData.rows[0];
+    if (!otherProLang)
+      throw { status: 404, message: "Proficiency/language not found" };
+    await requireSheetEditAccess(req, otherProLang.general_id);
+
     await remove5eCharOtherProLangQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -64,6 +74,12 @@ async function edit5eCharOtherProLang(
   next: NextFunction
 ) {
   try {
+    const otherProLangData = await get5eCharOtherProLangQuery(req.params.id);
+    const otherProLang = otherProLangData.rows[0];
+    if (!otherProLang)
+      throw { status: 404, message: "Proficiency/language not found" };
+    await requireSheetEditAccess(req, otherProLang.general_id);
+
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
       throw new Error('Request body cannot contain the "id" field');

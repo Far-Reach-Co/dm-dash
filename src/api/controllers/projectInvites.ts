@@ -6,6 +6,7 @@ import {
 } from "../queries/projectInvites.js";
 import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from "express";
+import { requireProjectEditorAccess } from "./accessControl";
 
 async function addProjectInvite(
   req: Request,
@@ -16,6 +17,8 @@ async function addProjectInvite(
   req.body.uuid = uuid;
 
   try {
+    if (!req.body.project_id) throw { status: 400, message: "project_id is required" };
+    await requireProjectEditorAccess(req, req.body.project_id);
     const data = await addProjectInviteQuery(req.body);
     const invite = data.rows[0];
     const inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${
@@ -62,6 +65,10 @@ async function removeProjectInvite(
   next: NextFunction
 ) {
   try {
+    const inviteData = await getProjectInviteQuery(req.params.id);
+    const invite = inviteData.rows[0];
+    if (!invite) throw { status: 404, message: "Invite not found" };
+    await requireProjectEditorAccess(req, invite.project_id);
     const data = await removeProjectInviteQuery(req.params.id);
 
     if (req.body.source === "settings") {

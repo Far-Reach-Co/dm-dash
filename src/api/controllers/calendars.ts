@@ -10,9 +10,15 @@ import { Month, getMonthsQuery, removeMonthQuery } from "../queries/months.js";
 import { Day, getDaysQuery, removeDayQuery } from "../queries/days.js";
 import { Request, Response, NextFunction } from "express";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import {
+  requireProjectEditorAccess,
+  requireProjectMemberAccess,
+  resolveProjectIdByCalendarId,
+} from "./accessControl";
 
 async function addCalendar(req: Request, res: Response, next: NextFunction) {
   try {
+    await requireProjectEditorAccess(req, req.body.project_id);
     const data = await addCalendarQuery(req.body);
     const calendar = data.rows[0];
     // Log calendar creation event
@@ -36,6 +42,7 @@ interface GetCalendarDataReturnModel extends Calendar {
 
 async function getCalendars(req: Request, res: Response, next: NextFunction) {
   try {
+    await requireProjectMemberAccess(req, req.params.project_id);
     const calendars = await getCalendarsQuery(req.params.project_id);
 
     for (const calendar of calendars.rows) {
@@ -55,6 +62,8 @@ async function getCalendars(req: Request, res: Response, next: NextFunction) {
 
 async function getCalendar(req: Request, res: Response, next: NextFunction) {
   try {
+    const { projectId } = await resolveProjectIdByCalendarId(req.params.id);
+    await requireProjectMemberAccess(req, projectId);
     const calendarData = await getCalendarQuery(req.params.id);
     const calendar = calendarData.rows[0];
 
@@ -72,6 +81,8 @@ async function getCalendar(req: Request, res: Response, next: NextFunction) {
 
 async function removeCalendar(req: Request, res: Response, next: NextFunction) {
   try {
+    const { projectId } = await resolveProjectIdByCalendarId(req.params.id);
+    await requireProjectEditorAccess(req, projectId);
     await removeCalendarQuery(req.params.id);
     // remove months and days associated
     const monthsData = await getMonthsQuery(req.params.id);
@@ -91,6 +102,8 @@ async function removeCalendar(req: Request, res: Response, next: NextFunction) {
 
 async function editCalendar(req: Request, res: Response, next: NextFunction) {
   try {
+    const { projectId } = await resolveProjectIdByCalendarId(req.params.id);
+    await requireProjectEditorAccess(req, projectId);
     if (!req.body.title) {
       delete req.body.title;
     }

@@ -102,7 +102,10 @@ export default class TableSidebarFolderComponent {
     }
 
     const foldersData = await getThings(
-      getTableFoldersEndpoint({ projectId: this.projectId }),
+      getTableFoldersEndpoint({
+        projectId: this.projectId,
+        tableViewId: this.tableView?.id,
+      }),
     );
     this.folders = foldersData || [];
     this.pruneExpandedFolderIds(this.folders);

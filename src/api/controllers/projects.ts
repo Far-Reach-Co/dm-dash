@@ -33,6 +33,7 @@ import { userSubscriptionStatus } from "../../lib/enums.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { requireProjectOwner, requireUser } from "../../lib/authz";
 import { getSignedUrls } from "./s3.js";
+import { requireProjectMemberAccess } from "./accessControl";
 
 interface addProjectRequest extends Request {
   body: {
@@ -88,14 +89,13 @@ interface GetProjectResponseData extends Project {
 
 async function getProject(req: Request, res: Response, next: NextFunction) {
   try {
-    const projectData = await getProjectQuery(req.params.id);
-    const project = projectData.rows[0];
-    const userId = requireUser(req);
-    const projectUsersData = await getProjectUserByUserAndProjectQuery(
-      userId,
-      project.id
-    );
-    if (projectUsersData.rows.length) {
+    const access = await requireProjectMemberAccess(req, req.params.id);
+    const project = access.project;
+    if (!access.isOwner) {
+      const projectUsersData = await getProjectUserByUserAndProjectQuery(
+        access.userId,
+        project.id
+      );
       const projectUser = projectUsersData.rows[0];
       (project as GetProjectResponseData).was_joined = true;
       (project as GetProjectResponseData).project_user_id = projectUser.id;

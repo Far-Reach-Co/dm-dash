@@ -9,6 +9,7 @@ import {
 } from "../queries/5eCharGeneral";
 import {
   add5eCharProQuery,
+  get5eCharProQuery,
   get5eCharProByGeneralQuery,
   edit5eCharProQuery,
   DndFiveEPro,
@@ -16,6 +17,7 @@ import {
 } from "../queries/5eCharPro";
 import {
   add5eCharBackQuery,
+  get5eCharBackQuery,
   get5eCharBackByGeneralQuery,
   edit5eCharBackQuery,
   DndFiveEBackground,
@@ -51,6 +53,12 @@ import {
 } from "../queries/playerInvites";
 import { duplicate5eCharClassesQuery } from "../queries/5eCharClasses";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import {
+  requireProjectEditorAccess,
+  requireSheetEditAccess,
+  requireSheetOwnerAccess,
+  requireSheetViewAccess,
+} from "./accessControl";
 
 interface add5eCharRequest extends Request {
   body: {
@@ -82,6 +90,7 @@ async function add5eChar(
 
     // If wyrld_id is provided, link the character to the Wyrld
     if (req.body.wyrld_id) {
+      await requireProjectEditorAccess(req, req.body.wyrld_id);
       const projectPlayersData = await getProjectPlayersByProjectQuery(
         req.body.wyrld_id
       );
@@ -140,13 +149,7 @@ async function duplicate5eChar(
   next: NextFunction
 ) {
   try {
-    const generalData = await get5eCharGeneralQuery(req.body.general_id);
-    const general = generalData.rows[0];
-
-    // check if owner
-    if (!req.session.user) throw new Error("User is not logged in");
-    if (req.session.user != general.user_id)
-      throw new Error("User does not own this property");
+    const { general } = await requireSheetOwnerAccess(req, req.body.general_id);
 
     // Duplicate
     // Gen
@@ -250,9 +253,7 @@ async function get5eCharGeneral(
   next: NextFunction
 ) {
   try {
-    // not user
-    const generalsData = await get5eCharGeneralQuery(req.params.id);
-    const general = generalsData.rows[0];
+    const { general } = await requireSheetViewAccess(req, req.params.id);
 
     const proData = await get5eCharProByGeneralQuery(general.id);
     const pro = proData.rows[0];
@@ -275,13 +276,7 @@ async function get5eCharGeneral(
 
 async function remove5eChar(req: Request, res: Response, next: NextFunction) {
   try {
-    const generalData = await get5eCharGeneralQuery(req.params.id);
-    const general = generalData.rows[0];
-
-    // check if owner
-    if (!req.session.user) throw new Error("User is not logged in");
-    if (req.session.user != general.user_id)
-      throw new Error("User does not own this property");
+    const { general } = await requireSheetOwnerAccess(req, req.params.id);
 
     await remove5eCharGeneralQuery(general.id);
 
@@ -307,22 +302,7 @@ async function edit5eCharGeneral(
   next: NextFunction
 ) {
   try {
-    // get the resource
-    // const generalData = await get5eCharGeneralQuery(req.params.id);
-    // const general = generalData.rows[0];
-
-    // // check if auth
-    // if (!req.session.user) throw new Error("User is not logged in");
-    // if (req.session.user != general.user_id) {
-    //   // check playerUser
-    //   const playerUserData = await getPlayerUserByUserAndPlayerQuery(
-    //     req.session.user,
-    //     req.params.id
-    //   );
-    //   if (!playerUserData.rows.length) {
-    //     throw new Error("User does not have permission to this property");
-    //   }
-    // }
+    await requireSheetEditAccess(req, req.params.id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
@@ -341,26 +321,10 @@ async function edit5eCharGeneral(
 
 async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
   try {
-    // get the resource
-    // const charProData = await get5eCharProQuery(req.params.id);
-    // const charPro = charProData.rows[0];
-
-    // // get the resource
-    // const generalData = await get5eCharGeneralQuery(charPro.general_id);
-    // const general = generalData.rows[0];
-
-    // // check if auth
-    // if (!req.session.user) throw new Error("User is not logged in");
-    // if (req.session.user != general.user_id) {
-    //   // check playerUser
-    //   const playerUserData = await getPlayerUserByUserAndPlayerQuery(
-    //     req.session.user,
-    //     req.params.id
-    //   );
-    //   if (!playerUserData.rows.length) {
-    //     throw new Error("User does not have permission to this property");
-    //   }
-    // }
+    const charProData = await get5eCharProQuery(req.params.id);
+    const charPro = charProData.rows[0];
+    if (!charPro) throw { status: 404, message: "Proficiencies not found" };
+    await requireSheetEditAccess(req, charPro.general_id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
@@ -379,6 +343,11 @@ async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
 
 async function edit5eCharBack(req: Request, res: Response, next: NextFunction) {
   try {
+    const charBackData = await get5eCharBackQuery(req.params.id);
+    const charBack = charBackData.rows[0];
+    if (!charBack) throw { status: 404, message: "Background not found" };
+    await requireSheetEditAccess(req, charBack.general_id);
+
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
       throw new Error('Request body cannot contain the "id" field');

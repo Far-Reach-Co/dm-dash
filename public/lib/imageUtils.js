@@ -1,16 +1,23 @@
 import renderTierLimitWarning from "../components/renderTierLimitWarning.js";
 import toast from "../components/Toast.js";
 
-export async function getPresignedUrlsForImages(imageIds) {
+export async function getPresignedUrlsForImages(
+  imageIds,
+  { tableViewId = null, guestUuid = null } = {}
+) {
   try {
+    const payload = {
+      image_ids: imageIds,
+    };
+    if (tableViewId) payload.table_view_id = tableViewId;
+    if (guestUuid) payload.guest_uuid = guestUuid;
+
     const res = await fetch(`${window.origin}/api/signed_URL_download_multi`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        image_ids: imageIds,
-      }),
+      body: JSON.stringify(payload),
     });
     const data = await res.json();
     if (data) return data;
