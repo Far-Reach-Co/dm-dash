@@ -23,7 +23,7 @@ npm run dev
 This runs:
 1. TypeScript watch compile (`src/` -> `dist/`)
 2. Rollup watch bundle (`public/views` -> `public/dist`)
-3. Server restart loop (`nodemon dist/server.js`)
+3. Server restart loop (`node --watch --watch-path=dist dist/server.js`)
 
 ## Quality Checks
 

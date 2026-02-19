@@ -4,7 +4,7 @@ import { createReadStream, createWriteStream } from "fs";
 import { promises as fs } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
-import { config as awsConfig, S3 } from "aws-sdk";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import mail from "../../api/smtp";
 import logger from "../logger";
 import { resolveDatabaseUrlForLibpq } from "../dbConnection";
@@ -44,14 +44,20 @@ const bucketConfig = resolveBucketConfig(
   process.env.DB_BACKUP_S3_PREFIX || "",
 );
 
-awsConfig.update({
-  signatureVersion: "v4",
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION || "us-east-1",
+const awsRegion = process.env.AWS_REGION || "us-east-1";
+const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
+const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+const s3 = new S3Client({
+  region: awsRegion,
+  ...(awsAccessKeyId && awsSecretAccessKey
+    ? {
+        credentials: {
+          accessKeyId: awsAccessKeyId,
+          secretAccessKey: awsSecretAccessKey,
+        },
+      }
+    : {}),
 });
-
-const s3 = new S3();
 
 function resolveBucketConfig(rawBucket: string, rawPrefix: string): BucketConfig {
   const normalizedBucket = rawBucket.trim().replace(/^\/+|\/+$/g, "");
@@ -187,20 +193,16 @@ async function ensureBackupFileLooksValid(filePath: string): Promise<void> {
 }
 
 async function uploadBackupToS3(localPath: string, s3Key: string): Promise<string> {
-  const result = await s3
-    .upload({
+  await s3.send(
+    new PutObjectCommand({
       Bucket: bucketConfig.bucket,
       Key: s3Key,
       Body: createReadStream(localPath),
       ContentType: "application/sql",
-    })
-    .promise();
+    }),
+  );
 
-  if (!result.Location) {
-    throw new Error("S3 upload completed without a file location");
-  }
-
-  return result.Location;
+  return `https://${bucketConfig.bucket}.s3.${awsRegion}.amazonaws.com/${s3Key}`;
 }
 
 async function sendSevereIssueEmail(params: {

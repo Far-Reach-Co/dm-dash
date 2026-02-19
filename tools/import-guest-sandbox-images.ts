@@ -3,7 +3,7 @@ import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import path from "path";
 import { inflateRawSync } from "zlib";
-import { S3, config } from "aws-sdk";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import db, { pool } from "../src/api/dbconfig";
 import { addImageQuery } from "../src/api/queries/images";
 
@@ -260,6 +260,35 @@ function deterministicKeyFromBuffer(buffer: Buffer, ext: string) {
   return `guest-token-${hash}${ext.toLowerCase()}`;
 }
 
+function normalizeBucketAndKey(
+  rawBucket: string,
+  rawFolder: string,
+  key: string,
+) {
+  const bucketValue = rawBucket.trim().replace(/^\/+|\/+$/g, "");
+  const folder = rawFolder.trim().replace(/^\/+|\/+$/g, "");
+  if (!bucketValue) throw new Error("Missing --bucket");
+
+  const slashIndex = bucketValue.indexOf("/");
+  const bucket =
+    slashIndex === -1 ? bucketValue : bucketValue.slice(0, slashIndex).trim();
+  const bucketPrefix =
+    slashIndex === -1
+      ? ""
+      : bucketValue
+          .slice(slashIndex + 1)
+          .trim()
+          .replace(/^\/+|\/+$/g, "");
+  if (!bucket) throw new Error("Invalid --bucket value");
+  const prefix = [bucketPrefix, folder].filter(Boolean).join("/");
+  const normalizedKey = key.trim().replace(/^\/+|\/+$/g, "");
+
+  return {
+    bucket,
+    key: prefix && normalizedKey ? `${prefix}/${normalizedKey}` : prefix || normalizedKey,
+  };
+}
+
 async function findImageByFileName(fileName: string) {
   const query = {
     text: 'select id, file_name from public."Image" where file_name = $1 and is_blocked = false order by id asc limit 1',
@@ -288,14 +317,24 @@ async function updateEnvFile(envFile: string, idsLine: string) {
 async function run() {
   const args = parseArgs();
 
-  config.update({
-    signatureVersion: "v4",
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: "us-east-1",
+  const awsRegion = process.env.AWS_REGION || "us-east-1";
+  const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+  const s3 = new S3Client({
+    region: awsRegion,
+    ...(awsAccessKeyId && awsSecretAccessKey
+      ? {
+          credentials: {
+            accessKeyId: awsAccessKeyId,
+            secretAccessKey: awsSecretAccessKey,
+          },
+        }
+      : {}),
   });
-  const s3 = new S3();
-  const bucketPath = `${args.bucket}/${args.folder}`;
+  const previewTarget = normalizeBucketAndKey(args.bucket, args.folder, "");
+  const bucketPath = previewTarget.key
+    ? `${previewTarget.bucket}/${previewTarget.key}`
+    : previewTarget.bucket;
 
   const tempRoot = await fs.mkdtemp(path.join(tmpdir(), "guest-sandbox-"));
   const zipPath = path.join(tempRoot, "source.zip");
@@ -337,13 +376,14 @@ async function run() {
         continue;
       }
 
-      await s3
-        .upload({
-          Bucket: bucketPath,
-          Key: key,
+      const s3Target = normalizeBucketAndKey(args.bucket, args.folder, key);
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: s3Target.bucket,
+          Key: s3Target.key,
           Body: buffer,
-        })
-        .promise();
+        }),
+      );
 
       const inserted = await addImageQuery({
         original_name: originalName,
