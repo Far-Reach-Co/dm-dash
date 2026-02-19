@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Far Reach Co. | Edit <%= record.title %></title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/record.css" />
   <%- include('./partials/icons') %>
   <script src="/lib/MobileNavHandler.js" defer></script>
   <script src="/lib/htmx.min.js"></script>
@@ -15,55 +16,63 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container p-3">
-    <div>
-      <h1>Edit <%= record.title %></h1>
-      <small>- Record</small>
-    </div>
-    <br />
-    <div class="input-container">
-      <label for="title">Title</label>
-      <input id="title" name="title" placeholder="Record Title" value="<%= record.title %>" />
-    </div>
-    <br />
-    <div class="input-container w-100">
-      <label for="description">Description</label>
-      <textarea class="w-100" id="description" name="description" required><%= record.description %></textarea>
-    </div>
-    <div id="images-list">
-      <% if (imageUrls && Object.keys(imageUrls).length) { %>
-      <% Object.entries(imageUrls).forEach(([key, value]) => { %>
-      <div class="d-flex align-items-baseline">
-        <img class="my-2 max-w-90" id="img-<%= key %>" src="<%= value %>">
-        <div class="text-red ms-2 cursor-pointer red-x" title="Remove image" data-remove-image="<%= key %>">ⓧ</div>
+  <div class="container-fluid info-container page-form p-3">
+
+    <h1 class="record-form-title">Edit <%= record.title %></h1>
+    <span class="record-badge record-form-subtitle">Record</span>
+
+    <fieldset>
+      <div class="input-container">
+        <label for="title">Title</label>
+        <input id="title" name="title" placeholder="Record Title" value="<%= record.title %>" />
       </div>
-      <% }) %>
+
+      <div class="input-container">
+        <label for="description">Description</label>
+        <textarea class="w-100" id="description" name="description" required><%= record.description %></textarea>
+      </div>
+
+      <% if (imageUrls && Object.keys(imageUrls).length) { %>
+      <div class="form-section">
+        <small><b class="text-orange">Attached Images</b></small>
+        <div class="record-edit-images" id="images-list">
+          <% Object.entries(imageUrls).forEach(([key, value]) => { %>
+          <div class="record-image-item">
+            <img id="img-<%= key %>" src="<%= value %>" alt="">
+            <span class="record-remove-btn" title="Remove image" data-remove-image="<%= key %>">✕</span>
+          </div>
+          <% }) %>
+        </div>
+      </div>
+      <% } else { %>
+      <div id="images-list"></div>
       <% } %>
-    </div>
-    <br />
-    <div class=" w-25">
-      <small><b class="text-orange">Upload Images</b></small>
-      <br />
-      <small class="hint">*These will also be available for use on your tables</small>
-      <br />
-      <input id="image" name="image" type="file" accept="image/*" style="display: none" multiple>
-      <label for="image" class="label-btn" title="Upload Image">Choose Images</label>
-      <div class="d-flex flex-column" id="files-list"></div>
-    </div>
-    <br />
-    <div class="w-25">
-      <small><b class="text-orange">Make Public</b></small>
-      <br />
-      <small class="hint">*Allow this page to viewed by others.</small>
-      <input type="checkbox" id="is_public" name="is_public" <%= record.is_public ? 'checked' : '' %> />
-    </div>
-    <br />
-    <br />
-    <button id="save">Save</button>
-    <hr>
-    <button class="btn-red" hx-delete="/api/remove_record/<%= record.id %>" hx-swap="none" hx-confirm="Are you sure you want to delete <%= record.title %>?">
-      Delete Record
-    </button>
+
+      <div class="form-section">
+        <small><b class="text-orange">Upload Images</b></small>
+        <small class="hint">*These will also be available for use on your tables</small>
+        <input id="image" name="image" type="file" accept="image/*" style="display: none" multiple>
+        <label for="image" class="label-btn mt-2" title="Upload Image">Choose Images</label>
+        <div class="d-flex flex-column mt-1" id="files-list"></div>
+      </div>
+
+      <div class="form-section">
+        <div class="d-flex align-items-center gap-2">
+          <input id="is_public" type="checkbox" name="is_public" <%= record.is_public ? 'checked' : '' %> />
+          <div>
+            <small><b class="text-orange">Make Public</b></small>
+            <small class="hint">*Allow this page to be viewed by others.</small>
+          </div>
+        </div>
+      </div>
+
+      <button id="save">Save</button>
+      <hr style="margin: var(--space-xl) 0; border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--blue), transparent);" />
+      <button class="btn-red" hx-delete="/api/remove_record/<%= record.id %>" hx-swap="none" hx-confirm="Are you sure you want to delete <%= record.title %>?">
+        Delete Record
+      </button>
+    </fieldset>
+
   </div>
 </body>
 
