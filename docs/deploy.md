@@ -35,6 +35,8 @@ Flow:
 - `DM_DASH_RUN_MIGRATIONS` (default: `0`; run `node-pg-migrate up` on remote)
 - `DM_DASH_RESTART_SERVICES` (default: `1`; set `0` to skip service restarts)
 - `DM_DASH_INSTALL_UNITS` (default: `1`; set `0` to skip copying systemd unit files)
+- `DM_DASH_CREATE_RELEASE_ARCHIVE` (default: `1`; create rollback archive on remote after sync)
+- `DM_DASH_SAVE_LOCAL_ARCHIVE` (default: `0`; optionally keep local archive in `.releases/`)
 - `DM_DASH_RELEASE_ID` (optional explicit release identifier)
 
 Example:
@@ -53,6 +55,12 @@ Deploy artifacts only (no service restart):
 
 ```bash
 DM_DASH_RESTART_SERVICES=0 ./ops/deploy.sh
+```
+
+Fastest deploy path (skip remote archive generation):
+
+```bash
+DM_DASH_CREATE_RELEASE_ARCHIVE=0 ./ops/deploy.sh
 ```
 
 ## Artifact Contents

@@ -38,5 +38,5 @@ if [[ "$SKIP_REMOTE" == "1" ]]; then
 fi
 
 echo "Running remote checks on $SERVER ..."
-run_remote "set -euo pipefail; command -v rsync >/dev/null; test -x '$REMOTE_NPM_BIN'; mkdir -p '$REMOTE_DIR'; df -h '$REMOTE_DIR' | sed -n '1,2p'"
+run_remote "set -euo pipefail; command -v rsync >/dev/null; test -x '$REMOTE_NPM_BIN'; export PATH=\"\$(dirname '$REMOTE_NPM_BIN'):\$PATH\"; '$REMOTE_NPM_BIN' --version >/dev/null; mkdir -p '$REMOTE_DIR'; df -h '$REMOTE_DIR' | sed -n '1,2p'"
 echo "Preflight complete."
