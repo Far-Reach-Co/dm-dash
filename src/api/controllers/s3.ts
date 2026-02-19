@@ -1,5 +1,5 @@
 import { S3, config, CloudFront } from "aws-sdk";
-import { readFileSync, statSync, unlinkSync } from "fs";
+import { createReadStream, statSync, unlinkSync } from "fs";
 import { userSubscriptionStatus } from "../../lib/enums";
 import {
   addImageQuery,
@@ -300,7 +300,7 @@ interface NewImageForProjectRequestObject extends Request {
   };
 }
 
-function computeAwsImageParamsFromRequest(req: Request, filePath: string) {
+function computeAwsImageParamsFromRequest(req: Request) {
   if (!req.file) throw new Error("Missing file");
   const name = req.file.originalname;
   var ind2 = name.lastIndexOf(".");
@@ -310,7 +310,6 @@ function computeAwsImageParamsFromRequest(req: Request, filePath: string) {
   return {
     Bucket: `${req.body.bucket_name}/${req.body.folder_name}`,
     Key: imageRef,
-    Body: readFileSync(filePath),
   };
 }
 
@@ -398,14 +397,13 @@ async function newImageForProject(
       req.session.user,
     );
 
-    const params = computeAwsImageParamsFromRequest(req, filePath);
+    const params = computeAwsImageParamsFromRequest(req);
     let fileSize = req.file.size;
 
     if (req.body.make_image_small) {
       const newFilePathFromResizedImage = await makeImageSmall(filePath);
       if (newFilePathFromResizedImage) {
         filePath = newFilePathFromResizedImage;
-        params.Body = readFileSync(newFilePathFromResizedImage);
         const stats = statSync(newFilePathFromResizedImage);
         fileSize = stats.size;
       }
@@ -418,7 +416,10 @@ async function newImageForProject(
     });
     const image = imageData.rows[0];
 
-    await uploadToS3(params as S3.PutObjectRequest);
+    await uploadToS3({
+      ...(params as S3.PutObjectRequest),
+      Body: createReadStream(filePath),
+    });
 
     logEventAsync({
       userId: req.session.user,
@@ -480,14 +481,13 @@ async function newImageForUser(
 
     await checkUserProLimitReachedAndAuth(req.session.user);
 
-    const params = computeAwsImageParamsFromRequest(req, filePath);
+    const params = computeAwsImageParamsFromRequest(req);
     let fileSize = req.file.size;
 
     if (req.body.make_image_small) {
       const newFilePathFromResizedImage = await makeImageSmall(filePath);
       if (newFilePathFromResizedImage) {
         filePath = newFilePathFromResizedImage;
-        params.Body = readFileSync(newFilePathFromResizedImage);
         const stats = statSync(newFilePathFromResizedImage);
         fileSize = stats.size;
       }
@@ -500,7 +500,10 @@ async function newImageForUser(
     });
     const image = imageData.rows[0];
 
-    await uploadToS3(params as S3.PutObjectRequest);
+    await uploadToS3({
+      ...(params as S3.PutObjectRequest),
+      Body: createReadStream(filePath),
+    });
 
     logEventAsync({
       userId: req.session.user,

@@ -196,14 +196,8 @@ function runSingleBackup() {
         }
     });
 }
-function startDbBackupScheduler() {
-    let inFlight = false;
-    const runAndHandle = () => __awaiter(this, void 0, void 0, function* () {
-        if (inFlight) {
-            logger_1.default.warn("Skipping backup run because a previous run is still in progress");
-            return;
-        }
-        inFlight = true;
+function executeBackupRun() {
+    return __awaiter(this, void 0, void 0, function* () {
         let localPathForCleanup;
         let startedAt = new Date();
         try {
@@ -222,6 +216,7 @@ function startDbBackupScheduler() {
                 durationMs: result.finishedAt.getTime() - result.startedAt.getTime(),
                 warnings: result.warnings || undefined,
             }, "Database backup completed");
+            return true;
         }
         catch (err) {
             logger_1.default.error({ err }, "Database backup failed");
@@ -241,6 +236,7 @@ function startDbBackupScheduler() {
             catch (emailErr) {
                 logger_1.default.error({ err: emailErr }, "Failed to send severe backup failure email");
             }
+            return false;
         }
         finally {
             if (localPathForCleanup) {
@@ -251,6 +247,21 @@ function startDbBackupScheduler() {
                     logger_1.default.warn({ err: cleanupErr, localPath: localPathForCleanup }, "Failed to clean up local backup file");
                 }
             }
+        }
+    });
+}
+function startDbBackupScheduler() {
+    let inFlight = false;
+    const runAndHandle = () => __awaiter(this, void 0, void 0, function* () {
+        if (inFlight) {
+            logger_1.default.warn("Skipping backup run because a previous run is still in progress");
+            return;
+        }
+        inFlight = true;
+        try {
+            yield executeBackupRun();
+        }
+        finally {
             inFlight = false;
         }
     });
@@ -263,5 +274,20 @@ function startDbBackupScheduler() {
         });
     }, backupIntervalMs);
 }
-startDbBackupScheduler();
+if (require.main === module) {
+    const runOnce = process.argv.includes("--once");
+    if (runOnce) {
+        executeBackupRun()
+            .then((ok) => {
+            process.exit(ok ? 0 : 1);
+        })
+            .catch((err) => {
+            logger_1.default.error({ err }, "Unexpected backup runner error");
+            process.exit(1);
+        });
+    }
+    else {
+        startDbBackupScheduler();
+    }
+}
 exports.default = startDbBackupScheduler;

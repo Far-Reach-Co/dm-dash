@@ -50,19 +50,23 @@ SERVER_ENV=prod npx rollup --config rollup.config.mjs
 git restore --worktree --staged package-lock.json package.json 2>/dev/null || true
 
 echo "Installing systemd units + restarting services..."
-if [[ -f "$REMOTE_DIR/systemd/dm-dash.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.service" ]]; then
+if [[ -f "$REMOTE_DIR/systemd/dm-dash.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.timer" ]]; then
   cp "$REMOTE_DIR/systemd/dm-dash.service" /etc/systemd/system/dm-dash.service
   cp "$REMOTE_DIR/systemd/dm-dash-backup.service" /etc/systemd/system/dm-dash-backup.service
+  cp "$REMOTE_DIR/systemd/dm-dash-backup.timer" /etc/systemd/system/dm-dash-backup.timer
   systemctl daemon-reload
 else
   echo "systemd unit files not found in repo; keeping currently installed units."
 fi
-systemctl enable dm-dash.service dm-dash-backup.service
-systemctl restart dm-dash.service dm-dash-backup.service
+systemctl enable dm-dash.service dm-dash-backup.timer
+systemctl restart dm-dash.service
+systemctl restart dm-dash-backup.timer
+systemctl stop dm-dash-backup.service || true
 
 echo "Service status:"
 systemctl --no-pager --full status dm-dash.service | sed -n '1,24p'
 systemctl --no-pager --full status dm-dash-backup.service | sed -n '1,24p'
+systemctl --no-pager --full status dm-dash-backup.timer | sed -n '1,24p'
 REMOTE
 
 echo "Deploy complete."

@@ -1,7 +1,7 @@
 import path = require("path");
 import fs = require("fs");
 
-// ── Load all SRD JSON at startup ──────────────────────────────────────────────
+// ── Lazy-load SRD JSON on first access ───────────────────────────────────────
 
 const DATA_DIR = path.join(__dirname, "../../../public/lib/data/2014");
 
@@ -33,15 +33,59 @@ const SRD_FILES: Record<string, string> = {
   "equipment-categories": "5e-srd-equipment-categories.json",
 };
 
-export const srdData: Record<string, any[]> = {};
-for (const [key, file] of Object.entries(SRD_FILES)) {
+const srdDataCache: Record<string, any[]> = {};
+
+function loadSrdCategory(key: string): any[] {
+  if (Object.prototype.hasOwnProperty.call(srdDataCache, key)) {
+    return srdDataCache[key];
+  }
+
+  const file = SRD_FILES[key];
+  if (!file) {
+    srdDataCache[key] = [];
+    return srdDataCache[key];
+  }
+
   try {
-    srdData[key] = JSON.parse(
+    srdDataCache[key] = JSON.parse(
       fs.readFileSync(path.join(DATA_DIR, file), "utf8"),
     );
   } catch {
-    srdData[key] = [];
+    srdDataCache[key] = [];
   }
+
+  return srdDataCache[key];
+}
+
+export const srdData = {} as Record<string, any[]>;
+for (const key of Object.keys(SRD_FILES)) {
+  Object.defineProperty(srdData, key, {
+    enumerable: true,
+    configurable: false,
+    get() {
+      return loadSrdCategory(key);
+    },
+  });
+}
+
+export function getSrdData(key: string): any[] {
+  return loadSrdCategory(key);
+}
+
+export function getLoadedSrdCategoryCount(): number {
+  return Object.keys(srdDataCache).length;
+}
+
+export function getLoadedSrdBytesEstimate(): number {
+  let total = 0;
+  for (const value of Object.values(srdDataCache)) {
+    try {
+      total += Buffer.byteLength(JSON.stringify(value), "utf8");
+    } catch {
+      // Ignore serialization errors in diagnostic helper
+    }
+  }
+  return total;
 }
 
 // ── Category detection ────────────────────────────────────────────────────────

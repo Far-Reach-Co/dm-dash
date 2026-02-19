@@ -65,7 +65,7 @@ Note: You'll also need a `private_frc_cloudfront_key.pem` file in the root direc
 ```
 DB_BACKUP_S3_BUCKET=your-s3-bucket-or-bucket/path-prefix
 DB_BACKUP_S3_PREFIX=optional-extra-prefix
-DB_BACKUP_INTERVAL_MS=86400000             # Optional, defaults to 24 hours
+DB_BACKUP_INTERVAL_MS=86400000             # Optional, used by long-running backup worker mode
 DB_BACKUP_ALERT_EMAIL=ops@yourcompany.com  # Severe backup failures are emailed here
 ```
 
@@ -160,7 +160,7 @@ What deploy does:
 4. Runs `npm ci` and `SERVER_ENV=prod npx rollup --config rollup.config.mjs`
 5. Optionally runs TypeScript build when `DM_DASH_REMOTE_BUILD_TS=1`
 6. Runs `npm prune --omit=dev`
-7. Installs/updates `systemd` units from `systemd/` and restarts both services
+7. Installs/updates `systemd` units from `systemd/`, restarts web service, and enables the backup timer
 
 Service controls:
 ```bash
@@ -187,15 +187,20 @@ npm run migrate:redo     # Rollback and reapply the last migration
 
 ## Database Backups
 
-Run the backup worker:
+Run one backup immediately:
 ```bash
-npm run backup:db
+npm run backup:db:once
 ```
 
 Behavior:
-- Runs one backup immediately, then repeats on `DB_BACKUP_INTERVAL_MS`.
 - Uses `pg_dump --data-only --no-acl`, uploads to S3 with timestamped filenames.
 - Sends email alerts only for severe failures (dump/upload/config issues).
+
+Optional long-running mode (mostly for local/dev testing):
+```bash
+npm run backup:db
+```
+This runs once immediately, then repeats on `DB_BACKUP_INTERVAL_MS`.
 
 ## Product Update Emails
 

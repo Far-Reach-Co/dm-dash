@@ -6,6 +6,72 @@ import { srdData } from "./srd/data.js";
 
 var router = Router();
 
+let equipmentDataCache: any[] | null = null;
+let magicItemsDataCache: any[] | null = null;
+let spellsDataCache: any[] | null = null;
+let monstersDataCache: any[] | null = null;
+
+let equipmentMapCache: Map<string, any> | null = null;
+let magicItemsMapCache: Map<string, any> | null = null;
+let spellsMapCache: Map<string, any> | null = null;
+let monstersMapCache: Map<string, any> | null = null;
+
+function getEquipmentData(): any[] {
+  if (!equipmentDataCache) equipmentDataCache = srdData["equipment"] || [];
+  return equipmentDataCache;
+}
+
+function getMagicItemsData(): any[] {
+  if (!magicItemsDataCache) magicItemsDataCache = srdData["magic-items"] || [];
+  return magicItemsDataCache;
+}
+
+function getSpellsData(): any[] {
+  if (!spellsDataCache) spellsDataCache = srdData["spells"] || [];
+  return spellsDataCache;
+}
+
+function getMonstersData(): any[] {
+  if (!monstersDataCache) monstersDataCache = srdData["monsters"] || [];
+  return monstersDataCache;
+}
+
+function getEquipmentMap(): Map<string, any> {
+  if (!equipmentMapCache) {
+    equipmentMapCache = new Map(
+      getEquipmentData().map((entry: any) => [entry.index, entry]),
+    );
+  }
+  return equipmentMapCache;
+}
+
+function getMagicItemsMap(): Map<string, any> {
+  if (!magicItemsMapCache) {
+    magicItemsMapCache = new Map(
+      getMagicItemsData().map((entry: any) => [entry.index, entry]),
+    );
+  }
+  return magicItemsMapCache;
+}
+
+function getSpellsMap(): Map<string, any> {
+  if (!spellsMapCache) {
+    spellsMapCache = new Map(
+      getSpellsData().map((entry: any) => [entry.index, entry]),
+    );
+  }
+  return spellsMapCache;
+}
+
+function getMonstersMap(): Map<string, any> {
+  if (!monstersMapCache) {
+    monstersMapCache = new Map(
+      getMonstersData().map((entry: any) => [entry.index, entry]),
+    );
+  }
+  return monstersMapCache;
+}
+
 // Fifth Edition
 // SRD
 router.get(
@@ -63,18 +129,12 @@ router.get(
   },
 );
 
-// Pre-load equipment and magic items data for efficient lookup
-const equipmentData: any[] = srdData["equipment"] || [];
-const magicItemsData: any[] = srdData["magic-items"] || [];
-const equipmentMap = new Map(equipmentData.map((e: any) => [e.index, e]));
-const magicItemsMap = new Map(magicItemsData.map((m: any) => [m.index, m]));
-
 // Individual equipment page
 router.get(
   "/5e/srd/equipment/:index",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const item = equipmentMap.get(req.params.index);
+      const item = getEquipmentMap().get(req.params.index);
       if (!item) {
         return res.status(404).render("404", { auth: req.session.user });
       }
@@ -95,8 +155,8 @@ router.get(
     try {
       res.render("dnd/5e/srd/equipment", {
         auth: req.session.user,
-        equipmentData,
-        magicItemsData,
+        equipmentData: getEquipmentData(),
+        magicItemsData: getMagicItemsData(),
       });
     } catch (err) {
       next(err);
@@ -109,7 +169,7 @@ router.get(
   "/5e/srd/magic-items/:index",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const item = magicItemsMap.get(req.params.index);
+      const item = getMagicItemsMap().get(req.params.index);
       if (!item) {
         return res.status(404).render("404", { auth: req.session.user });
       }
@@ -219,16 +279,12 @@ router.get(
   },
 );
 
-// Pre-load spells data for efficient lookup
-const spellsData: any[] = srdData["spells"] || [];
-const spellsMap = new Map(spellsData.map((s: any) => [s.index, s]));
-
 // Individual spell page (must be before /spells to match first)
 router.get(
   "/5e/srd/spells/:index",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const spell = spellsMap.get(req.params.index);
+      const spell = getSpellsMap().get(req.params.index);
       if (!spell) {
         return res.status(404).render("404", { auth: req.session.user });
       }
@@ -249,7 +305,7 @@ router.get(
     try {
       res.render("dnd/5e/srd/spells", {
         auth: req.session.user,
-        spellsData,
+        spellsData: getSpellsData(),
       });
     } catch (err) {
       next(err);
@@ -285,8 +341,6 @@ router.get(
   },
 );
 
-const monstersData: any[] = srdData["monsters"] || [];
-const monstersMap = new Map(monstersData.map((m: any) => [m.index, m]));
 const DND_API_BASE = "https://www.dnd5eapi.co";
 
 // Individual monster page (must be before /monsters to match first)
@@ -294,7 +348,7 @@ router.get(
   "/5e/srd/monsters/:index",
   (req: Request, res: Response, next: NextFunction) => {
     try {
-      const monster = monstersMap.get(req.params.index);
+      const monster = getMonstersMap().get(req.params.index);
       if (!monster) {
         return res.status(404).render("404", { auth: req.session.user });
       }
@@ -316,7 +370,7 @@ router.get(
     try {
       res.render("dnd/5e/srd/monsters", {
         auth: req.session.user,
-        data: monstersData,
+        data: getMonstersData(),
       });
     } catch (err) {
       next(err);

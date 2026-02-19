@@ -1,16 +1,15 @@
 [Unit]
-Description=dm-dash postgres backup worker
+Description=dm-dash postgres backup run
 After=network.target
 
 [Service]
-Type=simple
+Type=oneshot
 User=root
 WorkingDirectory=/root/dm-dash
 Environment=NODE_ENV=production
 EnvironmentFile=/root/dm-dash/.env
-ExecStart=/root/.nvm/versions/node/v24.13.0/bin/node /root/dm-dash/dist/lib/db_backups/pgBackup.js
-Restart=always
-RestartSec=5
+ExecStart=/root/.nvm/versions/node/v24.13.0/bin/node /root/dm-dash/dist/lib/db_backups/pgBackup.js --once
+TimeoutStartSec=30min
 StandardOutput=journal
 StandardError=journal
 
