@@ -41,7 +41,7 @@ function usage() {
   console.log(
     [
       "Usage:",
-      "  bash ./scripts/run_with_env.sh tsx tools/import-guest-sandbox-images.ts [options]",
+      "  npm run guest-sandbox:import-images -- [options]",
       "",
       "Options:",
       "  --source <url-or-zip-path>   Source ZIP (default: FreeTokens_v4.zip URL)",
