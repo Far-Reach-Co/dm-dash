@@ -493,6 +493,34 @@
   box-shadow: var(--shadow-sm), var(--shadow-warm-sm);
 }
 
+.wyrld-status > * {
+  position: relative;
+  z-index: 1;
+}
+
+.wyrld-status--with-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: clamp(260px, 34vw, 380px);
+  padding-top: clamp(48px, 9vw, 92px);
+  padding-bottom: clamp(28px, 7vw, 64px);
+  background:
+    linear-gradient(180deg,
+      rgba(9, 16, 24, 0.06) 0%,
+      rgba(9, 16, 24, 0.36) 46%,
+      rgba(9, 16, 24, 0.68) 100%),
+    var(--wyrld-banner-url) center 22% / cover no-repeat,
+    linear-gradient(160deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.5) 60%,
+      rgba(165, 79, 4, 0.04) 100%);
+}
+
+.wyrld-status--with-banner .invite-section {
+  margin-top: auto;
+}
+
 /* Warm top edge accent */
 .wyrld-status::before {
   content: "";
@@ -513,6 +541,16 @@
 .wyrld-status h1 {
   font-size: 1.85rem;
   letter-spacing: 0.6px;
+}
+
+.wyrld-title {
+  font-family: Brookshire, YoungSerif, Georgia, serif;
+  font-size: clamp(2.3rem, 5vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: 0.3px;
+  color: var(--orange3);
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
 }
 
 .wyrld-status-item {
@@ -923,6 +961,57 @@
   outline: none;
   border-color: var(--orange2);
   box-shadow: 0 0 12px rgba(209, 158, 116, 0.08);
+}
+
+.settings-banner-preview {
+  width: 100%;
+  min-height: 140px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-ornate);
+  background-color: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-bottom: var(--space-md);
+}
+
+.settings-banner-preview img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.settings-banner-actions {
+  flex-wrap: wrap;
+}
+
+.settings-banner-actions .label-btn {
+  margin: 0;
+}
+
+.settings-banner-actions .label-btn,
+.settings-banner-actions .btn-red {
+  transition: none;
+}
+
+.settings-banner-actions .label-btn:hover {
+  background: linear-gradient(to bottom, var(--green) 0%, var(--green2) 100%);
+  border-color: rgba(161, 190, 128, 0.3);
+  box-shadow: var(--shadow-md);
+}
+
+.settings-banner-actions .btn-red:hover {
+  background: linear-gradient(to bottom, var(--red3) 0%, var(--red1) 100%);
+  border-color: rgba(241, 143, 143, 0.3);
+  box-shadow: var(--shadow-md);
+}
+
+.settings-banner-actions .label-btn:active,
+.settings-banner-actions .btn-red:active {
+  transform: none;
+  box-shadow: var(--shadow-sm);
 }
 
 .settings-users-header {

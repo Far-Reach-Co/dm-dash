@@ -653,6 +653,11 @@ async function removeImageByProject(
     await editProjectQuery(project.id, {
       used_data_in_bytes: project.used_data_in_bytes - image.size,
     });
+    if (String(project.image_id) === String(req.params.image_id)) {
+      await editProjectQuery(project.id, {
+        image_id: null,
+      });
+    }
 
     logEventAsync({
       userId: req.session.user,

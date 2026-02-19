@@ -24,6 +24,7 @@ import {
 } from "../queries/tableViews.js";
 import {
   getTableImagesByProjectQuery,
+  getTableImagesByImageQuery,
   removeTableImageQuery,
 } from "../queries/tableImages.js";
 import { Request, Response, NextFunction } from "express";
@@ -31,6 +32,7 @@ import { getUserByIdQuery } from "../queries/users.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { requireProjectOwner, requireUser } from "../../lib/authz";
+import { getSignedUrls } from "./s3.js";
 
 interface addProjectRequest extends Request {
   body: {
@@ -213,4 +215,69 @@ async function editProjectTitle(
   }
 }
 
-export { getProjects, getProject, addProject, removeProject, editProjectTitle };
+async function editProjectBannerImage(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const project = await requireProjectOwner(req, req.params.id);
+    const rawImageId = req.body.image_id;
+
+    if (
+      rawImageId === null ||
+      typeof rawImageId === "undefined" ||
+      rawImageId === ""
+    ) {
+      await editProjectQuery(req.params.id, {
+        image_id: null,
+      });
+      res.status(200).json({ message: "Saved", image_id: null, src: null });
+      return;
+    }
+
+    const imageId = Number(rawImageId);
+    if (!Number.isInteger(imageId) || imageId <= 0) {
+      throw { status: 400, message: "Invalid image_id" };
+    }
+
+    if (!project.is_pro) {
+      throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+    }
+
+    const tableImagesData = await getTableImagesByImageQuery(imageId);
+    const isImageInProject = tableImagesData.rows.some(
+      (tableImage) => String(tableImage.project_id) === String(project.id)
+    );
+    if (!isImageInProject) {
+      throw { status: 404, message: "Image not found in this project" };
+    }
+
+    const imageData = await getImageQuery(imageId);
+    const image = imageData.rows[0];
+    if (!image) throw { status: 404, message: "Image not found" };
+
+    await editProjectQuery(req.params.id, {
+      image_id: imageId,
+    });
+
+    const signedUrls = await getSignedUrls([image]);
+    res.status(200).json({
+      message: "Saved",
+      image_id: imageId,
+      src: signedUrls[image.id],
+      original_name: image.original_name,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export {
+  getProjects,
+  getProject,
+  addProject,
+  removeProject,
+  editProjectTitle,
+  editProjectBannerImage,
+};

@@ -5,6 +5,7 @@ import {
   addProject,
   removeProject,
   editProjectTitle,
+  editProjectBannerImage,
 } from "./controllers/projects.js";
 import {
   registerUser,
@@ -466,6 +467,7 @@ router.get("/get_projects", getProjects);
 router.post("/add_project", addProject);
 router.delete("/remove_project/:id", removeProject);
 router.post("/edit_project_title/:id", editProjectTitle);
+router.post("/edit_project_banner_image/:id", editProjectBannerImage);
 
 // Auth and Users
 // setup rate limiters

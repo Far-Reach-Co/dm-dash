@@ -50,30 +50,13 @@
       <% } %>
     </aside>
     <main class="dashboard-main">
-      <div class="p-3 wyrld-status mx-2">
-        <h1 class="text-green" style="text-align: left;"><%= project.title %></h1>
-        <div class="d-flex flex-wrap gap-3 mt-2">
-          <% if (!project.is_pro) { %>
-          <div class="wyrld-status-item">
-            <h3>Status:</h3>
-            <p>Free Tier</p>
-          </div>
-          <div class="wyrld-status-item">
-            <h3>Data Used:</h3>
-            <p><%= usedDataFormatted %> / 50MB</p>
-          </div>
-          <% } else { %>
-          <div class="wyrld-status-item">
-            <h3>Subscription:</h3>
-            <p>Pro</p>
-          </div>
-          <div class="wyrld-status-item">
-            <h3>Data Used:</h3>
-            <p><%= usedDataFormatted %></p>
-          </div>
-          <% } %>
-        </div>
-        <small class="d-block mt-2">-- Subscriptions under Construction --</small>
+      <div
+        class="p-3 wyrld-status mx-2 <%= project.is_pro && projectBannerSrc ? 'wyrld-status--with-banner' : '' %>"
+        <% if (project.is_pro && projectBannerSrc) { %>
+        style="--wyrld-banner-url: url('<%= projectBannerSrc %>');"
+        <% } %>
+      >
+        <h1 class="wyrld-title"><%= project.title %></h1>
         <% if (projectAuth) { %>
         <div class="invite-section mt-3" id="invite-section">
           <% if (inviteLink) { %>
@@ -279,6 +262,56 @@
         </section>
 
         <section class="dashboard-card settings-card">
+          <h2>Wyrld Banner</h2>
+          <small>Feature your wyrld with a custom banner image at the top of this dashboard.</small>
+          <small>Recommended: 1600x500 (wide landscape). The banner is responsively cropped, so keep key details near the center.</small>
+          <hr />
+          <% if (!project.is_pro) { %>
+          <small>This feature is available on Pro Wyrlds.</small>
+          <% } else { %>
+          <div id="settings-banner-preview" class="settings-banner-preview">
+            <% if (projectBannerSrc) { %>
+            <img id="settings-banner-image" src="<%= projectBannerSrc %>" alt="<%= projectBannerName || project.title %> banner" />
+            <% } else { %>
+            <small id="settings-banner-empty">No banner selected.</small>
+            <% } %>
+          </div>
+          <div class="settings-form-row settings-banner-actions">
+            <input type="file" id="settings-banner-upload" accept="image/*" style="display: none" />
+            <label for="settings-banner-upload" class="label-btn" title="Upload banner image">Choose Image</label>
+            <button class="btn-red" id="settings-banner-clear" <%= projectBannerSrc ? '' : 'disabled' %>>Clear Banner</button>
+          </div>
+          <small class="success-message" id="settings-banner-msg"></small>
+          <% } %>
+        </section>
+
+        <section class="dashboard-card settings-card">
+          <h2>Subscription</h2>
+          <small>Current plan and data usage for this wyrld.</small>
+          <hr />
+          <% if (!project.is_pro) { %>
+          <div class="wyrld-status-item">
+            <h3>Status:</h3>
+            <p>Free Tier</p>
+          </div>
+          <div class="wyrld-status-item">
+            <h3>Data Used:</h3>
+            <p><%= usedDataFormatted %> / 50MB</p>
+          </div>
+          <% } else { %>
+          <div class="wyrld-status-item">
+            <h3>Status:</h3>
+            <p>Pro</p>
+          </div>
+          <div class="wyrld-status-item">
+            <h3>Data Used:</h3>
+            <p><%= usedDataFormatted %></p>
+          </div>
+          <% } %>
+          <small class="d-block mt-2">-- Subscriptions under Construction --</small>
+        </section>
+
+        <section class="dashboard-card settings-card">
           <h2>Manage Users</h2>
           <small>Give an invited user access to edit wyrld resources by making them a manager.</small>
           <hr />
@@ -318,6 +351,65 @@
         (function() {
           var projectId = '<%= project.id %>';
           var projectTitle = '<%= project.title.replace(/\x27/g, "\\x27") %>';
+          var projectIsPro = <%= project.is_pro ? 'true' : 'false' %>;
+          var defaultBannerAlt = '<%= (project.title + " banner").replace(/\x27/g, "\\x27") %>';
+
+          function setSettingsMessage(elemId, message, isError) {
+            var msg = document.getElementById(elemId);
+            if (!msg) return;
+            msg.textContent = message;
+            msg.style.color = isError ? 'var(--red)' : 'var(--green)';
+            if (message) {
+              setTimeout(function() {
+                msg.textContent = '';
+              }, 3000);
+            }
+          }
+
+          function showProjectProWarning() {
+            if (typeof renderTierLimitWarning === 'function') {
+              renderTierLimitWarning('This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.');
+            } else {
+              window.alert('This Wyrld feature requires Pro.');
+            }
+          }
+
+          function renderBannerPreview(src, altText) {
+            var preview = document.getElementById('settings-banner-preview');
+            if (!preview) return;
+            preview.textContent = '';
+            if (src) {
+              var img = document.createElement('img');
+              img.id = 'settings-banner-image';
+              img.src = src;
+              img.alt = altText || defaultBannerAlt;
+              preview.appendChild(img);
+            } else {
+              var empty = document.createElement('small');
+              empty.id = 'settings-banner-empty';
+              empty.textContent = 'No banner selected.';
+              preview.appendChild(empty);
+            }
+            var clearButton = document.getElementById('settings-banner-clear');
+            if (clearButton) clearButton.disabled = !src;
+          }
+
+          async function setProjectBanner(imageId) {
+            var res = await fetch('/api/edit_project_banner_image/' + projectId, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ image_id: imageId })
+            });
+            var data = await res.json().catch(function() { return null; });
+            if (res.status === 402 && data && data.error && data.error.message === 'PROJECT_IS_NOT_PRO') {
+              showProjectProWarning();
+              return null;
+            }
+            if (!res.ok || (data && data.error)) {
+              throw new Error((data && data.error && data.error.message) || 'Failed to save banner image');
+            }
+            return data;
+          }
 
           // Edit Title
           document.getElementById('settings-title-save').addEventListener('click', async function() {
@@ -328,16 +420,95 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ title: title })
             });
-            var msg = document.getElementById('settings-title-msg');
             if (res.ok) {
-              msg.textContent = 'Saved';
-              msg.style.color = 'var(--green)';
-              setTimeout(function() { msg.textContent = ''; }, 3000);
+              setSettingsMessage('settings-title-msg', 'Saved', false);
             } else {
-              msg.textContent = 'Error saving title';
-              msg.style.color = 'var(--red)';
+              setSettingsMessage('settings-title-msg', 'Error saving title', true);
             }
           });
+
+          if (projectIsPro) {
+            var bannerUploadInput = document.getElementById('settings-banner-upload');
+            var bannerClearButton = document.getElementById('settings-banner-clear');
+
+            if (bannerUploadInput) {
+              bannerUploadInput.addEventListener('change', async function(event) {
+                var file = event.target.files && event.target.files[0];
+                if (!file) return;
+                bannerUploadInput.disabled = true;
+                if (bannerClearButton) bannerClearButton.disabled = true;
+                setSettingsMessage('settings-banner-msg', 'Uploading banner...', false);
+
+                try {
+                  var formData = new FormData();
+                  formData.append('file', file);
+                  formData.append('bucket_name', 'wyrld');
+                  formData.append('folder_name', 'images');
+                  formData.append('project_id', projectId);
+
+                  var uploadRes = await fetch('/api/new_image_for_project', {
+                    method: 'POST',
+                    body: formData
+                  });
+                  var uploadData = await uploadRes.json().catch(function() { return null; });
+
+                  if (uploadRes.status === 402 && uploadData && uploadData.error && uploadData.error.message === 'PROJECT_IS_NOT_PRO') {
+                    showProjectProWarning();
+                    setSettingsMessage('settings-banner-msg', '', false);
+                    return;
+                  }
+                  if (!uploadRes.ok || !uploadData || uploadData.error) {
+                    throw new Error((uploadData && uploadData.error && uploadData.error.message) || 'Banner upload failed');
+                  }
+
+                  var linkRes = await fetch('/api/add_table_image_by_project', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      project_id: projectId,
+                      image_id: uploadData.id,
+                      folder_id: null
+                    })
+                  });
+                  var linkData = await linkRes.json().catch(function() { return null; });
+                  if (!linkRes.ok || (linkData && linkData.error)) {
+                    throw new Error((linkData && linkData.error && linkData.error.message) || 'Failed to link uploaded image to this wyrld');
+                  }
+
+                  var bannerData = await setProjectBanner(uploadData.id);
+                  if (!bannerData) return;
+                  renderBannerPreview(bannerData.src || uploadData.src || null, bannerData.original_name || uploadData.original_name || defaultBannerAlt);
+                  setSettingsMessage('settings-banner-msg', 'Banner updated', false);
+                } catch (err) {
+                  console.log(err);
+                  setSettingsMessage('settings-banner-msg', 'Error updating banner', true);
+                } finally {
+                  bannerUploadInput.disabled = false;
+                  bannerUploadInput.value = '';
+                  if (bannerClearButton && document.getElementById('settings-banner-image')) {
+                    bannerClearButton.disabled = false;
+                  }
+                }
+              });
+            }
+
+            if (bannerClearButton) {
+              bannerClearButton.addEventListener('click', async function() {
+                if (bannerClearButton.disabled) return;
+                try {
+                  bannerClearButton.disabled = true;
+                  var bannerData = await setProjectBanner(null);
+                  if (!bannerData) return;
+                  renderBannerPreview(null, null);
+                  setSettingsMessage('settings-banner-msg', 'Banner removed', false);
+                } catch (err) {
+                  console.log(err);
+                  setSettingsMessage('settings-banner-msg', 'Error clearing banner', true);
+                  bannerClearButton.disabled = false;
+                }
+              });
+            }
+          }
 
           // Manage Users — toggle editor
           document.querySelectorAll('.settings-editor-toggle').forEach(function(cb) {

@@ -68,6 +68,21 @@ Notes:
 
 - Both `addProjectPlayer` and `add5eChar` enforce the same project-side cap to avoid bypassing via character creation.
 
-## Other Pro-Related References (No Limits Enforced)
+## Wyrld Banner Image (Feature Gating Enforced)
+
+Source: `src/api/controllers/projects.ts`
+
+- Banner images are a Pro Wyrld feature.
+  - Function: `editProjectBannerImage`
+  - Logic: Setting `Project.image_id` to a banner image requires `projects.is_pro = true`.
+  - Failure behavior: Reject with HTTP `402` and message `PROJECT_IS_NOT_PRO`.
+  - Additional guard: The selected image must already be linked to the same project (cannot point at arbitrary image IDs).
+
+Notes:
+
+- Clearing a banner (`image_id: null`) is allowed for the owner regardless of Pro status.
+- This is feature gating, not a numeric usage cap.
+
+## Other Pro-Related References
 
 - `src/api/controllers/5eCharGeneral.ts` imports `userSubscriptionStatus` but does not use it.
