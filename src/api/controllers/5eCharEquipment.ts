@@ -1,10 +1,12 @@
 import {
   add5eCharEquipmentQuery,
+  get5eCharEquipmentQuery,
   get5eCharEquipmentsByGeneralQuery,
   remove5eCharEquipmentQuery,
   edit5eCharEquipmentQuery,
 } from "../queries/5eCharEquipment";
 import { Request, Response, NextFunction } from "express";
+import { requireSheetEditAccess, requireSheetViewAccess } from "./accessControl";
 
 interface add5eCharEquipmentRequest extends Request {
   body: {
@@ -22,6 +24,7 @@ async function add5eCharEquipment(
   next: NextFunction
 ) {
   try {
+    await requireSheetEditAccess(req, req.body.general_id);
     const data = await add5eCharEquipmentQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -35,6 +38,7 @@ async function get5eCharEquipmentsByGeneral(
   next: NextFunction
 ) {
   try {
+    await requireSheetViewAccess(req, req.params.general_id);
     const data = await get5eCharEquipmentsByGeneralQuery(req.params.general_id);
 
     res.send(data.rows);
@@ -49,6 +53,11 @@ async function remove5eCharEquipment(
   next: NextFunction
 ) {
   try {
+    const equipmentData = await get5eCharEquipmentQuery(req.params.id);
+    const equipment = equipmentData.rows[0];
+    if (!equipment) throw { status: 404, message: "Equipment not found" };
+    await requireSheetEditAccess(req, equipment.general_id);
+
     await remove5eCharEquipmentQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -62,6 +71,11 @@ async function edit5eCharEquipment(
   next: NextFunction
 ) {
   try {
+    const equipmentData = await get5eCharEquipmentQuery(req.params.id);
+    const equipment = equipmentData.rows[0];
+    if (!equipment) throw { status: 404, message: "Equipment not found" };
+    await requireSheetEditAccess(req, equipment.general_id);
+
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
       throw new Error('Request body cannot contain the "id" field');

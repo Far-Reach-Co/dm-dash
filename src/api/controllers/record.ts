@@ -3,12 +3,19 @@ import {
   addRecordByProjectQuery,
   addRecordByUserQuery,
   editRecordQuery,
-  getRecordQuery,
   getRecordsByProjectQuery,
   getRecordsByUserQuery,
   removeRecordQuery,
 } from "../queries/record";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import {
+  getRecordOrThrow,
+  requireApiUser,
+  requireProjectEditorAccess,
+  requireProjectMemberAccess,
+  requireRecordEditAccess,
+  requireRecordViewAccess,
+} from "./accessControl";
 
 interface addRecordByUserRequest extends Request {
   body: {
@@ -24,10 +31,10 @@ async function addRecordByUser(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = requireApiUser(req);
 
     const data = await addRecordByUserQuery({
-      user_id: req.session.user,
+      user_id: userId,
       title: req.body.title,
       description: req.body.description,
       is_public: req.body.is_public ? true : false,
@@ -35,7 +42,7 @@ async function addRecordByUser(
     const record = data.rows[0];
     // Log record creation event
     logEventAsync({
-      userId: req.session.user,
+      userId,
       eventType: EventType.RECORD_CREATED,
       eventData: { recordId: record.id, title: record.title },
       req,
@@ -60,8 +67,9 @@ async function addRecordByProject(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = requireApiUser(req);
     if (!req.params.project_id) throw new Error("No project ID in params");
+    await requireProjectEditorAccess(req, req.params.project_id);
 
     const data = await addRecordByProjectQuery({
       project_id: req.params.project_id,
@@ -72,7 +80,7 @@ async function addRecordByProject(
     const record = data.rows[0];
     // Log record creation event
     logEventAsync({
-      userId: req.session.user,
+      userId,
       projectId: req.params.project_id,
       eventType: EventType.RECORD_CREATED,
       eventData: { recordId: record.id, title: record.title },
@@ -86,9 +94,8 @@ async function addRecordByProject(
 
 async function getRecord(req: Request, res: Response, next: NextFunction) {
   try {
-    const recordData = await getRecordQuery(req.params.id);
-    const record = recordData.rows[0];
-
+    const record = await getRecordOrThrow(req.params.id);
+    await requireRecordViewAccess(req, record);
     res.send(record);
   } catch (err) {
     next(err);
@@ -101,9 +108,9 @@ async function getRecordsByUser(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = requireApiUser(req);
 
-    const recordData = await getRecordsByUserQuery(req.session.user);
+    const recordData = await getRecordsByUserQuery(userId);
     const records = recordData.rows;
 
     res.send(records);
@@ -118,6 +125,7 @@ async function getRecordsByProject(
   next: NextFunction
 ) {
   try {
+    await requireProjectMemberAccess(req, req.params.project_id);
     const recordData = await getRecordsByProjectQuery(req.params.project_id);
     const records = recordData.rows;
 
@@ -129,7 +137,20 @@ async function getRecordsByProject(
 
 async function editRecord(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await editRecordQuery(req.params.id, req.body);
+    const existingRecord = await getRecordOrThrow(req.params.id);
+    await requireRecordEditAccess(req, existingRecord);
+    const payload: Record<string, unknown> = {};
+    if (typeof req.body.title !== "undefined") payload.title = req.body.title;
+    if (typeof req.body.description !== "undefined") {
+      payload.description = req.body.description;
+    }
+    if (typeof req.body.is_public !== "undefined") {
+      payload.is_public =
+        req.body.is_public === true ||
+        req.body.is_public === "true" ||
+        req.body.is_public === "on";
+    }
+    const data = await editRecordQuery(req.params.id, payload);
     const record = data.rows[0];
 
     res.status(200).send(record);
@@ -140,6 +161,8 @@ async function editRecord(req: Request, res: Response, next: NextFunction) {
 
 async function removeRecord(req: Request, res: Response, next: NextFunction) {
   try {
+    const record = await getRecordOrThrow(req.params.id);
+    await requireRecordEditAccess(req, record);
     await removeRecordQuery(req.params.id);
 
     res.setHeader("HX-Redirect", "/dash");

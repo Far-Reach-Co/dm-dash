@@ -59,7 +59,18 @@ export default class Toolbar {
     if (!obj.imageId) return info;
 
     info.idPrefix = "img";
-    const image = await getThings(`/api/get_image/${obj.imageId}`);
+    const searchParams = new URLSearchParams();
+    if (this.tableApp?.tableView?.is_guest_sandbox) {
+      const guestUuid =
+        this.tableApp?.tableView?.guest_sandbox_id || this.tableApp?.tableView?.id;
+      if (guestUuid) searchParams.set("guest_uuid", guestUuid);
+    } else if (this.tableApp?.tableView?.id) {
+      searchParams.set("table_view_id", this.tableApp.tableView.id);
+    }
+    const queryString = searchParams.toString();
+    const image = await getThings(
+      `/api/get_image/${obj.imageId}${queryString ? `?${queryString}` : ""}`
+    );
     info.displayName = truncateString(image.original_name, 12);
     info.imageSrc = image.src;
 

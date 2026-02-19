@@ -23,28 +23,35 @@ export function getRecordsEndpoint(projectId = getCurrentProjectId()) {
 export function getTableFoldersEndpoint({
   projectId = getCurrentProjectId(),
   guestSandboxId = null,
+  tableViewId = null,
 } = {}) {
   if (guestSandboxId) return null;
-  return projectId
-    ? `/api/get_table_folders_by_project/${projectId}`
-    : "/api/get_table_folders_by_user";
+  if (projectId) {
+    return `/api/get_table_folders_by_project/${projectId}`;
+  }
+  const suffix = buildTableViewQuerySuffix(tableViewId);
+  return `/api/get_table_folders_by_user${suffix}`;
 }
 
 export function getImageCountsEndpoint({
   projectId = getCurrentProjectId(),
   guestSandboxId = null,
+  tableViewId = null,
 } = {}) {
   if (guestSandboxId) {
     return `/api/get_guest_sandbox_image_counts/${guestSandboxId}`;
   }
-  return projectId
-    ? `/api/get_library_image_counts_by_project/${projectId}`
-    : "/api/get_library_image_counts_by_user";
+  if (projectId) {
+    return `/api/get_library_image_counts_by_project/${projectId}`;
+  }
+  const suffix = buildTableViewQuerySuffix(tableViewId);
+  return `/api/get_library_image_counts_by_user${suffix}`;
 }
 
 export function getLibraryImagesEndpoint({
   projectId = getCurrentProjectId(),
   guestSandboxId = null,
+  tableViewId = null,
   limit = 60,
   offset = 0,
   sort = "newest",
@@ -72,10 +79,14 @@ export function getLibraryImagesEndpoint({
     }
   }
 
-  const base = projectId
-    ? `/api/get_library_images_by_project/${projectId}`
-    : "/api/get_library_images_by_user";
-  return `${base}?${params.toString()}`;
+  if (projectId) {
+    return `/api/get_library_images_by_project/${projectId}?${params.toString()}`;
+  }
+
+  if (tableViewId) {
+    params.set("table_view_id", String(tableViewId));
+  }
+  return `/api/get_library_images_by_user?${params.toString()}`;
 }
 
 export function getImageDeleteEndpoint({

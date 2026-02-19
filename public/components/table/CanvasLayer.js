@@ -140,7 +140,12 @@ export default class CanvasLayer {
 
     const objects = getCanvasObjects(this.tableView);
     const imageIds = getCanvasImageIds(objects);
-    const presignedUrls = await getPresignedUrlsForImages(imageIds);
+    const presignedUrls = await getPresignedUrlsForImages(imageIds, {
+      tableViewId: this.tableView?.is_guest_sandbox ? null : this.tableView?.id,
+      guestUuid: this.tableView?.is_guest_sandbox
+        ? this.tableView?.guest_sandbox_id || this.tableView?.id
+        : null,
+    });
     hydrateCanvasImageSources(objects, presignedUrls);
     await this.renderSavedData();
   };

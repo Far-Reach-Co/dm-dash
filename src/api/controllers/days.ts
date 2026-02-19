@@ -1,14 +1,21 @@
 import {
   addDayQuery,
   getDaysQuery,
-  getDayQuery,
   removeDayQuery,
   editDayQuery,
 } from "../queries/days";
 import { Request, Response, NextFunction } from "express";
+import {
+  requireProjectEditorAccess,
+  requireProjectMemberAccess,
+  resolveProjectIdByCalendarId,
+  resolveProjectIdByDayId,
+} from "./accessControl";
 
 async function addDay(req: Request, res: Response, next: NextFunction) {
   try {
+    const { projectId } = await resolveProjectIdByCalendarId(req.body.calendar_id);
+    await requireProjectEditorAccess(req, projectId);
     const data = await addDayQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -18,6 +25,8 @@ async function addDay(req: Request, res: Response, next: NextFunction) {
 
 async function getDays(req: Request, res: Response, next: NextFunction) {
   try {
+    const { projectId } = await resolveProjectIdByCalendarId(req.params.calendar_id);
+    await requireProjectMemberAccess(req, projectId);
     const data = await getDaysQuery(req.params.calendar_id);
     res.send(data.rows);
   } catch (err) {
@@ -27,6 +36,8 @@ async function getDays(req: Request, res: Response, next: NextFunction) {
 
 async function removeDay(req: Request, res: Response, next: NextFunction) {
   try {
+    const { projectId } = await resolveProjectIdByDayId(req.params.id);
+    await requireProjectEditorAccess(req, projectId);
     await removeDayQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -36,6 +47,8 @@ async function removeDay(req: Request, res: Response, next: NextFunction) {
 
 async function editDay(req: Request, res: Response, next: NextFunction) {
   try {
+    const { projectId } = await resolveProjectIdByDayId(req.params.id);
+    await requireProjectEditorAccess(req, projectId);
     if (!req.body.title) {
       delete req.body.title;
     }

@@ -14,6 +14,7 @@ export interface TableViewAuthResource {
 
 export interface TableCapabilities {
   mode: TableMode;
+  canPlaceImagesFromSidebar: boolean;
   canEditTableData: boolean;
   canManagePins: boolean;
   canUsePinPortals: boolean;
@@ -54,11 +55,12 @@ export function buildTableCapabilities(
   overrides: TableCapabilityOverrides = {},
 ): TableCapabilities {
   const baseCapabilities: TableCapabilities = !canEdit
-    ? {
-        mode,
-        canEditTableData: false,
-        canManagePins: false,
-        canUsePinPortals: false,
+      ? {
+          mode,
+          canPlaceImagesFromSidebar: false,
+          canEditTableData: false,
+          canManagePins: false,
+          canUsePinPortals: false,
         canChangeTable: false,
         canManageLayers: false,
         canManageGrid: false,
@@ -71,6 +73,7 @@ export function buildTableCapabilities(
       : mode === "sandbox"
       ? {
           mode,
+          canPlaceImagesFromSidebar: true,
           canEditTableData: true,
           canManagePins: false,
           canUsePinPortals: false,
@@ -85,6 +88,7 @@ export function buildTableCapabilities(
         }
       : {
           mode,
+          canPlaceImagesFromSidebar: true,
           canEditTableData: true,
           canManagePins: true,
           canUsePinPortals: true,
@@ -132,7 +136,11 @@ export async function resolveTableAuth(
     const isOwner =
       typeof currentUser !== "undefined" &&
       String(table.user_id) === String(currentUser);
-    const capabilities = buildTableCapabilities(mode, !!isOwner);
+    const canEdit = isOwner || mode === "sandbox";
+    const capabilities = buildTableCapabilities(mode, canEdit);
+    if (mode === "sandbox" && !isOwner) {
+      capabilities.canManageTableSettings = false;
+    }
     if (!isOwner) {
       capabilities.canEditTableData = true;
     }
@@ -140,9 +148,9 @@ export async function resolveTableAuth(
       table,
       mode,
       canView: true,
-      canEdit: !!isOwner,
+      canEdit,
       isOwner: !!isOwner,
-      isEditor: !!isOwner,
+      isEditor: canEdit,
       capabilities,
     };
   }
@@ -152,11 +160,14 @@ export async function resolveTableAuth(
   const access = await getProjectAccess(req, table.project_id);
   if (!access) throw forbiddenError();
 
-  const canView = access.isEditor || isPublic;
+  const canView = mode === "sandbox" ? access.isMember : access.isEditor || isPublic;
   if (!canView) throw forbiddenError();
 
-  const canEdit = access.isEditor;
+  const canEdit = mode === "sandbox" ? access.isMember : access.isEditor;
   const capabilities = buildTableCapabilities(mode, canEdit);
+  if (mode === "sandbox" && !access.isEditor) {
+    capabilities.canManageTableSettings = false;
+  }
   if (!canEdit) {
     capabilities.canEditTableData = true;
   }
@@ -166,7 +177,7 @@ export async function resolveTableAuth(
     canView,
     canEdit,
     isOwner: access.isOwner,
-    isEditor: access.isEditor,
+    isEditor: canEdit,
     capabilities,
   };
 }

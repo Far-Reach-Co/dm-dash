@@ -13,9 +13,26 @@ import {
 } from "../queries/tableImages";
 import { Request, Response, NextFunction } from "express";
 import { getSignedUrls } from "./s3";
+import { requireApiUser, requireProjectMemberAccess } from "./accessControl";
+import {
+  parsePositiveInt,
+  requireTablePermissionById,
+  requireUserIdFromTable,
+} from "./tableResourceUtils";
 
 interface TableImageWithSignedUrl extends TableImageWithImage {
   src: string;
+}
+
+async function resolveLibraryUserId(req: Request) {
+  const tableViewId = parsePositiveInt(req.query.table_view_id, "table_view_id", {
+    required: false,
+  });
+  if (tableViewId === null) {
+    return requireApiUser(req);
+  }
+  const { table } = await requireTablePermissionById(req, tableViewId, "view");
+  return requireUserIdFromTable(table);
 }
 
 async function getLibraryImagesByUser(
@@ -24,7 +41,7 @@ async function getLibraryImagesByUser(
   next: NextFunction,
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = await resolveLibraryUserId(req);
 
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
@@ -40,14 +57,14 @@ async function getLibraryImagesByUser(
           : parsedFolderId;
 
     const [data, countData] = await Promise.all([
-      getTableImagesWithImageByUserPaginatedQuery(req.session.user, {
+      getTableImagesWithImageByUserPaginatedQuery(userId, {
         limit,
         offset,
         q,
         sort: sort as "newest" | "name" | "size",
         folderId,
       }),
-      getTableImageCountByUserFilteredQuery(req.session.user, { q, folderId }),
+      getTableImageCountByUserFilteredQuery(userId, { q, folderId }),
     ]);
 
     const images = data.rows.map((row) => ({
@@ -83,7 +100,7 @@ async function getLibraryImagesByProject(
   next: NextFunction,
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    await requireProjectMemberAccess(req, req.params.project_id);
 
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
@@ -145,7 +162,7 @@ async function getLibraryImagesByUserInFolder(
   next: NextFunction,
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = await resolveLibraryUserId(req);
 
     const folderParam = req.params.folder_id;
     const parsedFolderId = parseInt(folderParam);
@@ -155,7 +172,7 @@ async function getLibraryImagesByUserInFolder(
         : parsedFolderId;
 
     const data = await getTableImagesWithImageByUserInFolderQuery(
-      req.session.user,
+      userId,
       folderId
     );
 
@@ -192,7 +209,7 @@ async function getLibraryImagesByProjectInFolder(
   next: NextFunction,
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    await requireProjectMemberAccess(req, req.params.project_id);
 
     const folderParam = req.params.folder_id;
     const parsedFolderId = parseInt(folderParam);
@@ -239,9 +256,9 @@ async function getLibraryImageCountsByUser(
   next: NextFunction,
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    const userId = await resolveLibraryUserId(req);
 
-    const countsData = await getTableImageCountsByUserQuery(req.session.user);
+    const countsData = await getTableImageCountsByUserQuery(userId);
     const by_folder: Record<string, number> = {};
     let total = 0;
     let unsorted = 0;
@@ -267,7 +284,7 @@ async function getLibraryImageCountsByProject(
   next: NextFunction,
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
+    await requireProjectMemberAccess(req, req.params.project_id);
 
     const countsData = await getTableImageCountsByProjectQuery(
       req.params.project_id

@@ -20,7 +20,6 @@ import { Request, Response, NextFunction } from "express";
 import { getMetadata, resizeImage } from "../../lib/imageProcessing";
 import { splitAtIndex } from "../../lib/utils";
 import { editUserQuery, getUserByIdQuery } from "../queries/users";
-import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers";
 import {
   getTableImagesByImageQuery,
   getTableImagesByProjectQuery,
@@ -35,15 +34,19 @@ import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { redisClient } from "../../lib/socketUsers";
 import logger from "../../lib/logger.js";
 import { getProjectAccess, requireProjectEditor, requireUser } from "../../lib/authz";
+import { requireGuestSandboxAccess } from "../../lib/guestSandbox.js";
 import {
   assertProjectIdMatchesTable,
+  badRequestError,
   forbiddenError,
   getOptionalTableEditAuth,
   notFoundError,
+  parsePositiveInt,
   requireProjectIdFromTable,
   requireTablePermissionById,
   requireUserIdFromTable,
 } from "./tableResourceUtils";
+import { requireRecordViewAccess } from "./accessControl";
 
 const awsRegion = process.env.AWS_REGION || "us-east-1";
 const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
@@ -73,7 +76,7 @@ const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
 
 // Signed URL cache settings - cache for 2.5 days (URLs expire in 3 days)
 const SIGNED_URL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 2.5; // 2.5 days
-const SIGNED_URL_CACHE_PREFIX = "signed_url:";
+const SIGNED_URL_CACHE_PREFIX = "signed_url:v2:";
 
 // === Helper Functions ===
 
@@ -162,6 +165,146 @@ async function ensureImageEditableWithOptionalTableContext(
   throw forbiddenError();
 }
 
+function getStarterImageIdsFromRecord(record: { starter_image_ids?: unknown }) {
+  if (!Array.isArray(record.starter_image_ids)) return [];
+  return record.starter_image_ids
+    .map((value) => Number(value))
+    .filter((value) => Number.isFinite(value) && value > 0)
+    .map((value) => Math.trunc(value));
+}
+
+type ImageViewScope =
+  | { kind: "guestSandbox"; allowedImageIds: Set<number> }
+  | {
+      kind: "tableProject";
+      projectId: string | number;
+      tableDataImageIds: Set<number>;
+    }
+  | {
+      kind: "tableUser";
+      userId: string | number;
+      tableDataImageIds: Set<number>;
+    }
+  | { kind: "user"; userId: string | number };
+
+function collectImageIdsFromTableData(data: unknown) {
+  const imageIds = new Set<number>();
+  const stack: unknown[] = [data];
+
+  while (stack.length) {
+    const current = stack.pop();
+    if (!current || typeof current !== "object") continue;
+
+    const value = current as { [key: string]: unknown };
+    const imageIdRaw = value.imageId ?? value.image_id;
+    const imageId = Number(imageIdRaw);
+    if (Number.isFinite(imageId) && imageId > 0) {
+      imageIds.add(Math.trunc(imageId));
+    }
+
+    for (const child of Object.values(value)) {
+      if (child && typeof child === "object") {
+        stack.push(child);
+      }
+    }
+  }
+
+  return imageIds;
+}
+
+async function resolveImageViewScope(req: Request): Promise<ImageViewScope> {
+  const guestUuidRaw = req.body?.guest_uuid ?? req.query?.guest_uuid;
+  if (typeof guestUuidRaw !== "undefined" && guestUuidRaw !== null) {
+    const guestUuid = String(guestUuidRaw).trim();
+    if (!guestUuid) throw badRequestError("guest_uuid is required");
+    const guestRecord = await requireGuestSandboxAccess(req, guestUuid);
+    return {
+      kind: "guestSandbox",
+      allowedImageIds: new Set(getStarterImageIdsFromRecord(guestRecord)),
+    };
+  }
+
+  const tableViewId = parsePositiveInt(
+    req.body?.table_view_id ?? req.query?.table_view_id,
+    "table_view_id",
+    { required: false },
+  );
+  if (tableViewId !== null) {
+    const { table } = await requireTablePermissionById(req, tableViewId, "view");
+    const tableDataImageIds = collectImageIdsFromTableData(table.data);
+    if (table.project_id) {
+      return {
+        kind: "tableProject",
+        projectId: table.project_id,
+        tableDataImageIds,
+      };
+    }
+    if (table.user_id) {
+      return { kind: "tableUser", userId: table.user_id, tableDataImageIds };
+    }
+    throw forbiddenError();
+  }
+
+  return { kind: "user", userId: requireUser(req) };
+}
+
+async function isImageViewableForUser(
+  req: Request,
+  userId: string | number,
+  imageId: string | number,
+) {
+  const tableImages = (await getTableImagesByImageQuery(imageId)).rows;
+  if (!tableImages.length) return false;
+
+  const checkedProjects = new Map<string, boolean>();
+  for (const tableImage of tableImages) {
+    if (tableImage.user_id) {
+      if (String(tableImage.user_id) === String(userId)) return true;
+      continue;
+    }
+    if (!tableImage.project_id) continue;
+    const key = String(tableImage.project_id);
+    if (!checkedProjects.has(key)) {
+      const access = await getProjectAccess(req, tableImage.project_id);
+      checkedProjects.set(key, Boolean(access?.isMember));
+    }
+    if (checkedProjects.get(key)) return true;
+  }
+
+  return false;
+}
+
+async function ensureImageViewable(
+  req: Request,
+  imageId: string | number,
+  scope: ImageViewScope,
+) {
+  if (scope.kind === "guestSandbox") {
+    const imageIdNumber = Number(imageId);
+    if (!scope.allowedImageIds.has(imageIdNumber)) {
+      throw forbiddenError();
+    }
+    return;
+  }
+
+  if (scope.kind === "tableProject") {
+    const imageIdNumber = Number(imageId);
+    if (scope.tableDataImageIds.has(imageIdNumber)) return;
+    await ensureImageLinkedToProject(imageId, scope.projectId);
+    return;
+  }
+
+  if (scope.kind === "tableUser") {
+    const imageIdNumber = Number(imageId);
+    if (scope.tableDataImageIds.has(imageIdNumber)) return;
+    await ensureImageLinkedToUser(imageId, scope.userId);
+    return;
+  }
+
+  const isViewable = await isImageViewableForUser(req, scope.userId, imageId);
+  if (!isViewable) throw forbiddenError();
+}
+
 function getImageOrThrow(imageData: { rows: Array<any> }) {
   const image = imageData.rows[0];
   if (!image) throw notFoundError("Image not found");
@@ -177,6 +320,33 @@ function generateSignedUrl(fileName: string): string {
     privateKey: cloudFrontPrivateKey,
     dateLessThan: expiresAt.toISOString(),
   });
+}
+
+function isCachedSignedUrlUsable(cachedUrl: string): boolean {
+  try {
+    const parsed = new URL(cachedUrl);
+    const expectedHost = String(process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN || "").trim();
+    if (!expectedHost) return false;
+    if (parsed.hostname !== expectedHost) return false;
+    if (!parsed.pathname.startsWith("/images/")) return false;
+
+    const cachedKeyPairId = parsed.searchParams.get("Key-Pair-Id");
+    if (!cachedKeyPairId || cachedKeyPairId !== cloudFrontKeyId) {
+      return false;
+    }
+
+    const expiresRaw = parsed.searchParams.get("Expires");
+    if (expiresRaw) {
+      const expiresSeconds = Number(expiresRaw);
+      if (!Number.isFinite(expiresSeconds)) return false;
+      const nowSeconds = Math.floor(Date.now() / 1000);
+      if (expiresSeconds <= nowSeconds + 60) return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function cacheSignedUrl(imageId: number | string, url: string): void {
@@ -254,20 +424,26 @@ async function deleteFromS3(bucket: string, key: string): Promise<void> {
   );
 }
 
-interface GetSignedUrlsRequestObject {
+interface GetSignedUrlsRequestObject extends Request {
   body: {
     image_ids: (string | number)[];
+    table_view_id?: string | number;
+    guest_uuid?: string;
   };
 }
 
 async function getSignedUrlsHandler(
-  req: GetSignedUrlsRequestObject, // note that the request object type will change
+  req: GetSignedUrlsRequestObject,
   res: Response,
   next: NextFunction,
 ) {
   try {
     if (!req.body.image_ids.length) return res.send([]);
-    const imageDataList = await getImagesQuery(req.body.image_ids); // adjusted function to fetch multiple rows
+    const scope = await resolveImageViewScope(req);
+    await Promise.all(
+      req.body.image_ids.map((imageId) => ensureImageViewable(req, imageId, scope)),
+    );
+    const imageDataList = await getImagesQuery(req.body.image_ids);
     const urls = getSignedUrls(imageDataList.rows);
     return res.send({ urls });
   } catch (err) {
@@ -290,7 +466,7 @@ async function getSignedUrls(images: Image[]) {
   for (let i = 0; i < images.length; i++) {
     const imageData = images[i];
     const cachedUrl = cachedUrls[i];
-    if (cachedUrl) {
+    if (cachedUrl && isCachedSignedUrlUsable(cachedUrl)) {
       urls[imageData.id] = cachedUrl;
     } else {
       const signedUrl = generateSignedUrl(imageData.file_name);
@@ -391,16 +567,6 @@ async function checkProjectProLimitReachedAndAuth(
 
   const projectData = await getProjectQuery(projectId);
   const project = projectData.rows[0];
-  // auth
-  if (sessionUser != project.user_id) {
-    const projectUserData = await getProjectUserByUserAndProjectQuery(
-      sessionUser,
-      projectId,
-    );
-    if (!projectUserData.rows.length)
-      throw new Error("Not authorized to update this resource");
-  }
-
   const projectDataCount = project.used_data_in_bytes;
 
   if (projectDataCount >= megabytesInBytes.fifty) {
@@ -446,6 +612,8 @@ async function newImageForProject(
     const tableAuth = await getOptionalTableAuthForImageMutation(req);
     if (tableAuth) {
       req.body.project_id = Number(requireProjectIdFromTable(tableAuth.table));
+    } else {
+      await requireProjectEditor(req, req.body.project_id);
     }
     await checkProjectProLimitReachedAndAuth(
       req.body.project_id,
@@ -594,8 +762,11 @@ interface imageDataResObject extends Image {
 
 async function getImage(req: Request, res: Response, next: NextFunction) {
   try {
+    const scope = await resolveImageViewScope(req);
+    await ensureImageViewable(req, req.params.id, scope);
+
     const imageData = await getImageQuery(req.params.id);
-    const image = imageData.rows[0] as imageDataResObject;
+    const image = getImageOrThrow(imageData) as imageDataResObject;
 
     const cacheKey = getSignedUrlCacheKey(image.id);
     const cachedUrl = await redisClient.get(cacheKey);
@@ -614,7 +785,21 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
         return recordData.rows[0];
       }),
     );
-    image.records = recordsData;
+    const accessibleRecords: Record[] = [];
+    for (const record of recordsData) {
+      if (!record) continue;
+      if (!req.session?.user) {
+        if (record.is_public) accessibleRecords.push(record);
+        continue;
+      }
+      try {
+        await requireRecordViewAccess(req, record);
+        accessibleRecords.push(record);
+      } catch {
+        // Intentionally ignore records the caller cannot access.
+      }
+    }
+    image.records = accessibleRecords;
     res.send(image);
   } catch (err) {
     logger.error({ err, imageId: req.params.id }, "Failed to get image");

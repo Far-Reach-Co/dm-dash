@@ -25,7 +25,9 @@ import {
   forbiddenError,
   getOptionalTableEditAuth,
   notFoundError,
+  parsePositiveInt,
   requireProjectIdFromTable,
+  requireTablePermissionById,
   requireUserIdFromTable,
 } from "./tableResourceUtils";
 
@@ -106,7 +108,15 @@ async function getTableFoldersByUser(
   next: NextFunction
 ) {
   try {
-    const userId = requireUser(req);
+    const tableViewId = parsePositiveInt(req.query.table_view_id, "table_view_id", {
+      required: false,
+    });
+    const userId =
+      tableViewId === null
+        ? requireUser(req)
+        : requireUserIdFromTable(
+            (await requireTablePermissionById(req, tableViewId, "view")).table,
+          );
     const data = await getTableFoldersByUserQuery(userId);
     res.send(data.rows);
   } catch (err) {

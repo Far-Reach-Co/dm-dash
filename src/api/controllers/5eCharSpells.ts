@@ -1,12 +1,14 @@
 import {
   add5eCharSpellQuery,
+  get5eCharSpellQuery,
   get5eCharSpellsByTypeQuery,
   remove5eCharSpellQuery,
   edit5eCharSpellQuery,
 } from "../queries/5eCharSpells";
 import { Request, Response, NextFunction } from "express";
+import { requireSheetEditAccess, requireSheetViewAccess } from "./accessControl";
 
-interface add5eCharSpellRequest {
+interface add5eCharSpellRequest extends Request {
   body: {
     general_id: number | string;
     title: string;
@@ -21,6 +23,7 @@ async function add5eCharSpell(
   next: NextFunction
 ) {
   try {
+    await requireSheetEditAccess(req, req.body.general_id);
     const data = await add5eCharSpellQuery(req.body);
     res.status(201).json(data.rows[0]);
   } catch (err) {
@@ -34,6 +37,7 @@ async function get5eCharSpellsByType(
   next: NextFunction
 ) {
   try {
+    await requireSheetViewAccess(req, req.params.general_id);
     const data = await get5eCharSpellsByTypeQuery(
       req.params.general_id,
       req.params.type
@@ -51,6 +55,11 @@ async function remove5eCharSpell(
   next: NextFunction
 ) {
   try {
+    const spellData = await get5eCharSpellQuery(req.params.id);
+    const spell = spellData.rows[0];
+    if (!spell) throw { status: 404, message: "Spell not found" };
+    await requireSheetEditAccess(req, spell.general_id);
+
     await remove5eCharSpellQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -64,6 +73,11 @@ async function edit5eCharSpell(
   next: NextFunction
 ) {
   try {
+    const spellData = await get5eCharSpellQuery(req.params.id);
+    const spell = spellData.rows[0];
+    if (!spell) throw { status: 404, message: "Spell not found" };
+    await requireSheetEditAccess(req, spell.general_id);
+
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
       throw new Error('Request body cannot contain the "id" field');

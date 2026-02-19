@@ -1,5 +1,6 @@
 import {
   addProjectPlayerQuery,
+  getProjectPlayerQuery,
   getProjectPlayersByProjectQuery,
   removeProjectPlayerQuery,
   editProjectPlayerQuery,
@@ -10,6 +11,11 @@ import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { getProjectQuery } from "../queries/projects";
 import { userSubscriptionStatus } from "../../lib/enums";
 import { notifySheetLinkedAsync } from "../../lib/emailNotifications";
+import {
+  requireProjectEditorAccess,
+  requireProjectMemberAccess,
+  requireSheetOwnerAccess,
+} from "./accessControl";
 
 async function addProjectPlayer(
   req: Request,
@@ -17,6 +23,7 @@ async function addProjectPlayer(
   next: NextFunction
 ) {
   try {
+    await requireProjectEditorAccess(req, req.body.project_id);
     const projectPlayersData = await getProjectPlayersByProjectQuery(
       req.body.project_id
     );
@@ -67,6 +74,7 @@ async function getProjectPlayersByProject(
   next: NextFunction
 ) {
   try {
+    await requireProjectMemberAccess(req, req.params.project_id);
     const projectPlayerData = await getProjectPlayersByProjectQuery(
       req.params.project_id
     );
@@ -83,6 +91,7 @@ async function getProjectPlayersByPlayer(
   next: NextFunction
 ) {
   try {
+    await requireSheetOwnerAccess(req, req.params.player_id);
     const projectPlayerData = await getProjectPlayersByPlayerQuery(
       req.params.player_id
     );
@@ -99,6 +108,10 @@ async function removeProjectPlayer(
   next: NextFunction
 ) {
   try {
+    const projectPlayerData = await getProjectPlayerQuery(req.params.id);
+    const projectPlayer = projectPlayerData.rows[0];
+    if (!projectPlayer) throw { status: 404, message: "Project player not found" };
+    await requireProjectEditorAccess(req, projectPlayer.project_id);
     await removeProjectPlayerQuery(req.params.id);
     res.status(204).send();
   } catch (err) {
@@ -112,7 +125,19 @@ async function editProjectPlayer(
   next: NextFunction
 ) {
   try {
-    const data = await editProjectPlayerQuery(req.params.id, req.body);
+    const projectPlayerData = await getProjectPlayerQuery(req.params.id);
+    const projectPlayer = projectPlayerData.rows[0];
+    if (!projectPlayer) throw { status: 404, message: "Project player not found" };
+    await requireProjectEditorAccess(req, projectPlayer.project_id);
+    const payload: Record<string, unknown> = {};
+    if (typeof req.body.player_id !== "undefined") {
+      payload.player_id = req.body.player_id;
+    }
+    if (!Object.keys(payload).length) {
+      res.status(200).send(projectPlayer);
+      return;
+    }
+    const data = await editProjectPlayerQuery(req.params.id, payload);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);

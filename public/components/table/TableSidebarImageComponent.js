@@ -72,11 +72,13 @@ export default class TableSidebarImageComponent {
   };
 
   placeImageOnTable = (image) => {
+    if (!this.can("canPlaceImagesFromSidebar")) return;
     if (!image?.src) return;
     this.tableApp?.addImageToCanvas?.(image);
   };
 
   startDesktopImageDrag = (image) => {
+    if (!this.can("canPlaceImagesFromSidebar")) return;
     if (!image?.src) return;
     imageFollowingCursor.setImageSrc(image.src);
     imageFollowingCursor.render();
@@ -89,7 +91,7 @@ export default class TableSidebarImageComponent {
   };
 
   renderImage = async (image) => {
-    if (image.src) {
+    if (image.src && this.can("canPlaceImagesFromSidebar")) {
       this.downloadedImageSourceList[image.id] = image.src;
 
       const isMobile = detectMob();
@@ -143,6 +145,7 @@ export default class TableSidebarImageComponent {
         handlers,
       );
     }
+    return createElement("div", { class: "d-none" });
   };
 
   getDeleteImageEndpoint = (imageId) => {
@@ -258,6 +261,7 @@ export default class TableSidebarImageComponent {
     return getImageCountsEndpoint({
       projectId: this.projectId,
       guestSandboxId: this.guestSandboxId,
+      tableViewId: this.tableView?.id,
     });
   };
 
@@ -288,6 +292,7 @@ export default class TableSidebarImageComponent {
     return getLibraryImagesEndpoint({
       projectId: this.projectId,
       guestSandboxId: this.guestSandboxId,
+      tableViewId: this.tableView?.id,
       limit: this.pageLimit,
       offset,
       sort: this.sortKey,
@@ -438,23 +443,25 @@ export default class TableSidebarImageComponent {
 
     let elem = null;
 
-    const placeImageBtn = createElement(
-      "button",
-      {
-        class: "sidebar-image-place-btn",
-        title: "Add image to table center",
-        type: "button",
-      },
-      "+",
-      {
-        type: "click",
-        event: (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          this.placeImageOnTable(image);
-        },
-      },
-    );
+    const placeImageBtn = this.can("canPlaceImagesFromSidebar")
+      ? createElement(
+          "button",
+          {
+            class: "sidebar-image-place-btn",
+            title: "Add image to table center",
+            type: "button",
+          },
+          "+",
+          {
+            type: "click",
+            event: (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              this.placeImageOnTable(image);
+            },
+          },
+        )
+      : createElement("div");
 
     const settingsBtn = createElement(
       "img",
