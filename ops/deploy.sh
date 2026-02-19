@@ -53,24 +53,33 @@ echo "Saved release archive: $ARCHIVE_PATH"
 echo "Validating remote prerequisites on $SERVER ..."
 run_remote "set -euo pipefail; command -v rsync >/dev/null; test -x '$REMOTE_NPM_BIN'; mkdir -p '$REMOTE_DIR' '$REMOTE_DIR/releases'; df -h '$REMOTE_DIR' | sed -n '1,2p'"
 
-RSYNC_DELETE_FLAGS=(--delete)
+RSYNC_DELETE_ENABLED=1
 if ! run_remote "[ -f '$REMOTE_DIR/.artifact_deploy_initialized' ]"; then
   if [[ "$FORCE_DELETE" == "1" ]]; then
     echo "First artifact deploy detected. --delete enabled by DM_DASH_FORCE_DELETE=1."
   else
     echo "First artifact deploy detected. Skipping --delete for safety."
     echo "Set DM_DASH_FORCE_DELETE=1 to enable --delete on first artifact deploy."
-    RSYNC_DELETE_FLAGS=()
+    RSYNC_DELETE_ENABLED=0
   fi
 fi
 
 echo "Syncing artifacts to $SERVER:$REMOTE_DIR ..."
-rsync -az "${RSYNC_DELETE_FLAGS[@]}" -e "$RSYNC_SSH" \
-  --exclude ".env" \
-  --exclude "private_frc_cloudfront_key.pem" \
-  --exclude "file_uploads/" \
-  --rsync-path="mkdir -p '$REMOTE_DIR' && rsync" \
-  "$STAGING_DIR"/ "$SERVER:$REMOTE_DIR/"
+if [[ "$RSYNC_DELETE_ENABLED" == "1" ]]; then
+  rsync -az --delete -e "$RSYNC_SSH" \
+    --exclude ".env" \
+    --exclude "private_frc_cloudfront_key.pem" \
+    --exclude "file_uploads/" \
+    --rsync-path="mkdir -p '$REMOTE_DIR' && rsync" \
+    "$STAGING_DIR"/ "$SERVER:$REMOTE_DIR/"
+else
+  rsync -az -e "$RSYNC_SSH" \
+    --exclude ".env" \
+    --exclude "private_frc_cloudfront_key.pem" \
+    --exclude "file_uploads/" \
+    --rsync-path="mkdir -p '$REMOTE_DIR' && rsync" \
+    "$STAGING_DIR"/ "$SERVER:$REMOTE_DIR/"
+fi
 
 echo "Uploading release archive..."
 rsync -az -e "$RSYNC_SSH" \
