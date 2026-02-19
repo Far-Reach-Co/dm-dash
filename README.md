@@ -218,6 +218,13 @@ Run restore verification (creates temp DB, restores a full dump, then cleans up)
 npm run backup:db:restore-check
 ```
 
+Production-safe equivalents (work when devDependencies are pruned on the server):
+```bash
+npm run prod:backup:db:once
+npm run prod:backup:db:once:full
+npm run prod:backup:db:restore-check
+```
+
 Optional long-running mode (mostly for local/dev testing):
 ```bash
 npm run backup:db
