@@ -8,7 +8,7 @@ export interface Project {
   date_created: string;
   used_data_in_bytes: number;
   description: string;
-  image_id: number;
+  image_id: number | null;
   is_pro: boolean;
 }
 

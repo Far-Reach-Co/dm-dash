@@ -12,6 +12,8 @@ import { getRecordsByProjectQuery } from "../api/queries/record";
 import { getUserByIdQuery, User } from "../api/queries/users";
 import { humanFileSize } from "../lib/utils";
 import { getTableImageCountByProjectQuery } from "../api/queries/tableImages";
+import { getImageQuery } from "../api/queries/images";
+import { getSignedUrls } from "../api/controllers/s3";
 import {
   requireProjectEditorOrRedirect,
   requireProjectMemberOrRedirect,
@@ -87,6 +89,18 @@ async function loadWyrldData(
     "/forbidden",
   );
   if (!project) return null;
+
+  let projectBannerSrc: string | null = null;
+  let projectBannerName: string | null = null;
+  if (project.is_pro && project.image_id) {
+    const imageData = await getImageQuery(project.image_id);
+    const image = imageData.rows[0];
+    if (image) {
+      const signedUrls = await getSignedUrls([image]);
+      projectBannerSrc = signedUrls[image.id] || null;
+      projectBannerName = image.original_name || null;
+    }
+  }
 
   let projectAuth = true;
   if (userId != project.user_id) {
@@ -186,6 +200,8 @@ async function loadWyrldData(
     usedDataFormatted,
     inviteLink,
     inviteId,
+    projectBannerSrc,
+    projectBannerName,
     recentTables,
     recentRecords,
     recentSheets,
