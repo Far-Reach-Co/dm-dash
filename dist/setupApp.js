@@ -22,6 +22,7 @@ const pino_http_1 = __importDefault(require("pino-http"));
 const crypto_1 = require("crypto");
 const logger_js_1 = __importDefault(require("./lib/logger.js"));
 const redisSessionStore_js_1 = __importDefault(require("./lib/redisSessionStore.js"));
+const redisConfig_js_1 = require("./lib/redisConfig.js");
 const routes_js_1 = __importDefault(require("./api/routes.js"));
 const routes_js_2 = __importDefault(require("./routes.js"));
 const routes_js_3 = __importDefault(require("./dnd/routes.js"));
@@ -89,8 +90,7 @@ app.use(body_parser_1.default.urlencoded({
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.static("public"));
 app.set("trust proxy", 1);
-const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-const sessionRedisClient = (0, redis_1.createClient)({ url: redisUrl });
+const sessionRedisClient = (0, redis_1.createClient)({ url: (0, redisConfig_js_1.getRedisUrl)() });
 sessionRedisClient.on("error", (err) => {
     logger_js_1.default.error({ err }, "Redis session client error");
 });

@@ -15,14 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.pool = void 0;
 const pg_1 = require("pg");
 const logger_js_1 = __importDefault(require("../lib/logger.js"));
-var credentials = {
-    user: process.env.PG_USER,
-    host: process.env.PG_HOST,
-    database: process.env.PG_DB,
-    password: process.env.PG_PW,
-    port: 5432,
-};
-exports.pool = new pg_1.Pool(credentials);
+const dbConnection_js_1 = require("../lib/dbConnection.js");
+exports.pool = new pg_1.Pool((0, dbConnection_js_1.resolveDatabasePoolConfig)());
 function query(queryObject, params) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
