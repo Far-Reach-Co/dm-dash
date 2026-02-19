@@ -7,6 +7,7 @@ This folder contains remote operations scripts for dm-dash.
 - `./ops/preflight.sh`: local/remote deployment readiness checks + release dry-run packaging
 - `./ops/deploy.sh`: build locally, sync artifacts, install prod deps, restart services
 - `DM_DASH_RESTART_SERVICES=0 ./ops/deploy.sh`: deploy artifacts without restarting services
+- `DM_DASH_CREATE_RELEASE_ARCHIVE=0 ./ops/deploy.sh`: fastest deploy path (no rollback archive creation)
 - `./ops/service.sh`: status/logs/restart/stop for web + backup services
 - `./ops/rollback.sh`: list release archives and roll back to a selected archive
 - `./ops/cleanup_remote.sh`: remove legacy repo-era paths from remote server
@@ -46,6 +47,7 @@ SERVER_ENV=prod npm run build:client
 
 - Ensure remote node/npm paths are valid:
   - `DM_DASH_REMOTE_NPM_BIN=/root/.nvm/versions/node/v24.13.0/bin/npm`
+- Ensure that same directory contains `node` (deploy prepends npm bin dir to `PATH`).
 - Verify package files were synced:
   - `ssh "$DM_DASH_SERVER" "ls -l /root/dm-dash/package.json /root/dm-dash/package-lock.json"`
 
