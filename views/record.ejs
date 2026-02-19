@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Far Reach Co. | <%= record.title %></title>
   <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/record.css" />
   <%- include('./partials/icons') %>
   <script src="/lib/MobileNavHandler.js" defer></script>
   <script src="/lib/htmx.min.js"></script>
@@ -15,34 +16,54 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid info-container p-3">
-    <div>
+  <div class="container-fluid record-page">
+
+    <div class="record-header">
       <h1><%= record.title %></h1>
-      <% if (projectId) { %>
-      <small>- Wyrld Record</small>
-      <% } else { %>
-      <small>- Record</small>
-      <% } %>
-      <% if (record.is_public) { %>
-      <small>(Public)</small>
-      <% } %>
+      <div class="record-meta">
+        <% if (projectId) { %>
+        <span class="record-badge record-badge-wyrld">Wyrld Record</span>
+        <% } else { %>
+        <span class="record-badge">Record</span>
+        <% } %>
+        <% if (record.is_public) { %>
+        <span class="record-badge record-badge-public">Public</span>
+        <% } %>
+      </div>
     </div>
-    <p id="description" class="whitespace-pre-wrap"></p>
-    <div>
-      <% if (imageUrls && Object.keys(imageUrls).length) { %>
+
+    <div class="record-body" id="description"></div>
+
+    <% if (imageUrls && Object.keys(imageUrls).length) { %>
+    <div class="record-images">
       <% Object.entries(imageUrls).forEach(([key, value]) => { %>
-      <img class="my-2 max-w-90" id="img-<%= key %>" src="<%= value %>">
+      <img class="record-image-thumb" id="img-<%= key %>" src="<%= value %>" alt="" data-lightbox="<%= value %>">
       <% }) %>
+    </div>
+    <% } %>
+
+    <% if (canEdit) { %>
+    <div class="record-actions">
+      <% if (projectId) { %>
+      <a class="record-edit-link" href="/editrecord?id=<%= record.id %>&project_id=<%= projectId %>">Edit Record</a>
+      <% } else { %>
+      <a class="record-edit-link" href="/editrecord?id=<%= record.id %>">Edit Record</a>
       <% } %>
     </div>
-    <hr />
-    <% if (canEdit) { %>
-    <% if (projectId) { %>
-    <small><a href="/editrecord?id=<%= record.id %>&project_id=<%= projectId %>">Edit Record</a></small>
-    <% } else { %>
-    <small><a href="/editrecord?id=<%= record.id %>">Edit Record</a></small>
     <% } %>
-    <% } %>
+
+  </div>
+
+  <!-- Image lightbox -->
+  <div class="modal-custom" id="record-lightbox" role="dialog" aria-modal="true">
+    <div class="modal-custom-container">
+      <span class="close-custom-modal" id="lightbox-close" title="Close">&times;</span>
+      <div class="modal-custom-content">
+        <img class="modal-custom-image" id="lightbox-img" src="" alt="">
+      </div>
+    </div>
+  </div>
+
 </body>
 <script type="application/json" id="description-data"><%- JSON.stringify(record.description) %></script>
 <script type="module" defer>
@@ -53,6 +74,30 @@
   for (const elem of elems) {
     descElem.appendChild(elem);
   }
+
+  // Lightbox
+  const lightbox = document.getElementById("record-lightbox");
+  const lightboxImg = document.getElementById("lightbox-img");
+
+  document.querySelectorAll("[data-lightbox]").forEach(img => {
+    img.addEventListener("click", () => {
+      lightboxImg.src = img.dataset.lightbox;
+      lightbox.classList.add("visible");
+    });
+  });
+
+  function closeLightbox() {
+    lightbox.classList.remove("visible");
+    lightboxImg.src = "";
+  }
+
+  document.getElementById("lightbox-close").addEventListener("click", closeLightbox);
+  lightbox.addEventListener("click", e => {
+    if (e.target === lightbox) closeLightbox();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeLightbox();
+  });
 </script>
 
 </html>
