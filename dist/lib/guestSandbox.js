@@ -27,13 +27,13 @@ const dbconfig_1 = __importDefault(require("../api/dbconfig"));
 const httpErrors_1 = require("./httpErrors");
 const tableAuthz_1 = require("./tableAuthz");
 Object.defineProperty(exports, "buildGuestSandboxCapabilities", { enumerable: true, get: function () { return tableAuthz_1.buildGuestSandboxCapabilities; } });
+const redisConfig_js_1 = require("./redisConfig.js");
 const GUEST_SANDBOX_PREFIX = "frc:guest:sandbox:";
 const DEFAULT_GUEST_SANDBOX_TITLE = "Sandbox Demo";
 const GUEST_SANDBOX_TTL_SECONDS = Math.max(60, Number(process.env.GUEST_SANDBOX_TTL_SECONDS || 12 * 60 * 60));
 const GUEST_SANDBOX_MAX_IMAGES = Math.max(1, Number(process.env.GUEST_SANDBOX_MAX_IMAGES || 30));
 const GUEST_SANDBOX_MAX_DATA_BYTES = Math.max(1024, Number(process.env.GUEST_SANDBOX_MAX_DATA_BYTES || 2 * 1024 * 1024));
-const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
-const guestSandboxRedisClient = (0, redis_1.createClient)({ url: redisUrl });
+const guestSandboxRedisClient = (0, redis_1.createClient)({ url: (0, redisConfig_js_1.getRedisUrl)() });
 guestSandboxRedisClient.on("error", (err) => {
     logger_js_1.default.error({ err }, "Guest sandbox Redis client error");
 });
