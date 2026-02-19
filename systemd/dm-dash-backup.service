@@ -1,0 +1,18 @@
+[Unit]
+Description=dm-dash postgres backup worker
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/dm-dash
+Environment=NODE_ENV=production
+EnvironmentFile=/root/dm-dash/.env
+ExecStart=/root/.nvm/versions/node/v24.13.0/bin/node /root/dm-dash/dist/lib/db_backups/pgBackup.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
