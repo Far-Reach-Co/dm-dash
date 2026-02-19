@@ -56,7 +56,7 @@ function download(url: string): Promise<string> {
 async function main() {
   const edition = process.argv[2] || "2014";
   if (!["2014", "2024"].includes(edition)) {
-    console.error(`Usage: npx tsx tools/download-5e-srd.ts [2014|2024]`);
+    console.error(`Usage: npm run srd:download -- [2014|2024]`);
     process.exit(1);
   }
 

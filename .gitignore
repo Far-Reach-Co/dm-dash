@@ -9,6 +9,9 @@ private_frc_cloudfront_key.pem
 
 # Bundles
 public/dist/*
+dist/*
+dist-tools/*
+.releases/*
 
 # Editor directories and files
 .vscode/*
@@ -134,4 +137,3 @@ localhost.pem
 # misc
 **/nohup.out
 backup.sql
-

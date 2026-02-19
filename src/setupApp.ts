@@ -128,7 +128,7 @@ const redisSessionStore = new RedisSessionStore({
 const sessionMiddleware = isProd
   ? session({
       store: redisSessionStore,
-      secret: SECRET_KEY || "",
+      secret: SECRET_KEY,
       name: "frc_session",
       resave: false,
       saveUninitialized: false,
@@ -142,7 +142,7 @@ const sessionMiddleware = isProd
     })
   : session({
       store: redisSessionStore,
-      secret: SECRET_KEY || "",
+      secret: SECRET_KEY,
       name: "frcsession",
       resave: false,
       saveUninitialized: false,
