@@ -129,10 +129,45 @@ The server will be available at `http://localhost:4000`
    npm run build
    ```
 
-2. Start the production server:
+2. Build frontend bundles:
    ```bash
-   sh ./commands/start_prod.sh
+   SERVER_ENV=prod npx rollup --config rollup.config.mjs
    ```
+
+3. Start the production server:
+   ```bash
+   node ./dist/server.js
+   ```
+
+## Deploy (Systemd)
+
+This repo includes local deploy scripts, similar to the `go_chat` workflow:
+
+```bash
+./scripts/deploy.sh
+```
+
+Optional overrides:
+```bash
+DM_DASH_SERVER=root@your-server-ip DM_DASH_BRANCH=navel ./scripts/deploy.sh
+DM_DASH_REMOTE_BUILD_TS=1 ./scripts/deploy.sh
+```
+
+What deploy does:
+1. SSHes to `root@165.227.88.65`
+2. Ensures `/root/dm-dash` is a git checkout (auto re-clones if `.git` is missing, preserving `.env`, `private_frc_cloudfront_key.pem`, and `file_uploads/`)
+3. Pulls `origin navel`
+4. Runs `npm ci` and `SERVER_ENV=prod npx rollup --config rollup.config.mjs`
+5. Optionally runs TypeScript build when `DM_DASH_REMOTE_BUILD_TS=1`
+6. Runs `npm prune --omit=dev`
+7. Installs/updates `systemd` units from `systemd/` and restarts both services
+
+Service controls:
+```bash
+./scripts/service.sh status all
+./scripts/service.sh logs web
+./scripts/service.sh restart backup
+```
 
 ## Database Migrations
 
@@ -209,6 +244,7 @@ SELECT * FROM monthly_log_events_summary WHERE month >= '2026-01-01';
 ├── file_uploads/      # Temporary file storage for uploads
 ├── migrations/        # Database migration files (SQL)
 ├── public/            # Static assets (CSS, client-side JS bundles)
+├── scripts/           # Local deploy + remote service control scripts
 ├── src/               # TypeScript source code
 │   ├── api/          # API routes, controllers, and queries
 │   ├── lib/          # Shared utilities and services
@@ -218,6 +254,7 @@ SELECT * FROM monthly_log_events_summary WHERE month >= '2026-01-01';
 │   ├── setupSocket.ts # Socket.io setup
 │   └── setupRedisAdapter.ts # Redis adapter for Socket.io
 ├── views/             # EJS templates
+├── systemd/           # systemd unit files used during deploy
 ├── .env              # Environment variables (not in git)
 └── tsconfig.json     # TypeScript configuration
 ```
