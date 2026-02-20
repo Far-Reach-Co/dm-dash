@@ -49,11 +49,27 @@ async function postThing(endpoint, body) {
       );
       return null;
     } else if (
+      res.status === 413 &&
+      data.error.message === "USER_DATA_HARD_LIMIT_REACHED"
+    ) {
+      renderTierLimitWarning(
+        "This account is at its hard image data cap. Remove unused images to free space."
+      );
+      return null;
+    } else if (
       res.status === 402 &&
       data.error.message === "PROJECT_IS_NOT_PRO"
     ) {
       renderTierLimitWarning(
         'This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.'
+      );
+      return null;
+    } else if (
+      res.status === 413 &&
+      data.error.message === "PROJECT_DATA_HARD_LIMIT_REACHED"
+    ) {
+      renderTierLimitWarning(
+        "This Wyrld is at its hard image data cap. Remove unused images to free space."
       );
       return null;
     } else {

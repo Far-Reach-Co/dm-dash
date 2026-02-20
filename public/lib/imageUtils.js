@@ -52,7 +52,17 @@ export async function uploadProjectImage(
     // warn about data usage for poject
     if (res.status === 402 && data.error.message === "PROJECT_IS_NOT_PRO") {
       renderTierLimitWarning(
-        'You have reached the image data limit for this project. Please subscribe to our "Pro Wyrld" package to increase the limit.'
+        'You have reached the free image data limit for this Wyrld. Upgrade to "Pro Wyrld" to increase storage.'
+      );
+      return null;
+    }
+
+    if (
+      res.status === 413 &&
+      data.error.message === "PROJECT_DATA_HARD_LIMIT_REACHED"
+    ) {
+      renderTierLimitWarning(
+        "This Wyrld is at its hard image data cap. Remove unused images to free space."
       );
       return null;
     }
@@ -85,7 +95,14 @@ export async function uploadUserImage(image, makeImageSmall, tableViewId = null)
     // warn about data usage for user
     if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
       renderTierLimitWarning(
-        'You have reached the image data limit for this account. Please subscribe to our "Pro User" package to increase the limit.'
+        'You have reached the free image data limit for this account. Upgrade to "Pro User" to increase storage.'
+      );
+      return null;
+    }
+
+    if (res.status === 413 && data.error.message === "USER_DATA_HARD_LIMIT_REACHED") {
+      renderTierLimitWarning(
+        "This account is at its hard image data cap. Remove unused images to free space."
       );
       return null;
     }

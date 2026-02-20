@@ -1,6 +1,25 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { humanFileSize } from "../lib/utils";
+import { subscriptionPlanLimits } from "../lib/subscription";
 
 const router = Router();
+
+function buildPlanLimitViewModel() {
+  return {
+    user: {
+      freeWyrlds: subscriptionPlanLimits.freeOwnedWyrlds,
+      freeTables: subscriptionPlanLimits.freeUserTables,
+      freeDataLimit: humanFileSize(subscriptionPlanLimits.freeUserDataBytes),
+      proDataLimit: humanFileSize(subscriptionPlanLimits.proUserDataBytes),
+    },
+    wyrld: {
+      freeTables: subscriptionPlanLimits.freeWyrldTables,
+      freeCharacterLinks: subscriptionPlanLimits.freeWyrldCharacterLinks,
+      freeDataLimit: humanFileSize(subscriptionPlanLimits.freeWyrldDataBytes),
+      proDataLimit: humanFileSize(subscriptionPlanLimits.proWyrldDataBytes),
+    },
+  };
+}
 
 router.get("/", (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -68,6 +87,17 @@ router.get(
     }
   },
 );
+
+router.get("/pricing", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.render("pricing", {
+      auth: req.session.user,
+      planLimits: buildPlanLimitViewModel(),
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get(
   "/public-wyrlds-admin-guide",

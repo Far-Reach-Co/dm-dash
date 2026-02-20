@@ -27,7 +27,6 @@ import {
 } from "../queries/tableImages";
 import path = require("path");
 import fs = require("fs");
-import { megabytesInBytes } from "../../lib/enums";
 import { getRecordImagesByImageQuery } from "../queries/recordImage";
 import { getRecordQuery, Record } from "../queries/record";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
@@ -35,6 +34,10 @@ import { redisClient } from "../../lib/socketUsers";
 import logger from "../../lib/logger.js";
 import { getProjectAccess, requireProjectEditor, requireUser } from "../../lib/authz";
 import { requireGuestSandboxAccess } from "../../lib/guestSandbox.js";
+import {
+  getUserDataUsageLimitBytes,
+  getWyrldDataUsageLimitBytes,
+} from "../../lib/subscription";
 import {
   assertProjectIdMatchesTable,
   badRequestError,
@@ -544,35 +547,50 @@ function computeAwsImageParamsFromRequest(req: Request) {
   };
 }
 
-async function checkUserProLimitReachedAndAuth(
+async function checkUserDataUsageLimitReachedAndAuth(
   sessionUser: string | number | undefined,
+  incomingBytes = 0,
 ) {
   if (!sessionUser) throw new Error("User is not logged in");
   const userData = await getUserByIdQuery(sessionUser);
   const user = userData.rows[0];
-  const userDataCount = user.used_data_in_bytes;
+  if (!user) throw { status: 404, message: "User not found" };
+  const limitBytes = getUserDataUsageLimitBytes(Boolean(user.is_pro));
+  const projectedUsage = Number(user.used_data_in_bytes || 0) + incomingBytes;
 
-  if (userDataCount >= megabytesInBytes.fifty) {
-    if (!user.is_pro)
+  if (projectedUsage > limitBytes) {
+    if (!user.is_pro) {
       throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+    }
+    throw {
+      status: 413,
+      message: userSubscriptionStatus.userDataHardLimitReached,
+    };
   }
 }
 
-async function checkProjectProLimitReachedAndAuth(
+async function checkProjectDataUsageLimitReachedAndAuth(
   projectId: number | undefined,
   sessionUser: string | number | undefined,
+  incomingBytes = 0,
 ) {
   if (!sessionUser) throw new Error("User is not logged in");
   if (!projectId) throw new Error("Missing project ID");
 
   const projectData = await getProjectQuery(projectId);
   const project = projectData.rows[0];
-  const projectDataCount = project.used_data_in_bytes;
+  if (!project) throw { status: 404, message: "Project not found" };
+  const limitBytes = getWyrldDataUsageLimitBytes(Boolean(project.is_pro));
+  const projectedUsage = Number(project.used_data_in_bytes || 0) + incomingBytes;
 
-  if (projectDataCount >= megabytesInBytes.fifty) {
+  if (projectedUsage > limitBytes) {
     if (!project.is_pro) {
       throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
     }
+    throw {
+      status: 413,
+      message: userSubscriptionStatus.projectDataHardLimitReached,
+    };
   }
 }
 
@@ -615,10 +633,6 @@ async function newImageForProject(
     } else {
       await requireProjectEditor(req, req.body.project_id);
     }
-    await checkProjectProLimitReachedAndAuth(
-      req.body.project_id,
-      req.session.user,
-    );
 
     const params = computeAwsImageParamsFromRequest(req);
     let fileSize = req.file.size;
@@ -631,6 +645,11 @@ async function newImageForProject(
         fileSize = stats.size;
       }
     }
+    await checkProjectDataUsageLimitReachedAndAuth(
+      req.body.project_id,
+      req.session.user,
+      fileSize,
+    );
 
     const imageData = await addImageQuery({
       original_name: req.file.originalname,
@@ -699,8 +718,6 @@ async function newImageForUser(
       requireUserIdFromTable(tableAuth.table);
     }
 
-    await checkUserProLimitReachedAndAuth(req.session.user);
-
     const params = computeAwsImageParamsFromRequest(req);
     let fileSize = req.file.size;
 
@@ -712,6 +729,7 @@ async function newImageForUser(
         fileSize = stats.size;
       }
     }
+    await checkUserDataUsageLimitReachedAndAuth(req.session.user, fileSize);
 
     const imageData = await addImageQuery({
       original_name: req.file.originalname,

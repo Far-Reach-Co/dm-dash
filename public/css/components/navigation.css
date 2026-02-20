@@ -34,16 +34,19 @@ nav {
 
 #nav-links-container-mobile {
   visibility: hidden;
-  position: absolute;
-  top: 10%;
+  position: fixed;
+  top: 0;
   left: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  height: 80%;
+  justify-content: flex-start;
+  padding-top: 72px;
+  height: 100vh;
   width: 100%;
   z-index: 1;
+  pointer-events: none;
+  overflow-y: auto;
   background-color: rgba(24, 32, 41, 0.97);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -52,11 +55,12 @@ nav {
 #nav-links-container-mobile.open {
   visibility: visible;
   z-index: 4;
+  pointer-events: auto;
 }
 
 #nav-links-container-mobile .top-nav-btn {
-  margin-bottom: var(--main-distance);
-  height: 10%;
+  margin-bottom: 0;
+  min-height: 56px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -76,6 +80,13 @@ nav {
 }
 
 @media screen and (max-width: 500px) {
+  nav {
+    padding-left: var(--space-md);
+    padding-right: var(--space-md);
+  }
+}
+
+@media screen and (max-width: 980px) {
   #nav-ham {
     visibility: visible;
   }

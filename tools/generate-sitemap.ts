@@ -28,6 +28,7 @@ const staticPages: SitemapEntry[] = [
   { url: "/about-us", priority: 0.9, changefreq: "monthly" },
   { url: "/what-is-frc", priority: 0.9, changefreq: "monthly" },
   { url: "/resources", priority: 0.9, changefreq: "monthly" },
+  { url: "/pricing", priority: 0.9, changefreq: "monthly" },
   { url: "/wyrlds/public", priority: 0.85, changefreq: "weekly" },
   { url: "/public-wyrlds-guide", priority: 0.8, changefreq: "monthly" },
   { url: "/public-wyrlds-admin-guide", priority: 0.7, changefreq: "monthly" },

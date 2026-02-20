@@ -9,24 +9,39 @@ Source: `src/lib/enums.ts`
 - `userSubscriptionStatus`
   - `USER_IS_NOT_PRO`
   - `PROJECT_IS_NOT_PRO`
+  - `USER_DATA_HARD_LIMIT_REACHED`
+  - `PROJECT_DATA_HARD_LIMIT_REACHED`
 - `megabytesInBytes`
   - `fifty = 52428800` (50 MB)
+  - `fiveHundred = 524288000` (500 MB)
+
+Source of effective plan limits: `src/lib/subscription.ts`
+
+- Free user data cap: `50 MB`
+- Pro user hard data cap: `500 MB`
+- Free Wyrld data cap: `50 MB`
+- Pro Wyrld hard data cap: `500 MB`
+- Free owned Wyrlds: `2`
+- Free personal tables: `10`
+- Free Wyrld tables: `10`
+- Free Wyrld character links: `5`
 
 ## Image Upload Usage Limits (Enforced)
 
-Source: `src/api/controllers/s3.ts`
+Source: `src/api/controllers/s3.ts`, `src/lib/subscription.ts`
 
-Limits are enforced using `megabytesInBytes.fifty` and `userSubscriptionStatus` when uploading images.
+Limits are enforced against projected post-upload usage (`current_used_data_in_bytes + incoming_image_size`).
 
-- User-level usage cap (50 MB)
-  - Function: `checkUserProLimitReachedAndAuth`
-  - Logic: If `users.used_data_in_bytes >= 50 MB` and `users.is_pro` is false, reject with HTTP `402` and message `USER_IS_NOT_PRO`.
+- User-level usage cap
+  - Function: `checkUserDataUsageLimitReachedAndAuth`
+  - Free logic: if projected usage exceeds `50 MB` and user is not Pro, reject with HTTP `402` and `USER_IS_NOT_PRO`.
+  - Pro logic: if projected usage exceeds `500 MB`, reject with HTTP `413` and `USER_DATA_HARD_LIMIT_REACHED`.
   - Used by: `newImageForUser`
 
-- Project-level usage cap (50 MB)
-  - Function: `checkProjectProLimitReachedAndAuth`
-  - Logic: If `projects.used_data_in_bytes >= 50 MB` and `projects.is_pro` is false, reject with HTTP `402` and message `PROJECT_IS_NOT_PRO`.
-  - Auth: Ensures the session user is the project owner or an authorized project user before applying the limit.
+- Wyrld/project-level usage cap
+  - Function: `checkProjectDataUsageLimitReachedAndAuth`
+  - Free logic: if projected usage exceeds `50 MB` and project is not Pro, reject with HTTP `402` and `PROJECT_IS_NOT_PRO`.
+  - Pro logic: if projected usage exceeds `500 MB`, reject with HTTP `413` and `PROJECT_DATA_HARD_LIMIT_REACHED`.
   - Used by: `newImageForProject`
 
 ## Wyrlds Created (Enforced)
@@ -126,6 +141,19 @@ Notes:
 - This is selective visibility control, not a separate quantity limit.
 - Other Wyrld records remain non-public unless user has normal Wyrld membership access.
 
-## Other Pro-Related References
+## User-Facing Pro Docs
 
-- `src/api/controllers/5eCharGeneral.ts` imports `userSubscriptionStatus` but does not use it.
+- Pricing page: `views/pricing.ejs` at route `/pricing`
+
+## Cross-Service Pro Gate (FRC Radio)
+
+Source: `../music_stream_server`
+
+- `GET /playlists` returns full playlists for Pro users, otherwise free playlists.
+  - Reference: `../music_stream_server/radio.py` (`get_playlists_route`)
+- Pro-only playlist selection is blocked for non-Pro users.
+  - Reference: `../music_stream_server/radio.py` (`POST /command`)
+- Pro state is read from the same `public."User".is_pro` field.
+  - Reference: `../music_stream_server/radio.py` (`_get_user_is_pro`)
+
+This means one account-level Pro entitlement can unlock both DM Dash user limits and FRC Radio Pro playlists.

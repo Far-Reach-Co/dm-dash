@@ -34,6 +34,7 @@ import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { requireProjectOwner, requireUser } from "../../lib/authz";
 import { getSignedUrls } from "./s3.js";
 import { requireProjectMemberAccess } from "./accessControl";
+import { subscriptionPlanLimits } from "../../lib/subscription";
 
 interface addProjectRequest extends Request {
   body: {
@@ -52,7 +53,7 @@ async function addProject(
     // check if user is pro, hard limit project creation to 2
     const projectsByUserData = await getProjectsQuery(userId);
 
-    if (projectsByUserData.rows.length >= 2) {
+    if (projectsByUserData.rows.length >= subscriptionPlanLimits.freeOwnedWyrlds) {
       const userData = await getUserByIdQuery(userId);
       if (!userData.rows[0].is_pro)
         throw { status: 402, message: userSubscriptionStatus.userIsNotPro };

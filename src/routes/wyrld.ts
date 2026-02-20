@@ -13,6 +13,7 @@ import { getCalendarsQuery } from "../api/queries/calendars";
 import { getRecordsByProjectQuery, getRecordQuery } from "../api/queries/record";
 import { getUserByIdQuery, User } from "../api/queries/users";
 import { humanFileSize } from "../lib/utils";
+import { getWyrldDataUsageLimitBytes } from "../lib/subscription";
 import { getTableImageCountByProjectQuery } from "../api/queries/tableImages";
 import { getImageQuery, getImagesQuery } from "../api/queries/images";
 import { getSignedUrls } from "../api/controllers/s3";
@@ -185,6 +186,9 @@ async function loadWyrldData(
 
   // calculate used data formatted
   const usedDataFormatted = humanFileSize(project.used_data_in_bytes);
+  const projectDataLimitFormatted = humanFileSize(
+    getWyrldDataUsageLimitBytes(Boolean(project.is_pro)),
+  );
 
   // get invite link if exists (only needed for owners/managers)
   let inviteLink = null;
@@ -355,6 +359,7 @@ async function loadWyrldData(
     records,
     imageCount,
     usedDataFormatted,
+    projectDataLimitFormatted,
     inviteLink,
     inviteId,
     projectBannerSrc,

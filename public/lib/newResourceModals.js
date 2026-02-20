@@ -20,6 +20,15 @@ async function submitResourceForm(url, body) {
       renderTierLimitWarning(err.error.message === "USER_IS_NOT_PRO"
         ? 'You have reached the limit for this account. Please subscribe to our "Pro User" package to increase the limit.'
         : 'This Wyrld has reached the limit. Please subscribe to our "Pro Wyrld" package to increase the limit.');
+    } else if (
+      err.error?.message === "USER_DATA_HARD_LIMIT_REACHED" ||
+      err.error?.message === "PROJECT_DATA_HARD_LIMIT_REACHED"
+    ) {
+      renderTierLimitWarning(
+        err.error.message === "USER_DATA_HARD_LIMIT_REACHED"
+          ? "This account is at its hard image data cap. Remove unused images to free space."
+          : "This Wyrld is at its hard image data cap. Remove unused images to free space."
+      );
     } else {
       modal.show(
         createElement("div", { class: "modal-form" }, [

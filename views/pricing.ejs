@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pricing & Plans | Far Reach Co.</title>
+  <meta name="description" content="Compare Free, Pro User, and Pro Wyrld plans on Far Reach Co. including features, gating rules, and hard data limits." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <link rel="stylesheet" href="/css/features/pro.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="pricing-hero">
+      <h1>Pricing & Plans</h1>
+      <p>
+        Standard account-style plans with separate entitlements for <strong>User</strong> and <strong>Wyrld</strong>.
+        Billing UI is still under construction, but all limits below are already enforced.
+      </p>
+      <div class="pricing-toggle" aria-hidden="true">
+        <span class="active">Monthly</span>
+        <span>Yearly</span>
+      </div>
+    </div>
+
+    <h2>Plans</h2>
+    <div class="pricing-grid">
+      <article class="plan-card">
+        <h3 class="plan-name">Free</h3>
+        <p class="plan-price">$0 <small>/month</small></p>
+        <p class="plan-desc">For casual worldbuilding and standard FRC Radio usage.</p>
+        <ul>
+          <li>Own up to <strong><%= planLimits.user.freeWyrlds %></strong> Wyrlds</li>
+          <li>Create up to <strong><%= planLimits.user.freeTables %></strong> personal tables</li>
+          <li>Account image storage: <strong><%= planLimits.user.freeDataLimit %></strong> hard cap</li>
+          <li>Wyrld image storage: <strong><%= planLimits.wyrld.freeDataLimit %></strong> hard cap</li>
+          <li>FRC Radio: standard playlist library</li>
+        </ul>
+        <div class="plan-cta">
+          <a class="label-btn" href="/register">Get Started</a>
+        </div>
+      </article>
+
+      <article class="plan-card featured">
+        <span class="plan-badge">Popular</span>
+        <h3 class="plan-name">Pro User</h3>
+        <p class="plan-price">TBD <small>/month</small></p>
+        <p class="plan-desc">For heavy individual usage across DM Dash and Radio.</p>
+        <ul>
+          <li>Own more than <strong><%= planLimits.user.freeWyrlds %></strong> Wyrlds</li>
+          <li>Create more than <strong><%= planLimits.user.freeTables %></strong> personal tables</li>
+          <li>Higher account image storage cap: <strong><%= planLimits.user.proDataLimit %></strong> hard cap</li>
+          <li>FRC Radio: full playlist catalog (including Pro playlists)</li>
+        </ul>
+        <div class="plan-cta">
+          <a class="label-btn" href="/account">Choose Pro User</a>
+        </div>
+      </article>
+
+      <article class="plan-card">
+        <h3 class="plan-name">Pro Wyrld</h3>
+        <p class="plan-price">TBD <small>/wyrld/month</small></p>
+        <p class="plan-desc">For campaign owners who need larger Wyrld capacity and public discovery.</p>
+        <ul>
+          <li>More than <strong><%= planLimits.wyrld.freeTables %></strong> tables in that Wyrld</li>
+          <li>More than <strong><%= planLimits.wyrld.freeCharacterLinks %></strong> linked character sheets</li>
+          <li>Wyrld banner support</li>
+          <li>Public directory listing + featured onboarding record</li>
+          <li>Wyrld image storage cap: <strong><%= planLimits.wyrld.proDataLimit %></strong> hard cap</li>
+        </ul>
+        <div class="plan-cta">
+          <a class="label-btn" href="/account">Choose Pro Wyrld</a>
+        </div>
+      </article>
+    </div>
+
+    <h2>Feature Comparison</h2>
+    <table class="pricing-compare">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Free</th>
+          <th>Pro User</th>
+          <th>Pro Wyrld</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Owned Wyrlds</td>
+          <td class="center"><%= planLimits.user.freeWyrlds %></td>
+          <td class="center"><strong>Expanded</strong></td>
+          <td class="center">-</td>
+        </tr>
+        <tr>
+          <td>Personal tables</td>
+          <td class="center"><%= planLimits.user.freeTables %></td>
+          <td class="center"><strong>Expanded</strong></td>
+          <td class="center">-</td>
+        </tr>
+        <tr>
+          <td>Tables per Wyrld</td>
+          <td class="center"><%= planLimits.wyrld.freeTables %></td>
+          <td class="center">-</td>
+          <td class="center"><strong>Expanded</strong></td>
+        </tr>
+        <tr>
+          <td>Character links per Wyrld</td>
+          <td class="center"><%= planLimits.wyrld.freeCharacterLinks %></td>
+          <td class="center">-</td>
+          <td class="center"><strong>Expanded</strong></td>
+        </tr>
+        <tr>
+          <td>FRC Radio Pro playlists</td>
+          <td class="center">No</td>
+          <td class="center">Yes</td>
+          <td class="center">No</td>
+        </tr>
+        <tr>
+          <td>Public Wyrld listing</td>
+          <td class="center">No</td>
+          <td class="center">No</td>
+          <td class="center">Yes</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <section>
+      <h2>FAQ</h2>
+      <h3>Can I bundle Pro User + Pro Wyrld?</h3>
+      <p>Yes, that is planned. Initial implementation will likely support discounted Pro Wyrld pricing when you already have Pro User.</p>
+      <h3>Does Pro remove all limits?</h3>
+      <p>No. Pro increases limits but hard storage caps still apply.</p>
+      <h3>Where are all limits documented?</h3>
+      <p>This page is the primary user-facing summary of current plan limits and feature access.</p>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>
