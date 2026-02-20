@@ -25,6 +25,7 @@ import {
   getTableViewByUUIDOrThrow,
   requireTablePermissionById,
 } from "./tableResourceUtils";
+import { subscriptionPlanLimits } from "../../lib/subscription";
 
 function getTitle(value: unknown) {
   if (typeof value === "string" && value.trim()) return value.trim();
@@ -63,7 +64,7 @@ async function addTableViewByProject(
     const tableViewsData = await getTableViewsByProjectQuery(
       req.params.project_id
     );
-    if (tableViewsData.rows.length >= 10) {
+    if (tableViewsData.rows.length >= subscriptionPlanLimits.freeWyrldTables) {
       const projectData = await getProjectQuery(req.params.project_id);
       if (!projectData.rows[0].is_pro) {
         throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
@@ -101,7 +102,7 @@ async function addTableViewByUser(
   try {
     if (!req.session.user) throw new Error("User is not logged in");
     const tableViewsData = await getTableViewsByUserQuery(req.session.user);
-    if (tableViewsData.rows.length >= 10) {
+    if (tableViewsData.rows.length >= subscriptionPlanLimits.freeUserTables) {
       const userData = await getUserByIdQuery(req.session.user);
       if (!userData.rows[0].is_pro) {
         throw { status: 402, message: userSubscriptionStatus.userIsNotPro };

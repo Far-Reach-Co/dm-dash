@@ -1,14 +1,23 @@
+<%
+  const navLinks = typeof auth !== 'undefined'
+    ? [
+        { href: '/resources', label: 'Resources' },
+        { href: '/pricing', label: 'Pricing' },
+        { href: '/dash', label: 'Dashboard' },
+        { href: '/wyrlds/public', label: 'Public Wyrlds' },
+        { href: '/account', label: 'Account' },
+      ]
+    : [
+        { href: '/resources', label: 'Resources' },
+        { href: '/pricing', label: 'Pricing' },
+        { href: '/wyrlds/public', label: 'Public Wyrlds' },
+        { href: '/login', label: 'Login' },
+      ];
+%>
 <div id="nav-links-container-mobile">
-  <% if (typeof auth !== 'undefined') { %>
-  <a class="top-nav-btn" href="/resources">Resources</a>
-  <a class="top-nav-btn" href="/dash">Dashboard</a>
-  <a class="top-nav-btn" href="/wyrlds/public">Public Wyrlds</a>
-  <a class="top-nav-btn" href="/account">Account</a>
-  <% } else { %>
-  <a class="top-nav-btn" href="/resources">Resources</a>
-  <a class="top-nav-btn" href="/wyrlds/public">Public Wyrlds</a>
-  <a class="top-nav-btn" href="/login">Login</a>
-  <% } %>
+  <% navLinks.forEach((link) => { %>
+    <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+  <% }) %>
 </div>
 <nav>
   <a id="frlogo-container" class="d-flex align-items-center" href="/index">
@@ -16,16 +25,9 @@
   </a>
   <img src="/assets/hamburger.svg" height="32" width="32" id="nav-ham" alt="" />
   <div id="nav-links-container" class="d-flex">
-    <% if (typeof auth !== 'undefined') { %>
-    <a class="top-nav-btn" href="/resources">Resources</a>
-    <a class="top-nav-btn" href="/dash">Dashboard</a>
-    <a class="top-nav-btn" href="/wyrlds/public">Public Wyrlds</a>
-    <a class="top-nav-btn" href="/account">Account</a>
-    <% } else { %>
-    <a class="top-nav-btn" href="/resources">Resources</a>
-    <a class="top-nav-btn" href="/wyrlds/public">Public Wyrlds</a>
-    <a class="top-nav-btn" href="/login">Login</a>
-    <% } %>
+    <% navLinks.forEach((link) => { %>
+      <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+    <% }) %>
   </div>
 </nav>
 <script>

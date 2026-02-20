@@ -59,6 +59,7 @@ import {
   requireSheetOwnerAccess,
   requireSheetViewAccess,
 } from "./accessControl";
+import { subscriptionPlanLimits } from "../../lib/subscription";
 
 interface add5eCharRequest extends Request {
   body: {
@@ -94,7 +95,10 @@ async function add5eChar(
       const projectPlayersData = await getProjectPlayersByProjectQuery(
         req.body.wyrld_id
       );
-      if (projectPlayersData.rows.length >= 5) {
+      if (
+        projectPlayersData.rows.length >=
+        subscriptionPlanLimits.freeWyrldCharacterLinks
+      ) {
         const projectData = await getProjectQuery(req.body.wyrld_id);
         if (!projectData.rows[0].is_pro) {
           throw {

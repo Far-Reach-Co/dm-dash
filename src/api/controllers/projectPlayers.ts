@@ -16,6 +16,7 @@ import {
   requireProjectMemberAccess,
   requireSheetOwnerAccess,
 } from "./accessControl";
+import { subscriptionPlanLimits } from "../../lib/subscription";
 
 async function addProjectPlayer(
   req: Request,
@@ -27,7 +28,10 @@ async function addProjectPlayer(
     const projectPlayersData = await getProjectPlayersByProjectQuery(
       req.body.project_id
     );
-    if (projectPlayersData.rows.length >= 5) {
+    if (
+      projectPlayersData.rows.length >=
+      subscriptionPlanLimits.freeWyrldCharacterLinks
+    ) {
       const projectData = await getProjectQuery(req.body.project_id);
       if (!projectData.rows[0].is_pro) {
         throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };

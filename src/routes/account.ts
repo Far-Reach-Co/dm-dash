@@ -3,6 +3,7 @@ import { getUserByIdQuery } from "../api/queries/users";
 import { humanFileSize } from "../lib/utils";
 import { csrfMiddleware } from "./csrf";
 import { requireUserOrRedirect } from "../lib/authz";
+import { getUserDataUsageLimitBytes } from "../lib/subscription";
 
 const router = Router();
 
@@ -15,14 +16,19 @@ router.get(
       if (!userId) return;
       const csrfToken = res.locals.csrfToken;
       const { rows } = await getUserByIdQuery(userId);
+      const user = rows[0];
 
       // calculate used data formatted
-      const usedDataFormatted = humanFileSize(rows[0].used_data_in_bytes);
+      const usedDataFormatted = humanFileSize(user.used_data_in_bytes);
+      const userDataLimitFormatted = humanFileSize(
+        getUserDataUsageLimitBytes(Boolean(user.is_pro)),
+      );
 
       res.render("account", {
         auth: userId,
-        user: rows[0],
+        user,
         usedDataFormatted,
+        userDataLimitFormatted,
         csrfToken,
       });
     } catch (err) {
