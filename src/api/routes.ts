@@ -5,8 +5,17 @@ import {
   addProject,
   removeProject,
   editProjectTitle,
+  editProjectDescription,
   editProjectBannerImage,
 } from "./controllers/projects.js";
+import {
+  cancelProjectJoinRequest,
+  editProjectPublicSettings,
+  getProjectJoinRequestsByProject,
+  getPublicWyrldDirectory,
+  requestProjectJoin,
+  respondProjectJoinRequest,
+} from "./controllers/publicWyrlds.js";
 import {
   registerUser,
   loginUser,
@@ -38,6 +47,7 @@ import {
 import {
   removeProjectUser,
   editProjectUserIsEditor,
+  leaveProject,
 } from "./controllers/projectUsers.js";
 import {
   getImage,
@@ -222,6 +232,20 @@ const guestSandboxStartLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     message: "Too many guest sandbox requests, please try again shortly",
+  },
+});
+
+const publicJoinRequestLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutes
+  max: 8,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const userKey = req.session?.user ? `user:${req.session.user}` : `ip:${req.ip}`;
+    return `${userKey}:project:${req.params.project_id || "unknown"}`;
+  },
+  message: {
+    message: "Too many join requests for this wyrld, please try again shortly",
   },
 });
 
@@ -456,6 +480,7 @@ router.post("/edit_calendar/:id", editCalendar);
 // project users
 router.delete("/remove_project_user/:id", removeProjectUser);
 router.post("/edit_project_user_is_editor/:id", editProjectUserIsEditor);
+router.post("/leave_project/:project_id", leaveProject);
 
 // project invites
 router.post("/add_project_invite", addProjectInvite);
@@ -464,10 +489,21 @@ router.delete("/remove_project_invite/:id", removeProjectInvite);
 // projects
 router.get("/get_project/:id", getProject);
 router.get("/get_projects", getProjects);
+router.get("/get_public_wyrld_directory", getPublicWyrldDirectory);
 router.post("/add_project", addProject);
 router.delete("/remove_project/:id", removeProject);
 router.post("/edit_project_title/:id", editProjectTitle);
+router.post("/edit_project_description/:id", editProjectDescription);
 router.post("/edit_project_banner_image/:id", editProjectBannerImage);
+router.post("/edit_project_public_settings/:id", editProjectPublicSettings);
+router.post(
+  "/request_project_join/:project_id",
+  publicJoinRequestLimiter,
+  requestProjectJoin,
+);
+router.get("/get_project_join_requests/:project_id", getProjectJoinRequestsByProject);
+router.post("/respond_project_join_request/:id", respondProjectJoinRequest);
+router.post("/cancel_project_join_request/:id", cancelProjectJoinRequest);
 
 // Auth and Users
 // setup rate limiters

@@ -226,6 +226,7 @@
           <a onclick="openNewWyrldModal()" title="Create a new wyrld" style="cursor:pointer">+ Wyrld</a>
         </div>
         <small>A Wyrld is a contained environment that associates tables and character sheets to create a more organized experience.</small>
+        <small class="d-block mt-1"><a href="/wyrlds/public">Browse Public Wyrlds</a></small>
         <hr />
         <h3>Created</h3>
         <% if (projectsSorted.length === 0) { %>
@@ -286,7 +287,7 @@
   }
 
   function handleSharedWyrldSettingsClick(id) {
-    window.location.href = `/wyrld?id=${id}`;
+    window.location.href = `/wyrld/settings?id=${id}`;
   }
 </script>
 

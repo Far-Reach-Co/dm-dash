@@ -215,6 +215,34 @@ async function editProjectTitle(
   }
 }
 
+const PROJECT_DESCRIPTION_MAX_LENGTH = 1200;
+
+async function editProjectDescription(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    await requireProjectOwner(req, req.params.id);
+    const rawDescription =
+      typeof req.body?.description === "string" ? req.body.description : "";
+    const description = rawDescription.trim();
+    if (description.length > PROJECT_DESCRIPTION_MAX_LENGTH) {
+      throw {
+        status: 400,
+        message: `Description must be ${PROJECT_DESCRIPTION_MAX_LENGTH} characters or fewer`,
+      };
+    }
+
+    await editProjectQuery(req.params.id, {
+      description,
+    });
+    res.send("Saved");
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function editProjectBannerImage(
   req: Request,
   res: Response,
@@ -279,5 +307,6 @@ export {
   addProject,
   removeProject,
   editProjectTitle,
+  editProjectDescription,
   editProjectBannerImage,
 };

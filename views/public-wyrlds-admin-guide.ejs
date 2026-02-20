@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Public Wyrlds Admin Guide | Far Reach Co.</title>
+  <meta name="description" content="Learn how to configure Public Discovery settings for your wyrld, including join mode, capacity, and featured records." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">Public Wyrlds Admin Guide</h1>
+      <p>How owners can set up discovery, onboarding, and join workflows safely.</p>
+      <small>
+        <a href="/wyrlds/public">View Public Directory</a>
+        |
+        <a href="/public-wyrlds-guide">Player Guide</a>
+      </small>
+      <hr>
+    </div>
+
+    <div class="quick-links" aria-label="Page sections">
+      <a href="#setup">Setup Checklist</a>
+      <a href="#settings">Public Discovery Settings</a>
+      <a href="#records">Featured Record Strategy</a>
+      <a href="#requests">Join Requests</a>
+      <a href="#best-practices">Best Practices</a>
+    </div>
+
+    <section id="setup">
+      <h2>Setup Checklist</h2>
+      <ul>
+        <li>Go to <strong>Wyrld Settings</strong> and open the <strong>Public Discovery</strong> card.</li>
+        <li>Write a strong wyrld description that explains the campaign at a glance.</li>
+        <li>Select a featured record with onboarding details and expectations.</li>
+        <li>Choose join mode and capacity that match your bandwidth as DM.</li>
+      </ul>
+    </section>
+
+    <section id="settings">
+      <h2>Public Discovery Settings</h2>
+      <p>The settings card controls how your wyrld appears and how players can access it.</p>
+      <ul>
+        <li><strong>List this wyrld publicly</strong>: toggles directory visibility.</li>
+        <li><strong>Join Mode</strong>: choose <em>Request to Join</em> or <em>Invite Only</em>.</li>
+        <li><strong>Capacity</strong>: optional limit on total members.</li>
+        <li><strong>Featured Record</strong>: one selected record is exposed for discovery viewing.</li>
+      </ul>
+    </section>
+
+    <section id="records">
+      <h2>Featured Record Strategy</h2>
+      <p>Treat the featured record like a campaign landing page.</p>
+      <ul>
+        <li>Explain tone, system, session cadence, and required tools.</li>
+        <li>State table expectations and communication norms clearly.</li>
+        <li>Include onboarding steps so interested players know how to join.</li>
+        <li>Keep details up to date as your campaign evolves.</li>
+      </ul>
+    </section>
+
+    <section id="requests">
+      <h2>Join Requests Workflow</h2>
+      <ul>
+        <li>When in request mode, review incoming requests in the <strong>Join Requests</strong> card.</li>
+        <li>Approve good fits, reject mismatches, and keep your roster aligned to campaign goals.</li>
+        <li>Capacity limits are enforced when approving requests.</li>
+        <li>Members can leave from their own settings panel, freeing slots automatically.</li>
+      </ul>
+    </section>
+
+    <section id="best-practices">
+      <h2>Best Practices</h2>
+      <ul>
+        <li>Start with request mode and no/soft capacity while you test demand.</li>
+        <li>Use invite-only for private campaigns that should not accept new requests.</li>
+        <li>Revisit your description and featured record between arcs or seasons.</li>
+        <li>If you want more visibility, share your directory link directly with your community.</li>
+      </ul>
+      <p>Need player-facing context? Share the <a href="/public-wyrlds-guide">Public Wyrlds Guide</a>.</p>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>
