@@ -130,6 +130,136 @@
 }
 
 /* ==========================================================================
+   Community Forum Layout
+   ========================================================================== */
+
+.community-forum {
+  display: grid;
+  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  gap: var(--space-lg);
+  margin: var(--space-sm);
+  align-items: start;
+}
+
+.community-forum .dashboard-card {
+  margin: 0;
+}
+
+.community-sidebar {
+  position: sticky;
+  top: calc(var(--space-lg) + 56px);
+}
+
+.community-thread-list {
+  max-height: 56vh;
+  overflow-y: auto;
+  padding-right: var(--space-xs);
+}
+
+.community-thread-row {
+  cursor: pointer;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.community-thread-row-selected {
+  border-color: var(--orange2);
+  background-color: rgba(165, 79, 4, 0.08);
+}
+
+.community-thread-list-title {
+  width: 100%;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  line-height: 1.35;
+  color: var(--bright-white);
+}
+
+.community-thread-meta {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  font-size: 0.78rem;
+  opacity: 0.68;
+}
+
+.community-main-header {
+  align-items: baseline;
+}
+
+.community-thread-title {
+  margin: 0;
+}
+
+.community-thread-state {
+  color: var(--orange2);
+}
+
+.community-thread-author-line {
+  display: block;
+}
+
+.community-thread-body {
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+.community-thread-actions {
+  gap: var(--space-sm);
+}
+
+.community-post-list {
+  gap: var(--space-sm);
+}
+
+.community-post-row {
+  border: 1px solid var(--border-ornate);
+  border-left: 3px solid rgba(116, 167, 215, 0.35);
+  border-radius: var(--border-radius);
+  background: rgba(22, 30, 39, 0.8);
+  padding: var(--space-sm) var(--space-md);
+}
+
+.community-post-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.community-post-author {
+  color: var(--orange3);
+  font-weight: 600;
+}
+
+.community-post-content {
+  white-space: pre-wrap;
+  line-height: 1.55;
+  color: var(--bright-white);
+  font-size: 0.95rem;
+  margin-top: var(--space-xs);
+}
+
+.community-post-header-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.community-delete-reply-btn {
+  margin: 0;
+  width: auto;
+  height: auto;
+  padding: 0;
+}
+
+.community-compose .settings-input {
+  width: 100%;
+}
+
+/* ==========================================================================
    Dashboard Cards
    ========================================================================== */
 
@@ -367,6 +497,18 @@
 
   .dashboard-list .dash-detail-row {
     animation: none;
+  }
+
+  .community-forum {
+    grid-template-columns: 1fr;
+  }
+
+  .community-sidebar {
+    position: static;
+  }
+
+  .community-thread-list {
+    max-height: none;
   }
 }
 

@@ -29,6 +29,11 @@ import {
   getPendingProjectJoinRequestsByRequesterQuery,
 } from "../api/queries/projectJoinRequests";
 import { getPublicWyrldDirectoryQuery } from "../api/queries/publicWyrlds";
+import {
+  getProjectDiscussionPostsByThreadQuery,
+  getProjectDiscussionThreadWithUserQuery,
+  getProjectDiscussionThreadsByProjectQuery,
+} from "../api/queries/projectDiscussion";
 
 const router = Router();
 
@@ -126,6 +131,7 @@ async function loadWyrldData(
   res: Response,
   userId: string | number,
   projectId: string,
+  section = "overview",
 ) {
   const project = await requireProjectMemberOrRedirect(
     req,
@@ -262,6 +268,82 @@ async function loadWyrldData(
     (calendar) => (calendar as any).created_at,
   ).slice(0, RECENT_LIMIT);
 
+  let discussionThreads: Array<{
+    id: number;
+    project_id: number;
+    creator_user_id: number;
+    title: string;
+    body: string;
+    is_locked: boolean;
+    is_pinned: boolean;
+    created_at: string;
+    updated_at: string;
+    creator_username: string;
+    reply_count: number;
+    latest_reply_at: string | null;
+    last_activity_at: string;
+  }> = [];
+  let selectedDiscussionThread: {
+    id: number;
+    project_id: number;
+    creator_user_id: number;
+    title: string;
+    body: string;
+    is_locked: boolean;
+    is_pinned: boolean;
+    created_at: string;
+    updated_at: string;
+    creator_username: string;
+    reply_count: number;
+    latest_reply_at: string | null;
+    last_activity_at: string;
+  } | null = null;
+  let selectedDiscussionPosts: Array<{
+    id: number;
+    thread_id: number;
+    project_id: number;
+    user_id: number;
+    content: string;
+    created_at: string;
+    updated_at: string;
+    username: string;
+  }> = [];
+
+  if (section === "community") {
+    const threadsData = await getProjectDiscussionThreadsByProjectQuery(project.id);
+    discussionThreads = threadsData.rows;
+
+    const selectedThreadRaw = Number(req.query.thread);
+    const selectedThreadId =
+      Number.isInteger(selectedThreadRaw) && selectedThreadRaw > 0
+        ? selectedThreadRaw
+        : null;
+
+    if (selectedThreadId) {
+      const selectedThreadData = await getProjectDiscussionThreadWithUserQuery(
+        selectedThreadId,
+      );
+      const foundThread = selectedThreadData.rows[0];
+      if (
+        foundThread &&
+        String(foundThread.project_id) === String(project.id)
+      ) {
+        selectedDiscussionThread = foundThread;
+      }
+    }
+
+    if (!selectedDiscussionThread && discussionThreads.length) {
+      selectedDiscussionThread = discussionThreads[0];
+    }
+
+    if (selectedDiscussionThread) {
+      const postsData = await getProjectDiscussionPostsByThreadQuery(
+        selectedDiscussionThread.id,
+      );
+      selectedDiscussionPosts = postsData.rows;
+    }
+  }
+
   return {
     projectAuth,
     isOwner: userId == project.user_id,
@@ -283,6 +365,9 @@ async function loadWyrldData(
     recentRecords,
     recentSheets,
     recentCalendars,
+    discussionThreads,
+    selectedDiscussionThread,
+    selectedDiscussionPosts,
     tablesSorted: sortByTitle(tables, (table) => (table as any).title),
     recordsSorted: sortByTitle(records, (record) => (record as any).title),
     sheetsSorted: sortByTitle(sheets, (sheet) => (sheet as any).name),
@@ -316,7 +401,14 @@ router.get(
 );
 
 router.get(
-  ["/wyrld/tables", "/wyrld/records", "/wyrld/sheets", "/wyrld/calendars", "/wyrld/settings"],
+  [
+    "/wyrld/tables",
+    "/wyrld/records",
+    "/wyrld/sheets",
+    "/wyrld/calendars",
+    "/wyrld/community",
+    "/wyrld/settings",
+  ],
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = requireUserOrRedirect(req, res, "/login");
@@ -325,7 +417,7 @@ router.get(
       const projectId = req.query.id as string;
       const section = req.path.split("/")[2];
 
-      const data = await loadWyrldData(req, res, userId, projectId);
+      const data = await loadWyrldData(req, res, userId, projectId, section);
       if (!data) return;
 
       res.render("wyrld", {

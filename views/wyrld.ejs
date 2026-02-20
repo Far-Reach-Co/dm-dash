@@ -32,6 +32,7 @@
           <a class="dashboard-nav-link <%= section === 'records' ? 'active' : '' %>" href="/wyrld/records?id=<%= project.id %>">Records</a>
           <a class="dashboard-nav-link <%= section === 'sheets' ? 'active' : '' %>" href="/wyrld/sheets?id=<%= project.id %>">Character Sheets</a>
           <a class="dashboard-nav-link <%= section === 'calendars' ? 'active' : '' %>" href="/wyrld/calendars?id=<%= project.id %>">Calendars</a>
+          <a class="dashboard-nav-link <%= section === 'community' ? 'active' : '' %>" href="/wyrld/community?id=<%= project.id %>">Community</a>
           <a class="dashboard-nav-link <%= section === 'settings' ? 'active' : '' %>" href="/wyrld/settings?id=<%= project.id %>">Settings</a>
         </div>
       </div>
@@ -48,6 +49,7 @@
       <% } %>
     </aside>
     <main class="dashboard-main">
+      <% if (section !== 'community') { %>
       <div
         class="p-3 wyrld-status mx-2 <%= project.is_pro && projectBannerSrc ? 'wyrld-status--with-banner' : '' %>"
       >
@@ -66,6 +68,7 @@
         </div>
         <% } %>
       </div>
+      <% } %>
 
       <% if (section === 'overview') { %>
       <div class="dashboard-highlights">
@@ -245,6 +248,316 @@
         </div>
         <% } %>
       </section>
+      <% } %>
+
+      <% if (section === 'community') { %>
+      <div class="community-forum">
+        <section class="dashboard-card community-sidebar">
+          <div class="dashboard-card-header">
+            <h2>Community Discussion</h2>
+            <a id="community-open-create-modal" title="Start a new discussion thread" style="cursor:pointer">+ New Thread</a>
+          </div>
+          <small>Browse current threads and open one to join the discussion.</small>
+          <hr />
+          <% if (!discussionThreads.length) { %>
+            <small>No threads yet. Start the first discussion.</small>
+          <% } else { %>
+            <div class="dashboard-list community-thread-list">
+              <% discussionThreads.forEach(function(thread) { %>
+                <% const isSelectedThread = selectedDiscussionThread && Number(selectedDiscussionThread.id) === Number(thread.id); %>
+                <div
+                  class="dash-detail-row community-thread-row <%= isSelectedThread ? 'community-thread-row-selected' : '' %>"
+                  onclick="openDiscussionThread('<%= thread.id %>')"
+                  title="Open discussion thread"
+                >
+                  <div class="dash-detail-title community-thread-list-title">
+                    <%= thread.is_pinned ? '[Pinned] ' : '' %><%= thread.title %>
+                  </div>
+                  <div class="dash-detail-meta community-thread-meta">
+                    <span><%= thread.reply_count %> replies</span>
+                    <% if (thread.is_locked) { %>
+                      <span>&bull;</span>
+                      <span>Locked</span>
+                    <% } %>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          <% } %>
+        </section>
+
+        <section class="dashboard-card community-main">
+          <% if (!selectedDiscussionThread) { %>
+            <h2>Thread</h2>
+            <small>Select a thread from the left to view and reply.</small>
+          <% } else { %>
+            <div class="dashboard-card-header community-main-header">
+              <h2 class="community-thread-title"><%= selectedDiscussionThread.title %></h2>
+              <small class="community-thread-state"><%= selectedDiscussionThread.is_locked ? 'Locked' : 'Open' %></small>
+            </div>
+            <small class="community-thread-author-line">
+              Started by <%= selectedDiscussionThread.creator_username %> on
+              <%= formatDate(selectedDiscussionThread.created_at) %>
+            </small>
+            <div class="mt-2 community-thread-body"><%= selectedDiscussionThread.body %></div>
+
+            <div class="settings-form-row mt-2 community-thread-actions">
+              <% const canModerateThread = projectAuth; %>
+              <% const canDeleteThread = canModerateThread || String(selectedDiscussionThread.creator_user_id) === String(auth); %>
+              <% if (canModerateThread) { %>
+                <button
+                  class="modal-form-button"
+                  type="button"
+                  onclick="toggleDiscussionThreadLock('<%= selectedDiscussionThread.id %>')"
+                >
+                  <%= selectedDiscussionThread.is_locked ? 'Unlock Thread' : 'Lock Thread' %>
+                </button>
+              <% } %>
+              <% if (canDeleteThread) { %>
+                <button
+                  class="btn-red"
+                  type="button"
+                  onclick="deleteDiscussionThread('<%= selectedDiscussionThread.id %>')"
+                >
+                  Delete Thread
+                </button>
+              <% } %>
+            </div>
+
+            <hr />
+            <h3>Replies</h3>
+            <% if (!selectedDiscussionPosts.length) { %>
+              <small>No replies yet.</small>
+            <% } else { %>
+              <div class="dashboard-list community-post-list">
+                <% selectedDiscussionPosts.forEach(function(post) { %>
+                  <% const canDeletePost = projectAuth || String(post.user_id) === String(auth); %>
+                  <div class="community-post-row">
+                    <div class="community-post-header">
+                      <div class="community-post-author"><%= post.username %></div>
+                      <div class="dash-detail-meta community-post-header-actions">
+                        <span><%= formatDate(post.created_at) %></span>
+                        <% if (canDeletePost) { %>
+                          <button
+                            class="settings-remove-btn community-delete-reply-btn"
+                            type="button"
+                            title="Delete reply"
+                            onclick="deleteDiscussionPost('<%= post.id %>')"
+                          >&times;</button>
+                        <% } %>
+                      </div>
+                    </div>
+                    <div class="community-post-content"><%= post.content %></div>
+                  </div>
+                <% }); %>
+              </div>
+            <% } %>
+
+            <% if (!selectedDiscussionThread.is_locked || projectAuth) { %>
+              <hr />
+              <div class="settings-form-row community-compose">
+                <textarea
+                  id="community-reply-content"
+                  class="settings-input"
+                  rows="4"
+                  maxlength="4000"
+                  placeholder="Write a reply..."
+                ></textarea>
+              </div>
+              <div class="settings-form-row mt-2">
+                <button
+                  class="modal-form-button"
+                  id="community-reply-submit"
+                  data-thread-id="<%= selectedDiscussionThread.id %>"
+                >
+                  Post Reply
+                </button>
+                <small class="success-message" id="community-reply-msg"></small>
+              </div>
+            <% } else { %>
+              <hr />
+              <small>This thread is locked. Managers can unlock it to allow new replies.</small>
+            <% } %>
+          <% } %>
+        </section>
+      </div>
+
+      <script>
+        (function() {
+          var projectId = '<%= project.id %>';
+          var openCreateThreadModalButton = document.getElementById('community-open-create-modal');
+          var replyButton = document.getElementById('community-reply-submit');
+          var replyMessageElem = document.getElementById('community-reply-msg');
+
+          function setCommunityMessage(elem, message, isError) {
+            if (!elem) return;
+            elem.textContent = message;
+            elem.style.color = isError ? 'var(--red)' : 'var(--green)';
+            if (message) {
+              setTimeout(function() { elem.textContent = ''; }, 3000);
+            }
+          }
+
+          async function submitDiscussionThread(title, body) {
+            var res = await fetch('/api/add_project_discussion_thread/' + projectId, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ title: title, body: body }),
+            });
+            var data = await res.json().catch(function() { return null; });
+            if (!res.ok || (data && data.error)) {
+              throw new Error((data && data.error && data.error.message) || 'Failed to create thread');
+            }
+            return data;
+          }
+
+          function openCreateThreadModal() {
+            if (!window.modal) return;
+
+            var container = document.createElement('div');
+            container.className = 'modal-form';
+
+            var heading = document.createElement('h2');
+            heading.textContent = 'Create Discussion Thread';
+            container.appendChild(heading);
+
+            var titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.className = 'modal-form-input';
+            titleInput.maxLength = 140;
+            titleInput.placeholder = 'Thread title';
+            titleInput.required = true;
+            container.appendChild(titleInput);
+
+            var bodyInput = document.createElement('textarea');
+            bodyInput.className = 'modal-form-input';
+            bodyInput.rows = 6;
+            bodyInput.maxLength = 5000;
+            bodyInput.placeholder = 'Start the discussion...';
+            bodyInput.required = true;
+            container.appendChild(bodyInput);
+
+            var messageElem = document.createElement('small');
+            messageElem.className = 'success-message';
+            container.appendChild(messageElem);
+
+            var submitButton = document.createElement('button');
+            submitButton.type = 'button';
+            submitButton.className = 'modal-form-button';
+            submitButton.textContent = 'Post Thread';
+            submitButton.addEventListener('click', async function() {
+              var title = titleInput.value.trim();
+              var body = bodyInput.value.trim();
+              if (!title || !body) {
+                setCommunityMessage(messageElem, 'Title and content are required', true);
+                return;
+              }
+
+              submitButton.disabled = true;
+              submitButton.textContent = 'Posting...';
+              try {
+                var data = await submitDiscussionThread(title, body);
+                window.location.href = (data && data.redirect) || ('/wyrld/community?id=' + projectId);
+              } catch (err) {
+                setCommunityMessage(messageElem, (err && err.message) || 'Failed to create thread', true);
+                submitButton.disabled = false;
+                submitButton.textContent = 'Post Thread';
+              }
+            });
+            container.appendChild(submitButton);
+
+            window.modal.show(container);
+            titleInput.focus();
+          }
+
+          if (openCreateThreadModalButton) {
+            openCreateThreadModalButton.addEventListener('click', function() {
+              openCreateThreadModal();
+            });
+          }
+
+          if (replyButton) {
+            replyButton.addEventListener('click', async function() {
+              var threadId = replyButton.dataset.threadId;
+              var replyInput = document.getElementById('community-reply-content');
+              var content = replyInput ? replyInput.value.trim() : '';
+              if (!threadId) return;
+
+              try {
+                var res = await fetch('/api/add_project_discussion_post/' + threadId, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ content: content }),
+                });
+                var data = await res.json().catch(function() { return null; });
+                if (!res.ok || (data && data.error)) {
+                  throw new Error((data && data.error && data.error.message) || 'Failed to post reply');
+                }
+                window.location.reload();
+              } catch (err) {
+                setCommunityMessage(replyMessageElem, (err && err.message) || 'Failed to post reply', true);
+              }
+            });
+          }
+
+          window.openDiscussionThread = function(threadId) {
+            if (!threadId) return;
+            window.location.href = '/wyrld/community?id=' + projectId + '&thread=' + threadId;
+          };
+
+          window.toggleDiscussionThreadLock = async function(threadId) {
+            if (!threadId) return;
+            try {
+              var res = await fetch('/api/toggle_project_discussion_thread_lock/' + threadId, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({}),
+              });
+              var data = await res.json().catch(function() { return null; });
+              if (!res.ok || (data && data.error)) {
+                throw new Error((data && data.error && data.error.message) || 'Failed to update thread');
+              }
+              window.location.reload();
+            } catch (err) {
+              window.alert((err && err.message) || 'Failed to update thread');
+            }
+          };
+
+          window.deleteDiscussionThread = async function(threadId) {
+            if (!threadId) return;
+            if (!confirm('Delete this discussion thread and all replies?')) return;
+            try {
+              var res = await fetch('/api/remove_project_discussion_thread/' + threadId, {
+                method: 'DELETE',
+              });
+              var data = await res.json().catch(function() { return null; });
+              if (!res.ok || (data && data.error)) {
+                throw new Error((data && data.error && data.error.message) || 'Failed to delete thread');
+              }
+              window.location.href = '/wyrld/community?id=' + projectId;
+            } catch (err) {
+              window.alert((err && err.message) || 'Failed to delete thread');
+            }
+          };
+
+          window.deleteDiscussionPost = async function(postId) {
+            if (!postId) return;
+            if (!confirm('Delete this reply?')) return;
+            try {
+              var res = await fetch('/api/remove_project_discussion_post/' + postId, {
+                method: 'DELETE',
+              });
+              var data = await res.json().catch(function() { return null; });
+              if (!res.ok || (data && data.error)) {
+                throw new Error((data && data.error && data.error.message) || 'Failed to delete reply');
+              }
+              window.location.reload();
+            } catch (err) {
+              window.alert((err && err.message) || 'Failed to delete reply');
+            }
+          };
+        })();
+      </script>
       <% } %>
 
       <% if (section === 'settings' && isOwner) { %>

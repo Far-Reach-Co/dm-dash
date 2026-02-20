@@ -17,6 +17,15 @@ import {
   respondProjectJoinRequest,
 } from "./controllers/publicWyrlds.js";
 import {
+  addProjectDiscussionPost,
+  addProjectDiscussionThread,
+  getProjectDiscussionThreadWithPosts,
+  getProjectDiscussionThreads,
+  removeProjectDiscussionPost,
+  removeProjectDiscussionThread,
+  toggleProjectDiscussionThreadLock,
+} from "./controllers/projectDiscussion.js";
+import {
   registerUser,
   loginUser,
   resetPassword,
@@ -504,6 +513,13 @@ router.post(
 router.get("/get_project_join_requests/:project_id", getProjectJoinRequestsByProject);
 router.post("/respond_project_join_request/:id", respondProjectJoinRequest);
 router.post("/cancel_project_join_request/:id", cancelProjectJoinRequest);
+router.get("/get_project_discussion_threads/:project_id", getProjectDiscussionThreads);
+router.get("/get_project_discussion_thread/:thread_id", getProjectDiscussionThreadWithPosts);
+router.post("/add_project_discussion_thread/:project_id", addProjectDiscussionThread);
+router.post("/add_project_discussion_post/:thread_id", addProjectDiscussionPost);
+router.post("/toggle_project_discussion_thread_lock/:thread_id", toggleProjectDiscussionThreadLock);
+router.delete("/remove_project_discussion_thread/:thread_id", removeProjectDiscussionThread);
+router.delete("/remove_project_discussion_post/:post_id", removeProjectDiscussionPost);
 
 // Auth and Users
 // setup rate limiters
