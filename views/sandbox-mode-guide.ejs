@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sandbox Mode Guide | Far Reach Co.</title>
+  <meta name="description" content="Learn the purpose of Sandbox mode, what it enables, and what it intentionally restricts for safer collaboration." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">Sandbox Mode Guide</h1>
+      <p>Why Sandbox mode exists and when to use it in your campaign workflow.</p>
+      <small>
+        <a href="/wyrld-permissions-guide">Wyrld Permissions Guide</a>
+        |
+        <a href="/vtt-guide">VTT Guide</a>
+      </small>
+      <hr>
+    </div>
+
+    <div class="quick-links" aria-label="Page sections">
+      <a href="#purpose">Purpose</a>
+      <a href="#who-can-use">Who Can Use It</a>
+      <a href="#allows">What It Allows</a>
+      <a href="#restricts">What It Restricts</a>
+      <a href="#when-to-use">When to Use It</a>
+    </div>
+
+    <section id="purpose">
+      <h2>Purpose of Sandbox Mode</h2>
+      <p>Sandbox mode is designed for collaborative play where participants can interact with the map without getting full table-admin power.</p>
+      <ul>
+        <li>Encourages fast collaboration during sessions.</li>
+        <li>Reduces accidental configuration changes.</li>
+        <li>Keeps table settings under owner/manager control.</li>
+      </ul>
+    </section>
+
+    <section id="who-can-use">
+      <h2>Who Can Use Sandbox Tables</h2>
+      <ul>
+        <li><strong>Wyrld tables:</strong> Wyrld members can collaborate in sandbox mode.</li>
+        <li><strong>User-based public tables:</strong> guests can participate when the table is public and sandbox mode is enabled.</li>
+      </ul>
+    </section>
+
+    <section id="allows">
+      <h2>What Sandbox Mode Allows</h2>
+      <ul>
+        <li>Map/canvas interaction and collaborative edits during play.</li>
+        <li>Dragging existing sidebar images onto the canvas.</li>
+        <li>Normal real-time participation in session activity.</li>
+      </ul>
+    </section>
+
+    <section id="restricts">
+      <h2>What Sandbox Mode Restricts</h2>
+      <ul>
+        <li>Table settings menu remains restricted to owner (or managers for project-based tables).</li>
+        <li>Regular collaborators cannot rename tables or change public visibility.</li>
+        <li>Image asset/folder administration and metadata management are not granted by default.</li>
+      </ul>
+    </section>
+
+    <section id="when-to-use">
+      <h2>When to Use Sandbox Mode</h2>
+      <ul>
+        <li>Live play where players should interact freely without changing table configuration.</li>
+        <li>Guest-facing demo tables where you want activity but controlled settings.</li>
+        <li>Wyrld sessions where managers/owners keep admin actions separate from player actions.</li>
+      </ul>
+      <p>Need a role breakdown too? Read the <a href="/wyrld-permissions-guide">Wyrld Permissions Guide</a>.</p>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>

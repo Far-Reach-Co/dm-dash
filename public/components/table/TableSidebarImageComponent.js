@@ -43,7 +43,7 @@ export default class TableSidebarImageComponent {
   }
 
   get projectId() {
-    return getCurrentProjectId();
+    return this.tableView?.project_id || getCurrentProjectId();
   }
 
   can = (capability) => {

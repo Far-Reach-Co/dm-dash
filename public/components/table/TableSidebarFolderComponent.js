@@ -36,7 +36,7 @@ export default class TableSidebarFolderComponent {
   }
 
   get projectId() {
-    return getCurrentProjectId();
+    return this.tableView?.project_id || getCurrentProjectId();
   }
 
   can = (capability) => {

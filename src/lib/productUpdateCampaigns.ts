@@ -59,6 +59,56 @@ const campaigns: ProductUpdateCampaign[] = [
     ctaText: "Go to Dashboard",
     ctaUrl: "https://farreachco.com/dash",
   },
+  {
+    slug: "2026-02-public-wyrlds-community",
+    subject: "New in Far Reach Co: Public Wyrlds, community discussion, and Far Reach Radio",
+    intro:
+      "This release is focused on campaign discovery, onboarding, in-wyrld communication, and campaign atmosphere, with new Pro presentation controls for campaign owners.",
+    recent: [
+      {
+        title: "Public Wyrlds Directory + Shareable Wyrld Pages (Feb 18-19, 2026)",
+        body:
+          "Wyrlds can now appear in a public directory with their own shareable page. Guests and logged-in users can browse listings, and logged-in users can request to join when enabled.",
+        linkText: "Browse Public Wyrlds",
+        linkUrl: "https://farreachco.com/wyrlds/public",
+      },
+      {
+        title: "Featured onboarding record for public discovery (Feb 19, 2026)",
+        body:
+          "Wyrld owners can select one featured record that is visible in public discovery flows, making it easier to set expectations, tone, and onboarding details.",
+        linkText: "Read the player guide",
+        linkUrl: "https://farreachco.com/public-wyrlds-guide",
+      },
+      {
+        title: "Wyrld community discussion board (Feb 19, 2026)",
+        body:
+          "Each wyrld now has a Community section with thread-based discussion and replies. Managers can lock threads, and users can moderate their own posts.",
+        linkText: "Open Dashboard",
+        linkUrl: "https://farreachco.com/dash",
+      },
+      {
+        title: "Pro Wyrld banner and dashboard presentation upgrades (Feb 18-19, 2026)",
+        body:
+          "Pro wyrlds can now set a banner image to personalize the dashboard and public wyrld presence.",
+        linkText: "View admin setup guide",
+        linkUrl: "https://farreachco.com/public-wyrlds-admin-guide",
+      },
+      {
+        title: "Far Reach Radio spotlight (Feb 2026)",
+        body:
+          "Use Far Reach Radio for campaign-ready ambient audio and music while you run sessions on the tabletop.",
+        linkText: "Open Far Reach Radio",
+        linkUrl: "https://farreachco.com/radio",
+      },
+    ],
+    upcoming: [
+      "Community discussion quality-of-life improvements and moderation polish.",
+      "Additional public wyrld discovery enhancements and onboarding guidance.",
+      "Permission documentation and user-facing clarity updates across wyrld settings.",
+    ],
+    ctaText: "Explore Public Wyrlds",
+    ctaUrl: "https://farreachco.com/wyrlds/public",
+  },
 ];
 
 export function getProductUpdateCampaigns(): ProductUpdateCampaign[] {

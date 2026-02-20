@@ -80,6 +80,28 @@ router.get(
   },
 );
 
+router.get(
+  "/wyrld-permissions-guide",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("wyrld-permissions-guide", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/sandbox-mode-guide",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("sandbox-mode-guide", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 router.get("/preaethrend", (req: Request, res: Response, next: NextFunction) => {
   try {
     res.render("preaethrend", { auth: req.session.user });

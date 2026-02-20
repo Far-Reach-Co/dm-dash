@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wyrld Permissions Guide | Far Reach Co.</title>
+  <meta name="description" content="Understand Owner, Manager, Member, and Guest permissions in Wyrlds, including visibility and moderation rules." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">Wyrld Permissions Guide</h1>
+      <p>Who can view, edit, and manage each part of a Wyrld.</p>
+      <small>
+        <a href="/public-wyrlds-guide">Public Wyrlds Guide</a>
+        |
+        <a href="/sandbox-mode-guide">Sandbox Mode Guide</a>
+      </small>
+      <hr>
+    </div>
+
+    <div class="quick-links" aria-label="Page sections">
+      <a href="#roles">Roles at a Glance</a>
+      <a href="#owner">Owner</a>
+      <a href="#manager">Manager</a>
+      <a href="#member">Member</a>
+      <a href="#guest">Guest</a>
+      <a href="#visibility">Visibility Rules</a>
+    </div>
+
+    <section id="roles">
+      <h2>Roles at a Glance</h2>
+      <ul>
+        <li><strong>Owner</strong>: full control of Wyrld settings, membership, and public discovery configuration.</li>
+        <li><strong>Manager</strong>: trusted member with editing/moderation powers, but not owner-level account controls.</li>
+        <li><strong>Member</strong>: standard participant access with limited editing based on table mode and feature rules.</li>
+        <li><strong>Guest</strong>: non-account visitor; can browse public discovery pages but does not become a Wyrld member automatically.</li>
+      </ul>
+    </section>
+
+    <section id="owner">
+      <h2>Owner Permissions</h2>
+      <ul>
+        <li>Can edit Wyrld settings including title, description, and membership roles.</li>
+        <li>Can configure Public Discovery settings (listing, join mode, capacity, featured record).</li>
+        <li>Can approve or reject join requests when request mode is enabled.</li>
+        <li>Can remove members or promote/demote managers.</li>
+        <li>Can always moderate community threads and replies.</li>
+      </ul>
+    </section>
+
+    <section id="manager">
+      <h2>Manager Permissions</h2>
+      <ul>
+        <li>Can edit shared campaign content that requires editor-level access.</li>
+        <li>Can lock/unlock discussion threads and moderate posts.</li>
+        <li>Can manage Wyrld tables and records where editor permissions apply.</li>
+        <li>Cannot change owner-only settings like role assignment and public discovery ownership controls.</li>
+      </ul>
+    </section>
+
+    <section id="member">
+      <h2>Member Permissions</h2>
+      <ul>
+        <li>Can access Wyrld content available to participants.</li>
+        <li>Can participate in community discussion (create threads/replies), unless a thread is locked.</li>
+        <li>Can collaborate in sandbox-mode tables without receiving full table-admin controls.</li>
+        <li>Can leave the Wyrld from settings.</li>
+      </ul>
+    </section>
+
+    <section id="guest">
+      <h2>Guest Permissions</h2>
+      <ul>
+        <li>Can browse Public Wyrld directory pages and listing details.</li>
+        <li>Can view only the selected featured onboarding record for a listed Pro Wyrld.</li>
+        <li>Must log in to request to join a Wyrld.</li>
+        <li>Cannot access private Wyrld dashboards, records, or member-only content.</li>
+      </ul>
+    </section>
+
+    <section id="visibility">
+      <h2>Visibility Rules</h2>
+      <ul>
+        <li>Public listing does not make a whole Wyrld public.</li>
+        <li>Only the owner-selected featured record is exposed for public discovery viewing.</li>
+        <li>Other records, settings, and most campaign content remain protected by member/editor permissions.</li>
+        <li>Public listing itself is a Pro Wyrld feature.</li>
+      </ul>
+      <p>For table behavior details, read the <a href="/sandbox-mode-guide">Sandbox Mode Guide</a>.</p>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>
