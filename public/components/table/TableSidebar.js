@@ -52,7 +52,7 @@ export default class TableSidebar {
   }
 
   get projectId() {
-    return getCurrentProjectId();
+    return this.tableView?.project_id || getCurrentProjectId();
   }
 
   can = (capability) => {

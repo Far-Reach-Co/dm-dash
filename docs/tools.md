@@ -30,8 +30,8 @@ npm run prod:backup:db:restore-check
 
 ```bash
 npm run email:product-update -- --list
-npm run email:product-update -- --campaign 2026-02-feature-roundup --dry-run
-npm run email:product-update -- --campaign 2026-02-feature-roundup
+npm run email:product-update -- --campaign 2026-02-public-wyrlds-community --dry-run
+npm run email:product-update -- --campaign 2026-02-public-wyrlds-community
 ```
 
 ## Utility Scripts

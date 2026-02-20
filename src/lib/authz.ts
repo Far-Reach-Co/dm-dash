@@ -250,23 +250,61 @@ export async function requireRecordAccessOrRedirect(
     return { canEdit: isOwner, projectId: null };
   }
 
-  const userId = requireUserOrRedirect(req, res, redirectTo);
-  if (!userId) return null;
-  const access = await getProjectAccess(req, projectId);
-  if (!access) {
+  if (!record.project_id || String(record.project_id) !== String(projectId)) {
     res.redirect(redirectTo);
     return null;
   }
+
+  let project: Project;
+  try {
+    project = await getProjectOrThrow(projectId);
+  } catch {
+    res.redirect(redirectTo);
+    return null;
+  }
+
+  const canViewFeaturedRecord =
+    options.mode === "view" &&
+    project.is_pro &&
+    project.is_public_listed &&
+    project.featured_record_id !== null &&
+    String(project.featured_record_id) === String(record.id);
+
+  if (!req.session?.user) {
+    if (canViewFeaturedRecord) {
+      return { canEdit: false, projectId };
+    }
+    res.redirect(redirectTo);
+    return null;
+  }
+
+  const userId = req.session.user;
+  if (isProjectOwner(project, userId)) {
+    return { canEdit: true, projectId };
+  }
+
+  const projectUser = await getProjectUser(userId, projectId);
+
   if (options.mode === "edit") {
-    if (!access.isEditor) {
+    if (!projectUser || !projectUser.is_editor) {
       res.redirect(redirectTo);
       return null;
     }
     return { canEdit: true, projectId };
   }
-  if (!access.isEditor && !record.is_public) {
-    res.redirect(redirectTo);
-    return null;
+
+  if (projectUser) {
+    if (!projectUser.is_editor && !record.is_public && !canViewFeaturedRecord) {
+      res.redirect(redirectTo);
+      return null;
+    }
+    return { canEdit: !!projectUser.is_editor, projectId };
   }
-  return { canEdit: access.isEditor, projectId };
+
+  if (canViewFeaturedRecord) {
+    return { canEdit: false, projectId };
+  }
+
+  res.redirect(redirectTo);
+  return null;
 }

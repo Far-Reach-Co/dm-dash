@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Public Wyrlds Guide | Far Reach Co.</title>
+  <meta name="description" content="Learn what Public Wyrlds are, how discovery works, and how players can request to join campaigns." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">Public Wyrlds</h1>
+      <p>A quick guide for players and guests browsing the public wyrld directory.</p>
+      <small><a href="/wyrlds/public">Open Public Directory</a></small>
+      <hr>
+    </div>
+
+    <div class="quick-links" aria-label="Page sections">
+      <a href="#what">What It Is</a>
+      <a href="#join">How Joining Works</a>
+      <a href="#featured">Featured Records</a>
+      <a href="#privacy">Privacy and Access</a>
+      <a href="#visibility-rules">Visibility Rules</a>
+      <a href="#tips">Tips</a>
+    </div>
+
+    <section id="what">
+      <h2>What Public Wyrlds Are</h2>
+      <p>Public Wyrlds are campaign spaces that an owner has chosen to list in the directory.</p>
+      <ul>
+        <li>You can browse listed wyrlds by title and read each wyrld summary.</li>
+        <li>Listings show join mode and capacity so you know whether requests are open.</li>
+        <li>Each listing can feature one onboarding record chosen by the owner.</li>
+      </ul>
+    </section>
+
+    <section id="join">
+      <h2>How Joining Works</h2>
+      <p>Joining is always controlled by the wyrld owner.</p>
+      <ul>
+        <li><strong>Request to Join</strong>: send a request, then wait for approval.</li>
+        <li><strong>Invite Only</strong>: the owner is not accepting public requests.</li>
+        <li>If you are not logged in, you can still browse but must log in to request access.</li>
+      </ul>
+    </section>
+
+    <section id="featured">
+      <h2>Featured Record</h2>
+      <p>Featured records are intended to explain tone, expectations, and onboarding details.</p>
+      <ul>
+        <li>Click the featured record title in a listing to open it.</li>
+        <li>This is the owner-selected public entry point for that wyrld.</li>
+      </ul>
+    </section>
+
+    <section id="privacy">
+      <h2>Privacy and Access</h2>
+      <p>Public listing does not make the entire wyrld open.</p>
+      <ul>
+        <li>Only the selected featured record is viewable for public discovery.</li>
+        <li>Other wyrld content still requires proper membership permissions.</li>
+        <li>Owners and managers remain in control of tables, records, and membership.</li>
+      </ul>
+    </section>
+
+    <section id="visibility-rules">
+      <h2>Visibility Rules (Important)</h2>
+      <ul>
+        <li>Only Pro wyrlds can be listed in the public directory.</li>
+        <li>Public discovery pages are visible to guests and logged-in users.</li>
+        <li>Joining is never automatic: request mode still requires owner approval, and invite-only requires a direct invite.</li>
+        <li>The featured record is the only public content entry from a listed wyrld unless you become a member.</li>
+      </ul>
+      <p>Need role-level details? Read the <a href="/wyrld-permissions-guide">Wyrld Permissions Guide</a>.</p>
+    </section>
+
+    <section id="tips">
+      <h2>Tips for Players</h2>
+      <ul>
+        <li>Read the featured record before requesting to join.</li>
+        <li>Include a short message when requesting so the DM knows your intent.</li>
+        <li>Use the directory search to find campaigns that match your interests.</li>
+      </ul>
+      <p>Running a wyrld? Read the <a href="/public-wyrlds-admin-guide">Public Wyrlds Admin Guide</a>.</p>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>

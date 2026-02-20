@@ -85,7 +85,9 @@ async function addTableViewByProject(
       eventData: { tableId: data.rows[0].id, title },
       req,
     });
-    res.status(201).json({ redirect: `/vtt?uuid=${data.rows[0].uuid}` });
+    res.status(201).json({
+      redirect: `/vtt?uuid=${data.rows[0].uuid}&project=${req.params.project_id}`,
+    });
   } catch (err) {
     next(err);
   }

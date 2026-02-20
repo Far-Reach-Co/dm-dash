@@ -43,7 +43,7 @@ export default class Toolbar {
 
   getRecordHref = (recordId) => {
     const base = `/record?id=${recordId}`;
-    const projectId = getCurrentProjectId();
+    const projectId = this.tableApp?.tableView?.project_id || getCurrentProjectId();
     return projectId ? `${base}&project_id=${projectId}` : base;
   };
 

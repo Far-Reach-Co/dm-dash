@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | <%= project.title %></title>
+  <link rel="canonical" href="<%= canonicalUrl %>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="<%= canonicalUrl %>" />
+  <meta property="og:title" content="<%= project.title %> | Public Wyrld" />
+  <meta property="og:description" content="<%= metaDescription %>" />
+  <meta property="og:site_name" content="Far Reach Co." />
+  <% if (shareImage) { %>
+  <meta property="og:image" content="<%= shareImage %>" />
+  <% } %>
+  <meta name="twitter:card" content="<%= shareImage ? 'summary_large_image' : 'summary' %>" />
+  <meta name="twitter:title" content="<%= project.title %> | Public Wyrld" />
+  <meta name="twitter:description" content="<%= metaDescription %>" />
+  <% if (shareImage) { %>
+  <meta name="twitter:image" content="<%= shareImage %>" />
+  <% } %>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/record.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+  <style>
+    .public-wyrld-hero {
+      min-height: 220px;
+      overflow: hidden;
+    }
+
+    .public-wyrld-hero .wyrld-status-banner-overlay {
+      opacity: 0.18;
+    }
+
+    .public-wyrld-actions {
+      gap: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .public-wyrld-share-feedback {
+      display: block;
+      min-height: 18px;
+      color: var(--detail-color-light-blue);
+    }
+  </style>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <% const featuredImageEntries = Object.entries(featuredRecordImageUrls || {}); %>
+  <div class="mt-5 px-2 dashboard-shell">
+    <main class="dashboard-main" style="width: 100%;">
+      <% if (projectBannerSrc) { %>
+      <div class="p-3 wyrld-status mx-2 public-wyrld-hero wyrld-status--with-banner">
+        <img class="wyrld-status-banner-media" src="<%= projectBannerSrc %>" alt="<%= projectBannerName || (project.title + ' banner') %>" />
+        <div class="wyrld-status-banner-overlay" aria-hidden="true"></div>
+      </div>
+      <% } %>
+
+      <section class="dashboard-card mt-3">
+        <h1 class="wyrld-title"><%= project.title %></h1>
+        <div class="record-meta mt-2">
+          <span class="record-badge record-badge-wyrld">Public Wyrld</span>
+          <span class="record-badge">Owner: <%= ownerUsername %></span>
+        </div>
+
+        <% if (project.description) { %>
+        <p class="mt-2"><%= project.description %></p>
+        <% } %>
+
+        <small>
+          Join mode: <%= project.public_join_mode === 'request' ? 'Request to Join' : 'Invite Only' %>
+          <% if (project.public_join_capacity) { %>
+          - Members: <%= memberCount %> / <%= project.public_join_capacity %>
+          <% } else { %>
+          - Members: <%= memberCount %> (no capacity limit)
+          <% } %>
+        </small>
+
+        <div class="public-wyrld-actions mt-3">
+          <% if (isOwner || isMember) { %>
+          <a class="label-btn" href="/wyrld?id=<%= project.id %>">Open Wyrld</a>
+          <% } else if (!isAuthenticated && project.public_join_mode === 'request' && !isFull) { %>
+          <a class="modal-form-button" href="<%= loginHref %>">Login to Request Join</a>
+          <% } else if (hasPendingRequest) { %>
+          <button class="modal-form-button" type="button" disabled>Request Pending</button>
+          <% if (pendingRequestId) { %>
+          <button class="btn-red" type="button" onclick="cancelJoinRequest(<%= pendingRequestId %>)">Cancel Request</button>
+          <% } %>
+          <% } else if (project.public_join_mode === 'request' && !isFull) { %>
+          <button class="modal-form-button" type="button" onclick="requestJoin(<%= project.id %>)">Request to Join</button>
+          <% } else if (project.public_join_mode === 'request' && isFull) { %>
+          <button class="modal-form-button" type="button" disabled>At Capacity</button>
+          <% } else { %>
+          <button class="modal-form-button" type="button" disabled>Invite Only</button>
+          <% } %>
+
+          <button
+            class="label-btn"
+            id="copy-wyrld-link"
+            type="button"
+            data-url="<%= canonicalUrl %>"
+            title="Copy shareable public wyrld link"
+          >
+            Copy Share Link
+          </button>
+          <a class="dash-inline-action" href="/wyrlds/public">Back to Directory</a>
+        </div>
+        <small id="public-wyrld-share-feedback" class="public-wyrld-share-feedback" aria-live="polite"></small>
+      </section>
+
+      <% if (featuredRecord) { %>
+      <section class="dashboard-card mt-3">
+        <div class="dashboard-card-header">
+          <h2>Featured Record</h2>
+        </div>
+        <small><%= featuredRecord.title %></small>
+        <hr />
+        <div class="record-body" id="featured-record-description"></div>
+
+        <% if (featuredImageEntries.length) { %>
+        <div class="record-images mt-2">
+          <% featuredImageEntries.forEach(([key, value]) => { %>
+          <img class="record-image-thumb" id="img-<%= key %>" src="<%= value %>" alt="" />
+          <% }) %>
+        </div>
+        <% } %>
+      </section>
+      <% } else { %>
+      <section class="dashboard-card mt-3">
+        <small>No featured record has been selected for this wyrld yet.</small>
+      </section>
+      <% } %>
+    </main>
+  </div>
+</body>
+
+<% if (featuredRecord) { %>
+<script type="application/json" id="featured-record-data"><%- JSON.stringify(featuredRecord.description) %></script>
+<script type="module" defer>
+  import parseUrlTextContent from "/components/parseUrlTextContent.js";
+  const descriptionElem = document.getElementById("featured-record-description");
+  const description = JSON.parse(document.getElementById("featured-record-data").textContent);
+  const elems = parseUrlTextContent(description);
+  for (const elem of elems) {
+    descriptionElem.appendChild(elem);
+  }
+</script>
+<% } %>
+
+<script>
+  async function requestJoin(projectId) {
+    const message = window.prompt("Optional intro message for the DM:", "") || "";
+    const res = await fetch(`/api/request_project_join/${projectId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    const data = await res.json().catch(function() { return null; });
+    if (!res.ok || (data && data.error)) {
+      window.alert((data && data.error && data.error.message) || "Unable to request join.");
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function cancelJoinRequest(requestId) {
+    const res = await fetch(`/api/cancel_project_join_request/${requestId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json().catch(function() { return null; });
+    if (!res.ok || (data && data.error)) {
+      window.alert((data && data.error && data.error.message) || "Unable to cancel request.");
+      return;
+    }
+    window.location.reload();
+  }
+
+  (function bindShareLink() {
+    const button = document.getElementById("copy-wyrld-link");
+    const feedback = document.getElementById("public-wyrld-share-feedback");
+    if (!button || !feedback) return;
+
+    button.addEventListener("click", async function() {
+      const rawUrl = button.getAttribute("data-url") || window.location.href;
+      const url = new URL(rawUrl, window.location.origin);
+      url.searchParams.set("utm_source", "share");
+      url.searchParams.set("utm_medium", "copy_link");
+      url.searchParams.set("utm_campaign", "public_wyrld");
+      const shareUrl = url.toString();
+
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        feedback.textContent = "Share link copied.";
+      } catch (err) {
+        feedback.textContent = "Copy failed. Copy this URL: " + shareUrl;
+      }
+    });
+  })();
+</script>
+
+</html>

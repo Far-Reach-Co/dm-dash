@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Far Reach Co. | Public Wyrlds</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+<body>
+  <%- include('./partials/nav') %>
+  <div class="mt-5 px-2 dashboard-shell">
+    <main class="dashboard-main" style="width: 100%;">
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Public Wyrld Directory</h2>
+          <a href="<%= isAuthenticated ? '/dash/wyrlds' : '/index' %>"><%= isAuthenticated ? 'Back to My Wyrlds' : 'Back to Home' %></a>
+        </div>
+        <small>Discover listed wyrlds. Joining is controlled by each wyrld owner.</small>
+        <small class="d-block mt-1">
+          <a href="/public-wyrlds-guide">What are Public Wyrlds?</a>
+          |
+          <a href="/public-wyrlds-admin-guide">How to set up Public Discovery</a>
+        </small>
+        <hr />
+
+        <form method="GET" action="/wyrlds/public" class="settings-form-row">
+          <input
+            type="text"
+            name="q"
+            class="settings-input"
+            placeholder="Search wyrlds by title"
+            value="<%= query %>"
+          />
+          <button class="modal-form-button" type="submit">Search</button>
+        </form>
+
+        <% if (!projects.length) { %>
+          <small>No public wyrlds found.</small>
+        <% } else { %>
+          <div class="dashboard-list mt-3">
+            <% projects.forEach(function(project) { %>
+              <div class="dash-detail-row" style="display:block; cursor: default;">
+                <div class="dashboard-card-header">
+                  <div class="dash-detail-title">
+                    <a href="<%= project.publicPath || ('/wyrlds/public/' + project.id) %>"><%= project.title %></a>
+                  </div>
+                  <div class="dash-detail-meta">Owner: <%= project.owner_username %></div>
+                </div>
+
+                <% if (project.description) { %>
+                  <small class="d-block mt-1">
+                    <%= project.description.length > 220 ? project.description.slice(0, 220) + '...' : project.description %>
+                  </small>
+                <% } %>
+
+                <% if (project.featured_record_title) { %>
+                  <div class="mt-2 public-wyrld-featured">
+                    <small><strong>Featured Record:</strong></small>
+                    <a
+                      class="dash-inline-action"
+                      href="/record?id=<%= project.featured_record_id %>&project_id=<%= project.id %>"
+                    ><%= project.featured_record_title %></a>
+                  </div>
+                <% } %>
+
+                <div class="dash-detail-meta mt-2">
+                  Join mode: <%= project.public_join_mode === 'request' ? 'Request to Join' : 'Invite Only' %>
+                  <% if (project.public_join_capacity) { %>
+                    - Members: <%= project.member_count %> / <%= project.public_join_capacity %>
+                  <% } else { %>
+                    - Members: <%= project.member_count %> (no capacity limit)
+                  <% } %>
+                </div>
+
+                <div class="settings-form-row mt-2">
+                  <a class="dash-inline-action" href="<%= project.publicPath || ('/wyrlds/public/' + project.id) %>">View Wyrld Page</a>
+                  <% if (project.isOwner || project.isMember) { %>
+                    <a class="label-btn" href="/wyrld?id=<%= project.id %>">Open Wyrld</a>
+                  <% } else if (!isAuthenticated && project.public_join_mode === 'request' && !project.isFull) { %>
+                    <a class="modal-form-button" href="<%= loginHref %>">Login to Request Join</a>
+                  <% } else if (project.hasPendingRequest) { %>
+                    <button class="modal-form-button" type="button" disabled>Request Pending</button>
+                    <% if (project.pendingRequestId) { %>
+                      <button class="btn-red" type="button" onclick="cancelJoinRequest(<%= project.pendingRequestId %>)">Cancel Request</button>
+                    <% } %>
+                  <% } else if (project.public_join_mode === 'request' && !project.isFull) { %>
+                    <button class="modal-form-button" type="button" onclick="requestJoin(<%= project.id %>)">Request to Join</button>
+                  <% } else if (project.public_join_mode === 'request' && project.isFull) { %>
+                    <button class="modal-form-button" type="button" disabled>At Capacity</button>
+                  <% } else { %>
+                    <button class="modal-form-button" type="button" disabled>Invite Only</button>
+                  <% } %>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        <% } %>
+      </section>
+    </main>
+  </div>
+</body>
+<script>
+  async function requestJoin(projectId) {
+    const message = window.prompt("Optional intro message for the DM:", "") || "";
+    const res = await fetch(`/api/request_project_join/${projectId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message }),
+    });
+    const data = await res.json().catch(function() { return null; });
+    if (!res.ok || (data && data.error)) {
+      window.alert((data && data.error && data.error.message) || "Unable to request join.");
+      return;
+    }
+    window.location.reload();
+  }
+
+  async function cancelJoinRequest(requestId) {
+    const res = await fetch(`/api/cancel_project_join_request/${requestId}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    const data = await res.json().catch(function() { return null; });
+    if (!res.ok || (data && data.error)) {
+      window.alert((data && data.error && data.error.message) || "Unable to cancel request.");
+      return;
+    }
+    window.location.reload();
+  }
+</script>
+</html>

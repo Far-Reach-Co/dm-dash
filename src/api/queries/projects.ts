@@ -10,6 +10,10 @@ export interface Project {
   description: string;
   image_id: number | null;
   is_pro: boolean;
+  is_public_listed: boolean;
+  public_join_mode: "invite_only" | "request";
+  public_join_capacity: number | null;
+  featured_record_id: number | null;
 }
 
 async function addProjectQuery(data: {title: string, user_id: string | number}) {

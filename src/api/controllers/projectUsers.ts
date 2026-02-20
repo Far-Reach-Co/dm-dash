@@ -137,10 +137,39 @@ async function editProjectUserIsEditor(
   }
 }
 
+async function leaveProject(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = requireApiUser(req);
+    const projectData = await getProjectQuery(req.params.project_id);
+    const project = projectData.rows[0];
+    if (!project) throw { status: 404, message: "Project not found" };
+    if (String(project.user_id) === String(userId)) {
+      throw { status: 409, message: "Project owner cannot leave the wyrld" };
+    }
+
+    const projectUserData = await getProjectUserByUserAndProjectQuery(
+      userId,
+      project.id
+    );
+    const projectUser = projectUserData.rows[0];
+    if (!projectUser) throw { status: 404, message: "You are not a member of this wyrld" };
+
+    await removeProjectUserQuery(String(projectUser.id));
+    res.status(200).send({ redirect: "/dash/wyrlds" });
+  } catch (err) {
+    next(err);
+  }
+}
+
 export {
   addProjectUserByInvite,
   getProjectUserByUserAndProject,
   getProjectUsersByProject,
   removeProjectUser,
   editProjectUserIsEditor,
+  leaveProject,
 };
