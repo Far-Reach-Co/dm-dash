@@ -156,6 +156,12 @@
   padding-right: var(--space-xs);
 }
 
+.community-members-list {
+  max-height: 30vh;
+  overflow-y: auto;
+  padding-right: var(--space-xs);
+}
+
 .community-thread-row {
   cursor: pointer;
   align-items: flex-start;
@@ -257,6 +263,79 @@
 
 .community-compose .settings-input {
   width: 100%;
+}
+
+.activity-log-list {
+  list-style: none;
+  margin: var(--space-md) 0 0;
+  padding: 0;
+  max-height: 56vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: var(--space-sm);
+}
+
+.activity-log-item {
+  margin: 0;
+  padding: var(--space-sm) 0;
+  border: 0;
+  border-bottom: 1px solid rgba(116, 167, 215, 0.18);
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.activity-log-item:last-child {
+  border-bottom: 0;
+}
+
+.activity-log-summary {
+  margin: 0;
+  padding: 0;
+  color: var(--bright-white);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.activity-log-meta {
+  margin-top: 2px;
+  font-size: 0.82rem;
+  color: var(--light-gray);
+  opacity: 0.82;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.wyrld-member-list-wrap {
+  margin-top: var(--space-md);
+}
+
+.wyrld-member-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wyrld-member-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(116, 167, 215, 0.15);
+}
+
+.wyrld-member-item:last-child {
+  border-bottom: 0;
+}
+
+.wyrld-member-name {
+  color: var(--bright-white);
+}
+
+.wyrld-member-role {
+  color: var(--light-gray);
+  font-size: 0.82rem;
 }
 
 /* ==========================================================================
@@ -509,6 +588,10 @@
 
   .community-thread-list {
     max-height: none;
+  }
+
+  .activity-log-list {
+    max-height: 60vh;
   }
 }
 

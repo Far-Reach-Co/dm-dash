@@ -11,6 +11,8 @@ import { getProjectQuery } from "../queries/projects.js";
 import { User, getUserByIdQuery } from "../queries/users.js";
 import { Request, Response, NextFunction } from "express";
 import { requireApiUser, requireProjectOwnerAccess } from "./accessControl";
+import { EventType, logEventAsync } from "../../lib/eventLogger";
+import { notifyProjectUserRemovedAsync } from "../../lib/emailNotifications";
 
 async function addProjectUserByInvite(
   req: Request,
@@ -41,6 +43,35 @@ async function addProjectUserByInvite(
     req.body.project_id = project.id;
 
     const data = await addProjectUserQuery(req.body);
+    const projectUser = data.rows[0];
+    logEventAsync({
+      userId,
+      projectId: project.id,
+      eventType: EventType.PROJECT_USER_CREATED,
+      eventData: {
+        projectUserId: projectUser.id,
+        joiningUserId: userId,
+        source: "invite_id",
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
+    logEventAsync({
+      userId,
+      projectId: project.id,
+      eventType: EventType.PROJECT_INVITE_USED,
+      eventData: {
+        inviteId: invite.id,
+        inviteUuid: invite.uuid,
+        projectUserId: projectUser.id,
+        joiningUserId: userId,
+        source: "invite_id",
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);
@@ -107,8 +138,26 @@ async function removeProjectUser(
     const projectUserData = await getProjectUserQuery(req.params.id);
     const projectUser = projectUserData.rows[0];
     if (!projectUser) throw { status: 404, message: "Project user not found" };
-    await requireProjectOwnerAccess(req, projectUser.project_id);
+    const ownerRole = await requireProjectOwnerAccess(req, projectUser.project_id);
     await removeProjectUserQuery(req.params.id);
+    logEventAsync({
+      userId: ownerRole.userId,
+      projectId: projectUser.project_id,
+      eventType: EventType.PROJECT_USER_REMOVED,
+      eventData: {
+        removedUserId: projectUser.user_id,
+        removedByUserId: ownerRole.userId,
+        source: "owner_removed_member",
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
+    notifyProjectUserRemovedAsync({
+      projectId: projectUser.project_id,
+      removedUserId: projectUser.user_id,
+      removedByUserId: ownerRole.userId,
+    });
     res.status(200).send();
   } catch (err) {
     next(err);
@@ -124,13 +173,29 @@ async function editProjectUserIsEditor(
     const projectUserData = await getProjectUserQuery(req.params.id);
     const projectUser = projectUserData.rows[0];
     if (!projectUser) throw { status: 404, message: "Project user not found" };
-    await requireProjectOwnerAccess(req, projectUser.project_id);
+    const ownerRole = await requireProjectOwnerAccess(req, projectUser.project_id);
+    const wasEditor = Boolean(projectUser.is_editor);
     const is_editor =
       req.body.is_editor === true ||
       req.body.is_editor === "true" ||
       req.body.is_editor === "on";
 
     const data = await editProjectUserQuery(req.params.id, { is_editor });
+    if (wasEditor !== is_editor) {
+      logEventAsync({
+        userId: ownerRole.userId,
+        projectId: projectUser.project_id,
+        eventType: EventType.PROJECT_USER_ROLE_CHANGED,
+        eventData: {
+          targetUserId: projectUser.user_id,
+          previousRole: wasEditor ? "manager" : "member",
+          nextRole: is_editor ? "manager" : "member",
+          outcome: "success",
+          reason: null,
+        },
+        req,
+      });
+    }
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -159,6 +224,19 @@ async function leaveProject(
     if (!projectUser) throw { status: 404, message: "You are not a member of this wyrld" };
 
     await removeProjectUserQuery(String(projectUser.id));
+    logEventAsync({
+      userId,
+      projectId: project.id,
+      eventType: EventType.PROJECT_USER_REMOVED,
+      eventData: {
+        removedUserId: userId,
+        removedByUserId: userId,
+        source: "self_leave",
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
     res.status(200).send({ redirect: "/dash/wyrlds" });
   } catch (err) {
     next(err);
