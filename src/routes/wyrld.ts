@@ -160,8 +160,16 @@ function summarizeWyrldActivityEvent(params: {
   eventData: Record<string, any>;
   usernamesById: Map<number, string>;
   characterNamesById: Map<number, string>;
+  recordTitlesById: Map<number, string>;
 }): string | null {
-  const { eventType, actorUsername, eventData, usernamesById, characterNamesById } = params;
+  const {
+    eventType,
+    actorUsername,
+    eventData,
+    usernamesById,
+    characterNamesById,
+    recordTitlesById,
+  } = params;
   const requesterUserId = toNumericId(eventData.requesterUserId);
   const joiningUserId = toNumericId(eventData.joiningUserId ?? eventData.userId);
   const removedUserId = toNumericId(eventData.removedUserId);
@@ -237,6 +245,15 @@ function summarizeWyrldActivityEvent(params: {
         null;
       if (!tableTitle) return null;
       return `${actorUsername} created table "${tableTitle}".`;
+    }
+    case "record.created": {
+      const recordId = toNumericId(eventData.recordId);
+      const recordTitle =
+        readEventString(eventData.title) ||
+        readEventString(eventData.recordTitle) ||
+        (recordId ? recordTitlesById.get(recordId) || null : null);
+      if (!recordTitle) return `${actorUsername} created a record.`;
+      return `${actorUsername} created record "${recordTitle}".`;
     }
     default:
       return `${actorUsername} triggered ${eventType}.`;
@@ -504,6 +521,11 @@ async function loadWyrldData(
           .map((row) => [Number(row.id), row.name.trim()]),
       );
     }
+    const recordTitlesById = new Map<number, string>(
+      records
+        .filter((row) => typeof row.title === "string" && row.title.trim().length > 0)
+        .map((row) => [Number(row.id), row.title.trim()]),
+    );
 
     activityEvents = visibleRows.map((row) => {
       const eventData = toEventData(row.event_data);
@@ -526,6 +548,7 @@ async function loadWyrldData(
         eventData,
         usernamesById,
         characterNamesById,
+        recordTitlesById,
       });
       if (!summary) return null;
 
