@@ -11,6 +11,7 @@ const VALID_SSL_MODES = new Set([
   "verify-full",
   "no-verify",
 ]);
+const LIBPQ_UNSUPPORTED_URI_QUERY_PARAMETERS = new Set(["uselibpqcompat"]);
 
 function readRequiredEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -110,6 +111,11 @@ export function resolveDatabaseUrl(): string {
 
 export function resolveDatabaseUrlForLibpq(): string {
   const url = new URL(resolveDatabaseUrl());
+  for (const [parameterName] of url.searchParams.entries()) {
+    if (LIBPQ_UNSUPPORTED_URI_QUERY_PARAMETERS.has(parameterName.toLowerCase())) {
+      url.searchParams.delete(parameterName);
+    }
+  }
   const sslMode = url.searchParams.get("sslmode");
   if (sslMode && sslMode.toLowerCase() === "no-verify") {
     url.searchParams.set("sslmode", "require");
