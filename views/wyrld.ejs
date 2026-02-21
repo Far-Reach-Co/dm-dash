@@ -199,28 +199,6 @@
         </div>
         <% } %>
       </section>
-      <script>
-        (function() {
-          var linkForm = document.getElementById('link-existing-sheet-form');
-          var linkMsg = document.getElementById('link-existing-sheet-msg');
-          if (!linkForm || !linkMsg) return;
-
-          function setLinkMessage(message, isError) {
-            linkMsg.textContent = message || '';
-            linkMsg.style.color = isError ? 'var(--red)' : 'var(--green)';
-          }
-
-          linkForm.addEventListener('htmx:responseError', function(event) {
-            var responseText = event && event.detail && event.detail.xhr && event.detail.xhr.responseText;
-            var message = 'Unable to link character.';
-            try {
-              var parsed = JSON.parse(responseText || '{}');
-              message = (parsed && parsed.error && parsed.error.message) || message;
-            } catch (_) {}
-            setLinkMessage(message, true);
-          });
-        })();
-      </script>
       <% } %>
 
       <% if (section === 'records') { %>
@@ -285,6 +263,36 @@
         </div>
         <% } %>
       </section>
+      <script>
+        (function() {
+          var linkForm = document.getElementById('link-existing-sheet-form');
+          var linkMsg = document.getElementById('link-existing-sheet-msg');
+          if (!linkForm || !linkMsg) return;
+
+          function setLinkMessage(message, isError) {
+            linkMsg.textContent = message || '';
+            linkMsg.style.color = isError ? 'var(--red)' : 'var(--green)';
+          }
+
+          linkForm.addEventListener('htmx:afterRequest', function(event) {
+            if (!event || !event.detail || !event.detail.successful) return;
+            setLinkMessage('Character linked. Refreshing...', false);
+            window.setTimeout(function() {
+              window.location.reload();
+            }, 250);
+          });
+
+          linkForm.addEventListener('htmx:responseError', function(event) {
+            var responseText = event && event.detail && event.detail.xhr && event.detail.xhr.responseText;
+            var message = 'Unable to link character.';
+            try {
+              var parsed = JSON.parse(responseText || '{}');
+              message = (parsed && parsed.error && parsed.error.message) || message;
+            } catch (_) {}
+            setLinkMessage(message, true);
+          });
+        })();
+      </script>
       <% } %>
 
       <% if (section === 'calendars') { %>
