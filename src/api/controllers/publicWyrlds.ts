@@ -24,9 +24,44 @@ import {
   requireProjectOwnerAccess,
 } from "./accessControl";
 import { userSubscriptionStatus } from "../../lib/enums.js";
+import { EventType, logEventAsync } from "../../lib/eventLogger";
+import logger from "../../lib/logger.js";
 
 type ProjectPublicJoinMode = "invite_only" | "request";
 const PROJECT_JOIN_REQUEST_COOLDOWN_MS = 60 * 1000;
+
+function logJoinRequestDenied(params: {
+  req: Request;
+  reason: string;
+  message: string;
+  statusCode: number;
+  userId?: string | number;
+  projectId?: string | number;
+}) {
+  const { req, reason, message, statusCode, userId, projectId } = params;
+  logEventAsync({
+    userId,
+    projectId,
+    eventType: EventType.PROJECT_JOIN_REQUEST_DENIED,
+    eventData: {
+      outcome: "denied",
+      reason,
+      statusCode,
+      message,
+    },
+    req,
+  });
+  logger.warn(
+    {
+      requestId: req.id,
+      userId: userId ?? null,
+      projectId: projectId ?? null,
+      reason,
+      statusCode,
+    },
+    "Project join request denied",
+  );
+}
 
 function parseBooleanLike(
   value: unknown,
@@ -172,12 +207,36 @@ async function requestProjectJoin(
     const userId = requireApiUser(req);
     const project = await getProjectOrThrow(req.params.project_id);
     if (String(project.user_id) === String(userId)) {
+      logJoinRequestDenied({
+        req,
+        userId,
+        projectId: project.id,
+        reason: "already_owner",
+        statusCode: 409,
+        message: "You already own this wyrld",
+      });
       throw { status: 409, message: "You already own this wyrld" };
     }
     if (!project.is_pro || !project.is_public_listed) {
+      logJoinRequestDenied({
+        req,
+        userId,
+        projectId: project.id,
+        reason: "not_public",
+        statusCode: 403,
+        message: "This wyrld is not listed publicly",
+      });
       throw { status: 403, message: "This wyrld is not listed publicly" };
     }
     if (project.public_join_mode !== "request") {
+      logJoinRequestDenied({
+        req,
+        userId,
+        projectId: project.id,
+        reason: "invite_only",
+        statusCode: 403,
+        message: "This wyrld is invite-only",
+      });
       throw { status: 403, message: "This wyrld is invite-only" };
     }
 
@@ -186,6 +245,14 @@ async function requestProjectJoin(
       project.id,
     );
     if (existingMemberData.rows[0]) {
+      logJoinRequestDenied({
+        req,
+        userId,
+        projectId: project.id,
+        reason: "already_member",
+        statusCode: 409,
+        message: "You are already a member of this wyrld",
+      });
       throw { status: 409, message: "You are already a member of this wyrld" };
     }
 
@@ -194,6 +261,14 @@ async function requestProjectJoin(
       userId,
     );
     if (pendingData.rows[0]) {
+      logJoinRequestDenied({
+        req,
+        userId,
+        projectId: project.id,
+        reason: "duplicate_pending",
+        statusCode: 200,
+        message: "A pending join request already exists",
+      });
       res.status(200).send(pendingData.rows[0]);
       return;
     }
@@ -212,6 +287,14 @@ async function requestProjectJoin(
             1,
             Math.ceil((PROJECT_JOIN_REQUEST_COOLDOWN_MS - elapsedMs) / 1000),
           );
+          logJoinRequestDenied({
+            req,
+            userId,
+            projectId: project.id,
+            reason: "cooldown",
+            statusCode: 429,
+            message: `Please wait ${waitSeconds}s before sending another join request`,
+          });
           throw {
             status: 429,
             message: `Please wait ${waitSeconds}s before sending another join request`,
@@ -226,6 +309,14 @@ async function requestProjectJoin(
     ) {
       const memberCount = await getProjectMemberCount(project.id);
       if (memberCount >= project.public_join_capacity) {
+        logJoinRequestDenied({
+          req,
+          userId,
+          projectId: project.id,
+          reason: "capacity_full",
+          statusCode: 409,
+          message: "This wyrld is at capacity",
+        });
         throw { status: 409, message: "This wyrld is at capacity" };
       }
     }
@@ -238,6 +329,28 @@ async function requestProjectJoin(
         requester_user_id: userId,
         message,
       });
+      const joinRequest = data.rows[0];
+      logEventAsync({
+        userId,
+        projectId: project.id,
+        eventType: EventType.PROJECT_JOIN_REQUEST_CREATED,
+        eventData: {
+          requestId: joinRequest.id,
+          messageLength: message.length,
+          outcome: "success",
+          reason: null,
+        },
+        req,
+      });
+      logger.info(
+        {
+          requestId: req.id,
+          userId,
+          projectId: project.id,
+          joinRequestId: joinRequest.id,
+        },
+        "Project join request created",
+      );
       res.status(201).send(data.rows[0]);
     } catch (dbErr) {
       const pgErr = dbErr as { code?: string };
@@ -247,6 +360,14 @@ async function requestProjectJoin(
           userId,
         );
         if (pendingData.rows[0]) {
+          logJoinRequestDenied({
+            req,
+            userId,
+            projectId: project.id,
+            reason: "duplicate_pending",
+            statusCode: 200,
+            message: "A pending join request already exists",
+          });
           res.status(200).send(pendingData.rows[0]);
           return;
         }
@@ -267,11 +388,36 @@ async function cancelProjectJoinRequest(
     const userId = requireApiUser(req);
     const joinRequestData = await getProjectJoinRequestQuery(req.params.id);
     const joinRequest = joinRequestData.rows[0];
-    if (!joinRequest) throw { status: 404, message: "Join request not found" };
+    if (!joinRequest) {
+      logJoinRequestDenied({
+        req,
+        userId,
+        reason: "request_not_found",
+        statusCode: 404,
+        message: "Join request not found",
+      });
+      throw { status: 404, message: "Join request not found" };
+    }
     if (String(joinRequest.requester_user_id) !== String(userId)) {
+      logJoinRequestDenied({
+        req,
+        userId,
+        projectId: joinRequest.project_id,
+        reason: "forbidden",
+        statusCode: 403,
+        message: "Forbidden",
+      });
       throw { status: 403, message: "Forbidden" };
     }
     if (joinRequest.status !== "pending") {
+      logJoinRequestDenied({
+        req,
+        userId,
+        projectId: joinRequest.project_id,
+        reason: "already_resolved",
+        statusCode: 409,
+        message: "Only pending requests can be cancelled",
+      });
       throw { status: 409, message: "Only pending requests can be cancelled" };
     }
 
@@ -279,6 +425,26 @@ async function cancelProjectJoinRequest(
       status: "cancelled",
       updated_at: new Date().toISOString(),
     });
+    logEventAsync({
+      userId,
+      projectId: joinRequest.project_id,
+      eventType: EventType.PROJECT_JOIN_REQUEST_CANCELLED,
+      eventData: {
+        requestId: joinRequest.id,
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
+    logger.info(
+      {
+        requestId: req.id,
+        userId,
+        projectId: joinRequest.project_id,
+        joinRequestId: joinRequest.id,
+      },
+      "Project join request cancelled",
+    );
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -311,13 +477,34 @@ async function respondProjectJoinRequest(
   try {
     const action = String(req.body?.action || "").trim().toLowerCase();
     if (action !== "approve" && action !== "reject") {
+      logJoinRequestDenied({
+        req,
+        reason: "invalid_action",
+        statusCode: 400,
+        message: "action must be 'approve' or 'reject'",
+      });
       throw { status: 400, message: "action must be 'approve' or 'reject'" };
     }
 
     const joinRequestData = await getProjectJoinRequestQuery(req.params.id);
     const joinRequest = joinRequestData.rows[0];
-    if (!joinRequest) throw { status: 404, message: "Join request not found" };
+    if (!joinRequest) {
+      logJoinRequestDenied({
+        req,
+        reason: "request_not_found",
+        statusCode: 404,
+        message: "Join request not found",
+      });
+      throw { status: 404, message: "Join request not found" };
+    }
     if (joinRequest.status !== "pending") {
+      logJoinRequestDenied({
+        req,
+        projectId: joinRequest.project_id,
+        reason: "already_resolved",
+        statusCode: 409,
+        message: "Join request is already resolved",
+      });
       throw { status: 409, message: "Join request is already resolved" };
     }
 
@@ -337,6 +524,14 @@ async function respondProjectJoinRequest(
         ) {
           const memberCount = await getProjectMemberCount(joinRequest.project_id);
           if (memberCount >= ownerRole.project.public_join_capacity) {
+            logJoinRequestDenied({
+              req,
+              userId: ownerRole.userId,
+              projectId: joinRequest.project_id,
+              reason: "capacity_full",
+              statusCode: 409,
+              message: "This wyrld is at capacity",
+            });
             throw { status: 409, message: "This wyrld is at capacity" };
           }
         }
@@ -356,6 +551,34 @@ async function respondProjectJoinRequest(
       reviewed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
+    const eventType =
+      status === "approved"
+        ? EventType.PROJECT_JOIN_REQUEST_APPROVED
+        : EventType.PROJECT_JOIN_REQUEST_REJECTED;
+    logEventAsync({
+      userId: ownerRole.userId,
+      projectId: joinRequest.project_id,
+      eventType,
+      eventData: {
+        requestId: joinRequest.id,
+        requesterUserId: joinRequest.requester_user_id,
+        joined,
+        outcome: "success",
+        reason: status === "approved" ? null : "owner_rejected",
+      },
+      req,
+    });
+    logger.info(
+      {
+        requestId: req.id,
+        userId: ownerRole.userId,
+        projectId: joinRequest.project_id,
+        joinRequestId: joinRequest.id,
+        action: status,
+        joined,
+      },
+      "Project join request reviewed",
+    );
 
     res.status(200).send({
       request: updatedData.rows[0],
@@ -374,6 +597,12 @@ async function editProjectPublicSettings(
   try {
     const ownerRole = await requireProjectOwnerAccess(req, req.params.id);
     const project = ownerRole.project;
+    const previousSettings = {
+      is_public_listed: Boolean(project.is_public_listed),
+      public_join_mode: project.public_join_mode || "invite_only",
+      public_join_capacity: project.public_join_capacity,
+      featured_record_id: project.featured_record_id,
+    };
 
     const is_public_listed = parseBooleanLike(
       req.body?.is_public_listed,
@@ -424,6 +653,51 @@ async function editProjectPublicSettings(
       public_join_capacity,
       featured_record_id,
     });
+    const nextSettings = {
+      is_public_listed,
+      public_join_mode,
+      public_join_capacity,
+      featured_record_id,
+    };
+    const changedFields = Object.keys(nextSettings).filter((field) => {
+      const key = field as keyof typeof nextSettings;
+      return previousSettings[key] !== nextSettings[key];
+    });
+    const changes = changedFields.reduce<Record<string, { from: unknown; to: unknown }>>(
+      (acc, field) => {
+        const key = field as keyof typeof nextSettings;
+        acc[field] = {
+          from: previousSettings[key],
+          to: nextSettings[key],
+        };
+        return acc;
+      },
+      {},
+    );
+    logEventAsync({
+      userId: ownerRole.userId,
+      projectId: project.id,
+      eventType: EventType.PROJECT_PUBLIC_SETTINGS_UPDATED,
+      eventData: {
+        changedFields,
+        changedCount: changedFields.length,
+        changes,
+        previousSettings,
+        nextSettings,
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
+    logger.info(
+      {
+        requestId: req.id,
+        userId: ownerRole.userId,
+        projectId: project.id,
+        changedFields,
+      },
+      "Project public settings updated",
+    );
 
     res.status(200).send(data.rows[0]);
   } catch (err) {

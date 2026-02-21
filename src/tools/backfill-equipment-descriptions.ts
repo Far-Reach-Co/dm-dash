@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import db from "../src/api/dbconfig";
+import db from "../api/dbconfig";
 
 interface EquipmentData {
   index: string;
@@ -141,7 +141,7 @@ async function backfillEquipmentDescriptions() {
     // Load 5e SRD equipment data
     const equipmentDataPath = path.join(
       __dirname,
-      "../public/lib/data/2014/5e-srd-equipment.json"
+      "../../public/lib/data/2014/5e-srd-equipment.json"
     );
     const equipmentJsonData: EquipmentData[] = JSON.parse(
       fs.readFileSync(equipmentDataPath, "utf-8")
@@ -150,7 +150,7 @@ async function backfillEquipmentDescriptions() {
     // Load 5e SRD magic items data
     const magicItemsDataPath = path.join(
       __dirname,
-      "../public/lib/data/2014/5e-srd-magic-items.json"
+      "../../public/lib/data/2014/5e-srd-magic-items.json"
     );
     const magicItemsJsonData: EquipmentData[] = JSON.parse(
       fs.readFileSync(magicItemsDataPath, "utf-8")

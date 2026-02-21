@@ -1,0 +1,11 @@
+[Unit]
+Description=Run dm-dash monthly log report email on first day of month
+
+[Timer]
+OnCalendar=monthly
+RandomizedDelaySec=30m
+Persistent=true
+Unit=dm-dash-monthly-report.service
+
+[Install]
+WantedBy=timers.target

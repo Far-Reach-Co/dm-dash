@@ -60,7 +60,7 @@ async function main() {
     process.exit(1);
   }
 
-  const outDir = path.join(__dirname, `../public/lib/data/${edition}`);
+  const outDir = path.join(__dirname, `../../public/lib/data/${edition}`);
   fs.mkdirSync(outDir, { recursive: true });
 
   console.log(`Downloading 5e SRD (${edition}) → ${outDir}\n`);

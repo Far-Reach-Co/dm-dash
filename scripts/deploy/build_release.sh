@@ -24,9 +24,6 @@ cp package.json "$STAGING_DIR/package.json"
 cp package-lock.json "$STAGING_DIR/package-lock.json"
 
 rsync -a dist/ "$STAGING_DIR/dist/"
-if [[ -d dist-tools ]]; then
-  rsync -a dist-tools/ "$STAGING_DIR/dist-tools/"
-fi
 rsync -a public/ "$STAGING_DIR/public/"
 rsync -a views/ "$STAGING_DIR/views/"
 rsync -a migrations/ "$STAGING_DIR/migrations/"

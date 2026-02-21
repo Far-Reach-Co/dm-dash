@@ -34,6 +34,14 @@ npm run email:product-update -- --campaign 2026-02-public-wyrlds-community --dry
 npm run email:product-update -- --campaign 2026-02-public-wyrlds-community
 ```
 
+## Monthly Log Report Email
+
+```bash
+npm run email:monthly-report -- --dry-run
+npm run email:monthly-report
+npm run email:monthly-report:force
+```
+
 ## Utility Scripts
 
 ```bash
