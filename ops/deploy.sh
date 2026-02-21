@@ -141,11 +141,12 @@ if [[ "$RESTART_SERVICES" == "1" ]]; then
   systemctl stop dm-dash-monthly-report.service || true
 
   echo "Service status:"
-  systemctl --no-pager --full status dm-dash.service | sed -n '1,24p'
-  systemctl --no-pager --full status dm-dash-backup.service | sed -n '1,24p'
-  systemctl --no-pager --full status dm-dash-backup.timer | sed -n '1,24p'
-  systemctl --no-pager --full status dm-dash-monthly-report.service | sed -n '1,24p'
-  systemctl --no-pager --full status dm-dash-monthly-report.timer | sed -n '1,24p'
+  # status returns non-zero for inactive one-shot units; print status without failing deploy
+  systemctl --no-pager --full status dm-dash.service | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-backup.service | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-backup.timer | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-monthly-report.service | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-monthly-report.timer | sed -n '1,24p' || true
 else
   echo "Skipping service restarts (DM_DASH_RESTART_SERVICES=$RESTART_SERVICES)."
 fi
