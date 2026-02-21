@@ -26,6 +26,10 @@ import {
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { EventType, logEventAsync } from "../../lib/eventLogger";
 import logger from "../../lib/logger.js";
+import {
+  notifyProjectJoinRequestCreatedAsync,
+  notifyProjectJoinRequestReviewedAsync,
+} from "../../lib/emailNotifications";
 
 type ProjectPublicJoinMode = "invite_only" | "request";
 const PROJECT_JOIN_REQUEST_COOLDOWN_MS = 60 * 1000;
@@ -351,6 +355,12 @@ async function requestProjectJoin(
         },
         "Project join request created",
       );
+      notifyProjectJoinRequestCreatedAsync({
+        projectId: project.id,
+        requesterUserId: userId,
+        joinRequestId: joinRequest.id,
+        message,
+      });
       res.status(201).send(data.rows[0]);
     } catch (dbErr) {
       const pgErr = dbErr as { code?: string };
@@ -541,6 +551,18 @@ async function respondProjectJoinRequest(
           user_id: joinRequest.requester_user_id,
           is_editor: false,
         });
+        logEventAsync({
+          userId: ownerRole.userId,
+          projectId: joinRequest.project_id,
+          eventType: EventType.PROJECT_USER_CREATED,
+          eventData: {
+            joiningUserId: joinRequest.requester_user_id,
+            source: "join_request_approval",
+            outcome: "success",
+            reason: null,
+          },
+          req,
+        });
       }
       joined = true;
     }
@@ -579,6 +601,12 @@ async function respondProjectJoinRequest(
       },
       "Project join request reviewed",
     );
+    notifyProjectJoinRequestReviewedAsync({
+      projectId: joinRequest.project_id,
+      requesterUserId: joinRequest.requester_user_id,
+      reviewerUserId: ownerRole.userId,
+      status,
+    });
 
     res.status(200).send({
       request: updatedData.rows[0],

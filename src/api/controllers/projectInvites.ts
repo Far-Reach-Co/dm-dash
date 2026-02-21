@@ -7,6 +7,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from "express";
 import { requireProjectEditorAccess } from "./accessControl";
+import { EventType, logEventAsync } from "../../lib/eventLogger";
 
 async function addProjectInvite(
   req: Request,
@@ -18,13 +19,26 @@ async function addProjectInvite(
 
   try {
     if (!req.body.project_id) throw { status: 400, message: "project_id is required" };
-    await requireProjectEditorAccess(req, req.body.project_id);
+    const editorRole = await requireProjectEditorAccess(req, req.body.project_id);
     const data = await addProjectInviteQuery(req.body);
     const invite = data.rows[0];
     const inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${
       invite.uuid
     }`;
     const inviteId = invite.id;
+    logEventAsync({
+      userId: editorRole.userId,
+      projectId: invite.project_id,
+      eventType: EventType.PROJECT_INVITE_CREATED,
+      eventData: {
+        inviteId: invite.id,
+        inviteUuid: invite.uuid,
+        source: req.body.source || null,
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
 
     if (req.body.source === "settings") {
       res.status(201).json({ inviteLink, inviteId });
@@ -68,8 +82,22 @@ async function removeProjectInvite(
     const inviteData = await getProjectInviteQuery(req.params.id);
     const invite = inviteData.rows[0];
     if (!invite) throw { status: 404, message: "Invite not found" };
-    await requireProjectEditorAccess(req, invite.project_id);
+    const editorRole = await requireProjectEditorAccess(req, invite.project_id);
     const data = await removeProjectInviteQuery(req.params.id);
+    const removedInvite = data.rows[0];
+    logEventAsync({
+      userId: editorRole.userId,
+      projectId: removedInvite.project_id,
+      eventType: EventType.PROJECT_INVITE_REVOKED,
+      eventData: {
+        inviteId: removedInvite.id,
+        inviteUuid: removedInvite.uuid,
+        source: req.body.source || null,
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
 
     if (req.body.source === "settings") {
       res.status(200).json({ success: true });
@@ -82,7 +110,7 @@ async function removeProjectInvite(
       : "partials/wyrld_settings/invitebutton";
 
     res.render(partial, {
-      projectId: data.rows[0].project_id,
+      projectId: removedInvite.project_id,
     });
   } catch (err) {
     next(err);

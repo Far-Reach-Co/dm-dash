@@ -8,10 +8,15 @@ import {
 import { getProjectsQuery, getProjectQuery } from "../api/queries/projects";
 import { getProjectPlayersByProjectQuery } from "../api/queries/projectPlayers";
 import { getProjectInviteByProjectQuery } from "../api/queries/projectInvites";
-import { get5eCharGeneralQuery } from "../api/queries/5eCharGeneral";
+import {
+  get5eCharGeneralQuery,
+  get5eCharNamesQuery,
+  get5eCharsGeneralByUserQuery,
+} from "../api/queries/5eCharGeneral";
 import { getCalendarsQuery } from "../api/queries/calendars";
 import { getRecordsByProjectQuery, getRecordQuery } from "../api/queries/record";
-import { getUserByIdQuery, User } from "../api/queries/users";
+import { getUserByIdQuery, getUsersByIdsQuery, User } from "../api/queries/users";
+import { getProjectLogEventsQuery } from "../api/queries/logEvents";
 import { humanFileSize } from "../lib/utils";
 import { getWyrldDataUsageLimitBytes } from "../lib/subscription";
 import { getTableImageCountByProjectQuery } from "../api/queries/tableImages";
@@ -122,9 +127,134 @@ function buildRecents<T>(
   return recent;
 }
 
+interface WyrldActivityEvent {
+  id: number;
+  created_at: string;
+  event_type: string;
+  actor_username: string;
+  summary: string;
+  outcome: string;
+  reason: string | null;
+}
+
+function toNumericId(value: unknown): number | null {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) return null;
+  return parsed;
+}
+
+function toEventData(value: unknown): Record<string, any> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  return value as Record<string, any>;
+}
+
+function readEventString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : null;
+}
+
+function summarizeWyrldActivityEvent(params: {
+  eventType: string;
+  actorUsername: string;
+  eventData: Record<string, any>;
+  usernamesById: Map<number, string>;
+  characterNamesById: Map<number, string>;
+}): string | null {
+  const { eventType, actorUsername, eventData, usernamesById, characterNamesById } = params;
+  const requesterUserId = toNumericId(eventData.requesterUserId);
+  const joiningUserId = toNumericId(eventData.joiningUserId ?? eventData.userId);
+  const removedUserId = toNumericId(eventData.removedUserId);
+  const targetUserId = toNumericId(eventData.targetUserId);
+  const explicitRequesterUsername = readEventString(eventData.requesterUsername);
+  const explicitJoiningUsername = readEventString(eventData.joiningUsername);
+  const explicitRemovedUsername = readEventString(eventData.removedUsername);
+  const explicitTargetUsername = readEventString(eventData.targetUsername);
+  const requesterUsername = requesterUserId
+    ? usernamesById.get(requesterUserId) || explicitRequesterUsername || "A user"
+    : explicitRequesterUsername || "A user";
+  const joiningUsername = explicitJoiningUsername ||
+    (joiningUserId
+      ? usernamesById.get(joiningUserId) || actorUsername
+      : actorUsername);
+  const removedUsername = explicitRemovedUsername ||
+    (removedUserId
+      ? usernamesById.get(removedUserId) || actorUsername
+      : actorUsername);
+  const targetUsername = explicitTargetUsername ||
+    (targetUserId ? usernamesById.get(targetUserId) || "A user" : "A user");
+
+  switch (eventType) {
+    case "project_join_request.created":
+      return `${requesterUsername} requested to join this wyrld.`;
+    case "project_join_request.cancelled":
+      return `${actorUsername} cancelled their join request.`;
+    case "project_join_request.approved":
+      return `${actorUsername} approved ${requesterUsername}'s join request.`;
+    case "project_join_request.rejected":
+      return `${actorUsername} rejected ${requesterUsername}'s join request.`;
+    case "project_join_request.denied":
+      return `${actorUsername} could not submit a join request (${eventData.reason || "denied"}).`;
+    case "project_user.created":
+      return `${joiningUsername} joined the wyrld.`;
+    case "project_user.removed":
+      if (eventData.source === "self_leave") {
+        return `${removedUsername} left the wyrld.`;
+      }
+      return `${removedUsername} was removed from the wyrld by ${actorUsername}.`;
+    case "project_user.role_changed": {
+      const nextRole = readEventString(eventData.nextRole) || "member";
+      return `${actorUsername} changed ${targetUsername}'s role to ${nextRole}.`;
+    }
+    case "project_invite.created":
+      return `${actorUsername} created an invite link.`;
+    case "project_invite.revoked":
+      return `${actorUsername} revoked an invite link.`;
+    case "project_invite.used":
+      return `${joiningUsername} joined the wyrld via invite link.`;
+    case "project_player.created": {
+      const playerId = toNumericId(eventData.playerId);
+      const characterName =
+        readEventString(eventData.characterName) ||
+        (playerId ? characterNamesById.get(playerId) || null : null);
+      const characterLabel = characterName ? `"${characterName}"` : null;
+      if (!characterLabel) return null;
+      return `${actorUsername} connected character ${characterLabel} to the wyrld.`;
+    }
+    case "project_player.removed": {
+      const playerId = toNumericId(eventData.playerId);
+      const characterName =
+        readEventString(eventData.characterName) ||
+        (playerId ? characterNamesById.get(playerId) || null : null);
+      const characterLabel = characterName ? `"${characterName}"` : null;
+      if (!characterLabel) return null;
+      return `${actorUsername} disconnected character ${characterLabel} from the wyrld.`;
+    }
+    case "table.created": {
+      const tableTitle =
+        readEventString(eventData.title) ||
+        readEventString(eventData.tableTitle) ||
+        null;
+      if (!tableTitle) return null;
+      return `${actorUsername} created table "${tableTitle}".`;
+    }
+    default:
+      return `${actorUsername} triggered ${eventType}.`;
+  }
+}
+
 interface GetProjectUsersByProjectReturnUser extends User {
   project_user_id: number;
   is_editor: boolean;
+}
+
+interface WyrldMemberRole {
+  user_id: number;
+  username: string;
+  role: "Owner" | "Manager" | "Member";
+  is_owner: boolean;
+  is_editor: boolean;
+  project_user_id: number | null;
 }
 
 async function loadWyrldData(
@@ -167,12 +297,13 @@ async function loadWyrldData(
   // get table views by project
   const tableData = await getTableViewsByProjectQuery(projectId);
   // get all character sheets by project
-  const players = [];
+  const players: Array<{ id: number; name?: string; created_at?: string }> = [];
   const projectPlayers = await getProjectPlayersByProjectQuery(projectId);
   for (const player of projectPlayers.rows) {
     const charData = await get5eCharGeneralQuery(player.player_id);
-    players.push(charData.rows[0]);
+    if (charData.rows[0]) players.push(charData.rows[0]);
   }
+  const ownedSheetsData = await get5eCharsGeneralByUserQuery(userId);
 
   // calendars
   const calendars = await getCalendarsQuery(projectId);
@@ -202,6 +333,55 @@ async function loadWyrldData(
     }
   }
 
+  const projectUsersData = await getProjectUsersByProjectQuery(project.id);
+  const projectUsers = projectUsersData.rows;
+  const allMemberUserIds = [
+    Number(project.user_id),
+    ...projectUsers.map((projectUser) => Number(projectUser.user_id)),
+  ];
+  const uniqueMemberUserIds = [...new Set(allMemberUserIds)];
+  const memberUsersData = await getUsersByIdsQuery(uniqueMemberUserIds);
+  const memberUsersById = new Map<number, User>(
+    memberUsersData.rows.map((user) => [Number(user.id), user]),
+  );
+  const ownerUsername =
+    memberUsersById.get(Number(project.user_id))?.username || `User #${project.user_id}`;
+
+  const wyrldMembersUnsorted: WyrldMemberRole[] = [
+    {
+      user_id: Number(project.user_id),
+      username: ownerUsername,
+      role: "Owner" as const,
+      is_owner: true,
+      is_editor: true,
+      project_user_id: null,
+    },
+    ...projectUsers.map((projectUser) => {
+      const userId = Number(projectUser.user_id);
+      const username = memberUsersById.get(userId)?.username || `User #${userId}`;
+      return {
+        user_id: userId,
+        username,
+        role: (projectUser.is_editor ? "Manager" : "Member") as
+          | "Manager"
+          | "Member",
+        is_owner: false,
+        is_editor: Boolean(projectUser.is_editor),
+        project_user_id: Number(projectUser.id),
+      };
+    }),
+  ];
+  const roleOrder: Record<WyrldMemberRole["role"], number> = {
+    Owner: 0,
+    Manager: 1,
+    Member: 2,
+  };
+  const wyrldMembers: WyrldMemberRole[] = [...wyrldMembersUnsorted].sort((a, b) => {
+    const roleDelta = roleOrder[a.role] - roleOrder[b.role];
+    if (roleDelta !== 0) return roleDelta;
+    return a.username.toLowerCase().localeCompare(b.username.toLowerCase());
+  });
+
   // load project users for settings (owner only)
   let settingsUsers: GetProjectUsersByProjectReturnUser[] = [];
   let pendingJoinRequests: Array<{
@@ -212,7 +392,6 @@ async function loadWyrldData(
     created_at: string;
   }> = [];
   if (userId == project.user_id) {
-    const projectUsersData = await getProjectUsersByProjectQuery(project.id);
     let joinRequestsRows: Array<{
       id: number;
       requester_user_id: number;
@@ -229,14 +408,15 @@ async function loadWyrldData(
       if (!isMissingProjectJoinRequestTableError(err)) throw err;
     }
 
-    for (const projectUser of projectUsersData.rows) {
-      const userData = await getUserByIdQuery(projectUser.user_id);
-      const user = userData.rows[0];
-      (user as GetProjectUsersByProjectReturnUser).project_user_id =
-        projectUser.id;
-      (user as GetProjectUsersByProjectReturnUser).is_editor =
-        projectUser.is_editor;
-      settingsUsers.push(user as GetProjectUsersByProjectReturnUser);
+    for (const projectUser of projectUsers) {
+      const user = memberUsersById.get(Number(projectUser.user_id));
+      if (!user) continue;
+      const settingsUser = {
+        ...user,
+        project_user_id: Number(projectUser.id),
+        is_editor: Boolean(projectUser.is_editor),
+      } as GetProjectUsersByProjectReturnUser;
+      settingsUsers.push(settingsUser);
     }
     pendingJoinRequests = joinRequestsRows.map((row) => ({
       id: row.id,
@@ -250,6 +430,10 @@ async function loadWyrldData(
   const tables = tableData.rows;
   const records = recordsData.rows;
   const sheets = players.filter(Boolean);
+  const linkedSheetIds = new Set(sheets.map((sheet) => Number((sheet as any).id)));
+  const unlinkedOwnedSheets = ownedSheetsData.rows.filter(
+    (sheet) => !linkedSheetIds.has(Number(sheet.id)),
+  );
   const calendarsList = calendars.rows;
 
   // query recently viewed entity_ids scoped to this project's items
@@ -271,6 +455,91 @@ async function loadWyrldData(
     calendarsList,
     (calendar) => (calendar as any).created_at,
   ).slice(0, RECENT_LIMIT);
+
+  let activityEvents: WyrldActivityEvent[] = [];
+  if (section === "activity") {
+    const activityData = await getProjectLogEventsQuery(project.id, { limit: 120 });
+    const allowedProjectPlayerEvents = new Set([
+      "project_player.created",
+      "project_player.removed",
+    ]);
+    const excludedEventPrefixes = ["image."];
+    const visibleRows = activityData.rows.filter((row) =>
+      !excludedEventPrefixes.some((prefix) => row.event_type.startsWith(prefix)) &&
+      (!row.event_type.startsWith("project_player.") ||
+        allowedProjectPlayerEvents.has(row.event_type)),
+    );
+    const userIds = new Set<number>();
+    const playerIds = new Set<number>();
+
+    for (const row of visibleRows) {
+      if (row.user_id) userIds.add(Number(row.user_id));
+      const eventData = toEventData(row.event_data);
+      const relatedUserIds = [
+        toNumericId(eventData.userId),
+        toNumericId(eventData.requesterUserId),
+        toNumericId(eventData.joiningUserId),
+        toNumericId(eventData.removedUserId),
+        toNumericId(eventData.removedByUserId),
+        toNumericId(eventData.targetUserId),
+      ].filter((id): id is number => Boolean(id));
+      for (const id of relatedUserIds) userIds.add(id);
+      const playerId = toNumericId(eventData.playerId);
+      if (playerId) playerIds.add(playerId);
+    }
+
+    let usernamesById = new Map<number, string>();
+    if (userIds.size) {
+      const usersData = await getUsersByIdsQuery([...userIds]);
+      usernamesById = new Map<number, string>(
+        usersData.rows.map((user) => [Number(user.id), user.username]),
+      );
+    }
+    let characterNamesById = new Map<number, string>();
+    if (playerIds.size) {
+      const charsData = await get5eCharNamesQuery([...playerIds]);
+      characterNamesById = new Map<number, string>(
+        charsData.rows
+          .filter((row) => typeof row.name === "string" && row.name.trim().length > 0)
+          .map((row) => [Number(row.id), row.name.trim()]),
+      );
+    }
+
+    activityEvents = visibleRows.map((row) => {
+      const eventData = toEventData(row.event_data);
+      const actorUsername =
+        row.actor_username ||
+        (row.user_id ? usernamesById.get(Number(row.user_id)) : null) ||
+        "System";
+      const outcome =
+        typeof eventData.outcome === "string" && eventData.outcome.trim()
+          ? eventData.outcome.trim()
+          : "success";
+      const reason =
+        typeof eventData.reason === "string" && eventData.reason.trim()
+          ? eventData.reason.trim()
+          : null;
+
+      const summary = summarizeWyrldActivityEvent({
+        eventType: row.event_type,
+        actorUsername,
+        eventData,
+        usernamesById,
+        characterNamesById,
+      });
+      if (!summary) return null;
+
+      return {
+        id: Number(row.id),
+        created_at: row.created_at,
+        event_type: row.event_type,
+        actor_username: actorUsername,
+        summary,
+        outcome,
+        reason,
+      };
+    }).filter((row): row is WyrldActivityEvent => Boolean(row));
+  }
 
   let discussionThreads: Array<{
     id: number;
@@ -355,6 +624,7 @@ async function loadWyrldData(
     settingsUsers,
     tables,
     sheets,
+    unlinkedOwnedSheets,
     calendars: calendarsList,
     records,
     imageCount,
@@ -364,8 +634,9 @@ async function loadWyrldData(
     inviteId,
     projectBannerSrc,
     projectBannerName,
+    wyrldMembers,
     pendingJoinRequests,
-    memberCount: settingsUsers.length + 1,
+    memberCount: wyrldMembers.length,
     recentTables,
     recentRecords,
     recentSheets,
@@ -373,6 +644,7 @@ async function loadWyrldData(
     discussionThreads,
     selectedDiscussionThread,
     selectedDiscussionPosts,
+    activityEvents,
     tablesSorted: sortByTitle(tables, (table) => (table as any).title),
     recordsSorted: sortByTitle(records, (record) => (record as any).title),
     sheetsSorted: sortByTitle(sheets, (sheet) => (sheet as any).name),
@@ -412,6 +684,7 @@ router.get(
     "/wyrld/sheets",
     "/wyrld/calendars",
     "/wyrld/community",
+    "/wyrld/activity",
     "/wyrld/settings",
   ],
   async (req: Request, res: Response, next: NextFunction) => {

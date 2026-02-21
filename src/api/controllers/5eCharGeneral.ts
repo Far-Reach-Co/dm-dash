@@ -116,7 +116,14 @@ async function add5eChar(
         userId: req.session.user,
         projectId: Number(req.body.wyrld_id),
         eventType: EventType.PROJECT_PLAYER_CREATED,
-        eventData: { playerId: generalId, projectId: req.body.wyrld_id },
+        eventData: {
+          playerId: generalId,
+          projectId: req.body.wyrld_id,
+          characterName: req.body.name,
+          source: "new_character_link",
+          outcome: "success",
+          reason: null,
+        },
         req,
       });
       res.status(201).json({ redirect: `/wyrld?id=${req.body.wyrld_id}` });
@@ -287,6 +294,23 @@ async function remove5eChar(req: Request, res: Response, next: NextFunction) {
     const projectPlayerData = await getProjectPlayersByPlayerQuery(general.id);
     const playerUserData = await getPlayerUsersByPlayerQuery(general.id);
     const playerInviteData = await getPlayerInviteByPlayerQuery(general.id);
+
+    for (const projectPlayer of projectPlayerData.rows) {
+      logEventAsync({
+        userId: req.session.user,
+        projectId: projectPlayer.project_id,
+        eventType: EventType.PROJECT_PLAYER_REMOVED,
+        eventData: {
+          projectPlayerId: projectPlayer.id,
+          playerId: general.id,
+          characterName: general.name || null,
+          source: "character_deleted",
+          outcome: "success",
+          reason: null,
+        },
+        req,
+      });
+    }
 
     await Promise.all([
       ...projectPlayerData.rows.map((pp) => removeProjectPlayerQuery(pp.id)),

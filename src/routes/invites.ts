@@ -70,7 +70,28 @@ router.get(
         userId,
         projectId: project.id,
         eventType: EventType.PROJECT_USER_CREATED,
-        eventData: { projectUserId: projectUser.id },
+        eventData: {
+          projectUserId: projectUser.id,
+          joiningUserId: userId,
+          source: "invite_link",
+          outcome: "success",
+          reason: null,
+        },
+        req,
+      });
+      logEventAsync({
+        userId,
+        projectId: project.id,
+        eventType: EventType.PROJECT_INVITE_USED,
+        eventData: {
+          inviteId: invite.id,
+          inviteUuid: invite.uuid,
+          projectUserId: projectUser.id,
+          joiningUserId: userId,
+          source: "invite_link",
+          outcome: "success",
+          reason: null,
+        },
         req,
       });
       notifyWyrldJoinAsync({

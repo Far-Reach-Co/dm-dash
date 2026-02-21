@@ -215,3 +215,184 @@ export function notifySheetLinkedAsync(params: {
     logger.error({ err, params }, "Failed to send sheet linked email notifications");
   });
 }
+
+async function notifyProjectJoinRequestCreated(params: {
+  projectId: string | number;
+  requesterUserId: string | number;
+  joinRequestId: string | number;
+  message?: string | null;
+}) {
+  const { projectId, requesterUserId, joinRequestId, message } = params;
+  const requesterUserIdNum = Number(requesterUserId);
+
+  const [projectData, users] = await Promise.all([
+    getProjectQuery(projectId),
+    getUsersByIds([requesterUserIdNum]),
+  ]);
+  const project = projectData.rows[0];
+  if (!project) return;
+
+  const ownerData = await getUsersByIds([Number(project.user_id)]);
+  const owner = ownerData[0];
+  if (!owner || !shouldReceiveNotification(owner, "notify_wyrld_join")) return;
+
+  const requester = users[0];
+  const requesterUsername = requester?.username || "A user";
+  const projectTitle = project.title || `Wyrld #${project.id}`;
+  const settingsUrl = `${getPublicAppUrl()}/wyrld/settings?id=${project.id}`;
+  const safeMessage = String(message || "").trim();
+
+  await sendNotificationEmail({
+    recipient: owner,
+    subject: `New join request for ${projectTitle}`,
+    message: /*html*/ `
+      <p>
+        <strong>${escapeHtml(requesterUsername)}</strong> requested to join
+        <strong>${escapeHtml(projectTitle)}</strong>.
+      </p>
+      ${
+        safeMessage
+          ? `<p>Message: <em>${escapeHtml(safeMessage)}</em></p>`
+          : "<p>No message was included.</p>"
+      }
+      <p>Request ID: <strong>${escapeHtml(String(joinRequestId))}</strong></p>
+      <p><a href="${settingsUrl}">Review join requests</a></p>
+    `,
+  });
+}
+
+async function notifyProjectJoinRequestReviewed(params: {
+  projectId: string | number;
+  requesterUserId: string | number;
+  reviewerUserId: string | number;
+  status: "approved" | "rejected";
+}) {
+  const { projectId, requesterUserId, reviewerUserId, status } = params;
+  const requesterUserIdNum = Number(requesterUserId);
+  const reviewerUserIdNum = Number(reviewerUserId);
+
+  const [projectData, users] = await Promise.all([
+    getProjectQuery(projectId),
+    getUsersByIds([requesterUserIdNum, reviewerUserIdNum]),
+  ]);
+  const project = projectData.rows[0];
+  if (!project) return;
+
+  const usersById = new Map<number, User>(
+    users.map((user) => [Number(user.id), user]),
+  );
+  const requester = usersById.get(requesterUserIdNum);
+  if (!requester || !shouldReceiveNotification(requester, "notify_wyrld_join")) return;
+
+  const reviewer = usersById.get(reviewerUserIdNum);
+  const reviewerUsername = reviewer?.username || "A manager";
+  const projectTitle = project.title || `Wyrld #${project.id}`;
+  const wyrldUrl = `${getPublicAppUrl()}/wyrld?id=${project.id}`;
+  const wasApproved = status === "approved";
+
+  await sendNotificationEmail({
+    recipient: requester,
+    subject: wasApproved
+      ? `Join request approved for ${projectTitle}`
+      : `Join request update for ${projectTitle}`,
+    message: /*html*/ `
+      <p>
+        Your request to join <strong>${escapeHtml(projectTitle)}</strong> was
+        <strong>${wasApproved ? "approved" : "rejected"}</strong> by
+        <strong>${escapeHtml(reviewerUsername)}</strong>.
+      </p>
+      ${
+        wasApproved
+          ? `<p><a href="${wyrldUrl}">Open this Wyrld</a></p>`
+          : ""
+      }
+    `,
+  });
+}
+
+async function notifyProjectUserRemoved(params: {
+  projectId: string | number;
+  removedUserId: string | number;
+  removedByUserId?: string | number | null;
+}) {
+  const { projectId, removedUserId, removedByUserId } = params;
+  const removedUserIdNum = Number(removedUserId);
+  const actorUserIdNum =
+    removedByUserId === undefined || removedByUserId === null
+      ? null
+      : Number(removedByUserId);
+
+  const userIds = [removedUserIdNum];
+  if (actorUserIdNum !== null) userIds.push(actorUserIdNum);
+
+  const [projectData, users] = await Promise.all([
+    getProjectQuery(projectId),
+    getUsersByIds(userIds),
+  ]);
+  const project = projectData.rows[0];
+  if (!project) return;
+
+  const usersById = new Map<number, User>(
+    users.map((user) => [Number(user.id), user]),
+  );
+  const removedUser = usersById.get(removedUserIdNum);
+  if (!removedUser || !shouldReceiveNotification(removedUser, "notify_wyrld_join")) {
+    return;
+  }
+
+  const actorUser =
+    actorUserIdNum === null ? null : usersById.get(actorUserIdNum) || null;
+  const actorUsername = actorUser?.username || "A wyrld manager";
+  const projectTitle = project.title || `Wyrld #${project.id}`;
+  const dashUrl = `${getPublicAppUrl()}/dash/wyrlds`;
+
+  await sendNotificationEmail({
+    recipient: removedUser,
+    subject: `Removed from ${projectTitle}`,
+    message: /*html*/ `
+      <p>
+        You were removed from <strong>${escapeHtml(projectTitle)}</strong> by
+        <strong>${escapeHtml(actorUsername)}</strong>.
+      </p>
+      <p><a href="${dashUrl}">Open your Wyrlds dashboard</a></p>
+    `,
+  });
+}
+
+export function notifyProjectJoinRequestCreatedAsync(params: {
+  projectId: string | number;
+  requesterUserId: string | number;
+  joinRequestId: string | number;
+  message?: string | null;
+}): void {
+  notifyProjectJoinRequestCreated(params).catch((err) => {
+    logger.error(
+      { err, params },
+      "Failed to send project join request created email notification",
+    );
+  });
+}
+
+export function notifyProjectJoinRequestReviewedAsync(params: {
+  projectId: string | number;
+  requesterUserId: string | number;
+  reviewerUserId: string | number;
+  status: "approved" | "rejected";
+}): void {
+  notifyProjectJoinRequestReviewed(params).catch((err) => {
+    logger.error(
+      { err, params },
+      "Failed to send project join request reviewed email notification",
+    );
+  });
+}
+
+export function notifyProjectUserRemovedAsync(params: {
+  projectId: string | number;
+  removedUserId: string | number;
+  removedByUserId?: string | number | null;
+}): void {
+  notifyProjectUserRemoved(params).catch((err) => {
+    logger.error({ err, params }, "Failed to send project user removed email notification");
+  });
+}

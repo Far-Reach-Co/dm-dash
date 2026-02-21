@@ -17,6 +17,7 @@ import {
   requireSheetOwnerAccess,
 } from "./accessControl";
 import { subscriptionPlanLimits } from "../../lib/subscription";
+import { get5eCharGeneralQuery } from "../queries/5eCharGeneral";
 
 async function addProjectPlayer(
   req: Request,
@@ -24,7 +25,19 @@ async function addProjectPlayer(
   next: NextFunction
 ) {
   try {
-    await requireProjectEditorAccess(req, req.body.project_id);
+    const generalData = await get5eCharGeneralQuery(req.body.player_id);
+    const general = generalData.rows[0];
+    if (!general) throw { status: 404, message: "Character not found" };
+
+    const isSheetOwner =
+      req.session?.user &&
+      String(general.user_id) === String(req.session.user);
+
+    if (isSheetOwner) {
+      await requireProjectMemberAccess(req, req.body.project_id);
+    } else {
+      await requireProjectEditorAccess(req, req.body.project_id);
+    }
     const projectPlayersData = await getProjectPlayersByProjectQuery(
       req.body.project_id
     );
@@ -40,6 +53,7 @@ async function addProjectPlayer(
 
     const data = await addProjectPlayerQuery(req.body);
     const projectPlayer = data.rows[0];
+    const characterName = general.name || null;
     // Log project player creation event
     logEventAsync({
       userId: req.session.user,
@@ -48,6 +62,10 @@ async function addProjectPlayer(
       eventData: {
         projectPlayerId: projectPlayer.id,
         playerId: req.body.player_id,
+        characterName,
+        source: "manual_link",
+        outcome: "success",
+        reason: null,
       },
       req,
     });
@@ -116,7 +134,23 @@ async function removeProjectPlayer(
     const projectPlayer = projectPlayerData.rows[0];
     if (!projectPlayer) throw { status: 404, message: "Project player not found" };
     await requireProjectEditorAccess(req, projectPlayer.project_id);
+    const generalData = await get5eCharGeneralQuery(projectPlayer.player_id);
+    const characterName = generalData.rows[0]?.name || null;
     await removeProjectPlayerQuery(req.params.id);
+    logEventAsync({
+      userId: req.session.user,
+      projectId: projectPlayer.project_id,
+      eventType: EventType.PROJECT_PLAYER_REMOVED,
+      eventData: {
+        projectPlayerId: projectPlayer.id,
+        playerId: projectPlayer.player_id,
+        characterName,
+        source: "manual_unlink",
+        outcome: "success",
+        reason: null,
+      },
+      req,
+    });
     res.status(204).send();
   } catch (err) {
     next(err);

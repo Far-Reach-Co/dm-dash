@@ -33,6 +33,7 @@
           <a class="dashboard-nav-link <%= section === 'sheets' ? 'active' : '' %>" href="/wyrld/sheets?id=<%= project.id %>">Character Sheets</a>
           <a class="dashboard-nav-link <%= section === 'calendars' ? 'active' : '' %>" href="/wyrld/calendars?id=<%= project.id %>">Calendars</a>
           <a class="dashboard-nav-link <%= section === 'community' ? 'active' : '' %>" href="/wyrld/community?id=<%= project.id %>">Community</a>
+          <a class="dashboard-nav-link <%= section === 'activity' ? 'active' : '' %>" href="/wyrld/activity?id=<%= project.id %>">Activity</a>
           <a class="dashboard-nav-link <%= section === 'settings' ? 'active' : '' %>" href="/wyrld/settings?id=<%= project.id %>">Settings</a>
         </div>
       </div>
@@ -147,6 +148,28 @@
             <% } %>
           </div>
         </section>
+
+        <section class="dashboard-card">
+          <div class="dashboard-card-header">
+            <h2>Members & Roles</h2>
+            <small><%= wyrldMembers.length %> total</small>
+          </div>
+          <small>Everyone currently in this wyrld and their role.</small>
+          <div class="wyrld-member-list-wrap">
+            <% if (wyrldMembers.length === 0) { %>
+            <small>No members found.</small>
+            <% } else { %>
+            <ul class="wyrld-member-list">
+              <% wyrldMembers.forEach(function(member) { %>
+              <li class="wyrld-member-item">
+                <span class="wyrld-member-name"><%= member.username %></span>
+                <span class="wyrld-member-role"><%= member.role %></span>
+              </li>
+              <% }); %>
+            </ul>
+            <% } %>
+          </div>
+        </section>
       </div>
       <% } %>
 
@@ -176,6 +199,28 @@
         </div>
         <% } %>
       </section>
+      <script>
+        (function() {
+          var linkForm = document.getElementById('link-existing-sheet-form');
+          var linkMsg = document.getElementById('link-existing-sheet-msg');
+          if (!linkForm || !linkMsg) return;
+
+          function setLinkMessage(message, isError) {
+            linkMsg.textContent = message || '';
+            linkMsg.style.color = isError ? 'var(--red)' : 'var(--green)';
+          }
+
+          linkForm.addEventListener('htmx:responseError', function(event) {
+            var responseText = event && event.detail && event.detail.xhr && event.detail.xhr.responseText;
+            var message = 'Unable to link character.';
+            try {
+              var parsed = JSON.parse(responseText || '{}');
+              message = (parsed && parsed.error && parsed.error.message) || message;
+            } catch (_) {}
+            setLinkMessage(message, true);
+          });
+        })();
+      </script>
       <% } %>
 
       <% if (section === 'records') { %>
@@ -209,7 +254,23 @@
           <h2>Player Character Sheets</h2>
           <a onclick="openNewSheetModal('<%= project.id %>', '<%= encodeURIComponent(project.title) %>')" title="Create a new character sheet for this wyrld" style="cursor:pointer">+ New Character Sheet</a>
         </div>
-        <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator of the sheet and the wyrld managers are allowed to view these sheets.</small>
+        <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator of the sheet and the wyrld managers can view these sheets.</small>
+        <small class="d-block mt-1">To connect an existing character you already own, use the link form below.</small>
+        <% if (unlinkedOwnedSheets && unlinkedOwnedSheets.length > 0) { %>
+        <form id="link-existing-sheet-form" class="settings-form-row mt-2" hx-post="/api/add_project_player" hx-swap="none">
+          <input type="hidden" name="project_id" value="<%= project.id %>" />
+          <select class="settings-input" name="player_id" required>
+            <option value="">Select your character...</option>
+            <% unlinkedOwnedSheets.forEach(function(sheet) { %>
+            <option value="<%= sheet.id %>"><%= sheet.name %></option>
+            <% }); %>
+          </select>
+          <button class="modal-form-button" type="submit">Link Existing Character</button>
+        </form>
+        <small class="success-message" id="link-existing-sheet-msg"></small>
+        <% } else { %>
+        <small class="d-block mt-2">All of your existing characters are already linked here.</small>
+        <% } %>
         <hr />
         <% if (sheetsSorted.length === 0) { %>
         <small>No sheets have been connected to this wyrld yet...</small>
@@ -285,6 +346,26 @@
               <% }); %>
             </div>
           <% } %>
+
+          <hr />
+          <div class="dashboard-card-header">
+            <h3>Members & Roles</h3>
+            <small><%= wyrldMembers.length %></small>
+          </div>
+          <div class="community-members-list">
+            <% if (!wyrldMembers.length) { %>
+            <small>No members found.</small>
+            <% } else { %>
+            <ul class="wyrld-member-list">
+              <% wyrldMembers.forEach(function(member) { %>
+              <li class="wyrld-member-item">
+                <span class="wyrld-member-name"><%= member.username %></span>
+                <span class="wyrld-member-role"><%= member.role %></span>
+              </li>
+              <% }); %>
+            </ul>
+            <% } %>
+          </div>
         </section>
 
         <section class="dashboard-card community-main">
@@ -559,6 +640,32 @@
           };
         })();
       </script>
+      <% } %>
+
+      <% if (section === 'activity') { %>
+      <section class="dashboard-card">
+        <div class="dashboard-card-header">
+          <h2>Wyrld Activity</h2>
+          <small><%= activityEvents.length %> recent events</small>
+        </div>
+        <small>Recent join request and membership activity for this wyrld.</small>
+        <hr />
+        <% if (!activityEvents.length) { %>
+        <small>No activity events yet...</small>
+        <% } else { %>
+        <ul class="activity-log-list">
+          <% activityEvents.forEach(function(activity) { %>
+          <li class="activity-log-item">
+            <div class="activity-log-summary"><%= activity.summary %></div>
+            <div class="activity-log-meta">
+              <%= new Date(activity.created_at).toLocaleString('en-US') %> -
+              <%= activity.event_type %><%= activity.reason ? ` (${activity.reason})` : '' %>
+            </div>
+          </li>
+          <% }); %>
+        </ul>
+        <% } %>
+      </section>
       <% } %>
 
       <% if (section === 'settings' && isOwner) { %>

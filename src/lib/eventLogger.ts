@@ -10,7 +10,13 @@ export enum EventType {
   // Project events
   PROJECT_CREATED = "project.created",
   PROJECT_USER_CREATED = "project_user.created",
+  PROJECT_USER_REMOVED = "project_user.removed",
+  PROJECT_USER_ROLE_CHANGED = "project_user.role_changed",
   PROJECT_PLAYER_CREATED = "project_player.created",
+  PROJECT_PLAYER_REMOVED = "project_player.removed",
+  PROJECT_INVITE_CREATED = "project_invite.created",
+  PROJECT_INVITE_REVOKED = "project_invite.revoked",
+  PROJECT_INVITE_USED = "project_invite.used",
 
   // Character events
   DND_5E_CHARACTER_CREATED = "dnd_5e_character.created",
