@@ -30,8 +30,7 @@ Core app for Far Reach Co. (dashboard, VTT, character sheets, Discord integratio
 ```text
 .
 ├── docs/               # Workflow docs
-├── dist/               # Compiled TypeScript output (server)
-├── dist-tools/         # Compiled TypeScript output (tools)
+├── dist/               # Compiled TypeScript output (server + tools)
 ├── migrations/         # SQL migrations
 ├── ops/                # Deployment + remote operations scripts
 ├── public/             # Static assets and client bundles

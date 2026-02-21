@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "rootDir": ".",
-    "outDir": "dist-tools"
-  },
-  "include": ["tools/**/*.ts", "src/**/*.ts"],
-  "exclude": ["node_modules", "public", "dist", "dist-tools"]
-}

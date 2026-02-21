@@ -8,8 +8,8 @@ import {
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
-import db, { pool } from "../src/api/dbconfig";
-import { addImageQuery } from "../src/api/queries/images";
+import db, { pool } from "../api/dbconfig";
+import { addImageQuery } from "../api/queries/images";
 
 const DEFAULT_SOURCE_URL =
   "https://wyrld.s3.us-east-1.amazonaws.com/free-images/FreeTokens_v4.zip";

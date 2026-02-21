@@ -68,7 +68,6 @@ DM_DASH_CREATE_RELEASE_ARCHIVE=0 ./ops/deploy.sh
 Artifacts are staged by `scripts/deploy/build_release.sh` and include:
 
 - `dist/`
-- `dist-tools/` (if present)
 - `public/`
 - `views/`
 - `migrations/`

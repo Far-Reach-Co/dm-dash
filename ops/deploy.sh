@@ -117,10 +117,12 @@ fi
 
 if [[ "$INSTALL_UNITS" == "1" ]]; then
   echo "Installing systemd units..."
-  if [[ -f "$REMOTE_DIR/systemd/dm-dash.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.timer" ]]; then
+  if [[ -f "$REMOTE_DIR/systemd/dm-dash.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.timer" && -f "$REMOTE_DIR/systemd/dm-dash-monthly-report.service" && -f "$REMOTE_DIR/systemd/dm-dash-monthly-report.timer" ]]; then
     cp "$REMOTE_DIR/systemd/dm-dash.service" /etc/systemd/system/dm-dash.service
     cp "$REMOTE_DIR/systemd/dm-dash-backup.service" /etc/systemd/system/dm-dash-backup.service
     cp "$REMOTE_DIR/systemd/dm-dash-backup.timer" /etc/systemd/system/dm-dash-backup.timer
+    cp "$REMOTE_DIR/systemd/dm-dash-monthly-report.service" /etc/systemd/system/dm-dash-monthly-report.service
+    cp "$REMOTE_DIR/systemd/dm-dash-monthly-report.timer" /etc/systemd/system/dm-dash-monthly-report.timer
     systemctl daemon-reload
   else
     echo "systemd unit files not found in repo; keeping currently installed units."
@@ -131,15 +133,19 @@ fi
 
 if [[ "$RESTART_SERVICES" == "1" ]]; then
   echo "Restarting services..."
-  systemctl enable dm-dash.service dm-dash-backup.timer
+  systemctl enable dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer
   systemctl restart dm-dash.service
   systemctl restart dm-dash-backup.timer
+  systemctl restart dm-dash-monthly-report.timer
   systemctl stop dm-dash-backup.service || true
+  systemctl stop dm-dash-monthly-report.service || true
 
   echo "Service status:"
   systemctl --no-pager --full status dm-dash.service | sed -n '1,24p'
   systemctl --no-pager --full status dm-dash-backup.service | sed -n '1,24p'
   systemctl --no-pager --full status dm-dash-backup.timer | sed -n '1,24p'
+  systemctl --no-pager --full status dm-dash-monthly-report.service | sed -n '1,24p'
+  systemctl --no-pager --full status dm-dash-monthly-report.timer | sed -n '1,24p'
 else
   echo "Skipping service restarts (DM_DASH_RESTART_SERVICES=$RESTART_SERVICES)."
 fi

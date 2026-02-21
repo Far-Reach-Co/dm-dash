@@ -6,6 +6,7 @@ import db from "../api/dbconfig";
 import { badRequestError, notFoundError } from "./httpErrors";
 import { buildGuestSandboxCapabilities } from "./tableAuthz";
 import { getRedisUrl } from "./redisConfig.js";
+import { EventType, logEventAsync } from "./eventLogger";
 
 declare module "express-session" {
   export interface SessionData {
@@ -109,6 +110,10 @@ async function resolveStarterImageIds(input: unknown) {
   return await loadCuratedGuestImageIds();
 }
 
+function readSessionUserId(req: Request): string | number | undefined {
+  return req.session?.user;
+}
+
 export function ensureGuestId(req: Request): string {
   if (!req.session.guest_id) {
     req.session.guest_id = randomUUID();
@@ -131,6 +136,10 @@ export async function createGuestSandbox(
   if (existingId) {
     const existing = await getGuestSandbox(existingId);
     if (existing && String(existing.guest_id) === String(guestId)) {
+      logger.info(
+        { requestId: req.id, guestSandboxId: existing.id, guestId },
+        "Reused existing guest sandbox",
+      );
       return existing;
     }
   }
@@ -155,6 +164,22 @@ export async function createGuestSandbox(
 
   await writeGuestSandbox(record);
   req.session.guest_sandbox_id = id;
+  logEventAsync({
+    userId: readSessionUserId(req),
+    eventType: EventType.GUEST_SANDBOX_STARTED,
+    eventData: {
+      guestSandboxId: id,
+      guestId,
+      starterImageCount: starterImageIds.length,
+      outcome: "success",
+      reason: null,
+    },
+    req,
+  });
+  logger.info(
+    { requestId: req.id, guestSandboxId: id, guestId, starterImageCount: starterImageIds.length },
+    "Created guest sandbox",
+  );
 
   return record;
 }
@@ -171,9 +196,15 @@ export async function getGuestSandbox(id: string) {
   }
 }
 
-export async function requireGuestSandboxAccess(_req: Request, id: string) {
+export async function requireGuestSandboxAccess(req: Request, id: string) {
   const record = await getGuestSandbox(id);
-  if (!record) throw guestSandboxNotFoundError();
+  if (!record) {
+    logger.warn(
+      { requestId: req.id, guestSandboxId: id },
+      "Guest sandbox access denied: not found",
+    );
+    throw guestSandboxNotFoundError();
+  }
   return record;
 }
 
@@ -195,7 +226,9 @@ export async function saveGuestSandboxData(id: string, data: unknown) {
   }
 
   const record = await getGuestSandbox(id);
-  if (!record) throw guestSandboxNotFoundError();
+  if (!record) {
+    throw guestSandboxNotFoundError();
+  }
   const updated: GuestSandboxRecord = {
     ...record,
     data: JSON.parse(dataJson),

@@ -8,7 +8,7 @@ This folder contains remote operations scripts for dm-dash.
 - `./ops/deploy.sh`: build locally, sync artifacts, install prod deps, restart services
 - `DM_DASH_RESTART_SERVICES=0 ./ops/deploy.sh`: deploy artifacts without restarting services
 - `DM_DASH_CREATE_RELEASE_ARCHIVE=0 ./ops/deploy.sh`: fastest deploy path (no rollback archive creation)
-- `./ops/service.sh`: status/logs/restart/stop for web + backup services
+- `./ops/service.sh`: status/logs/restart/stop for web + backup + monthly-report services
 - `./ops/rollback.sh`: list release archives and roll back to a selected archive
 - `./ops/cleanup_remote.sh`: remove legacy repo-era paths from remote server
 - `./ops/caddy_sync.sh`: push and reload Caddy config
@@ -59,12 +59,13 @@ Check status + logs:
 ./ops/service.sh status all
 ./ops/service.sh logs web
 ./ops/service.sh logs backup
+./ops/service.sh logs report
 ```
 
 If units are stale:
 
 ```bash
-ssh "$DM_DASH_SERVER" "systemctl daemon-reload && systemctl restart dm-dash.service dm-dash-backup.timer"
+ssh "$DM_DASH_SERVER" "systemctl daemon-reload && systemctl restart dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer"
 ```
 
 ## Service Troubleshooting
