@@ -2,6 +2,8 @@
 .info-container {
   max-width: 900px;
   margin: 0 auto;
+  position: relative;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
 }
 
 .intro {
@@ -572,8 +574,24 @@ tr:hover {
 .info-container hr {
   border: none;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--blue), transparent);
-  margin: 2rem 0;
+  background: linear-gradient(90deg, transparent, rgba(72, 99, 125, 0.5), transparent);
+  margin: 1.5rem 0;
+}
+
+.info-container hr.w-75 {
+  width: 75%;
+  margin-left: 0;
+  background: linear-gradient(90deg, rgba(72, 99, 125, 0.25), transparent);
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-container hr.w-50 {
+  width: 50%;
+  margin-left: 0;
+  background: linear-gradient(90deg, rgba(72, 99, 125, 0.2), transparent);
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 /* ===== SRD Growth Rail ===== */
@@ -994,4 +1012,219 @@ tr:hover {
   .info-container {
     max-width: 980px;
   }
+}
+
+/* ===== SRD See Also / Related Content ===== */
+/* For supplementary cross-links at the bottom of detail pages */
+.srd-see-also {
+  margin-top: 2rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid rgba(72, 99, 125, 0.18);
+}
+
+.srd-see-also h3,
+.srd-see-also h4 {
+  color: var(--main-gray);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  padding-left: 0;
+  border-left: none;
+}
+
+.srd-see-also + .srd-see-also {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+}
+
+.srd-see-also ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.srd-see-also ul li {
+  margin: 0;
+  padding: 0;
+}
+
+.srd-see-also ul li::before {
+  display: none;
+}
+
+.srd-see-also a {
+  color: var(--link-blue);
+  text-decoration: none;
+  font-size: 0.85rem;
+  opacity: 0.65;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 20px;
+  border: 1px solid rgba(116, 167, 215, 0.15);
+}
+
+.srd-see-also a:hover {
+  color: var(--orange3);
+  opacity: 1;
+  border-color: rgba(209, 158, 116, 0.25);
+}
+
+/* ===== SRD Filter Pills (crawlable browse-by link groups) ===== */
+.srd-filter-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.srd-filter-pills a {
+  display: inline-block;
+  padding: 3px 11px;
+  border-radius: 20px;
+  font-size: 0.83rem;
+  color: var(--link-blue);
+  border: 1px solid rgba(116, 167, 215, 0.2);
+  background: rgba(47, 64, 84, 0.4);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.srd-filter-pills a:hover {
+  color: var(--orange3);
+  border-color: rgba(209, 158, 116, 0.35);
+  background: rgba(47, 64, 84, 0.65);
+}
+
+/* ===== SRD Filter Label ===== */
+.srd-filter-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--main-gray);
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+/* ===== SRD Class Grid ===== */
+.srd-class-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 14px 0 20px;
+}
+
+.srd-class-card {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid rgba(107, 131, 154, 0.4);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--link-blue);
+  font-size: 0.95rem;
+  background: rgba(47, 64, 84, 0.35);
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.srd-class-card:hover {
+  color: var(--orange3);
+  border-color: rgba(209, 158, 116, 0.4);
+  background: rgba(47, 64, 84, 0.65);
+}
+
+/* ===== SRD Back Link ===== */
+.srd-back-link {
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(72, 99, 125, 0.2);
+}
+
+.srd-back-link a {
+  color: var(--link-blue);
+  text-decoration: none;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.srd-back-link a:hover {
+  color: var(--orange3);
+  opacity: 1;
+}
+
+/* ===== SRD Prev/Next Navigation ===== */
+.srd-prev-next {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(72, 99, 125, 0.2);
+}
+
+.srd-prev-next a {
+  color: var(--link-blue);
+  text-decoration: none;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
+.srd-prev-next a:hover {
+  color: var(--orange3);
+  opacity: 1;
+}
+
+/* ===== SRD Column List ===== */
+.srd-col-list-3 {
+  column-count: 3;
+  column-gap: 20px;
+}
+
+.srd-col-list-2 {
+  column-count: 2;
+  column-gap: 24px;
+}
+
+@media (max-width: 600px) {
+  .srd-col-list-3,
+  .srd-col-list-2 {
+    column-count: 1;
+  }
+}
+
+/* ===== SRD Filter Group Wrapper ===== */
+.srd-filter-group {
+  margin-bottom: 1.25rem;
+}
+
+.srd-filter-group + .srd-filter-group {
+  margin-top: 0.5rem;
+}
+
+/* ===== Interactive Filter Row ===== */
+.srd-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.srd-filter-row .srd-filter-label {
+  margin-bottom: 0;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+.srd-filter-row .quick-links {
+  margin-bottom: 0;
 }
