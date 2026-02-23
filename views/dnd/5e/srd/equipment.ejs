@@ -81,7 +81,7 @@
     <h2>Equipment</h2>
     <p>Browse all SRD equipment with stable anchors for deep links from classes, backgrounds, and feature pages.</p>
 
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+    <div class="srd-filter-pills">
       <a href="#armor">Armor</a>
       <a href="#light-armor">Light Armor</a>
       <a href="#medium-armor">Medium Armor</a>
@@ -101,7 +101,7 @@
 
     <hr />
     <h3 id="armor">Armor</h3>
-    <ul style="column-count: 3; column-gap: 20px;">
+    <ul class="srd-col-list-3">
       <% armorItems.forEach((item) => { %>
       <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
       <% }) %>
@@ -130,7 +130,7 @@
 
     <hr />
     <h3 id="weapon">Weapons</h3>
-    <ul style="column-count: 3; column-gap: 20px;">
+    <ul class="srd-col-list-3">
       <% weaponItems.forEach((item) => { %>
       <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
       <% }) %>
@@ -181,7 +181,7 @@
     <hr />
     <h3 id="adventuring-gear">Adventuring Gear</h3>
     <h4 id="standard-gear">Standard Gear</h4>
-    <ul style="column-count: 3; column-gap: 20px;">
+    <ul class="srd-col-list-3">
       <% standardGear.forEach((item) => { %>
       <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
       <% }) %>
@@ -240,7 +240,7 @@
 
     <hr />
     <h3 id="mounts-and-vehicles">Mounts and Vehicles</h3>
-    <ul style="column-count: 3; column-gap: 20px;">
+    <ul class="srd-col-list-3">
       <% mountItems.forEach((item) => { %>
       <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
       <% }) %>
@@ -249,7 +249,7 @@
     <hr />
     <h2>Magic Items</h2>
     <p>Magic items are listed separately but remain tightly linked with the rest of the equipment system.</p>
-    <ul style="column-count: 3; column-gap: 20px;">
+    <ul class="srd-col-list-3">
       <% magicItemsData.forEach(item => { %>
       <li id="<%= item.index %>">
         <a href="/dnd/5e/srd/magic-items/<%= item.index %>"><%= item.name %></a>

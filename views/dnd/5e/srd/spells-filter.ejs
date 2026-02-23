@@ -56,29 +56,36 @@
     <p><b><%= spellsData.length %></b> spells matched this filter.</p>
 
     <hr />
-    <h3>Browse Spells by Level</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:8px;">
-      <% spellLevelOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/spells/level/<%= opt.value %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">Browse by Level</div>
+      <div class="srd-filter-pills">
+        <% spellLevelOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/spells/level/<%= opt.value %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
-    <h3>Browse Spells by School</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:8px;">
-      <% spellSchoolOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/spells/school/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">Browse by School</div>
+      <div class="srd-filter-pills">
+        <% spellSchoolOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/spells/school/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
-    <h3>Browse Spells by Class</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
-      <% spellClassOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/spells/class/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">Browse by Class</div>
+      <div class="srd-filter-pills">
+        <% spellClassOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/spells/class/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
     <hr />
-    <ul style="column-count: 3; column-gap: 20px;">
+    <ul class="srd-col-list-3">
       <% spellsData.forEach((spell) => { %>
         <li>
           <a href="/dnd/5e/srd/spells/<%= spell.index %>"><%= spell.name %></a>

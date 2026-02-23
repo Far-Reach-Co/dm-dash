@@ -51,34 +51,39 @@
     <p>Browse our complete collection of <%= spellsData.length %> spells from the D&D 5E SRD. Click any spell to view full details including casting time, components, and effects.</p>
 
     <h3>Browse Spell Index Pages</h3>
-    <p>These links point to crawlable filtered pages with dedicated metadata and canonical URLs.</p>
 
-    <h4>By Level</h4>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-      <% spellLevelOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/spells/level/<%= opt.value %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">By Level</div>
+      <div class="srd-filter-pills">
+        <% spellLevelOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/spells/level/<%= opt.value %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
-    <h4>By School</h4>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-      <% spellSchoolOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/spells/school/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">By School</div>
+      <div class="srd-filter-pills">
+        <% spellSchoolOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/spells/school/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
-    <h4>By Class</h4>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
-      <% spellClassOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/spells/class/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">By Class</div>
+      <div class="srd-filter-pills">
+        <% spellClassOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/spells/class/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
     <hr />
 
-    <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px;">
-      <span style="font-size: 0.85rem; color: var(--light-gray); margin-right: 4px;">School</span>
-      <div class="quick-links" id="school-filter" style="margin-bottom: 0;">
+    <div class="srd-filter-row">
+      <span class="srd-filter-label">School</span>
+      <div class="quick-links" id="school-filter">
         <a href="#" data-school="all" class="active">All</a>
         <% spellSchoolOptions.forEach((opt) => { %>
           <a href="#" data-school="<%= opt.index %>"><%= opt.label %></a>
@@ -86,9 +91,9 @@
       </div>
     </div>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px;">
-      <span style="font-size: 0.85rem; color: var(--light-gray); margin-right: 4px;">Level</span>
-      <div class="quick-links" id="level-filter" style="margin-bottom: 0;">
+    <div class="srd-filter-row">
+      <span class="srd-filter-label">Level</span>
+      <div class="quick-links" id="level-filter">
         <a href="#" data-level="all" class="active">All</a>
         <% spellLevelOptions.forEach((opt) => { %>
           <a href="#" data-level="<%= opt.value %>"><%= opt.value === 0 ? 'Cantrip' : opt.value + (opt.value === 1 ? 'st' : opt.value === 2 ? 'nd' : opt.value === 3 ? 'rd' : 'th') %></a>
@@ -98,7 +103,7 @@
 
     <p id="spell-count" style="font-size: 0.9rem; color: var(--light-gray);"></p>
 
-    <ul id="spell-list" style="column-count: 3; column-gap: 20px;">
+    <ul id="spell-list" class="srd-col-list-3">
       <% spellsData.forEach(spell => { %>
       <li data-school="<%= spell.school.index %>" data-level="<%= spell.level %>">
         <a href="/dnd/5e/srd/spells/<%= spell.index %>"><%= spell.name %></a>

@@ -55,34 +55,33 @@
     <h2>Classes</h2>
     <p>Each class now has a dedicated URL so you can link directly to the class page instead of relying on anchors in one giant document.</p>
 
-    <div style="display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 20px;">
+    <div class="srd-class-grid">
       <% classesData.forEach((cls) => { %>
-        <a href="/dnd/5e/srd/classes/<%= cls.index %>" style="display:inline-block; padding:8px 12px; border:1px solid var(--gray); border-radius:6px; text-decoration:none;">
-          <%= cls.name %>
-        </a>
+        <a href="/dnd/5e/srd/classes/<%= cls.index %>" class="srd-class-card"><%= cls.name %></a>
       <% }) %>
     </div>
 
-    <hr />
-    <h3>Class Spell Lists</h3>
-    <p>Browse crawlable spell-list pages by class:</p>
-    <ul style="column-count:2; column-gap:24px;">
-      <li><a href="/dnd/5e/srd/spells/class/bard">Bard Spell List</a></li>
-      <li><a href="/dnd/5e/srd/spells/class/cleric">Cleric Spell List</a></li>
-      <li><a href="/dnd/5e/srd/spells/class/druid">Druid Spell List</a></li>
-      <li><a href="/dnd/5e/srd/spells/class/paladin">Paladin Spell List</a></li>
-      <li><a href="/dnd/5e/srd/spells/class/ranger">Ranger Spell List</a></li>
-      <li><a href="/dnd/5e/srd/spells/class/sorcerer">Sorcerer Spell List</a></li>
-      <li><a href="/dnd/5e/srd/spells/class/warlock">Warlock Spell List</a></li>
-      <li><a href="/dnd/5e/srd/spells/class/wizard">Wizard Spell List</a></li>
-    </ul>
+    <div class="srd-see-also">
+      <h3>Class Spell Lists</h3>
+      <ul>
+        <li><a href="/dnd/5e/srd/spells/class/bard">Bard</a></li>
+        <li><a href="/dnd/5e/srd/spells/class/cleric">Cleric</a></li>
+        <li><a href="/dnd/5e/srd/spells/class/druid">Druid</a></li>
+        <li><a href="/dnd/5e/srd/spells/class/paladin">Paladin</a></li>
+        <li><a href="/dnd/5e/srd/spells/class/ranger">Ranger</a></li>
+        <li><a href="/dnd/5e/srd/spells/class/sorcerer">Sorcerer</a></li>
+        <li><a href="/dnd/5e/srd/spells/class/warlock">Warlock</a></li>
+        <li><a href="/dnd/5e/srd/spells/class/wizard">Wizard</a></li>
+      </ul>
+    </div>
 
-    <hr />
-    <h3>Character Build Links</h3>
-    <ul>
-      <li><a href="/dnd/5e/srd/races">Race Pages</a></li>
-      <li><a href="/dnd/5e/srd/backgrounds">Background Pages</a></li>
-    </ul>
+    <div class="srd-see-also">
+      <h3>Also See</h3>
+      <ul>
+        <li><a href="/dnd/5e/srd/races">Races</a></li>
+        <li><a href="/dnd/5e/srd/backgrounds">Backgrounds</a></li>
+      </ul>
+    </div>
 
     <script>
       (function() {

@@ -84,34 +84,37 @@
       </div>
     <% } %>
 
-    <hr class="w-75" />
-    <div class="inline-div">
+    <div class="srd-prev-next">
       <% if (previousFeature) { %>
         <a href="/dnd/5e/srd/features/<%= previousFeature.index %>">&larr; <%= previousFeature.name %></a>
+      <% } else { %>
+        <span></span>
       <% } %>
       <% if (nextFeature) { %>
-        <a href="/dnd/5e/srd/features/<%= nextFeature.index %>" style="margin-left: 20px;"><%= nextFeature.name %> &rarr;</a>
+        <a href="/dnd/5e/srd/features/<%= nextFeature.index %>"><%= nextFeature.name %> &rarr;</a>
       <% } %>
     </div>
 
     <% if (subclassFeatures.length) { %>
-      <hr />
-      <h3>More <%= feature.subclass.name %> Features</h3>
-      <ul>
-        <% subclassFeatures.forEach((item) => { %>
-          <li><a href="/dnd/5e/srd/features/<%= item.index %>"><%= item.name %></a> (Level <%= item.level %>)</li>
-        <% }) %>
-      </ul>
+      <div class="srd-see-also">
+        <h3>More <%= feature.subclass.name %> Features</h3>
+        <ul>
+          <% subclassFeatures.forEach((item) => { %>
+            <li><a href="/dnd/5e/srd/features/<%= item.index %>"><%= item.name %> (Lvl <%= item.level %>)</a></li>
+          <% }) %>
+        </ul>
+      </div>
     <% } %>
 
     <% if (relatedFeatures.length) { %>
-      <hr />
-      <h3>More <%= feature.class.name %> Features</h3>
-      <ul style="column-count: 2; column-gap: 20px;">
-        <% relatedFeatures.forEach((item) => { %>
-          <li><a href="/dnd/5e/srd/features/<%= item.index %>"><%= item.name %></a> (Level <%= item.level %>)</li>
-        <% }) %>
-      </ul>
+      <div class="srd-see-also">
+        <h3>More <%= feature.class.name %> Features</h3>
+        <ul>
+          <% relatedFeatures.forEach((item) => { %>
+            <li><a href="/dnd/5e/srd/features/<%= item.index %>"><%= item.name %> (Lvl <%= item.level %>)</a></li>
+          <% }) %>
+        </ul>
+      </div>
     <% } %>
   </div>
   <%- include('../../../partials/footer') %>
