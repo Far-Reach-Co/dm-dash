@@ -45,11 +45,13 @@ export default async function renderImageSettingsModal({
     : true;
 
   const thumb = image.src
-    ? createElement("img", {
-        class: "library-detail-thumb",
-        src: image.src,
-        alt: image.original_name,
-      })
+    ? createElement("div", { class: "library-detail-thumb-frame" }, [
+        createElement("img", {
+          class: "library-detail-thumb",
+          src: image.src,
+          alt: image.original_name,
+        }),
+      ])
     : createElement("div");
 
   const nameInput = createElement("input", {
