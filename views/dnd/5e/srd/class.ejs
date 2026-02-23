@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= classData.name %> - D&D 5E Class | Far Reach Co.</title>
+  <meta name="description" content="<%= classData.name %> class reference for D&D 5E SRD including progression table, proficiencies, starting equipment, and class features." />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/classes/<%= classData.index %>" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/classes/<%= classData.index %>" />
+  <meta property="og:title" content="<%= classData.name %> - D&D 5E Class" />
+  <meta property="og:description" content="SRD class page for <%= classData.name %> with progression, proficiencies, and features." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= classData.name %> - D&D 5E Class" />
+  <meta name="twitter:description" content="SRD class page for <%= classData.name %> with progression and features." />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "<%= classData.name %>",
+      "name": "<%= classData.name %> - D&D 5E Class",
+      "url": "https://farreachco.com/dnd/5e/srd/classes/<%= classData.index %>",
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition"
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <a href="/dnd/5e/srd/classes">Classes</a>
+      <span class="separator">→</span>
+      <span class="current"><%= classData.name %></span>
+    </div>
+    <hr />
+
+    <h1><%= classData.name %></h1>
+
+    <div class="inline-div">
+      <b>Hit Die:</b>
+      <span>d<%= classData.hit_die %></span>
+    </div>
+
+    <div class="inline-div">
+      <b>Saving Throws:</b>
+      <span>
+        <% (classData.saving_throws || []).forEach((score, idx) => { %>
+          <a href="/dnd/5e/srd/ability-scores#<%= String(score.index || '').toLowerCase() %>"><%= score.name %></a><%= idx < classData.saving_throws.length - 1 ? ', ' : '' %>
+        <% }) %>
+      </span>
+    </div>
+
+    <% if (classSpellCount > 0) { %>
+      <div class="inline-div">
+        <b>Class Spell List:</b>
+        <a href="/dnd/5e/srd/spells/class/<%= classData.index %>"><%= classData.name %> Spells (<%= classSpellCount %>)</a>
+      </div>
+    <% } %>
+
+    <div class="inline-div">
+      <b>Related Pages:</b>
+      <a href="/dnd/5e/srd/races">Races</a>,
+      <a href="/dnd/5e/srd/backgrounds">Backgrounds</a>
+    </div>
+
+    <hr class="w-75" />
+
+    <% if (tablePartial) { %>
+      <h2>Progression Table</h2>
+      <div style="overflow-x:auto;">
+        <%- include(tablePartial) %>
+      </div>
+      <hr class="w-75" />
+    <% } %>
+
+    <h2>Starting Proficiencies</h2>
+    <ul>
+      <% (classData.proficiencies || []).forEach((prof) => { 
+        const profName = String(prof.name || '').replace(/^Skill:\s*/, '');
+        let href = '';
+        if (String(prof.index || '').startsWith('skill-')) {
+          href = '/dnd/5e/srd/skills#' + String(prof.index).replace('skill-', '');
+        } else if (profName.toLowerCase().includes('armor')) {
+          href = '/dnd/5e/srd/equipment#armor';
+        } else if (profName.toLowerCase().includes('weapon')) {
+          href = '/dnd/5e/srd/equipment#weapon';
+        } else if (profName.toLowerCase().includes('tool')) {
+          href = '/dnd/5e/srd/equipment#tools';
+        }
+      %>
+        <li>
+          <% if (href) { %>
+            <a href="<%= href %>"><%= profName %></a>
+          <% } else { %>
+            <%= profName %>
+          <% } %>
+        </li>
+      <% }) %>
+    </ul>
+
+    <% if ((classData.proficiency_choices || []).length) { %>
+      <h3>Proficiency Choices</h3>
+      <% classData.proficiency_choices.forEach((choice) => { %>
+        <p><%= choice.desc %></p>
+      <% }) %>
+    <% } %>
+
+    <hr class="w-75" />
+
+    <h2>Starting Equipment</h2>
+    <ul>
+      <% (classData.starting_equipment || []).forEach((entry) => { %>
+        <li>
+          <a href="/dnd/5e/srd/equipment/<%= entry.equipment.index %>"><%= entry.equipment.name %></a>
+          <% if (entry.quantity > 1) { %> (x<%= entry.quantity %>) <% } %>
+        </li>
+      <% }) %>
+    </ul>
+
+    <% if ((classData.starting_equipment_options || []).length) { %>
+      <h3>Equipment Options</h3>
+      <ul>
+        <% classData.starting_equipment_options.forEach((option) => { %>
+          <li><%= option.desc %></li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <% if (classData.spellcasting) { %>
+      <hr class="w-75" />
+      <h2>Spellcasting</h2>
+      <div class="inline-div">
+        <b>Spellcasting Ability:</b>
+        <a href="/dnd/5e/srd/ability-scores#<%= String(classData.spellcasting.spellcasting_ability.index || '').toLowerCase() %>"><%= classData.spellcasting.spellcasting_ability.name %></a>
+      </div>
+
+      <% (classData.spellcasting.info || []).forEach((block) => { %>
+        <h3><%= block.name %></h3>
+        <% (block.desc || []).forEach((paragraph) => { %>
+          <p><%= paragraph %></p>
+        <% }) %>
+      <% }) %>
+    <% } %>
+
+    <hr class="w-75" />
+    <h2>Core Features</h2>
+    <% if (!baseFeatures.length) { %>
+      <p>No standalone class feature entries were found in the SRD dataset for this class.</p>
+    <% } %>
+    <% baseFeatures.forEach((feature) => { %>
+      <div id="<%= feature.index %>">
+        <h3>
+          Level <%= feature.level %> -
+          <a href="/dnd/5e/srd/features/<%= feature.index %>"><%= feature.name %></a>
+        </h3>
+        <% (feature.desc || []).forEach((paragraph) => { %>
+          <p><%= paragraph %></p>
+        <% }) %>
+      </div>
+    <% }) %>
+
+    <% if (subclassFeatures.length) { %>
+      <hr class="w-75" />
+      <h2>Subclass Features</h2>
+      <% subclassFeatures.forEach((group) => { %>
+        <h3><%= group.name %></h3>
+        <% group.features.forEach((feature) => { %>
+          <div id="<%= feature.index %>">
+            <h4>
+              Level <%= feature.level %> -
+              <a href="/dnd/5e/srd/features/<%= feature.index %>"><%= feature.name %></a>
+            </h4>
+            <% (feature.desc || []).forEach((paragraph) => { %>
+              <p><%= paragraph %></p>
+            <% }) %>
+          </div>
+        <% }) %>
+      <% }) %>
+    <% } %>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

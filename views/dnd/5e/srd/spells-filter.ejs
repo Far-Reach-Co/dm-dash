@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <meta name="description" content="<%= description %>" />
+  <link rel="canonical" href="https://farreachco.com<%= canonicalPath %>" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com<%= canonicalPath %>" />
+  <meta property="og:title" content="<%= title.replace(' | Far Reach Co.', '') %>" />
+  <meta property="og:description" content="<%= description %>" />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= title.replace(' | Far Reach Co.', '') %>" />
+  <meta name="twitter:description" content="<%= description %>" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "<%= heading %>",
+      "description": "<%= description %>",
+      "url": "https://farreachco.com<%= canonicalPath %>"
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <a href="/dnd/5e/srd/spells">Spells</a>
+      <span class="separator">→</span>
+      <span class="current"><%= heading %></span>
+    </div>
+    <hr />
+
+    <h2><%= heading %></h2>
+    <p><%= intro %></p>
+    <p><b><%= spellsData.length %></b> spells matched this filter.</p>
+
+    <hr />
+    <h3>Browse Spells by Level</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <% spellLevelOptions.forEach((opt) => { %>
+        <a href="/dnd/5e/srd/spells/level/<%= opt.value %>"><%= opt.label %> (<%= opt.count %>)</a>
+      <% }) %>
+    </div>
+
+    <h3>Browse Spells by School</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <% spellSchoolOptions.forEach((opt) => { %>
+        <a href="/dnd/5e/srd/spells/school/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+      <% }) %>
+    </div>
+
+    <h3>Browse Spells by Class</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+      <% spellClassOptions.forEach((opt) => { %>
+        <a href="/dnd/5e/srd/spells/class/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+      <% }) %>
+    </div>
+
+    <hr />
+    <ul style="column-count: 3; column-gap: 20px;">
+      <% spellsData.forEach((spell) => { %>
+        <li>
+          <a href="/dnd/5e/srd/spells/<%= spell.index %>"><%= spell.name %></a>
+          <span class="spell-meta"><%= spell.level === 0 ? 'Cantrip' : 'Lvl ' + spell.level %> · <%= spell.school.name %></span>
+        </li>
+      <% }) %>
+    </ul>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

@@ -19,7 +19,7 @@
 
   <title><%= spell.name %> - D&D 5E Spell | Far Reach Co.</title>
   <meta name="description" content="<%= spell.name %> is a <%= levelDisplay(spell.level) %> <%= spell.school.name %> spell. <%= spell.desc[0].substring(0, 150) %>..." />
-  <meta name="keywords" content="<%= spell.name %> 5e, <%= spell.name %> spell, <%= spell.school.name %> spell, <%= spell.classes.map(c => c.name).join(' spell, ') %> spell, D&D 5E spells" />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />
@@ -103,8 +103,8 @@
     <!-- Spell Header -->
     <h1><%= spell.name %></h1>
     <div class="inline-div">
-      <i><%= levelDisplay(spell.level) %></i>
-      <i><%= spell.school.name %></i>
+      <i><a href="/dnd/5e/srd/spells/level/<%= spell.level %>"><%= levelDisplay(spell.level) %></a></i>
+      <i><a href="/dnd/5e/srd/spells/school/<%= spell.school.index %>"><%= spell.school.name %></a></i>
       <% if (spell.ritual) { %><i class="text-green">(Ritual)</i><% } %>
     </div>
 
@@ -243,7 +243,7 @@
       <b>Classes:</b>
       <div class="indent">
         <% spell.classes.forEach((cls, idx) => { %>
-        <a href="/dnd/5e/srd/classes#<%= cls.index %>"><%= cls.name %></a><%= idx < spell.classes.length - 1 ? ', ' : '' %>
+        <a href="/dnd/5e/srd/classes/<%= cls.index %>"><%= cls.name %></a><%= idx < spell.classes.length - 1 ? ', ' : '' %>
         <% }) %>
       </div>
     </div>

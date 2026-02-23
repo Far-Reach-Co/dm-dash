@@ -15,12 +15,24 @@
       if (decimalCR === 0.5)   return '1/2';
       return String(cr);
     };
+    const crSlug = cr => {
+      const value = String(cr);
+      if (value === '0.125') return '1-8';
+      if (value === '0.25') return '1-4';
+      if (value === '0.5') return '1-2';
+      return value;
+    };
+    const typeSlug = String(monster.type || '')
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
     const monsterImage = monster.image ? imageBaseUrl + monster.image : null;
   %>
 
   <title><%= monster.name %> - D&D 5E Monster Stats | Far Reach Co.</title>
   <meta name="description" content="<%= monster.name %> is a <%= monster.size %> <%= monster.type %> with CR <%= crDisplay(monster.challenge_rating) %>. Complete stat block with AC <%= monster.armor_class[0]?.value %>, HP <%= monster.hit_points %>, abilities, actions, and more." />
-  <meta name="keywords" content="<%= monster.name %> 5e, <%= monster.name %> stats, <%= monster.name %> D&D, <%= monster.type %> 5e, CR <%= crDisplay(monster.challenge_rating) %> monsters" />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />
@@ -120,7 +132,7 @@
         <h1><%= monster.name %></h1>
         <div class="inline-div">
           <i><%= monster.size %>,</i>
-          <i><%= monster.type %>,</i>
+          <i><a href="/dnd/5e/srd/monsters/type/<%= typeSlug %>"><%= monster.type %></a>,</i>
           <i><%= monster.alignment %></i>
         </div>
       </div>
@@ -274,8 +286,7 @@
       <div>
         <div class="inline-div">
           <b>CR:</b>
-          <div>
-            <%= crDisplay(monster.challenge_rating)%> </div>
+          <div><a href="/dnd/5e/srd/monsters/cr/<%= crSlug(monster.challenge_rating) %>"><%= crDisplay(monster.challenge_rating) %></a></div>
           <i>(<%= monster.xp %> XP)</i>
         </div>
       </div>

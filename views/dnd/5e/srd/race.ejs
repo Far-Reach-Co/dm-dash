@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= race.name %> - D&D 5E Race | Far Reach Co.</title>
+  <meta name="description" content="<%= race.name %> race for D&D 5E SRD with racial traits, ability bonuses, subraces, and language details." />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/races/<%= race.index %>" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/races/<%= race.index %>" />
+  <meta property="og:title" content="<%= race.name %> - D&D 5E Race" />
+  <meta property="og:description" content="Standalone SRD page for the <%= race.name %> race." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= race.name %> - D&D 5E Race" />
+  <meta name="twitter:description" content="Standalone SRD page for the <%= race.name %> race." />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "<%= race.name %>",
+      "name": "<%= race.name %> - D&D 5E Race",
+      "url": "https://farreachco.com/dnd/5e/srd/races/<%= race.index %>"
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <a href="/dnd/5e/srd/races">Races</a>
+      <span class="separator">→</span>
+      <span class="current"><%= race.name %></span>
+    </div>
+    <hr />
+
+    <h1><%= race.name %></h1>
+
+    <div class="inline-div">
+      <b>Size:</b>
+      <span><%= race.size %></span>
+    </div>
+    <div class="inline-div">
+      <b>Speed:</b>
+      <span><%= race.speed %> ft.</span>
+    </div>
+
+    <% if ((race.ability_bonuses || []).length) { %>
+      <div class="inline-div">
+        <b>Ability Bonuses:</b>
+        <span>
+          <% race.ability_bonuses.forEach((bonus, idx) => { %>
+            <a href="/dnd/5e/srd/ability-scores#<%= bonus.ability_score.index %>"><%= bonus.ability_score.name %></a> +<%= bonus.bonus %><%= idx < race.ability_bonuses.length - 1 ? ', ' : '' %>
+          <% }) %>
+        </span>
+      </div>
+    <% } %>
+
+    <% if ((race.languages || []).length) { %>
+      <div class="inline-div">
+        <b>Languages:</b>
+        <span>
+          <% race.languages.forEach((lang, idx) => { %>
+            <a href="/dnd/5e/srd/languages#<%= lang.index %>"><%= lang.name %></a><%= idx < race.languages.length - 1 ? ', ' : '' %>
+          <% }) %>
+        </span>
+      </div>
+    <% } %>
+
+    <hr class="w-75" />
+
+    <% if (race.size_description) { %>
+      <h2>Size Description</h2>
+      <p><%= race.size_description %></p>
+    <% } %>
+
+    <% if (race.age) { %>
+      <h2>Age</h2>
+      <p><%= race.age %></p>
+    <% } %>
+
+    <% if (race.alignment) { %>
+      <h2>Alignment</h2>
+      <p><%= race.alignment %></p>
+    <% } %>
+
+    <% if (race.language_desc) { %>
+      <h2>Language Description</h2>
+      <p><%= race.language_desc %></p>
+    <% } %>
+
+    <hr class="w-75" />
+    <h2>Racial Traits</h2>
+    <% if (!traitDetails.length) { %>
+      <p>No detailed trait entries were found for this race in the SRD dataset.</p>
+    <% } %>
+    <% traitDetails.forEach((trait) => { %>
+      <div id="<%= trait.index %>">
+        <h3><%= trait.name %></h3>
+        <% (trait.desc || []).forEach((paragraph) => { %>
+          <p><%= paragraph %></p>
+        <% }) %>
+
+        <% if ((trait.proficiencies || []).length) { %>
+          <h4>Proficiencies</h4>
+          <ul>
+            <% trait.proficiencies.forEach((prof) => { %>
+              <li>
+                <% if (String(prof.index || '').startsWith('skill-')) { %>
+                  <a href="/dnd/5e/srd/skills#<%= String(prof.index).replace('skill-', '') %>"><%= prof.name %></a>
+                <% } else { %>
+                  <%= prof.name %>
+                <% } %>
+              </li>
+            <% }) %>
+          </ul>
+        <% } %>
+
+        <% if (trait.trait_specific && trait.trait_specific.spell_options) { %>
+          <h4>Spell Options</h4>
+          <p>Choose <%= trait.trait_specific.spell_options.choose %>:</p>
+          <ul>
+            <% ((trait.trait_specific.spell_options.from || {}).options || []).forEach((option) => { %>
+              <% if (option.item && option.item.index) { %>
+                <li><a href="/dnd/5e/srd/spells/<%= option.item.index %>"><%= option.item.name %></a></li>
+              <% } %>
+            <% }) %>
+          </ul>
+        <% } %>
+      </div>
+    <% }) %>
+
+    <% if (subraceDetails.length) { %>
+      <hr class="w-75" />
+      <h2>Subraces</h2>
+      <% subraceDetails.forEach((subrace) => { %>
+        <div id="<%= subrace.index %>">
+          <h3><%= subrace.name %></h3>
+          <% if (subrace.desc) { %>
+            <p><%= subrace.desc %></p>
+          <% } %>
+
+          <% if ((subrace.ability_bonuses || []).length) { %>
+            <div class="inline-div">
+              <b>Ability Bonuses:</b>
+              <span>
+                <% subrace.ability_bonuses.forEach((bonus, idx) => { %>
+                  <a href="/dnd/5e/srd/ability-scores#<%= bonus.ability_score.index %>"><%= bonus.ability_score.name %></a> +<%= bonus.bonus %><%= idx < subrace.ability_bonuses.length - 1 ? ', ' : '' %>
+                <% }) %>
+              </span>
+            </div>
+          <% } %>
+
+          <% if (subrace.traitDetails && subrace.traitDetails.length) { %>
+            <h4>Subrace Traits</h4>
+            <% subrace.traitDetails.forEach((trait) => { %>
+              <div id="<%= trait.index %>">
+                <h5><%= trait.name %></h5>
+                <% (trait.desc || []).forEach((paragraph) => { %>
+                  <p><%= paragraph %></p>
+                <% }) %>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      <% }) %>
+    <% } %>
+
+    <hr />
+    <h3>Related Character Pages</h3>
+    <ul>
+      <li><a href="/dnd/5e/srd/classes">Class Pages</a></li>
+      <li><a href="/dnd/5e/srd/backgrounds">Background Pages</a></li>
+    </ul>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

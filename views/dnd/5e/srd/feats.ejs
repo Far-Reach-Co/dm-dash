@@ -5,7 +5,20 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D | 5e | SRD | Feats | Far Reach Co.</title>
+  <title>D&D 5E Feats - SRD Reference | Far Reach Co.</title>
+  <meta name="description" content="D&D 5E SRD feats reference with prerequisites and complete feat descriptions." />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/feats" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/feats" />
+  <meta property="og:title" content="D&D 5E Feats - SRD Reference" />
+  <meta property="og:description" content="D&D 5E SRD feats with prerequisites and complete descriptions." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Feats - SRD Reference" />
+  <meta name="twitter:description" content="D&D 5E SRD feats with prerequisites and complete descriptions." />
+
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -18,42 +31,50 @@
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
+
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
       <span class="separator">→</span>
       <span class="current">Feats</span>
     </div>
     <hr />
+
     <h2>Feats</h2>
-    <ul>
-      <% data.forEach(function(feat){ %>
-      <li>
-        <a href="#<%= feat.index %>"><%= feat.name %></a>
-      </li>
-      <% }); %>
+    <ul style="column-count: 2; column-gap: 20px;">
+      <% data.forEach((feat) => { %>
+      <li><a href="#<%= feat.index %>"><%= feat.name %></a></li>
+      <% }) %>
     </ul>
-    <br />
-    <% data.forEach(function(feat){ %>
-    <div class="inline-div" id="<%= feat.index %>">
-      <h3><%= feat.name %></h3>
-      </span>
-      <div class="indent">
-        <h4>Prerequisites:</h4>
-        <div class="indent">
-          <% feat.prerequisites.forEach(pr => { %>
-          <p><b><%= pr.ability_score.name %>:</b> <%= pr.minimum_score %></p>
-          <% }) %>
-          </span>
-          <br />
-          <% feat.desc.forEach((str, index) => { %>
-          <p><%= str %></p>
-          <% }) %>
-          <br />
-          </span>
-          <br />
-          <% }); %>
-          </span>
-          <%- include('../../../partials/footer') %>
+
+    <hr />
+    <% data.forEach((feat) => { %>
+      <section id="<%= feat.index %>">
+        <h3><%= feat.name %></h3>
+
+        <% if ((feat.prerequisites || []).length) { %>
+          <h4>Prerequisites</h4>
+          <ul>
+            <% feat.prerequisites.forEach((pr) => { %>
+              <% if (pr.ability_score) { %>
+                <li>
+                  <a href="/dnd/5e/srd/ability-scores#<%= String(pr.ability_score.index || '').toLowerCase() %>"><%= pr.ability_score.name %></a> <%= pr.minimum_score %>
+                </li>
+              <% } else { %>
+                <li><%= JSON.stringify(pr) %></li>
+              <% } %>
+            <% }) %>
+          </ul>
+        <% } %>
+
+        <% (feat.desc || []).forEach((paragraph) => { %>
+          <p><%= paragraph %></p>
+        <% }) %>
+
+        <hr />
+      </section>
+    <% }) %>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>

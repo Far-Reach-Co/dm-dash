@@ -7,50 +7,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>D&D 5E Equipment & Magic Items - Complete Reference | Far Reach Co.</title>
   <meta name="description" content="Complete D&D 5E equipment reference with <%= equipmentData.length %> items and <%= magicItemsData.length %> magic items. Weapons, armor, adventuring gear, tools, and magical treasures." />
-  <meta name="keywords" content="D&D 5E equipment, weapons, armor, magic items, adventuring gear, tools, equipment stats, weapon properties, D&D items" />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/equipment" />
 
-  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/equipment" />
   <meta property="og:title" content="D&D 5E Equipment & Magic Items - Complete Reference" />
   <meta property="og:description" content="Complete D&D 5E equipment reference with <%= equipmentData.length %> items and <%= magicItemsData.length %> magic items." />
   <meta property="og:site_name" content="Far Reach Co." />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="D&D 5E Equipment & Magic Items - Complete Reference" />
   <meta name="twitter:description" content="Complete D&D 5E equipment reference with <%= equipmentData.length %> items and <%= magicItemsData.length %> magic items." />
 
-  <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebPage",
+      "@type": "CollectionPage",
       "name": "D&D 5E Equipment Reference",
       "description": "Complete equipment and magic items reference for D&D 5th Edition",
-      "url": "https://farreachco.com/dnd/5e/srd/equipment",
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [{
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://farreachco.com"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "D&D 5E SRD",
-            "item": "https://farreachco.com/dnd/5e/srd/contents"
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": "Equipment",
-            "item": "https://farreachco.com/dnd/5e/srd/equipment"
-          }
-        ]
-      }
+      "url": "https://farreachco.com/dnd/5e/srd/equipment"
     }
   </script>
 
@@ -66,28 +41,217 @@
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
+
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
       <span class="separator">→</span>
       <div class="text-green">Equipment</div>
     </div>
     <hr />
+
+    <%
+      const armorItems = equipmentData.filter((item) => item.equipment_category?.index === 'armor');
+      const weaponItems = equipmentData.filter((item) => item.equipment_category?.index === 'weapon');
+      const gearItems = equipmentData.filter((item) => item.equipment_category?.index === 'adventuring-gear');
+      const toolItems = equipmentData.filter((item) => item.equipment_category?.index === 'tools');
+      const mountItems = equipmentData.filter((item) => item.equipment_category?.index === 'mounts-and-vehicles');
+
+      const lightArmor = armorItems.filter((item) => item.armor_category === 'Light');
+      const mediumArmor = armorItems.filter((item) => item.armor_category === 'Medium');
+      const shields = armorItems.filter((item) => item.armor_category === 'Shield');
+
+      const simpleWeapons = weaponItems.filter((item) => item.weapon_category === 'Simple');
+      const martialWeapons = weaponItems.filter((item) => item.weapon_category === 'Martial');
+      const simpleMeleeWeapons = simpleWeapons.filter((item) => item.weapon_range === 'Melee');
+      const simpleRangedWeapons = simpleWeapons.filter((item) => item.weapon_range === 'Ranged');
+      const martialMeleeWeapons = martialWeapons.filter((item) => item.weapon_range === 'Melee');
+      const martialRangedWeapons = martialWeapons.filter((item) => item.weapon_range === 'Ranged');
+      const meleeWeapons = weaponItems.filter((item) => item.weapon_range === 'Melee');
+
+      const standardGear = gearItems.filter((item) => item.gear_category?.index === 'standard-gear');
+      const equipmentPacks = gearItems.filter((item) => item.gear_category?.index === 'equipment-packs');
+      const arcaneFoci = gearItems.filter((item) => item.gear_category?.index === 'arcane-foci');
+      const druidicFoci = gearItems.filter((item) => item.gear_category?.index === 'druidic-foci');
+      const holySymbols = gearItems.filter((item) => item.gear_category?.index === 'holy-symbols');
+
+      const artisansTools = toolItems.filter((item) => item.tool_category === "Artisan's Tools");
+      const musicalInstruments = toolItems.filter((item) => item.tool_category === 'Musical Instrument');
+    %>
+
     <h2>Equipment</h2>
-    <p>Browse our complete collection of <%= equipmentData.length %> equipment items from the D&D 5E SRD. Click any item to view full details including cost, weight, and properties.</p>
+    <p>Browse all SRD equipment with stable anchors for deep links from classes, backgrounds, and feature pages.</p>
+
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+      <a href="#armor">Armor</a>
+      <a href="#light-armor">Light Armor</a>
+      <a href="#medium-armor">Medium Armor</a>
+      <a href="#shields">Shields</a>
+      <a href="#weapon">Weapons</a>
+      <a href="#simple-weapons">Simple Weapons</a>
+      <a href="#martial-weapons">Martial Weapons</a>
+      <a href="#melee-weapons">Melee Weapons</a>
+      <a href="#martial-melee-weapons">Martial Melee Weapons</a>
+      <a href="#arcane-foci">Arcane Foci</a>
+      <a href="#druidic-foci">Druidic Foci</a>
+      <a href="#holy-symbols">Holy Symbols</a>
+      <a href="#artisans-tools">Artisan's Tools</a>
+      <a href="#musical-instruments">Musical Instruments</a>
+      <a href="#tools">Tools</a>
+    </div>
+
+    <hr />
+    <h3 id="armor">Armor</h3>
     <ul style="column-count: 3; column-gap: 20px;">
-      <% equipmentData.sort((a, b) => a.name.localeCompare(b.name)).forEach(item => { %>
-      <li>
-        <a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a>
-      </li>
-      <% }); %>
+      <% armorItems.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="light-armor">Light Armor</h4>
+    <ul>
+      <% lightArmor.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="medium-armor">Medium Armor</h4>
+    <ul>
+      <% mediumArmor.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="shields">Shields</h4>
+    <ul>
+      <% shields.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <hr />
+    <h3 id="weapon">Weapons</h3>
+    <ul style="column-count: 3; column-gap: 20px;">
+      <% weaponItems.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="simple-weapons">Simple Weapons</h4>
+    <ul>
+      <% simpleWeapons.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="martial-weapons">Martial Weapons</h4>
+    <ul>
+      <% martialWeapons.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="melee-weapons">Melee Weapons</h4>
+    <ul>
+      <% meleeWeapons.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="martial-melee-weapons">Martial Melee Weapons</h4>
+    <ul>
+      <% martialMeleeWeapons.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="simple-ranged-weapons">Simple Ranged Weapons</h4>
+    <ul>
+      <% simpleRangedWeapons.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="martial-ranged-weapons">Martial Ranged Weapons</h4>
+    <ul>
+      <% martialRangedWeapons.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <hr />
+    <h3 id="adventuring-gear">Adventuring Gear</h3>
+    <h4 id="standard-gear">Standard Gear</h4>
+    <ul style="column-count: 3; column-gap: 20px;">
+      <% standardGear.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="equipment-packs">Equipment Packs</h4>
+    <ul>
+      <% equipmentPacks.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="arcane-foci">Arcane Foci</h4>
+    <ul>
+      <% arcaneFoci.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="druidic-foci">Druidic Foci</h4>
+    <ul>
+      <% druidicFoci.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="holy-symbols">Holy Symbols</h4>
+    <ul>
+      <% holySymbols.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <hr />
+    <h3 id="tools">Tools</h3>
+    <h4 id="artisans-tools">Artisan's Tools</h4>
+    <ul>
+      <% artisansTools.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="musical-instruments">Musical Instruments</h4>
+    <ul>
+      <% musicalInstruments.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <h4 id="other-tools">Other Tools</h4>
+    <ul>
+      <% toolItems.filter((item) => !artisansTools.includes(item) && !musicalInstruments.includes(item)).forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
+    </ul>
+
+    <hr />
+    <h3 id="mounts-and-vehicles">Mounts and Vehicles</h3>
+    <ul style="column-count: 3; column-gap: 20px;">
+      <% mountItems.forEach((item) => { %>
+      <li id="<%= item.index %>"><a href="/dnd/5e/srd/equipment/<%= item.index %>"><%= item.name %></a></li>
+      <% }) %>
     </ul>
 
     <hr />
     <h2>Magic Items</h2>
-    <p>Browse our complete collection of <%= magicItemsData.length %> magic items from the D&D 5E SRD. Click any item to view full details including rarity and magical properties.</p>
+    <p>Magic items are listed separately but remain tightly linked with the rest of the equipment system.</p>
     <ul style="column-count: 3; column-gap: 20px;">
-      <% magicItemsData.sort((a, b) => a.name.localeCompare(b.name)).forEach(item => { %>
-      <li>
+      <% magicItemsData.forEach(item => { %>
+      <li id="<%= item.index %>">
         <a href="/dnd/5e/srd/magic-items/<%= item.index %>"><%= item.name %></a>
       </li>
       <% }); %>

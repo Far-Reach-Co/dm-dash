@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>D&D 5E Classes - Standalone Class Pages | Far Reach Co.</title>
+  <meta name="description" content="Browse all 12 D&D 5E SRD classes with dedicated pages for progression tables, proficiencies, spellcasting, and feature references." />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/classes" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/classes" />
+  <meta property="og:title" content="D&D 5E Classes - Standalone Class Pages" />
+  <meta property="og:description" content="Dedicated SRD pages for every D&D 5E class with progression, proficiencies, and features." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Classes - Standalone Class Pages" />
+  <meta name="twitter:description" content="Dedicated SRD pages for every D&D 5E class with progression and feature references." />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "D&D 5E Classes",
+      "description": "Index of D&D 5E SRD classes with standalone class pages",
+      "url": "https://farreachco.com/dnd/5e/srd/classes",
+      "about": {
+        "@type": "Game",
+        "name": "Dungeons & Dragons 5th Edition"
+      }
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <span class="current">Classes</span>
+    </div>
+    <hr />
+
+    <h2>Classes</h2>
+    <p>Each class now has a dedicated URL so you can link directly to the class page instead of relying on anchors in one giant document.</p>
+
+    <div style="display:flex; flex-wrap:wrap; gap:10px; margin:14px 0 20px;">
+      <% classesData.forEach((cls) => { %>
+        <a href="/dnd/5e/srd/classes/<%= cls.index %>" style="display:inline-block; padding:8px 12px; border:1px solid var(--gray); border-radius:6px; text-decoration:none;">
+          <%= cls.name %>
+        </a>
+      <% }) %>
+    </div>
+
+    <hr />
+    <h3>Class Spell Lists</h3>
+    <p>Browse crawlable spell-list pages by class:</p>
+    <ul style="column-count:2; column-gap:24px;">
+      <li><a href="/dnd/5e/srd/spells/class/bard">Bard Spell List</a></li>
+      <li><a href="/dnd/5e/srd/spells/class/cleric">Cleric Spell List</a></li>
+      <li><a href="/dnd/5e/srd/spells/class/druid">Druid Spell List</a></li>
+      <li><a href="/dnd/5e/srd/spells/class/paladin">Paladin Spell List</a></li>
+      <li><a href="/dnd/5e/srd/spells/class/ranger">Ranger Spell List</a></li>
+      <li><a href="/dnd/5e/srd/spells/class/sorcerer">Sorcerer Spell List</a></li>
+      <li><a href="/dnd/5e/srd/spells/class/warlock">Warlock Spell List</a></li>
+      <li><a href="/dnd/5e/srd/spells/class/wizard">Wizard Spell List</a></li>
+    </ul>
+
+    <hr />
+    <h3>Character Build Links</h3>
+    <ul>
+      <li><a href="/dnd/5e/srd/races">Race Pages</a></li>
+      <li><a href="/dnd/5e/srd/backgrounds">Background Pages</a></li>
+    </ul>
+
+    <script>
+      (function() {
+        var hash = (window.location.hash || "").replace(/^#/, "");
+        if (!hash) return;
+        if (!/^[a-z0-9-]+$/.test(hash)) return;
+        window.location.replace("/dnd/5e/srd/classes/" + hash);
+      })();
+    </script>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

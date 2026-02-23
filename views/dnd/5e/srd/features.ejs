@@ -5,7 +5,30 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D | 5e | SRD | Features | Far Reach Co.</title>
+  <title>D&D 5E Features - SRD Feature Index | Far Reach Co.</title>
+  <meta name="description" content="Browse all <%= data.length %> D&D 5E SRD class and subclass features with standalone pages by level and class." />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/features" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/features" />
+  <meta property="og:title" content="D&D 5E Features - SRD Feature Index" />
+  <meta property="og:description" content="Standalone SRD pages for D&D 5E class and subclass features." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Features - SRD Feature Index" />
+  <meta name="twitter:description" content="Standalone SRD pages for D&D 5E class and subclass features." />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "name": "D&D 5E Features",
+      "description": "Index of D&D 5E SRD class and subclass features",
+      "url": "https://farreachco.com/dnd/5e/srd/features"
+    }
+  </script>
+
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -18,44 +41,48 @@
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
+
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
       <span class="separator">→</span>
       <span class="current">Features</span>
     </div>
     <hr />
+
     <h2>Features</h2>
-    <ul>
-      <% data.forEach(function(features){ %>
-      <li>
-        <a href="#<%= features.index %>"><%= features.name %></a>
-      </li>
-      <% }); %>
+    <p>This index includes <b><%= data.length %></b> standalone SRD feature pages.</p>
+
+    <h3>Browse by Class</h3>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+      <% featureClassOptions.forEach((opt) => { %>
+        <a href="/dnd/5e/srd/classes/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+      <% }) %>
+    </div>
+
+    <hr />
+    <ul style="column-count: 2; column-gap: 20px;">
+      <% data.forEach((feature) => { %>
+        <li>
+          <a href="/dnd/5e/srd/features/<%= feature.index %>"><%= feature.name %></a>
+          <small>
+            - <a href="/dnd/5e/srd/classes/<%= feature.class.index %>"><%= feature.class.name %></a>
+            <% if (feature.level) { %> (Level <%= feature.level %>) <% } %>
+            <% if (feature.subclass) { %> - <%= feature.subclass.name %> <% } %>
+          </small>
+        </li>
+      <% }) %>
     </ul>
-    <br />
-    <% data.forEach(function(feature){ %>
-    <div class="inline-div" id="<%= feature.index %>">
-      <h3><%= feature.name %></h3>
-      </span>
-      <div class="indent">
-        <div class="breadcrumbs">
-          <h4>Class:</h4>
-          <p><%= feature.class.name %></p>
-          </span>
-          <% if (feature.subclass) { %>
-          <div class="breadcrumbs">
-            <h4>Sub Class:</h4>
-            <p><%= feature.subclass.name %></p>
-            </span>
-            <% } %> <% feature.desc.forEach((str, index) => { %>
-            <p><%= str %></p>
-            <% }) %>
-            <br />
-            </span>
-            <br />
-            <% }); %>
-            </span>
-            <%- include('../../../partials/footer') %>
+
+    <script>
+      (function() {
+        var hash = (window.location.hash || "").replace(/^#/, "");
+        if (!hash) return;
+        if (!/^[a-z0-9-]+$/.test(hash)) return;
+        window.location.replace("/dnd/5e/srd/features/" + hash);
+      })();
+    </script>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>

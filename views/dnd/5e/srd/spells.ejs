@@ -7,55 +7,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>D&D 5E Spells - Complete SRD Spell List | Far Reach Co.</title>
   <meta name="description" content="Complete D&D 5E spell reference with <%= spellsData.length %>+ spells for all classes including Bard, Cleric, Druid, Paladin, Ranger, Sorcerer, Warlock, and Wizard. Full spell descriptions, components, and casting details." />
-  <meta name="keywords" content="D&D 5E spells, spell list, wizard spells, cleric spells, sorcerer spells, warlock spells, druid spells, bard spells, paladin spells, ranger spells, cantrips, magic schools" />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/spells" />
 
-  <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/spells" />
   <meta property="og:title" content="D&D 5E Spells - Complete SRD Spell List" />
   <meta property="og:description" content="Complete D&D 5E spell reference with <%= spellsData.length %>+ spells. Full descriptions and casting details." />
   <meta property="og:site_name" content="Far Reach Co." />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="D&D 5E Spells - Complete SRD Spell List" />
   <meta name="twitter:description" content="Complete D&D 5E spell reference with <%= spellsData.length %>+ spells for all classes." />
 
-  <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebPage",
+      "@type": "CollectionPage",
       "name": "D&D 5E Spells Reference",
       "description": "Complete spell reference for D&D 5th Edition with over <%= spellsData.length %> spells",
-      "url": "https://farreachco.com/dnd/5e/srd/spells",
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [{
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "https://farreachco.com"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "D&D 5E SRD",
-            "item": "https://farreachco.com/dnd/5e/srd/contents"
-          },
-          {
-            "@type": "ListItem",
-            "position": 3,
-            "name": "Spells",
-            "item": "https://farreachco.com/dnd/5e/srd/spells"
-          }
-        ]
-      },
-      "about": {
-        "@type": "Game",
-        "name": "Dungeons & Dragons 5th Edition",
-        "gamePlatform": "Tabletop"
-      }
+      "url": "https://farreachco.com/dnd/5e/srd/spells"
     }
   </script>
 
@@ -80,41 +50,56 @@
     <h2>Spells</h2>
     <p>Browse our complete collection of <%= spellsData.length %> spells from the D&D 5E SRD. Click any spell to view full details including casting time, components, and effects.</p>
 
+    <h3>Browse Spell Index Pages</h3>
+    <p>These links point to crawlable filtered pages with dedicated metadata and canonical URLs.</p>
+
+    <h4>By Level</h4>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+      <% spellLevelOptions.forEach((opt) => { %>
+        <a href="/dnd/5e/srd/spells/level/<%= opt.value %>"><%= opt.label %> (<%= opt.count %>)</a>
+      <% }) %>
+    </div>
+
+    <h4>By School</h4>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+      <% spellSchoolOptions.forEach((opt) => { %>
+        <a href="/dnd/5e/srd/spells/school/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+      <% }) %>
+    </div>
+
+    <h4>By Class</h4>
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
+      <% spellClassOptions.forEach((opt) => { %>
+        <a href="/dnd/5e/srd/spells/class/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+      <% }) %>
+    </div>
+
+    <hr />
+
     <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px;">
       <span style="font-size: 0.85rem; color: var(--light-gray); margin-right: 4px;">School</span>
       <div class="quick-links" id="school-filter" style="margin-bottom: 0;">
         <a href="#" data-school="all" class="active">All</a>
-        <a href="#" data-school="abjuration">Abjuration</a>
-        <a href="#" data-school="conjuration">Conjuration</a>
-        <a href="#" data-school="divination">Divination</a>
-        <a href="#" data-school="enchantment">Enchantment</a>
-        <a href="#" data-school="evocation">Evocation</a>
-        <a href="#" data-school="illusion">Illusion</a>
-        <a href="#" data-school="necromancy">Necromancy</a>
-        <a href="#" data-school="transmutation">Transmutation</a>
+        <% spellSchoolOptions.forEach((opt) => { %>
+          <a href="#" data-school="<%= opt.index %>"><%= opt.label %></a>
+        <% }) %>
       </div>
     </div>
+
     <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px;">
       <span style="font-size: 0.85rem; color: var(--light-gray); margin-right: 4px;">Level</span>
       <div class="quick-links" id="level-filter" style="margin-bottom: 0;">
         <a href="#" data-level="all" class="active">All</a>
-        <a href="#" data-level="0">Cantrip</a>
-        <a href="#" data-level="1">1st</a>
-        <a href="#" data-level="2">2nd</a>
-        <a href="#" data-level="3">3rd</a>
-        <a href="#" data-level="4">4th</a>
-        <a href="#" data-level="5">5th</a>
-        <a href="#" data-level="6">6th</a>
-        <a href="#" data-level="7">7th</a>
-        <a href="#" data-level="8">8th</a>
-        <a href="#" data-level="9">9th</a>
+        <% spellLevelOptions.forEach((opt) => { %>
+          <a href="#" data-level="<%= opt.value %>"><%= opt.value === 0 ? 'Cantrip' : opt.value + (opt.value === 1 ? 'st' : opt.value === 2 ? 'nd' : opt.value === 3 ? 'rd' : 'th') %></a>
+        <% }) %>
       </div>
     </div>
 
     <p id="spell-count" style="font-size: 0.9rem; color: var(--light-gray);"></p>
 
     <ul id="spell-list" style="column-count: 3; column-gap: 20px;">
-      <% spellsData.sort((a, b) => a.name.localeCompare(b.name)).forEach(spell => { %>
+      <% spellsData.forEach(spell => { %>
       <li data-school="<%= spell.school.index %>" data-level="<%= spell.level %>">
         <a href="/dnd/5e/srd/spells/<%= spell.index %>"><%= spell.name %></a>
         <span class="spell-meta"><%= spell.level === 0 ? 'Cantrip' : 'Lvl ' + spell.level %> · <%= spell.school.name %></span>
@@ -142,9 +127,7 @@
             if (show) shown++;
           }
           var filtering = activeSchool !== 'all' || activeLevel !== 'all';
-          countEl.textContent = filtering
-            ? shown + ' of ' + total + ' spells'
-            : '';
+          countEl.textContent = filtering ? shown + ' of ' + total + ' spells' : '';
         }
 
         function bindFilter(container, setActive) {
