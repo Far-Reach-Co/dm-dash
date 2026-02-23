@@ -137,6 +137,54 @@
     grid-template-columns: 1fr;
   }
 }
+/* ===== Monster Ability Score Grid ===== */
+.monster-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  margin: 0.75rem 0;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-ornate);
+  background: var(--border-ornate);
+  text-align: center;
+}
+
+.ability-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 6px;
+  background: linear-gradient(145deg, var(--blue3) 0%, rgba(31, 37, 49, 0.95) 100%);
+}
+
+.ability-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--main-gray);
+  font-weight: 700;
+}
+
+.ability-score {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--orange3);
+  font-family: 'YoungSerif', Georgia, serif;
+}
+
+.ability-mod {
+  font-size: 0.8rem;
+  color: var(--light-gray);
+}
+
+@media (max-width: 480px) {
+  .monster-ability-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 
 /* ===== Sections ===== */
 .info-container section {
