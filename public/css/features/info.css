@@ -449,8 +449,15 @@ img {
 
 .info-container>ul>li {
   margin: 0;
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(72, 99, 125, 0.3);
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid rgba(72, 99, 125, 0.25);
+  border-radius: 4px;
+  transition: background 0.12s ease, padding-left 0.12s ease;
+}
+
+.info-container>ul>li:hover {
+  background: rgba(47, 64, 84, 0.45);
+  padding-left: 8px;
 }
 
 .info-container>ul>li>a {
@@ -1228,6 +1235,19 @@ tr:hover {
 .srd-col-list-2 {
   column-count: 2;
   column-gap: 24px;
+}
+
+.srd-col-list-3 > li,
+.srd-col-list-2 > li {
+  padding: 3px 8px 3px 0;
+  border-radius: 4px;
+  transition: background 0.12s ease, padding-left 0.12s ease;
+}
+
+.srd-col-list-3 > li:hover,
+.srd-col-list-2 > li:hover {
+  background: rgba(47, 64, 84, 0.45);
+  padding-left: 8px;
 }
 
 @media (max-width: 600px) {
