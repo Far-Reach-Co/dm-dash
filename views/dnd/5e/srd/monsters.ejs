@@ -52,24 +52,27 @@
     <p>Browse our complete collection of <%= data.length %> monsters from the D&D 5E SRD. Click any monster to view its full stat block.</p>
 
     <h3>Browse Monster Index Pages</h3>
-    <p>Use dedicated filter pages by creature type and challenge rating.</p>
 
-    <h4>By Type</h4>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
-      <% monsterTypeOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/monsters/type/<%= opt.slug %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">By Type</div>
+      <div class="srd-filter-pills">
+        <% monsterTypeOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/monsters/type/<%= opt.slug %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
-    <h4>By Challenge Rating</h4>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
-      <% monsterCrOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/monsters/cr/<%= opt.slug %>">CR <%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">By Challenge Rating</div>
+      <div class="srd-filter-pills">
+        <% monsterCrOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/monsters/cr/<%= opt.slug %>">CR <%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
     <hr />
-    <ul style="column-count: 3; column-gap: 20px;">
+    <ul class="srd-col-list-3">
       <% data.forEach((mon) => { %>
       <li>
         <a href="/dnd/5e/srd/monsters/<%= mon.index %>"><%= mon.name %></a>

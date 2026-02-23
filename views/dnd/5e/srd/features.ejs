@@ -52,15 +52,17 @@
     <h2>Features</h2>
     <p>This index includes <b><%= data.length %></b> standalone SRD feature pages.</p>
 
-    <h3>Browse by Class</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-      <% featureClassOptions.forEach((opt) => { %>
-        <a href="/dnd/5e/srd/classes/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
-      <% }) %>
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">Browse by Class</div>
+      <div class="srd-filter-pills">
+        <% featureClassOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/classes/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
     </div>
 
     <hr />
-    <ul style="column-count: 2; column-gap: 20px;">
+    <ul class="srd-col-list-2">
       <% data.forEach((feature) => { %>
         <li>
           <a href="/dnd/5e/srd/features/<%= feature.index %>"><%= feature.name %></a>

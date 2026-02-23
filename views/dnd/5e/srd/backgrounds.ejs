@@ -42,7 +42,7 @@
     <h2>Backgrounds</h2>
     <p>Each background now has a standalone URL for easier sharing and clearer indexing.</p>
 
-    <ul style="column-count: 2; column-gap: 20px;">
+    <ul class="srd-col-list-2">
       <% data.forEach((background) => { %>
       <li>
         <a href="/dnd/5e/srd/backgrounds/<%= background.index %>"><%= background.name %></a>
@@ -50,12 +50,13 @@
       <% }) %>
     </ul>
 
-    <hr />
-    <h3>Character Build Links</h3>
-    <ul>
-      <li><a href="/dnd/5e/srd/races">Race Pages</a></li>
-      <li><a href="/dnd/5e/srd/classes">Class Pages</a></li>
-    </ul>
+    <div class="srd-see-also">
+      <h3>Also See</h3>
+      <ul>
+        <li><a href="/dnd/5e/srd/races">Races</a></li>
+        <li><a href="/dnd/5e/srd/classes">Classes</a></li>
+      </ul>
+    </div>
   </div>
   <%- include('../../../partials/footer') %>
 </body>
