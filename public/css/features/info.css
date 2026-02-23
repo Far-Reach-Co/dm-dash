@@ -573,9 +573,34 @@ tr:hover {
 /* ===== Horizontal Rule ===== */
 .info-container hr {
   border: none;
+  height: 0;
+  margin: 1.75rem 0;
+  position: relative;
+  overflow: visible;
+  background: none;
+}
+
+.info-container hr::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(72, 99, 125, 0.5), transparent);
-  margin: 1.5rem 0;
+  background: linear-gradient(90deg, transparent, rgba(72, 99, 125, 0.4), transparent);
+}
+
+.info-container hr::after {
+  content: '✦';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.6rem;
+  color: rgba(116, 167, 215, 0.35);
+  background: var(--main-dark);
+  padding: 0 10px;
+  letter-spacing: 0;
 }
 
 .info-container hr.w-75 {
