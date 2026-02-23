@@ -689,6 +689,7 @@ tr:hover {
 
 .info-container hr::before {
   content: '';
+  display: block;
   position: absolute;
   top: 50%;
   left: 0;
@@ -699,6 +700,7 @@ tr:hover {
 
 .info-container hr::after {
   content: '✦';
+  display: block;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -713,15 +715,18 @@ tr:hover {
 .info-container hr.w-75 {
   width: 75%;
   margin-left: 0;
-  background: linear-gradient(90deg, rgba(72, 99, 125, 0.25), transparent);
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
+}
+
+.info-container hr.w-75::after,
+.info-container hr.w-50::after {
+  display: none;
 }
 
 .info-container hr.w-50 {
   width: 50%;
   margin-left: 0;
-  background: linear-gradient(90deg, rgba(72, 99, 125, 0.2), transparent);
   margin-top: 0.75rem;
   margin-bottom: 0.75rem;
 }
@@ -1329,15 +1334,15 @@ tr:hover {
 
 .srd-col-list-3 > li,
 .srd-col-list-2 > li {
-  padding: 3px 8px 3px 0;
+  padding: 3px 8px;
   border-radius: 4px;
-  transition: background 0.12s ease, padding-left 0.12s ease;
+  transition: background 0.12s ease, transform 0.12s ease;
 }
 
 .srd-col-list-3 > li:hover,
 .srd-col-list-2 > li:hover {
   background: rgba(47, 64, 84, 0.45);
-  padding-left: 8px;
+  transform: translateX(4px);
 }
 
 @media (max-width: 600px) {
