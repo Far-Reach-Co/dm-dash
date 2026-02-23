@@ -114,10 +114,11 @@ function serializeMagicItem(m: any): string {
 export function serializeGeneric(entry: any, label: string): string {
   const desc = Array.isArray(entry.desc) ? entry.desc.join(" ") : entry.desc || "";
   const extra: string[] = [];
+  const index = entry.index ? ` [index: ${entry.index}]` : "";
   if (entry.class?.name) extra.push(`Class: ${entry.class.name}`);
   if (entry.level !== undefined) extra.push(`Level: ${entry.level}`);
   return (
-    `${label}: ${entry.name}` +
+    `${label}: ${entry.name}${index}` +
     (extra.length ? ` (${extra.join(", ")})` : "") +
     `\n${desc.slice(0, 400)}`
   );
@@ -130,7 +131,7 @@ function serializeRace(r: any): string {
   const traits = (r.traits || []).map((t: any) => t.name).join(", ");
   const langs = (r.languages || []).map((l: any) => l.name).join(", ");
   return (
-    `RACE: ${r.name} (Size: ${r.size || "?"}, Speed: ${r.speed || "?"} ft)` +
+    `RACE: ${r.name} [index: ${r.index}] (Size: ${r.size || "?"}, Speed: ${r.speed || "?"} ft)` +
     (bonuses ? `\nAbility Bonuses: ${bonuses}` : "") +
     (traits ? `\nTraits: ${traits}` : "") +
     (langs ? `\nLanguages: ${langs}` : "") +
@@ -142,7 +143,7 @@ function serializeRace(r: any): string {
 function serializeSubclass(s: any): string {
   const desc = Array.isArray(s.desc) ? s.desc.join(" ") : s.desc || "";
   return (
-    `SUBCLASS: ${s.name} (${s.subclass_flavor || ""}, ${s.class?.name || ""})` +
+    `SUBCLASS: ${s.name} [index: ${s.index}] (${s.subclass_flavor || ""}, ${s.class?.name || ""})` +
     `\n${desc.slice(0, 500)}`
   );
 }
@@ -166,7 +167,7 @@ export const SERIALIZERS: Record<string, (entry: any) => string> = {
     const desc = typeof e.desc === "string" ? e.desc : "";
     const traits = (e.racial_traits || []).map((t: any) => t.name).join(", ");
     return (
-      `SUBRACE: ${e.name} (${e.race?.name || ""})` +
+      `SUBRACE: ${e.name} [index: ${e.index}] (${e.race?.name || ""})` +
       (desc ? `\n${desc}` : "") +
       (traits ? `\nRacial Traits: ${traits}` : "")
     );

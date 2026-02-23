@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= feature.name %> - D&D 5E Feature | Far Reach Co.</title>
+  <meta name="description" content="<%= feature.name %> feature for D&D 5E SRD (<%= feature.class.name %><% if (feature.level) { %> level <%= feature.level %><% } %>) with full rules text." />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/features/<%= feature.index %>" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/features/<%= feature.index %>" />
+  <meta property="og:title" content="<%= feature.name %> - D&D 5E Feature" />
+  <meta property="og:description" content="Standalone SRD page for <%= feature.name %>." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= feature.name %> - D&D 5E Feature" />
+  <meta name="twitter:description" content="Standalone SRD page for <%= feature.name %>." />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "<%= feature.name %>",
+      "name": "<%= feature.name %> - D&D 5E Feature",
+      "url": "https://farreachco.com/dnd/5e/srd/features/<%= feature.index %>"
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro') %>
+    <br />
+
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <a href="/dnd/5e/srd/features">Features</a>
+      <span class="separator">→</span>
+      <span class="current"><%= feature.name %></span>
+    </div>
+    <hr />
+
+    <h1><%= feature.name %></h1>
+
+    <div class="inline-div">
+      <b>Class:</b>
+      <a href="/dnd/5e/srd/classes/<%= feature.class.index %>"><%= feature.class.name %></a>
+    </div>
+    <% if (feature.subclass) { %>
+      <div class="inline-div">
+        <b>Subclass:</b>
+        <span><%= feature.subclass.name %></span>
+      </div>
+    <% } %>
+    <% if (feature.level) { %>
+      <div class="inline-div">
+        <b>Level:</b>
+        <span><%= feature.level %></span>
+      </div>
+    <% } %>
+
+    <hr class="w-75" />
+
+    <% (feature.desc || []).forEach((paragraph) => { %>
+      <p><%= paragraph %></p>
+    <% }) %>
+
+    <% if (feature.parent) { %>
+      <hr class="w-75" />
+      <div class="inline-div">
+        <b>Parent Feature:</b>
+        <a href="/dnd/5e/srd/features/<%= feature.parent.index %>"><%= feature.parent.name %></a>
+      </div>
+    <% } %>
+
+    <hr class="w-75" />
+    <div class="inline-div">
+      <% if (previousFeature) { %>
+        <a href="/dnd/5e/srd/features/<%= previousFeature.index %>">&larr; <%= previousFeature.name %></a>
+      <% } %>
+      <% if (nextFeature) { %>
+        <a href="/dnd/5e/srd/features/<%= nextFeature.index %>" style="margin-left: 20px;"><%= nextFeature.name %> &rarr;</a>
+      <% } %>
+    </div>
+
+    <% if (subclassFeatures.length) { %>
+      <hr />
+      <h3>More <%= feature.subclass.name %> Features</h3>
+      <ul>
+        <% subclassFeatures.forEach((item) => { %>
+          <li><a href="/dnd/5e/srd/features/<%= item.index %>"><%= item.name %></a> (Level <%= item.level %>)</li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <% if (relatedFeatures.length) { %>
+      <hr />
+      <h3>More <%= feature.class.name %> Features</h3>
+      <ul style="column-count: 2; column-gap: 20px;">
+        <% relatedFeatures.forEach((item) => { %>
+          <li><a href="/dnd/5e/srd/features/<%= item.index %>"><%= item.name %></a> (Level <%= item.level %>)</li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>

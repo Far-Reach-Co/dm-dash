@@ -14,7 +14,7 @@
 
   <title><%= item.name %> - D&D 5E <%= category %> | Far Reach Co.</title>
   <meta name="description" content="<%= item.name %> is a D&D 5E <%= subCategory || category %>. <%= costStr ? 'Cost: ' + costStr + '.' : '' %> <%= item.weight ? 'Weight: ' + item.weight + ' lb.' : '' %> <%= item.damage ? 'Damage: ' + item.damage.damage_dice + ' ' + item.damage.damage_type.name + '.' : '' %>" />
-  <meta name="keywords" content="<%= item.name %> 5e, <%= item.name %> D&D, <%= category %> 5e, D&D 5E equipment" />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />

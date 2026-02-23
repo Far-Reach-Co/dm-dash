@@ -5,27 +5,27 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D 5E Monsters - SRD Creature Stat Blocks | Far Reach Co.</title>
-  <meta name="description" content="Complete D&D 5E monster reference with <%= data.length %> SRD creatures. Full stat blocks including AC, HP, abilities, actions, and legendary actions." />
-  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/monsters" />
+  <title><%= title %></title>
+  <meta name="description" content="<%= description %>" />
+  <link rel="canonical" href="https://farreachco.com<%= canonicalPath %>" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/monsters" />
-  <meta property="og:title" content="D&D 5E Monsters - SRD Creature Stat Blocks" />
-  <meta property="og:description" content="Complete D&D 5E SRD monster reference with full stat blocks and quick lookup links." />
+  <meta property="og:url" content="https://farreachco.com<%= canonicalPath %>" />
+  <meta property="og:title" content="<%= title.replace(' | Far Reach Co.', '') %>" />
+  <meta property="og:description" content="<%= description %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="D&D 5E Monsters - SRD Creature Stat Blocks" />
-  <meta name="twitter:description" content="Complete D&D 5E SRD monster reference with full stat blocks and quick lookup links." />
+  <meta name="twitter:title" content="<%= title.replace(' | Far Reach Co.', '') %>" />
+  <meta name="twitter:description" content="<%= description %>" />
 
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
-      "name": "D&D 5E Monsters Reference",
-      "description": "Complete monster and creature reference for D&D 5th Edition",
-      "url": "https://farreachco.com/dnd/5e/srd/monsters"
+      "name": "<%= heading %>",
+      "description": "<%= description %>",
+      "url": "https://farreachco.com<%= canonicalPath %>"
     }
   </script>
 
@@ -41,27 +41,29 @@
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
+
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
       <span class="separator">→</span>
-      <span class="current">Monsters</span>
+      <a href="/dnd/5e/srd/monsters">Monsters</a>
+      <span class="separator">→</span>
+      <span class="current"><%= heading %></span>
     </div>
     <hr />
 
-    <h2>Monsters</h2>
-    <p>Browse our complete collection of <%= data.length %> monsters from the D&D 5E SRD. Click any monster to view its full stat block.</p>
+    <h2><%= heading %></h2>
+    <p><%= intro %></p>
+    <p><b><%= data.length %></b> monsters matched this filter.</p>
 
-    <h3>Browse Monster Index Pages</h3>
-    <p>Use dedicated filter pages by creature type and challenge rating.</p>
-
-    <h4>By Type</h4>
+    <hr />
+    <h3>Browse Monsters by Type</h3>
     <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;">
       <% monsterTypeOptions.forEach((opt) => { %>
         <a href="/dnd/5e/srd/monsters/type/<%= opt.slug %>"><%= opt.label %> (<%= opt.count %>)</a>
       <% }) %>
     </div>
 
-    <h4>By Challenge Rating</h4>
+    <h3>Browse Monsters by CR</h3>
     <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;">
       <% monsterCrOptions.forEach((opt) => { %>
         <a href="/dnd/5e/srd/monsters/cr/<%= opt.slug %>">CR <%= opt.label %> (<%= opt.count %>)</a>
@@ -74,7 +76,7 @@
       <li>
         <a href="/dnd/5e/srd/monsters/<%= mon.index %>"><%= mon.name %></a>
       </li>
-      <% }); %>
+      <% }) %>
     </ul>
   </div>
   <%- include('../../../partials/footer') %>

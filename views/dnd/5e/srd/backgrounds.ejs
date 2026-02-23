@@ -5,7 +5,20 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D | 5e | SRD | Backgrounds | Far Reach Co.</title>
+  <title>D&D 5E Backgrounds - SRD Index | Far Reach Co.</title>
+  <meta name="description" content="Browse D&D 5E SRD backgrounds with standalone pages for proficiencies, starting equipment, feature text, and roleplay traits." />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/backgrounds" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/backgrounds" />
+  <meta property="og:title" content="D&D 5E Backgrounds - SRD Index" />
+  <meta property="og:description" content="Standalone SRD pages for D&D 5E backgrounds." />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Backgrounds - SRD Index" />
+  <meta name="twitter:description" content="Standalone SRD pages for D&D 5E backgrounds." />
+
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -18,119 +31,33 @@
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro') %>
     <br />
+
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
       <span class="separator">→</span>
       <span class="current">Backgrounds</span>
     </div>
     <hr />
+
     <h2>Backgrounds</h2>
-    <ul>
-      <% data.forEach(function(background){ %>
+    <p>Each background now has a standalone URL for easier sharing and clearer indexing.</p>
+
+    <ul style="column-count: 2; column-gap: 20px;">
+      <% data.forEach((background) => { %>
       <li>
-        <a href="#<%= background.index %>"><%= background.name %></a>
+        <a href="/dnd/5e/srd/backgrounds/<%= background.index %>"><%= background.name %></a>
       </li>
-      <% }); %>
+      <% }) %>
     </ul>
-    <br />
-    <% data.forEach(function(background){ %>
-    <div class="inline-div" id="<%= background.index %>">
-      <h3><%= background.name %></h3>
-      </span>
-      <p class="indent">
-        <% background.desc.forEach((str, index) => { %> <% if (index > 0) { %>
-      <p class="pindent"><%= str %></p>
-      <% } else { %>
-      <p><%= str %></p>
-      <% } %> <% }) %>
-      </p>
-      <br>
-      <div class="indent">
-        <h4>Starting Proficiencies</h4>
-        <div class="indent">
-          <% background.starting_proficiencies.forEach(function(prof){ %>
-          <% if (prof.index.split("-")[0] == "skill") { %>
-          <li>
-            <a href="/dnd/5e/srd/skills#<%= prof.index.split("-")[1] %>"><%= prof.name %></a>
-          </li>
-          <% }; %>
-          <% }); %>
-          </span>
-          <br />
-          <h4>Language Options</h4>
-          <div class="indent">
-            <p>- Choose <%= background.language_options.choose %> of any language</p>
-            </span>
-            <br />
-            <h4>Starting Equipment</h4>
-            <div class="indent">
-              <% background.starting_equipment.forEach(item => { %>
-              <p><a href="/dnd/5e/srd/equipment#<%= item.equipment.index %>"><%= item.equipment.name %></a> (<%= item.quantity %>)</p>
-              <% }) %>
-              </span>
-              <br>
-              <h4>Starting Equipment Options</h4>
-              <div class="indent">
-                <% background.starting_equipment_options.forEach(opt => { %>
-                <p>Choose <%= opt.choose %> from <a href="/dnd/5e/srd/equipment#<%= opt.from.equipment_category.index %>"><%= opt.from.equipment_category.name %></a></p>
-                <% }) %>
-                </span>
-                <br>
-                <h4>Feature</h4>
-                <div class="indent">
-                  <p><b><%= background.feature.name %></b></p>
-                  <% background.desc.forEach((str, index) => { %> <% if (index > 0) { %>
-                  <p class="pindent"><%= str %></p>
-                  <% } else { %>
-                  <p><%= str %></p>
-                  <% } %> <% }) %>
-                  </span>
-                  <br>
-                  <h4>Personality Traits</h4>
-                  <div class="indent">
-                    <b>Choose <%= background.personality_traits.choose %> from</b>
-                    <ul>
-                      <% background.personality_traits.from.options.forEach(opt =>{ %>
-                      <li><%= opt.string %></li>
-                      <% }); %>
-                    </ul>
-                    </span>
-                    <br>
-                    <h4>Ideals</h4>
-                    <div class="indent">
-                      <p>Choose <%= background.ideals.choose %> from</p>
-                      <ul>
-                        <% background.ideals.from.options.forEach(opt =>{ %>
-                        <li><%= opt.desc %></li>
-                        <% }); %>
-                      </ul>
-                      </span>
-                      <br>
-                      <h4>Bonds</h4>
-                      <div class="indent">
-                        <p>Choose <%= background.bonds.choose %> from</p>
-                        <ul>
-                          <% background.bonds.from.options.forEach(opt =>{ %>
-                          <li><%= opt.string %></li>
-                          <% }); %>
-                        </ul>
-                        </span>
-                        <br>
-                        <h4>Flaws</h4>
-                        <div class="indent">
-                          <p>Choose <%= background.flaws.choose %> from</p>
-                          <ul>
-                            <% background.flaws.from.options.forEach(opt =>{ %>
-                            <li><%= opt.string %></li>
-                            <% }); %>
-                          </ul>
-                          </span>
-                          <br>
-                          </span>
-                          <br />
-                          <% }); %>
-                          </span>
-                          <%- include('../../../partials/footer') %>
+
+    <hr />
+    <h3>Character Build Links</h3>
+    <ul>
+      <li><a href="/dnd/5e/srd/races">Race Pages</a></li>
+      <li><a href="/dnd/5e/srd/classes">Class Pages</a></li>
+    </ul>
+  </div>
+  <%- include('../../../partials/footer') %>
 </body>
 
 </html>

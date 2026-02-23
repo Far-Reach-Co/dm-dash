@@ -147,6 +147,10 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
     "constitution", "intelligence", "wisdom", "charisma",
     "str", "dex", "con", "int", "wis", "cha", "modifier",
   ],
+  backgrounds: [
+    "background", "backgrounds", "acolyte", "personality trait",
+    "ideal", "bond", "flaw", "starting equipment", "feature",
+  ],
   races: [
     "race", "races", "dwarf", "elf", "halfling", "human", "dragonborn",
     "gnome", "half-elf", "half-orc", "tiefling", "subrace", "subraces",
