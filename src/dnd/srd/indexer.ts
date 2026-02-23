@@ -171,16 +171,184 @@ function tokenize(text: string): string[] {
     .filter((w) => w.length > 1);
 }
 
-function scoreEntry(queryTokens: string[], entry: any): number {
+function normalizeForMatch(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function isTitleLikeQuery(query: string, queryTokens: string[]): boolean {
+  const lower = query.toLowerCase().trim();
+  if (!lower) return false;
+  if (queryTokens.length <= 3) return true;
+  if (queryTokens.length > 6 || lower.length > 80) return false;
+  if (/^(what|which|how|when|where|why|who|can|does|do|is|are|list|show|tell|find)\b/.test(lower)) {
+    return false;
+  }
+  return true;
+}
+
+function getEntryKey(category: string, entry: any): string {
+  const index = normalizeForMatch(String(entry.index || ""));
+  if (index) return `${category}:${index}`;
+  const fallbackName = normalizeForMatch(String(entry.name || ""));
+  return `${category}:${fallbackName}`;
+}
+
+type TitleIndexRecord = {
+  category: string;
+  entry: any;
+  key: string;
+  normalizedName: string;
+  normalizedIndex: string;
+};
+
+let titleIndexRecords: TitleIndexRecord[] | null = null;
+let exactTitleMap: Map<string, TitleIndexRecord[]> | null = null;
+let exactIndexMap: Map<string, TitleIndexRecord[]> | null = null;
+
+function getAllSrdCategories(): string[] {
+  return Object.keys(srdData);
+}
+
+function ensureTitleIndex() {
+  if (titleIndexRecords && exactTitleMap && exactIndexMap) {
+    return {
+      records: titleIndexRecords,
+      titles: exactTitleMap,
+      indexes: exactIndexMap,
+    };
+  }
+
+  const records: TitleIndexRecord[] = [];
+  const titles = new Map<string, TitleIndexRecord[]>();
+  const indexes = new Map<string, TitleIndexRecord[]>();
+
+  for (const category of getAllSrdCategories()) {
+    for (const entry of srdData[category] || []) {
+      const rawName = String(entry.name || entry.full_name || entry.index || "");
+      const normalizedName = normalizeForMatch(rawName);
+      const normalizedIndex = normalizeForMatch(String(entry.index || ""));
+      if (!normalizedName && !normalizedIndex) continue;
+
+      const record: TitleIndexRecord = {
+        category,
+        entry,
+        key: getEntryKey(category, entry),
+        normalizedName,
+        normalizedIndex,
+      };
+      records.push(record);
+
+      if (normalizedName) {
+        const existing = titles.get(normalizedName);
+        if (existing) existing.push(record);
+        else titles.set(normalizedName, [record]);
+      }
+      if (normalizedIndex) {
+        const existing = indexes.get(normalizedIndex);
+        if (existing) existing.push(record);
+        else indexes.set(normalizedIndex, [record]);
+      }
+    }
+  }
+
+  titleIndexRecords = records;
+  exactTitleMap = titles;
+  exactIndexMap = indexes;
+
+  return { records, titles, indexes };
+}
+
+function findTitleHints(query: string, queryTokens: string[]) {
+  const normalizedQuery = normalizeForMatch(query);
+  const hintedCategories = new Set<string>();
+  const boostedEntryKeys = new Set<string>();
+  if (!normalizedQuery) return { hintedCategories, boostedEntryKeys };
+
+  const { records, titles, indexes } = ensureTitleIndex();
+  const addMatch = (record: TitleIndexRecord) => {
+    hintedCategories.add(record.category);
+    boostedEntryKeys.add(record.key);
+  };
+
+  const exactTitle = titles.get(normalizedQuery) || [];
+  const exactIndex = indexes.get(normalizedQuery) || [];
+  for (const record of exactTitle) addMatch(record);
+  for (const record of exactIndex) addMatch(record);
+
+  // No exact hit. Try high-confidence partial title matches.
+  if (!boostedEntryKeys.size && normalizedQuery.length >= 4) {
+    const partialMatches: { record: TitleIndexRecord; score: number }[] = [];
+    for (const record of records) {
+      let score = 0;
+      if (record.normalizedName.startsWith(normalizedQuery)) score = 95;
+      else if (record.normalizedIndex.startsWith(normalizedQuery)) score = 90;
+      else if (record.normalizedName.includes(normalizedQuery)) score = 82;
+      else if (record.normalizedIndex.includes(normalizedQuery)) score = 80;
+      else if (
+        normalizedQuery.includes(record.normalizedName) &&
+        record.normalizedName.length >= 4
+      ) {
+        score = 70;
+      } else if (queryTokens.length >= 2) {
+        let overlap = 0;
+        for (const token of queryTokens) {
+          if (record.normalizedName.includes(token)) overlap++;
+        }
+        if (overlap === queryTokens.length) score = 72;
+      }
+
+      if (score >= 70) partialMatches.push({ record, score });
+    }
+
+    partialMatches
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .forEach(({ record }) => addMatch(record));
+  }
+
+  return { hintedCategories, boostedEntryKeys };
+}
+
+function scoreEntry(
+  queryTokens: string[],
+  normalizedQuery: string,
+  category: string,
+  entry: any,
+  boostedEntryKeys: Set<string>,
+): number {
   const { name, desc } = getEntryText(entry);
   const nameLower = name.toLowerCase();
   const descLower = desc.toLowerCase();
+  const normalizedName = normalizeForMatch(name);
+  const normalizedIndex = normalizeForMatch(String(entry.index || ""));
+  const entryKey = getEntryKey(category, entry);
   let score = 0;
 
+  if (boostedEntryKeys.has(entryKey)) score += 140;
+  if (normalizedQuery) {
+    if (normalizedName === normalizedQuery) score += 120;
+    if (normalizedIndex && normalizedIndex === normalizedQuery) score += 110;
+    if (normalizedName.startsWith(normalizedQuery) && normalizedQuery.length >= 3) {
+      score += 70;
+    } else if (normalizedName.includes(normalizedQuery) && normalizedQuery.length >= 4) {
+      score += 45;
+    }
+  }
+
+  let nameTokenHits = 0;
   for (const token of queryTokens) {
-    if (nameLower.includes(token)) score += 3;
+    if (nameLower.includes(token)) {
+      score += 8;
+      nameTokenHits++;
+    }
     if (descLower.includes(token)) score += 1;
   }
+  if (nameTokenHits === queryTokens.length && queryTokens.length > 1) score += 20;
 
   return score;
 }
@@ -190,14 +358,28 @@ const MAX_CONTEXT_CHARS = 32000;
 
 export function findRelevantEntries(query: string, categories: string[]): string {
   const queryTokens = tokenize(query);
+  const normalizedQuery = normalizeForMatch(query);
+  const { hintedCategories, boostedEntryKeys } = findTitleHints(query, queryTokens);
+  const searchCategories = new Set<string>(categories || []);
+  for (const category of hintedCategories) searchCategories.add(category);
+  if (isTitleLikeQuery(query, queryTokens) || searchCategories.size === 0) {
+    for (const category of getAllSrdCategories()) searchCategories.add(category);
+  }
+
   const scored: { text: string; score: number }[] = [];
 
-  for (const cat of categories) {
+  for (const cat of searchCategories) {
     const entries = srdData[cat] || [];
     const serialize = SERIALIZERS[cat] || ((e: any) => serializeGeneric(e, cat.toUpperCase()));
 
     for (const entry of entries) {
-      const score = scoreEntry(queryTokens, entry);
+      const score = scoreEntry(
+        queryTokens,
+        normalizedQuery,
+        cat,
+        entry,
+        boostedEntryKeys,
+      );
       if (score > 0) {
         scored.push({ text: serialize(entry), score });
       }
