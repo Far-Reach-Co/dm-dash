@@ -180,33 +180,39 @@
           <%   } }); %>
         </div>
       </div>
-      <br>
       <!-- Ability scores -->
-      <hr class="w-50" />
-      <div class="inline-div">
-        <b>STR</b>
-        <div> <%= monster.strength%></div>
-        <i>(<%= Math.floor((Number(monster.strength) - 10) / 2) %>)</i>
-        <b>DEX</b>
-        <div> <%= monster.dexterity%></div>
-        <div> (<%= Math.floor((Number(monster.dexterity) - 10) / 2) %>)</div>
-        <b>CON</b>
-        <div> <%= monster.constitution%></div>
-        <div> (<%= Math.floor((Number(monster.constitution) - 10) / 2) %>)</div>
+      <div class="monster-ability-grid">
+        <div class="ability-cell">
+          <span class="ability-label">STR</span>
+          <span class="ability-score"><%= monster.strength %></span>
+          <span class="ability-mod">(<%= Math.floor((Number(monster.strength) - 10) / 2) >= 0 ? '+' : '' %><%= Math.floor((Number(monster.strength) - 10) / 2) %>)</span>
+        </div>
+        <div class="ability-cell">
+          <span class="ability-label">DEX</span>
+          <span class="ability-score"><%= monster.dexterity %></span>
+          <span class="ability-mod">(<%= Math.floor((Number(monster.dexterity) - 10) / 2) >= 0 ? '+' : '' %><%= Math.floor((Number(monster.dexterity) - 10) / 2) %>)</span>
+        </div>
+        <div class="ability-cell">
+          <span class="ability-label">CON</span>
+          <span class="ability-score"><%= monster.constitution %></span>
+          <span class="ability-mod">(<%= Math.floor((Number(monster.constitution) - 10) / 2) >= 0 ? '+' : '' %><%= Math.floor((Number(monster.constitution) - 10) / 2) %>)</span>
+        </div>
+        <div class="ability-cell">
+          <span class="ability-label">INT</span>
+          <span class="ability-score"><%= monster.intelligence %></span>
+          <span class="ability-mod">(<%= Math.floor((Number(monster.intelligence) - 10) / 2) >= 0 ? '+' : '' %><%= Math.floor((Number(monster.intelligence) - 10) / 2) %>)</span>
+        </div>
+        <div class="ability-cell">
+          <span class="ability-label">WIS</span>
+          <span class="ability-score"><%= monster.wisdom %></span>
+          <span class="ability-mod">(<%= Math.floor((Number(monster.wisdom) - 10) / 2) >= 0 ? '+' : '' %><%= Math.floor((Number(monster.wisdom) - 10) / 2) %>)</span>
+        </div>
+        <div class="ability-cell">
+          <span class="ability-label">CHA</span>
+          <span class="ability-score"><%= monster.charisma %></span>
+          <span class="ability-mod">(<%= Math.floor((Number(monster.charisma) - 10) / 2) >= 0 ? '+' : '' %><%= Math.floor((Number(monster.charisma) - 10) / 2) %>)</span>
+        </div>
       </div>
-      <div class="inline-div">
-        <b>INT</b>
-        <div> <%= monster.intelligence%></div>
-        <div> (<%= Math.floor((Number(monster.intelligence) - 10) / 2) %>)</div>
-        <b>WIS</b>
-        <div> <%= monster.wisdom%></div>
-        <div> (<%= Math.floor((Number(monster.wisdom) - 10) / 2) %>)</div>
-        <b>CHA</b>
-        <div> <%= monster.charisma%></div>
-        <div> (<%= Math.floor((Number(monster.charisma) - 10) / 2) %>)</div>
-      </div>
-      <hr class="w-50" />
-      <br>
       <!-- Saves -->
       <div class="inline-div">
         <b>Saving Throws:</b>
@@ -489,9 +495,7 @@
         </ul>
       </div>
 
-      <br />
-      <hr />
-      <div style="margin-top: 20px;">
+      <div class="srd-back-link">
         <a href="/dnd/5e/srd/monsters">&larr; Back to Monster List</a>
       </div>
     </div>
