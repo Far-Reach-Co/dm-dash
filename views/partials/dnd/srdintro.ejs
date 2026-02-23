@@ -5,3 +5,52 @@
     <a href="https://dnd.wizards.com/resources/systems-reference-document">System Reference Document</a>.</small>
   <small>(v5.1 2014)</small>
 </div>
+
+<% if (typeof showSrdGrowthRail === 'undefined' || showSrdGrowthRail !== false) { %>
+  <aside class="srd-growth-rail" aria-label="SRD tools">
+    <div class="srd-growth-card">
+      <h3>Ask the Archives</h3>
+      <p>Ask our AI assistant about rules, monsters, spells, classes, and more.</p>
+      <form id="srd-mini-search-form" class="srd-mini-search-form">
+        <input
+          type="text"
+          id="srd-mini-search-input"
+          placeholder="Ask a rules question..."
+          autocomplete="off"
+        />
+        <button type="submit">Ask</button>
+      </form>
+      <button type="button" class="srd-growth-link-btn" data-open-srd-search>
+        Open full response
+      </button>
+    </div>
+
+    <div class="srd-growth-card srd-growth-card-vtt">
+      <h3>Try The VTT Sandbox</h3>
+      <p>Jump into our guest table and test the VTT tools with no signup required.</p>
+      <a class="srd-vtt-sandbox-link" href="/vtt/guest/start">Open Guest Sandbox</a>
+    </div>
+  </aside>
+
+  <div id="srd-search-modal" class="srd-search-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="srd-search-modal-card">
+      <button type="button" class="srd-search-modal-close" data-close-srd-search aria-label="Close Ask the Archives">×</button>
+      <h3>Ask the Archives</h3>
+      <p class="srd-search-modal-subtitle">Get SRD answers without leaving this page.</p>
+      <form id="srd-search-form" class="srd-search-form">
+        <input
+          type="text"
+          id="srd-search-input"
+          placeholder="e.g. What spells deal fire damage at level 3?"
+          autocomplete="off"
+        />
+        <button type="submit">Search</button>
+      </form>
+      <div id="srd-search-results" class="search-results"></div>
+    </div>
+  </div>
+
+  <script src="/lib/marked.min.js" defer></script>
+  <script src="/lib/purify.min.js" defer></script>
+  <script src="/lib/srdSearch.js" defer></script>
+<% } %>

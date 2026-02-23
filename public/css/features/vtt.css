@@ -942,3 +942,106 @@
   font-size: 11px;
   color: var(--orange3);
 }
+
+.guest-register-modal {
+  min-width: min(480px, 90vw);
+  max-width: min(520px, 90vw);
+  text-align: center;
+}
+
+.guest-register-modal h2 {
+  margin: 0 0 var(--space-sm);
+  color: var(--orange2);
+}
+
+.guest-register-modal p {
+  margin: 0;
+  color: var(--main-gray);
+}
+
+.guest-register-actions {
+  margin-top: var(--space-lg);
+  display: flex;
+  justify-content: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.guest-register-cta,
+.guest-register-dismiss {
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.guest-register-cta {
+  background: linear-gradient(135deg, var(--green) 0%, #2f7b4f 100%);
+  color: var(--main-white);
+}
+
+.guest-register-dismiss {
+  background: transparent;
+  color: var(--main-gray);
+}
+
+.guest-register-dismiss:hover {
+  color: var(--main-white);
+}
+
+.guest-welcome-modal {
+  min-width: min(560px, 92vw);
+  max-width: min(640px, 92vw);
+}
+
+.guest-welcome-modal h2 {
+  margin: 0 0 var(--space-sm);
+  color: var(--orange2);
+}
+
+.guest-welcome-modal p {
+  margin: 0;
+  color: var(--main-gray);
+}
+
+.guest-welcome-feature-list {
+  margin: var(--space-md) 0 0;
+  padding-left: 20px;
+  color: var(--main-white);
+}
+
+.guest-welcome-feature-list li {
+  margin: 0 0 var(--space-xs);
+  line-height: 1.45;
+}
+
+.guest-welcome-actions {
+  margin-top: var(--space-lg);
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.guest-welcome-guide-link,
+.guest-welcome-dismiss {
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.guest-welcome-guide-link {
+  background: linear-gradient(135deg, var(--blue6) 0%, var(--blue4) 100%);
+  color: var(--main-white);
+}
+
+.guest-welcome-dismiss {
+  background: transparent;
+  color: var(--main-gray);
+}
+
+.guest-welcome-dismiss:hover {
+  color: var(--main-white);
+}

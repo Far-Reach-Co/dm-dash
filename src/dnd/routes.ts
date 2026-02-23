@@ -80,6 +80,7 @@ router.get(
     try {
       res.render("dnd/5e/srd/contents", {
         auth: req.session.user,
+        showSrdGrowthRail: false,
       });
     } catch (err) {
       next(err);
