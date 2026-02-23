@@ -108,41 +108,30 @@
       <% if (spell.ritual) { %><i class="text-green">(Ritual)</i><% } %>
     </div>
 
-    <br />
-    <hr class="w-75" />
-
     <!-- Spell Stats -->
-    <div class="spell-stats">
-      <div class="inline-div">
-        <b>Casting Time:</b>
-        <div><%= spell.casting_time %></div>
+    <div class="spell-stat-block">
+      <div class="spell-stat-field">
+        <span class="spell-stat-label">Casting Time</span>
+        <span class="spell-stat-value"><%= spell.casting_time %></span>
       </div>
-      <div class="inline-div">
-        <b>Range:</b>
-        <div><%= spell.range %></div>
+      <div class="spell-stat-field">
+        <span class="spell-stat-label">Range</span>
+        <span class="spell-stat-value"><%= spell.range %></span>
       </div>
-      <div class="inline-div">
-        <b>Components:</b>
-        <div>
+      <div class="spell-stat-field">
+        <span class="spell-stat-label">Components</span>
+        <span class="spell-stat-value">
           <%= spell.components.join(', ') %>
-          <% if (spell.material) { %>
-          <i>(<%= spell.material %>)</i>
-          <% } %>
-        </div>
+          <% if (spell.material) { %><i> (<%= spell.material %>)</i><% } %>
+        </span>
       </div>
-      <div class="inline-div">
-        <b>Duration:</b>
-        <div>
-          <% if (spell.concentration) { %>
-          <span class="text-orange">Concentration,</span>
-          <% } %>
-          <%= spell.duration %>
-        </div>
+      <div class="spell-stat-field">
+        <span class="spell-stat-label">Duration</span>
+        <span class="spell-stat-value">
+          <% if (spell.concentration) { %><span class="text-orange">Concentration, </span><% } %><%= spell.duration %>
+        </span>
       </div>
     </div>
-
-    <hr class="w-75" />
-    <br />
 
     <!-- Spell Description -->
     <div class="spell-description">
@@ -157,7 +146,6 @@
 
     <!-- Higher Level -->
     <% if (spell.higher_level && spell.higher_level.length) { %>
-    <br />
     <div class="higher-level">
       <b>At Higher Levels:</b>
       <% spell.higher_level.forEach(text => { %>
@@ -166,7 +154,6 @@
     </div>
     <% } %>
 
-    <br />
     <hr class="w-75" />
 
     <!-- Additional Details -->
@@ -235,7 +222,6 @@
       <% } %>
     </div>
 
-    <br />
     <hr class="w-75" />
 
     <!-- Classes -->
@@ -259,9 +245,7 @@
     </div>
     <% } %>
 
-    <br />
-    <hr />
-    <div style="margin-top: 20px;">
+    <div class="srd-back-link">
       <a href="/dnd/5e/srd/spells">&larr; Back to Spell List</a>
     </div>
   </div>
