@@ -87,6 +87,7 @@
   color: var(--orange2);
   background: var(--blue4);
   border-color: var(--orange2);
+  box-shadow: 0 0 8px var(--glow-warm);
 }
 
 /* ===== Spell Meta ===== */
@@ -1143,6 +1144,7 @@ tr:hover {
   color: var(--orange3);
   border-color: rgba(209, 158, 116, 0.35);
   background: rgba(47, 64, 84, 0.65);
+  box-shadow: 0 0 6px var(--glow-warm);
 }
 
 /* ===== SRD Filter Label ===== */
