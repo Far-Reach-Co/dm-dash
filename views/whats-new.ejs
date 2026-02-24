@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>What's New | Far Reach Co.</title>
+  <meta name="description" content="Recent Far Reach Co. updates, feature launches, and community improvements across VTT, Wyrlds, and tabletop tools." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <link rel="stylesheet" href="/css/features/whats-new.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <% const formatCampaignDate = (slug) => { const match = String(slug || '').match(/^(\d{4})-(\d{2})-/); if (!match) return 'Recent update'; const year = Number(match[1]); const month = Number(match[2]) - 1; return new Date(Date.UTC(year, month, 1)).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }); }; %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">What's New</h1>
+      <p>The latest updates from Far Reach Co, in one place.</p>
+      <small>
+        <a href="/radio">Far Reach Radio</a>
+        |
+        <a href="/sandbox-mode-guide">Sandbox Mode Guide</a>
+        |
+        <a href="/wyrlds/public">Public Wyrlds</a>
+      </small>
+      <hr>
+    </div>
+
+    <% campaigns.forEach((campaign, idx) => { %>
+      <section id="update-<%= idx + 1 %>" class="whats-new-campaign">
+        <div class="whats-new-kicker"><%= formatCampaignDate(campaign.slug) %> Product Update</div>
+        <h2><%= campaign.subject %></h2>
+        <p class="whats-new-intro"><%= campaign.intro %></p>
+
+        <h3>Highlights</h3>
+        <ul>
+          <% campaign.recent.forEach((item) => { %>
+            <li>
+              <strong><%= item.title %></strong>
+              <p><%= item.body %></p>
+              <% if (item.linkText && item.linkUrl) { %>
+                <a href="<%= item.linkUrl %>"><%= item.linkText %></a>
+              <% } %>
+            </li>
+          <% }) %>
+        </ul>
+
+        <% if (campaign.upcoming && campaign.upcoming.length) { %>
+          <h3>What We Are Building Next</h3>
+          <ul>
+            <% campaign.upcoming.forEach((upcomingItem) => { %>
+              <li><%= upcomingItem %></li>
+            <% }) %>
+          </ul>
+        <% } %>
+
+        <p class="whats-new-cta">
+          <a href="<%= campaign.ctaUrl %>"><%= campaign.ctaText %></a>
+        </p>
+      </section>
+    <% }) %>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>

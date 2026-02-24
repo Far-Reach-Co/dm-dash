@@ -1,0 +1,48 @@
+.whats-new-kicker {
+  color: var(--main-gray);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+
+.whats-new-campaign h2 {
+  margin-bottom: 0.9rem;
+}
+
+.whats-new-campaign h3 {
+  margin-top: 1.25rem;
+}
+
+.whats-new-campaign ul {
+  margin-left: 1.1rem;
+}
+
+.whats-new-campaign li {
+  margin-bottom: 0.8rem;
+}
+
+.whats-new-campaign li p {
+  margin: 0.3rem 0 0.35rem;
+}
+
+.whats-new-intro {
+  color: var(--light-gray);
+}
+
+.whats-new-cta a {
+  display: inline-block;
+  margin-top: 0.3rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--bright-white);
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue4) 100%);
+  border: 1px solid var(--blue2);
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.whats-new-cta a:hover {
+  background: linear-gradient(135deg, var(--blue2) 0%, var(--blue) 100%);
+  transform: translateY(-1px);
+}

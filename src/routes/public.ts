@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { humanFileSize } from "../lib/utils";
 import { subscriptionPlanLimits } from "../lib/subscription";
+import { getProductUpdateCampaigns } from "../lib/productUpdateCampaigns";
 
 const router = Router();
 
@@ -56,6 +57,18 @@ router.get("/what-is-frc", (req: Request, res: Response, next: NextFunction) => 
 router.get("/resources", (req: Request, res: Response, next: NextFunction) => {
   try {
     res.render("resources", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/whats-new", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const recentCampaigns = getProductUpdateCampaigns().slice(-2).reverse();
+    res.render("whats-new", {
+      auth: req.session.user,
+      campaigns: recentCampaigns,
+    });
   } catch (err) {
     next(err);
   }
