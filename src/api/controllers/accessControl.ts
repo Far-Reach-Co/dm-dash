@@ -1,7 +1,9 @@
 import { Request } from "express";
 import { requireUser } from "../../lib/authz";
-import { getProjectQuery } from "../queries/projects";
-import { getProjectUserByUserAndProjectQuery } from "../queries/projectUsers";
+import {
+  getProjectAccessForUser,
+  getProjectOrThrow as getProjectOrThrowCore,
+} from "../../lib/projectAccessCore";
 import { get5eCharGeneralQuery } from "../queries/5eCharGeneral";
 import { getPlayerUserByUserAndPlayerQuery } from "../queries/playerUsers";
 import { getProjectPlayersByPlayerQuery } from "../queries/projectPlayers";
@@ -23,41 +25,23 @@ export function requireApiUser(req: Request): string | number {
 }
 
 export async function getProjectOrThrow(projectId: string | number) {
-  const projectData = await getProjectQuery(projectId);
-  const project = projectData.rows[0];
-  if (!project) throw apiError(404, "Project not found");
-  return project;
+  return await getProjectOrThrowCore(projectId, {
+    onNotFound: () => apiError(404, "Project not found"),
+  });
 }
 
 export async function getProjectRole(req: Request, projectId: string | number) {
   const userId = requireApiUser(req);
-  const project = await getProjectOrThrow(projectId);
-  const isOwner = String(project.user_id) === String(userId);
-  if (isOwner) {
-    return { userId, project, isOwner: true, isEditor: true, isMember: true };
-  }
-
-  const projectUserData = await getProjectUserByUserAndProjectQuery(
-    userId,
-    project.id,
-  );
-  const projectUser = projectUserData.rows[0];
-  if (!projectUser) {
-    return {
-      userId,
-      project,
-      isOwner: false,
-      isEditor: false,
-      isMember: false,
-    };
-  }
-
+  const role = await getProjectAccessForUser(userId, projectId, {
+    onNotFound: () => apiError(404, "Project not found"),
+  });
   return {
     userId,
-    project,
-    isOwner: false,
-    isEditor: Boolean(projectUser.is_editor),
-    isMember: true,
+    project: role.project,
+    isOwner: role.isOwner,
+    isEditor: role.isEditor,
+    isMember: role.isMember,
+    projectUserId: role.projectUserId,
   };
 }
 

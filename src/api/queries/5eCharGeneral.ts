@@ -225,6 +225,28 @@ async function get5eCharNamesQuery(ids: (string | number)[]) {
   return await db.query<DndFiveEGeneral>(query)
 }
 
+async function get5eCharsGeneralByIdsQuery(ids: (string | number)[]) {
+  if (!ids.length) return toQueryResult([]);
+  const query = {
+    text: /*sql*/ `
+      SELECT
+        id,
+        user_id,
+        name,
+        COALESCE(
+          sheet_data -> 'general' ->> 'created_at',
+          to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+        ) AS created_at,
+        sheet_data
+      FROM public."dnd_5e_character_general"
+      WHERE id = ANY($1)
+    `,
+    values: [ids],
+  };
+  const result = await db.query<DndFiveEGeneralSheetRow>(query);
+  return toQueryResult(result.rows.map((row) => toGeneralModel(row)));
+}
+
 async function get5eCharsGeneralByUserQuery(userId: string | number) {
   const query = {
     text: /*sql*/ `
@@ -259,6 +281,7 @@ export {
   add5eCharGeneralQuery,
   get5eCharGeneralUserIdQuery,
   get5eCharsGeneralByUserQuery,
+  get5eCharsGeneralByIdsQuery,
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
   get5eCharNamesQuery,

@@ -40,6 +40,12 @@ export interface TableAuthContext {
   capabilities: TableCapabilities;
 }
 
+export type TableActionAuthContext = {
+  canView: boolean;
+  canEdit: boolean;
+  capabilities?: TableCapabilities | null;
+};
+
 export function normalizeTableMode(mode: unknown): TableMode {
   if (mode === "sandbox") return "sandbox";
   return "standard";
@@ -188,10 +194,21 @@ export async function requireTablePermission(
   mode: "view" | "edit" = "view",
 ): Promise<TableAuthContext> {
   const auth = await resolveTableAuth(req, table);
-  if (mode === "edit" && !auth.canEdit) {
+  if (!isTableActionAllowed(auth, mode)) {
     throw forbiddenError();
   }
   return auth;
+}
+
+export function isTableActionAllowed(
+  auth: TableActionAuthContext,
+  mode: "view" | "edit",
+  capability?: keyof TableCapabilities,
+) {
+  if (mode === "view" && !auth.canView) return false;
+  if (mode === "edit" && !auth.canEdit) return false;
+  if (capability && !auth.capabilities?.[capability]) return false;
+  return true;
 }
 
 export function hasTableCapability(

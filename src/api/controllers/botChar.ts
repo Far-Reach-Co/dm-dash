@@ -248,11 +248,11 @@ async function handleGetBackgroundResponse(
       },
       {
         title: "Bonds",
-        description: background.ideals,
+        description: background.bonds,
       },
       {
         title: "Flaws",
-        description: background.ideals,
+        description: background.flaws,
       },
       {
         title: "Appearance",
@@ -557,7 +557,7 @@ async function handleGetSkillsResponse(
         ? calculateAbilityScoreModifier(charGeneral.wisdom) +
           calculateProBonus(charGeneral.level)
         : calculateAbilityScoreModifier(charGeneral.wisdom)
-    } **nature (wis)**`;
+    } **Medicine (wis)**`;
     content += `\n(${proficiencies.nature ? "●" : "○"}) ${
       proficiencies.nature
         ? calculateAbilityScoreModifier(charGeneral.intelligence) +
@@ -649,19 +649,19 @@ async function handleGetSavingThrowsResponse(
           calculateProBonus(charGeneral.level)
         : calculateAbilityScoreModifier(charGeneral.constitution)
     }`;
-    content += `\n**CON**(${proficiencies.sv_int ? "●" : "○"}) - ${
+    content += `\n**INT**(${proficiencies.sv_int ? "●" : "○"}) - ${
       proficiencies.sv_int
         ? calculateAbilityScoreModifier(charGeneral.intelligence) +
           calculateProBonus(charGeneral.level)
         : calculateAbilityScoreModifier(charGeneral.intelligence)
     }`;
-    content += `\n**CON**(${proficiencies.sv_wis ? "●" : "○"}) - ${
+    content += `\n**WIS**(${proficiencies.sv_wis ? "●" : "○"}) - ${
       proficiencies.sv_wis
         ? calculateAbilityScoreModifier(charGeneral.wisdom) +
           calculateProBonus(charGeneral.level)
         : calculateAbilityScoreModifier(charGeneral.wisdom)
     }`;
-    content += `\n**CON**(${proficiencies.sv_char ? "●" : "○"}) - ${
+    content += `\n**CHA**(${proficiencies.sv_char ? "●" : "○"}) - ${
       proficiencies.sv_char
         ? calculateAbilityScoreModifier(charGeneral.charisma) +
           calculateProBonus(charGeneral.level)

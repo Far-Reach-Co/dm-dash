@@ -1,8 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { getTableViewByUUIDQuery } from "../api/queries/tableViews";
 import { upsertRecentlyViewed } from "../api/queries/recentlyViewed";
-import { requireTableAccessOrRedirect } from "../lib/authz";
 import { createGuestSandbox, requireGuestSandboxAccess } from "../lib/guestSandbox";
+import { resolveTableAccessByUUID } from "../lib/tableAccessEvaluator";
 import { rateLimit } from "express-rate-limit";
 
 const router = Router();
@@ -44,18 +43,23 @@ router.get("/vtt", async (req: Request, res: Response, next: NextFunction) => {
 
     if (!req.query.uuid) return res.render("404", { auth: req.session.user });
     const uuid = req.query.uuid as string;
-    const tableData = await getTableViewByUUIDQuery(uuid);
-
-    // if not table
-    if (!tableData.rows.length) {
+    let access;
+    try {
+      access = await resolveTableAccessByUUID(req, uuid, {
+        allowGuestSandbox: false,
+      });
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      if (status === 404) {
+        return res.render("404", { auth: req.session.user });
+      }
+      return res.redirect("/forbidden");
+    }
+    if (!access.table) {
       return res.render("404", { auth: req.session.user });
     }
-
-    const table = tableData.rows[0];
-    const hasAccess = await requireTableAccessOrRedirect(req, res, table, "/forbidden");
-    if (!hasAccess) return;
     if (req.session.user) {
-      upsertRecentlyViewed(req.session.user, "table", table.id);
+      upsertRecentlyViewed(req.session.user, "table", access.table.id);
     }
     return res.render("vtt", {
       auth: req.session.user,

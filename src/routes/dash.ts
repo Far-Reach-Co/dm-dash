@@ -1,11 +1,11 @@
 import { Router, Request, Response, NextFunction } from "express";
 import {
-  get5eCharGeneralQuery,
+  get5eCharsGeneralByIdsQuery,
   get5eCharsGeneralByUserQuery,
 } from "../api/queries/5eCharGeneral";
 import { getTableViewsByUserQuery } from "../api/queries/tableViews";
 import { getPlayerUsersQuery } from "../api/queries/playerUsers";
-import { getProjectsQuery, getProjectQuery } from "../api/queries/projects";
+import { getProjectsByIdsQuery, getProjectsQuery } from "../api/queries/projects";
 import { getProjectUsersQuery } from "../api/queries/projectUsers";
 import { getRecordsByUserQuery } from "../api/queries/record";
 import { getTableImageCountByUserQuery } from "../api/queries/tableImages";
@@ -70,24 +70,44 @@ async function loadDashData(userId: string | number) {
   // get all character sheets by user
   const charData = await get5eCharsGeneralByUserQuery(userId);
   // get shared character sheets by playerUser
-  const sharedCharData = [];
   const playerUsersData = await getPlayerUsersQuery(userId);
-  if (playerUsersData.rows.length) {
-    for (const playerUser of playerUsersData.rows) {
-      const puCharData = await get5eCharGeneralQuery(playerUser.player_id);
-      sharedCharData.push(puCharData.rows[0]);
-    }
-  }
+  const sharedSheetIds = [
+    ...new Set(
+      playerUsersData.rows
+        .map((playerUser) => Number(playerUser.player_id))
+        .filter((playerId) => Number.isInteger(playerId) && playerId > 0),
+    ),
+  ];
+  const sharedSheetsData = sharedSheetIds.length
+    ? await get5eCharsGeneralByIdsQuery(sharedSheetIds)
+    : { rows: [] };
+  const sharedSheetsById = new Map(
+    sharedSheetsData.rows.map((sheet) => [Number(sheet.id), sheet]),
+  );
+  const sharedCharData = playerUsersData.rows
+    .map((playerUser) => sharedSheetsById.get(Number(playerUser.player_id)))
+    .filter(Boolean);
 
   // created wyrlds
   const projectData = await getProjectsQuery(userId);
   // join wyrlds
-  const sharedProjectList = [];
   const projectUserData = await getProjectUsersQuery(userId);
-  for (const projectUser of projectUserData.rows) {
-    const sharedProjectData = await getProjectQuery(projectUser.project_id);
-    sharedProjectList.push(sharedProjectData.rows[0]);
-  }
+  const sharedProjectIds = [
+    ...new Set(
+      projectUserData.rows
+        .map((projectUser) => Number(projectUser.project_id))
+        .filter((projectId) => Number.isInteger(projectId) && projectId > 0),
+    ),
+  ];
+  const sharedProjectsData = sharedProjectIds.length
+    ? await getProjectsByIdsQuery(sharedProjectIds)
+    : { rows: [] };
+  const sharedProjectsById = new Map(
+    sharedProjectsData.rows.map((project) => [Number(project.id), project]),
+  );
+  const sharedProjectList = projectUserData.rows
+    .map((projectUser) => sharedProjectsById.get(Number(projectUser.project_id)))
+    .filter(Boolean);
 
   // records
   const recordsData = await getRecordsByUserQuery(userId);

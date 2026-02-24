@@ -1,8 +1,12 @@
 import { Request } from "express";
 import { Response } from "express";
-import { getProjectQuery, Project } from "../api/queries/projects";
-import { getProjectUserByUserAndProjectQuery } from "../api/queries/projectUsers";
+import { Project } from "../api/queries/projects";
 import { Record } from "../api/queries/record";
+import {
+  getProjectAccessForProject,
+  getProjectAccessForUser,
+  getProjectOrThrow as getProjectOrThrowCore,
+} from "./projectAccessCore";
 
 export function requireUser(req: Request): string | number {
   if (!req.session?.user) throw new Error("User is not logged in");
@@ -22,25 +26,25 @@ export function requireUserOrRedirect(
 }
 
 async function getProjectOrThrow(projectId: string | number): Promise<Project> {
-  const projectData = await getProjectQuery(projectId);
-  const project = projectData.rows[0];
-  if (!project) throw new Error("Project not found");
-  return project;
+  return await getProjectOrThrowCore(projectId, {
+    onNotFound: () => new Error("Project not found"),
+  });
 }
 
-function isProjectOwner(project: Project, userId: string | number): boolean {
-  return String(project.user_id) === String(userId);
-}
-
-async function getProjectUser(
+async function getProjectAccessOrThrow(
   userId: string | number,
   projectId: string | number,
 ) {
-  const projectUserData = await getProjectUserByUserAndProjectQuery(
-    userId,
-    projectId,
-  );
-  return projectUserData.rows[0] || null;
+  return await getProjectAccessForUser(userId, projectId, {
+    onNotFound: () => new Error("Project not found"),
+  });
+}
+
+async function getProjectAccessForLoadedProject(
+  userId: string | number,
+  project: Project,
+) {
+  return await getProjectAccessForProject(userId, project);
 }
 
 export async function requireProjectOwnerOrRedirect(
@@ -52,12 +56,12 @@ export async function requireProjectOwnerOrRedirect(
   const userId = requireUserOrRedirect(req, res, redirectTo);
   if (!userId) return null;
   try {
-    const project = await getProjectOrThrow(projectId);
-    if (!isProjectOwner(project, userId)) {
+    const role = await getProjectAccessOrThrow(userId, projectId);
+    if (!role.isOwner) {
       res.redirect(redirectTo);
       return null;
     }
-    return project;
+    return role.project;
   } catch {
     res.redirect(redirectTo);
     return null;
@@ -73,14 +77,12 @@ export async function requireProjectEditorOrRedirect(
   const userId = requireUserOrRedirect(req, res, redirectTo);
   if (!userId) return null;
   try {
-    const project = await getProjectOrThrow(projectId);
-    if (isProjectOwner(project, userId)) return project;
-    const projectUser = await getProjectUser(userId, projectId);
-    if (!projectUser || !projectUser.is_editor) {
+    const role = await getProjectAccessOrThrow(userId, projectId);
+    if (!role.isEditor) {
       res.redirect(redirectTo);
       return null;
     }
-    return project;
+    return role.project;
   } catch {
     res.redirect(redirectTo);
     return null;
@@ -96,14 +98,12 @@ export async function requireProjectMemberOrRedirect(
   const userId = requireUserOrRedirect(req, res, redirectTo);
   if (!userId) return null;
   try {
-    const project = await getProjectOrThrow(projectId);
-    if (isProjectOwner(project, userId)) return project;
-    const projectUser = await getProjectUser(userId, projectId);
-    if (!projectUser) {
+    const role = await getProjectAccessOrThrow(userId, projectId);
+    if (!role.isMember) {
       res.redirect(redirectTo);
       return null;
     }
-    return project;
+    return role.project;
   } catch {
     res.redirect(redirectTo);
     return null;
@@ -115,11 +115,11 @@ export async function requireProjectOwner(
   projectId: string | number,
 ) {
   const userId = requireUser(req);
-  const project = await getProjectOrThrow(projectId);
-  if (!isProjectOwner(project, userId)) {
+  const role = await getProjectAccessOrThrow(userId, projectId);
+  if (!role.isOwner) {
     throw new Error("User is not owner");
   }
-  return project;
+  return role.project;
 }
 
 export async function requireProjectEditor(
@@ -127,13 +127,11 @@ export async function requireProjectEditor(
   projectId: string | number,
 ) {
   const userId = requireUser(req);
-  const project = await getProjectOrThrow(projectId);
-  if (isProjectOwner(project, userId)) return project;
-  const projectUser = await getProjectUser(userId, projectId);
-  if (!projectUser || !projectUser.is_editor) {
+  const role = await getProjectAccessOrThrow(userId, projectId);
+  if (!role.isEditor) {
     throw new Error("User is not authorized");
   }
-  return project;
+  return role.project;
 }
 
 export async function getProjectUserForViewer(
@@ -141,13 +139,13 @@ export async function getProjectUserForViewer(
   projectId: string | number,
 ): Promise<{ project: Project; isOwner: boolean; isEditor: boolean } | null> {
   const userId = requireUser(req);
-  const project = await getProjectOrThrow(projectId);
-  if (isProjectOwner(project, userId)) {
-    return { project, isOwner: true, isEditor: true };
-  }
-  const projectUser = await getProjectUser(userId, projectId);
-  if (!projectUser) return null;
-  return { project, isOwner: false, isEditor: !!projectUser.is_editor };
+  const role = await getProjectAccessOrThrow(userId, projectId);
+  if (!role.isMember) return null;
+  return {
+    project: role.project,
+    isOwner: role.isOwner,
+    isEditor: role.isEditor,
+  };
 }
 
 export async function getProjectAccess(
@@ -164,60 +162,9 @@ export async function getProjectAccess(
   | null
 > {
   const userId = requireUser(req);
-  const project = await getProjectOrThrow(projectId);
-  if (isProjectOwner(project, userId)) {
-    return {
-      project,
-      isOwner: true,
-      isEditor: true,
-      isMember: true,
-      projectUserId: null,
-    };
-  }
-  const projectUser = await getProjectUser(userId, projectId);
-  if (!projectUser) return null;
-  return {
-    project,
-    isOwner: false,
-    isEditor: !!projectUser.is_editor,
-    isMember: true,
-    projectUserId: projectUser.id,
-  };
-}
-
-export async function requireTableAccessOrRedirect(
-  req: Request,
-  res: Response,
-  table: {
-    project_id?: number | null;
-    user_id?: number | null;
-    is_public?: boolean;
-    mode?: string | null;
-  },
-  redirectTo = "/forbidden",
-): Promise<{ projectAuth: boolean } | null> {
-  if (!table.project_id) {
-    if (table.is_public) return { projectAuth: false };
-    const userId = requireUserOrRedirect(req, res, redirectTo);
-    if (!userId) return null;
-    if (String(table.user_id) === String(userId)) return { projectAuth: false };
-    res.redirect(redirectTo);
-    return null;
-  }
-
-  const userId = requireUserOrRedirect(req, res, redirectTo);
-  if (!userId) return null;
-  const access = await getProjectAccess(req, table.project_id);
-  if (!access) {
-    res.redirect(redirectTo);
-    return null;
-  }
-
-  if (!table.is_public && !access.isEditor) {
-    res.redirect(redirectTo);
-    return null;
-  }
-  return { projectAuth: access.isEditor };
+  const role = await getProjectAccessOrThrow(userId, projectId);
+  if (!role.isMember) return null;
+  return role;
 }
 
 export async function requireRecordAccessOrRedirect(
@@ -279,26 +226,22 @@ export async function requireRecordAccessOrRedirect(
   }
 
   const userId = req.session.user;
-  if (isProjectOwner(project, userId)) {
-    return { canEdit: true, projectId };
-  }
-
-  const projectUser = await getProjectUser(userId, projectId);
+  const role = await getProjectAccessForLoadedProject(userId, project);
 
   if (options.mode === "edit") {
-    if (!projectUser || !projectUser.is_editor) {
+    if (!role.isEditor) {
       res.redirect(redirectTo);
       return null;
     }
     return { canEdit: true, projectId };
   }
 
-  if (projectUser) {
-    if (!projectUser.is_editor && !record.is_public && !canViewFeaturedRecord) {
+  if (role.isMember) {
+    if (!role.isEditor && !record.is_public && !canViewFeaturedRecord) {
       res.redirect(redirectTo);
       return null;
     }
-    return { canEdit: !!projectUser.is_editor, projectId };
+    return { canEdit: role.isEditor, projectId };
   }
 
   if (canViewFeaturedRecord) {
