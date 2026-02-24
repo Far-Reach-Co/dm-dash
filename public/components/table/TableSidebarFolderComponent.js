@@ -121,11 +121,11 @@ export default class TableSidebarFolderComponent {
 
   removeFolder = async (folder) => {
     if (!this.can("canManageFolders") || this.guestSandboxId) return;
-    if (
-      !window.confirm(
-        `Are you sure you want to remove folder: "${folder.title}"? All the images in this folder and it's sub-folders will be moved to the parent folder.`,
-      )
-    ) {
+    const confirmed = await window.customConfirm(
+      `Are you sure you want to remove folder: "${folder.title}"? All the images in this folder and it's sub-folders will be moved to the parent folder.`,
+      { confirmText: "Remove", danger: true },
+    );
+    if (!confirmed) {
       return;
     }
 
@@ -142,7 +142,7 @@ export default class TableSidebarFolderComponent {
       }
     } catch (err) {
       console.log(err);
-      window.alert("Failed to remove folder.");
+      window.customAlertError("Failed to remove folder.");
       this.folderLoading = false;
       this.render();
       return;

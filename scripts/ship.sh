@@ -98,6 +98,10 @@ done
 [[ -n "$branch" ]] || fail "--branch is required"
 [[ -n "$message" ]] || fail "--message is required"
 
+if [[ "$branch" == "navel" ]]; then
+  fail "Shipping directly to 'navel' is disabled. Use a feature/fix branch."
+fi
+
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || fail "Not inside a Git repository"
 
 if ! git check-ref-format --branch "$branch" >/dev/null 2>&1; then

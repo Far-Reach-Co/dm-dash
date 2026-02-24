@@ -177,3 +177,18 @@
   border-radius: 0;
   box-shadow: none;
 }
+
+.custom-confirm-message {
+  margin: 0;
+}
+
+.custom-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+  margin-top: var(--space-md);
+}
+
+.custom-confirm-btn {
+  min-width: 92px;
+}

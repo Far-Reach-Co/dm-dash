@@ -75,7 +75,7 @@ export function renderCreateFolderModal(sidebar) {
             await sidebar.tableSidebarFolderComponent.loadFolders();
           } catch (err) {
             console.log(err);
-            window.alert("Something went wrong when creating a new folder");
+            window.customAlertError("Something went wrong when creating a new folder");
           } finally {
             sidebar.tableSidebarFolderComponent.folderLoading = false;
             sidebar.tableSidebarFolderComponent.render();

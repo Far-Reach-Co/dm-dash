@@ -179,17 +179,17 @@ export default class ClassesComponent {
             "ⓧ",
             {
               type: "click",
-              event: (e) => {
-                if (
-                  window.confirm(
-                    `Are you sure you want to delete ${
-                      item.class ? item.class : "Empty"
-                    }`,
-                  )
-                ) {
-                  deleteThing(`/api/remove_5e_character_class/${item.id}`);
-                  e.target.parentElement.remove();
-                }
+              event: async (e) => {
+                const confirmed = await window.customConfirm(
+                  `Are you sure you want to delete ${
+                    item.class ? item.class : "Empty"
+                  }`,
+                  { confirmText: "Delete", danger: true },
+                );
+                if (!confirmed) return;
+
+                deleteThing(`/api/remove_5e_character_class/${item.id}`);
+                e.target.parentElement.remove();
               },
             },
           ),

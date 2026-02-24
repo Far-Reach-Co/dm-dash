@@ -10,16 +10,24 @@ export function buildSocketEventHandlers(integration) {
       app.reloadTableByUUID(newTableUUID, { historyMode: "push" });
     },
 
-    connect_error: (error) => {
+    connect_error: async (error) => {
       console.log(error);
-      if (window.confirm("There was a connection error, refresh the page?")) {
+      const confirmed = await window.customConfirm(
+        "There was a connection error, refresh the page?",
+        { confirmText: "Refresh" },
+      );
+      if (confirmed) {
         history.go();
       }
     },
 
-    disconnect: (error) => {
+    disconnect: async (error) => {
       console.log(error);
-      if (window.confirm("There was a connection error, refresh the page?")) {
+      const confirmed = await window.customConfirm(
+        "There was a connection error, refresh the page?",
+        { confirmText: "Refresh" },
+      );
+      if (confirmed) {
         history.go();
       }
     },

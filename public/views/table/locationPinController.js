@@ -134,7 +134,10 @@ export default class LocationPinController {
     if (!this.can("canManagePins") || !object) return;
     const pin = this.tableApp.locationPinsByObjectId.get(object.id);
     if (!pin?.id) return;
-    const confirmed = window.confirm("Delete this location pin?");
+    const confirmed = await window.customConfirm("Delete this location pin?", {
+      confirmText: "Delete",
+      danger: true,
+    });
     if (!confirmed) return;
 
     try {
@@ -150,7 +153,7 @@ export default class LocationPinController {
       socketIntegration.locationPinsUpdated();
     } catch (err) {
       console.error(err);
-      window.alert("Failed to delete the location pin.");
+      window.customAlertError("Failed to delete the location pin.");
     }
   };
 

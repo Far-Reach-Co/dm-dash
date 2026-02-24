@@ -36,7 +36,7 @@ class InitSheet {
             window.location.pathname + "?" + searchParams.toString();
           history.replaceState(null, "", newRelativePathQuery);
         } else {
-          window.alert("Invalid invite link");
+          window.customAlertError("Invalid invite link");
           window.location.pathname = "/";
         }
       }

@@ -184,7 +184,7 @@ export default class TableSidebar {
       } catch (err) {
         console.log(err);
         this.tableSidebarImageComponent.hideLoading();
-        window.alert("Something went wrong while uploading your image");
+        window.customAlertError("Something went wrong while uploading your image");
       }
     }
   };

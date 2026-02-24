@@ -57,7 +57,7 @@ export default class LibrarySidebar {
       await this.libraryApp.refreshImagesForCurrentScope();
     } catch (err) {
       console.log(err);
-      window.alert("Something went wrong while uploading your image");
+      window.customAlertError("Something went wrong while uploading your image");
     }
   };
 
@@ -181,7 +181,7 @@ export default class LibrarySidebar {
               await this.libraryApp.loadFolders();
             } catch (err) {
               console.log(err);
-              window.alert("Something went wrong when creating a new folder");
+              window.customAlertError("Something went wrong when creating a new folder");
             } finally {
               this.folderLoading = false;
               this.render();

@@ -496,13 +496,17 @@ export default class Calendar {
       { class: "btn-red" },
       "Remove Calendar"
     );
-    removeButton.addEventListener("click", () => {
-      if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        deleteThing(`/api/remove_calendar/${this.id}`);
-        this.toggleEdit();
-        this.domComponent.remove();
-        modal.hide();
-      }
+    removeButton.addEventListener("click", async () => {
+      const confirmed = await window.customConfirm(
+        `Are you sure you want to delete ${this.title}`,
+        { confirmText: "Delete", danger: true },
+      );
+      if (!confirmed) return;
+
+      deleteThing(`/api/remove_calendar/${this.id}`);
+      this.toggleEdit();
+      this.domComponent.remove();
+      modal.hide();
     });
 
     this.domComponent.append(

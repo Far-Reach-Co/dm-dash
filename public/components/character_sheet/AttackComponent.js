@@ -690,15 +690,15 @@ export default class AttackComponent {
             "ⓧ",
             {
               type: "click",
-              event: (e) => {
-                if (
-                  window.confirm(
-                    `Are you sure you want to delete ${item.title}`,
-                  )
-                ) {
-                  deleteThing(`/api/remove_5e_character_attack/${item.id}`);
-                  e.target.parentElement.remove();
-                }
+              event: async (e) => {
+                const confirmed = await window.customConfirm(
+                  `Are you sure you want to delete ${item.title}`,
+                  { confirmText: "Delete", danger: true },
+                );
+                if (!confirmed) return;
+
+                deleteThing(`/api/remove_5e_character_attack/${item.id}`);
+                e.target.parentElement.remove();
               },
             },
           ),

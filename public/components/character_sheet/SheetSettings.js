@@ -27,7 +27,7 @@ export default class SheetSettings {
       } else throw new Error();
     } catch (err) {
       console.log(err);
-      alert("There was a problem creating your invite link");
+      window.customAlertError("There was a problem creating your invite link");
     }
   };
 
@@ -91,12 +91,14 @@ export default class SheetSettings {
         "Delete Link",
       );
       removeInviteButton.addEventListener("click", async () => {
-        if (
-          window.confirm(`Are you sure you want to delete the invite link?`)
-        ) {
-          await deleteThing(`/api/remove_player_invite/${playerInvite.id}`);
-          this.render();
-        }
+        const confirmed = await window.customConfirm(
+          "Are you sure you want to delete the invite link?",
+          { confirmText: "Delete", danger: true },
+        );
+        if (!confirmed) return;
+
+        await deleteThing(`/api/remove_player_invite/${playerInvite.id}`);
+        this.render();
       });
 
       return createElement("div", { class: "form-section" }, [
@@ -209,16 +211,16 @@ export default class SheetSettings {
               event: async (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (
-                  window.confirm(
-                    `Are you sure you want to disconnect ${this.generalData.name}`,
-                  )
-                ) {
-                  await deleteThing(
-                    `/api/remove_player_user_by_user_and_player${this.generalData.id}`,
-                  );
-                  window.location.pathname = "/dash";
-                }
+                const confirmed = await window.customConfirm(
+                  `Are you sure you want to disconnect ${this.generalData.name}`,
+                  { confirmText: "Disconnect", danger: true },
+                );
+                if (!confirmed) return;
+
+                await deleteThing(
+                  `/api/remove_player_user_by_user_and_player${this.generalData.id}`,
+                );
+                window.location.pathname = "/dash";
               },
             }),
           ]),
@@ -249,11 +251,11 @@ export default class SheetSettings {
               general_id: this.generalData.id,
             });
             if (res.general_id) {
-              window.alert(
+              window.customAlert(
                 "Your character sheet has been successfully duplicated!",
               );
             } else
-              window.alert("Something went wrong when attempting to duplicate!");
+              window.customAlertError("Something went wrong when attempting to duplicate!");
           },
         }),
       ]),
@@ -315,16 +317,16 @@ export default class SheetSettings {
           event: async (e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (
-              window.confirm(
-                `Are you sure you want to delete ${this.generalData.name}`,
-              )
-            ) {
-              await deleteThing(
-                `/api/remove_5e_character/${this.generalData.id}`,
-              );
-              window.location.pathname = "/dash";
-            }
+            const confirmed = await window.customConfirm(
+              `Are you sure you want to delete ${this.generalData.name}`,
+              { confirmText: "Delete", danger: true },
+            );
+            if (!confirmed) return;
+
+            await deleteThing(
+              `/api/remove_5e_character/${this.generalData.id}`,
+            );
+            window.location.pathname = "/dash";
           },
         }),
       ]),

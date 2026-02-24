@@ -535,17 +535,17 @@ export default class EquipmentComponent {
                 "ⓧ",
                 {
                   type: "click",
-                  event: (e) => {
-                    if (
-                      window.confirm(
-                        `Are you sure you want to delete ${equipmentItem.title}`,
-                      )
-                    ) {
-                      deleteThing(
-                        `/api/remove_5e_character_equipment/${equipmentItem.id}`,
-                      );
-                      e.target.parentElement.remove();
-                    }
+                  event: async (e) => {
+                    const confirmed = await window.customConfirm(
+                      `Are you sure you want to delete ${equipmentItem.title}`,
+                      { confirmText: "Delete", danger: true },
+                    );
+                    if (!confirmed) return;
+
+                    deleteThing(
+                      `/api/remove_5e_character_equipment/${equipmentItem.id}`,
+                    );
+                    e.target.parentElement.remove();
                   },
                 },
               ),

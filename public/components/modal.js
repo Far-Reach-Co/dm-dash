@@ -17,7 +17,7 @@ class Modal {
       this.closeButton = createElement(
         "div",
         { id: "close-custom-modal", class: "close-custom-modal" },
-        "×"
+        "x"
       );
 
       this.domContent = createElement("div", {

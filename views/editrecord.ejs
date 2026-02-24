@@ -68,7 +68,7 @@
 
       <button id="save">Save</button>
       <hr style="margin: var(--space-xl) 0; border: none; height: 1px; background: linear-gradient(90deg, transparent, var(--blue), transparent);" />
-      <button class="btn-red" hx-delete="/api/remove_record/<%= record.id %>" hx-swap="none" hx-confirm="Are you sure you want to delete <%= record.title %>?">
+      <button id="delete-record-btn" type="button" class="btn-red">
         Delete Record
       </button>
     </fieldset>
@@ -161,11 +161,35 @@
       }
     } catch (error) {
       console.log(error);
-      window.alert(error);
+      window.customAlertError(error && error.message ? error.message : String(error));
       e.target.disabled = false;
       document.body.style.cursor = "default";
     }
   })
+
+  document.getElementById("delete-record-btn").addEventListener("click", async (e) => {
+    e.preventDefault();
+    const titleInput = document.getElementById("title");
+    const recordTitle = (titleInput?.value || "<%= record.title %>").trim() || "<%= record.title %>";
+    const confirmed = await window.customConfirm(
+      `Are you sure you want to delete ${recordTitle}?`,
+      { confirmText: "Delete", danger: true }
+    );
+    if (!confirmed) return;
+
+    e.target.disabled = true;
+    try {
+      const res = await fetch(`/api/remove_record/${recordId}`, { method: "DELETE" });
+      if (!res.ok) {
+        throw new Error("Failed to delete record");
+      }
+      window.location.href = "/dash";
+    } catch (error) {
+      console.log(error);
+      window.customAlertError(error && error.message ? error.message : "Failed to delete record");
+      e.target.disabled = false;
+    }
+  });
 
   async function uploadImage(file) {
     // if its for a wyrld or public

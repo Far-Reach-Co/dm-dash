@@ -86,16 +86,16 @@
         }
         window.location.pathname = "/dash";
       } else if (res.status === 400) {
-        alert(resData.error.message);
+        window.customAlertError(resData.error.message);
       } else if (res.status === 403) {
-        alert(resData.error.message);
+        window.customAlertError(resData.error.message);
       } else if (res.status === 429) {
-        alert(resData.message);
+        window.customAlertError(resData.message);
       } else {
         throw resData.error;
       }
     } catch (err) {
-      alert("Failed to register");
+      window.customAlertError("Failed to register");
       console.log(err);
     }
   }

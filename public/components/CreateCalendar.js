@@ -170,7 +170,7 @@ export default class CreateCalendar {
     const completeButton = createElement("button", {}, "Complete");
     completeButton.addEventListener("click", async () => {
       if (!this.daysOfTheWeek.length)
-        return alert("Please create at least one day");
+        return window.customAlertError("Please create at least one day");
 
       window.location.href = `/wyrld?id=${this.projectId}`;
     });
@@ -336,7 +336,8 @@ export default class CreateCalendar {
 
     const completeButton = createElement("button", {}, "Next");
     completeButton.addEventListener("click", async () => {
-      if (!this.months.length) return alert("Please create at least one month");
+      if (!this.months.length)
+        return window.customAlertError("Please create at least one month");
       this.toggleLoading();
       this.creatingNewMonths = false;
       this.creatingNewDaysInWeek = true;

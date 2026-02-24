@@ -424,18 +424,16 @@ class SingleFeatComponent {
                     "ⓧ",
                     {
                       type: "click",
-                      event: (e) => {
+                      event: async (e) => {
                         e.preventDefault();
-                        if (
-                          window.confirm(
-                            `Are you sure you want to delete ${this.title}`,
-                          )
-                        ) {
-                          deleteThing(
-                            `/api/remove_5e_character_feat/${this.id}`,
-                          );
-                          this.parentRemoveItem(this.id);
-                        }
+                        const confirmed = await window.customConfirm(
+                          `Are you sure you want to delete ${this.title}`,
+                          { confirmText: "Delete", danger: true },
+                        );
+                        if (!confirmed) return;
+
+                        deleteThing(`/api/remove_5e_character_feat/${this.id}`);
+                        this.parentRemoveItem(this.id);
                       },
                     },
                   ),
