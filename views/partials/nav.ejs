@@ -1,23 +1,25 @@
 <%
   const navLinks = typeof auth !== 'undefined'
     ? [
-        { href: '/resources', label: 'Resources' },
+        { href: '/whats-new', label: "What's New" },
         { href: '/pricing', label: 'Pricing' },
-        { href: '/dash', label: 'Dashboard' },
+        { href: '/resources', label: 'Resources' },
         { href: '/wyrlds/public', label: 'Public Wyrlds' },
+        { href: '/dash', label: 'Dashboard' },
         { href: '/account', label: 'Account' },
       ]
     : [
-        { href: '/resources', label: 'Resources' },
+        { href: '/whats-new', label: "What's New" },
         { href: '/pricing', label: 'Pricing' },
         { href: '/wyrlds/public', label: 'Public Wyrlds' },
+        { href: '/resources', label: 'Resources' },
         { href: '/login', label: 'Login' },
       ];
 %>
 <script src="/lib/customUi.js"></script>
 <div id="nav-links-container-mobile">
   <% navLinks.forEach((link) => { %>
-    <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+  <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
   <% }) %>
 </div>
 <nav>
@@ -27,7 +29,7 @@
   <img src="/assets/hamburger.svg" height="32" width="32" id="nav-ham" alt="" />
   <div id="nav-links-container" class="d-flex">
     <% navLinks.forEach((link) => { %>
-      <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+    <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
     <% }) %>
   </div>
 </nav>
