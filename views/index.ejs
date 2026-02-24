@@ -66,99 +66,76 @@
 </head>
 <%- include('./partials/google') %>
 
-<body>
+<body class="landing-page">
   <%- include('./partials/nav') %>
 
-  <!-- HERO -->
-  <section class="section hero">
-    <div class="hero-background">
-      <img class="logo" src="/assets/landing/mainlogo.webp" alt="Far Reach Co Logo" />
-    </div>
-
-    <p>
-      <b>Unleash your creativity with friends!</b> Far Reach Co. offers an
-      engaging, collaborative, roleplaying experience. Assemble your group to
-      conquer fearsome beasts, embark on thrilling adventures, and weave
-      fantastical tales brimming with excitement and imagination.
-    </p>
-
-    <p class="text-center mb-3">
-      <a href="/what-is-frc" style="font-size: 1.1em;">
-        <b>What is Far Reach Co? →</b>
-      </a>
-      <br />
-      <a href="/whats-new" style="font-size: 1.05em;">
-        Latest updates and feature highlights →
-      </a>
-    </p>
-
-    <img class="cta-signup" src="/assets/landing/peli_signup.webp" alt="Sign up" onclick="window.location = '/register'" />
-  </section>
-
-  <!-- WORLD MAP -->
-  <section class="section world-map">
-    <!-- <img class="scroll-icon" src="/assets/landing/scroll.svg" alt="" /> -->
-    <h1>Virtual Table Top</h1>
-    <!-- <p>
-        Take your team on an adventure by using our virtual tabletop system.
-        Our service is fast and simple and allows you to keep everything
-        organized and accessible without cluttering up the screen for your
-        players!
-      </p> -->
-
-    <div class="vtt-showcase animate-scale-on-scroll">
-      <div class="vtt-showcase__frame">
-        <div class="vtt-showcase__toolbar">
-          <span class="vtt-showcase__dot"></span>
-          <span class="vtt-showcase__dot"></span>
-          <span class="vtt-showcase__dot"></span>
+  <main class="landing-main">
+    <section class="landing-section landing-hero">
+      <div class="landing-container landing-hero__content">
+        <p class="landing-kicker animate-on-scroll">Built for storytellers, GMs, and players</p>
+        <img class="landing-hero__logo animate-scale-on-scroll" src="/assets/landing/mainlogo.webp" alt="Far Reach Co Logo" />
+        <p class="landing-hero__lead animate-on-scroll">
+          Run your campaign from one polished workspace. Build worlds, manage D&D 5E sheets, and play on a real-time virtual tabletop that keeps your group focused on the story.
+        </p>
+        <div class="landing-hero__links animate-on-scroll">
+          <a href="/what-is-frc">What is Far Reach Co?</a>
+          <a href="/whats-new">Latest updates and feature highlights</a>
         </div>
-        <img class="vtt-showcase__img" src="/assets/landing/vtt_screenshot.png" alt="Far Reach Co. Virtual Tabletop — tokens, maps, dice rolls, and asset management" loading="lazy" />
+        <img class="landing-hero__cta animate-on-scroll" src="/assets/landing/peli_signup.webp" alt="Create your free account" onclick="window.location = '/register'" />
       </div>
-    </div>
-    <a class="about-btn vtt-try-btn" href="/vtt/guest/start">
-      Try VTT Sandbox (No Signup)
-    </a>
-  </section>
+    </section>
 
-  <!-- CHARACTERS -->
-  <section class="section characters">
-    <div class="content">
-      <img class="dice-icon" src="/assets/landing/dice.svg" alt="" />
-      <h1>Character Sheets</h1>
-      <p>
-        Manage your D&D 5E character sheet with a fresh and intuitive
-        approach. Our character sheets are designed to be user-friendly and visually appealing, making it easy for players to keep track of their stats, abilities, and inventory.
-      </p>
-    </div>
+    <section class="landing-section landing-vtt">
+      <div class="landing-container">
+        <div class="landing-title-block animate-on-scroll">
+          <h1>Virtual Tabletop</h1>
+          <p>Fast setup, focused play surface, and tools that stay out of the way when your session is live.</p>
+        </div>
 
-    <img class="character-image" src="/assets/landing/character.png" alt="" />
-  </section>
+        <div class="vtt-showcase animate-scale-on-scroll">
+          <div class="vtt-showcase__frame">
+            <div class="vtt-showcase__toolbar">
+              <span class="vtt-showcase__dot"></span>
+              <span class="vtt-showcase__dot"></span>
+              <span class="vtt-showcase__dot"></span>
+            </div>
+            <img class="vtt-showcase__img" src="/assets/landing/vtt_screenshot.png" alt="Far Reach Co. Virtual Tabletop — tokens, maps, dice rolls, and asset management" loading="lazy" />
+          </div>
+        </div>
 
-  <!-- FEATURE / QUEST -->
-  <section class="section feature-scroll">
-    <div class="media">
-      <img class="scroll-image" src="/assets/landing/scroll_dice.webp" alt="" />
-    </div>
+        <a class="landing-btn" href="/vtt/guest/start">Try VTT Sandbox (No Signup)</a>
+      </div>
+    </section>
 
-    <div class="content">
-      <h1>Our Personal Quest</h1>
-      <br />
-      <p>
-        We do whatever it takes to ensure a quality experience by keeping
-        things accessible and responsive. Players can jump into a game with
-        one simple click. Our goal is to cultivate a community of inspired
-        creators able to run exciting and fulfilling adventures with the
-        innovations we provide.
-      </p>
+    <section class="landing-section landing-character">
+      <div class="landing-container landing-character__grid">
+        <div class="landing-character__copy animate-left-on-scroll">
+          <img class="landing-character__dice" src="/assets/landing/dice.svg" alt="" />
+          <h1>Character Sheets</h1>
+          <p>
+            Keep classes, spells, inventory, and combat details organized in a sheet designed for quick play decisions. Built for D&D 5E, optimized for real campaigns.
+          </p>
+        </div>
+        <img class="landing-character__art animate-right-on-scroll" src="/assets/landing/character.png" alt="D&D character artwork" loading="lazy" />
+      </div>
+    </section>
 
-      <b>
-        <a class="about-btn" href="/about-us">
-          Read More About Us
-        </a>
-      </b>
-    </div>
-  </section>
+    <section class="landing-section landing-quest">
+      <div class="landing-container landing-quest__grid">
+        <div class="landing-quest__media animate-left-on-scroll">
+          <img class="landing-quest__scroll" src="/assets/landing/scroll_dice.webp" alt="Far Reach Co. visual style artwork" loading="lazy" />
+        </div>
+
+        <div class="landing-quest__copy animate-right-on-scroll">
+          <h1>Our Personal Quest</h1>
+          <p>
+            We build for reliability, clarity, and momentum at the table. The mission is simple: remove friction so game masters and players can spend more time creating unforgettable adventures together.
+          </p>
+          <a class="landing-btn landing-btn--subtle" href="/about-us">Read More About Us</a>
+        </div>
+      </div>
+    </section>
+  </main>
 
   <%- include('./partials/footer') %>
 
@@ -182,6 +159,5 @@
     });
   </script>
 </body>
-
 
 </html>
