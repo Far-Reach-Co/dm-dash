@@ -1,6 +1,11 @@
-import db from "../dbconfig";
-import { buildUpdateQuery } from "./utils";
-import { columnNamesQuery } from "./utils";
+import {
+  asNumber,
+  ensureSheetDataDocument,
+  getObjectSection,
+  getSheetDataByGeneralIdQuery,
+  setObjectSection,
+  updateSheetDataByGeneralIdQuery,
+} from "./5eSheetDataUtils";
 
 export interface DndFiveEBackground {
   id: number,
@@ -23,74 +28,145 @@ export interface DndFiveEBackground {
   allies_and_organizations: string
 }
 
-async function add5eCharBackQuery(data: {
-  general_id: any
-}) {
-  const query = {
-    text: /*sql*/ `insert into public."dnd_5e_character_background" (general_id) values($1) returning *`,
-    values: [
-      data.general_id,
-    ]
+const DEFAULT_BACKGROUND: Record<string, unknown> = {
+  personality_traits: "",
+  ideals: "",
+  bonds: "",
+  flaws: "",
+  backstory: "",
+  age: null,
+  height: "",
+  weight: "",
+  eyes: "",
+  skin: "",
+  hair: "",
+  other_info: "",
+  background: "",
+  alignment: "",
+  appearance: "",
+  allies_and_organizations: "",
+};
+
+function ensureBackgroundSection(
+  sheetData: Record<string, unknown>,
+  generalId: string | number,
+): Record<string, unknown> {
+  const existing = getObjectSection(sheetData, "background");
+  if (existing) {
+    if (!("id" in existing)) existing.id = asNumber(generalId) || 0;
+    if (!("general_id" in existing)) existing.general_id = asNumber(generalId) || 0;
+    return existing;
   }
-  return await db.query<DndFiveEBackground>(query)
+  const created: Record<string, unknown> = {
+    id: asNumber(generalId) || 0,
+    general_id: asNumber(generalId) || 0,
+    ...DEFAULT_BACKGROUND,
+  };
+  setObjectSection(sheetData, "background", created);
+  return created;
+}
+
+function emptyResult<T>() {
+  return { rows: [] as T[] } as any;
+}
+
+function rowResult<T>(row: T) {
+  return { rows: [row] as T[] } as any;
+}
+
+async function add5eCharBackQuery(data: { general_id: any }) {
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(data.general_id);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEBackground>();
+
+  const background = ensureBackgroundSection(sheetData, data.general_id);
+  await updateSheetDataByGeneralIdQuery(data.general_id, sheetData);
+  return rowResult(background as unknown as DndFiveEBackground);
 }
 
 async function duplicate5eCharBackQuery(data: {
   oldGeneralId: number
   newGeneralId: number
 }) {
-  const tableName = "dnd_5e_character_background"
-  const columnNames = await columnNamesQuery(tableName)
-  const columnStr = columnNames.join(", ")
-  const selectStr = columnNames.map(col => {
-    if (col === "general_id") return "$2";
-    return col
-  }).join(", ")
+  const generalId = asNumber(data.newGeneralId);
+  if (!generalId) return;
 
-  const query = {
-    text: /*sql*/ `
-      INSERT INTO public."${tableName}" (${columnStr})
-      SELECT ${selectStr}
-      FROM ${tableName}
-      WHERE general_id = $1
-    `,
-    values: [
-      data.oldGeneralId,
-      data.newGeneralId
-    ]
-  }
-  
-  await db.query<DndFiveEBackground>(query);
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return;
+
+  const background = ensureBackgroundSection(sheetData, generalId);
+  const next = {
+    ...background,
+    id: generalId,
+    general_id: generalId,
+  };
+  setObjectSection(sheetData, "background", next);
+  await updateSheetDataByGeneralIdQuery(generalId, sheetData);
+  return;
 }
 
-async function get5eCharBackQuery(id: string) {
-  const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_background" where id = $1`,
-    values: [id]
-  }
-  return await db.query<DndFiveEBackground>(query)
+async function get5eCharBackQuery(generalId: string | number) {
+  return await get5eCharBackByGeneralQuery(generalId);
 }
 
 async function get5eCharBackByGeneralQuery(generalId: string | number) {
-  const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_background" where general_id = $1`,
-    values: [generalId]
-  }
-  return await db.query<DndFiveEBackground>(query)
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEBackground>();
+
+  const background = ensureBackgroundSection(sheetData, generalId);
+  await updateSheetDataByGeneralIdQuery(generalId, sheetData);
+  return rowResult(background as unknown as DndFiveEBackground);
 }
 
-async function remove5eCharBackQuery(id: string | number) {
-  const query = {
-    text: /*sql*/ `delete from public."dnd_5e_character_background" where id = $1`,
-    values: [id]
-  }
+async function remove5eCharBackQuery(generalId: string | number) {
+  const backgroundData = await get5eCharBackByGeneralQuery(generalId);
+  const background = backgroundData.rows[0] as any;
+  if (!background) return emptyResult<DndFiveEBackground>();
 
-  return await db.query<DndFiveEBackground>(query)
+  const scopedGeneralId = asNumber(generalId);
+  if (!scopedGeneralId) return emptyResult<DndFiveEBackground>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEBackground>();
+
+  setObjectSection(sheetData, "background", {
+    id: scopedGeneralId,
+    general_id: scopedGeneralId,
+    ...DEFAULT_BACKGROUND,
+  });
+  return await updateSheetDataByGeneralIdQuery(scopedGeneralId, sheetData);
 }
 
-async function edit5eCharBackQuery(id: string, data: any) {
-  const query = buildUpdateQuery("dnd_5e_character_background", data, id);
-  return await db.query<DndFiveEBackground>(query);
+async function edit5eCharBackQuery(generalId: string, data: any) {
+  const backgroundData = await get5eCharBackByGeneralQuery(generalId);
+  const existing = backgroundData.rows[0] as any;
+  if (!existing) return emptyResult<DndFiveEBackground>();
+
+  const scopedGeneralId = asNumber(generalId);
+  if (!scopedGeneralId) return emptyResult<DndFiveEBackground>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEBackground>();
+
+  const current = ensureBackgroundSection(sheetData, scopedGeneralId);
+  const next = {
+    ...current,
+    ...data,
+    id: current.id,
+    general_id: current.general_id,
+  };
+  setObjectSection(sheetData, "background", next);
+  await updateSheetDataByGeneralIdQuery(scopedGeneralId, sheetData);
+  return rowResult(next as unknown as DndFiveEBackground);
 }
 
 export {

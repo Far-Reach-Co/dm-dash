@@ -222,7 +222,7 @@ export default class EquipmentComponent {
     }
 
     postThing(
-      `/api/edit_5e_character_equipment/${equipmentItem.id}`,
+      `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
       dataToSave,
     );
   };
@@ -375,7 +375,7 @@ export default class EquipmentComponent {
             // Update local state
             this.equipmentData[index].description = e.target.textContent;
             // Save to db
-            postThing(`/api/edit_5e_character_equipment/${equipmentItem.id}`, {
+            postThing(`/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`, {
               description: e.target.textContent,
             });
           },
@@ -428,7 +428,7 @@ export default class EquipmentComponent {
                       // hide suggestions
                       this.resetAndHideEquipmentSuggestions(equipmentItem);
                       postThing(
-                        `/api/edit_5e_character_equipment/${equipmentItem.id}`,
+                        `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
                         {
                           title: e.target.value,
                         },
@@ -460,7 +460,7 @@ export default class EquipmentComponent {
                   event: async (e) => {
                     e.preventDefault();
                     await postThing(
-                      `/api/edit_5e_character_equipment/${equipmentItem.id}`,
+                      `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
                       {
                         quantity: e.target.valueAsNumber,
                       },
@@ -486,7 +486,7 @@ export default class EquipmentComponent {
                   event: async (e) => {
                     e.preventDefault();
                     await postThing(
-                      `/api/edit_5e_character_equipment/${equipmentItem.id}`,
+                      `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
                       {
                         weight: e.target.valueAsNumber,
                       },
@@ -543,7 +543,7 @@ export default class EquipmentComponent {
                     if (!confirmed) return;
 
                     deleteThing(
-                      `/api/remove_5e_character_equipment/${equipmentItem.id}`,
+                      `/api/remove_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
                     );
                     e.target.parentElement.remove();
                   },

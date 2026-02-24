@@ -55,12 +55,14 @@ async function remove5eCharSpell(
   next: NextFunction
 ) {
   try {
-    const spellData = await get5eCharSpellQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const spellData = await get5eCharSpellQuery(req.params.id, generalId);
     const spell = spellData.rows[0];
     if (!spell) throw { status: 404, message: "Spell not found" };
-    await requireSheetEditAccess(req, spell.general_id);
 
-    await remove5eCharSpellQuery(req.params.id);
+    await remove5eCharSpellQuery(req.params.id, generalId);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -73,10 +75,12 @@ async function edit5eCharSpell(
   next: NextFunction
 ) {
   try {
-    const spellData = await get5eCharSpellQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const spellData = await get5eCharSpellQuery(req.params.id, generalId);
     const spell = spellData.rows[0];
     if (!spell) throw { status: 404, message: "Spell not found" };
-    await requireSheetEditAccess(req, spell.general_id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
@@ -85,7 +89,7 @@ async function edit5eCharSpell(
     if (req.body.hasOwnProperty("general_id")) {
       throw new Error('Request body cannot contain the "general_id" field');
     }
-    const data = await edit5eCharSpellQuery(req.params.id, req.body);
+    const data = await edit5eCharSpellQuery(req.params.id, generalId, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);

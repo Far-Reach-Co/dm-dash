@@ -55,13 +55,15 @@ async function remove5eCharOtherProLang(
   next: NextFunction
 ) {
   try {
-    const otherProLangData = await get5eCharOtherProLangQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const otherProLangData = await get5eCharOtherProLangQuery(req.params.id, generalId);
     const otherProLang = otherProLangData.rows[0];
     if (!otherProLang)
       throw { status: 404, message: "Proficiency/language not found" };
-    await requireSheetEditAccess(req, otherProLang.general_id);
 
-    await remove5eCharOtherProLangQuery(req.params.id);
+    await remove5eCharOtherProLangQuery(req.params.id, generalId);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -74,11 +76,13 @@ async function edit5eCharOtherProLang(
   next: NextFunction
 ) {
   try {
-    const otherProLangData = await get5eCharOtherProLangQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const otherProLangData = await get5eCharOtherProLangQuery(req.params.id, generalId);
     const otherProLang = otherProLangData.rows[0];
     if (!otherProLang)
       throw { status: 404, message: "Proficiency/language not found" };
-    await requireSheetEditAccess(req, otherProLang.general_id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
@@ -87,7 +91,7 @@ async function edit5eCharOtherProLang(
     if (req.body.hasOwnProperty("general_id")) {
       throw new Error('Request body cannot contain the "general_id" field');
     }
-    const data = await edit5eCharOtherProLangQuery(req.params.id, req.body);
+    const data = await edit5eCharOtherProLangQuery(req.params.id, generalId, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);

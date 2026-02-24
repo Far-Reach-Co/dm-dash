@@ -324,7 +324,7 @@ export default class AttackComponent {
             e.preventDefault();
             // Extract text preserving magic word keywords
             let newValue = this.extractTextWithMagicWords(e.target);
-            postThing(`/api/edit_5e_character_attack/${item.id}`, {
+            postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
               damage_type: newValue,
             });
           },
@@ -413,7 +413,7 @@ export default class AttackComponent {
                 newBonusValue = e.target.textContent;
               }
             }
-            postThing(`/api/edit_5e_character_attack/${item.id}`, {
+            postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
               bonus: newBonusValue,
             });
           },
@@ -616,6 +616,9 @@ export default class AttackComponent {
       `/api/get_5e_character_attacks/${this.generalData.id}`,
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    if (!Array.isArray(attacksData)) {
+      return [createElement("small", {}, "Unable to load attacks right now.")];
+    }
     if (!attacksData.length) return [createElement("small", {}, "None...")];
 
     return attacksData.map((item) => {
@@ -637,7 +640,7 @@ export default class AttackComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_attack/${item.id}`, {
+                postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
                   title: e.target.value,
                 });
               },
@@ -655,7 +658,7 @@ export default class AttackComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_attack/${item.id}`, {
+                postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
                   range: e.target.value,
                 });
               },
@@ -673,7 +676,7 @@ export default class AttackComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_attack/${item.id}`, {
+                postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
                   duration: e.target.value,
                 });
               },
@@ -697,7 +700,7 @@ export default class AttackComponent {
                 );
                 if (!confirmed) return;
 
-                deleteThing(`/api/remove_5e_character_attack/${item.id}`);
+                deleteThing(`/api/remove_5e_character_attack/${item.id}?general_id=${this.generalData.id}`);
                 e.target.parentElement.remove();
               },
             },

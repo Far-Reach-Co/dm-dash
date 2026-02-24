@@ -2,6 +2,7 @@ import { QueryResult } from "pg";
 import db from "../dbconfig";
 import { buildUpdateQuery } from "./utils";
 import { columnNamesQuery } from "./utils";
+import { sync5eSheetGeneralSectionQuery } from "./5eSheetDocument";
 
 export interface DndFiveEGeneral {
   id: number;
@@ -60,7 +61,12 @@ async function add5eCharGeneralQuery(data: {
       data.name,
     ]
   }
-  return await db.query<DndFiveEGeneral>(query)
+  const result = await db.query<DndFiveEGeneral>(query);
+  const general = result.rows[0];
+  if (general?.id) {
+    await sync5eSheetGeneralSectionQuery(general.id);
+  }
+  return result;
 }
 
 async function duplicate5eCharGeneralQuery(data: {
@@ -86,7 +92,12 @@ async function duplicate5eCharGeneralQuery(data: {
       data.generalId
     ]
   }
-  return await db.query<DndFiveEGeneral>(query);
+  const result = await db.query<DndFiveEGeneral>(query);
+  const duplicated = result.rows[0];
+  if (duplicated?.id) {
+    await sync5eSheetGeneralSectionQuery(duplicated.id);
+  }
+  return result;
 }
 
 async function get5eCharGeneralQuery(id: string | number) {
@@ -134,7 +145,9 @@ async function remove5eCharGeneralQuery(id: string | number) {
 
 async function edit5eCharGeneralQuery(id: string, data: any) {
   const query = buildUpdateQuery("dnd_5e_character_general", data, id);
-  return await db.query<DndFiveEGeneral>(query);
+  const result = await db.query<DndFiveEGeneral>(query);
+  await sync5eSheetGeneralSectionQuery(id);
+  return result;
 }
 
 export {

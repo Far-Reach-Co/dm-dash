@@ -83,8 +83,11 @@ export default class FiveEPlayerSheet {
 
   updateSpellSlotValue = async (name, value) => {
     this.generalData.spell_slots[name] = value;
+    const generalId =
+      this.generalData.spell_slots?.general_id || this.generalData.id;
+    if (!generalId) return;
     postThing(
-      `/api/edit_5e_character_spell_slots/${this.generalData.spell_slots.id}`,
+      `/api/edit_5e_character_spell_slots/${generalId}`,
       {
         [name]: value,
       },
@@ -94,7 +97,7 @@ export default class FiveEPlayerSheet {
   updateProficiencyInfo = async (name, value) => {
     this.generalData.proficiencies[name] = value;
     postThing(
-      `/api/edit_5e_character_proficiencies/${this.generalData.proficiencies.id}`,
+      `/api/edit_5e_character_proficiencies/${this.generalData.id}`,
       {
         [name]: value,
       },

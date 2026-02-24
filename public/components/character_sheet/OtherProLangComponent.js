@@ -73,7 +73,7 @@ export default class OtherProLangComponent {
               type: "change",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_other_pro_lang/${item.id}`, {
+                postThing(`/api/edit_5e_character_other_pro_lang/${item.id}?general_id=${this.general_id}`, {
                   type: e.target.value,
                 });
               },
@@ -92,7 +92,7 @@ export default class OtherProLangComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_other_pro_lang/${item.id}`, {
+                postThing(`/api/edit_5e_character_other_pro_lang/${item.id}?general_id=${this.general_id}`, {
                   proficiency: e.target.value,
                 });
               },
@@ -116,7 +116,7 @@ export default class OtherProLangComponent {
                 );
                 if (!confirmed) return;
 
-                deleteThing(`/api/remove_5e_character_other_pro_lang/${item.id}`);
+                deleteThing(`/api/remove_5e_character_other_pro_lang/${item.id}?general_id=${this.general_id}`);
                 e.target.parentElement.remove();
               },
             },

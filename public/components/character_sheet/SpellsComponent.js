@@ -336,6 +336,7 @@ class SingleSpell {
       const elem = createElement("div");
       const spellElement = new SingleSpellElement({
         domComponent: elem,
+        general_id: this.general_id,
         id: spellData.id,
         title: spellData.title,
         castingTime: spellData.casting_time,
@@ -371,6 +372,7 @@ class SingleSpell {
       const elem = createElement("div");
       const spellElem = new SingleSpellElement({
         domComponent: elem,
+        general_id: this.general_id,
         id: spell.id,
         title: spell.title,
         castingTime: spell.casting_time,
@@ -523,6 +525,7 @@ class SingleSpell {
 class SingleSpellElement {
   constructor(props) {
     this.domComponent = props.domComponent;
+    this.general_id = props.general_id;
     this.id = props.id;
     this.title = props.title;
     this.castingTime = props.castingTime;
@@ -630,7 +633,7 @@ class SingleSpellElement {
     this.description = descriptionInput.value;
 
     // then save to db
-    postThing(`/api/edit_5e_character_spell/${this.id}`, {
+    postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
       title: titleInput.value,
       casting_time: castingTimeInput.value,
       duration: durationInput.value,
@@ -743,7 +746,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}`, {
+                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
                   casting_time: e.target.value,
                 });
                 // update UI
@@ -767,7 +770,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}`, {
+                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
                   duration: e.target.value,
                 });
                 // update UI
@@ -791,7 +794,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}`, {
+                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
                   range: e.target.value,
                 });
                 // update UI
@@ -815,7 +818,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}`, {
+                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
                   damage_type: e.target.value,
                 });
                 // update UI
@@ -839,7 +842,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}`, {
+                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
                   components: e.target.value,
                 });
                 // update UI
@@ -862,7 +865,7 @@ class SingleSpellElement {
             type: "focusout",
             event: (e) => {
               e.preventDefault();
-              postThing(`/api/edit_5e_character_spell/${this.id}`, {
+              postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
                 description: e.target.value,
               });
               // update UI
@@ -937,7 +940,7 @@ class SingleSpellElement {
                       // hide suggestions
                       this.resetAndHideSpellSuggestions();
                       // send data
-                      postThing(`/api/edit_5e_character_spell/${this.id}`, {
+                      postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
                         title: e.target.value,
                       });
                       // update UI
@@ -970,7 +973,7 @@ class SingleSpellElement {
                     );
                     if (!confirmed) return;
 
-                    deleteThing(`/api/remove_5e_character_spell/${this.id}`);
+                    deleteThing(`/api/remove_5e_character_spell/${this.id}?general_id=${this.general_id}`);
                     this.parentRemoveItem(this.id);
                   },
                 },

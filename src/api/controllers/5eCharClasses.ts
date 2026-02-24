@@ -49,12 +49,14 @@ async function remove5eCharClass(
   next: NextFunction
 ) {
   try {
-    const classData = await get5eCharClassQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const classData = await get5eCharClassQuery(req.params.id, generalId);
     const classItem = classData.rows[0];
     if (!classItem) throw { status: 404, message: "Class not found" };
-    await requireSheetEditAccess(req, classItem.general_id);
 
-    await remove5eCharClassQuery(req.params.id);
+    await remove5eCharClassQuery(req.params.id, generalId);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -67,10 +69,12 @@ async function edit5eCharClass(
   next: NextFunction
 ) {
   try {
-    const classData = await get5eCharClassQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const classData = await get5eCharClassQuery(req.params.id, generalId);
     const classItem = classData.rows[0];
     if (!classItem) throw { status: 404, message: "Class not found" };
-    await requireSheetEditAccess(req, classItem.general_id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
@@ -79,7 +83,7 @@ async function edit5eCharClass(
     if (req.body.hasOwnProperty("general_id")) {
       throw new Error('Request body cannot contain the "general_id" field');
     }
-    const data = await edit5eCharClassQuery(req.params.id, req.body);
+    const data = await edit5eCharClassQuery(req.params.id, generalId, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
