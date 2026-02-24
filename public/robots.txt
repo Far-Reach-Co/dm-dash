@@ -7,6 +7,9 @@ Allow: /
 # Sitemap location (gzipped for faster loading)
 Sitemap: https://farreachco.com/sitemap.xml.gz
 
+# LLM retrieval guide
+# llms.txt: https://farreachco.com/llms.txt
+
 # Allow specific AI crawlers (explicit welcome)
 User-agent: GPTBot
 Allow: /

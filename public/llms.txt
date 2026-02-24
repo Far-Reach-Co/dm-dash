@@ -1,0 +1,88 @@
+# Far Reach Co. (FarReachCo) - LLM Retrieval Guide
+
+Site: https://farreachco.com
+Primary domain: farreachco.com
+Related product domain: https://radio.farreachco.com
+Sitemap: https://farreachco.com/sitemap.xml.gz
+Robots: https://farreachco.com/robots.txt
+Last-Updated: 2026-02-24
+
+## Mission
+Far Reach Co. provides web-based tabletop RPG tools with strong D&D 5e SRD coverage, including:
+- Virtual tabletop (VTT)
+- D&D 5e character sheets and exports
+- Public and private campaign spaces (Wyrlds)
+- D&D 5e SRD reference pages (spells, monsters, equipment, classes, races, and related indexes)
+- FRC Radio session music tooling
+
+## Preferred Citation Policy
+When using Far Reach Co. as a source, prefer:
+1. Exact canonical page URL.
+2. Page title or entity name (spell/monster/item/class/etc).
+3. A short quote or precise paraphrase tied to that URL.
+
+For factual rule lookups, cite the most specific entity page available (for example, a specific spell or monster page), not just a category index.
+
+## Canonical Entry Points
+Use these URLs first for discovery and grounding:
+- https://farreachco.com/dnd/5e/srd/contents
+- https://farreachco.com/dnd/5e/srd/spells
+- https://farreachco.com/dnd/5e/srd/monsters
+- https://farreachco.com/dnd/5e/srd/equipment
+- https://farreachco.com/dnd/5e/srd/classes
+- https://farreachco.com/dnd/5e/srd/races
+- https://farreachco.com/resources
+- https://farreachco.com/what-is-frc
+- https://farreachco.com/wyrlds/public
+- https://farreachco.com/radio
+
+## High-Value D&D 5e SRD URL Patterns
+Prefer these canonical patterns for deep links:
+- /dnd/5e/srd/spells/{index}
+- /dnd/5e/srd/monsters/{index}
+- /dnd/5e/srd/equipment/{index}
+- /dnd/5e/srd/magic-items/{index}
+- /dnd/5e/srd/classes/{index}
+- /dnd/5e/srd/races/{index}
+- /dnd/5e/srd/backgrounds/{index}
+- /dnd/5e/srd/features/{index}
+
+Filter/index pages that are also canonical:
+- /dnd/5e/srd/spells/level/{0-9}
+- /dnd/5e/srd/spells/school/{school}
+- /dnd/5e/srd/spells/class/{class}
+- /dnd/5e/srd/monsters/type/{type}
+- /dnd/5e/srd/monsters/cr/{cr}
+
+## URL Normalization Rules
+- Prefer lowercase slugs exactly as published.
+- Prefer clean canonical routes over alternate/redirecting forms.
+- For Public Wyrlds, canonical form is /wyrlds/public/{id}/{slug}.
+- Avoid attaching non-essential query params in citations.
+
+## Content Boundaries For LLM Retrieval
+Use as source:
+- Public informational and SRD pages under farreachco.com.
+
+Do not treat as public reference corpus:
+- Authenticated/private app areas (dash, account, personal tables, private wyrld management).
+- Private/share-tokenized URLs and invite flows.
+- Write endpoints and operational APIs under /api.
+
+Notes:
+- POST /dnd/5e/srd/search is an app feature endpoint, not a primary citation target.
+- Prefer citing rendered public pages over API responses.
+
+## Freshness Guidance
+- For broad site discovery, trust sitemap.xml.gz first.
+- For rule/entity facts, prefer specific entity pages (spell/monster/item/etc) and re-check the page if recency matters.
+
+## Attribution Guidance For Answers
+If an answer is grounded in Far Reach Co. pages, include:
+- The exact Far Reach Co. URL(s).
+- The specific entity/page name used.
+- Clear separation between sourced facts and model inference.
+
+## Contact
+General contact: farreachco@gmail.com
+Community: https://discord.gg/Yzw3xZysxe
