@@ -24,29 +24,26 @@ const campaigns: ProductUpdateCampaign[] = [
     recent: [
       {
         title: "Location Pins + Portals in VTT (Feb 11-12, 2026)",
-        body:
-          "Pins can mark points of interest with title/description, and can link portal destinations to move connected users between tables in real time. A pin manager also helps locate, restore, or clean up pins.",
+        body: "Pins can mark points of interest with title/description, and can link portal destinations to move connected users between tables in real time. A pin manager also helps locate, restore, or clean up pins.",
         linkText: "View pin guide",
         linkUrl: "https://farreachco.com/vtt-guide#pins",
       },
       {
         title: "Image Library improvements (Feb 10, 2026)",
-        body:
-          "Library browsing now supports server-side search, sorting, and folder-aware filtering to keep larger asset collections manageable for both user and wyrld libraries.",
+        body: "Library browsing now supports server-side search, sorting, and folder-aware filtering to keep larger asset collections manageable for both user and wyrld libraries.",
         linkText: "Open library",
         linkUrl: "https://farreachco.com/library",
       },
       {
-        title: "Character equipment description quality updates (Jan 29 + Feb 7, 2026)",
-        body:
-          "Equipment entries now support richer descriptions, including generated weapon/armor details and SRD-linked item details where available.",
+        title:
+          "Character equipment description quality updates (Jan 29 + Feb 7, 2026)",
+        body: "Equipment entries now support richer descriptions, including generated weapon/armor details and SRD-linked item details where available.",
         linkText: "Open your dashboard",
         linkUrl: "https://farreachco.com/dash",
       },
       {
         title: "Ask the Archives: AI-powered 5E SRD search (Feb 8-9, 2026)",
-        body:
-          "The SRD now includes an AI search assistant for rules lookup, backed by Mistral, with caching and link-sanitized responses to valid SRD detail pages.",
+        body: "The SRD now includes an AI search assistant for rules lookup, backed by Mistral, with caching and link-sanitized responses to valid SRD detail pages.",
         linkText: "Try SRD search",
         linkUrl: "https://farreachco.com/dnd/5e/srd/contents",
       },
@@ -61,53 +58,62 @@ const campaigns: ProductUpdateCampaign[] = [
   },
   {
     slug: "2026-02-public-wyrlds-community",
-    subject: "New in Far Reach Co: Public Wyrlds, community discussion, and Far Reach Radio",
+    subject:
+      "Set the scene: Far Reach Radio, VTT Sandbox mode, and new ways to adventure",
     intro:
-      "This release is focused on campaign discovery, onboarding, in-wyrld communication, and campaign atmosphere, with new Pro presentation controls for campaign owners.",
+      "This update is all about helping your table jump into the story faster: richer atmosphere with Far Reach Radio, easier first sessions with Sandbox mode, and better ways to discover and join new campaigns.",
     recent: [
       {
-        title: "Public Wyrlds Directory + Shareable Wyrld Pages (Feb 18-19, 2026)",
-        body:
-          "Wyrlds can now appear in a public directory with their own shareable page. Guests and logged-in users can browse listings, and logged-in users can request to join when enabled.",
+        title: "Far Reach Radio: soundtrack your sessions (Feb 2026)",
+        body: "Bring your world to life with music built for tabletop moments. Set the tone for tavern chatter, dungeon tension, or boss-fight chaos, then share one listener link so your whole party hears it together.",
+        linkText: "Open Far Reach Radio",
+        linkUrl: "https://farreachco.com/radio",
+      },
+      {
+        title: "VTT Sandbox mode: start a table in moments (Feb 2026)",
+        body: "Want to test the tabletop quickly before committing to a full setup? Launch Sandbox mode and start exploring right away. It is a fast on-ramp for new players and quick one-shot prep.",
+        linkText: "Try VTT Sandbox",
+        linkUrl: "https://farreachco.com/vtt/guest/start",
+      },
+      {
+        title: "Public Wyrlds: discover new worlds and crews (Feb 18-19, 2026)",
+        body: "Campaigns can now appear in a public directory with shareable pages. Players can browse, get a feel for each world, and request to join where available.",
         linkText: "Browse Public Wyrlds",
         linkUrl: "https://farreachco.com/wyrlds/public",
       },
       {
-        title: "Featured onboarding record for public discovery (Feb 19, 2026)",
-        body:
-          "Wyrld owners can select one featured record that is visible in public discovery flows, making it easier to set expectations, tone, and onboarding details.",
+        title: "Onboarding pages that set the story tone (Feb 19, 2026)",
+        body: "Campaign owners can highlight a featured onboarding record so new players know the vibe, the expectations, and where the adventure begins before they ever step into session one.",
         linkText: "Read the player guide",
         linkUrl: "https://farreachco.com/public-wyrlds-guide",
       },
       {
-        title: "Wyrld community discussion board (Feb 19, 2026)",
-        body:
-          "Each wyrld now has a Community section with thread-based discussion and replies. Managers can lock threads, and users can moderate their own posts.",
+        title:
+          "Wyrld Community: keep party chatter in one place (Feb 19+, 2026)",
+        body: "Each wyrld now has a dedicated community space for threads and replies, so planning, lore discussion, and between-session updates stay close to the campaign itself.",
         linkText: "Open Dashboard",
         linkUrl: "https://farreachco.com/dash",
       },
       {
-        title: "Pro Wyrld banner and dashboard presentation upgrades (Feb 18-19, 2026)",
-        body:
-          "Pro wyrlds can now set a banner image to personalize the dashboard and public wyrld presence.",
-        linkText: "View admin setup guide",
-        linkUrl: "https://farreachco.com/public-wyrlds-admin-guide",
+        title: "Character sheet exports for your table kit (Feb 2026)",
+        body: "You can now export character sheets as PDF or JSON, making it easier to share, archive, print, or carry your party’s details between sessions.",
+        linkText: "Open character sheet",
+        linkUrl: "https://farreachco.com/5eplayer",
       },
       {
-        title: "Far Reach Radio spotlight (Feb 2026)",
-        body:
-          "Use Far Reach Radio for campaign-ready ambient audio and music while you run sessions on the tabletop.",
-        linkText: "Open Far Reach Radio",
-        linkUrl: "https://farreachco.com/radio",
+        title: "SRD page polish for faster in-session lookup (Feb 2026)",
+        body: "SRD pages have been polished for clearer reading and quicker scanning, so your table spends less time hunting and more time adventuring.",
+        linkText: "Open SRD Contents",
+        linkUrl: "https://farreachco.com/dnd/5e/srd/contents",
       },
     ],
     upcoming: [
-      "Community discussion quality-of-life improvements and moderation polish.",
-      "Additional public wyrld discovery enhancements and onboarding guidance.",
-      "Permission documentation and user-facing clarity updates across wyrld settings.",
+      "More atmosphere tools and playlist expansion for session storytelling.",
+      "Further Sandbox and onboarding polish so new groups can start playing even faster.",
+      "Continued quality-of-life updates across campaign communication and player guides.",
     ],
-    ctaText: "Explore Public Wyrlds",
-    ctaUrl: "https://farreachco.com/wyrlds/public",
+    ctaText: "Start In Sandbox Mode",
+    ctaUrl: "https://farreachco.com/vtt/guest/start",
   },
 ];
 
@@ -125,7 +131,9 @@ export function getLatestProductUpdateCampaign(): ProductUpdateCampaign {
   return campaigns[campaigns.length - 1];
 }
 
-export function renderProductUpdateMessage(campaign: ProductUpdateCampaign): string {
+export function renderProductUpdateMessage(
+  campaign: ProductUpdateCampaign,
+): string {
   const recentHtml = campaign.recent
     .map((section) => {
       const linkHtml =
