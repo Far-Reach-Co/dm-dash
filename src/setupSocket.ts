@@ -12,13 +12,11 @@ import { calculateDiceRollResponse } from "./lib/dice.js";
 import { searchSrd } from "./dnd/srd/mistral.js";
 import { markdownToChat } from "./lib/markdownToChat.js";
 import { sessionMiddleware } from "./setupApp";
-import { getTableViewByUUIDQuery } from "./api/queries/tableViews";
 import {
-  buildGuestSandboxCapabilities,
-  requireTablePermission,
+  isTableActionAllowed,
 } from "./lib/tableAuthz";
 import type { TableCapabilities } from "./lib/tableAuthz";
-import { requireGuestSandboxAccess } from "./lib/guestSandbox";
+import { resolveTableAccessByUUID } from "./lib/tableAccessEvaluator";
 
 function parseTableRoomToUUID(tableRoom: unknown): string {
   if (typeof tableRoom !== "string") return "";
@@ -69,10 +67,15 @@ function canUseSocketTableAuthEntry(
   mode: "view" | "edit",
   capability?: keyof TableCapabilities,
 ): boolean {
-  if (mode === "view") return entry.viewAllowed;
-  if (!entry.editAllowed) return false;
-  if (capability) return Boolean(entry.capabilities?.[capability]);
-  return true;
+  return isTableActionAllowed(
+    {
+      canView: entry.viewAllowed,
+      canEdit: entry.editAllowed,
+      capabilities: entry.capabilities,
+    },
+    mode,
+    capability,
+  );
 }
 
 function clearSocketTableAuthCacheForSocket(socketId: string): void {
@@ -98,25 +101,13 @@ async function authorizeSocketTable(
 
   try {
     const reqForAuth = socket.request as any;
-    const tableData = await getTableViewByUUIDQuery(tableUUID);
-    const table = tableData.rows[0];
-
-    if (table) {
-      const auth = await requireTablePermission(reqForAuth, table, "view");
-      const nextEntry = setSocketTableAuthCacheEntry(cacheKey, {
-        viewAllowed: true,
-        editAllowed: auth.canEdit,
-        capabilities: auth.capabilities,
-      });
-      return canUseSocketTableAuthEntry(nextEntry, mode, capability);
-    }
-
-    await requireGuestSandboxAccess(reqForAuth, tableUUID);
-    const guestCapabilities = buildGuestSandboxCapabilities();
+    const access = await resolveTableAccessByUUID(reqForAuth, tableUUID, {
+      allowGuestSandbox: true,
+    });
     const nextEntry = setSocketTableAuthCacheEntry(cacheKey, {
-      viewAllowed: true,
-      editAllowed: true,
-      capabilities: guestCapabilities,
+      viewAllowed: access.canView,
+      editAllowed: access.canEdit,
+      capabilities: access.capabilities,
     });
     return canUseSocketTableAuthEntry(nextEntry, mode, capability);
   } catch (_err) {
