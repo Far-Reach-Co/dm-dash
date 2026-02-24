@@ -68,7 +68,8 @@ export async function resolvePlayerSheetAccess(
       return null;
     }
     const inviteData = await getPlayerInviteByUUIDQuery(invite);
-    if (!inviteData.rows.length) {
+    const inviteRow = inviteData.rows[0];
+    if (!inviteRow || String(inviteRow.player_id) !== playerSheetId) {
       res.render("forbidden", { auth: userId });
       return null;
     }
