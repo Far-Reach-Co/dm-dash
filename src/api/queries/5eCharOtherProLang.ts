@@ -1,6 +1,12 @@
-import db from "../dbconfig";
-import { buildUpdateQuery } from "./utils";
-import { columnNamesQuery } from "./utils";
+import {
+  asNumber,
+  ensureSheetDataDocument,
+  getArraySection,
+  getSheetDataByGeneralIdQuery,
+  nextItemId,
+  setArraySection,
+  updateSheetDataByGeneralIdQuery,
+} from "./5eSheetDataUtils";
 
 interface DndFiveEOtherProLang {
   id: number,
@@ -9,76 +15,155 @@ interface DndFiveEOtherProLang {
   proficiency: string
 }
 
+const SECTION_KEY = "otherProLangs";
+
+function emptyResult<T>() {
+  return { rows: [] as T[] } as any;
+}
+
+function rowResult<T>(row: T) {
+  return { rows: [row] as T[] } as any;
+}
+
+function defaultOtherProLangRow(
+  generalId: number,
+  id: number,
+  type: string,
+): Record<string, unknown> {
+  return {
+    id,
+    general_id: generalId,
+    type: type || "",
+    proficiency: "",
+  };
+}
+
 async function add5eCharOtherProLangQuery(data: {
   general_id: number | string,
   type: string
 }) {
-  const query = {
-    text: /*sql*/ `insert into public."dnd_5e_character_other_pro_lang" (general_id, type) values($1,$2) returning *`,
-    values: [
-      data.general_id,
-      data.type,
-    ]
-  }
-  return await db.query<DndFiveEOtherProLang>(query)
+  const generalId = asNumber(data.general_id);
+  if (!generalId) return emptyResult<DndFiveEOtherProLang>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEOtherProLang>();
+
+  const rows = getArraySection(sheetData, SECTION_KEY);
+  const nextId = nextItemId(rows);
+  const created = defaultOtherProLangRow(generalId, nextId, data.type);
+  rows.push(created);
+  setArraySection(sheetData, SECTION_KEY, rows);
+  await updateSheetDataByGeneralIdQuery(generalId, sheetData);
+  return rowResult(created as unknown as DndFiveEOtherProLang);
 }
 
 async function duplicate5eCharOtherProLangsQuery(data: {
   oldGeneralId: number
   newGeneralId: number
 }) {
-  const tableName = "dnd_5e_character_other_pro_lang"
-  const columnNames = await columnNamesQuery(tableName)
-  const columnStr = columnNames.join(", ")
-  const selectStr = columnNames.map(col => {
-    if (col === "general_id") return "$2";
-    return col
-  }).join(", ")
+  const generalId = asNumber(data.newGeneralId);
+  if (!generalId) return;
 
-  const query = {
-    text: /*sql*/ `
-      INSERT INTO public."${tableName}" (${columnStr})
-      SELECT ${selectStr}
-      FROM ${tableName}
-      WHERE general_id = $1
-    `,
-    values: [
-      data.oldGeneralId,
-      data.newGeneralId
-    ]
-  }
-  
-  await db.query<DndFiveEOtherProLang>(query);
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return;
+
+  const rows = getArraySection(sheetData, SECTION_KEY);
+  if (!rows.length) return;
+
+  const nextRows = rows.map((item) => ({
+    ...item,
+    general_id: generalId,
+  }));
+  setArraySection(sheetData, SECTION_KEY, nextRows);
+  await updateSheetDataByGeneralIdQuery(generalId, sheetData);
+  return;
 }
 
-async function get5eCharOtherProLangQuery(id: string) {
-  const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where id = $1`,
-    values: [id]
-  }
-  return await db.query<DndFiveEOtherProLang>(query)
+async function get5eCharOtherProLangQuery(id: string, generalId: string | number) {
+  const targetId = asNumber(id);
+  const scopedGeneralId = asNumber(generalId);
+  if (!targetId || !scopedGeneralId) return emptyResult<DndFiveEOtherProLang>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEOtherProLang>();
+
+  const rows = getArraySection(sheetData, SECTION_KEY);
+  const item = rows.find((entry) => (asNumber(entry.id) || 0) === targetId);
+  if (!item) return emptyResult<DndFiveEOtherProLang>();
+  if (!("general_id" in item)) item.general_id = scopedGeneralId;
+  return rowResult(item as unknown as DndFiveEOtherProLang);
+
 }
 
 async function get5eCharOtherProLangsByGeneralQuery(generalId: string | number) {
-  const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_other_pro_lang" where general_id = $1 order by id`,
-    values: [generalId]
-  }
-  return await db.query<DndFiveEOtherProLang>(query)
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEOtherProLang>();
+
+  const rows = getArraySection(sheetData, SECTION_KEY)
+    .map((item) => {
+      if (!("general_id" in item)) item.general_id = asNumber(generalId) || 0;
+      return item;
+    })
+    .sort((a, b) => (asNumber(a.id) || 0) - (asNumber(b.id) || 0));
+  return { rows: rows as unknown as DndFiveEOtherProLang[] } as any;
 }
 
-async function remove5eCharOtherProLangQuery(id: string | number) {
-  const query = {
-    text: /*sql*/ `delete from public."dnd_5e_character_other_pro_lang" where id = $1`,
-    values: [id]
-  }
+async function remove5eCharOtherProLangQuery(id: string | number, generalId: string | number) {
+  const rowData = await get5eCharOtherProLangQuery(String(id), generalId);
+  const existing = rowData.rows[0] as any;
+  if (!existing) return emptyResult<DndFiveEOtherProLang>();
 
-  return await db.query<DndFiveEOtherProLang>(query)
+  const scopedGeneralId = asNumber(generalId);
+  const itemId = asNumber(existing.id);
+  if (!scopedGeneralId || !itemId) return emptyResult<DndFiveEOtherProLang>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEOtherProLang>();
+
+  const rows = getArraySection(sheetData, SECTION_KEY)
+    .filter((item) => (asNumber(item.id) || 0) !== itemId);
+  setArraySection(sheetData, SECTION_KEY, rows);
+  return await updateSheetDataByGeneralIdQuery(scopedGeneralId, sheetData);
 }
 
-async function edit5eCharOtherProLangQuery(id: string, data: any) {
-  const query = buildUpdateQuery("dnd_5e_character_other_pro_lang", data, id);
-  return await db.query<DndFiveEOtherProLang>(query);
+async function edit5eCharOtherProLangQuery(id: string, generalId: string | number, data: any) {
+  const rowData = await get5eCharOtherProLangQuery(id, generalId);
+  const existing = rowData.rows[0] as any;
+  if (!existing) return emptyResult<DndFiveEOtherProLang>();
+
+  const scopedGeneralId = asNumber(generalId);
+  const itemId = asNumber(existing.id);
+  if (!scopedGeneralId || !itemId) return emptyResult<DndFiveEOtherProLang>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEOtherProLang>();
+
+  const rows = getArraySection(sheetData, SECTION_KEY);
+  const index = rows.findIndex((item) => (asNumber(item.id) || 0) === itemId);
+  if (index === -1) return emptyResult<DndFiveEOtherProLang>();
+
+  const next = {
+    ...rows[index],
+    ...data,
+    id: itemId,
+    general_id: scopedGeneralId,
+  };
+  rows[index] = next;
+  setArraySection(sheetData, SECTION_KEY, rows);
+  await updateSheetDataByGeneralIdQuery(scopedGeneralId, sheetData);
+  return rowResult(next as unknown as DndFiveEOtherProLang);
 }
 
 export {

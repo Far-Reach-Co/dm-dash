@@ -87,7 +87,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}`, {
+                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
                   class: e.target.value,
                 });
               },
@@ -105,7 +105,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}`, {
+                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
                   subclass: e.target.value,
                 });
               },
@@ -126,7 +126,7 @@ export default class ClassesComponent {
               type: "change",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}`, {
+                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
                   hit_dice_type: e.target.value,
                 });
               },
@@ -145,7 +145,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}`, {
+                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
                   total_hit_dice: e.target.value,
                 });
               },
@@ -164,7 +164,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}`, {
+                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
                   current_hit_dice: e.target.value,
                 });
               },
@@ -188,7 +188,7 @@ export default class ClassesComponent {
                 );
                 if (!confirmed) return;
 
-                deleteThing(`/api/remove_5e_character_class/${item.id}`);
+                deleteThing(`/api/remove_5e_character_class/${item.id}?general_id=${this.general_id}`);
                 e.target.parentElement.remove();
               },
             },

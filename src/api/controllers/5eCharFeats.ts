@@ -52,12 +52,14 @@ async function remove5eCharFeat(
   next: NextFunction
 ) {
   try {
-    const featData = await get5eCharFeatQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const featData = await get5eCharFeatQuery(req.params.id, generalId);
     const feat = featData.rows[0];
     if (!feat) throw { status: 404, message: "Feat not found" };
-    await requireSheetEditAccess(req, feat.general_id);
 
-    await remove5eCharFeatQuery(req.params.id);
+    await remove5eCharFeatQuery(req.params.id, generalId);
     res.status(204).send();
   } catch (err) {
     next(err);
@@ -66,10 +68,12 @@ async function remove5eCharFeat(
 
 async function edit5eCharFeat(req: Request, res: Response, next: NextFunction) {
   try {
-    const featData = await get5eCharFeatQuery(req.params.id);
+    const generalId = req.query.general_id as string | undefined;
+    if (!generalId) throw { status: 400, message: "Missing general_id" };
+    await requireSheetEditAccess(req, generalId);
+    const featData = await get5eCharFeatQuery(req.params.id, generalId);
     const feat = featData.rows[0];
     if (!feat) throw { status: 404, message: "Feat not found" };
-    await requireSheetEditAccess(req, feat.general_id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
@@ -78,7 +82,7 @@ async function edit5eCharFeat(req: Request, res: Response, next: NextFunction) {
     if (req.body.hasOwnProperty("general_id")) {
       throw new Error('Request body cannot contain the "general_id" field');
     }
-    const data = await edit5eCharFeatQuery(req.params.id, req.body);
+    const data = await edit5eCharFeatQuery(req.params.id, generalId, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);

@@ -2,27 +2,16 @@ import { Router, Request, Response, NextFunction } from "express";
 import {
   DndFiveEGeneral,
   get5eCharGeneralUserIdQuery,
-  get5eCharGeneralQuery,
   get5eCharNamesQuery,
 } from "../api/queries/5eCharGeneral";
-import { DndFiveEPro, get5eCharProByGeneralQuery } from "../api/queries/5eCharPro";
+import { DndFiveEPro } from "../api/queries/5eCharPro";
+import { DndFiveEBackground } from "../api/queries/5eCharBack";
+import { DndFiveESpellSlots } from "../api/queries/5eCharSpellSlots";
+import { DndFiveEEquipment } from "../api/queries/5eCharEquipment";
 import {
-  DndFiveEBackground,
-  get5eCharBackByGeneralQuery,
-} from "../api/queries/5eCharBack";
-import {
-  DndFiveESpellSlots,
-  get5eCharSpellSlotInfosByGeneralQuery,
-} from "../api/queries/5eCharSpellSlots";
-import { get5eCharClassesByGeneralQuery } from "../api/queries/5eCharClasses";
-import { get5eCharAttacksByGeneralQuery } from "../api/queries/5eCharAttacks";
-import { get5eCharSpellsByGeneralQuery } from "../api/queries/5eCharSpells";
-import { get5eCharFeatsByGeneralQuery } from "../api/queries/5eCharFeats";
-import {
-  DndFiveEEquipment,
-  get5eCharEquipmentsByGeneralQuery,
-} from "../api/queries/5eCharEquipment";
-import { get5eCharOtherProLangsByGeneralQuery } from "../api/queries/5eCharOtherProLang";
+  get5eSheetDocumentQuery,
+  sync5eSheetGeneralSectionQuery,
+} from "../api/queries/5eSheetDocument";
 import { getPlayerUserByUserAndPlayerQuery } from "../api/queries/playerUsers";
 import { getPlayerInviteByUUIDQuery } from "../api/queries/playerInvites";
 import { getProjectQuery } from "../api/queries/projects";
@@ -331,47 +320,43 @@ async function resolvePlayerSheetAccess(
 async function getCharacterSheetExportData(
   playerSheetId: string,
 ): Promise<CharacterSheetExportData | null> {
-  const [
-    generalData,
-    proData,
-    backData,
-    spellSlotData,
-    classData,
-    attackData,
-    spellData,
-    featData,
-    equipmentData,
-    otherProLangData,
-  ] = await Promise.all([
-    get5eCharGeneralQuery(playerSheetId),
-    get5eCharProByGeneralQuery(playerSheetId),
-    get5eCharBackByGeneralQuery(playerSheetId),
-    get5eCharSpellSlotInfosByGeneralQuery(playerSheetId),
-    get5eCharClassesByGeneralQuery(playerSheetId),
-    get5eCharAttacksByGeneralQuery(playerSheetId),
-    get5eCharSpellsByGeneralQuery(playerSheetId),
-    get5eCharFeatsByGeneralQuery(playerSheetId),
-    get5eCharEquipmentsByGeneralQuery(playerSheetId),
-    get5eCharOtherProLangsByGeneralQuery(playerSheetId),
-  ]);
+  let sheetDocumentData = await get5eSheetDocumentQuery(playerSheetId);
+  const sheetRow = sheetDocumentData.rows[0];
+  if (!sheetRow) return null;
 
-  const general = generalData.rows[0];
+  const isRecordObject = (value: unknown): value is Record<string, unknown> =>
+    !!value && typeof value === "object" && !Array.isArray(value);
+  const asObjectOrNull = <T>(value: unknown): T | null =>
+    isRecordObject(value) ? (value as T) : null;
+  const asArray = <T>(value: unknown): T[] =>
+    Array.isArray(value) ? (value as T[]) : [];
+
+  let document = isRecordObject(sheetRow.sheet_data) ? sheetRow.sheet_data : null;
+  const hasGeneralSection = !!(document && isRecordObject(document.general));
+  if (!hasGeneralSection) {
+    sheetDocumentData = await sync5eSheetGeneralSectionQuery(playerSheetId);
+    const refreshed = sheetDocumentData.rows[0];
+    document = refreshed && isRecordObject(refreshed.sheet_data) ? refreshed.sheet_data : null;
+  }
+  if (!document) return null;
+
+  const general = asObjectOrNull<DndFiveEGeneral>(document.general);
   if (!general) return null;
 
-  const spells = spellData.rows as CharacterSpellRow[];
+  const spells = asArray<CharacterSpellRow>(document.spells);
 
   return {
     general,
-    proficiencies: proData.rows[0] || null,
-    background: backData.rows[0] || null,
-    spellSlots: spellSlotData.rows[0] || null,
-    classes: classData.rows as CharacterClassRow[],
-    attacks: attackData.rows as CharacterAttackRow[],
+    proficiencies: asObjectOrNull<DndFiveEPro>(document.proficiencies),
+    background: asObjectOrNull<DndFiveEBackground>(document.background),
+    spellSlots: asObjectOrNull<DndFiveESpellSlots>(document.spellSlots),
+    classes: asArray<CharacterClassRow>(document.classes),
+    attacks: asArray<CharacterAttackRow>(document.attacks),
     spells,
     spellGroups: groupSpellsByType(spells),
-    feats: featData.rows as CharacterFeatRow[],
-    equipment: equipmentData.rows,
-    otherProLangs: otherProLangData.rows as CharacterOtherProLangRow[],
+    feats: asArray<CharacterFeatRow>(document.feats),
+    equipment: asArray<DndFiveEEquipment>(document.equipment),
+    otherProLangs: asArray<CharacterOtherProLangRow>(document.otherProLangs),
   };
 }
 

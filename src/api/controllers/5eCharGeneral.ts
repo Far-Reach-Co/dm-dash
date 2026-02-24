@@ -349,10 +349,10 @@ async function edit5eCharGeneral(
 
 async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
   try {
+    await requireSheetEditAccess(req, req.params.id);
     const charProData = await get5eCharProQuery(req.params.id);
     const charPro = charProData.rows[0];
     if (!charPro) throw { status: 404, message: "Proficiencies not found" };
-    await requireSheetEditAccess(req, charPro.general_id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {
@@ -371,10 +371,10 @@ async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
 
 async function edit5eCharBack(req: Request, res: Response, next: NextFunction) {
   try {
+    await requireSheetEditAccess(req, req.params.id);
     const charBackData = await get5eCharBackQuery(req.params.id);
     const charBack = charBackData.rows[0];
     if (!charBack) throw { status: 404, message: "Background not found" };
-    await requireSheetEditAccess(req, charBack.general_id);
 
     // If the "id" field is found, throw an error
     if (req.body.hasOwnProperty("id")) {

@@ -58,6 +58,7 @@ export default class FeatComponent {
         parentRemoveItem: this.removeItem,
         domComponent: elem,
         renderTypeSelectOptions: this.renderTypeSelectOptions,
+        general_id: this.general_id,
         id: featData.id,
         type: featData.type,
         title: featData.title,
@@ -102,6 +103,7 @@ export default class FeatComponent {
         parentRemoveItem: this.removeItem,
         domComponent: elem,
         renderTypeSelectOptions: this.renderTypeSelectOptions,
+        general_id: this.general_id,
         id: item.id,
         type: item.type,
         title: item.title,
@@ -174,6 +176,7 @@ class SingleFeatComponent {
     this.domComponent = props.domComponent;
     this.parentRemoveItem = props.parentRemoveItem;
     this.renderTypeSelectOptions = props.renderTypeSelectOptions;
+    this.general_id = props.general_id;
     this.id = props.id;
     this.title = props.title;
     this.description = props.description;
@@ -232,7 +235,7 @@ class SingleFeatComponent {
             // local
             this.description = e.target.value;
             // db
-            postThing(`/api/edit_5e_character_feat/${this.id}`, {
+            postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
               description: e.target.value,
             });
           },
@@ -249,7 +252,7 @@ class SingleFeatComponent {
     this.title = titleInput.value;
     this.description = descriptionInput.value;
     // save to db
-    postThing(`/api/edit_5e_character_feat/${this.id}`, {
+    postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
       title: titleInput.value,
       description: descriptionInput.value,
     });
@@ -401,7 +404,7 @@ class SingleFeatComponent {
                           // update local state
                           this.title = e.target.value;
                           // update db state
-                          postThing(`/api/edit_5e_character_feat/${this.id}`, {
+                          postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
                             title: e.target.value,
                           });
                         },
@@ -432,7 +435,7 @@ class SingleFeatComponent {
                         );
                         if (!confirmed) return;
 
-                        deleteThing(`/api/remove_5e_character_feat/${this.id}`);
+                        deleteThing(`/api/remove_5e_character_feat/${this.id}?general_id=${this.general_id}`);
                         this.parentRemoveItem(this.id);
                       },
                     },
@@ -460,7 +463,7 @@ class SingleFeatComponent {
                 // local
                 this.type = e.target.value;
                 // db
-                postThing(`/api/edit_5e_character_feat/${this.id}`, {
+                postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
                   type: e.target.value,
                 });
               },

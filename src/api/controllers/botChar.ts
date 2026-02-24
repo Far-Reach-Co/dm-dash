@@ -314,11 +314,11 @@ async function handleGetFeatsResponse(
       });
     }
 
-    const optionsList: { label: string; value: number }[] = [];
+    const optionsList: { label: string; value: string }[] = [];
     for (var feat of featsData.rows) {
       optionsList.push({
         label: feat.title,
-        value: feat.id,
+        value: `${charGeneralId}:${feat.id}`,
       });
     }
 
@@ -354,7 +354,7 @@ async function handleGetAttacksResponse(
 
     let content = "";
     content += `**Attacks & Spellcasting**`;
-    attacksData.rows.forEach((attack) => {
+    attacksData.rows.forEach((attack: any) => {
       if (!attack.title) return;
       content += `\n**${attack.title}:** Range: ${
         attack.range ? attack.range : "None"
@@ -412,7 +412,7 @@ async function handleGetEquipmentResponse(
 
     let content = "";
     content += `**Equipment**`;
-    equipmentData.rows.forEach((eq) => {
+    equipmentData.rows.forEach((eq: any) => {
       if (!eq.title) return;
       content += `\n**${eq.title}:** Quantity: ${eq.quantity}, Weight: ${eq.weight}`;
     });
@@ -469,7 +469,7 @@ async function handleGetOtherProLangResponse(
 
     let content = "";
     content += `**Other Proficiencies & Languages**`;
-    otherProLangData.rows.forEach((op) => {
+    otherProLangData.rows.forEach((op: any) => {
       if (!op.type) return;
       content += `\n**${op.type}:** ${op.proficiency}`;
     });
@@ -703,7 +703,7 @@ async function handleGetGeneralInfoResponse(
     content += `\n**Race:** ${charGeneral.race}`;
     // format classes
     if (classes.length > 0) {
-      const classStrings = classes.map((c) => {
+      const classStrings = classes.map((c: any) => {
         let classStr = c.class || "Unknown";
         if (c.subclass) classStr += ` (${c.subclass})`;
         return classStr;
@@ -879,11 +879,11 @@ async function handleSpellsCommand(req: Request, res: Response) {
           });
         }
 
-        const optionsList: { label: string; value: number }[] = [];
+        const optionsList: { label: string; value: string }[] = [];
         for (var spell of spellsData.rows) {
           optionsList.push({
             label: spell.title,
-            value: spell.id,
+            value: `${charGeneralId}:${spell.id}`,
           });
         }
 
@@ -948,9 +948,19 @@ async function characterSheetBotCommandResponse(req: Request, res: Response) {
   }
 }
 
+function parseScopedSelectValue(raw: string) {
+  const [generalIdPart, itemIdPart] = raw.split(":");
+  if (!generalIdPart || !itemIdPart) {
+    throw { status: 400, message: "Invalid select option value" };
+  }
+  return { generalId: generalIdPart, itemId: itemIdPart };
+}
+
 async function handleSelectFeatResponse(req: Request, res: Response) {
-  const featData = await get5eCharFeatQuery(req.body.data.values[0]);
+  const { generalId, itemId } = parseScopedSelectValue(req.body.data.values[0]);
+  const featData = await get5eCharFeatQuery(itemId, generalId);
   const feat = featData.rows[0];
+  if (!feat) throw { status: 404, message: "Feat not found" };
 
   let content = "";
   content += `**${feat.title}**`;
@@ -966,8 +976,10 @@ async function handleSelectFeatResponse(req: Request, res: Response) {
 }
 
 async function handleSelectSpellResponse(req: Request, res: Response) {
-  const spellData = await get5eCharSpellQuery(req.body.data.values[0]);
+  const { generalId, itemId } = parseScopedSelectValue(req.body.data.values[0]);
+  const spellData = await get5eCharSpellQuery(itemId, generalId);
   const spell = spellData.rows[0];
+  if (!spell) throw { status: 404, message: "Spell not found" };
 
   let content = "";
 

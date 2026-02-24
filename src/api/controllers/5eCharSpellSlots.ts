@@ -11,12 +11,13 @@ async function edit5eCharSpellSlotInfo(
   next: NextFunction
 ) {
   try {
-    const spellSlotData = await get5eCharSpellSlotInfoQuery(req.params.id);
+    const generalId = req.params.id;
+    await requireSheetEditAccess(req, generalId);
+    const spellSlotData = await get5eCharSpellSlotInfoQuery(generalId);
     const spellSlot = spellSlotData.rows[0];
     if (!spellSlot) throw { status: 404, message: "Spell slot info not found" };
-    await requireSheetEditAccess(req, spellSlot.general_id);
 
-    const data = await edit5eCharSpellSlotInfoQuery(req.params.id, req.body);
+    const data = await edit5eCharSpellSlotInfoQuery(generalId, req.body);
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);

@@ -1,6 +1,12 @@
-import db from "../dbconfig";
-import { buildUpdateQuery } from "./utils";
-import { columnNamesQuery } from "./utils";
+import {
+  asNumber,
+  ensureSheetDataDocument,
+  getArraySection,
+  getSheetDataByGeneralIdQuery,
+  nextItemId,
+  setArraySection,
+  updateSheetDataByGeneralIdQuery,
+} from "./5eSheetDataUtils";
 
 interface DndFiveEFeat {
   id: number,
@@ -10,80 +16,166 @@ interface DndFiveEFeat {
   general_id: number
 }
 
+const SECTION_KEY = "feats";
+
+function emptyResult<T>() {
+  return { rows: [] as T[] } as any;
+}
+
+function rowResult<T>(row: T) {
+  return { rows: [row] as T[] } as any;
+}
+
+function defaultFeatRow(
+  generalId: number,
+  id: number,
+  title: string,
+  description: string,
+  type: string,
+): Record<string, unknown> {
+  return {
+    id,
+    general_id: generalId,
+    type: type || "",
+    title: title || "",
+    description: description || "",
+  };
+}
+
 async function add5eCharFeatQuery(data: {
   general_id: number | string,
   title: string,
   description: string,
   type: string
 }) {
-  const query = {
-    text: /*sql*/ `insert into public."dnd_5e_character_feat_trait" (general_id, title, description, type) values($1,$2,$3,$4) returning *`,
-    values: [
-      data.general_id,
-      data.title,
-      data.description,
-      data.type,
-    ]
-  }
-  return await db.query<DndFiveEFeat>(query)
+  const generalId = asNumber(data.general_id);
+  if (!generalId) return emptyResult<DndFiveEFeat>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEFeat>();
+
+  const feats = getArraySection(sheetData, SECTION_KEY);
+  const nextId = nextItemId(feats);
+  const created = defaultFeatRow(
+    generalId,
+    nextId,
+    data.title,
+    data.description,
+    data.type,
+  );
+  feats.push(created);
+  setArraySection(sheetData, SECTION_KEY, feats);
+  await updateSheetDataByGeneralIdQuery(generalId, sheetData);
+  return rowResult(created as unknown as DndFiveEFeat);
 }
 
 async function duplicate5eCharFeatsQuery(data: {
   oldGeneralId: number
   newGeneralId: number
 }) {
-  const tableName = "dnd_5e_character_feat_trait"
-  const columnNames = await columnNamesQuery(tableName)
-  const columnStr = columnNames.join(", ")
-  const selectStr = columnNames.map(col => {
-    if (col === "general_id") return "$2";
-    return col
-  }).join(", ")
+  const generalId = asNumber(data.newGeneralId);
+  if (!generalId) return;
 
-  const query = {
-    text: /*sql*/ `
-      INSERT INTO public."${tableName}" (${columnStr})
-      SELECT ${selectStr}
-      FROM ${tableName}
-      WHERE general_id = $1
-    `,
-    values: [
-      data.oldGeneralId,
-      data.newGeneralId
-    ]
-  }
-  
-  await db.query<DndFiveEFeat>(query);
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return;
+
+  const feats = getArraySection(sheetData, SECTION_KEY);
+  if (!feats.length) return;
+
+  const nextFeats = feats.map((item) => ({
+    ...item,
+    general_id: generalId,
+  }));
+  setArraySection(sheetData, SECTION_KEY, nextFeats);
+  await updateSheetDataByGeneralIdQuery(generalId, sheetData);
+  return;
 }
 
-async function get5eCharFeatQuery(id: string) {
-  const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where id = $1`,
-    values: [id]
-  }
-  return await db.query<DndFiveEFeat>(query)
+async function get5eCharFeatQuery(id: string, generalId: string | number) {
+  const targetId = asNumber(id);
+  const scopedGeneralId = asNumber(generalId);
+  if (!targetId || !scopedGeneralId) return emptyResult<DndFiveEFeat>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEFeat>();
+
+  const feats = getArraySection(sheetData, SECTION_KEY);
+  const feat = feats.find((item) => (asNumber(item.id) || 0) === targetId);
+  if (!feat) return emptyResult<DndFiveEFeat>();
+  if (!("general_id" in feat)) feat.general_id = scopedGeneralId;
+  return rowResult(feat as unknown as DndFiveEFeat);
+
 }
 
 async function get5eCharFeatsByGeneralQuery(generalId: string | number) {
-  const query = {
-    text: /*sql*/ `select * from public."dnd_5e_character_feat_trait" where general_id = $1 order by id`,
-    values: [generalId]
-  }
-  return await db.query<DndFiveEFeat>(query)
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(generalId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEFeat>();
+
+  const feats = getArraySection(sheetData, SECTION_KEY)
+    .map((item) => {
+      if (!("general_id" in item)) item.general_id = asNumber(generalId) || 0;
+      return item;
+    })
+    .sort((a, b) => (asNumber(a.id) || 0) - (asNumber(b.id) || 0));
+  return { rows: feats as unknown as DndFiveEFeat[] } as any;
 }
 
-async function remove5eCharFeatQuery(id: string | number) {
-  const query = {
-    text: /*sql*/ `delete from public."dnd_5e_character_feat_trait" where id = $1`,
-    values: [id]
-  }
+async function remove5eCharFeatQuery(id: string | number, generalId: string | number) {
+  const featData = await get5eCharFeatQuery(String(id), generalId);
+  const existing = featData.rows[0] as any;
+  if (!existing) return emptyResult<DndFiveEFeat>();
 
-  return await db.query<DndFiveEFeat>(query)
+  const scopedGeneralId = asNumber(generalId);
+  const featId = asNumber(existing.id);
+  if (!scopedGeneralId || !featId) return emptyResult<DndFiveEFeat>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEFeat>();
+
+  const feats = getArraySection(sheetData, SECTION_KEY)
+    .filter((item) => (asNumber(item.id) || 0) !== featId);
+  setArraySection(sheetData, SECTION_KEY, feats);
+  return await updateSheetDataByGeneralIdQuery(scopedGeneralId, sheetData);
 }
 
-async function edit5eCharFeatQuery(id: string, data: any) {
-  const query = buildUpdateQuery("dnd_5e_character_feat_trait", data, id);
-  return await db.query<DndFiveEFeat>(query);
+async function edit5eCharFeatQuery(id: string, generalId: string | number, data: any) {
+  const featData = await get5eCharFeatQuery(id, generalId);
+  const existing = featData.rows[0] as any;
+  if (!existing) return emptyResult<DndFiveEFeat>();
+
+  const scopedGeneralId = asNumber(generalId);
+  const featId = asNumber(existing.id);
+  if (!scopedGeneralId || !featId) return emptyResult<DndFiveEFeat>();
+
+  const sheetDataResult = await getSheetDataByGeneralIdQuery(scopedGeneralId);
+  const row = sheetDataResult.rows[0];
+  const sheetData = ensureSheetDataDocument(row);
+  if (!sheetData) return emptyResult<DndFiveEFeat>();
+
+  const feats = getArraySection(sheetData, SECTION_KEY);
+  const index = feats.findIndex((item) => (asNumber(item.id) || 0) === featId);
+  if (index === -1) return emptyResult<DndFiveEFeat>();
+
+  const next = {
+    ...feats[index],
+    ...data,
+    id: featId,
+    general_id: scopedGeneralId,
+  };
+  feats[index] = next;
+  setArraySection(sheetData, SECTION_KEY, feats);
+  await updateSheetDataByGeneralIdQuery(scopedGeneralId, sheetData);
+  return rowResult(next as unknown as DndFiveEFeat);
 }
 
 export {
