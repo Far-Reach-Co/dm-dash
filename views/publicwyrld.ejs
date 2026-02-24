@@ -164,7 +164,7 @@
     });
     const data = await res.json().catch(function() { return null; });
     if (!res.ok || (data && data.error)) {
-      window.alert((data && data.error && data.error.message) || "Unable to request join.");
+      window.customAlertError((data && data.error && data.error.message) || "Unable to request join.");
       return;
     }
     window.location.reload();
@@ -178,7 +178,7 @@
     });
     const data = await res.json().catch(function() { return null; });
     if (!res.ok || (data && data.error)) {
-      window.alert((data && data.error && data.error.message) || "Unable to cancel request.");
+      window.customAlertError((data && data.error && data.error.message) || "Unable to cancel request.");
       return;
     }
     window.location.reload();

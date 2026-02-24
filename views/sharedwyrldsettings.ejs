@@ -28,14 +28,16 @@
   <%- include('./partials/footer') %>
   <script>
     async function removeProjectUser(id) {
-      if (
-        window.confirm("Are you sure you want to leave <%= project.title %>?")
-      ) {
-        await fetch(`/api/remove_project_user/${id}`, {
-          method: "DELETE",
-        });
-        window.location.href = "/dash";
-      }
+      const confirmed = await window.customConfirm(
+        "Are you sure you want to leave <%= project.title %>?",
+        { confirmText: "Leave Wyrld", danger: true },
+      );
+      if (!confirmed) return;
+
+      await fetch(`/api/remove_project_user/${id}`, {
+        method: "DELETE",
+      });
+      window.location.href = "/dash";
     }
   </script>
 </body>

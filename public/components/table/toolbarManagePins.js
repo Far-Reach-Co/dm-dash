@@ -64,8 +64,9 @@ export function showManagePinsModal(toolbar) {
         {
           type: "click",
           event: async () => {
-            const confirmed = window.confirm(
+            const confirmed = await window.customConfirm(
               `Delete pin "${pin.title || "Untitled"}"?`,
+              { confirmText: "Delete", danger: true },
             );
             if (!confirmed) return;
             try {
@@ -82,7 +83,7 @@ export function showManagePinsModal(toolbar) {
               showManagePinsModal(toolbar);
             } catch (err) {
               console.error(err);
-              window.alert("Failed to delete pin.");
+              window.customAlertError("Failed to delete pin.");
             }
           },
         },

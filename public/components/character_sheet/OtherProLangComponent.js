@@ -107,19 +107,17 @@ export default class OtherProLangComponent {
             "ⓧ",
             {
               type: "click",
-              event: (e) => {
-                if (
-                  window.confirm(
-                    `Are you sure you want to delete ${
-                      item.proficiency ? item.proficiency : "Empty"
-                    }`,
-                  )
-                ) {
-                  deleteThing(
-                    `/api/remove_5e_character_other_pro_lang/${item.id}`,
-                  );
-                  e.target.parentElement.remove();
-                }
+              event: async (e) => {
+                const confirmed = await window.customConfirm(
+                  `Are you sure you want to delete ${
+                    item.proficiency ? item.proficiency : "Empty"
+                  }`,
+                  { confirmText: "Delete", danger: true },
+                );
+                if (!confirmed) return;
+
+                deleteThing(`/api/remove_5e_character_other_pro_lang/${item.id}`);
+                e.target.parentElement.remove();
               },
             },
           ),

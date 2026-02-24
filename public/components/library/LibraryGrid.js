@@ -164,12 +164,11 @@ export default class LibraryGrid {
   };
 
   removeFolder = async (folder) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to remove folder: "${folder.title}"? Images will be moved to the parent folder.`,
-      )
-    )
-      return;
+    const confirmed = await window.customConfirm(
+      `Are you sure you want to remove folder: "${folder.title}"? Images will be moved to the parent folder.`,
+      { confirmText: "Remove", danger: true },
+    );
+    if (!confirmed) return;
 
     await deleteThing(`/api/remove_table_folder/${folder.id}`);
 
@@ -386,12 +385,11 @@ export default class LibraryGrid {
   };
 
   deleteImage = async (image) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to delete "${image.original_name}"?`,
-      )
-    )
-      return;
+    const confirmed = await window.customConfirm(
+      `Are you sure you want to delete "${image.original_name}"?`,
+      { confirmText: "Delete", danger: true },
+    );
+    if (!confirmed) return;
 
     await deleteThing(this.getDeleteEndpoint(image.image_id));
     this.images = this.images.filter((img) => img.image_id !== image.image_id);

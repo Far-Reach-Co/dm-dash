@@ -604,18 +604,22 @@
                 body: JSON.stringify({}),
               });
               var data = await res.json().catch(function() { return null; });
-              if (!res.ok || (data && data.error)) {
+            if (!res.ok || (data && data.error)) {
                 throw new Error((data && data.error && data.error.message) || 'Failed to update thread');
               }
               window.location.reload();
             } catch (err) {
-              window.alert((err && err.message) || 'Failed to update thread');
+              window.customAlertError((err && err.message) || 'Failed to update thread');
             }
           };
 
           window.deleteDiscussionThread = async function(threadId) {
             if (!threadId) return;
-            if (!confirm('Delete this discussion thread and all replies?')) return;
+            var confirmed = await window.customConfirm(
+              'Delete this discussion thread and all replies?',
+              { confirmText: 'Delete', danger: true }
+            );
+            if (!confirmed) return;
             try {
               var res = await fetch('/api/remove_project_discussion_thread/' + threadId, {
                 method: 'DELETE',
@@ -626,13 +630,17 @@
               }
               window.location.href = '/wyrld/community?id=' + projectId;
             } catch (err) {
-              window.alert((err && err.message) || 'Failed to delete thread');
+              window.customAlertError((err && err.message) || 'Failed to delete thread');
             }
           };
 
           window.deleteDiscussionPost = async function(postId) {
             if (!postId) return;
-            if (!confirm('Delete this reply?')) return;
+            var confirmed = await window.customConfirm('Delete this reply?', {
+              confirmText: 'Delete',
+              danger: true
+            });
+            if (!confirmed) return;
             try {
               var res = await fetch('/api/remove_project_discussion_post/' + postId, {
                 method: 'DELETE',
@@ -643,7 +651,7 @@
               }
               window.location.reload();
             } catch (err) {
-              window.alert((err && err.message) || 'Failed to delete reply');
+              window.customAlertError((err && err.message) || 'Failed to delete reply');
             }
           };
         })();
@@ -895,7 +903,7 @@
             if (typeof renderTierLimitWarning === 'function') {
               renderTierLimitWarning('This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.');
             } else {
-              window.alert('This Wyrld feature requires Pro.');
+              window.customAlertError('This Wyrld feature requires Pro.');
             }
           }
 
@@ -903,7 +911,7 @@
             if (typeof renderTierLimitWarning === 'function') {
               renderTierLimitWarning('This Wyrld is at its hard image data cap. Remove unused images to free space.');
             } else {
-              window.alert('This Wyrld is at its hard image data cap. Remove unused images to free space.');
+              window.customAlertError('This Wyrld is at its hard image data cap. Remove unused images to free space.');
             }
           }
 
@@ -1179,7 +1187,11 @@
             btn.addEventListener('click', async function() {
               var id = btn.dataset.id;
               var name = btn.dataset.name;
-              if (!confirm('Are you sure you want to remove ' + name + '?')) return;
+              var confirmed = await window.customConfirm(
+                'Are you sure you want to remove ' + name + '?',
+                { confirmText: 'Remove', danger: true }
+              );
+              if (!confirmed) return;
               var res = await fetch('/api/remove_project_user/' + id, {
                 method: 'DELETE'
               });
@@ -1200,7 +1212,11 @@
 
           // Delete Wyrld
           document.getElementById('settings-delete-wyrld').addEventListener('click', async function() {
-            if (!confirm('Are you sure you want to delete ' + projectTitle + '? This cannot be undone.')) return;
+            var confirmed = await window.customConfirm(
+              'Are you sure you want to delete ' + projectTitle + '? This cannot be undone.',
+              { confirmText: 'Delete Wyrld', danger: true }
+            );
+            if (!confirmed) return;
             var res = await fetch('/api/remove_project/' + projectId, {
               method: 'DELETE'
             });
@@ -1253,7 +1269,11 @@
 
           if (leaveBtn) {
             leaveBtn.addEventListener('click', async function() {
-              if (!confirm('Leave ' + projectTitle + '? You will lose access to this wyrld.')) return;
+              var confirmed = await window.customConfirm(
+                'Leave ' + projectTitle + '? You will lose access to this wyrld.',
+                { confirmText: 'Leave Wyrld', danger: true }
+              );
+              if (!confirmed) return;
               leaveBtn.disabled = true;
               setLeaveMessage('Leaving wyrld...', false);
               try {

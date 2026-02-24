@@ -159,7 +159,11 @@ export default class TableSidebarImageComponent {
 
   removeImageFromTableAndSidebar = async (image, elem) => {
     if (!this.can("canManageImageAssets")) return;
-    if (!window.confirm(`Are you sure you want to delete ${image.original_name}`)) {
+    const confirmed = await window.customConfirm(
+      `Are you sure you want to delete ${image.original_name}`,
+      { confirmText: "Delete", danger: true },
+    );
+    if (!confirmed) {
       return;
     }
 
@@ -172,7 +176,7 @@ export default class TableSidebarImageComponent {
       }
     } catch (err) {
       console.log(err);
-      window.alert("Failed to delete image.");
+      window.customAlertError("Failed to delete image.");
       return;
     }
 

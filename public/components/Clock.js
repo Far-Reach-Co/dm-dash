@@ -119,12 +119,16 @@ export default class Clock {
       { class: "btn-red" },
       "Remove Clock"
     );
-    removeButton.addEventListener("click", () => {
-      if (window.confirm(`Are you sure you want to delete ${this.title}`)) {
-        deleteThing(`/api/remove_clock/${this.id}`);
-        this.domComponent.remove();
-        this.toggleEdit();
-      }
+    removeButton.addEventListener("click", async () => {
+      const confirmed = await window.customConfirm(
+        `Are you sure you want to delete ${this.title}`,
+        { confirmText: "Delete", danger: true },
+      );
+      if (!confirmed) return;
+
+      deleteThing(`/api/remove_clock/${this.id}`);
+      this.domComponent.remove();
+      this.toggleEdit();
     });
     const resetButton = createElement(
       "button",
@@ -132,11 +136,15 @@ export default class Clock {
       "Reset"
     );
     resetButton.addEventListener("click", async () => {
-      if (window.confirm(`Are you sure you want to reset ${this.title}`)) {
-        this.reset();
-        this.toggleEdit();
-        this.saveClock();
-      }
+      const confirmed = await window.customConfirm(
+        `Are you sure you want to reset ${this.title}`,
+        { confirmText: "Reset" },
+      );
+      if (!confirmed) return;
+
+      this.reset();
+      this.toggleEdit();
+      this.saveClock();
     });
     // append
     this.domComponent.append(

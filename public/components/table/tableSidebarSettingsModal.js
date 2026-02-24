@@ -113,26 +113,26 @@ export async function renderTableSettingsModal(sidebar) {
         event: async (e) => {
           e.preventDefault();
           e.stopPropagation();
-          if (
-            window.confirm(
-              `Are you sure you want to delete ${sidebar.tableView.title}`,
-            )
-          ) {
-            try {
-              const res = await fetch(
-                `/api/remove_table_view/${sidebar.tableView.id}`,
-                { method: "DELETE" },
-              );
-              if (res.status !== 204) {
-                throw new Error(`remove table failed with status ${res.status}`);
-              }
-            } catch (err) {
-              console.log(err);
-              window.alert("Failed to delete table.");
-              return;
+          const confirmed = await window.customConfirm(
+            `Are you sure you want to delete ${sidebar.tableView.title}`,
+            { confirmText: "Delete", danger: true },
+          );
+          if (!confirmed) return;
+
+          try {
+            const res = await fetch(
+              `/api/remove_table_view/${sidebar.tableView.id}`,
+              { method: "DELETE" },
+            );
+            if (res.status !== 204) {
+              throw new Error(`remove table failed with status ${res.status}`);
             }
-            window.location.pathname = "/dash";
+          } catch (err) {
+            console.log(err);
+            window.customAlertError("Failed to delete table.");
+            return;
           }
+          window.location.pathname = "/dash";
         },
       }),
     ]),

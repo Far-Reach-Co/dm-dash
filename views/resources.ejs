@@ -170,7 +170,7 @@
           <p>
             We have a starter pack of free image assets for use on the virtual table top. We hope these help you get started on your adventures! Inside you will find character tokens and maps.
           </p>
-          <a href="https://wyrld.s3.us-east-1.amazonaws.com/free-images/FreeTokens_v4.zip" class="resource-link download-link" onclick="return confirm('Download FreeTokens_v4.zip (~15MB)?')">
+          <a href="https://wyrld.s3.us-east-1.amazonaws.com/free-images/FreeTokens_v4.zip" class="resource-link download-link" data-confirm-download="Download FreeTokens_v4.zip (~15MB)?">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
             </svg>
@@ -199,19 +199,19 @@
             paper, try our version of the 5e character sheet.
           </p>
           <div class="download-list">
-            <a href="/assets/resources/character_sheets/CharSheetPeli_v01.pdf" download class="resource-link download-link" onclick="return confirm('Download CharSheetPeli_v01.pdf?')">
+            <a href="/assets/resources/character_sheets/CharSheetPeli_v01.pdf" download class="resource-link download-link" data-confirm-download="Download CharSheetPeli_v01.pdf?">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
               </svg>
               <span>Color PDF with Peli</span>
             </a>
-            <a href="/assets/resources/character_sheets/CharSheetNOPeli_v02.pdf" download class="resource-link download-link" onclick="return confirm('Download CharSheetNOPeli_v02.pdf?')">
+            <a href="/assets/resources/character_sheets/CharSheetNOPeli_v02.pdf" download class="resource-link download-link" data-confirm-download="Download CharSheetNOPeli_v02.pdf?">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
               </svg>
               <span>Color PDF without Peli</span>
             </a>
-            <a href="/assets/resources/character_sheets/CharSheetNOPeliNOBkgd_v03.pdf" download class="resource-link download-link" onclick="return confirm('Download CharSheetNOPeliNOBkgd_v03.pdf?')">
+            <a href="/assets/resources/character_sheets/CharSheetNOPeliNOBkgd_v03.pdf" download class="resource-link download-link" data-confirm-download="Download CharSheetNOPeliNOBkgd_v03.pdf?">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" />
               </svg>
@@ -294,5 +294,41 @@
   </div>
   <%- include('./partials/footer') %>
 </body>
+<script>
+  (function bindDownloadConfirms() {
+    const links = document.querySelectorAll("[data-confirm-download]");
+    links.forEach(function(link) {
+      link.addEventListener("click", async function(event) {
+        event.preventDefault();
+        const message = link.getAttribute("data-confirm-download") || "Continue download?";
+        const confirmed = await window.customConfirm(message, {
+          confirmText: "Download",
+        });
+        if (!confirmed) return;
+        const tempLink = document.createElement("a");
+        tempLink.href = link.href;
+
+        const downloadAttr = link.getAttribute("download");
+        if (downloadAttr !== null) {
+          tempLink.setAttribute("download", downloadAttr);
+        }
+
+        const target = link.getAttribute("target");
+        if (target) {
+          tempLink.target = target;
+        }
+
+        const rel = link.getAttribute("rel");
+        if (rel) {
+          tempLink.rel = rel;
+        }
+
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        tempLink.remove();
+      });
+    });
+  })();
+</script>
 
 </html>

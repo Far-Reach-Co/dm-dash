@@ -155,7 +155,7 @@ export default function openLocationPinModal({ pin = null, attachments = [], tem
           const formData = new FormData(e.target);
           const title = formData.get("pin_title")?.toString().trim();
           if (!title) {
-            window.alert("Title is required.");
+            window.customAlertError("Title is required.");
             return;
           }
           const description = formData.get("pin_description")?.toString() ?? "";
