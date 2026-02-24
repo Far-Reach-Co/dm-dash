@@ -79,11 +79,8 @@ import {
 } from "./controllers/library.js";
 // for uploading files
 import {
-  get5eCharsByUser,
   add5eChar,
   remove5eChar,
-  edit5eCharGeneral,
-  get5eCharGeneral,
   duplicate5eChar,
 } from "./controllers/5eCharGeneral.js";
 import {
@@ -185,16 +182,37 @@ import { csrfProtection } from "../routes.js";
 var router = Router();
 
 // Global API rate limiter
+const isHighFrequencySheetEndpoint = (path: string) => {
+  return path.startsWith("/sheets/");
+};
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // 200 requests per 15 min per IP
   standardHeaders: true,
   legacyHeaders: false,
+  // Character sheet UIs fire many API calls rapidly (autosave, quick refreshes).
+  // Use a dedicated limiter for those endpoints instead of sharing the global bucket.
+  skip: (req) => isHighFrequencySheetEndpoint(req.path || ""),
   message: {
     message: "Too many requests, please try again later",
   },
 });
 router.use(apiLimiter);
+
+const sheetApiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 600, // allow bursty autosave/update traffic for sheet editing
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const userKey = req.session?.user ? `user:${req.session.user}` : `ip:${req.ip}`;
+    return `${userKey}:sheet-api`;
+  },
+  message: {
+    message: "Too many sheet requests, please wait a moment and try again",
+  },
+});
 
 const guestSandboxStartLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
@@ -374,14 +392,11 @@ router.post("/add_player_invite", addPlayerInvite);
 router.delete("/remove_player_invite/:id", removePlayerInvite);
 
 // 5e characters general, proficiencies, background, spell slots
-router.get("/get_5e_characters_by_user", get5eCharsByUser);
-router.get("/get_5e_character_general/:id", get5eCharGeneral);
-router.get("/sheets/:id", getSheet);
-router.post("/sheets/:id/ops", applySheetOps);
+router.get("/sheets/:id", sheetApiLimiter, getSheet);
+router.post("/sheets/:id/ops", sheetApiLimiter, applySheetOps);
 router.post("/add_5e_character", add5eChar);
 router.delete("/remove_5e_character/:id", remove5eChar);
 router.post("/duplicate_5e_character", duplicate5eChar);
-router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
 
 // months
 router.get("/get_months/:calendar_id", getMonths);

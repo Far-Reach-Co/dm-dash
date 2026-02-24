@@ -24,8 +24,8 @@ export interface DndFiveESpellSlots {
   sixth_expended: number,
   seventh_total: number,
   seventh_expended: number,
-  eigth_total: number,
-  eigth_expended: number,
+  eighth_total: number,
+  eighth_expended: number,
   nineth_total: number,
   nineth_expended: number,
   spell_casting_ability: string
@@ -46,8 +46,8 @@ const DEFAULT_SPELL_SLOTS: Record<string, unknown> = {
   sixth_expended: 0,
   seventh_total: 0,
   seventh_expended: 0,
-  eigth_total: 0,
-  eigth_expended: 0,
+  eighth_total: 0,
+  eighth_expended: 0,
   nineth_total: 0,
   nineth_expended: 0,
   spell_casting_ability: "wisdom",
@@ -59,6 +59,16 @@ function ensureSpellSlotsSection(
 ): Record<string, unknown> {
   const existing = getObjectSection(sheetData, "spellSlots");
   if (existing) {
+    // Normalize historic misspelling keys.
+    if (existing.eigth_total != null && existing.eighth_total == null) {
+      existing.eighth_total = existing.eigth_total;
+    }
+    if (existing.eigth_expended != null && existing.eighth_expended == null) {
+      existing.eighth_expended = existing.eigth_expended;
+    }
+    delete existing.eigth_total;
+    delete existing.eigth_expended;
+
     if (!("id" in existing)) existing.id = asNumber(generalId) || 0;
     if (!("general_id" in existing)) existing.general_id = asNumber(generalId) || 0;
     return existing;

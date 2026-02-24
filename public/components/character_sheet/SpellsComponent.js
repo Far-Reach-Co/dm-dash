@@ -21,9 +21,10 @@ fetch("/lib/data/2014/5e-srd-spells.json")
 export default class SpellsComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.general_id = props.general_id;
+    this.general_id = props.general_id || props.generalData?.id;
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
+    this.updateSpellSlotValues = props.updateSpellSlotValues;
     this.calculateSpellSaveDC = props.calculateSpellSaveDC;
     this.calculateSpellAttackBonus = props.calculateSpellAttackBonus;
 
@@ -92,10 +93,11 @@ export default class SpellsComponent {
 
       const component = new SingleSpell({
         domComponent: elem,
-        general_id: this.general_id,
+        general_id: this.generalData?.id || this.general_id,
         generalData: this.generalData,
         spellSlot: spellSlot,
         updateSpellSlotValue: this.updateSpellSlotValue,
+        updateSpellSlotValues: this.updateSpellSlotValues,
         isCantrip: false,
       });
       return component;
@@ -108,10 +110,11 @@ export default class SpellsComponent {
 
     this.cantripComponent = new SingleSpell({
       domComponent: elem,
-      general_id: this.general_id,
+      general_id: this.generalData?.id || this.general_id,
       spellSlot: { title: "cantrip" },
       generalData: this.generalData,
       updateSpellSlotValue: this.updateSpellSlotValue,
+      updateSpellSlotValues: this.updateSpellSlotValues,
       isCantrip: true,
     });
   };
@@ -140,11 +143,19 @@ export default class SpellsComponent {
     // Initialize cantrip component once
     if (!this.cantripComponent) {
       this.initCantripComponent();
+    } else {
+      this.cantripComponent.generalData = this.generalData;
+      this.cantripComponent.general_id = this.generalData?.id || this.general_id;
     }
 
     // Initialize spell slot components once
     if (!this.spellSlotComponents.length) {
       this.initSpellSlotComponents();
+    } else {
+      this.spellSlotComponents.forEach((component) => {
+        component.generalData = this.generalData;
+        component.general_id = this.generalData?.id || this.general_id;
+      });
     }
 
     this.domComponent.append(
@@ -287,10 +298,11 @@ class SpellInfoComponent {
 class SingleSpell {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.general_id = props.general_id;
+    this.general_id = props.general_id || props.generalData?.id;
     this.spellSlot = props.spellSlot;
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
+    this.updateSpellSlotValues = props.updateSpellSlotValues;
     this.isCantrip = props.isCantrip;
 
     this.spells = [];
@@ -322,7 +334,9 @@ class SingleSpell {
   };
 
   loadSpellsForSlot = async () => {
-    const sheetData = await getSheet(this.general_id);
+    const sheetId = this.generalData?.id || this.general_id;
+    if (!sheetId) return;
+    const sheetData = await getSheet(sheetId);
     const allSpells = sortByNumericId(readSheetArraySection(sheetData, "spells"));
     this.spells = allSpells.filter(
       (spell) =>
@@ -339,7 +353,13 @@ class SingleSpell {
   newSpell = async (type) => {
     this.toggleLoadingNewSpell();
 
-    const spellData = await insertSheetItem(this.general_id, "spells", {
+    const sheetId = this.generalData?.id || this.general_id;
+    if (!sheetId) {
+      this.toggleLoadingNewSpell();
+      return;
+    }
+
+    const spellData = await insertSheetItem(sheetId, "spells", {
       type,
       title: "New Spell",
       description: "Write spell details here...",
@@ -372,7 +392,7 @@ class SingleSpell {
       const elem = createElement("div");
       const spellElem = new SingleSpellElement({
         domComponent: elem,
-        general_id: this.general_id,
+        general_id: this.generalData?.id || this.general_id,
         id: spell.id,
         title: spell.title,
         castingTime: spell.casting_time,
@@ -470,12 +490,29 @@ class SingleSpell {
                 {
                   type: "focusout",
                   event: (e) => {
-                    this.updateSpellSlotValue(
-                      e.target.name,
-                      e.target.valueAsNumber ? e.target.valueAsNumber : 0,
+                    const nextTotal = e.target.valueAsNumber
+                      ? e.target.valueAsNumber
+                      : 0;
+                    const currentExpended = Number(
+                      this.generalData?.spell_slots?.[this.spellSlot.expendedKey] || 0,
                     );
-                    // reset expended
-                    this.updateSpellSlotValue(this.spellSlot.expendedKey, 0);
+                    const nextExpended = Math.max(
+                      0,
+                      Math.min(currentExpended, nextTotal),
+                    );
+                    // reset expended in same request when possible to avoid JSONB write races
+                    if (this.updateSpellSlotValues) {
+                      this.updateSpellSlotValues({
+                        [e.target.name]: nextTotal,
+                        [this.spellSlot.expendedKey]: nextExpended,
+                      });
+                    } else {
+                      this.updateSpellSlotValue(e.target.name, nextTotal);
+                      this.updateSpellSlotValue(
+                        this.spellSlot.expendedKey,
+                        nextExpended,
+                      );
+                    }
                   },
                 },
                 {
@@ -483,10 +520,14 @@ class SingleSpell {
                   event: (e) => {
                     // update expended UI
                     const newVal = e.target.valueAsNumber;
-                    this.expendedElement.totalSpellSlotCount = newVal
+                    const nextTotal = newVal
                       ? newVal
                       : 0;
-                    this.expendedElement.expendedSpellSlotCount = 0;
+                    this.expendedElement.totalSpellSlotCount = nextTotal;
+                    this.expendedElement.expendedSpellSlotCount = Math.max(
+                      0,
+                      Math.min(this.expendedElement.expendedSpellSlotCount, nextTotal),
+                    );
                     this.expendedElement.elems = [];
                     this.expendedElement.render();
                   },

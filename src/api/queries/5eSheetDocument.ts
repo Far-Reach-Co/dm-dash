@@ -5,8 +5,8 @@ export interface DndFiveESheetDocumentRow {
   user_id: number;
   name: string;
   sheet_data: Record<string, unknown>;
-  sheet_schema_version: number;
-  sheet_data_updated_at: string;
+  sheet_schema_version?: number;
+  sheet_data_updated_at?: string;
 }
 
 const DEFAULT_GENERAL_SECTION = {
@@ -58,9 +58,7 @@ async function get5eSheetDocumentQuery(generalId: string | number) {
         id,
         user_id,
         name,
-        sheet_data,
-        sheet_schema_version,
-        sheet_data_updated_at
+        sheet_data
       FROM public."dnd_5e_character_general"
       WHERE id = $1
       LIMIT 1
@@ -89,21 +87,20 @@ async function sync5eSheetGeneralSectionQuery(generalId: string | number) {
               'name',
               g.name,
               'created_at',
-              g.created_at
+              COALESCE(
+                g.sheet_data -> 'general' ->> 'created_at',
+                to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+              )
             )
           ),
           true
-        ),
-        "sheet_schema_version" = 1,
-        "sheet_data_updated_at" = now()
+        )
       WHERE g.id = $1
       RETURNING
         g.id,
         g.user_id,
         g.name,
-        g.sheet_data,
-        g.sheet_schema_version,
-        g.sheet_data_updated_at
+        g.sheet_data
     `,
     values: [generalId, JSON.stringify(DEFAULT_GENERAL_SECTION)],
   };
@@ -113,25 +110,22 @@ async function sync5eSheetGeneralSectionQuery(generalId: string | number) {
 async function save5eSheetDocumentQuery(
   generalId: string | number,
   sheetData: Record<string, unknown>,
-  schemaVersion = 1,
+  _schemaVersion = 1,
 ) {
   const query = {
     text: /*sql*/ `
       UPDATE public."dnd_5e_character_general"
       SET
         "sheet_data" = $2::jsonb,
-        "sheet_schema_version" = $3,
-        "sheet_data_updated_at" = now()
+        "name" = COALESCE(($2::jsonb -> 'general' ->> 'name'), "name")
       WHERE id = $1
       RETURNING
         id,
         user_id,
         name,
-        sheet_data,
-        sheet_schema_version,
-        sheet_data_updated_at
+        sheet_data
     `,
-    values: [generalId, JSON.stringify(sheetData), schemaVersion],
+    values: [generalId, JSON.stringify(sheetData)],
   };
   return await db.query<DndFiveESheetDocumentRow>(query);
 }

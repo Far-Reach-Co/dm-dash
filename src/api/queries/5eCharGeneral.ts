@@ -2,10 +2,6 @@ import { QueryResult } from "pg";
 import db from "../dbconfig";
 import { columnNamesQuery } from "./utils";
 import { sync5eSheetGeneralSectionQuery } from "./5eSheetDocument";
-import {
-  ensureSheetDataDocument,
-  updateSheetDataByGeneralIdQuery,
-} from "./5eSheetDataUtils";
 
 export interface DndFiveEGeneral {
   id: number;
@@ -57,7 +53,7 @@ interface DndFiveEGeneralSheetRow {
   id: number;
   user_id: number;
   name: string;
-  created_at: string;
+  created_at: string | null;
   sheet_data: Record<string, unknown> | null;
 }
 
@@ -114,13 +110,14 @@ function asObject(value: unknown): Record<string, unknown> | null {
 function toGeneralModel(row: DndFiveEGeneralSheetRow): DndFiveEGeneral {
   const sheetData = asObject(row.sheet_data) || {};
   const section = asObject(sheetData.general) || {};
+  const createdAtFallback = row.created_at || new Date(0).toISOString();
   return {
     ...DEFAULT_GENERAL_SECTION,
     ...section,
     id: row.id,
     user_id: row.user_id,
     name: row.name,
-    created_at: row.created_at,
+    created_at: createdAtFallback,
   } as DndFiveEGeneral;
 }
 
@@ -131,7 +128,15 @@ function toQueryResult(rows: DndFiveEGeneral[]): QueryResult<DndFiveEGeneral> {
 async function get5eCharGeneralSheetRowQuery(id: string | number) {
   const query = {
     text: /*sql*/ `
-      SELECT id, user_id, name, created_at, sheet_data
+      SELECT
+        id,
+        user_id,
+        name,
+        COALESCE(
+          sheet_data -> 'general' ->> 'created_at',
+          to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+        ) AS created_at,
+        sheet_data
       FROM public."dnd_5e_character_general"
       WHERE id = $1
       LIMIT 1
@@ -223,7 +228,15 @@ async function get5eCharNamesQuery(ids: (string | number)[]) {
 async function get5eCharsGeneralByUserQuery(userId: string | number) {
   const query = {
     text: /*sql*/ `
-      SELECT id, user_id, name, created_at, sheet_data
+      SELECT
+        id,
+        user_id,
+        name,
+        COALESCE(
+          sheet_data -> 'general' ->> 'created_at',
+          to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+        ) AS created_at,
+        sheet_data
       FROM public."dnd_5e_character_general"
       WHERE user_id = $1
     `,
@@ -242,62 +255,12 @@ async function remove5eCharGeneralQuery(id: string | number) {
   return await db.query<DndFiveEGeneral>(query)
 }
 
-async function edit5eCharGeneralQuery(id: string, data: any) {
-  if (!data || !Object.keys(data).length) {
-    throw new Error("No fields provided for update");
-  }
-
-  const currentData = await get5eCharGeneralSheetRowQuery(id);
-  const current = currentData.rows[0];
-  if (!current) return toQueryResult([]);
-
-  const nextGeneral: DndFiveEGeneral = {
-    ...toGeneralModel(current),
-  };
-  let nextName = current.name;
-  for (const [key, value] of Object.entries(data)) {
-    if (key === "name") {
-      if (typeof value === "string") nextName = value;
-      continue;
-    }
-    if (Object.prototype.hasOwnProperty.call(DEFAULT_GENERAL_SECTION, key)) {
-      (nextGeneral as any)[key] = value;
-    }
-  }
-  nextGeneral.id = current.id;
-  nextGeneral.user_id = current.user_id;
-  nextGeneral.name = nextName;
-  nextGeneral.created_at = current.created_at;
-
-  if (nextName !== current.name) {
-    await db.query({
-      text: /*sql*/ `
-        UPDATE public."dnd_5e_character_general"
-        SET name = $1
-        WHERE id = $2
-      `,
-      values: [nextName, id],
-    });
-  }
-
-  const sheetData = ensureSheetDataDocument({
-    id: current.id,
-    sheet_data: current.sheet_data,
-  });
-  if (!sheetData) return toQueryResult([]);
-  sheetData.general = nextGeneral;
-  await updateSheetDataByGeneralIdQuery(id, sheetData);
-  await sync5eSheetGeneralSectionQuery(id);
-  return await get5eCharGeneralQuery(id);
-}
-
 export {
   add5eCharGeneralQuery,
   get5eCharGeneralUserIdQuery,
   get5eCharsGeneralByUserQuery,
   get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
-  edit5eCharGeneralQuery,
   get5eCharNamesQuery,
   duplicate5eCharGeneralQuery
 }
