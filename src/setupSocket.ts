@@ -14,8 +14,6 @@ import { markdownToChat } from "./lib/markdownToChat.js";
 import { sessionMiddleware } from "./setupApp";
 import { getTableViewByUUIDQuery } from "./api/queries/tableViews";
 import {
-  assertTableCapability,
-  assertTableCapabilities,
   buildGuestSandboxCapabilities,
   requireTablePermission,
 } from "./lib/tableAuthz";
@@ -27,6 +25,63 @@ function parseTableRoomToUUID(tableRoom: unknown): string {
   return tableRoom.replace(/^table-/, "").trim();
 }
 
+const SOCKET_AUTH_CACHE_TTL_MS = 10 * 1000;
+
+type SocketTableAuthCacheEntry = {
+  expiresAt: number;
+  viewAllowed: boolean;
+  editAllowed: boolean;
+  capabilities: TableCapabilities | null;
+};
+
+const socketTableAuthCache = new Map<string, SocketTableAuthCacheEntry>();
+
+function getSocketTableAuthCacheKey(socketId: string, tableUUID: string): string {
+  return `${socketId}:${tableUUID}`;
+}
+
+function getSocketTableAuthCacheEntry(
+  cacheKey: string,
+): SocketTableAuthCacheEntry | null {
+  const entry = socketTableAuthCache.get(cacheKey);
+  if (!entry) return null;
+  if (entry.expiresAt <= Date.now()) {
+    socketTableAuthCache.delete(cacheKey);
+    return null;
+  }
+  return entry;
+}
+
+function setSocketTableAuthCacheEntry(
+  cacheKey: string,
+  entry: Omit<SocketTableAuthCacheEntry, "expiresAt">,
+): SocketTableAuthCacheEntry {
+  const nextEntry: SocketTableAuthCacheEntry = {
+    ...entry,
+    expiresAt: Date.now() + SOCKET_AUTH_CACHE_TTL_MS,
+  };
+  socketTableAuthCache.set(cacheKey, nextEntry);
+  return nextEntry;
+}
+
+function canUseSocketTableAuthEntry(
+  entry: SocketTableAuthCacheEntry,
+  mode: "view" | "edit",
+  capability?: keyof TableCapabilities,
+): boolean {
+  if (mode === "view") return entry.viewAllowed;
+  if (!entry.editAllowed) return false;
+  if (capability) return Boolean(entry.capabilities?.[capability]);
+  return true;
+}
+
+function clearSocketTableAuthCacheForSocket(socketId: string): void {
+  const prefix = `${socketId}:`;
+  for (const key of socketTableAuthCache.keys()) {
+    if (key.startsWith(prefix)) socketTableAuthCache.delete(key);
+  }
+}
+
 async function authorizeSocketTable(
   socket: any,
   tableRoomOrUUID: string,
@@ -35,6 +90,11 @@ async function authorizeSocketTable(
 ) {
   const tableUUID = parseTableRoomToUUID(tableRoomOrUUID);
   if (!tableUUID) return false;
+  const cacheKey = getSocketTableAuthCacheKey(socket.id, tableUUID);
+  const cachedAuth = getSocketTableAuthCacheEntry(cacheKey);
+  if (cachedAuth) {
+    return canUseSocketTableAuthEntry(cachedAuth, mode, capability);
+  }
 
   try {
     const reqForAuth = socket.request as any;
@@ -42,16 +102,29 @@ async function authorizeSocketTable(
     const table = tableData.rows[0];
 
     if (table) {
-      const auth = await requireTablePermission(reqForAuth, table, mode);
-      if (capability) assertTableCapability(auth, capability);
-      return true;
+      const auth = await requireTablePermission(reqForAuth, table, "view");
+      const nextEntry = setSocketTableAuthCacheEntry(cacheKey, {
+        viewAllowed: true,
+        editAllowed: auth.canEdit,
+        capabilities: auth.capabilities,
+      });
+      return canUseSocketTableAuthEntry(nextEntry, mode, capability);
     }
 
     await requireGuestSandboxAccess(reqForAuth, tableUUID);
     const guestCapabilities = buildGuestSandboxCapabilities();
-    assertTableCapabilities(guestCapabilities, mode, capability);
-    return true;
+    const nextEntry = setSocketTableAuthCacheEntry(cacheKey, {
+      viewAllowed: true,
+      editAllowed: true,
+      capabilities: guestCapabilities,
+    });
+    return canUseSocketTableAuthEntry(nextEntry, mode, capability);
   } catch (_err) {
+    setSocketTableAuthCacheEntry(cacheKey, {
+      viewAllowed: false,
+      editAllowed: false,
+      capabilities: null,
+    });
     return false;
   }
 }
@@ -287,6 +360,7 @@ export default function setupSocketHandlers(
 
     // when a user disconnects
     socket.on("disconnect", async () => {
+      clearSocketTableAuthCacheForSocket(socket.id);
       const user = await userLeave(socket.id);
 
       if (user) {
