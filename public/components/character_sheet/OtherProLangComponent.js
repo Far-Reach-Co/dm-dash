@@ -1,6 +1,13 @@
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import createElement from "../../components/createElement.js";
 import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
+import {
+  getSheet,
+  insertSheetItem,
+  readSheetArraySection,
+  removeSheetItem,
+  sortByNumericId,
+  updateSheetItem,
+} from "../../lib/sheetApi.js";
 
 export default class OtherProLangComponent {
   constructor(props) {
@@ -21,9 +28,9 @@ export default class OtherProLangComponent {
 
   newOtherProLang = async () => {
     this.toggleNewLoading();
-    const res = await postThing("/api/add_5e_character_other_pro_lang", {
-      general_id: this.general_id,
+    await insertSheetItem(this.general_id, "otherProLangs", {
       type: null,
+      proficiency: "",
     });
     this.toggleNewLoading();
   };
@@ -44,8 +51,9 @@ export default class OtherProLangComponent {
   };
 
   renderOtherProLangElems = async () => {
-    const otherProLangsData = await getThings(
-      `/api/get_5e_character_other_pro_langs/${this.general_id}`,
+    const sheetData = await getSheet(this.general_id);
+    const otherProLangsData = sortByNumericId(
+      readSheetArraySection(sheetData, "otherProLangs"),
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!otherProLangsData.length)
@@ -73,7 +81,7 @@ export default class OtherProLangComponent {
               type: "change",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_other_pro_lang/${item.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "otherProLangs", item.id, {
                   type: e.target.value,
                 });
               },
@@ -92,7 +100,7 @@ export default class OtherProLangComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_other_pro_lang/${item.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "otherProLangs", item.id, {
                   proficiency: e.target.value,
                 });
               },
@@ -116,7 +124,12 @@ export default class OtherProLangComponent {
                 );
                 if (!confirmed) return;
 
-                deleteThing(`/api/remove_5e_character_other_pro_lang/${item.id}?general_id=${this.general_id}`);
+                const removed = await removeSheetItem(
+                  this.general_id,
+                  "otherProLangs",
+                  item.id,
+                );
+                if (!removed) return;
                 e.target.parentElement.remove();
               },
             },

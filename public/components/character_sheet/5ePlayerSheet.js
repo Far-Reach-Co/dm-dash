@@ -1,5 +1,5 @@
 import createElement from "../../components/createElement.js";
-import { postThing } from "../../lib/apiUtils.js";
+import { patchSheetObject } from "../../lib/sheetApi.js";
 import HPComponent from "./HPComponent.js";
 import OtherProLangComponent from "./OtherProLangComponent.js";
 import AttackComponent from "./AttackComponent.js";
@@ -35,6 +35,8 @@ export default class FiveEPlayerSheet {
     this.generalData = props.params.content;
     // general, background, etc
     this.mainView = "general";
+    this.generalPatchQueue = Promise.resolve();
+    this.spellSlotPatchQueue = Promise.resolve();
 
     // settings view
     this.sheetSettings = new SheetSettings({
@@ -47,12 +49,13 @@ export default class FiveEPlayerSheet {
 
   updateGeneralValue = async (name, value) => {
     this.generalData[name] = value;
-    postThing(`/api/edit_5e_character_general/${this.generalData.id}`, {
-      [name]: value,
-    });
+    this.generalPatchQueue = this.generalPatchQueue
+      .then(() => patchSheetObject(this.generalData.id, "general", { [name]: value }))
+      .catch(() => null);
 
     // Run an update on attack - bonus component element magic words
     this.attemptUpdateAttackComponentMagicWords(name);
+    return this.generalPatchQueue;
   };
 
   attemptUpdateAttackComponentMagicWords(name) {
@@ -76,32 +79,54 @@ export default class FiveEPlayerSheet {
 
   updateBackgroundValue = async (name, value) => {
     this.generalData.background[name] = value;
-    postThing(`/api/edit_5e_character_background/${this.generalData.id}`, {
+    patchSheetObject(this.generalData.id, "background", {
       [name]: value,
     });
   };
 
   updateSpellSlotValue = async (name, value) => {
+    if (!this.generalData.spell_slots) {
+      this.generalData.spell_slots = {};
+    }
     this.generalData.spell_slots[name] = value;
-    const generalId =
-      this.generalData.spell_slots?.general_id || this.generalData.id;
-    if (!generalId) return;
-    postThing(
-      `/api/edit_5e_character_spell_slots/${generalId}`,
-      {
-        [name]: value,
-      },
-    );
+    const patch = { [name]: value };
+    this.enqueueSpellSlotPatch(patch);
+  };
+
+  enqueueSpellSlotPatch = (patch) => {
+    const normalizedPatch = { ...patch };
+
+    // Maintain compatibility with legacy typo keys that still exist on some sheets.
+    if (Object.prototype.hasOwnProperty.call(normalizedPatch, "eighth_total")) {
+      normalizedPatch.eigth_total = normalizedPatch.eighth_total;
+    }
+    if (
+      Object.prototype.hasOwnProperty.call(normalizedPatch, "eighth_expended")
+    ) {
+      normalizedPatch.eigth_expended = normalizedPatch.eighth_expended;
+    }
+
+    this.spellSlotPatchQueue = this.spellSlotPatchQueue
+      .then(() => patchSheetObject(this.generalData.id, "spellSlots", normalizedPatch))
+      .catch(() => null);
+    return this.spellSlotPatchQueue;
+  };
+
+  updateSpellSlotValues = async (patch) => {
+    if (!this.generalData.spell_slots) {
+      this.generalData.spell_slots = {};
+    }
+    Object.entries(patch || {}).forEach(([key, value]) => {
+      this.generalData.spell_slots[key] = value;
+    });
+    this.enqueueSpellSlotPatch(patch || {});
   };
 
   updateProficiencyInfo = async (name, value) => {
     this.generalData.proficiencies[name] = value;
-    postThing(
-      `/api/edit_5e_character_proficiencies/${this.generalData.id}`,
-      {
-        [name]: value,
-      },
-    );
+    patchSheetObject(this.generalData.id, "proficiencies", {
+      [name]: value,
+    });
   };
 
   renderPassivePerceptionComponent = () => {
@@ -643,6 +668,7 @@ export default class FiveEPlayerSheet {
         general_id: this.generalData.id,
         generalData: this.generalData,
         updateSpellSlotValue: this.updateSpellSlotValue,
+        updateSpellSlotValues: this.updateSpellSlotValues,
         calculateAbilityScoreModifier,
         calculateProBonus: () => calculateProBonus(this.generalData.level),
         calculateSpellSaveDC: () => calculateSpellSaveDC(this.generalData),

@@ -1,4 +1,3 @@
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import collectTextNodes from "../../lib/collectTextNodes.js";
 import isInsideSpan from "../../lib/isInsideSpan.js";
 import createElement from "../createElement.js";
@@ -6,6 +5,14 @@ import renderLoadingWithMessage from "../loadingWithMessage.js";
 import { setCaretStartAfter } from "../../lib/caretPositions.js";
 import safeMathEval from "../../lib/safeMathEval.js";
 import tooltip from "../Tooltip.js";
+import {
+  getSheet,
+  insertSheetItem,
+  readSheetArraySection,
+  removeSheetItem,
+  sortByNumericId,
+  updateSheetItem,
+} from "../../lib/sheetApi.js";
 
 export default class AttackComponent {
   constructor(props) {
@@ -324,9 +331,7 @@ export default class AttackComponent {
             e.preventDefault();
             // Extract text preserving magic word keywords
             let newValue = this.extractTextWithMagicWords(e.target);
-            postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
-              damage_type: newValue,
-            });
+            this.updateAttack(item.id, { damage_type: newValue });
           },
         },
         {
@@ -413,9 +418,7 @@ export default class AttackComponent {
                 newBonusValue = e.target.textContent;
               }
             }
-            postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
-              bonus: newBonusValue,
-            });
+            this.updateAttack(item.id, { bonus: newBonusValue });
           },
         },
         {
@@ -599,26 +602,30 @@ export default class AttackComponent {
     );
   };
 
+  updateAttack = async (attackId, patch) => {
+    return await updateSheetItem(this.generalData.id, "attacks", attackId, patch);
+  };
+
   newAttack = async (e) => {
     e.preventDefault();
     this.toggleNewLoading();
 
-    await postThing("/api/add_5e_character_attack", {
-      general_id: this.generalData.id,
+    await insertSheetItem(this.generalData.id, "attacks", {
       title: "New Attack/Spell",
+      description: "",
+      range: "",
+      damage_type: "",
+      bonus: "",
+      duration: "",
     });
 
     this.toggleNewLoading();
   };
 
   renderAttacksElems = async () => {
-    const attacksData = await getThings(
-      `/api/get_5e_character_attacks/${this.generalData.id}`,
-    );
+    const sheetData = await getSheet(this.generalData.id);
+    const attacksData = sortByNumericId(readSheetArraySection(sheetData, "attacks"));
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
-    if (!Array.isArray(attacksData)) {
-      return [createElement("small", {}, "Unable to load attacks right now.")];
-    }
     if (!attacksData.length) return [createElement("small", {}, "None...")];
 
     return attacksData.map((item) => {
@@ -640,9 +647,7 @@ export default class AttackComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
-                  title: e.target.value,
-                });
+                this.updateAttack(item.id, { title: e.target.value });
               },
             },
           ),
@@ -658,9 +663,7 @@ export default class AttackComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
-                  range: e.target.value,
-                });
+                this.updateAttack(item.id, { range: e.target.value });
               },
             },
           ),
@@ -676,9 +679,7 @@ export default class AttackComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_attack/${item.id}?general_id=${this.generalData.id}`, {
-                  duration: e.target.value,
-                });
+                this.updateAttack(item.id, { duration: e.target.value });
               },
             },
           ),
@@ -700,7 +701,12 @@ export default class AttackComponent {
                 );
                 if (!confirmed) return;
 
-                deleteThing(`/api/remove_5e_character_attack/${item.id}?general_id=${this.generalData.id}`);
+                const removed = await removeSheetItem(
+                  this.generalData.id,
+                  "attacks",
+                  item.id,
+                );
+                if (!removed) return;
                 e.target.parentElement.remove();
               },
             },

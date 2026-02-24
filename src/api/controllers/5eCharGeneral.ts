@@ -1,32 +1,18 @@
 import {
-  get5eCharsGeneralByUserQuery,
   add5eCharGeneralQuery,
-  get5eCharGeneralQuery,
   remove5eCharGeneralQuery,
-  edit5eCharGeneralQuery,
-  DndFiveEGeneral,
   duplicate5eCharGeneralQuery,
 } from "../queries/5eCharGeneral";
 import {
   add5eCharProQuery,
-  get5eCharProQuery,
-  get5eCharProByGeneralQuery,
-  edit5eCharProQuery,
-  DndFiveEPro,
   duplicate5eCharProQuery,
 } from "../queries/5eCharPro";
 import {
   add5eCharBackQuery,
-  get5eCharBackQuery,
-  get5eCharBackByGeneralQuery,
-  edit5eCharBackQuery,
-  DndFiveEBackground,
   duplicate5eCharBackQuery,
 } from "../queries/5eCharBack";
 import {
-  get5eCharSpellSlotInfosByGeneralQuery,
   add5eCharSpellSlotInfoQuery,
-  DndFiveESpellSlots,
   duplicate5eCharSpellSlotsQuery,
 } from "../queries/5eCharSpellSlots";
 import { duplicate5eCharAttacksQuery } from "../queries/5eCharAttacks";
@@ -55,9 +41,7 @@ import { duplicate5eCharClassesQuery } from "../queries/5eCharClasses";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import {
   requireProjectEditorAccess,
-  requireSheetEditAccess,
   requireSheetOwnerAccess,
-  requireSheetViewAccess,
 } from "./accessControl";
 import { subscriptionPlanLimits } from "../../lib/subscription";
 
@@ -220,71 +204,6 @@ async function duplicate5eChar(
   }
 }
 
-interface Get5eCharsDataReturnModel extends DndFiveEGeneral {
-  proficiencies: DndFiveEPro;
-  background: DndFiveEBackground;
-  spell_slots: DndFiveESpellSlots;
-}
-
-async function get5eCharsByUser(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    const generalsData = await get5eCharsGeneralByUserQuery(req.session.user);
-    const generals = generalsData.rows;
-    if (generals.length) {
-      for (var general of generals) {
-        const proData = await get5eCharProByGeneralQuery(general.id);
-        const pro = proData.rows[0];
-        const backData = await get5eCharBackByGeneralQuery(general.id);
-        const back = backData.rows[0];
-        const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(
-          general.id
-        );
-        const spellSlots = spellSlotsData.rows[0];
-
-        (general as Get5eCharsDataReturnModel).proficiencies = pro;
-        (general as Get5eCharsDataReturnModel).background = back;
-        (general as Get5eCharsDataReturnModel).spell_slots = spellSlots;
-      }
-    }
-
-    res.send(generals);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function get5eCharGeneral(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const { general } = await requireSheetViewAccess(req, req.params.id);
-
-    const proData = await get5eCharProByGeneralQuery(general.id);
-    const pro = proData.rows[0];
-    const backData = await get5eCharBackByGeneralQuery(general.id);
-    const back = backData.rows[0];
-    const spellSlotsData = await get5eCharSpellSlotInfosByGeneralQuery(
-      general.id
-    );
-    const spellSlots = spellSlotsData.rows[0];
-
-    (general as Get5eCharsDataReturnModel).proficiencies = pro;
-    (general as Get5eCharsDataReturnModel).background = back;
-    (general as Get5eCharsDataReturnModel).spell_slots = spellSlots;
-
-    res.send(general);
-  } catch (err) {
-    next(err);
-  }
-}
-
 async function remove5eChar(req: Request, res: Response, next: NextFunction) {
   try {
     const { general } = await requireSheetOwnerAccess(req, req.params.id);
@@ -324,79 +243,8 @@ async function remove5eChar(req: Request, res: Response, next: NextFunction) {
   }
 }
 
-async function edit5eCharGeneral(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    await requireSheetEditAccess(req, req.params.id);
-
-    // If the "id" field is found, throw an error
-    if (req.body.hasOwnProperty("id")) {
-      throw new Error('Request body cannot contain the "id" field');
-    }
-    if (req.body.hasOwnProperty("user_id")) {
-      throw new Error('Request body cannot contain the "user_id" field');
-    }
-
-    const editData = await edit5eCharGeneralQuery(req.params.id, req.body);
-    res.status(200).send(editData.rows[0]);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
-  try {
-    await requireSheetEditAccess(req, req.params.id);
-    const charProData = await get5eCharProQuery(req.params.id);
-    const charPro = charProData.rows[0];
-    if (!charPro) throw { status: 404, message: "Proficiencies not found" };
-
-    // If the "id" field is found, throw an error
-    if (req.body.hasOwnProperty("id")) {
-      throw new Error('Request body cannot contain the "id" field');
-    }
-    if (req.body.hasOwnProperty("general_id")) {
-      throw new Error('Request body cannot contain the "general_id" field');
-    }
-
-    const data = await edit5eCharProQuery(req.params.id, req.body);
-    res.status(200).send(data.rows[0]);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function edit5eCharBack(req: Request, res: Response, next: NextFunction) {
-  try {
-    await requireSheetEditAccess(req, req.params.id);
-    const charBackData = await get5eCharBackQuery(req.params.id);
-    const charBack = charBackData.rows[0];
-    if (!charBack) throw { status: 404, message: "Background not found" };
-
-    // If the "id" field is found, throw an error
-    if (req.body.hasOwnProperty("id")) {
-      throw new Error('Request body cannot contain the "id" field');
-    }
-    if (req.body.hasOwnProperty("general_id")) {
-      throw new Error('Request body cannot contain the "general_id" field');
-    }
-    const data = await edit5eCharBackQuery(req.params.id, req.body);
-    res.status(200).send(data.rows[0]);
-  } catch (err) {
-    next(err);
-  }
-}
-
 export {
   add5eChar,
-  get5eCharsByUser,
-  get5eCharGeneral,
   remove5eChar,
-  edit5eCharGeneral,
-  edit5eCharPro,
-  edit5eCharBack,
   duplicate5eChar,
 };

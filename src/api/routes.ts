@@ -79,46 +79,10 @@ import {
 } from "./controllers/library.js";
 // for uploading files
 import {
-  get5eCharsByUser,
   add5eChar,
   remove5eChar,
-  edit5eCharGeneral,
-  edit5eCharPro,
-  edit5eCharBack,
-  get5eCharGeneral,
   duplicate5eChar,
 } from "./controllers/5eCharGeneral.js";
-import {
-  get5eCharOtherProLangsByGeneral,
-  add5eCharOtherProLang,
-  remove5eCharOtherProLang,
-  edit5eCharOtherProLang,
-} from "./controllers/5eCharOtherProLang.js";
-import {
-  get5eCharAttacksByGeneral,
-  add5eCharAttack,
-  remove5eCharAttack,
-  edit5eCharAttack,
-} from "./controllers/5eCharAttacks.js";
-import {
-  get5eCharEquipmentsByGeneral,
-  add5eCharEquipment,
-  remove5eCharEquipment,
-  edit5eCharEquipment,
-} from "./controllers/5eCharEquipment.js";
-import {
-  get5eCharFeatsByGeneral,
-  add5eCharFeat,
-  remove5eCharFeat,
-  edit5eCharFeat,
-} from "./controllers/5eCharFeats.js";
-import { edit5eCharSpellSlotInfo } from "./controllers/5eCharSpellSlots.js";
-import {
-  get5eCharSpellsByType,
-  add5eCharSpell,
-  remove5eCharSpell,
-  edit5eCharSpell,
-} from "./controllers/5eCharSpells.js";
 import {
   addProjectPlayer,
   removeProjectPlayer,
@@ -186,12 +150,7 @@ import {
   getCommands,
   interactionsController,
 } from "./controllers/discordBot.js";
-import {
-  add5eCharClass,
-  edit5eCharClass,
-  get5eCharClassesByGeneral,
-  remove5eCharClass,
-} from "./controllers/5eCharClasses.js";
+import { applySheetOps, getSheet } from "./controllers/sheets.js";
 import {
   addRecordByProject,
   addRecordByUser,
@@ -223,16 +182,37 @@ import { csrfProtection } from "../routes.js";
 var router = Router();
 
 // Global API rate limiter
+const isHighFrequencySheetEndpoint = (path: string) => {
+  return path.startsWith("/sheets/");
+};
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // 200 requests per 15 min per IP
   standardHeaders: true,
   legacyHeaders: false,
+  // Character sheet UIs fire many API calls rapidly (autosave, quick refreshes).
+  // Use a dedicated limiter for those endpoints instead of sharing the global bucket.
+  skip: (req) => isHighFrequencySheetEndpoint(req.path || ""),
   message: {
     message: "Too many requests, please try again later",
   },
 });
 router.use(apiLimiter);
+
+const sheetApiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 600, // allow bursty autosave/update traffic for sheet editing
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const userKey = req.session?.user ? `user:${req.session.user}` : `ip:${req.ip}`;
+    return `${userKey}:sheet-api`;
+  },
+  message: {
+    message: "Too many sheet requests, please wait a moment and try again",
+  },
+});
 
 const guestSandboxStartLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
@@ -412,60 +392,11 @@ router.post("/add_player_invite", addPlayerInvite);
 router.delete("/remove_player_invite/:id", removePlayerInvite);
 
 // 5e characters general, proficiencies, background, spell slots
-router.get("/get_5e_characters_by_user", get5eCharsByUser);
-router.get("/get_5e_character_general/:id", get5eCharGeneral);
+router.get("/sheets/:id", sheetApiLimiter, getSheet);
+router.post("/sheets/:id/ops", sheetApiLimiter, applySheetOps);
 router.post("/add_5e_character", add5eChar);
 router.delete("/remove_5e_character/:id", remove5eChar);
 router.post("/duplicate_5e_character", duplicate5eChar);
-router.post("/edit_5e_character_general/:id", edit5eCharGeneral);
-router.post("/edit_5e_character_proficiencies/:id", edit5eCharPro);
-router.post("/edit_5e_character_background/:id", edit5eCharBack);
-router.post("/edit_5e_character_spell_slots/:id", edit5eCharSpellSlotInfo);
-
-// 5e characters attacks
-router.get("/get_5e_character_attacks/:general_id", get5eCharAttacksByGeneral);
-router.post("/add_5e_character_attack", add5eCharAttack);
-router.delete("/remove_5e_character_attack/:id", remove5eCharAttack);
-router.post("/edit_5e_character_attack/:id", edit5eCharAttack);
-
-// 5e characters spells
-router.get("/get_5e_character_spells/:general_id/:type", get5eCharSpellsByType);
-router.post("/add_5e_character_spell", add5eCharSpell);
-router.delete("/remove_5e_character_spell/:id", remove5eCharSpell);
-router.post("/edit_5e_character_spell/:id", edit5eCharSpell);
-
-// 5e characters feats/traits
-router.get("/get_5e_character_feats/:general_id", get5eCharFeatsByGeneral);
-router.post("/add_5e_character_feat", add5eCharFeat);
-router.delete("/remove_5e_character_feat/:id", remove5eCharFeat);
-router.post("/edit_5e_character_feat/:id", edit5eCharFeat);
-
-// 5e characters equipments
-router.get(
-  "/get_5e_character_equipments/:general_id",
-  get5eCharEquipmentsByGeneral
-);
-router.post("/add_5e_character_equipment", add5eCharEquipment);
-router.delete("/remove_5e_character_equipment/:id", remove5eCharEquipment);
-router.post("/edit_5e_character_equipment/:id", edit5eCharEquipment);
-
-// 5e characters other proficiencies and languages
-router.get(
-  "/get_5e_character_other_pro_langs/:general_id",
-  get5eCharOtherProLangsByGeneral
-);
-router.post("/add_5e_character_other_pro_lang", add5eCharOtherProLang);
-router.delete(
-  "/remove_5e_character_other_pro_lang/:id",
-  remove5eCharOtherProLang
-);
-router.post("/edit_5e_character_other_pro_lang/:id", edit5eCharOtherProLang);
-
-// 5e characters classes
-router.get("/get_5e_character_classes/:general_id", get5eCharClassesByGeneral);
-router.post("/add_5e_character_class", add5eCharClass);
-router.delete("/remove_5e_character_class/:id", remove5eCharClass);
-router.post("/edit_5e_character_class/:id", edit5eCharClass);
 
 // months
 router.get("/get_months/:calendar_id", getMonths);

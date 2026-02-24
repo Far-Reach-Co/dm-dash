@@ -4,10 +4,14 @@ import renderTierLimitWarning from "../components/renderTierLimitWarning.js";
 async function getThings(endpoint) {
   try {
     const res = await fetch(endpoint, {});
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
     if (res.status === 200) {
       return data;
-    } else throw new Error();
+    } else {
+      const message = data?.error?.message || data?.message || "Request failed";
+      console.error(`GET ${endpoint} -> ${res.status}: ${message}`);
+      throw new Error(message);
+    }
   } catch (err) {
     console.log(err);
     return null;
@@ -39,7 +43,7 @@ async function postThing(endpoint, body) {
       },
       body: JSON.stringify(body),
     });
-    const data = await res.json();
+    const data = await res.json().catch(() => null);
     if (res.status === 200 || res.status === 201) {
       // toast.show("Success");
       return data;
@@ -73,8 +77,11 @@ async function postThing(endpoint, body) {
       );
       return null;
     } else {
-      let error = new Error();
+      let error = new Error(data?.error?.message || data?.message || "Request failed");
       if (data && data.error) error = data.error;
+      console.error(
+        `POST ${endpoint} -> ${res.status}: ${data?.error?.message || data?.message || "Request failed"}`,
+      );
       throw error;
     }
   } catch (err) {

@@ -204,7 +204,7 @@ export function getSpellSlotExpendedByOption(
     case "seventh-level":
       return spellInfo.seventh_expended;
     case "eighth-level":
-      return spellInfo.eigth_expended;
+      return (spellInfo as any).eighth_expended ?? (spellInfo as any).eigth_expended;
     case "nineth-level":
       return spellInfo.nineth_expended;
     default:
@@ -231,7 +231,7 @@ export function getSpellSlotTotalByOption(
     case "seventh-level":
       return spellInfo.seventh_total;
     case "eighth-level":
-      return spellInfo.eigth_total;
+      return (spellInfo as any).eighth_total ?? (spellInfo as any).eigth_total;
     case "nineth-level":
       return spellInfo.nineth_total;
     default:

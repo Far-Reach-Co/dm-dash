@@ -35,8 +35,6 @@
     "migrate:create": "node-pg-migrate create",
     "sitemap": "tsx src/tools/generate-sitemap.ts",
     "sitemap:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/generate-sitemap.js",
-    "backfill:equipment-desc": "bash ./scripts/ops/run_with_env.sh tsx src/tools/backfill-equipment-descriptions.ts",
-    "backfill:equipment-desc:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/backfill-equipment-descriptions.js",
     "srd:download": "tsx src/tools/download-5e-srd.ts",
     "srd:download:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/download-5e-srd.js",
     "email:product-update": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendProductUpdateEmail.js",

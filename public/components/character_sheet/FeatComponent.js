@@ -1,7 +1,14 @@
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import getDataByQuery from "../../lib/getDataByQuery.js";
 import createElement from "../createElement.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
+import {
+  getSheet,
+  insertSheetItem,
+  readSheetArraySection,
+  removeSheetItem,
+  sortByNumericId,
+  updateSheetItem,
+} from "../../lib/sheetApi.js";
 
 // load features for suggestions on input
 let featSuggestions = [];
@@ -46,26 +53,14 @@ export default class FeatComponent {
     e.preventDefault();
     this.toggleNewLoading();
 
-    const featData = await postThing("/api/add_5e_character_feat", {
-      general_id: this.general_id,
+    const featData = await insertSheetItem(this.general_id, "feats", {
       type: "Class",
       title: "New Feat/Trait",
       description: "Write description here...",
     });
     if (featData) {
-      const elem = createElement("div");
-      const featElement = new SingleFeatComponent({
-        parentRemoveItem: this.removeItem,
-        domComponent: elem,
-        renderTypeSelectOptions: this.renderTypeSelectOptions,
-        general_id: this.general_id,
-        id: featData.id,
-        type: featData.type,
-        title: featData.title,
-        description: featData.description,
-      });
-      // save the components
-      this.featElements.push(featElement);
+      // Force a fresh fetch so we don't depend on legacy add endpoint response shape.
+      this.featElements = [];
     }
     this.toggleNewLoading();
   };
@@ -91,9 +86,8 @@ export default class FeatComponent {
       return this.featElements.map((item) => item.domComponent);
     }
 
-    const featsData = await getThings(
-      `/api/get_5e_character_feats/${this.general_id}`,
-    );
+    const sheetData = await getSheet(this.general_id);
+    const featsData = sortByNumericId(readSheetArraySection(sheetData, "feats"));
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!featsData.length) return [createElement("small", {}, "None...")];
 
@@ -235,7 +229,7 @@ class SingleFeatComponent {
             // local
             this.description = e.target.value;
             // db
-            postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
+            updateSheetItem(this.general_id, "feats", this.id, {
               description: e.target.value,
             });
           },
@@ -252,7 +246,7 @@ class SingleFeatComponent {
     this.title = titleInput.value;
     this.description = descriptionInput.value;
     // save to db
-    postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
+    updateSheetItem(this.general_id, "feats", this.id, {
       title: titleInput.value,
       description: descriptionInput.value,
     });
@@ -404,7 +398,7 @@ class SingleFeatComponent {
                           // update local state
                           this.title = e.target.value;
                           // update db state
-                          postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
+                          updateSheetItem(this.general_id, "feats", this.id, {
                             title: e.target.value,
                           });
                         },
@@ -435,7 +429,12 @@ class SingleFeatComponent {
                         );
                         if (!confirmed) return;
 
-                        deleteThing(`/api/remove_5e_character_feat/${this.id}?general_id=${this.general_id}`);
+                        const removed = await removeSheetItem(
+                          this.general_id,
+                          "feats",
+                          this.id,
+                        );
+                        if (!removed) return;
                         this.parentRemoveItem(this.id);
                       },
                     },
@@ -463,7 +462,7 @@ class SingleFeatComponent {
                 // local
                 this.type = e.target.value;
                 // db
-                postThing(`/api/edit_5e_character_feat/${this.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "feats", this.id, {
                   type: e.target.value,
                 });
               },

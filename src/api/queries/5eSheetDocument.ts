@@ -5,9 +5,51 @@ export interface DndFiveESheetDocumentRow {
   user_id: number;
   name: string;
   sheet_data: Record<string, unknown>;
-  sheet_schema_version: number;
-  sheet_data_updated_at: string;
+  sheet_schema_version?: number;
+  sheet_data_updated_at?: string;
 }
+
+const DEFAULT_GENERAL_SECTION = {
+  race: "",
+  class: "",
+  level: 0,
+  exp: 0,
+  inspiration: false,
+  initiative: 0,
+  speed: 0,
+  armor_class: 0,
+  current_hp: 0,
+  temp_hp: 0,
+  hit_dice: 0,
+  strength: 0,
+  dexterity: 0,
+  constitution: 0,
+  intelligence: 0,
+  wisdom: 0,
+  charisma: 0,
+  max_hp: 0,
+  hit_dice_total: "",
+  class_resource: 0,
+  class_resource_total: 0,
+  other_resource: "",
+  other_resource_total: "",
+  ds_success_1: false,
+  ds_success_2: false,
+  ds_success_3: false,
+  ds_failure_1: false,
+  ds_failure_2: false,
+  ds_failure_3: false,
+  class_resource_title: "",
+  other_resource_title: "",
+  wisdom_mod: 0,
+  subclass: "",
+  other_class: "",
+  copper: 0,
+  silver: 0,
+  electrum: 0,
+  gold: 0,
+  platinum: 0,
+};
 
 async function get5eSheetDocumentQuery(generalId: string | number) {
   const query = {
@@ -16,112 +58,10 @@ async function get5eSheetDocumentQuery(generalId: string | number) {
         id,
         user_id,
         name,
-        sheet_data,
-        sheet_schema_version,
-        sheet_data_updated_at
+        sheet_data
       FROM public."dnd_5e_character_general"
       WHERE id = $1
       LIMIT 1
-    `,
-    values: [generalId],
-  };
-  return await db.query<DndFiveESheetDocumentRow>(query);
-}
-
-async function refresh5eSheetDocumentFromRelationalQuery(generalId: string | number) {
-  const query = {
-    text: /*sql*/ `
-      UPDATE public."dnd_5e_character_general" g
-      SET
-        "sheet_data" = jsonb_build_object(
-          'general',
-          to_jsonb(g) - 'sheet_data' - 'sheet_schema_version' - 'sheet_data_updated_at',
-          'proficiencies',
-          (
-            SELECT to_jsonb(p)
-            FROM public."dnd_5e_character_proficiencies" p
-            WHERE p.general_id = g.id
-            LIMIT 1
-          ),
-          'background',
-          (
-            SELECT to_jsonb(b)
-            FROM public."dnd_5e_character_background" b
-            WHERE b.general_id = g.id
-            LIMIT 1
-          ),
-          'spellSlots',
-          (
-            SELECT to_jsonb(ss)
-            FROM public."dnd_5e_spell_slots" ss
-            WHERE ss.general_id = g.id
-            LIMIT 1
-          ),
-          'classes',
-          COALESCE(
-            (
-              SELECT jsonb_agg(to_jsonb(c) ORDER BY c.id)
-              FROM public."dnd_5e_class" c
-              WHERE c.general_id = g.id
-            ),
-            '[]'::jsonb
-          ),
-          'attacks',
-          COALESCE(
-            (
-              SELECT jsonb_agg(to_jsonb(a) ORDER BY a.id)
-              FROM public."dnd_5e_character_attack" a
-              WHERE a.general_id = g.id
-            ),
-            '[]'::jsonb
-          ),
-          'spells',
-          COALESCE(
-            (
-              SELECT jsonb_agg(to_jsonb(s) ORDER BY s.id)
-              FROM public."dnd_5e_character_spell" s
-              WHERE s.general_id = g.id
-            ),
-            '[]'::jsonb
-          ),
-          'feats',
-          COALESCE(
-            (
-              SELECT jsonb_agg(to_jsonb(f) ORDER BY f.id)
-              FROM public."dnd_5e_character_feat_trait" f
-              WHERE f.general_id = g.id
-            ),
-            '[]'::jsonb
-          ),
-          'equipment',
-          COALESCE(
-            (
-              SELECT jsonb_agg(to_jsonb(eq) ORDER BY eq.id)
-              FROM public."dnd_5e_character_equipment" eq
-              WHERE eq.general_id = g.id
-            ),
-            '[]'::jsonb
-          ),
-          'otherProLangs',
-          COALESCE(
-            (
-              SELECT jsonb_agg(to_jsonb(opl) ORDER BY opl.id)
-              FROM public."dnd_5e_character_other_pro_lang" opl
-              WHERE opl.general_id = g.id
-            ),
-            '[]'::jsonb
-          )
-        ),
-        "sheet_schema_version" = 1,
-        "sheet_data_updated_at" = now()
-      WHERE g.id = $1
-      RETURNING
-        g.id,
-        g.user_id,
-        g.name,
-        g.sheet_data,
-        g.sheet_schema_version,
-        g.sheet_data_updated_at
     `,
     values: [generalId],
   };
@@ -136,21 +76,33 @@ async function sync5eSheetGeneralSectionQuery(generalId: string | number) {
         "sheet_data" = jsonb_set(
           COALESCE(g.sheet_data, '{}'::jsonb),
           '{general}',
-          to_jsonb(g) - 'sheet_data' - 'sheet_schema_version' - 'sheet_data_updated_at',
+          (
+            $2::jsonb
+            || COALESCE(g.sheet_data -> 'general', '{}'::jsonb)
+            || jsonb_build_object(
+              'id',
+              g.id,
+              'user_id',
+              g.user_id,
+              'name',
+              g.name,
+              'created_at',
+              COALESCE(
+                g.sheet_data -> 'general' ->> 'created_at',
+                to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+              )
+            )
+          ),
           true
-        ),
-        "sheet_schema_version" = 1,
-        "sheet_data_updated_at" = now()
+        )
       WHERE g.id = $1
       RETURNING
         g.id,
         g.user_id,
         g.name,
-        g.sheet_data,
-        g.sheet_schema_version,
-        g.sheet_data_updated_at
+        g.sheet_data
     `,
-    values: [generalId],
+    values: [generalId, JSON.stringify(DEFAULT_GENERAL_SECTION)],
   };
   return await db.query<DndFiveESheetDocumentRow>(query);
 }
@@ -158,32 +110,28 @@ async function sync5eSheetGeneralSectionQuery(generalId: string | number) {
 async function save5eSheetDocumentQuery(
   generalId: string | number,
   sheetData: Record<string, unknown>,
-  schemaVersion = 1,
+  _schemaVersion = 1,
 ) {
   const query = {
     text: /*sql*/ `
       UPDATE public."dnd_5e_character_general"
       SET
         "sheet_data" = $2::jsonb,
-        "sheet_schema_version" = $3,
-        "sheet_data_updated_at" = now()
+        "name" = COALESCE(($2::jsonb -> 'general' ->> 'name'), "name")
       WHERE id = $1
       RETURNING
         id,
         user_id,
         name,
-        sheet_data,
-        sheet_schema_version,
-        sheet_data_updated_at
+        sheet_data
     `,
-    values: [generalId, JSON.stringify(sheetData), schemaVersion],
+    values: [generalId, JSON.stringify(sheetData)],
   };
   return await db.query<DndFiveESheetDocumentRow>(query);
 }
 
 export {
   get5eSheetDocumentQuery,
-  refresh5eSheetDocumentFromRelationalQuery,
   sync5eSheetGeneralSectionQuery,
   save5eSheetDocumentQuery,
 };

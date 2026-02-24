@@ -1,7 +1,14 @@
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import createElement from "../createElement.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import getDataByQuery from "../../lib/getDataByQuery.js";
+import {
+  getSheet,
+  insertSheetItem,
+  readSheetArraySection,
+  removeSheetItem,
+  sortByNumericId,
+  updateSheetItem,
+} from "../../lib/sheetApi.js";
 
 // load spells for suggestions on input
 let spellSuggestions = [];
@@ -14,9 +21,10 @@ fetch("/lib/data/2014/5e-srd-spells.json")
 export default class SpellsComponent {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.general_id = props.general_id;
+    this.general_id = props.general_id || props.generalData?.id;
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
+    this.updateSpellSlotValues = props.updateSpellSlotValues;
     this.calculateSpellSaveDC = props.calculateSpellSaveDC;
     this.calculateSpellAttackBonus = props.calculateSpellAttackBonus;
 
@@ -85,10 +93,11 @@ export default class SpellsComponent {
 
       const component = new SingleSpell({
         domComponent: elem,
-        general_id: this.general_id,
+        general_id: this.generalData?.id || this.general_id,
         generalData: this.generalData,
         spellSlot: spellSlot,
         updateSpellSlotValue: this.updateSpellSlotValue,
+        updateSpellSlotValues: this.updateSpellSlotValues,
         isCantrip: false,
       });
       return component;
@@ -101,10 +110,11 @@ export default class SpellsComponent {
 
     this.cantripComponent = new SingleSpell({
       domComponent: elem,
-      general_id: this.general_id,
+      general_id: this.generalData?.id || this.general_id,
       spellSlot: { title: "cantrip" },
       generalData: this.generalData,
       updateSpellSlotValue: this.updateSpellSlotValue,
+      updateSpellSlotValues: this.updateSpellSlotValues,
       isCantrip: true,
     });
   };
@@ -133,11 +143,19 @@ export default class SpellsComponent {
     // Initialize cantrip component once
     if (!this.cantripComponent) {
       this.initCantripComponent();
+    } else {
+      this.cantripComponent.generalData = this.generalData;
+      this.cantripComponent.general_id = this.generalData?.id || this.general_id;
     }
 
     // Initialize spell slot components once
     if (!this.spellSlotComponents.length) {
       this.initSpellSlotComponents();
+    } else {
+      this.spellSlotComponents.forEach((component) => {
+        component.generalData = this.generalData;
+        component.general_id = this.generalData?.id || this.general_id;
+      });
     }
 
     this.domComponent.append(
@@ -280,10 +298,11 @@ class SpellInfoComponent {
 class SingleSpell {
   constructor(props) {
     this.domComponent = props.domComponent;
-    this.general_id = props.general_id;
+    this.general_id = props.general_id || props.generalData?.id;
     this.spellSlot = props.spellSlot;
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
+    this.updateSpellSlotValues = props.updateSpellSlotValues;
     this.isCantrip = props.isCantrip;
 
     this.spells = [];
@@ -309,13 +328,21 @@ class SingleSpell {
   }
 
   init = async () => {
-    // init spells
-    const spells = await getThings(
-      `/api/get_5e_character_spells/${this.general_id}/${this.spellSlot.title}`,
-    );
-    if (spells.length) this.spells = spells;
+    await this.loadSpellsForSlot();
 
     this.render();
+  };
+
+  loadSpellsForSlot = async () => {
+    const sheetId = this.generalData?.id || this.general_id;
+    if (!sheetId) return;
+    const sheetData = await getSheet(sheetId);
+    const allSpells = sortByNumericId(readSheetArraySection(sheetData, "spells"));
+    this.spells = allSpells.filter(
+      (spell) =>
+        String(spell.type || "").toLowerCase() ===
+        String(this.spellSlot.title || "").toLowerCase(),
+    );
   };
 
   toggleLoadingNewSpell = () => {
@@ -326,31 +353,24 @@ class SingleSpell {
   newSpell = async (type) => {
     this.toggleLoadingNewSpell();
 
-    const spellData = await postThing("/api/add_5e_character_spell", {
-      general_id: this.general_id,
+    const sheetId = this.generalData?.id || this.general_id;
+    if (!sheetId) {
+      this.toggleLoadingNewSpell();
+      return;
+    }
+
+    const spellData = await insertSheetItem(sheetId, "spells", {
       type,
       title: "New Spell",
       description: "Write spell details here...",
+      casting_time: "",
+      duration: "",
+      range: "",
+      damage_type: "",
+      components: "",
     });
     if (spellData) {
-      const elem = createElement("div");
-      const spellElement = new SingleSpellElement({
-        domComponent: elem,
-        general_id: this.general_id,
-        id: spellData.id,
-        title: spellData.title,
-        castingTime: spellData.casting_time,
-        duration: spellData.duration,
-        range: spellData.range,
-        damgeType: spellData.damage_type,
-        components: spellData.components,
-        description: spellData.description,
-        parentRemoveItem: this.removeItem,
-      });
-      // update local state
-      this.spells.push(spellData);
-      // save the elems
-      this.spellElements.push(spellElement);
+      await this.loadSpellsForSlot();
     }
     this.toggleLoadingNewSpell();
   };
@@ -372,7 +392,7 @@ class SingleSpell {
       const elem = createElement("div");
       const spellElem = new SingleSpellElement({
         domComponent: elem,
-        general_id: this.general_id,
+        general_id: this.generalData?.id || this.general_id,
         id: spell.id,
         title: spell.title,
         castingTime: spell.casting_time,
@@ -470,12 +490,29 @@ class SingleSpell {
                 {
                   type: "focusout",
                   event: (e) => {
-                    this.updateSpellSlotValue(
-                      e.target.name,
-                      e.target.valueAsNumber ? e.target.valueAsNumber : 0,
+                    const nextTotal = e.target.valueAsNumber
+                      ? e.target.valueAsNumber
+                      : 0;
+                    const currentExpended = Number(
+                      this.generalData?.spell_slots?.[this.spellSlot.expendedKey] || 0,
                     );
-                    // reset expended
-                    this.updateSpellSlotValue(this.spellSlot.expendedKey, 0);
+                    const nextExpended = Math.max(
+                      0,
+                      Math.min(currentExpended, nextTotal),
+                    );
+                    // reset expended in same request when possible to avoid JSONB write races
+                    if (this.updateSpellSlotValues) {
+                      this.updateSpellSlotValues({
+                        [e.target.name]: nextTotal,
+                        [this.spellSlot.expendedKey]: nextExpended,
+                      });
+                    } else {
+                      this.updateSpellSlotValue(e.target.name, nextTotal);
+                      this.updateSpellSlotValue(
+                        this.spellSlot.expendedKey,
+                        nextExpended,
+                      );
+                    }
                   },
                 },
                 {
@@ -483,10 +520,14 @@ class SingleSpell {
                   event: (e) => {
                     // update expended UI
                     const newVal = e.target.valueAsNumber;
-                    this.expendedElement.totalSpellSlotCount = newVal
+                    const nextTotal = newVal
                       ? newVal
                       : 0;
-                    this.expendedElement.expendedSpellSlotCount = 0;
+                    this.expendedElement.totalSpellSlotCount = nextTotal;
+                    this.expendedElement.expendedSpellSlotCount = Math.max(
+                      0,
+                      Math.min(this.expendedElement.expendedSpellSlotCount, nextTotal),
+                    );
                     this.expendedElement.elems = [];
                     this.expendedElement.render();
                   },
@@ -629,11 +670,11 @@ class SingleSpellElement {
     this.duration = durationInput.value;
     this.range = rangeInput.value;
     this.damageType = damageTypeInput.value;
-    this.components = componentsInput.components;
+    this.components = componentsInput.value;
     this.description = descriptionInput.value;
 
     // then save to db
-    postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+    updateSheetItem(this.general_id, "spells", this.id, {
       title: titleInput.value,
       casting_time: castingTimeInput.value,
       duration: durationInput.value,
@@ -746,7 +787,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "spells", this.id, {
                   casting_time: e.target.value,
                 });
                 // update UI
@@ -770,7 +811,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "spells", this.id, {
                   duration: e.target.value,
                 });
                 // update UI
@@ -794,7 +835,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "spells", this.id, {
                   range: e.target.value,
                 });
                 // update UI
@@ -818,7 +859,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "spells", this.id, {
                   damage_type: e.target.value,
                 });
                 // update UI
@@ -842,7 +883,7 @@ class SingleSpellElement {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "spells", this.id, {
                   components: e.target.value,
                 });
                 // update UI
@@ -865,7 +906,7 @@ class SingleSpellElement {
             type: "focusout",
             event: (e) => {
               e.preventDefault();
-              postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+              updateSheetItem(this.general_id, "spells", this.id, {
                 description: e.target.value,
               });
               // update UI
@@ -940,7 +981,7 @@ class SingleSpellElement {
                       // hide suggestions
                       this.resetAndHideSpellSuggestions();
                       // send data
-                      postThing(`/api/edit_5e_character_spell/${this.id}?general_id=${this.general_id}`, {
+                      updateSheetItem(this.general_id, "spells", this.id, {
                         title: e.target.value,
                       });
                       // update UI
@@ -973,7 +1014,12 @@ class SingleSpellElement {
                     );
                     if (!confirmed) return;
 
-                    deleteThing(`/api/remove_5e_character_spell/${this.id}?general_id=${this.general_id}`);
+                    const removed = await removeSheetItem(
+                      this.general_id,
+                      "spells",
+                      this.id,
+                    );
+                    if (!removed) return;
                     this.parentRemoveItem(this.id);
                   },
                 },
