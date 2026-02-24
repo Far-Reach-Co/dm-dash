@@ -1,0 +1,188 @@
+import type { AuthorizeSocketTable } from "./tableSocketAuth";
+
+export function registerTableInteractionHandlers(params: {
+  socket: any;
+  authorizeSocketTable: AuthorizeSocketTable;
+  parseTableRoomToUUID: (tableRoom: unknown) => string;
+  broadcastTableChangeToAuthorizedSockets: (
+    sourceTableRoom: string,
+    targetTableUUID: string,
+    excludeSocketId?: string,
+  ) => Promise<void>;
+}) {
+  const {
+    socket,
+    authorizeSocketTable,
+    parseTableRoomToUUID,
+    broadcastTableChangeToAuthorizedSockets,
+  } = params;
+
+  socket.on(
+    "grid-toggled",
+    async ({ table, gridState }: { table: string; gridState: boolean }) => {
+      const canManageGrid = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canManageGrid",
+      );
+      if (!canManageGrid) return;
+      socket.broadcast.to(table).emit("grid-toggle", gridState);
+    },
+  );
+
+  socket.on(
+    "grid-resized",
+    async ({
+      table,
+      gridState,
+    }: {
+      table: string;
+      gridState: { width: string | number; height: string | number };
+    }) => {
+      const canManageGrid = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canManageGrid",
+      );
+      if (!canManageGrid) return;
+      socket.broadcast.to(table).emit("grid-resize", gridState);
+    },
+  );
+
+  socket.on(
+    "table-changed",
+    async ({ table, newTableUUID }: { table: string; newTableUUID: string }) => {
+      try {
+        if (!table || !newTableUUID) return;
+        const currentTableUUID = parseTableRoomToUUID(table);
+        if (!currentTableUUID) return;
+
+        const canChangeCurrentTable = await authorizeSocketTable(
+          socket,
+          currentTableUUID,
+          "edit",
+          "canChangeTable",
+        );
+        if (!canChangeCurrentTable) return;
+
+        const canViewTargetTable = await authorizeSocketTable(
+          socket,
+          String(newTableUUID),
+          "view",
+        );
+        if (!canViewTargetTable) return;
+
+        await broadcastTableChangeToAuthorizedSockets(
+          table,
+          String(newTableUUID),
+          socket.id,
+        );
+      } catch (err) {
+        console.log("Blocked unauthorized table-changed event", err);
+      }
+    },
+  );
+
+  socket.on(
+    "image-added",
+    async ({ table, image }: { table: string; image: any }) => {
+      const canEditTableData = await authorizeSocketTable(
+        socket,
+        table,
+        "view",
+        "canEditTableData",
+      );
+      if (!canEditTableData) return;
+      socket.broadcast.to(table).emit("image-add", image);
+    },
+  );
+
+  socket.on(
+    "image-removed",
+    async ({ table, id }: { table: string; id: string }) => {
+      const canDeleteObjects = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canDeleteCanvasObjects",
+      );
+      if (!canDeleteObjects) return;
+      socket.broadcast.to(table).emit("image-remove", id);
+    },
+  );
+
+  socket.on(
+    "image-moved",
+    async ({ table, image }: { table: string; image: any }) => {
+      const canEditTableData = await authorizeSocketTable(
+        socket,
+        table,
+        "view",
+        "canEditTableData",
+      );
+      if (!canEditTableData) return;
+      socket.broadcast.to(table).emit("image-move", image);
+    },
+  );
+
+  socket.on(
+    "object-changed-layer",
+    async ({ table, id }: { table: string; id: string }) => {
+      const canManageLayers = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canManageLayers",
+      );
+      if (!canManageLayers) return;
+      socket.broadcast.to(table).emit("object-change-layer", id);
+    },
+  );
+
+  socket.on(
+    "indicator-animation",
+    async ({
+      table,
+      x,
+      y,
+    }: {
+      table: string;
+      x: string | number;
+      y: string | number;
+    }) => {
+      const canViewTable = await authorizeSocketTable(socket, table, "view");
+      if (!canViewTable) return;
+      socket.broadcast.to(table).emit("run-indicator-animation", { x, y });
+    },
+  );
+
+  socket.on(
+    "pin-added",
+    async ({ table, pin }: { table: string; pin: any }) => {
+      const canManagePins = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canManagePins",
+      );
+      if (!canManagePins) return;
+      socket.broadcast.to(table).emit("pin-add", pin);
+    },
+  );
+
+  socket.on(
+    "location-pins-updated",
+    async ({ table }: { table: string }) => {
+      const canManagePins = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canManagePins",
+      );
+      if (!canManagePins) return;
+      socket.broadcast.to(table).emit("reload-location-pins");
+    },
+  );
+}
