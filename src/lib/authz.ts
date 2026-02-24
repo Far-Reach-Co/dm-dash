@@ -167,41 +167,6 @@ export async function getProjectAccess(
   return role;
 }
 
-export async function requireTableAccessOrRedirect(
-  req: Request,
-  res: Response,
-  table: {
-    project_id?: number | null;
-    user_id?: number | null;
-    is_public?: boolean;
-    mode?: string | null;
-  },
-  redirectTo = "/forbidden",
-): Promise<{ projectAuth: boolean } | null> {
-  if (!table.project_id) {
-    if (table.is_public) return { projectAuth: false };
-    const userId = requireUserOrRedirect(req, res, redirectTo);
-    if (!userId) return null;
-    if (String(table.user_id) === String(userId)) return { projectAuth: false };
-    res.redirect(redirectTo);
-    return null;
-  }
-
-  const userId = requireUserOrRedirect(req, res, redirectTo);
-  if (!userId) return null;
-  const access = await getProjectAccess(req, table.project_id);
-  if (!access) {
-    res.redirect(redirectTo);
-    return null;
-  }
-
-  if (!table.is_public && !access.isEditor) {
-    res.redirect(redirectTo);
-    return null;
-  }
-  return { projectAuth: access.isEditor };
-}
-
 export async function requireRecordAccessOrRedirect(
   req: Request,
   res: Response,
