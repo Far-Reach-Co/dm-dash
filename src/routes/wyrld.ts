@@ -9,7 +9,7 @@ import { getProjectsQuery, getProjectQuery } from "../api/queries/projects";
 import { getProjectPlayersByProjectQuery } from "../api/queries/projectPlayers";
 import { getProjectInviteByProjectQuery } from "../api/queries/projectInvites";
 import {
-  get5eCharGeneralQuery,
+  get5eCharsGeneralByIdsQuery,
   get5eCharNamesQuery,
   get5eCharsGeneralByUserQuery,
 } from "../api/queries/5eCharGeneral";
@@ -314,11 +314,29 @@ async function loadWyrldData(
   // get table views by project
   const tableData = await getTableViewsByProjectQuery(projectId);
   // get all character sheets by project
-  const players: Array<{ id: number; name?: string; created_at?: string }> = [];
   const projectPlayers = await getProjectPlayersByProjectQuery(projectId);
-  for (const player of projectPlayers.rows) {
-    const charData = await get5eCharGeneralQuery(player.player_id);
-    if (charData.rows[0]) players.push(charData.rows[0]);
+  const projectPlayerIds = [
+    ...new Set(
+      projectPlayers.rows
+        .map((player) => Number(player.player_id))
+        .filter((playerId) => Number.isInteger(playerId) && playerId > 0),
+    ),
+  ];
+  const playersData = projectPlayerIds.length
+    ? await get5eCharsGeneralByIdsQuery(projectPlayerIds)
+    : { rows: [] };
+  const playersById = new Map(
+    playersData.rows.map((player) => [Number(player.id), player]),
+  );
+  const players: Array<{ id: number; name?: string; created_at?: string }> = [];
+  for (const projectPlayer of projectPlayers.rows) {
+    const player = playersById.get(Number(projectPlayer.player_id));
+    if (!player) continue;
+    players.push({
+      id: Number(player.id),
+      name: player.name,
+      created_at: player.created_at,
+    });
   }
   const ownedSheetsData = await get5eCharsGeneralByUserQuery(userId);
 

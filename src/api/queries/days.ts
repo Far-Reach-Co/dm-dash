@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { QueryResult } from "pg";
 import { buildUpdateQuery } from "./utils";
 
 export interface Day {
@@ -40,6 +41,28 @@ async function getDaysQuery(calendarId: string | number) {
   return await db.query<Day>(query)
 }
 
+async function getDaysByCalendarIdsQuery(calendarIds: (string | number)[]) {
+  if (!calendarIds.length) {
+    return {
+      command: "SELECT",
+      rowCount: 0,
+      oid: 0,
+      fields: [],
+      rows: [],
+    } as QueryResult<Day>;
+  }
+  const query = {
+    text: /*sql*/ `
+      select *
+      from public."Day"
+      where calendar_id = ANY($1)
+      order by calendar_id asc, index asc
+    `,
+    values: [calendarIds],
+  };
+  return await db.query<Day>(query);
+}
+
 async function removeDayQuery(id: string) {
   const query = {
     text: /*sql*/ `delete from public."Day" where id = $1`,
@@ -57,6 +80,7 @@ async function editDayQuery(id: string, data: any) {
 export {
   addDayQuery,
   getDaysQuery,
+  getDaysByCalendarIdsQuery,
   getDayQuery,
   removeDayQuery,
   editDayQuery

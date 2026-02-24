@@ -6,8 +6,18 @@ import {
   editCalendarQuery,
   Calendar,
 } from "../queries/calendars.js";
-import { Month, getMonthsQuery, removeMonthQuery } from "../queries/months.js";
-import { Day, getDaysQuery, removeDayQuery } from "../queries/days.js";
+import {
+  Month,
+  getMonthsByCalendarIdsQuery,
+  getMonthsQuery,
+  removeMonthQuery,
+} from "../queries/months.js";
+import {
+  Day,
+  getDaysByCalendarIdsQuery,
+  getDaysQuery,
+  removeDayQuery,
+} from "../queries/days.js";
 import { Request, Response, NextFunction } from "express";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import {
@@ -44,14 +54,30 @@ async function getCalendars(req: Request, res: Response, next: NextFunction) {
   try {
     await requireProjectMemberAccess(req, req.params.project_id);
     const calendars = await getCalendarsQuery(req.params.project_id);
-
-    for (const calendar of calendars.rows) {
-      const months = await getMonthsQuery(calendar.id);
-      (calendar as GetCalendarDataReturnModel).months = months.rows;
+    const calendarIds = calendars.rows.map((calendar) => calendar.id);
+    const [monthsData, daysData] = await Promise.all([
+      getMonthsByCalendarIdsQuery(calendarIds),
+      getDaysByCalendarIdsQuery(calendarIds),
+    ]);
+    const monthsByCalendarId = new Map<number, Month[]>();
+    for (const month of monthsData.rows) {
+      const calendarId = Number(month.calendar_id);
+      const existing = monthsByCalendarId.get(calendarId);
+      if (existing) existing.push(month);
+      else monthsByCalendarId.set(calendarId, [month]);
+    }
+    const daysByCalendarId = new Map<number, Day[]>();
+    for (const day of daysData.rows) {
+      const calendarId = Number(day.calendar_id);
+      const existing = daysByCalendarId.get(calendarId);
+      if (existing) existing.push(day);
+      else daysByCalendarId.set(calendarId, [day]);
     }
     for (const calendar of calendars.rows) {
-      const days = await getDaysQuery(calendar.id);
-      (calendar as GetCalendarDataReturnModel).days_of_the_week = days.rows;
+      const calendarId = Number(calendar.id);
+      (calendar as GetCalendarDataReturnModel).months = monthsByCalendarId.get(calendarId) || [];
+      (calendar as GetCalendarDataReturnModel).days_of_the_week =
+        daysByCalendarId.get(calendarId) || [];
     }
 
     res.send(calendars.rows);

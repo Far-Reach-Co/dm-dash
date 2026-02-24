@@ -1,4 +1,5 @@
 import db from "../dbconfig";
+import { QueryResult } from "pg";
 import { buildUpdateQuery } from "./utils";
 
 export interface Month {
@@ -43,6 +44,28 @@ async function getMonthsQuery(calendarId: string | number) {
   return await db.query<Month>(query)
 }
 
+async function getMonthsByCalendarIdsQuery(calendarIds: (string | number)[]) {
+  if (!calendarIds.length) {
+    return {
+      command: "SELECT",
+      rowCount: 0,
+      oid: 0,
+      fields: [],
+      rows: [],
+    } as QueryResult<Month>;
+  }
+  const query = {
+    text: /*sql*/ `
+      select *
+      from public."Month"
+      where calendar_id = ANY($1)
+      order by calendar_id asc, index asc
+    `,
+    values: [calendarIds],
+  };
+  return await db.query<Month>(query);
+}
+
 async function removeMonthQuery(id: string | number) {
   const query = {
     text: /*sql*/ `delete from public."Month" where id = $1`,
@@ -60,6 +83,7 @@ async function editMonthQuery(id: string, data: any) {
 export {
   addMonthQuery,
   getMonthsQuery,
+  getMonthsByCalendarIdsQuery,
   getMonthQuery,
   removeMonthQuery,
   editMonthQuery
