@@ -71,7 +71,7 @@ async function getSignedUrlsHandler(
       req.body.image_ids.map((imageId) => ensureImageViewable(req, imageId, scope)),
     );
     const imageDataList = await getImagesQuery(req.body.image_ids);
-    const urls = getSignedUrls(imageDataList.rows);
+    const urls = await getSignedUrls(imageDataList.rows);
     return res.send({ urls });
   } catch (err) {
     return next(err);
