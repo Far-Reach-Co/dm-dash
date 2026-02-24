@@ -191,13 +191,73 @@ export default class SheetSettings {
     }
   };
 
+  getExportUrls = () => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams({
+      id: String(this.generalData.id),
+    });
+
+    const project = searchParams.get("project");
+    const invite = searchParams.get("invite");
+    if (project) params.set("project", project);
+    if (!project && invite) params.set("invite", invite);
+
+    const pdfUrl =
+      typeof EXPORT_HREF === "string" && EXPORT_HREF
+        ? EXPORT_HREF
+        : `/5eplayer/export?${params.toString()}`;
+    const jsonUrl =
+      typeof EXPORT_JSON_HREF === "string" && EXPORT_JSON_HREF
+        ? EXPORT_JSON_HREF
+        : `/5eplayer/export/json?${params.toString()}`;
+
+    return { pdfUrl, jsonUrl };
+  };
+
+  renderExportSection = () => {
+    const { pdfUrl, jsonUrl } = this.getExportUrls();
+
+    return createElement("div", { class: "form-section" }, [
+      createElement("h2", { class: "text-orange" }, "Export"),
+      createElement(
+        "small",
+        {},
+        "Download this character as PDF or JSON data.",
+      ),
+      createElement("div", { class: "form-actions" }, [
+        createElement("button", {}, "Export PDF", {
+          type: "click",
+          event: (e) => {
+            e.preventDefault();
+            window.open(pdfUrl, "_blank", "noopener,noreferrer");
+          },
+        }),
+        createElement("button", {}, "Export JSON", {
+          type: "click",
+          event: (e) => {
+            e.preventDefault();
+            window.open(jsonUrl, "_blank", "noopener,noreferrer");
+          },
+        }),
+      ]),
+      createElement(
+        "small",
+        { class: "hint" },
+        "JSON export preserves field keys for future import workflows.",
+      ),
+    ]);
+  };
+
   render = async () => {
     this.domComponent.replaceChildren();
     this.domComponent.className = "page-form";
     this.domComponent.style.maxWidth = "480px";
 
+    const exportSection = this.renderExportSection();
+
     if (USERID != this.generalData.user_id) {
       return this.domComponent.append(
+        exportSection,
         createElement("div", { class: "form-section" }, [
           createElement("h2", { class: "text-orange" }, "Disconnect"),
           createElement(
@@ -333,6 +393,7 @@ export default class SheetSettings {
     ]);
 
     this.domComponent.append(
+      exportSection,
       inviteSection,
       duplicateSection,
       connectionsSection,
