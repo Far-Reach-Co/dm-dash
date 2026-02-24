@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= playerSheetName %> | Character Sheet Export</title>
+  <link rel="stylesheet" href="/style.css" />
+  <%- include('./partials/icons') %>
+  <style>
+    :root {
+      --export-bg: #ffffff;
+      --export-text: #000000;
+      --export-muted: #000000;
+      --export-border: #000000;
+      --export-card: #ffffff;
+      --export-accent: #000000;
+    }
+
+    body {
+      margin: 0;
+      color: var(--export-text);
+      background: var(--export-bg);
+      font-family: "Avenir Next", "Segoe UI", Tahoma, sans-serif;
+    }
+
+    .export-shell,
+    .export-shell h1,
+    .export-shell h2,
+    .export-shell h3,
+    .export-shell p,
+    .export-shell div,
+    .export-shell span,
+    .export-shell td,
+    .export-shell th,
+    .export-shell li,
+    .export-shell small {
+      color: var(--export-text) !important;
+    }
+
+    #export-content,
+    #export-content * {
+      color: #000000 !important;
+      -webkit-text-fill-color: #000000 !important;
+      text-shadow: none !important;
+    }
+
+    .kv > div:not(.key) {
+      color: #000000 !important;
+      font-weight: 500;
+    }
+
+    td {
+      color: #000000 !important;
+      font-weight: 500;
+    }
+
+    .export-shell {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 2rem;
+    }
+
+    .export-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .export-action {
+      border: 1px solid var(--export-accent);
+      border-radius: 999px;
+      padding: 0.45rem 0.95rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--export-accent);
+      background: #fff;
+      cursor: pointer;
+      transition: filter 120ms ease;
+    }
+
+    .export-action,
+    .export-action:hover,
+    .export-action:focus,
+    .export-action:visited {
+      color: var(--export-text) !important;
+    }
+
+    .export-action:hover {
+      filter: brightness(0.93);
+    }
+
+    .export-action[disabled] {
+      opacity: 0.65;
+      cursor: not-allowed;
+      filter: none;
+    }
+
+    .export-header {
+      background: var(--export-card);
+      border: 1px solid var(--export-border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      break-inside: avoid;
+    }
+
+    .export-header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+      line-height: 1.2;
+      color: var(--export-text);
+    }
+
+    .export-meta {
+      margin-top: 0.5rem;
+      color: var(--export-muted);
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .card {
+      background: var(--export-card);
+      border: 1px solid var(--export-border);
+      border-radius: 0.75rem;
+      padding: 0.85rem;
+      break-inside: avoid;
+      margin-bottom: 0.75rem;
+    }
+
+    .card h2 {
+      margin: 0 0 0.55rem;
+      color: var(--export-accent);
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-weight: 700;
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: minmax(95px, 130px) 1fr;
+      gap: 0.25rem 0.6rem;
+      font-size: 0.95rem;
+    }
+
+    .kv .key {
+      color: var(--export-muted);
+      font-weight: 600;
+    }
+
+    .ability-horizontal {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+
+    .ability-item {
+      border: 1px solid var(--export-border);
+      border-radius: 0.45rem;
+      padding: 0.38rem 0.25rem;
+      text-align: center;
+    }
+
+    .ability-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .ability-value {
+      margin-top: 0.22rem;
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .ability-sub {
+      margin-top: 0.18rem;
+      font-size: 0.74rem;
+      line-height: 1;
+    }
+
+    .ability-row-section .ability-item {
+      min-height: 86px;
+      padding: 0.52rem 0.34rem;
+    }
+
+    .ability-row-section .ability-label {
+      font-size: 0.82rem;
+      letter-spacing: 0.03em;
+    }
+
+    .ability-row-section .ability-value {
+      margin-top: 0.24rem;
+      font-size: 1.2rem;
+    }
+
+    .ability-row-section .ability-sub {
+      margin-top: 0.22rem;
+      font-size: 0.78rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    .spell-table {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .spell-table th,
+    .spell-table td {
+      white-space: normal;
+      overflow-wrap: normal;
+      word-break: normal;
+      hyphens: none;
+    }
+
+    .spell-table th:nth-child(1),
+    .spell-table td:nth-child(1) {
+      width: 20%;
+    }
+
+    .spell-table th:nth-child(2),
+    .spell-table td:nth-child(2) {
+      width: 14%;
+    }
+
+    .spell-table th:nth-child(3),
+    .spell-table td:nth-child(3) {
+      width: 10%;
+    }
+
+    .spell-table th:nth-child(4),
+    .spell-table td:nth-child(4) {
+      width: 16%;
+    }
+
+    .spell-table th:nth-child(5),
+    .spell-table td:nth-child(5) {
+      width: 20%;
+    }
+
+    .spell-table th:nth-child(6),
+    .spell-table td:nth-child(6) {
+      width: 20%;
+    }
+
+    .spell-desc-row td {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      hyphens: auto;
+      line-height: 1.35;
+    }
+
+    .spells-section {
+      margin-bottom: 0.75rem;
+    }
+
+    .spell-group-card {
+      margin-bottom: 0.6rem;
+    }
+
+    .skills-table {
+      font-size: 0.82rem;
+    }
+
+    .skills-table th,
+    .skills-table td {
+      padding: 0.24rem 0.34rem;
+    }
+
+    th,
+    td {
+      border: 1px solid var(--export-border);
+      padding: 0.42rem 0.5rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #ffffff;
+      color: var(--export-accent);
+      font-weight: 700;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .line {
+      margin: 0;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+    }
+
+    .subtitle {
+      margin: 0 0 0.45rem;
+      font-size: 1rem;
+      color: var(--export-accent);
+    }
+
+    .background-table {
+      width: 100%;
+      table-layout: fixed;
+      font-size: 0.86rem;
+    }
+
+    .background-table th {
+      width: 16%;
+      background: #ffffff;
+      text-transform: none;
+      letter-spacing: 0;
+      vertical-align: top;
+    }
+
+    .background-table td {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .pill {
+      border: 1px solid var(--export-border);
+      border-radius: 999px;
+      padding: 0.1rem 0.5rem;
+      font-size: 0.8rem;
+      color: var(--export-muted);
+      background: #ffffff;
+      display: inline-block;
+      margin-right: 0.35rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .empty {
+      color: var(--export-muted);
+      font-style: italic;
+      margin: 0;
+    }
+
+    @media (max-width: 960px) {
+      .ability-horizontal {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .ability-horizontal {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media print {
+      @page {
+        size: Letter;
+        margin: 0.45in;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .export-shell {
+        max-width: none;
+        padding: 0;
+      }
+
+      .export-actions {
+        display: none !important;
+      }
+
+      .table-wrap {
+        overflow: visible;
+        width: 100%;
+        max-width: 100%;
+      }
+
+      table {
+        width: 100% !important;
+        max-width: 100% !important;
+        table-layout: auto !important;
+      }
+
+      .spells-screen-table {
+        display: block !important;
+      }
+
+      .spells-print-list {
+        display: none !important;
+      }
+
+      .card,
+      .export-header {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+
+      .card.allow-page-split {
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .card > h2 {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .card > h2 + * {
+        break-before: avoid;
+        page-break-before: avoid;
+      }
+
+      .table-wrap table thead {
+        display: table-header-group;
+      }
+
+      .table-wrap table tr {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+
+      .background-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .background-section {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+
+      .background-table {
+        font-size: 0.8rem;
+      }
+
+      .background-table th,
+      .background-table td {
+        padding: 0.26rem 0.34rem;
+      }
+
+      .spells-section > h2 {
+        display: none;
+      }
+
+      .spells-section .spell-group-card {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+
+      .spells-section .spell-group-card > h2 {
+        break-after: avoid;
+        page-break-after: avoid;
+      }
+
+      .spell-slots-section {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
+
+      .spells-section .spell-table tr {
+        break-inside: auto;
+        page-break-inside: auto;
+      }
+
+      .spell-desc-row td {
+        font-size: 0.84rem;
+      }
+    }
+  </style>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%
+    const data = exportData;
+    const general = data.general;
+    const pro = data.proficiencies;
+    const back = data.background;
+    const slots = data.spellSlots;
+    const valueOrDash = (value) => {
+      if (value === null || value === undefined) return "N/A";
+      if (typeof value === "string" && value.trim() === "") return "N/A";
+      return value;
+    };
+    const fmtBool = (value) => value ? "Yes" : "No";
+    const parseSafeNumber = (value, fallback = 0) => {
+      if (value === null || value === undefined || value === "") return fallback;
+      if (typeof value === "number" && Number.isFinite(value)) return value;
+      if (typeof value === "string") {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : fallback;
+      }
+      return fallback;
+    };
+    const abilityModifier = (abilityScore) => {
+      const score = parseSafeNumber(abilityScore, 10);
+      return Math.floor((score - 10) / 2);
+    };
+    const proficiencyBonus = (() => {
+      const level = parseSafeNumber(general.level, 1);
+      if (level < 5) return 2;
+      if (level < 9) return 3;
+      if (level < 13) return 4;
+      if (level < 17) return 5;
+      return 6;
+    })();
+    const formatSigned = (value) => {
+      const numeric = parseSafeNumber(value, 0);
+      if (numeric > 0) return `+${numeric}`;
+      return String(numeric);
+    };
+    const getSkillModifier = (skill) => {
+      let total = abilityModifier(general[skill.ability]);
+      if (pro && pro[skill.key]) {
+        total += proficiencyBonus;
+      }
+      total += parseSafeNumber(pro ? pro[skill.modKey] : 0, 0);
+      return total;
+    };
+    const abilityStats = [
+      { label: "STR", key: "strength" },
+      { label: "DEX", key: "dexterity" },
+      { label: "CON", key: "constitution" },
+      { label: "INT", key: "intelligence" },
+      { label: "WIS", key: "wisdom" },
+      { label: "CHA", key: "charisma" },
+    ];
+    const passivePerception = (() => {
+      let total = 10 + abilityModifier(general.wisdom);
+      if (pro && pro.perception) total += proficiencyBonus;
+      total += parseSafeNumber(general.wisdom_mod, 0);
+      return total;
+    })();
+    const castingAbilityKey =
+      slots && typeof slots.spell_casting_ability === "string"
+        ? slots.spell_casting_ability
+        : "";
+    const castingAbilityModifier = castingAbilityKey
+      ? abilityModifier(general[castingAbilityKey])
+      : 0;
+    const spellSaveDC = 8 + proficiencyBonus + castingAbilityModifier;
+    const spellAttackBonus = proficiencyBonus + castingAbilityModifier;
+    const savedAt = new Date().toLocaleString();
+    const savingThrows = [
+      ["STR", "sv_str"],
+      ["DEX", "sv_dex"],
+      ["CON", "sv_con"],
+      ["INT", "sv_int"],
+      ["WIS", "sv_wis"],
+      ["CHA", "sv_char"],
+    ];
+    const skills = [
+      { label: "Acrobatics", key: "acrobatics", modKey: "acrobatics_mod", ability: "dexterity" },
+      { label: "Animal Handling", key: "animal_handling", modKey: "animal_handling_mod", ability: "wisdom" },
+      { label: "Arcana", key: "arcana", modKey: "arcana_mod", ability: "intelligence" },
+      { label: "Athletics", key: "athletics", modKey: "athletics_mod", ability: "strength" },
+      { label: "Deception", key: "deception", modKey: "deception_mod", ability: "charisma" },
+      { label: "History", key: "history", modKey: "history_mod", ability: "intelligence" },
+      { label: "Insight", key: "insight", modKey: "insight_mod", ability: "wisdom" },
+      { label: "Intimidation", key: "intimidation", modKey: "intimidation_mod", ability: "charisma" },
+      { label: "Investigation", key: "investigation", modKey: "investigation_mod", ability: "intelligence" },
+      { label: "Medicine", key: "medicine", modKey: "medicine_mod", ability: "wisdom" },
+      { label: "Nature", key: "nature", modKey: "nature_mod", ability: "intelligence" },
+      { label: "Perception", key: "perception", modKey: "perception_mod", ability: "wisdom" },
+      { label: "Performance", key: "performance", modKey: "performance_mod", ability: "charisma" },
+      { label: "Persuasion", key: "persuasion", modKey: "persuasion_mod", ability: "charisma" },
+      { label: "Religion", key: "religion", modKey: "religion_mod", ability: "intelligence" },
+      { label: "Sleight of Hand", key: "sleight_of_hand", modKey: "sleight_of_hand_mod", ability: "dexterity" },
+      { label: "Stealth", key: "stealth", modKey: "stealth_mod", ability: "dexterity" },
+      { label: "Survival", key: "survival", modKey: "survival_mod", ability: "wisdom" },
+    ];
+    const slotRows = [
+      ["1st", slots?.first_total, slots?.first_expended],
+      ["2nd", slots?.second_total, slots?.second_expended],
+      ["3rd", slots?.third_total, slots?.third_expended],
+      ["4th", slots?.fourth_total, slots?.fourth_expended],
+      ["5th", slots?.fifth_total, slots?.fifth_expended],
+      ["6th", slots?.sixth_total, slots?.sixth_expended],
+      ["7th", slots?.seventh_total, slots?.seventh_expended],
+      ["8th", slots?.eigth_total, slots?.eigth_expended],
+      ["9th", slots?.nineth_total, slots?.nineth_expended],
+    ];
+  %>
+
+  <main class="export-shell">
+    <div class="export-actions">
+      <a class="export-action" href="<%= printHref %>">Open Print View</a>
+      <button class="export-action" id="download-pdf-btn" type="button">Download PDF</button>
+    </div>
+
+    <div id="export-content">
+      <section class="export-header">
+        <h1><%= playerSheetName %></h1>
+        <p class="export-meta">Export generated: <%= savedAt %></p>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <h2>Identity</h2>
+          <div class="kv">
+            <div class="key">Name</div><div><%= valueOrDash(general.name) %></div>
+            <div class="key">Race</div><div><%= valueOrDash(general.race) %></div>
+            <div class="key">Class</div><div><%= valueOrDash(general.class) %></div>
+            <div class="key">Subclass</div><div><%= valueOrDash(general.subclass) %></div>
+            <div class="key">Other Class</div><div><%= valueOrDash(general.other_class) %></div>
+            <div class="key">Level</div><div><%= valueOrDash(general.level) %></div>
+            <div class="key">Experience</div><div><%= valueOrDash(general.exp) %></div>
+            <div class="key">Inspiration</div><div><%= fmtBool(general.inspiration) %></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Combat</h2>
+          <div class="kv">
+            <div class="key">Armor Class</div><div><%= valueOrDash(general.armor_class) %></div>
+            <div class="key">Initiative</div><div><%= valueOrDash(general.initiative) %></div>
+            <div class="key">Speed</div><div><%= valueOrDash(general.speed) %></div>
+            <div class="key">Current HP</div><div><%= valueOrDash(general.current_hp) %></div>
+            <div class="key">Max HP</div><div><%= valueOrDash(general.max_hp) %></div>
+            <div class="key">Temp HP</div><div><%= valueOrDash(general.temp_hp) %></div>
+            <div class="key">Hit Dice</div><div><%= valueOrDash(general.hit_dice) %></div>
+            <div class="key">Hit Dice Total</div><div><%= valueOrDash(general.hit_dice_total) %></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Computed Values</h2>
+          <div class="kv">
+            <div class="key">Proficiency Bonus</div><div><%= formatSigned(proficiencyBonus) %></div>
+            <div class="key">Passive Perception</div><div><%= valueOrDash(passivePerception) %></div>
+            <div class="key">Spell Save DC</div><div><%= valueOrDash(spellSaveDC) %></div>
+            <div class="key">Spell Attack Bonus</div><div><%= formatSigned(spellAttackBonus) %></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Resources</h2>
+          <div class="kv">
+            <div class="key">Class Resource</div><div><%= valueOrDash(general.class_resource) %> / <%= valueOrDash(general.class_resource_total) %></div>
+            <div class="key">Class Resource Title</div><div><%= valueOrDash(general.class_resource_title) %></div>
+            <div class="key">Other Resource</div><div><%= valueOrDash(general.other_resource) %> / <%= valueOrDash(general.other_resource_total) %></div>
+            <div class="key">Other Resource Title</div><div><%= valueOrDash(general.other_resource_title) %></div>
+            <div class="key">DS Success</div><div><%= [general.ds_success_1, general.ds_success_2, general.ds_success_3].filter(Boolean).length %> / 3</div>
+            <div class="key">DS Failure</div><div><%= [general.ds_failure_1, general.ds_failure_2, general.ds_failure_3].filter(Boolean).length %> / 3</div>
+          </div>
+        </article>
+
+      </section>
+
+      <section class="card ability-row-section">
+        <h2>Ability Scores</h2>
+        <div class="ability-horizontal">
+          <% abilityStats.forEach((stat) => { %>
+            <div class="ability-item">
+              <div class="ability-label"><%= stat.label %></div>
+              <div class="ability-value"><%= valueOrDash(general[stat.key]) %></div>
+              <div class="ability-sub"><%= formatSigned(abilityModifier(general[stat.key])) %></div>
+            </div>
+          <% }); %>
+        </div>
+      </section>
+
+    <section class="card">
+      <h2>Classes</h2>
+      <% if (!data.classes.length) { %>
+        <p class="empty">No class rows.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Class</th>
+                <th>Subclass</th>
+                <th>Hit Dice Type</th>
+                <th>Total Hit Dice</th>
+                <th>Current Hit Dice</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.classes.forEach((row) => { %>
+                <tr>
+                  <td><%= valueOrDash(row.class) %></td>
+                  <td><%= valueOrDash(row.subclass) %></td>
+                  <td><%= valueOrDash(row.hit_dice_type) %></td>
+                  <td><%= valueOrDash(row.total_hit_dice) %></td>
+                  <td><%= valueOrDash(row.current_hit_dice) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card">
+      <h2>Saving Throws</h2>
+      <% if (!pro) { %>
+        <p class="empty">No proficiency data found.</p>
+      <% } else { %>
+        <div>
+          <% savingThrows.forEach(([label, key]) => { %>
+            <span class="pill"><%= label %>: <%= pro[key] ? "Proficient" : "Not Proficient" %></span>
+          <% }); %>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card <%= data.attacks.length > 6 ? 'allow-page-split' : '' %>">
+      <h2>Attacks</h2>
+      <% if (!data.attacks.length) { %>
+        <p class="empty">No attacks.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Bonus</th>
+                <th>Range</th>
+                <th>Damage Type</th>
+                <th>Duration</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.attacks.forEach((attack) => { %>
+                <tr>
+                  <td><%= valueOrDash(attack.title) %></td>
+                  <td><%= valueOrDash(attack.bonus) %></td>
+                  <td><%= valueOrDash(attack.range) %></td>
+                  <td><%= valueOrDash(attack.damage_type) %></td>
+                  <td><%= valueOrDash(attack.duration) %></td>
+                  <td><%= valueOrDash(attack.description) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card">
+      <h2>Skills</h2>
+      <% if (!pro) { %>
+        <p class="empty">No skill data found.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table class="skills-table">
+            <thead>
+              <tr>
+                <th>Skill</th>
+                <th>Proficient</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% skills.forEach((skill) => { %>
+                <tr>
+                  <td><%= skill.label %></td>
+                  <td><%= pro[skill.key] ? "Yes" : "No" %></td>
+                  <td><%= formatSigned(getSkillModifier(skill)) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card <%= data.otherProLangs.length > 10 ? 'allow-page-split' : '' %>">
+      <h2>Other Proficiencies And Languages</h2>
+      <% if (!data.otherProLangs.length) { %>
+        <p class="empty">No entries.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Proficiency / Language</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.otherProLangs.forEach((item) => { %>
+                <tr>
+                  <td><%= valueOrDash(item.type) %></td>
+                  <td><%= valueOrDash(item.proficiency) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card <%= data.feats.length > 6 ? 'allow-page-split' : '' %>">
+      <h2>Features And Traits</h2>
+      <% if (!data.feats.length) { %>
+        <p class="empty">No feats or traits.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Title</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.feats.forEach((feat) => { %>
+                <tr>
+                  <td><%= valueOrDash(feat.type) %></td>
+                  <td><%= valueOrDash(feat.title) %></td>
+                  <td><%= valueOrDash(feat.description) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card">
+      <h2>Currency</h2>
+      <div class="kv">
+        <div class="key">Copper</div><div><%= valueOrDash(general.copper) %></div>
+        <div class="key">Silver</div><div><%= valueOrDash(general.silver) %></div>
+        <div class="key">Electrum</div><div><%= valueOrDash(general.electrum) %></div>
+        <div class="key">Gold</div><div><%= valueOrDash(general.gold) %></div>
+        <div class="key">Platinum</div><div><%= valueOrDash(general.platinum) %></div>
+      </div>
+    </section>
+
+    <section class="card <%= data.equipment.length > 8 ? 'allow-page-split' : '' %>">
+      <h2>Equipment</h2>
+      <% if (!data.equipment.length) { %>
+        <p class="empty">No equipment.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Quantity</th>
+                <th>Weight</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% data.equipment.forEach((item) => { %>
+                <tr>
+                  <td><%= valueOrDash(item.title) %></td>
+                  <td><%= valueOrDash(item.quantity) %></td>
+                  <td><%= valueOrDash(item.weight) %></td>
+                  <td><%= valueOrDash(item.description) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="card spell-slots-section">
+      <h2>Spell Slots</h2>
+      <% if (!slots) { %>
+        <p class="empty">No spell slot data found.</p>
+      <% } else { %>
+        <div class="kv" style="margin-bottom: 0.65rem;">
+          <div class="key">Casting Ability</div><div><%= valueOrDash(slots.spell_casting_ability) %></div>
+          <div class="key">Spell Save DC</div><div><%= valueOrDash(spellSaveDC) %></div>
+          <div class="key">Spell Attack Bonus</div><div><%= formatSigned(spellAttackBonus) %></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Total</th>
+                <th>Expended</th>
+                <th>Remaining</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% slotRows.forEach(([label, total, expended]) => {
+                const remaining = (typeof total === "number" && typeof expended === "number") ? (total - expended) : "N/A";
+              %>
+                <tr>
+                  <td><%= label %></td>
+                  <td><%= valueOrDash(total) %></td>
+                  <td><%= valueOrDash(expended) %></td>
+                  <td><%= valueOrDash(remaining) %></td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+
+    <section class="spells-section">
+      <h2>Spells</h2>
+      <% if (!data.spellGroups.length) { %>
+        <p class="empty">No spells.</p>
+      <% } else { %>
+        <% data.spellGroups.forEach((group) => { %>
+          <article class="spell-group-card">
+            <h2 style="margin-bottom: 0.5rem;"><%= group.type %></h2>
+            <div class="table-wrap spells-screen-table">
+              <table class="spell-table">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Casting Time</th>
+                    <th>Range</th>
+                    <th>Duration</th>
+                    <th>Components</th>
+                    <th>Damage Type</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% group.spells.forEach((spell) => { %>
+                    <tr class="spell-meta-row">
+                      <td><%= valueOrDash(spell.title) %></td>
+                      <td><%= valueOrDash(spell.casting_time) %></td>
+                      <td><%= valueOrDash(spell.range) %></td>
+                      <td><%= valueOrDash(spell.duration) %></td>
+                      <td><%= valueOrDash(spell.components) %></td>
+                      <td><%= valueOrDash(spell.damage_type) %></td>
+                    </tr>
+                    <tr class="spell-desc-row">
+                      <td colspan="6"><strong>Description:</strong> <%= valueOrDash(spell.description) %></td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        <% }); %>
+      <% } %>
+    </section>
+
+    <section class="card background-section">
+      <h2>Background</h2>
+      <% if (!back) { %>
+        <p class="empty">No background data found.</p>
+      <% } else { %>
+        <div class="table-wrap">
+          <table class="background-table">
+            <tbody>
+              <tr>
+                <th>Background</th>
+                <td><%= valueOrDash(back.background) %></td>
+                <th>Alignment</th>
+                <td><%= valueOrDash(back.alignment) %></td>
+              </tr>
+              <tr>
+                <th>Age</th>
+                <td><%= valueOrDash(back.age) %></td>
+                <th>Height</th>
+                <td><%= valueOrDash(back.height) %></td>
+              </tr>
+              <tr>
+                <th>Weight</th>
+                <td><%= valueOrDash(back.weight) %></td>
+                <th>Eyes</th>
+                <td><%= valueOrDash(back.eyes) %></td>
+              </tr>
+              <tr>
+                <th>Skin</th>
+                <td><%= valueOrDash(back.skin) %></td>
+                <th>Hair</th>
+                <td><%= valueOrDash(back.hair) %></td>
+              </tr>
+              <tr>
+                <th>Appearance</th>
+                <td colspan="3"><%= valueOrDash(back.appearance) %></td>
+              </tr>
+              <tr>
+                <th>Personality Traits</th>
+                <td colspan="3"><%= valueOrDash(back.personality_traits) %></td>
+              </tr>
+              <tr>
+                <th>Ideals</th>
+                <td colspan="3"><%= valueOrDash(back.ideals) %></td>
+              </tr>
+              <tr>
+                <th>Bonds</th>
+                <td colspan="3"><%= valueOrDash(back.bonds) %></td>
+              </tr>
+              <tr>
+                <th>Flaws</th>
+                <td colspan="3"><%= valueOrDash(back.flaws) %></td>
+              </tr>
+              <tr>
+                <th>Backstory</th>
+                <td colspan="3"><%= valueOrDash(back.backstory) %></td>
+              </tr>
+              <tr>
+                <th>Allies & Organizations</th>
+                <td colspan="3"><%= valueOrDash(back.allies_and_organizations) %></td>
+              </tr>
+              <tr>
+                <th>Other Info</th>
+                <td colspan="3"><%= valueOrDash(back.other_info) %></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </section>
+    </div>
+  </main>
+
+  <script src="/lib/html2pdf.bundle.min.js"></script>
+  <script>
+    (() => {
+      const downloadBtn = document.getElementById("download-pdf-btn");
+      const exportContent = document.getElementById("export-content");
+      if (!downloadBtn || !exportContent) return;
+
+      const notifyError = (message) => {
+        if (typeof window.customAlert === "function") {
+          window.customAlert(message, { title: "PDF Export" });
+          return;
+        }
+        window.alert(message);
+      };
+
+      const toSafeFileName = (value) => {
+        if (!value || typeof value !== "string") return "character-sheet-export";
+        return value
+          .trim()
+          .replace(/[\\/:*?"<>|]+/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .toLowerCase();
+      };
+
+      const setDownloadState = (isBusy) => {
+        downloadBtn.disabled = isBusy;
+        downloadBtn.textContent = isBusy ? "Preparing PDF..." : "Download PDF";
+      };
+
+      downloadBtn.addEventListener("click", async () => {
+        if (typeof window.html2pdf !== "function") {
+          notifyError("PDF download is unavailable right now. Please use Open Print View.");
+          return;
+        }
+
+        setDownloadState(true);
+        try {
+          const fileName = `${toSafeFileName(<%- JSON.stringify(playerSheetName || "") %>)}.pdf`;
+          await window.html2pdf()
+            .set({
+              filename: fileName,
+              margin: [0.35, 0.35, 0.35, 0.35],
+              image: { type: "png", quality: 1 },
+              html2canvas: {
+                scale: 3,
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                letterRendering: true,
+              },
+              jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: false },
+              pagebreak: { mode: ["css", "legacy"] },
+            })
+            .from(exportContent)
+            .save();
+        } catch (error) {
+          console.error("PDF export failed", error);
+          notifyError("Could not generate the PDF. Please try Open Print View.");
+        } finally {
+          setDownloadState(false);
+        }
+      });
+    })();
+  </script>
+
+  <% if (autoPrint) { %>
+    <script>
+      window.addEventListener("load", () => {
+        setTimeout(() => window.print(), 50);
+      });
+    </script>
+  <% } %>
+</body>
+
+</html>

@@ -11,6 +11,8 @@
   <%- include('./partials/icons') %>
   <script>
     const USERID = "<%= auth %>";
+    const EXPORT_HREF = <%- JSON.stringify(exportHref) %>;
+    const EXPORT_JSON_HREF = <%- JSON.stringify(jsonExportHref) %>;
   </script>
   <script src="/lib/MobileNavHandler.js" defer></script>
   <script src="/dist/bundleInitSheet.js" defer type="module"></script>
