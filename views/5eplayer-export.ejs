@@ -1037,6 +1037,10 @@
       const downloadBtn = document.getElementById("download-pdf-btn");
       const exportContent = document.getElementById("export-content");
       if (!downloadBtn || !exportContent) return;
+      const printViewHref = <%- JSON.stringify(printHref) %>;
+      const MAX_CANVAS_EDGE_PX = 32767;
+      const MIN_ALLOWED_SCALE = 0.6;
+      const MAX_PREFERRED_SCALE = 2;
 
       const notifyError = (message) => {
         if (typeof window.customAlert === "function") {
@@ -1061,9 +1065,40 @@
         downloadBtn.textContent = isBusy ? "Preparing PDF..." : "Download PDF";
       };
 
+      const getScaleConfig = () => {
+        const widthPx = Math.max(exportContent.scrollWidth, exportContent.clientWidth, 1);
+        const heightPx = Math.max(exportContent.scrollHeight, exportContent.clientHeight, 1);
+        const preferredScale = Math.min(
+          MAX_PREFERRED_SCALE,
+          Math.max(1, Number(window.devicePixelRatio) || 1),
+        );
+        const maxScaleByWidth = MAX_CANVAS_EDGE_PX / widthPx;
+        const maxScaleByHeight = MAX_CANVAS_EDGE_PX / heightPx;
+        const computedScale = Math.min(preferredScale, maxScaleByWidth, maxScaleByHeight);
+        const canRender = Number.isFinite(computedScale) && computedScale >= MIN_ALLOWED_SCALE;
+
+        return {
+          canRender,
+          scale: canRender ? computedScale : MIN_ALLOWED_SCALE,
+        };
+      };
+
+      const openPrintViewFallback = () => {
+        if (typeof printViewHref === "string" && printViewHref.length) {
+          window.open(printViewHref, "_blank", "noopener,noreferrer");
+        }
+      };
+
       downloadBtn.addEventListener("click", async () => {
         if (typeof window.html2pdf !== "function") {
           notifyError("PDF download is unavailable right now. Please use Open Print View.");
+          return;
+        }
+
+        const { canRender, scale } = getScaleConfig();
+        if (!canRender) {
+          notifyError("This sheet is too large for direct PDF generation. Opening Print View instead.");
+          openPrintViewFallback();
           return;
         }
 
@@ -1076,12 +1111,12 @@
               margin: [0.35, 0.35, 0.35, 0.35],
               image: { type: "png", quality: 1 },
               html2canvas: {
-                scale: 3,
+                scale,
                 useCORS: true,
                 backgroundColor: "#ffffff",
                 letterRendering: true,
               },
-              jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: false },
+              jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: true },
               pagebreak: { mode: ["css", "legacy"] },
             })
             .from(exportContent)
