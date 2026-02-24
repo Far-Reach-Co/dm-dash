@@ -9,17 +9,13 @@ import {
 } from "../queries/5eCharGeneral";
 import {
   add5eCharProQuery,
-  get5eCharProQuery,
   get5eCharProByGeneralQuery,
-  edit5eCharProQuery,
   DndFiveEPro,
   duplicate5eCharProQuery,
 } from "../queries/5eCharPro";
 import {
   add5eCharBackQuery,
-  get5eCharBackQuery,
   get5eCharBackByGeneralQuery,
-  edit5eCharBackQuery,
   DndFiveEBackground,
   duplicate5eCharBackQuery,
 } from "../queries/5eCharBack";
@@ -347,56 +343,11 @@ async function edit5eCharGeneral(
   }
 }
 
-async function edit5eCharPro(req: Request, res: Response, next: NextFunction) {
-  try {
-    await requireSheetEditAccess(req, req.params.id);
-    const charProData = await get5eCharProQuery(req.params.id);
-    const charPro = charProData.rows[0];
-    if (!charPro) throw { status: 404, message: "Proficiencies not found" };
-
-    // If the "id" field is found, throw an error
-    if (req.body.hasOwnProperty("id")) {
-      throw new Error('Request body cannot contain the "id" field');
-    }
-    if (req.body.hasOwnProperty("general_id")) {
-      throw new Error('Request body cannot contain the "general_id" field');
-    }
-
-    const data = await edit5eCharProQuery(req.params.id, req.body);
-    res.status(200).send(data.rows[0]);
-  } catch (err) {
-    next(err);
-  }
-}
-
-async function edit5eCharBack(req: Request, res: Response, next: NextFunction) {
-  try {
-    await requireSheetEditAccess(req, req.params.id);
-    const charBackData = await get5eCharBackQuery(req.params.id);
-    const charBack = charBackData.rows[0];
-    if (!charBack) throw { status: 404, message: "Background not found" };
-
-    // If the "id" field is found, throw an error
-    if (req.body.hasOwnProperty("id")) {
-      throw new Error('Request body cannot contain the "id" field');
-    }
-    if (req.body.hasOwnProperty("general_id")) {
-      throw new Error('Request body cannot contain the "general_id" field');
-    }
-    const data = await edit5eCharBackQuery(req.params.id, req.body);
-    res.status(200).send(data.rows[0]);
-  } catch (err) {
-    next(err);
-  }
-}
-
 export {
   add5eChar,
   get5eCharsByUser,
   get5eCharGeneral,
   remove5eChar,
   edit5eCharGeneral,
-  edit5eCharPro,
-  edit5eCharBack,
   duplicate5eChar,
 };

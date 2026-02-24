@@ -1,6 +1,13 @@
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import createElement from "../../components/createElement.js";
 import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
+import {
+  getSheet,
+  insertSheetItem,
+  readSheetArraySection,
+  removeSheetItem,
+  sortByNumericId,
+  updateSheetItem,
+} from "../../lib/sheetApi.js";
 
 export default class ClassesComponent {
   constructor(props) {
@@ -22,8 +29,12 @@ export default class ClassesComponent {
 
   newClassItem = async () => {
     this.toggleNewLoading();
-    const res = await postThing("/api/add_5e_character_class", {
-      general_id: this.general_id,
+    await insertSheetItem(this.general_id, "classes", {
+      class: "",
+      subclass: "",
+      hit_dice_type: "",
+      total_hit_dice: 0,
+      current_hit_dice: 0,
     });
     this.toggleNewLoading();
   };
@@ -60,9 +71,8 @@ export default class ClassesComponent {
   };
 
   renderClassesElems = async () => {
-    const classesData = await getThings(
-      `/api/get_5e_character_classes/${this.general_id}`,
-    );
+    const sheetData = await getSheet(this.general_id);
+    const classesData = sortByNumericId(readSheetArraySection(sheetData, "classes"));
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!classesData.length) return [createElement("small", {}, "None...")];
 
@@ -87,7 +97,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "classes", item.id, {
                   class: e.target.value,
                 });
               },
@@ -105,7 +115,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "classes", item.id, {
                   subclass: e.target.value,
                 });
               },
@@ -126,7 +136,7 @@ export default class ClassesComponent {
               type: "change",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "classes", item.id, {
                   hit_dice_type: e.target.value,
                 });
               },
@@ -145,7 +155,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "classes", item.id, {
                   total_hit_dice: e.target.value,
                 });
               },
@@ -164,7 +174,7 @@ export default class ClassesComponent {
               type: "focusout",
               event: (e) => {
                 e.preventDefault();
-                postThing(`/api/edit_5e_character_class/${item.id}?general_id=${this.general_id}`, {
+                updateSheetItem(this.general_id, "classes", item.id, {
                   current_hit_dice: e.target.value,
                 });
               },
@@ -188,7 +198,12 @@ export default class ClassesComponent {
                 );
                 if (!confirmed) return;
 
-                deleteThing(`/api/remove_5e_character_class/${item.id}?general_id=${this.general_id}`);
+                const removed = await removeSheetItem(
+                  this.general_id,
+                  "classes",
+                  item.id,
+                );
+                if (!removed) return;
                 e.target.parentElement.remove();
               },
             },

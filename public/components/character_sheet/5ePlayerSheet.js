@@ -1,5 +1,6 @@
 import createElement from "../../components/createElement.js";
 import { postThing } from "../../lib/apiUtils.js";
+import { patchSheetObject } from "../../lib/sheetApi.js";
 import HPComponent from "./HPComponent.js";
 import OtherProLangComponent from "./OtherProLangComponent.js";
 import AttackComponent from "./AttackComponent.js";
@@ -76,32 +77,23 @@ export default class FiveEPlayerSheet {
 
   updateBackgroundValue = async (name, value) => {
     this.generalData.background[name] = value;
-    postThing(`/api/edit_5e_character_background/${this.generalData.id}`, {
+    patchSheetObject(this.generalData.id, "background", {
       [name]: value,
     });
   };
 
   updateSpellSlotValue = async (name, value) => {
     this.generalData.spell_slots[name] = value;
-    const generalId =
-      this.generalData.spell_slots?.general_id || this.generalData.id;
-    if (!generalId) return;
-    postThing(
-      `/api/edit_5e_character_spell_slots/${generalId}`,
-      {
-        [name]: value,
-      },
-    );
+    patchSheetObject(this.generalData.id, "spellSlots", {
+      [name]: value,
+    });
   };
 
   updateProficiencyInfo = async (name, value) => {
     this.generalData.proficiencies[name] = value;
-    postThing(
-      `/api/edit_5e_character_proficiencies/${this.generalData.id}`,
-      {
-        [name]: value,
-      },
-    );
+    patchSheetObject(this.generalData.id, "proficiencies", {
+      [name]: value,
+    });
   };
 
   renderPassivePerceptionComponent = () => {

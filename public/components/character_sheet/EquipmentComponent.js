@@ -1,10 +1,17 @@
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
 import createElement from "../../components/createElement.js";
 import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
 import getDataByQuery from "../../lib/getDataByQuery.js";
 import parseUrlTextContent from "../../components/parseUrlTextContent.js";
 import modal from "../../components/modal.js";
 import tooltip from "../../components/Tooltip.js";
+import {
+  getSheet,
+  insertSheetItem,
+  readSheetArraySection,
+  removeSheetItem,
+  sortByNumericId,
+  updateSheetItem,
+} from "../../lib/sheetApi.js";
 
 // Generate description from structured weapon data
 function generateWeaponDescription(item) {
@@ -129,6 +136,7 @@ export default class EquipmentComponent {
     this.general_id = props.general_id;
 
     this.newLoading = false;
+    this.equipmentData = [];
 
     this.render();
   }
@@ -142,8 +150,7 @@ export default class EquipmentComponent {
     e.preventDefault();
     this.toggleNewLoading();
 
-    await postThing("/api/add_5e_character_equipment", {
-      general_id: this.general_id,
+    await insertSheetItem(this.general_id, "equipment", {
       title: "New Item",
       description: "",
       quantity: 1,
@@ -221,10 +228,7 @@ export default class EquipmentComponent {
       dataToSave.description = this.equipmentData[index].description;
     }
 
-    postThing(
-      `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
-      dataToSave,
-    );
+    updateSheetItem(this.general_id, "equipment", equipmentItem.id, dataToSave);
   };
 
   resetAndHideEquipmentSuggestions(equipmentItem) {
@@ -375,7 +379,7 @@ export default class EquipmentComponent {
             // Update local state
             this.equipmentData[index].description = e.target.textContent;
             // Save to db
-            postThing(`/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`, {
+            updateSheetItem(this.general_id, "equipment", equipmentItem.id, {
               description: e.target.textContent,
             });
           },
@@ -427,8 +431,10 @@ export default class EquipmentComponent {
                       e.preventDefault();
                       // hide suggestions
                       this.resetAndHideEquipmentSuggestions(equipmentItem);
-                      postThing(
-                        `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
+                      updateSheetItem(
+                        this.general_id,
+                        "equipment",
+                        equipmentItem.id,
                         {
                           title: e.target.value,
                         },
@@ -459,8 +465,10 @@ export default class EquipmentComponent {
                   type: "focusout",
                   event: async (e) => {
                     e.preventDefault();
-                    await postThing(
-                      `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
+                    await updateSheetItem(
+                      this.general_id,
+                      "equipment",
+                      equipmentItem.id,
                       {
                         quantity: e.target.valueAsNumber,
                       },
@@ -485,8 +493,10 @@ export default class EquipmentComponent {
                   type: "focusout",
                   event: async (e) => {
                     e.preventDefault();
-                    await postThing(
-                      `/api/edit_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
+                    await updateSheetItem(
+                      this.general_id,
+                      "equipment",
+                      equipmentItem.id,
                       {
                         weight: e.target.valueAsNumber,
                       },
@@ -542,10 +552,17 @@ export default class EquipmentComponent {
                     );
                     if (!confirmed) return;
 
-                    deleteThing(
-                      `/api/remove_5e_character_equipment/${equipmentItem.id}?general_id=${this.general_id}`,
+                    const removed = await removeSheetItem(
+                      this.general_id,
+                      "equipment",
+                      equipmentItem.id,
+                    );
+                    if (!removed) return;
+                    this.equipmentData = this.equipmentData.filter(
+                      (item) => Number(item.id) !== Number(equipmentItem.id),
                     );
                     e.target.parentElement.remove();
+                    this.updateWeight();
                   },
                 },
               ),
@@ -579,8 +596,9 @@ export default class EquipmentComponent {
       return this.domComponent.append(renderLoadingWithMessage("Loading..."));
     }
 
-    const equipmentsData = await getThings(
-      `/api/get_5e_character_equipments/${this.general_id}`,
+    const sheetData = await getSheet(this.general_id);
+    const equipmentsData = sortByNumericId(
+      readSheetArraySection(sheetData, "equipment"),
     );
     this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
