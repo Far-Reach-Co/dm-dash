@@ -9,11 +9,39 @@
   <%
     const category = item.equipment_category?.name || 'Magic Item';
     const rarity = item.rarity?.name || 'Unknown';
-    const descPreview = item.desc && item.desc.length > 1 ? item.desc[1].substring(0, 150) : '';
+    const typeAttunementLine = item.desc && item.desc.length ? item.desc[0] : '';
+    const requiresAttunement = typeAttunementLine.toLowerCase().includes('attunement');
+    const descBody = item.desc && item.desc.length > 1 ? item.desc[1] : (item.desc && item.desc.length ? item.desc[0] : '');
+
+    // Build FAQ entries
+    const faqs = [];
+    faqs.push({
+      q: `What rarity is the ${item.name} in D&D 5e?`,
+      a: `The ${item.name} is a ${rarity} magic item in D&D 5th Edition.`
+    });
+    faqs.push({
+      q: `What type of magic item is the ${item.name} in D&D 5e?`,
+      a: `The ${item.name} is a ${category}${typeAttunementLine ? ' — ' + typeAttunementLine : ''}.`
+    });
+    faqs.push({
+      q: `Does the ${item.name} require attunement in D&D 5e?`,
+      a: requiresAttunement
+        ? `Yes, the ${item.name} requires attunement. Check the item description for any specific attunement requirements.`
+        : `No, the ${item.name} does not require attunement and can be used immediately when held or worn.`
+    });
+    if (item.variants && item.variants.length) {
+      faqs.push({
+        q: `What variants of the ${item.name} exist in D&D 5e?`,
+        a: `The following variants are available: ${item.variants.map(v => v.name).join(', ')}.`
+      });
+    }
+
+    // Richer meta description
+    const metaDesc = `${item.name} — ${rarity} ${category} in D&D 5e.${requiresAttunement ? ' Requires attunement.' : ''} ${descBody.substring(0, 110)}`.substring(0, 160);
   %>
 
   <title><%= item.name %> - D&D 5E Magic Item | Far Reach Co.</title>
-  <meta name="description" content="<%= item.name %> is a <%= rarity %> magic item in D&D 5E. <%= descPreview %>..." />
+  <meta name="description" content="<%= metaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/magic-items/<%= item.index %>" />
 
   <!-- Open Graph / Facebook -->
@@ -73,6 +101,20 @@
     }
   </script>
 
+  <% if (faqs.length > 0) { %>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(faqs.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a }
+      }))) %>
+    }
+  </script>
+  <% } %>
+
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -127,6 +169,19 @@
       </li>
       <% }) %>
     </ul>
+    <% } %>
+
+    <% if (faqs.length > 0) { %>
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% faqs.forEach(faq => { %>
+      <details>
+        <summary><%= faq.q %></summary>
+        <p><%= faq.a %></p>
+      </details>
+      <% }) %>
+    </section>
     <% } %>
 
     <div class="srd-back-link">

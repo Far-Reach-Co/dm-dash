@@ -28,6 +28,40 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
     const monsterImage = monster.image ? imageBaseUrl + monster.image : null;
+
+    // Build FAQ entries from monster data
+    const faqs = [];
+    const ac = monster.armor_class && monster.armor_class.length ? monster.armor_class[0].value : null;
+    faqs.push({
+      q: `What type of creature is the ${monster.name} in D&D 5e?`,
+      a: `The ${monster.name} is a ${monster.size} ${monster.type} with ${monster.alignment} alignment in D&D 5th Edition.`
+    });
+    faqs.push({
+      q: `What is the ${monster.name}'s challenge rating in D&D 5e?`,
+      a: `The ${monster.name} has a Challenge Rating (CR) of ${crDisplay(monster.challenge_rating)}, worth ${monster.xp} XP.`
+    });
+    faqs.push({
+      q: `What are the ${monster.name}'s hit points and armor class in D&D 5e?`,
+      a: `The ${monster.name} has ${monster.hit_points} hit points (${monster.hit_points_roll}) and an Armor Class of ${ac} in D&D 5th Edition.`
+    });
+    if (monster.damage_resistances && monster.damage_resistances.length) {
+      faqs.push({
+        q: `What is the ${monster.name} resistant to in D&D 5e?`,
+        a: `The ${monster.name} has resistance to: ${monster.damage_resistances.join(', ')}.`
+      });
+    }
+    if (monster.damage_immunities && monster.damage_immunities.length) {
+      faqs.push({
+        q: `What is the ${monster.name} immune to in D&D 5e?`,
+        a: `The ${monster.name} is immune to: ${monster.damage_immunities.join(', ')}.`
+      });
+    }
+    if (monster.speed && monster.speed.fly) {
+      faqs.push({
+        q: `Can the ${monster.name} fly in D&D 5e?`,
+        a: `Yes, the ${monster.name} has a flying speed of ${monster.speed.fly}${monster.speed.hover ? ' (hover)' : ''} in D&D 5th Edition.`
+      });
+    }
   %>
 
   <title><%= monster.name %> - D&D 5E Monster Stats | Far Reach Co.</title>
@@ -97,6 +131,20 @@
       }
     }
   </script>
+
+  <% if (faqs.length > 0) { %>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(faqs.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a }
+      }))) %>
+    }
+  </script>
+  <% } %>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
@@ -494,6 +542,19 @@
           <% } %>
         </ul>
       </div>
+
+      <% if (faqs.length > 0) { %>
+      <hr class="w-75" />
+      <section class="srd-faq">
+        <p class="srd-faq-label">Frequently Asked Questions</p>
+        <% faqs.forEach(faq => { %>
+        <details>
+          <summary><%= faq.q %></summary>
+          <p><%= faq.a %></p>
+        </details>
+        <% }) %>
+      </section>
+      <% } %>
 
       <div class="srd-back-link">
         <a href="/dnd/5e/srd/monsters">&larr; Back to Monster List</a>

@@ -15,10 +15,46 @@
     };
     const levelDisplayShort = level => level === 0 ? 'Cantrip' : 'Level ' + level;
     const componentNames = { V: 'Verbal', S: 'Somatic', M: 'Material' };
+
+    // Build FAQ entries from spell data
+    const faqs = [];
+    const classesStr = spell.classes.map(c => c.name).join(', ');
+    if (spell.classes.length) {
+      const subclassStr = spell.subclasses && spell.subclasses.length ? ` It is also available to: ${spell.subclasses.map(s => s.name).join(', ')}.` : '';
+      faqs.push({
+        q: `Who can cast ${spell.name} in D&D 5e?`,
+        a: `${spell.name} is available to the following classes: ${classesStr}.${subclassStr}`
+      });
+    }
+    faqs.push({
+      q: `Is ${spell.name} a concentration spell in D&D 5e?`,
+      a: spell.concentration
+        ? `Yes, ${spell.name} requires concentration and lasts up to ${spell.duration}.`
+        : `No, ${spell.name} does not require concentration. It lasts ${spell.duration}.`
+    });
+    faqs.push({
+      q: `What level is ${spell.name} in D&D 5e?`,
+      a: spell.level === 0
+        ? `${spell.name} is a cantrip (0th-level) ${spell.school.name} spell.`
+        : `${spell.name} is a ${levelDisplay(spell.level)} ${spell.school.name} spell.`
+    });
+    faqs.push({
+      q: `What is the range and casting time of ${spell.name} in D&D 5e?`,
+      a: `${spell.name} has a range of ${spell.range} and a casting time of ${spell.casting_time} in D&D 5th Edition.`
+    });
+    if (spell.ritual) {
+      faqs.push({
+        q: `Can ${spell.name} be cast as a ritual in D&D 5e?`,
+        a: `Yes, ${spell.name} can be cast as a ritual. Ritual casting takes an extra 10 minutes but does not expend a spell slot.`
+      });
+    }
+
+    // Build richer meta description
+    const spellMetaDesc = `${spell.name}: ${levelDisplay(spell.level)} ${spell.school.name} spell for ${classesStr}. Casting time: ${spell.casting_time}. Range: ${spell.range}.${spell.concentration ? ' Concentration.' : ''}${spell.ritual ? ' Ritual.' : ''} Full spell details and rules.`.substring(0, 160);
   %>
 
   <title><%= spell.name %> - D&D 5E Spell | Far Reach Co.</title>
-  <meta name="description" content="<%= spell.name %> is a <%= levelDisplay(spell.level) %> <%= spell.school.name %> spell. <%= spell.desc[0].substring(0, 150) %>..." />
+  <meta name="description" content="<%= spellMetaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>" />
 
   <!-- Open Graph / Facebook -->
@@ -77,6 +113,20 @@
       }
     }
   </script>
+
+  <% if (faqs.length > 0) { %>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(faqs.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a }
+      }))) %>
+    }
+  </script>
+  <% } %>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
@@ -243,6 +293,19 @@
         <% }) %>
       </div>
     </div>
+    <% } %>
+
+    <% if (faqs.length > 0) { %>
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% faqs.forEach(faq => { %>
+      <details>
+        <summary><%= faq.q %></summary>
+        <p><%= faq.a %></p>
+      </details>
+      <% }) %>
+    </section>
     <% } %>
 
     <div class="srd-back-link">
