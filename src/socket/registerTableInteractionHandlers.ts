@@ -185,4 +185,18 @@ export function registerTableInteractionHandlers(params: {
       socket.broadcast.to(table).emit("reload-location-pins");
     },
   );
+
+  socket.on(
+    "table-mode-changed",
+    async ({ table, mode }: { table: string; mode: string }) => {
+      const canManage = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canManageTableSettings",
+      );
+      if (!canManage) return;
+      socket.broadcast.to(table).emit("table-mode-changed", { mode });
+    },
+  );
 }
