@@ -1379,3 +1379,54 @@ tr:hover {
 .srd-filter-row .quick-links {
   margin-bottom: 0;
 }
+
+/* ===== SEO CTA Block ===== */
+.seo-cta-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+}
+
+.seo-cta-block p {
+  color: var(--light-gray);
+  font-size: 1.05rem;
+  margin: 0 0 0.5rem;
+}
+
+.seo-cta-primary {
+  display: inline-block;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, var(--orange) 0%, var(--orange2) 100%);
+  color: var(--main-dark);
+  font-weight: 700;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 14px rgba(209, 158, 116, 0.3);
+}
+
+.seo-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(209, 158, 116, 0.45);
+}
+
+.seo-cta-secondary {
+  display: inline-block;
+  padding: 10px 22px;
+  border: 1px solid var(--green);
+  background: linear-gradient(135deg, #2d5a3d 0%, #1e3d29 100%);
+  color: var(--bright-white);
+  font-size: 0.97rem;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.seo-cta-secondary:hover {
+  background: linear-gradient(135deg, #3d7a4d 0%, #2d5a3d 100%);
+  transform: translateY(-1px);
+}
