@@ -315,6 +315,43 @@
   filter: drop-shadow(0 24px 45px rgba(0, 0, 0, 0.5));
 }
 
+.landing-radio {
+  background: linear-gradient(180deg, rgba(14, 25, 36, 0.97) 0%, rgba(10, 18, 27, 0.98) 100%);
+  border-top: 1px solid rgba(140, 177, 213, 0.16);
+  border-bottom: 1px solid rgba(140, 177, 213, 0.16);
+}
+
+.landing-radio__card {
+  border: 1px solid var(--landing-border);
+  border-radius: 14px;
+  background: var(--landing-surface-soft);
+  box-shadow: var(--landing-shadow);
+  padding: 34px;
+  max-width: 860px;
+  margin: 0 auto;
+  display: grid;
+  gap: 14px;
+  text-align: center;
+}
+
+.landing-radio__icon {
+  display: flex;
+  justify-content: center;
+}
+
+.landing-radio__icon svg {
+  width: 72px;
+  height: 72px;
+}
+
+.landing-radio__links {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .landing-quest {
   position: relative;
   overflow: hidden;
@@ -441,6 +478,14 @@
 
   .landing-character__copy {
     padding: 22px;
+  }
+
+  .landing-radio__card {
+    padding: 22px;
+  }
+
+  .landing-radio__links {
+    flex-direction: column;
   }
 
   .landing-character__art {
