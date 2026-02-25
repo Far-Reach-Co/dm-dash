@@ -44,6 +44,39 @@
       }
     }
   </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How many damage types are in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "There are 13 damage types in D&D 5th Edition: Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does damage resistance mean in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Resistance halves the damage dealt by that type. Immunity negates all damage of that type entirely. Vulnerability doubles the damage taken from that type." }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the most commonly resisted damage type in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Poison is the most commonly resisted damage type in D&D 5e — a large number of monsters have resistance or immunity to it. Fire is also widely resisted and immune among creatures." }
+        },
+        {
+          "@type": "Question",
+          "name": "What is force damage in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Force is pure magical energy formed into a damaging shape. It is one of the rarest damage types and very few creatures have resistance or immunity to it, making it one of the most reliably effective damage types." }
+        },
+        {
+          "@type": "Question",
+          "name": "What damage types bypass physical resistance in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Many monsters are resistant to Bludgeoning, Piercing, and Slashing damage from non-magical weapons. Using magical weapons or spells that deal other damage types — such as Fire, Radiant, or Force — bypasses this resistance." }
+        }
+      ]
+    }
+  </script>
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -63,6 +96,7 @@
     </div>
     <hr />
     <h2>Damage Types</h2>
+    <p>D&D 5e has <strong>13 damage types</strong>: Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder. Every source of damage — weapons, spells, traps, and monster abilities — deals one of these types. Creatures can have <strong>resistance</strong> (half damage), <strong>immunity</strong> (no damage), or <strong>vulnerability</strong> (double damage) to specific types.</p>
     <ul>
       <% data.forEach(function(dType){ %>
       <li>
@@ -82,6 +116,31 @@
       </div>
     </div>
     <% }); %>
+
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <details>
+        <summary>How many damage types are in D&D 5e?</summary>
+        <p>There are 13 damage types in D&D 5th Edition: Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder.</p>
+      </details>
+      <details>
+        <summary>What does damage resistance mean in D&D 5e?</summary>
+        <p>Resistance halves the damage dealt by that type. Immunity negates all damage of that type entirely. Vulnerability doubles the damage taken from that type. When multiple modifiers apply, resistances and vulnerabilities are applied after all other modifiers.</p>
+      </details>
+      <details>
+        <summary>What is the most commonly resisted damage type in D&D 5e?</summary>
+        <p>Poison is the most commonly resisted damage type — a large number of monsters have resistance or full immunity to it. Fire and cold are also widely resisted. Force damage is the rarest to resist, making it one of the most reliably effective damage types.</p>
+      </details>
+      <details>
+        <summary>What is force damage in D&D 5e?</summary>
+        <p>Force is pure magical energy formed into a damaging shape. Very few creatures have resistance or immunity to it, making spells like Magic Missile and Eldritch Blast especially reliable.</p>
+      </details>
+      <details>
+        <summary>What damage types bypass physical resistance in D&D 5e?</summary>
+        <p>Many monsters resist Bludgeoning, Piercing, and Slashing from non-magical weapons. Magical weapons bypass this. Spells dealing Fire, Radiant, Force, or other elemental damage types are unaffected by physical resistance entirely.</p>
+      </details>
+    </section>
   </div>
   <%- include('../../../partials/footer') %>
 </body>

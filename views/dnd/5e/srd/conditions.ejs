@@ -44,6 +44,39 @@
       }
     }
   </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How many conditions are in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "There are 14 conditions in D&D 5th Edition: Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, and Unconscious." }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the difference between Paralyzed and Stunned in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Both conditions incapacitate a creature and cause it to fail Strength and Dexterity saving throws. Paralyzed is more severe: the creature cannot move or speak, and any attack against it from within 5 feet is a critical hit. Stunned creatures can still speak falteringly and do not grant automatic critical hits." }
+        },
+        {
+          "@type": "Question",
+          "name": "What conditions cause automatic failure on saving throws in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Paralyzed and Unconscious both cause automatic failure on Strength and Dexterity saving throws. Stunned also causes automatic failure on Strength and Dexterity saves." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does the Restrained condition do in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A Restrained creature's speed becomes 0. Attack rolls against it have advantage, and its own attack rolls have disadvantage. It also has disadvantage on Dexterity saving throws." }
+        },
+        {
+          "@type": "Question",
+          "name": "How is the Exhaustion condition removed in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Each long rest reduces a creature's exhaustion level by 1, provided it has food and water. The Greater Restoration spell can also remove one exhaustion level." }
+        }
+      ]
+    }
+  </script>
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -63,6 +96,7 @@
     </div>
     <hr />
     <h2>Conditions</h2>
+    <p>D&D 5e has <strong>14 conditions</strong> that alter a creature's capabilities during play: Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, and Unconscious. Conditions are caused by spells, monster abilities, environmental hazards, and class features. A condition lasts until it is removed — either by the effect that imposed it ending, a saving throw, or a spell like <a href="/dnd/5e/srd/spells/lesser-restoration">Lesser Restoration</a>.</p>
     <ul>
       <% data.forEach(function(condition){ %>
       <li>
@@ -83,6 +117,31 @@
       </div>
     </div>
     <% }); %>
+
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <details>
+        <summary>How many conditions are in D&D 5e?</summary>
+        <p>There are 14 conditions in D&D 5th Edition: Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, and Unconscious.</p>
+      </details>
+      <details>
+        <summary>What is the difference between Paralyzed and Stunned in D&D 5e?</summary>
+        <p>Both incapacitate the creature and cause automatic failure on Strength and Dexterity saves. Paralyzed is more severe: the creature cannot move or speak at all, and any attack against it from within 5 feet is automatically a critical hit. Stunned creatures can still speak falteringly and do not grant automatic critical hits.</p>
+      </details>
+      <details>
+        <summary>What does the Restrained condition do in D&D 5e?</summary>
+        <p>A Restrained creature's speed becomes 0 and it cannot benefit from any bonus to speed. Attack rolls against it have advantage, its own attack rolls have disadvantage, and it has disadvantage on Dexterity saving throws.</p>
+      </details>
+      <details>
+        <summary>What conditions cause automatic saving throw failure in D&D 5e?</summary>
+        <p>Paralyzed, Stunned, and Unconscious all cause a creature to automatically fail Strength and Dexterity saving throws. Attacks against a Paralyzed or Unconscious creature from within 5 feet also automatically score a critical hit.</p>
+      </details>
+      <details>
+        <summary>How is Exhaustion removed in D&D 5e?</summary>
+        <p>Each long rest removes one level of exhaustion, provided the creature has food and water. The Greater Restoration spell also removes one exhaustion level. A creature dies if it reaches exhaustion level 6.</p>
+      </details>
+    </section>
   </div>
   <%- include('../../../partials/footer') %>
 </body>

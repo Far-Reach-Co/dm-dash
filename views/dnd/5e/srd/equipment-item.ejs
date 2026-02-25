@@ -10,10 +10,69 @@
     const category = item.equipment_category?.name || 'Equipment';
     const subCategory = item.category_range || item.armor_category || item.gear_category?.name || '';
     const costStr = item.cost ? `${item.cost.quantity} ${item.cost.unit}` : '';
+
+    // Build FAQ entries from available item data
+    const faqs = [];
+    if (item.contents && item.contents.length) {
+      const contentList = item.contents.map(c => c.quantity > 1 ? `${c.quantity}x ${c.item.name}` : c.item.name).join(', ');
+      faqs.push({
+        q: `What is in the ${item.name} in D&D 5e?`,
+        a: `The ${item.name} in D&D 5th Edition contains: ${contentList}.`
+      });
+    }
+    if (item.cost) {
+      faqs.push({
+        q: `How much does the ${item.name} cost in D&D 5e?`,
+        a: `The ${item.name} costs ${item.cost.quantity} ${item.cost.unit} in D&D 5th Edition.`
+      });
+    }
+    if (item.weight) {
+      faqs.push({
+        q: `How much does the ${item.name} weigh in D&D 5e?`,
+        a: `The ${item.name} weighs ${item.weight} pounds in D&D 5th Edition.`
+      });
+    }
+    if (item.damage) {
+      const twoHand = item.two_handed_damage ? ` When used two-handed, it deals ${item.two_handed_damage.damage_dice} ${item.two_handed_damage.damage_type.name} damage.` : '';
+      faqs.push({
+        q: `How much damage does the ${item.name} deal in D&D 5e?`,
+        a: `The ${item.name} deals ${item.damage.damage_dice} ${item.damage.damage_type.name} damage in D&D 5th Edition.${twoHand}`
+      });
+    }
+    if (item.range) {
+      const longRange = item.range.long ? ` and a long range of ${item.range.long} feet` : '';
+      faqs.push({
+        q: `What is the range of the ${item.name} in D&D 5e?`,
+        a: `The ${item.name} has a normal range of ${item.range.normal} feet${longRange} in D&D 5th Edition.`
+      });
+    }
+    if (item.armor_class) {
+      const armorType = item.armor_category || subCategory || category;
+      const dexBonus = item.armor_class.dex_bonus ? ` + your Dexterity modifier${item.armor_class.max_bonus ? ` (max +${item.armor_class.max_bonus})` : ''}` : '';
+      const strReq = item.str_minimum ? ` Requires Strength ${item.str_minimum}.` : '';
+      const stealth = item.stealth_disadvantage ? ' Imposes disadvantage on Stealth checks.' : '';
+      faqs.push({
+        q: `What armor class does ${item.name} give in D&D 5e?`,
+        a: `${item.name} provides AC ${item.armor_class.base}${dexBonus} in D&D 5th Edition. It is ${armorType} armor.${strReq}${stealth}`
+      });
+    }
+
+    // Build richer meta description
+    const descParts = [];
+    if (item.contents && item.contents.length) {
+      const names = item.contents.slice(0, 4).map(c => c.item.name).join(', ');
+      descParts.push(`Contains ${names}${item.contents.length > 4 ? ' & more' : ''}.`);
+    }
+    if (item.damage) descParts.push(`${item.damage.damage_dice} ${item.damage.damage_type.name} damage.`);
+    if (item.armor_class) descParts.push(`AC ${item.armor_class.base}${item.armor_class.dex_bonus ? '+Dex' : ''}.`);
+    if (item.range) descParts.push(`Range ${item.range.normal}/${item.range.long || item.range.normal} ft.`);
+    if (costStr) descParts.push(`Cost: ${costStr}.`);
+    if (item.weight) descParts.push(`Weight: ${item.weight} lb.`);
+    const metaDesc = `${item.name} D&D 5e stats: ${descParts.join(' ')} Complete reference for ${subCategory || category}.`.substring(0, 160);
   %>
 
   <title><%= item.name %> - D&D 5E <%= category %> | Far Reach Co.</title>
-  <meta name="description" content="<%= item.name %> is a D&D 5E <%= subCategory || category %>. <%= costStr ? 'Cost: ' + costStr + '.' : '' %> <%= item.weight ? 'Weight: ' + item.weight + ' lb.' : '' %> <%= item.damage ? 'Damage: ' + item.damage.damage_dice + ' ' + item.damage.damage_type.name + '.' : '' %>" />
+  <meta name="description" content="<%= metaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>" />
 
   <!-- Open Graph / Facebook -->
@@ -72,6 +131,20 @@
       }
     }
   </script>
+
+  <% if (faqs.length > 0) { %>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(faqs.map(f => ({
+        "@type": "Question",
+        "name": f.q,
+        "acceptedAnswer": { "@type": "Answer", "text": f.a }
+      }))) %>
+    }
+  </script>
+  <% } %>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
@@ -224,6 +297,19 @@
       </li>
       <% }) %>
     </ul>
+    <% } %>
+
+    <% if (faqs.length > 0) { %>
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% faqs.forEach(faq => { %>
+      <details>
+        <summary><%= faq.q %></summary>
+        <p><%= faq.a %></p>
+      </details>
+      <% }) %>
+    </section>
     <% } %>
 
     <div class="srd-back-link">
