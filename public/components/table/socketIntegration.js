@@ -130,6 +130,13 @@ class SocketIntegration {
       y,
     });
   };
+
+  tableModeChanged = (mode) => {
+    this.socket.emit("table-mode-changed", {
+      table: `table-${this.tableApp.tableId}`,
+      mode,
+    });
+  };
 }
 const socketIntegration = new SocketIntegration();
 export default socketIntegration;

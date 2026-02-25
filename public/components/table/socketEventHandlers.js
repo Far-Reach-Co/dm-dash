@@ -154,5 +154,13 @@ export function buildSocketEventHandlers(integration) {
     "reload-location-pins": () => {
       integration.tableApp?.reloadLocationPins?.();
     },
+
+    "table-mode-changed": () => {
+      const app = integration.tableApp;
+      if (!app) return;
+      const tableId = app.tableId;
+      app.teardown();
+      app.loadTable(tableId);
+    },
   };
 }

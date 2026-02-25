@@ -77,16 +77,54 @@ export async function renderTableSettingsModal(sidebar) {
             }),
       ]),
       createElement("br"),
+      createElement("div", { class: "d-flex align-items-center" }, [
+        createElement(
+          "small",
+          {
+            class: "text-orange me-1 font-bold",
+          },
+          "Sandbox Mode",
+        ),
+        sidebar.tableView.mode === "sandbox"
+          ? createElement("input", {
+              type: "checkbox",
+              name: "mode",
+              id: "mode-input",
+              checked: true,
+            })
+          : createElement("input", {
+              type: "checkbox",
+              name: "mode",
+              id: "mode-input",
+            }),
+      ]),
+      createElement("br"),
       createElement("button", { class: "new-btn me-1" }, "Save", {
         type: "click",
         event: async (e) => {
           e.preventDefault();
           const titleInput = document.getElementById("title-input");
           const isPublicInput = document.getElementById("is_public-input");
+          const modeInput = document.getElementById("mode-input");
+
+          const newMode = modeInput.checked ? "sandbox" : "standard";
+          const modeChanged = newMode !== sidebar.tableView.mode;
+
+          if (modeChanged) {
+            const confirmed = await window.customConfirm(
+              `Switch to ${newMode} mode? All connected users will be re-initialized.`,
+              { confirmText: "Switch" },
+            );
+            if (!confirmed) {
+              modeInput.checked = sidebar.tableView.mode === "sandbox";
+              return;
+            }
+          }
 
           const res = await postThing(`/api/edit_table_view/${sidebar.tableView.id}`, {
             title: titleInput.value,
             is_public: isPublicInput.checked,
+            mode: newMode,
           });
           if (res) {
             const titleUpdateMessageElem = document.querySelector(
@@ -100,6 +138,17 @@ export async function renderTableSettingsModal(sidebar) {
               titleInput.value;
             sidebar.tableView.title = titleInput.value;
             sidebar.tableView.is_public = isPublicInput.checked;
+            sidebar.tableView.mode = newMode;
+
+            if (modeChanged) {
+              socketIntegration.tableModeChanged(newMode);
+              const app = socketIntegration.tableApp;
+              if (app) {
+                const tableId = app.tableId;
+                app.teardown();
+                app.loadTable(tableId);
+              }
+            }
           }
         },
       }),
