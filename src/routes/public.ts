@@ -177,4 +177,15 @@ router.get("/terms-of-use", (req: Request, res: Response, next: NextFunction) =>
   }
 });
 
+router.get(
+  "/simple-virtual-tabletop-no-player-accounts",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("simple-virtual-tabletop-no-player-accounts", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 export default router;
