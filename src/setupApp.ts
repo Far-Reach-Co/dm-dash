@@ -62,6 +62,8 @@ app.use(
       "https://www.farreachco.com",
       "https://radio.farreachco.com",
       /\.farreachco\.com$/,
+      "https://5ebot.com",
+      "https://www.5ebot.com",
     ],
     credentials: true,
   })

@@ -16,22 +16,37 @@ function getClient(): Mistral {
 async function queryMistral(
   question: string,
   context: string,
+  short = false,
 ): Promise<string> {
   const client = getClient();
 
-  const srdLinkReference = getSrdLinkReference();
-  const systemPrompt =
-    `You are a knowledgeable D&D 5th Edition rules assistant. Answer the user's question using ONLY the SRD reference data provided below. ` +
-    `Be specific, cite names and stats when relevant, and keep answers concise. ` +
-    `If the data doesn't contain enough information to answer, say so honestly and provide a helpful suggestion to the user about where they might find more information.\n\n` +
-    `FORMATTING RULES:\n` +
-    `- When listing items, include a MAXIMUM of 15 items. If more exist, mention how many total and suggest the user browse the full list.\n` +
-    `- Use markdown links for SRD pages whenever relevant and available.\n` +
-    `- Detail page patterns: spells → /dnd/5e/srd/spells/{index}, monsters → /dnd/5e/srd/monsters/{index}, equipment → /dnd/5e/srd/equipment/{index}, magic items → /dnd/5e/srd/magic-items/{index}, classes → /dnd/5e/srd/classes/{index}, races → /dnd/5e/srd/races/{index}, backgrounds → /dnd/5e/srd/backgrounds/{index}, features → /dnd/5e/srd/features/{index}\n` +
-    `- You may also link to spell filter pages and monster filter pages when useful.\n` +
-    `- Only generate links that match the allowed SRD URL reference below.\n\n` +
-    `ALLOWED SRD URL REFERENCE:\n${srdLinkReference}\n\n` +
-    `--- SRD REFERENCE DATA ---\n${context}`;
+  let systemPrompt: string;
+  let maxTokens: number;
+
+  if (short) {
+    systemPrompt =
+      `You are a D&D 5e rules assistant replying inside a Discord message. ` +
+      `Answer in 2-3 sentences using ONLY the SRD reference data provided. ` +
+      `Be direct and specific. Do NOT use markdown links. Do NOT use bullet lists. ` +
+      `If the data is insufficient, say so in one sentence.\n\n` +
+      `--- SRD REFERENCE DATA ---\n${context}`;
+    maxTokens = 300;
+  } else {
+    const srdLinkReference = getSrdLinkReference();
+    systemPrompt =
+      `You are a knowledgeable D&D 5th Edition rules assistant. Answer the user's question using ONLY the SRD reference data provided below. ` +
+      `Be specific, cite names and stats when relevant, and keep answers concise. ` +
+      `If the data doesn't contain enough information to answer, say so honestly and provide a helpful suggestion to the user about where they might find more information.\n\n` +
+      `FORMATTING RULES:\n` +
+      `- When listing items, include a MAXIMUM of 15 items. If more exist, mention how many total and suggest the user browse the full list.\n` +
+      `- Use markdown links for SRD pages whenever relevant and available.\n` +
+      `- Detail page patterns: spells → /dnd/5e/srd/spells/{index}, monsters → /dnd/5e/srd/monsters/{index}, equipment → /dnd/5e/srd/equipment/{index}, magic items → /dnd/5e/srd/magic-items/{index}, classes → /dnd/5e/srd/classes/{index}, races → /dnd/5e/srd/races/{index}, backgrounds → /dnd/5e/srd/backgrounds/{index}, features → /dnd/5e/srd/features/{index}\n` +
+      `- You may also link to spell filter pages and monster filter pages when useful.\n` +
+      `- Only generate links that match the allowed SRD URL reference below.\n\n` +
+      `ALLOWED SRD URL REFERENCE:\n${srdLinkReference}\n\n` +
+      `--- SRD REFERENCE DATA ---\n${context}`;
+    maxTokens = 1024;
+  }
 
   const response = await client.chat.complete({
     model: "mistral-small-latest",
@@ -40,7 +55,7 @@ async function queryMistral(
       { role: "user", content: question },
     ],
     temperature: 0.3,
-    maxTokens: 1024,
+    maxTokens,
   });
 
   return (
@@ -54,21 +69,21 @@ async function queryMistral(
 const CACHE_PREFIX = "srd-search:";
 const CACHE_TTL = 60 * 60; // 1 hour in seconds
 
-function cacheKey(query: string): string {
-  return CACHE_PREFIX + query.toLowerCase().trim();
+function cacheKey(query: string, short: boolean): string {
+  return CACHE_PREFIX + (short ? "short:" : "") + query.toLowerCase().trim();
 }
 
-async function getCached(query: string): Promise<string | null> {
+async function getCached(query: string, short: boolean): Promise<string | null> {
   try {
-    return await redisClient.get(cacheKey(query));
+    return await redisClient.get(cacheKey(query, short));
   } catch {
     return null;
   }
 }
 
-async function setCache(query: string, answer: string): Promise<void> {
+async function setCache(query: string, answer: string, short: boolean): Promise<void> {
   try {
-    await redisClient.setEx(cacheKey(query), CACHE_TTL, answer);
+    await redisClient.setEx(cacheKey(query, short), CACHE_TTL, answer);
   } catch {
     // Cache write failure is non-fatal
   }
@@ -374,9 +389,9 @@ function stripInvalidLinks(markdown: string): string {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export async function searchSrd(query: string): Promise<string> {
+export async function searchSrd(query: string, short = false): Promise<string> {
   // Check cache
-  const cached = await getCached(query);
+  const cached = await getCached(query, short);
   if (cached) return cached;
 
   // Detect relevant categories
@@ -389,13 +404,12 @@ export async function searchSrd(query: string): Promise<string> {
     return "I couldn't find any relevant SRD data for that query. Try asking about specific spells, monsters, equipment, conditions, or other D&D 5E rules.";
   }
 
-  // Query Mistral, add deterministic links, then strip any links to invalid pages.
-  const raw = await queryMistral(query, context);
-  const withAutoLinks = addDeterministicLinks(raw);
-  const answer = stripInvalidLinks(withAutoLinks);
+  // Query Mistral; short mode skips auto-linking (plain text for Discord).
+  const raw = await queryMistral(query, context, short);
+  const answer = short ? raw : stripInvalidLinks(addDeterministicLinks(raw));
 
   // Cache the result
-  await setCache(query, answer);
+  await setCache(query, answer, short);
 
   return answer;
 }

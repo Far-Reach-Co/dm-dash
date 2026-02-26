@@ -16,7 +16,7 @@ export function registerSrdSearchRoute(router: Router) {
     srdSearchLimiter,
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
-        const { query } = req.body;
+        const { query, short } = req.body;
         if (!query || typeof query !== "string") {
           res.status(400).json({ message: "Query is required" });
           return;
@@ -26,7 +26,7 @@ export function registerSrdSearchRoute(router: Router) {
           res.status(400).json({ message: "Query must be between 3 and 500 characters" });
           return;
         }
-        const answer = await searchSrd(trimmed);
+        const answer = await searchSrd(trimmed, short === true);
         res.json({ answer });
       } catch (err) {
         next(err);
