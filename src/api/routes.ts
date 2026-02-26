@@ -108,6 +108,14 @@ import {
   editTableView,
 } from "./controllers/tableViews.js";
 import {
+  addTableViewTemplateByProject,
+  addTableViewTemplateByUser,
+  applyTableViewTemplate,
+  getTableViewTemplatesByProject,
+  getTableViewTemplatesByUser,
+  removeTableViewTemplate,
+} from "./controllers/tableViewTemplates.js";
+import {
   getLocationPinsByTableView,
   addLocationPin,
   removeLocationPin,
@@ -330,6 +338,21 @@ router.post("/add_table_view_by_user", addTableViewByUser);
 router.delete("/remove_table_view/:id", removeTableView);
 router.post("/edit_table_view_data/:id", editTableViewData);
 router.post("/edit_table_view/:id", editTableView);
+router.get("/get_table_view_templates_by_user", getTableViewTemplatesByUser);
+router.get(
+  "/get_table_view_templates_by_project/:project_id",
+  getTableViewTemplatesByProject,
+);
+router.post(
+  "/add_table_view_template_by_user/:table_view_id",
+  addTableViewTemplateByUser,
+);
+router.post(
+  "/add_table_view_template_by_project/:project_id/:table_view_id",
+  addTableViewTemplateByProject,
+);
+router.post("/apply_table_view_template/:id", applyTableViewTemplate);
+router.delete("/remove_table_view_template/:id", removeTableViewTemplate);
 router.post(
   "/start_guest_sandbox",
   guestSandboxStartLimiter,

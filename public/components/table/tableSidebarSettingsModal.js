@@ -1,49 +1,302 @@
 import createElement from "../createElement.js";
-import { postThing } from "../../lib/apiUtils.js";
+import { getThings, postThing } from "../../lib/apiUtils.js";
 import tableSelect from "./tableSelect.js";
 import socketIntegration from "./socketIntegration.js";
 
-export async function renderTableSettingsModal(sidebar) {
-  const sections = [createElement("h1", {}, "Table Settings")];
+const IDS = {
+  templateTitle: "template-title-input",
+  templateSelect: "template-select",
+  title: "title-input",
+  isPublic: "is_public-input",
+  mode: "mode-input",
+  titleSuccess: "title-update-success",
+};
 
-  if (sidebar.can("canChangeTable")) {
-    sections.push(
-      createElement("hr"),
-      createElement("h2", {}, "Change Table"),
-      createElement(
-        "small",
-        {},
-        "This will move everyone viewing this table to another table",
-      ),
-      createElement(
-        "form",
-        {},
-        [await tableSelect(), createElement("Button", { class: "ms-2" }, "Go")],
-        {
-          type: "submit",
-          event: (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const formProps = Object.fromEntries(formData);
-            const tableUUID = formProps.table_uuid;
-            if (tableUUID != 0) {
-              socketIntegration.tableChanged(tableUUID);
-            }
-          },
-        },
-      ),
-    );
+function sectionTitle(title, description) {
+  return createElement("div", { class: "table-settings-section-header" }, [
+    createElement("h2", {}, title),
+    createElement("small", { class: "table-settings-section-subtitle" }, description),
+  ]);
+}
+
+function getInputValue(id) {
+  return document.getElementById(id)?.value || "";
+}
+
+function getInputChecked(id) {
+  return !!document.getElementById(id)?.checked;
+}
+
+async function saveTemplate(sidebar, scope) {
+  const title = getInputValue(IDS.templateTitle);
+  const endpoint =
+    scope === "project" && sidebar.projectId
+      ? `/api/add_table_view_template_by_project/${sidebar.projectId}/${sidebar.tableView.id}`
+      : `/api/add_table_view_template_by_user/${sidebar.tableView.id}`;
+  const res = await postThing(endpoint, { title });
+  if (!res) return;
+  window.customAlert(
+    scope === "project" ? "Saved wyrld template." : "Saved user template.",
+  );
+  window.location.reload();
+}
+
+async function loadTemplateIntoCurrentTable(sidebar) {
+  const templateId = Number(getInputValue(IDS.templateSelect));
+  if (!templateId) {
+    window.customAlertError("Select a template first.");
+    return;
   }
 
-  sections.push(
-    createElement("hr"),
-    createElement("h2", {}, "Details"),
-    createElement("div", {}, [
+  const confirmed = await window.customConfirm(
+    "Load this template into the current table? This replaces current table state.",
+    { confirmText: "Load" },
+  );
+  if (!confirmed) return;
+
+  const res = await postThing(`/api/apply_table_view_template/${templateId}`, {
+    table_view_id: sidebar.tableView.id,
+  });
+  if (!res) return;
+
+  sidebar.tableView.data = res.data;
+  sidebar.tableView.mode = res.mode;
+
+  const app = socketIntegration.tableApp;
+  if (!app) {
+    window.location.reload();
+    return;
+  }
+
+  const tableId = app.tableId;
+  socketIntegration.tableModeChanged(res.mode);
+  app.teardown();
+  app.loadTable(tableId);
+}
+
+async function deleteSelectedTemplate() {
+  const templateId = Number(getInputValue(IDS.templateSelect));
+  if (!templateId) {
+    window.customAlertError("Select a template first.");
+    return;
+  }
+
+  const confirmed = await window.customConfirm(
+    "Delete this template? This cannot be undone.",
+    { confirmText: "Delete", danger: true },
+  );
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`/api/remove_table_view_template/${templateId}`, {
+      method: "DELETE",
+    });
+    if (res.status !== 204) {
+      throw new Error(`remove template failed with status ${res.status}`);
+    }
+  } catch (err) {
+    console.log(err);
+    window.customAlertError("Failed to delete template.");
+    return;
+  }
+
+  window.customAlert("Template deleted.");
+  window.location.reload();
+}
+
+async function handleDetailsSave(sidebar) {
+  const title = getInputValue(IDS.title);
+  const isPublic = getInputChecked(IDS.isPublic);
+  const newMode = getInputChecked(IDS.mode) ? "sandbox" : "standard";
+  const modeChanged = newMode !== sidebar.tableView.mode;
+
+  if (modeChanged) {
+    const confirmed = await window.customConfirm(
+      `Switch to ${newMode} mode? All connected users will be re-initialized.`,
+      { confirmText: "Switch" },
+    );
+    if (!confirmed) {
+      const modeInput = document.getElementById(IDS.mode);
+      if (modeInput) modeInput.checked = sidebar.tableView.mode === "sandbox";
+      return;
+    }
+  }
+
+  const res = await postThing(`/api/edit_table_view/${sidebar.tableView.id}`, {
+    title,
+    is_public: isPublic,
+    mode: newMode,
+  });
+  if (!res) return;
+
+  const titleUpdateMessageElem = document.querySelector(`#${IDS.titleSuccess}`);
+  if (titleUpdateMessageElem) {
+    titleUpdateMessageElem.innerText = "Saved!";
+    setTimeout(() => {
+      titleUpdateMessageElem.innerText = "";
+    }, 3000);
+  }
+
+  const displayTitle = document.querySelector("#table-display-title");
+  if (displayTitle) displayTitle.innerText = title;
+  sidebar.tableView.title = title;
+  sidebar.tableView.is_public = isPublic;
+  sidebar.tableView.mode = newMode;
+
+  if (!modeChanged) return;
+
+  socketIntegration.tableModeChanged(newMode);
+  const app = socketIntegration.tableApp;
+  if (!app) return;
+  const tableId = app.tableId;
+  app.teardown();
+  app.loadTable(tableId);
+}
+
+async function handleDeleteTable(sidebar) {
+  const confirmed = await window.customConfirm(
+    `Are you sure you want to delete ${sidebar.tableView.title}`,
+    { confirmText: "Delete", danger: true },
+  );
+  if (!confirmed) return;
+
+  try {
+    const res = await fetch(`/api/remove_table_view/${sidebar.tableView.id}`, {
+      method: "DELETE",
+    });
+    if (res.status !== 204) {
+      throw new Error(`remove table failed with status ${res.status}`);
+    }
+  } catch (err) {
+    console.log(err);
+    window.customAlertError("Failed to delete table.");
+    return;
+  }
+  window.location.pathname = "/dash";
+}
+
+async function renderChangeTableSection(sidebar) {
+  if (!sidebar.can("canChangeTable")) return null;
+  return createElement("section", { class: "table-settings-section" }, [
+    sectionTitle(
+      "Change Table",
+      "Move everyone currently viewing this table to a different table.",
+    ),
+    createElement(
+      "form",
+      { class: "table-settings-inline-form" },
+      [await tableSelect(), createElement("Button", { class: "new-btn" }, "Go")],
+      {
+        type: "submit",
+        event: (e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          const formProps = Object.fromEntries(formData);
+          const tableUUID = formProps.table_uuid;
+          if (tableUUID != 0) {
+            socketIntegration.tableChanged(tableUUID);
+          }
+        },
+      },
+    ),
+  ]);
+}
+
+function renderTemplatesSection(sidebar, templates) {
+  return createElement("section", { class: "table-settings-section" }, [
+    sectionTitle(
+      "Templates",
+      "Save this table setup as a template, then load templates into this table.",
+    ),
+    createElement("div", { class: "table-settings-grid" }, [
       createElement("div", { class: "input-container" }, [
         createElement(
           "label",
           {
-            for: "title",
+            for: IDS.templateTitle,
+            class: "me-1",
+          },
+          "Template Title",
+        ),
+        createElement("input", {
+          value: `${sidebar.tableView.title} Template`,
+          name: "template_title",
+          id: IDS.templateTitle,
+        }),
+      ]),
+      createElement("div", { class: "table-settings-actions" }, [
+        createElement("button", { class: "new-btn" }, "Save as User Template", {
+          type: "click",
+          event: async (e) => {
+            e.preventDefault();
+            await saveTemplate(sidebar, "user");
+          },
+        }),
+        ...(sidebar.projectId
+          ? [
+              createElement(
+                "button",
+                { class: "new-btn" },
+                "Save as Wyrld Template",
+                {
+                  type: "click",
+                  event: async (e) => {
+                    e.preventDefault();
+                    await saveTemplate(sidebar, "project");
+                  },
+                },
+              ),
+            ]
+          : []),
+      ]),
+      createElement("div", { class: "table-settings-inline-group" }, [
+        createElement("small", { class: "table-settings-label" }, "Load Template"),
+        createElement(
+          "select",
+          {
+            id: IDS.templateSelect,
+            name: "template_id",
+            class: "table-settings-select",
+          },
+          [
+            createElement("option", { value: 0 }, "Select a template"),
+            ...templates.map((template) =>
+              createElement(
+                "option",
+                { value: template.id },
+                `${template.scope === "project" ? "Wyrld" : "User"}: ${template.title}`,
+              ),
+            ),
+          ],
+        ),
+        createElement("button", { class: "new-btn" }, "Load", {
+          type: "click",
+          event: async (e) => {
+            e.preventDefault();
+            await loadTemplateIntoCurrentTable(sidebar);
+          },
+        }),
+        createElement("button", { class: "btn-red" }, "Delete", {
+          type: "click",
+          event: async (e) => {
+            e.preventDefault();
+            await deleteSelectedTemplate();
+          },
+        }),
+      ]),
+    ]),
+  ]);
+}
+
+function renderDetailsSection(sidebar) {
+  return createElement("section", { class: "table-settings-section" }, [
+    sectionTitle("Details", "Update table title, visibility, and mode."),
+    createElement("div", { class: "table-settings-grid" }, [
+      createElement("div", { class: "input-container" }, [
+        createElement(
+          "label",
+          {
+            for: IDS.title,
             class: "me-1",
           },
           "Edit Title",
@@ -51,141 +304,71 @@ export async function renderTableSettingsModal(sidebar) {
         createElement("input", {
           value: sidebar.tableView.title,
           name: "title",
-          id: "title-input",
+          id: IDS.title,
         }),
       ]),
-      createElement("br"),
-      createElement("div", { class: "d-flex align-items-center" }, [
-        createElement(
-          "small",
-          {
-            class: "text-orange me-1 font-bold",
-          },
-          "Make Public",
-        ),
-        sidebar.tableView.is_public
-          ? createElement("input", {
-              type: "checkbox",
-              name: "is_public",
-              id: "is_public-input",
-              checked: true,
-            })
-          : createElement("input", {
-              type: "checkbox",
-              name: "is_public",
-              id: "is_public-input",
-            }),
+      createElement("div", { class: "table-settings-toggle-row" }, [
+        createElement("small", { class: "table-settings-label" }, "Make Public"),
+        createElement("input", {
+          type: "checkbox",
+          name: "is_public",
+          id: IDS.isPublic,
+          checked: !!sidebar.tableView.is_public,
+        }),
       ]),
-      createElement("br"),
-      createElement("div", { class: "d-flex align-items-center" }, [
-        createElement(
-          "small",
-          {
-            class: "text-orange me-1 font-bold",
-          },
-          "Sandbox Mode",
-        ),
-        sidebar.tableView.mode === "sandbox"
-          ? createElement("input", {
-              type: "checkbox",
-              name: "mode",
-              id: "mode-input",
-              checked: true,
-            })
-          : createElement("input", {
-              type: "checkbox",
-              name: "mode",
-              id: "mode-input",
-            }),
+      createElement("div", { class: "table-settings-toggle-row" }, [
+        createElement("small", { class: "table-settings-label" }, "Sandbox Mode"),
+        createElement("input", {
+          type: "checkbox",
+          name: "mode",
+          id: IDS.mode,
+          checked: sidebar.tableView.mode === "sandbox",
+        }),
       ]),
-      createElement("br"),
-      createElement("button", { class: "new-btn me-1" }, "Save", {
-        type: "click",
-        event: async (e) => {
-          e.preventDefault();
-          const titleInput = document.getElementById("title-input");
-          const isPublicInput = document.getElementById("is_public-input");
-          const modeInput = document.getElementById("mode-input");
-
-          const newMode = modeInput.checked ? "sandbox" : "standard";
-          const modeChanged = newMode !== sidebar.tableView.mode;
-
-          if (modeChanged) {
-            const confirmed = await window.customConfirm(
-              `Switch to ${newMode} mode? All connected users will be re-initialized.`,
-              { confirmText: "Switch" },
-            );
-            if (!confirmed) {
-              modeInput.checked = sidebar.tableView.mode === "sandbox";
-              return;
-            }
-          }
-
-          const res = await postThing(`/api/edit_table_view/${sidebar.tableView.id}`, {
-            title: titleInput.value,
-            is_public: isPublicInput.checked,
-            mode: newMode,
-          });
-          if (res) {
-            const titleUpdateMessageElem = document.querySelector(
-              "#title-update-success",
-            );
-            titleUpdateMessageElem.innerText = "Saved!";
-            setTimeout(() => {
-              titleUpdateMessageElem.innerText = "";
-            }, 3000);
-            document.querySelector("#table-display-title").innerText =
-              titleInput.value;
-            sidebar.tableView.title = titleInput.value;
-            sidebar.tableView.is_public = isPublicInput.checked;
-            sidebar.tableView.mode = newMode;
-
-            if (modeChanged) {
-              socketIntegration.tableModeChanged(newMode);
-              const app = socketIntegration.tableApp;
-              if (app) {
-                const tableId = app.tableId;
-                app.teardown();
-                app.loadTable(tableId);
-              }
-            }
-          }
-        },
-      }),
-      createElement("small", {
-        class: "success-message",
-        id: "title-update-success",
-      }),
-      createElement("hr"),
-      createElement("button", { class: "btn-red" }, "Delete Table", {
-        type: "click",
-        event: async (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          const confirmed = await window.customConfirm(
-            `Are you sure you want to delete ${sidebar.tableView.title}`,
-            { confirmText: "Delete", danger: true },
-          );
-          if (!confirmed) return;
-
-          try {
-            const res = await fetch(
-              `/api/remove_table_view/${sidebar.tableView.id}`,
-              { method: "DELETE" },
-            );
-            if (res.status !== 204) {
-              throw new Error(`remove table failed with status ${res.status}`);
-            }
-          } catch (err) {
-            console.log(err);
-            window.customAlertError("Failed to delete table.");
-            return;
-          }
-          window.location.pathname = "/dash";
-        },
-      }),
+      createElement("div", { class: "table-settings-actions" }, [
+        createElement("button", { class: "new-btn" }, "Save", {
+          type: "click",
+          event: async (e) => {
+            e.preventDefault();
+            await handleDetailsSave(sidebar);
+          },
+        }),
+        createElement("button", { class: "btn-red" }, "Delete Table", {
+          type: "click",
+          event: async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            await handleDeleteTable(sidebar);
+          },
+        }),
+        createElement("small", {
+          class: "success-message table-settings-save-msg",
+          id: IDS.titleSuccess,
+        }),
+      ]),
     ]),
-  );
+  ]);
+}
 
-  return createElement("div", { class: "help-content" }, sections);
+async function loadTemplates(sidebar) {
+  const userTemplates =
+    (await getThings("/api/get_table_view_templates_by_user")) || [];
+  const projectTemplates = sidebar.projectId
+    ? (await getThings(
+        `/api/get_table_view_templates_by_project/${sidebar.projectId}`,
+      )) || []
+    : [];
+  return [...projectTemplates, ...userTemplates];
+}
+
+export async function renderTableSettingsModal(sidebar) {
+  const templates = await loadTemplates(sidebar);
+  const changeSection = await renderChangeTableSection(sidebar);
+  const sections = [
+    createElement("h1", { class: "table-settings-title" }, "Table Settings"),
+    ...(changeSection ? [changeSection] : []),
+    renderTemplatesSection(sidebar, templates),
+    renderDetailsSection(sidebar),
+  ];
+  return createElement("div", { class: "help-content table-settings-modal" }, sections);
 }
