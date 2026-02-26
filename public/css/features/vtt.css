@@ -172,6 +172,138 @@
 
 /* help-content styling is in modals.css */
 
+/* ==========================================================================
+   Table Settings Modal
+   ========================================================================== */
+
+.table-settings-modal {
+  width: min(720px, 90vw);
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.table-settings-title {
+  margin: 0;
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid rgba(116, 167, 215, 0.24);
+}
+
+.table-settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border: 1px solid rgba(116, 167, 215, 0.2);
+  border-radius: var(--border-radius-lg);
+  background: rgba(24, 32, 41, 0.45);
+}
+
+.table-settings-section-header h2 {
+  margin: 0;
+}
+
+.table-settings-section-subtitle {
+  color: var(--main-gray);
+  font-size: 0.85rem;
+}
+
+.table-settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.table-settings-modal .input-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding-top: 0;
+  margin: 0;
+}
+
+.table-settings-modal .input-container > label {
+  position: static;
+  transform: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+}
+
+.table-settings-modal .input-container input {
+  float: none;
+  width: 100%;
+}
+
+.table-settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.table-settings-inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.table-settings-inline-form select,
+.table-settings-select {
+  min-width: 230px;
+  flex: 1;
+}
+
+.table-settings-inline-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.table-settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(116, 167, 215, 0.14);
+  background: rgba(24, 32, 41, 0.3);
+}
+
+.table-settings-label {
+  color: var(--orange3);
+  font-weight: 700;
+  margin: 0;
+}
+
+.table-settings-save-msg {
+  min-height: 1em;
+}
+
+@media (max-width: 680px) {
+  .table-settings-modal {
+    width: min(96vw, 96vw);
+    padding: var(--space-md);
+  }
+
+  .table-settings-inline-form,
+  .table-settings-inline-group,
+  .table-settings-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .table-settings-inline-form select,
+  .table-settings-select {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
 .canvas-log-item {
   padding: var(--space-sm);
   color: var(--link-blue);
