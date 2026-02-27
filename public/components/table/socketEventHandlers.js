@@ -97,6 +97,7 @@ export function buildSocketEventHandlers(integration) {
           strokeWidth: newImg.strokeWidth,
           layer: newImg.layer,
           lockInPosition: !!newImg.lockInPosition,
+          hiddenFromPlayers: !!newImg.hiddenFromPlayers,
           angle: newImg.angle || 0,
         };
 

@@ -15,6 +15,7 @@ export function configureFabricDefaults() {
         selectable: this.selectable,
         evented: this.evented,
         lockInPosition: this.lockInPosition,
+        hiddenFromPlayers: this.hiddenFromPlayers,
       });
     };
   })(fabric.Object.prototype.toObject);

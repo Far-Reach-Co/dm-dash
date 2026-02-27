@@ -206,6 +206,7 @@ export async function renderSelectedObjectBar(toolbar) {
     createElement("div", { class: "vtt-toolbar-sep" }),
     createElement("small", {}, "Aura"),
     renderAuraColorPicker(toolbar, obj),
+    ...toolbar.renderObjectVisibilityControls(obj, { withSeparator: true }),
     ...toolbar.renderObjectLockControls(obj, { withSeparator: true }),
   ]);
 }

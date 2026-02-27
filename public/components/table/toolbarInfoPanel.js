@@ -175,6 +175,13 @@ export function renderInfoMenu(toolbar) {
             " - Remove selected object or bring it to front of its layer.",
           ),
           createElement("br"),
+          createElement("b", {}, "Object Visibility"),
+          createElement(
+            "small",
+            {},
+            " - Managers can hide selected objects from players while keeping them visible to themselves.",
+          ),
+          createElement("br"),
           createElement("br"),
 
           createElement("h2", {}, "Sandbox Mode"),

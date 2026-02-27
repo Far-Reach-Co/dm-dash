@@ -337,6 +337,7 @@ export default class CanvasLayer {
     path.set("id", uuidv4());
     path.set("layer", this.tableApp.currentLayer);
     path.set("lockInPosition", false);
+    path.set("hiddenFromPlayers", false);
 
     // Re-add to canvas on correct layer
     this.canvasEngine.removeObject(path);
@@ -496,6 +497,7 @@ export default class CanvasLayer {
       padding: 6,
       layer: this.tableApp.currentLayer,
       lockInPosition: false,
+      hiddenFromPlayers: false,
     });
 
     this.canvasEngine.addObject(text);
@@ -545,6 +547,7 @@ export default class CanvasLayer {
       evented: false,
       layer: this.tableApp.currentLayer,
       lockInPosition: false,
+      hiddenFromPlayers: false,
     };
 
     let shape = null;
@@ -633,6 +636,7 @@ export default class CanvasLayer {
     shape.set("id", uuidv4());
     shape.set("layer", this.tableApp.currentLayer);
     shape.set("lockInPosition", false);
+    shape.set("hiddenFromPlayers", false);
     shape.set("selectable", true);
     shape.set("evented", true);
 
@@ -726,6 +730,9 @@ export default class CanvasLayer {
         if (typeof clone.lockInPosition !== "boolean") {
           clone.set("lockInPosition", !!object.lockInPosition);
         }
+        if (typeof clone.hiddenFromPlayers !== "boolean") {
+          clone.set("hiddenFromPlayers", !!object.hiddenFromPlayers);
+        }
 
         // place close to the original
         if (object.group) {
@@ -779,6 +786,7 @@ export default class CanvasLayer {
         newImg.set("imageId", image.id);
         newImg.set("layer", this.tableApp.currentLayer);
         newImg.set("lockInPosition", false);
+        newImg.set("hiddenFromPlayers", false);
 
         // add to canvas on correct layer
         this.canvasEngine.addObject(newImg);
@@ -979,6 +987,7 @@ export default class CanvasLayer {
       object,
       gridManager: this.gridManager,
       currentLayer: this.tableApp.currentLayer,
+      capabilities: this.tableApp.capabilities,
     });
   };
 

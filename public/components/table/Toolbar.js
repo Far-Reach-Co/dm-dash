@@ -97,6 +97,11 @@ export default class Toolbar {
     return this.can("canDeleteCanvasObjects");
   };
 
+  canManageVisibility = (obj) => {
+    if (!obj || obj.isLocationPin) return false;
+    return this.can("canDeleteCanvasObjects");
+  };
+
   hiddenElement = () => createElement("div", { class: "d-none" });
 
   layerStyles = LAYER_STYLES;
@@ -216,6 +221,65 @@ export default class Toolbar {
             type: "click",
             event: async () => {
               await this.setObjectLockInPosition(obj, !isLocked);
+            },
+          },
+        ),
+      );
+    }
+
+    return controls;
+  };
+
+  setObjectVisibilityForPlayers = async (obj, isVisibleToPlayers) => {
+    if (!obj || !this.canManageVisibility(obj)) return;
+    obj.set("hiddenFromPlayers", !isVisibleToPlayers);
+    this.tableApp.canvasLayer.updateObjectProperties(obj);
+    this.tableApp.canvasRenderAll();
+    socketIntegration.imageMoved(obj);
+    await this.tableApp.canvasLayer.saveToDatabase();
+    await this.updateObjectSelection();
+  };
+
+  renderObjectVisibilityControls = (
+    obj,
+    { withSeparator = false, includeStatus = true, includeButton = true } = {},
+  ) => {
+    if (!obj || !this.canManageVisibility(obj)) return [];
+    const isVisibleToPlayers = !obj.hiddenFromPlayers;
+    const controls = [];
+
+    if (withSeparator) {
+      controls.push(createElement("div", { class: "vtt-toolbar-sep" }));
+    }
+
+    if (includeStatus) {
+      controls.push(
+        createElement(
+          "small",
+          {
+            style: `color: ${isVisibleToPlayers ? "var(--green)" : "var(--orange3)"};`,
+          },
+          isVisibleToPlayers ? "Visible to players" : "Hidden from players",
+        ),
+      );
+    }
+
+    if (includeButton) {
+      controls.push(
+        createElement(
+          "button",
+          {
+            type: "button",
+            class: "vtt-lock-toggle-btn",
+            title: isVisibleToPlayers
+              ? "Hide this object from players"
+              : "Show this object to players",
+          },
+          isVisibleToPlayers ? "Hide from players" : "Show to players",
+          {
+            type: "click",
+            event: async () => {
+              await this.setObjectVisibilityForPlayers(obj, !isVisibleToPlayers);
             },
           },
         ),
