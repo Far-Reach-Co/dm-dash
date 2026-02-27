@@ -22,13 +22,19 @@ import {
   requireApiUser,
   requireProjectOwnerAccess,
 } from "./accessControl";
-import { userSubscriptionStatus } from "../../lib/enums.js";
 import { EventType, logEventAsync } from "../../lib/eventLogger";
 import logger from "../../lib/logger.js";
 import {
   notifyProjectJoinRequestCreatedAsync,
   notifyProjectJoinRequestReviewedAsync,
 } from "../../lib/emailNotifications";
+import { expireStaleProJoinRequests } from "../../lib/projectJoinRequestExpiry";
+import {
+  notifyCapacityStateForOwner,
+  notifyProjectOwner,
+  notifySilently,
+  notifyUser,
+} from "../../lib/notifications";
 import {
   getProjectMemberCount,
   logJoinRequestDenied,
@@ -47,6 +53,7 @@ async function getPublicWyrldDirectory(
 ) {
   try {
     const userId = requireApiUser(req);
+    await expireStaleProJoinRequests({ req, requesterUserId: userId });
     const search =
       typeof req.query.q === "string" ? req.query.q.trim().toLowerCase() : "";
     const limit = parseBoundedInt(req.query.limit, 40, 1, 200);
@@ -123,7 +130,7 @@ async function requestProjectJoin(
       });
       throw { status: 409, message: "You already own this wyrld" };
     }
-    if (!project.is_pro || !project.is_public_listed) {
+    if (!project.is_public_listed) {
       logJoinRequestDenied({
         req,
         userId,
@@ -134,6 +141,11 @@ async function requestProjectJoin(
       });
       throw { status: 403, message: "This wyrld is not listed publicly" };
     }
+    await expireStaleProJoinRequests({
+      req,
+      projectId: project.id,
+      requesterUserId: userId,
+    });
     if (project.public_join_mode !== "request") {
       logJoinRequestDenied({
         req,
@@ -263,6 +275,23 @@ async function requestProjectJoin(
         joinRequestId: joinRequest.id,
         message,
       });
+      notifySilently(
+        notifyProjectOwner({
+          projectId: project.id,
+          type: "project.join_request_pending",
+          title: `New join request for ${project.title}`,
+          body: message || "A player requested to join your wyrld.",
+          link: `/wyrld/settings?id=${project.id}`,
+          data: {
+            projectId: Number(project.id),
+            requestId: Number(joinRequest.id),
+            requesterUserId: Number(userId),
+          },
+          excludeUserIds: [userId],
+        }),
+        "Failed to create in-app notification for pending join request",
+        { projectId: project.id, joinRequestId: joinRequest.id, requesterUserId: userId },
+      );
       res.status(201).send(data.rows[0]);
     } catch (dbErr) {
       const pgErr = dbErr as { code?: string };
@@ -298,6 +327,7 @@ async function cancelProjectJoinRequest(
 ) {
   try {
     const userId = requireApiUser(req);
+    await expireStaleProJoinRequests({ req, requestId: req.params.id });
     const joinRequestData = await getProjectJoinRequestQuery(req.params.id);
     const joinRequest = joinRequestData.rows[0];
     if (!joinRequest) {
@@ -357,6 +387,22 @@ async function cancelProjectJoinRequest(
       },
       "Project join request cancelled",
     );
+    notifySilently(
+      notifyProjectOwner({
+        projectId: joinRequest.project_id,
+        type: "project.join_request_cancelled",
+        title: "A join request was cancelled",
+        body: "A pending requester cancelled their join request.",
+        link: `/wyrld/settings?id=${joinRequest.project_id}`,
+        data: {
+          projectId: Number(joinRequest.project_id),
+          requestId: Number(joinRequest.id),
+          requesterUserId: Number(joinRequest.requester_user_id),
+        },
+      }),
+      "Failed to create in-app notification for cancelled join request",
+      { projectId: joinRequest.project_id, joinRequestId: joinRequest.id },
+    );
     res.status(200).send(data.rows[0]);
   } catch (err) {
     next(err);
@@ -369,6 +415,7 @@ async function getProjectJoinRequestsByProject(
   next: NextFunction,
 ) {
   try {
+    await expireStaleProJoinRequests({ req, projectId: req.params.project_id });
     await requireProjectOwnerAccess(req, req.params.project_id);
     const [rowsData, countData] = await Promise.all([
       getPendingProjectJoinRequestsByProjectQuery(req.params.project_id),
@@ -398,6 +445,7 @@ async function respondProjectJoinRequest(
       throw { status: 400, message: "action must be 'approve' or 'reject'" };
     }
 
+    await expireStaleProJoinRequests({ req, requestId: req.params.id });
     const joinRequestData = await getProjectJoinRequestQuery(req.params.id);
     const joinRequest = joinRequestData.rows[0];
     if (!joinRequest) {
@@ -509,6 +557,48 @@ async function respondProjectJoinRequest(
       reviewerUserId: ownerRole.userId,
       status,
     });
+    notifySilently(
+      Promise.all([
+        notifyUser({
+          userId: joinRequest.requester_user_id,
+          type:
+            status === "approved"
+              ? "project.join_request_approved"
+              : "project.join_request_rejected",
+          title:
+            status === "approved"
+              ? "Your join request was approved"
+              : "Your join request was rejected",
+          body:
+            status === "approved"
+              ? "You can now access the wyrld."
+              : "The owner declined this request.",
+          link:
+            status === "approved"
+              ? `/wyrld?id=${joinRequest.project_id}`
+              : `/wyrlds/public`,
+          data: {
+            projectId: Number(joinRequest.project_id),
+            requestId: Number(joinRequest.id),
+            reviewerUserId: Number(ownerRole.userId),
+            status,
+          },
+        }),
+        joined
+          ? notifyCapacityStateForOwner({
+              projectId: joinRequest.project_id,
+              trigger: "member_joined",
+            })
+          : Promise.resolve(),
+      ]),
+      "Failed to create in-app notification for join request review",
+      {
+        projectId: joinRequest.project_id,
+        joinRequestId: joinRequest.id,
+        requesterUserId: joinRequest.requester_user_id,
+        status,
+      },
+    );
 
     res.status(200).send({
       request: updatedData.rows[0],
@@ -551,10 +641,6 @@ async function editProjectPublicSettings(
       req.body?.featured_record_id,
       project.featured_record_id,
     );
-
-    if (!project.is_pro && is_public_listed) {
-      throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
-    }
 
     const memberCount = await getProjectMemberCount(project.id);
     if (

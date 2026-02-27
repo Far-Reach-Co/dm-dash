@@ -38,6 +38,7 @@ import {
   toNumericId,
   WyrldActivityEvent,
 } from "./wyrldHelpers";
+import { expireStaleProJoinRequests } from "../lib/projectJoinRequestExpiry";
 
 const RECENT_LIMIT = 5;
 
@@ -197,6 +198,7 @@ export async function loadWyrldData(
     created_at: string;
   }> = [];
   if (userId == project.user_id) {
+    await expireStaleProJoinRequests({ req, projectId: project.id });
     let joinRequestsRows: Array<{
       id: number;
       requester_user_id: number;

@@ -149,6 +149,45 @@ async function editProjectJoinRequestQuery(
   return await db.query<ProjectJoinRequest>(query);
 }
 
+function toNullableInt(
+  value: number | string | null | undefined,
+): number | null {
+  if (value === null || typeof value === "undefined") return null;
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+async function expirePendingProjectJoinRequestsForProWyrldsQuery(filters?: {
+  projectId?: number | string | null;
+  requesterUserId?: number | string | null;
+  requestId?: number | string | null;
+}) {
+  const projectId = toNullableInt(filters?.projectId);
+  const requesterUserId = toNullableInt(filters?.requesterUserId);
+  const requestId = toNullableInt(filters?.requestId);
+
+  const query = {
+    text: /*sql*/ `
+      update public."ProjectJoinRequest" pjr
+      set
+        status = 'rejected',
+        reviewed_at = now(),
+        updated_at = now()
+      from public."Project" p
+      where p.id = pjr.project_id
+        and p.is_pro = true
+        and pjr.status = 'pending'
+        and pjr.created_at <= (now() - interval '7 days')
+        and ($1::int is null or pjr.project_id = $1)
+        and ($2::int is null or pjr.requester_user_id = $2)
+        and ($3::int is null or pjr.id = $3)
+      returning pjr.*
+    `,
+    values: [projectId, requesterUserId, requestId],
+  };
+  return await db.query<ProjectJoinRequest>(query);
+}
+
 export {
   addProjectJoinRequestQuery,
   getProjectJoinRequestQuery,
@@ -158,4 +197,5 @@ export {
   getLatestProjectJoinRequestByProjectAndUserQuery,
   getPendingJoinRequestCountByProjectQuery,
   editProjectJoinRequestQuery,
+  expirePendingProjectJoinRequestsForProWyrldsQuery,
 };

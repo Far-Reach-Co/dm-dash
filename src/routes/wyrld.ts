@@ -28,6 +28,7 @@ import {
   toPublicWyrldSlug,
 } from "./wyrldHelpers";
 import { loadWyrldData } from "./wyrldData";
+import { expireStaleProJoinRequests } from "../lib/projectJoinRequestExpiry";
 
 const router = Router();
 
@@ -116,6 +117,10 @@ router.get(
       let pendingRequestIdByProjectId = new Map<number, number>();
 
       if (userId) {
+        await expireStaleProJoinRequests({
+          req,
+          requesterUserId: userId,
+        });
         const [ownedData, joinedData] = await Promise.all([
           getProjectsQuery(userId),
           getProjectUsersQuery(userId),
@@ -198,7 +203,7 @@ router.get(
 
       const projectData = await getProjectQuery(projectId);
       const project = projectData.rows[0];
-      if (!project || !project.is_public_listed || !project.is_pro) {
+      if (!project || !project.is_public_listed) {
         return res.redirect("/404");
       }
 
@@ -223,7 +228,7 @@ router.get(
 
       const projectData = await getProjectQuery(projectId);
       const project = projectData.rows[0];
-      if (!project || !project.is_public_listed || !project.is_pro) {
+      if (!project || !project.is_public_listed) {
         return res.redirect("/404");
       }
       const expectedSlug = toPublicWyrldSlug(project.title);

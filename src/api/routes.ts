@@ -26,6 +26,12 @@ import {
   toggleProjectDiscussionThreadLock,
 } from "./controllers/projectDiscussion.js";
 import {
+  getNotifications,
+  getUnreadNotificationsCount,
+  markAllNotificationsAsRead,
+  markNotificationAsRead,
+} from "./controllers/notifications.js";
+import {
   registerUser,
   loginUser,
   resetPassword,
@@ -474,6 +480,10 @@ router.post("/add_project_discussion_post/:thread_id", addProjectDiscussionPost)
 router.post("/toggle_project_discussion_thread_lock/:thread_id", toggleProjectDiscussionThreadLock);
 router.delete("/remove_project_discussion_thread/:thread_id", removeProjectDiscussionThread);
 router.delete("/remove_project_discussion_post/:post_id", removeProjectDiscussionPost);
+router.get("/notifications", getNotifications);
+router.get("/notifications/unread-count", getUnreadNotificationsCount);
+router.post("/notifications/:id/read", markNotificationAsRead);
+router.post("/notifications/read-all", markAllNotificationsAsRead);
 
 // Auth and Users
 // setup rate limiters

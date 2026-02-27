@@ -212,7 +212,6 @@ export async function requireRecordAccessOrRedirect(
 
   const canViewFeaturedRecord =
     options.mode === "view" &&
-    project.is_pro &&
     project.is_public_listed &&
     project.featured_record_id !== null &&
     String(project.featured_record_id) === String(record.id);
