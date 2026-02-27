@@ -87,21 +87,79 @@ export function buildSocketEventHandlers(integration) {
       if (!canvasLayer || !canvasEngine) return;
 
       if (!newImg.src) {
-        const newPath = canvasEngine.createPath(newImg.path);
-        newPath.set({
+        let vectorObject = null;
+        const commonProps = {
           id: newImg.id,
           left: newImg.left,
           top: newImg.top,
-          fill: false,
+          fill: typeof newImg.fill === "undefined" ? false : newImg.fill,
           stroke: newImg.stroke,
           strokeWidth: newImg.strokeWidth,
           layer: newImg.layer,
-        });
+          lockInPosition: !!newImg.lockInPosition,
+          angle: newImg.angle || 0,
+        };
 
-        canvasEngine.addObject(newPath);
-        canvasLayer.placeObjectOnLayer(newPath);
-        canvasLayer.updateObjectProperties(newPath);
-        canvasLayer.setupObjectEventListeners(newPath);
+        if (newImg.type === "path") {
+          vectorObject = canvasEngine.createPath(newImg.path, commonProps);
+        } else if (newImg.type === "line") {
+          vectorObject = canvasEngine.createLine(
+            [newImg.x1 || 0, newImg.y1 || 0, newImg.x2 || 0, newImg.y2 || 0],
+            commonProps,
+          );
+        } else if (newImg.type === "rect") {
+          vectorObject = canvasEngine.createRect({
+            ...commonProps,
+            width: newImg.width || 0,
+            height: newImg.height || 0,
+            originX: newImg.originX || "left",
+            originY: newImg.originY || "top",
+            scaleX: typeof newImg.scaleX === "number" ? newImg.scaleX : 1,
+            scaleY: typeof newImg.scaleY === "number" ? newImg.scaleY : 1,
+          });
+        } else if (newImg.type === "ellipse") {
+          vectorObject = canvasEngine.createEllipse({
+            ...commonProps,
+            rx: newImg.rx || 0,
+            ry: newImg.ry || 0,
+            originX: newImg.originX || "center",
+            originY: newImg.originY || "center",
+            scaleX: typeof newImg.scaleX === "number" ? newImg.scaleX : 1,
+            scaleY: typeof newImg.scaleY === "number" ? newImg.scaleY : 1,
+          });
+        } else if (newImg.type === "i-text") {
+          vectorObject = canvasEngine.createIText(newImg.text || "", {
+            ...commonProps,
+            fontSize: newImg.fontSize || 24,
+            fontFamily: newImg.fontFamily || "YoungSerif, serif",
+            originX: newImg.originX || "left",
+            originY: newImg.originY || "top",
+            scaleX: typeof newImg.scaleX === "number" ? newImg.scaleX : 1,
+            scaleY: typeof newImg.scaleY === "number" ? newImg.scaleY : 1,
+          });
+        } else if (newImg.type === "textbox" || newImg.type === "text") {
+          vectorObject = canvasEngine.createTextbox(newImg.text || "", {
+            ...commonProps,
+            fontSize: newImg.fontSize || 24,
+            fontFamily: newImg.fontFamily || "YoungSerif, serif",
+            width: Math.max(180, newImg.width || 180),
+            backgroundColor: newImg.backgroundColor || "rgba(24, 32, 41, 0.45)",
+            textBackgroundColor:
+              newImg.textBackgroundColor || "rgba(24, 32, 41, 0.45)",
+            borderColor: newImg.borderColor || "rgba(222, 199, 174, 0.9)",
+            padding: typeof newImg.padding === "number" ? newImg.padding : 6,
+            originX: newImg.originX || "left",
+            originY: newImg.originY || "top",
+            scaleX: typeof newImg.scaleX === "number" ? newImg.scaleX : 1,
+            scaleY: typeof newImg.scaleY === "number" ? newImg.scaleY : 1,
+          });
+        }
+
+        if (!vectorObject) return;
+        canvasEngine.addObject(vectorObject);
+        canvasLayer.placeObjectOnLayer(vectorObject);
+        canvasLayer.updateObjectProperties(vectorObject);
+        canvasLayer.setupObjectEventListeners(vectorObject);
         return;
       }
 

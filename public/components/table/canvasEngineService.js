@@ -35,6 +35,22 @@ export default class CanvasEngineService {
     return new fabric.Circle(props);
   };
 
+  createRect = (props = {}) => {
+    return new fabric.Rect(props);
+  };
+
+  createEllipse = (props = {}) => {
+    return new fabric.Ellipse(props);
+  };
+
+  createIText = (text, props = {}) => {
+    return new fabric.IText(text, props);
+  };
+
+  createTextbox = (text, props = {}) => {
+    return new fabric.Textbox(text, props);
+  };
+
   createLine = (points, props = {}) => {
     return new fabric.Line(points, props);
   };

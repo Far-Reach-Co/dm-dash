@@ -19,7 +19,32 @@ export function renderDrawBar(toolbar) {
     return toolbar.hiddenElement();
   }
 
+  const canvasLayer = toolbar.tableApp.canvasLayer;
+  const drawingTool = toolbar.tableApp.canvasLayer.getDrawingTool();
+
   return createElement("div", { class: "vtt-draw-bar" }, [
+    createElement("small", {}, "Tool"),
+    createElement(
+      "select",
+      {
+        class: "vtt-draw-control vtt-draw-select",
+        value: drawingTool,
+      },
+      [
+        createElement("option", { value: "freehand" }, "Freehand"),
+        createElement("option", { value: "line" }, "Line"),
+        createElement("option", { value: "rect" }, "Rectangle"),
+        createElement("option", { value: "ellipse" }, "Ellipse"),
+        createElement("option", { value: "text" }, "Text"),
+      ],
+      {
+        type: "change",
+        event: (e) => {
+          canvasLayer.setDrawingTool(e.target.value);
+          toolbar._updateDrawBar();
+        },
+      },
+    ),
     createElement("small", {}, "Color"),
     createElement(
       "input",
@@ -33,7 +58,7 @@ export function renderDrawBar(toolbar) {
       {
         type: "input",
         event: (e) => {
-          toolbar.tableApp.canvasLayer.setDrawingBrushColor(e.target.value);
+          canvasLayer.setDrawingBrushColor(e.target.value);
         },
       },
     ),
@@ -46,15 +71,30 @@ export function renderDrawBar(toolbar) {
       "input",
       {
         type: "number",
-        value: toolbar.tableApp.canvasLayer.getDrawingBrushWidth(),
+        class: "vtt-draw-control vtt-draw-width",
+        value: canvasLayer.getDrawingBrushWidth(),
         min: 1,
-        style: "width: 44px; height: 26px; padding: 2px 4px;",
       },
       null,
       {
         type: "input",
         event: (e) => {
-          toolbar.tableApp.canvasLayer.setDrawingBrushWidth(e.target.valueAsNumber);
+          canvasLayer.setDrawingBrushWidth(e.target.valueAsNumber);
+        },
+      },
+    ),
+    createElement(
+      "button",
+      {
+        type: "button",
+        class: "vtt-draw-control vtt-draw-undo",
+        title: "Undo most recent drawing object (Cmd/Ctrl+Z)",
+      },
+      "Undo",
+      {
+        type: "click",
+        event: async () => {
+          await canvasLayer.undoLastDraw();
         },
       },
     ),

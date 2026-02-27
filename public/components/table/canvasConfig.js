@@ -8,7 +8,7 @@ export function configureFabricDefaults() {
 
   fabric.Object.prototype.toObject = (function (toObject) {
     return function () {
-      return fabric.util.object.extend(toObject.call(this), {
+      return fabric.util.object.extend(toObject.call(this, ...arguments), {
         id: this.id,
         imageId: this.imageId,
         layer: this.layer,

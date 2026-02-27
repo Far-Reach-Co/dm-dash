@@ -5,7 +5,7 @@ export function calculateZoomLevel(currentZoom, delta, min, max) {
 
 export function handleMouseWheelZoom(canvasEngine, opt) {
   const delta = opt.e.deltaY;
-  const newZoom = calculateZoomLevel(canvasEngine.getZoom(), delta, 0.25, 20);
+  const newZoom = calculateZoomLevel(canvasEngine.getZoom(), delta, 0.25, 3);
   canvasEngine.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, newZoom);
   opt.e.preventDefault();
   opt.e.stopPropagation();
@@ -20,7 +20,7 @@ export function handlePinchZoomGesture(canvasEngine, opt) {
 
   const delta = 1 - opt.self.scale;
   const sensitivity = 0.1;
-  const newZoom = Math.max(0.2, Math.min(5, zoom + zoom * delta * sensitivity));
+  const newZoom = Math.max(0.25, Math.min(3, zoom + zoom * delta * sensitivity));
 
   canvasEngine.zoomToPoint(pt, newZoom);
   opt.e.preventDefault();
