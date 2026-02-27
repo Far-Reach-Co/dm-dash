@@ -25,6 +25,15 @@
       font-family: "Avenir Next", "Segoe UI", Tahoma, sans-serif;
     }
 
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family: "Brookshire", "Avenir Next", "Segoe UI", Tahoma, sans-serif;
+    }
+
     .export-shell,
     .export-shell h1,
     .export-shell h2,
@@ -46,7 +55,7 @@
       text-shadow: none !important;
     }
 
-    .kv > div:not(.key) {
+    .kv>div:not(.key) {
       color: #000000 !important;
       font-weight: 500;
     }
@@ -138,15 +147,26 @@
     .card h2 {
       margin: 0 0 0.55rem;
       color: var(--export-accent);
-      font-size: 1rem;
-      text-transform: uppercase;
+      font-size: 1.15rem;
+      text-transform: capitalize;
       letter-spacing: 0.04em;
       font-weight: 700;
     }
 
+    .skills-proficiencies-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .skills-proficiencies-container .card {
+      margin-bottom: 0;
+    }
+
     .kv {
       display: grid;
-      grid-template-columns: minmax(95px, 130px) 1fr;
+      grid-template-columns: minmax(100px, 130px) 1fr;
       gap: 0.25rem 0.6rem;
       font-size: 0.95rem;
     }
@@ -157,15 +177,14 @@
     }
 
     .ability-horizontal {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
+      display: flex;
+      justify-content: center;
       gap: 0.35rem;
     }
 
     .ability-item {
       border: 1px solid var(--export-border);
       border-radius: 0.45rem;
-      padding: 0.38rem 0.25rem;
       text-align: center;
     }
 
@@ -190,7 +209,7 @@
 
     .ability-row-section .ability-item {
       min-height: 86px;
-      padding: 0.52rem 0.34rem;
+      padding: 1rem 2rem;
     }
 
     .ability-row-section .ability-label {
@@ -210,12 +229,19 @@
 
     .table-wrap {
       overflow-x: auto;
+      overflow-y: hidden;
+      border-radius: 0.75rem;
+      border: 1px solid var(--export-border);
     }
 
     table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 0.75rem;
+      overflow: hidden;
       font-size: 0.92rem;
+      border: 1px solid var(--export-border);
     }
 
     .spell-table {
@@ -261,6 +287,12 @@
       width: 20%;
     }
 
+    .spell-meta-row td:nth-child(1) {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--export-accent);
+    }
+
     .spell-desc-row td {
       white-space: pre-wrap;
       overflow-wrap: anywhere;
@@ -277,8 +309,14 @@
       margin-bottom: 0.6rem;
     }
 
-    .skills-table {
-      font-size: 0.82rem;
+    .spell-group-card>h2 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--export-accent);
+      margin-bottom: 0.5rem;
+    }
+
+    font-size: 0.82rem;
     }
 
     .skills-table th,
@@ -357,18 +395,6 @@
       margin: 0;
     }
 
-    @media (max-width: 960px) {
-      .ability-horizontal {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-    }
-
-    @media (max-width: 640px) {
-      .ability-horizontal {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
-
     @media print {
       @page {
         size: Letter;
@@ -419,12 +445,12 @@
         page-break-inside: auto;
       }
 
-      .card > h2 {
+      .card>h2 {
         break-after: avoid;
         page-break-after: avoid;
       }
 
-      .card > h2 + * {
+      .card>h2+* {
         break-before: avoid;
         page-break-before: avoid;
       }
@@ -456,7 +482,7 @@
         padding: 0.26rem 0.34rem;
       }
 
-      .spells-section > h2 {
+      .spells-section>h2 {
         display: none;
       }
 
@@ -465,7 +491,7 @@
         page-break-inside: avoid;
       }
 
-      .spells-section .spell-group-card > h2 {
+      .spells-section .spell-group-card>h2 {
         break-after: avoid;
         page-break-after: avoid;
       }
@@ -483,6 +509,15 @@
       .spell-desc-row td {
         font-size: 0.84rem;
       }
+
+      .skills-proficiencies-container {
+        grid-template-columns: 1fr;
+      }
+
+      .skills-proficiencies-container .card {
+        break-inside: avoid-page;
+        page-break-inside: avoid;
+      }
     }
   </style>
 </head>
@@ -496,8 +531,8 @@
     const back = data.background;
     const slots = data.spellSlots;
     const valueOrDash = (value) => {
-      if (value === null || value === undefined) return "N/A";
-      if (typeof value === "string" && value.trim() === "") return "N/A";
+      if (value === null || value === undefined) return "-";
+      if (typeof value === "string" && value.trim() === "") return "-";
       return value;
     };
     const fmtBool = (value) => value ? "Yes" : "No";
@@ -616,73 +651,98 @@
         <article class="card">
           <h2>Identity</h2>
           <div class="kv">
-            <div class="key">Name</div><div><%= valueOrDash(general.name) %></div>
-            <div class="key">Race</div><div><%= valueOrDash(general.race) %></div>
-            <div class="key">Class</div><div><%= valueOrDash(general.class) %></div>
-            <div class="key">Subclass</div><div><%= valueOrDash(general.subclass) %></div>
-            <div class="key">Other Class</div><div><%= valueOrDash(general.other_class) %></div>
-            <div class="key">Level</div><div><%= valueOrDash(general.level) %></div>
-            <div class="key">Experience</div><div><%= valueOrDash(general.exp) %></div>
-            <div class="key">Inspiration</div><div><%= fmtBool(general.inspiration) %></div>
+            <div class="key">Name</div>
+            <div><%= valueOrDash(general.name) %></div>
+            <div class="key">Race</div>
+            <div><%= valueOrDash(general.race) %></div>
+            <div class="key">Class</div>
+            <div><%= valueOrDash(general.class) %></div>
+            <div class="key">Subclass</div>
+            <div><%= valueOrDash(general.subclass) %></div>
+            <div class="key">Other Class</div>
+            <div><%= valueOrDash(general.other_class) %></div>
+            <div class="key">Level</div>
+            <div><%= valueOrDash(general.level) %></div>
+            <div class="key">Experience</div>
+            <div><%= valueOrDash(general.exp) %></div>
+            <div class="key">Inspiration</div>
+            <div><%= fmtBool(general.inspiration) %></div>
           </div>
         </article>
 
         <article class="card">
           <h2>Combat</h2>
           <div class="kv">
-            <div class="key">Armor Class</div><div><%= valueOrDash(general.armor_class) %></div>
-            <div class="key">Initiative</div><div><%= valueOrDash(general.initiative) %></div>
-            <div class="key">Speed</div><div><%= valueOrDash(general.speed) %></div>
-            <div class="key">Current HP</div><div><%= valueOrDash(general.current_hp) %></div>
-            <div class="key">Max HP</div><div><%= valueOrDash(general.max_hp) %></div>
-            <div class="key">Temp HP</div><div><%= valueOrDash(general.temp_hp) %></div>
-            <div class="key">Hit Dice</div><div><%= valueOrDash(general.hit_dice) %></div>
-            <div class="key">Hit Dice Total</div><div><%= valueOrDash(general.hit_dice_total) %></div>
+            <div class="key">Armor Class</div>
+            <div><%= valueOrDash(general.armor_class) %></div>
+            <div class="key">Initiative</div>
+            <div><%= valueOrDash(general.initiative) %></div>
+            <div class="key">Speed</div>
+            <div><%= valueOrDash(general.speed) %></div>
+            <div class="key">Current HP</div>
+            <div><%= valueOrDash(general.current_hp) %></div>
+            <div class="key">Max HP</div>
+            <div><%= valueOrDash(general.max_hp) %></div>
+            <div class="key">Temp HP</div>
+            <div><%= valueOrDash(general.temp_hp) %></div>
+            <div class="key">Hit Dice</div>
+            <div><%= valueOrDash(general.hit_dice) %></div>
+            <div class="key">Hit Dice Total</div>
+            <div><%= valueOrDash(general.hit_dice_total) %></div>
           </div>
         </article>
 
         <article class="card">
           <h2>Computed Values</h2>
           <div class="kv">
-            <div class="key">Proficiency Bonus</div><div><%= formatSigned(proficiencyBonus) %></div>
-            <div class="key">Passive Perception</div><div><%= valueOrDash(passivePerception) %></div>
-            <div class="key">Spell Save DC</div><div><%= valueOrDash(spellSaveDC) %></div>
-            <div class="key">Spell Attack Bonus</div><div><%= formatSigned(spellAttackBonus) %></div>
+            <div class="key">Proficiency Bonus</div>
+            <div><%= formatSigned(proficiencyBonus) %></div>
+            <div class="key">Passive Perception</div>
+            <div><%= valueOrDash(passivePerception) %></div>
+            <div class="key">Spell Save DC</div>
+            <div><%= valueOrDash(spellSaveDC) %></div>
+            <div class="key">Spell Attack Bonus</div>
+            <div><%= formatSigned(spellAttackBonus) %></div>
           </div>
         </article>
 
         <article class="card">
           <h2>Resources</h2>
           <div class="kv">
-            <div class="key">Class Resource</div><div><%= valueOrDash(general.class_resource) %> / <%= valueOrDash(general.class_resource_total) %></div>
-            <div class="key">Class Resource Title</div><div><%= valueOrDash(general.class_resource_title) %></div>
-            <div class="key">Other Resource</div><div><%= valueOrDash(general.other_resource) %> / <%= valueOrDash(general.other_resource_total) %></div>
-            <div class="key">Other Resource Title</div><div><%= valueOrDash(general.other_resource_title) %></div>
-            <div class="key">DS Success</div><div><%= [general.ds_success_1, general.ds_success_2, general.ds_success_3].filter(Boolean).length %> / 3</div>
-            <div class="key">DS Failure</div><div><%= [general.ds_failure_1, general.ds_failure_2, general.ds_failure_3].filter(Boolean).length %> / 3</div>
+            <div class="key">Class Resource</div>
+            <div><%= valueOrDash(general.class_resource) %> / <%= valueOrDash(general.class_resource_total) %></div>
+            <div class="key">Class Resource Title</div>
+            <div><%= valueOrDash(general.class_resource_title) %></div>
+            <div class="key">Other Resource</div>
+            <div><%= valueOrDash(general.other_resource) %> / <%= valueOrDash(general.other_resource_total) %></div>
+            <div class="key">Other Resource Title</div>
+            <div><%= valueOrDash(general.other_resource_title) %></div>
+            <div class="key">DS Success</div>
+            <div><%= [general.ds_success_1, general.ds_success_2, general.ds_success_3].filter(Boolean).length %> / 3</div>
+            <div class="key">DS Failure</div>
+            <div><%= [general.ds_failure_1, general.ds_failure_2, general.ds_failure_3].filter(Boolean).length %> / 3</div>
           </div>
         </article>
 
+        <section class="card">
+          <h2>Saving Throws</h2>
+          <% if (!pro) { %>
+          <p class="empty">No proficiency data found.</p>
+          <% } else { %>
+          <div>
+            <% savingThrows.forEach(([label, key]) => { %>
+            <span class="pill"><%= label %>: <%= pro[key] ? "Proficient" : "Not Proficient" %></span>
+            <% }); %>
+          </div>
+          <% } %>
+        </section>
       </section>
 
-      <section class="card ability-row-section">
-        <h2>Ability Scores</h2>
-        <div class="ability-horizontal">
-          <% abilityStats.forEach((stat) => { %>
-            <div class="ability-item">
-              <div class="ability-label"><%= stat.label %></div>
-              <div class="ability-value"><%= valueOrDash(general[stat.key]) %></div>
-              <div class="ability-sub"><%= formatSigned(abilityModifier(general[stat.key])) %></div>
-            </div>
-          <% }); %>
-        </div>
-      </section>
-
-    <section class="card">
-      <h2>Classes</h2>
-      <% if (!data.classes.length) { %>
+      <section class="card">
+        <h2>Classes</h2>
+        <% if (!data.classes.length) { %>
         <p class="empty">No class rows.</p>
-      <% } else { %>
+        <% } else { %>
         <div class="table-wrap">
           <table>
             <thead>
@@ -696,38 +756,39 @@
             </thead>
             <tbody>
               <% data.classes.forEach((row) => { %>
-                <tr>
-                  <td><%= valueOrDash(row.class) %></td>
-                  <td><%= valueOrDash(row.subclass) %></td>
-                  <td><%= valueOrDash(row.hit_dice_type) %></td>
-                  <td><%= valueOrDash(row.total_hit_dice) %></td>
-                  <td><%= valueOrDash(row.current_hit_dice) %></td>
-                </tr>
+              <tr>
+                <td><%= valueOrDash(row.class) %></td>
+                <td><%= valueOrDash(row.subclass) %></td>
+                <td><%= valueOrDash(row.hit_dice_type) %></td>
+                <td><%= valueOrDash(row.total_hit_dice) %></td>
+                <td><%= valueOrDash(row.current_hit_dice) %></td>
+              </tr>
               <% }); %>
             </tbody>
           </table>
         </div>
-      <% } %>
-    </section>
+        <% } %>
+      </section>
 
-    <section class="card">
-      <h2>Saving Throws</h2>
-      <% if (!pro) { %>
-        <p class="empty">No proficiency data found.</p>
-      <% } else { %>
-        <div>
-          <% savingThrows.forEach(([label, key]) => { %>
-            <span class="pill"><%= label %>: <%= pro[key] ? "Proficient" : "Not Proficient" %></span>
+
+
+      <section class="card ability-row-section">
+        <div class="ability-horizontal">
+          <% abilityStats.forEach((stat) => { %>
+          <div class="ability-item">
+            <div class="ability-label"><%= stat.label %></div>
+            <div class="ability-value"><%= valueOrDash(general[stat.key]) %></div>
+            <div class="ability-sub"><%= formatSigned(abilityModifier(general[stat.key])) %></div>
+          </div>
           <% }); %>
         </div>
-      <% } %>
-    </section>
+      </section>
 
-    <section class="card <%= data.attacks.length > 6 ? 'allow-page-split' : '' %>">
-      <h2>Attacks</h2>
-      <% if (!data.attacks.length) { %>
+      <section class="card <%= data.attacks.length > 6 ? 'allow-page-split' : '' %>">
+        <h2>Attacks</h2>
+        <% if (!data.attacks.length) { %>
         <p class="empty">No attacks.</p>
-      <% } else { %>
+        <% } else { %>
         <div class="table-wrap">
           <table>
             <thead>
@@ -742,80 +803,84 @@
             </thead>
             <tbody>
               <% data.attacks.forEach((attack) => { %>
-                <tr>
-                  <td><%= valueOrDash(attack.title) %></td>
-                  <td><%= valueOrDash(attack.bonus) %></td>
-                  <td><%= valueOrDash(attack.range) %></td>
-                  <td><%= valueOrDash(attack.damage_type) %></td>
-                  <td><%= valueOrDash(attack.duration) %></td>
-                  <td><%= valueOrDash(attack.description) %></td>
-                </tr>
+              <tr>
+                <td><%= valueOrDash(attack.title) %></td>
+                <td><%= valueOrDash(attack.bonus) %></td>
+                <td><%= valueOrDash(attack.range) %></td>
+                <td><%= valueOrDash(attack.damage_type) %></td>
+                <td><%= valueOrDash(attack.duration) %></td>
+                <td><%= valueOrDash(attack.description) %></td>
+              </tr>
               <% }); %>
             </tbody>
           </table>
         </div>
-      <% } %>
-    </section>
+        <% } %>
+      </section>
 
-    <section class="card">
-      <h2>Skills</h2>
-      <% if (!pro) { %>
-        <p class="empty">No skill data found.</p>
-      <% } else { %>
-        <div class="table-wrap">
-          <table class="skills-table">
-            <thead>
-              <tr>
-                <th>Skill</th>
-                <th>Proficient</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% skills.forEach((skill) => { %>
+      <div class="skills-proficiencies-container">
+
+        <section class="card">
+          <h2>Skills</h2>
+          <% if (!pro) { %>
+          <p class="empty">No skill data found.</p>
+          <% } else { %>
+          <div class="table-wrap">
+            <table class="skills-table">
+              <thead>
+                <tr>
+                  <th>Skill</th>
+                  <th>Proficient</th>
+                  <th>Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% skills.forEach((skill) => { %>
                 <tr>
                   <td><%= skill.label %></td>
                   <td><%= pro[skill.key] ? "Yes" : "No" %></td>
                   <td><%= formatSigned(getSkillModifier(skill)) %></td>
                 </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-    </section>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <% } %>
+        </section>
 
-    <section class="card <%= data.otherProLangs.length > 10 ? 'allow-page-split' : '' %>">
-      <h2>Other Proficiencies And Languages</h2>
-      <% if (!data.otherProLangs.length) { %>
-        <p class="empty">No entries.</p>
-      <% } else { %>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Type</th>
-                <th>Proficiency / Language</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% data.otherProLangs.forEach((item) => { %>
+        <section class="card <%= data.otherProLangs.length > 10 ? 'allow-page-split' : '' %>">
+          <h2>Other Proficiencies And Languages</h2>
+          <% if (!data.otherProLangs.length) { %>
+          <p class="empty">No entries.</p>
+          <% } else { %>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Type</th>
+                  <th>Proficiency / Language</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% data.otherProLangs.forEach((item) => { %>
                 <tr>
                   <td><%= valueOrDash(item.type) %></td>
                   <td><%= valueOrDash(item.proficiency) %></td>
                 </tr>
-              <% }); %>
-            </tbody>
-          </table>
-        </div>
-      <% } %>
-    </section>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+          <% } %>
+        </section>
 
-    <section class="card <%= data.feats.length > 6 ? 'allow-page-split' : '' %>">
-      <h2>Features And Traits</h2>
-      <% if (!data.feats.length) { %>
+      </div>
+
+      <section class="card <%= data.feats.length > 6 ? 'allow-page-split' : '' %>">
+        <h2>Features And Traits</h2>
+        <% if (!data.feats.length) { %>
         <p class="empty">No feats or traits.</p>
-      <% } else { %>
+        <% } else { %>
         <div class="table-wrap">
           <table>
             <thead>
@@ -827,34 +892,39 @@
             </thead>
             <tbody>
               <% data.feats.forEach((feat) => { %>
-                <tr>
-                  <td><%= valueOrDash(feat.type) %></td>
-                  <td><%= valueOrDash(feat.title) %></td>
-                  <td><%= valueOrDash(feat.description) %></td>
-                </tr>
+              <tr>
+                <td><%= valueOrDash(feat.type) %></td>
+                <td><%= valueOrDash(feat.title) %></td>
+                <td><%= valueOrDash(feat.description) %></td>
+              </tr>
               <% }); %>
             </tbody>
           </table>
         </div>
-      <% } %>
-    </section>
+        <% } %>
+      </section>
 
-    <section class="card">
-      <h2>Currency</h2>
-      <div class="kv">
-        <div class="key">Copper</div><div><%= valueOrDash(general.copper) %></div>
-        <div class="key">Silver</div><div><%= valueOrDash(general.silver) %></div>
-        <div class="key">Electrum</div><div><%= valueOrDash(general.electrum) %></div>
-        <div class="key">Gold</div><div><%= valueOrDash(general.gold) %></div>
-        <div class="key">Platinum</div><div><%= valueOrDash(general.platinum) %></div>
-      </div>
-    </section>
 
-    <section class="card <%= data.equipment.length > 8 ? 'allow-page-split' : '' %>">
-      <h2>Equipment</h2>
-      <% if (!data.equipment.length) { %>
+      <section class="card <%= data.equipment.length > 8 ? 'allow-page-split' : '' %>">
+        <section>
+          <h2>Currency</h2>
+          <div class="kv">
+            <div class="key">Copper</div>
+            <div><%= valueOrDash(general.copper) %></div>
+            <div class="key">Silver</div>
+            <div><%= valueOrDash(general.silver) %></div>
+            <div class="key">Electrum</div>
+            <div><%= valueOrDash(general.electrum) %></div>
+            <div class="key">Gold</div>
+            <div><%= valueOrDash(general.gold) %></div>
+            <div class="key">Platinum</div>
+            <div><%= valueOrDash(general.platinum) %></div>
+          </div>
+        </section>
+        <h2>Equipment</h2>
+        <% if (!data.equipment.length) { %>
         <p class="empty">No equipment.</p>
-      <% } else { %>
+        <% } else { %>
         <div class="table-wrap">
           <table>
             <thead>
@@ -867,28 +937,31 @@
             </thead>
             <tbody>
               <% data.equipment.forEach((item) => { %>
-                <tr>
-                  <td><%= valueOrDash(item.title) %></td>
-                  <td><%= valueOrDash(item.quantity) %></td>
-                  <td><%= valueOrDash(item.weight) %></td>
-                  <td><%= valueOrDash(item.description) %></td>
-                </tr>
+              <tr>
+                <td><%= valueOrDash(item.title) %></td>
+                <td><%= valueOrDash(item.quantity) %></td>
+                <td><%= valueOrDash(item.weight) %></td>
+                <td><%= valueOrDash(item.description) %></td>
+              </tr>
               <% }); %>
             </tbody>
           </table>
         </div>
-      <% } %>
-    </section>
+        <% } %>
+      </section>
 
-    <section class="card spell-slots-section">
-      <h2>Spell Slots</h2>
-      <% if (!slots) { %>
+      <section class="card spell-slots-section">
+        <h2>Spell Slots</h2>
+        <% if (!slots) { %>
         <p class="empty">No spell slot data found.</p>
-      <% } else { %>
+        <% } else { %>
         <div class="kv" style="margin-bottom: 0.65rem;">
-          <div class="key">Casting Ability</div><div><%= valueOrDash(slots.spell_casting_ability) %></div>
-          <div class="key">Spell Save DC</div><div><%= valueOrDash(spellSaveDC) %></div>
-          <div class="key">Spell Attack Bonus</div><div><%= formatSigned(spellAttackBonus) %></div>
+          <div class="key">Casting Ability</div>
+          <div><%= valueOrDash(slots.spell_casting_ability) %></div>
+          <div class="key">Spell Save DC</div>
+          <div><%= valueOrDash(spellSaveDC) %></div>
+          <div class="key">Spell Attack Bonus</div>
+          <div><%= formatSigned(spellAttackBonus) %></div>
         </div>
         <div class="table-wrap">
           <table>
@@ -902,68 +975,68 @@
             </thead>
             <tbody>
               <% slotRows.forEach(([label, total, expended]) => {
-                const remaining = (typeof total === "number" && typeof expended === "number") ? (total - expended) : "N/A";
+                const remaining = (typeof total === "number" && typeof expended === "number") ? (total - expended) : "-";
               %>
-                <tr>
-                  <td><%= label %></td>
-                  <td><%= valueOrDash(total) %></td>
-                  <td><%= valueOrDash(expended) %></td>
-                  <td><%= valueOrDash(remaining) %></td>
-                </tr>
+              <tr>
+                <td><%= label %></td>
+                <td><%= valueOrDash(total) %></td>
+                <td><%= valueOrDash(expended) %></td>
+                <td><%= valueOrDash(remaining) %></td>
+              </tr>
               <% }); %>
             </tbody>
           </table>
         </div>
-      <% } %>
-    </section>
+        <% } %>
+      </section>
 
-    <section class="spells-section">
-      <h2>Spells</h2>
-      <% if (!data.spellGroups.length) { %>
+      <section class="card spells-section">
+        <h2>Spells</h2>
+        <% if (!data.spellGroups.length) { %>
         <p class="empty">No spells.</p>
-      <% } else { %>
+        <% } else { %>
         <% data.spellGroups.forEach((group) => { %>
-          <article class="spell-group-card">
-            <h2 style="margin-bottom: 0.5rem;"><%= group.type %></h2>
-            <div class="table-wrap spells-screen-table">
-              <table class="spell-table">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Casting Time</th>
-                    <th>Range</th>
-                    <th>Duration</th>
-                    <th>Components</th>
-                    <th>Damage Type</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% group.spells.forEach((spell) => { %>
-                    <tr class="spell-meta-row">
-                      <td><%= valueOrDash(spell.title) %></td>
-                      <td><%= valueOrDash(spell.casting_time) %></td>
-                      <td><%= valueOrDash(spell.range) %></td>
-                      <td><%= valueOrDash(spell.duration) %></td>
-                      <td><%= valueOrDash(spell.components) %></td>
-                      <td><%= valueOrDash(spell.damage_type) %></td>
-                    </tr>
-                    <tr class="spell-desc-row">
-                      <td colspan="6"><strong>Description:</strong> <%= valueOrDash(spell.description) %></td>
-                    </tr>
-                  <% }); %>
-                </tbody>
-              </table>
-            </div>
-          </article>
+        <article class="spell-group-card">
+          <h2><%= group.type %></h2>
+          <div class="table-wrap spells-screen-table">
+            <table class="spell-table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Casting Time</th>
+                  <th>Range</th>
+                  <th>Duration</th>
+                  <th>Components</th>
+                  <th>Damage Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% group.spells.forEach((spell) => { %>
+                <tr class="spell-meta-row">
+                  <td><%= valueOrDash(spell.title) %></td>
+                  <td><%= valueOrDash(spell.casting_time) %></td>
+                  <td><%= valueOrDash(spell.range) %></td>
+                  <td><%= valueOrDash(spell.duration) %></td>
+                  <td><%= valueOrDash(spell.components) %></td>
+                  <td><%= valueOrDash(spell.damage_type) %></td>
+                </tr>
+                <tr class="spell-desc-row">
+                  <td colspan="6"><strong>Description:</strong> <%= valueOrDash(spell.description) %></td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+        </article>
         <% }); %>
-      <% } %>
-    </section>
+        <% } %>
+      </section>
 
-    <section class="card background-section">
-      <h2>Background</h2>
-      <% if (!back) { %>
+      <section class="card background-section">
+        <h2>Background</h2>
+        <% if (!back) { %>
         <p class="empty">No background data found.</p>
-      <% } else { %>
+        <% } else { %>
         <div class="table-wrap">
           <table class="background-table">
             <tbody>
@@ -1026,8 +1099,8 @@
             </tbody>
           </table>
         </div>
-      <% } %>
-    </section>
+        <% } %>
+      </section>
     </div>
   </main>
 
@@ -1044,7 +1117,9 @@
 
       const notifyError = (message) => {
         if (typeof window.customAlert === "function") {
-          window.customAlert(message, { title: "PDF Export" });
+          window.customAlert(message, {
+            title: "PDF Export"
+          });
           return;
         }
         window.alert(message);
@@ -1095,7 +1170,10 @@
           return;
         }
 
-        const { canRender, scale } = getScaleConfig();
+        const {
+          canRender,
+          scale
+        } = getScaleConfig();
         if (!canRender) {
           notifyError("This sheet is too large for direct PDF generation. Opening Print View instead.");
           openPrintViewFallback();
@@ -1109,15 +1187,25 @@
             .set({
               filename: fileName,
               margin: [0.35, 0.35, 0.35, 0.35],
-              image: { type: "png", quality: 1 },
+              image: {
+                type: "png",
+                quality: 1
+              },
               html2canvas: {
                 scale,
                 useCORS: true,
                 backgroundColor: "#ffffff",
                 letterRendering: true,
               },
-              jsPDF: { unit: "in", format: "letter", orientation: "portrait", compress: true },
-              pagebreak: { mode: ["css", "legacy"] },
+              jsPDF: {
+                unit: "in",
+                format: "letter",
+                orientation: "portrait",
+                compress: true
+              },
+              pagebreak: {
+                mode: ["css", "legacy"]
+              },
             })
             .from(exportContent)
             .save();
@@ -1132,11 +1220,11 @@
   </script>
 
   <% if (autoPrint) { %>
-    <script>
-      window.addEventListener("load", () => {
-        setTimeout(() => window.print(), 50);
-      });
-    </script>
+  <script>
+    window.addEventListener("load", () => {
+      setTimeout(() => window.print(), 50);
+    });
+  </script>
   <% } %>
 </body>
 
