@@ -18,6 +18,13 @@
 %>
 <script src="/lib/customUi.js"></script>
 <div id="nav-links-container-mobile">
+  <% if (typeof auth !== 'undefined') { %>
+  <button id="mobile-notification-bell" class="top-nav-btn nav-bell-button" type="button" title="Notifications">
+    <span class="nav-bell-icon" aria-hidden="true">&#128276;</span>
+    <span class="nav-bell-label">Notifications</span>
+    <span id="mobile-notification-count" class="nav-notification-count" style="display:none;">0</span>
+  </button>
+  <% } %>
   <% navLinks.forEach((link) => { %>
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
   <% }) %>
@@ -31,11 +38,208 @@
     <% navLinks.forEach((link) => { %>
     <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
     <% }) %>
+    <% if (typeof auth !== 'undefined') { %>
+    <button id="notification-bell" class="top-nav-btn nav-bell-button" type="button" title="Notifications">
+      <span class="nav-bell-icon" aria-hidden="true">&#128276;</span>
+      <span id="notification-count" class="nav-notification-count" style="display:none;">0</span>
+    </button>
+    <% } %>
   </div>
 </nav>
+<% if (typeof auth !== 'undefined') { %>
+<div id="notification-popover" class="notification-popover" style="display:none;">
+  <div class="notification-popover-header">
+    <strong>Notifications</strong>
+    <button id="notification-read-all" type="button" class="notification-read-all">Mark all read</button>
+  </div>
+  <div id="notification-list" class="notification-list">
+    <small class="dash-detail-meta">No notifications yet.</small>
+  </div>
+</div>
+<% } %>
 <script>
   if (window.location.pathname == "/index" || window.location.pathname == "/") {
     const elem = document.getElementById("frlogo-container");
     document.getElementById("frlogo-container").remove();
   }
 </script>
+<% if (typeof auth !== 'undefined') { %>
+<script>
+  (function() {
+    var bell = document.getElementById('notification-bell');
+    var mobileBell = document.getElementById('mobile-notification-bell');
+    var popover = document.getElementById('notification-popover');
+    var listEl = document.getElementById('notification-list');
+    var countEl = document.getElementById('notification-count');
+    var mobileCountEl = document.getElementById('mobile-notification-count');
+    var markAllBtn = document.getElementById('notification-read-all');
+    var pollHandle = null;
+    var isOpen = false;
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function relativeTime(isoDate) {
+      var date = new Date(isoDate);
+      if (Number.isNaN(date.getTime())) return '';
+      var diffMs = Date.now() - date.getTime();
+      var minute = 60 * 1000;
+      var hour = 60 * minute;
+      var day = 24 * hour;
+      if (diffMs < minute) return 'just now';
+      if (diffMs < hour) return Math.floor(diffMs / minute) + 'm ago';
+      if (diffMs < day) return Math.floor(diffMs / hour) + 'h ago';
+      return Math.floor(diffMs / day) + 'd ago';
+    }
+
+    function setUnreadCount(count) {
+      var normalized = Math.max(0, Number(count || 0));
+      var display = normalized > 99 ? '99+' : String(normalized);
+      if (countEl) {
+        countEl.textContent = display;
+        countEl.style.display = normalized > 0 ? 'inline-flex' : 'none';
+      }
+      if (mobileCountEl) {
+        mobileCountEl.textContent = display;
+        mobileCountEl.style.display = normalized > 0 ? 'inline-flex' : 'none';
+      }
+    }
+
+    async function markRead(id) {
+      var res = await fetch('/api/notifications/' + id + '/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      if (!res.ok) return;
+      await refreshNotifications();
+    }
+
+    function renderNotifications(notifications) {
+      if (!listEl) return;
+      if (!notifications || !notifications.length) {
+        listEl.innerHTML = '<small class="dash-detail-meta">No notifications yet.</small>';
+        return;
+      }
+      listEl.innerHTML = notifications.map(function(item) {
+        var title = escapeHtml(item.title);
+        var body = escapeHtml(item.body || '');
+        var link = item.link ? String(item.link) : '';
+        var time = relativeTime(item.created_at);
+        var unreadClass = item.is_read ? '' : ' notification-item-unread';
+        var action = item.is_read
+          ? ''
+          : '<button class="notification-mark-read" data-id="' + item.id + '" type="button">Mark read</button>';
+        var contentHtml = link
+          ? '<a class="notification-item-link" href="' + escapeHtml(link) + '">' + title + '</a>'
+          : '<span class="notification-item-link">' + title + '</span>';
+        return (
+          '<div class="notification-item' + unreadClass + '">' +
+            '<div class="notification-item-top">' +
+              contentHtml +
+              '<small class="dash-detail-meta">' + escapeHtml(time) + '</small>' +
+            '</div>' +
+            (body ? '<small class="notification-item-body">' + body + '</small>' : '') +
+            '<div class="notification-item-actions">' + action + '</div>' +
+          '</div>'
+        );
+      }).join('');
+
+      listEl.querySelectorAll('.notification-mark-read').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var id = btn.getAttribute('data-id');
+          if (!id) return;
+          markRead(id).catch(function() {});
+        });
+      });
+    }
+
+    async function refreshNotifications() {
+      var res = await fetch('/api/notifications?limit=20&offset=0', {
+        headers: { 'Accept': 'application/json' }
+      });
+      if (!res.ok) return;
+      var data = await res.json().catch(function() { return null; });
+      if (!data) return;
+      setUnreadCount(data.unread_count || 0);
+      if (isOpen) renderNotifications(data.notifications || []);
+    }
+
+    async function markAllRead() {
+      var res = await fetch('/api/notifications/read-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      if (!res.ok) return;
+      await refreshNotifications();
+    }
+
+    function openPopover() {
+      if (!popover) return;
+      var target = bell || mobileBell;
+      if (!target) return;
+      popover.style.display = 'block';
+      var rect = target.getBoundingClientRect();
+      popover.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
+      popover.style.left = Math.max(8, rect.right - 360 + window.scrollX) + 'px';
+      isOpen = true;
+      refreshNotifications().catch(function() {});
+    }
+
+    function closePopover() {
+      if (!popover) return;
+      popover.style.display = 'none';
+      isOpen = false;
+    }
+
+    function togglePopover() {
+      if (isOpen) closePopover();
+      else openPopover();
+    }
+
+    if (bell) {
+      bell.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePopover();
+      });
+    }
+    if (mobileBell) {
+      mobileBell.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePopover();
+      });
+    }
+    if (markAllBtn) {
+      markAllBtn.addEventListener('click', function() {
+        markAllRead().catch(function() {});
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      if (!isOpen || !popover) return;
+      var target = e.target;
+      if (popover.contains(target) || (bell && bell.contains(target)) || (mobileBell && mobileBell.contains(target))) {
+        return;
+      }
+      closePopover();
+    });
+
+    refreshNotifications().catch(function() {});
+    pollHandle = window.setInterval(function() {
+      refreshNotifications().catch(function() {});
+    }, 45000);
+    window.addEventListener('beforeunload', function() {
+      if (pollHandle) window.clearInterval(pollHandle);
+    });
+  })();
+</script>
+<% } %>

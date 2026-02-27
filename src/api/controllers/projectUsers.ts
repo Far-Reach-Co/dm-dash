@@ -13,6 +13,12 @@ import { Request, Response, NextFunction } from "express";
 import { requireApiUser, requireProjectOwnerAccess } from "./accessControl";
 import { EventType, logEventAsync } from "../../lib/eventLogger";
 import { notifyProjectUserRemovedAsync } from "../../lib/emailNotifications";
+import {
+  notifyCapacityStateForOwner,
+  notifyProjectOwner,
+  notifySilently,
+  notifyUser,
+} from "../../lib/notifications";
 
 async function addProjectUserByInvite(
   req: Request,
@@ -72,6 +78,33 @@ async function addProjectUserByInvite(
       },
       req,
     });
+    notifySilently(
+      Promise.all([
+        notifyProjectOwner({
+          projectId: project.id,
+          type: "project.invite_used",
+          title: "A player joined your wyrld by invite",
+          body: "A new member accepted your invite and joined.",
+          link: `/wyrld?id=${project.id}`,
+          data: { projectId: Number(project.id), joiningUserId: Number(userId) },
+          excludeUserIds: [userId],
+        }),
+        notifyUser({
+          userId,
+          type: "project.membership_joined",
+          title: `You joined ${project.title}`,
+          body: "Welcome to the wyrld.",
+          link: `/wyrld?id=${project.id}`,
+          data: { projectId: Number(project.id), source: "invite" },
+        }),
+        notifyCapacityStateForOwner({
+          projectId: project.id,
+          trigger: "member_joined",
+        }),
+      ]),
+      "Failed to create in-app notifications for invite join",
+      { projectId: project.id, joiningUserId: userId },
+    );
     res.status(201).json(data.rows[0]);
   } catch (err) {
     next(err);
@@ -158,6 +191,31 @@ async function removeProjectUser(
       removedUserId: projectUser.user_id,
       removedByUserId: ownerRole.userId,
     });
+    notifySilently(
+      Promise.all([
+        notifyUser({
+          userId: projectUser.user_id,
+          type: "project.membership_removed",
+          title: "You were removed from a wyrld",
+          body: "A manager removed your access.",
+          link: "/dash/wyrlds",
+          data: {
+            projectId: Number(projectUser.project_id),
+            removedByUserId: Number(ownerRole.userId),
+          },
+        }),
+        notifyCapacityStateForOwner({
+          projectId: projectUser.project_id,
+          trigger: "member_left",
+        }),
+      ]),
+      "Failed to create in-app notifications for removed project user",
+      {
+        projectId: projectUser.project_id,
+        removedUserId: projectUser.user_id,
+        actorUserId: ownerRole.userId,
+      },
+    );
     res.status(200).send();
   } catch (err) {
     next(err);
@@ -195,6 +253,29 @@ async function editProjectUserIsEditor(
         },
         req,
       });
+      notifySilently(
+        notifyUser({
+          userId: projectUser.user_id,
+          type: "project.role_changed",
+          title: is_editor ? "You were promoted to Manager" : "Your manager role was removed",
+          body: is_editor
+            ? "You can now help manage this wyrld."
+            : "You are now a regular member.",
+          link: `/wyrld?id=${projectUser.project_id}`,
+          data: {
+            projectId: Number(projectUser.project_id),
+            previousRole: wasEditor ? "manager" : "member",
+            nextRole: is_editor ? "manager" : "member",
+            changedByUserId: Number(ownerRole.userId),
+          },
+        }),
+        "Failed to create in-app notification for role change",
+        {
+          projectId: projectUser.project_id,
+          targetUserId: projectUser.user_id,
+          actorUserId: ownerRole.userId,
+        },
+      );
     }
     res.status(200).send(data.rows[0]);
   } catch (err) {
@@ -237,6 +318,14 @@ async function leaveProject(
       },
       req,
     });
+    notifySilently(
+      notifyCapacityStateForOwner({
+        projectId: project.id,
+        trigger: "member_left",
+      }),
+      "Failed to create in-app notification for opened capacity slot",
+      { projectId: project.id, leavingUserId: userId },
+    );
     res.status(200).send({ redirect: "/dash/wyrlds" });
   } catch (err) {
     next(err);

@@ -3,6 +3,7 @@ import { expirePendingProjectJoinRequestsForProWyrldsQuery } from "../api/querie
 import { EventType, logEventAsync } from "./eventLogger";
 import logger from "./logger";
 import { notifyProjectJoinRequestExpiredAsync } from "./emailNotifications";
+import { notifySilently, notifyUser } from "./notifications";
 
 export const PRO_JOIN_REQUEST_EXPIRATION_DAYS = 7;
 
@@ -38,6 +39,23 @@ export async function expireStaleProJoinRequests(params?: {
       projectId: request.project_id,
       requesterUserId: request.requester_user_id,
     });
+    notifySilently(
+      notifyUser({
+        userId: request.requester_user_id,
+        type: "project.join_request_expired",
+        title: "Your join request expired",
+        body: "The request timed out without a response.",
+        link: "/wyrlds/public",
+        data: {
+          projectId: Number(request.project_id),
+          requestId: Number(request.id),
+          autoExpired: true,
+          expirationDays: PRO_JOIN_REQUEST_EXPIRATION_DAYS,
+        },
+      }),
+      "Failed to create in-app notification for expired join request",
+      { projectId: request.project_id, requestId: request.id },
+    );
   }
 
   logger.info(

@@ -30,6 +30,12 @@ import {
 } from "../../lib/emailNotifications";
 import { expireStaleProJoinRequests } from "../../lib/projectJoinRequestExpiry";
 import {
+  notifyCapacityStateForOwner,
+  notifyProjectOwner,
+  notifySilently,
+  notifyUser,
+} from "../../lib/notifications";
+import {
   getProjectMemberCount,
   logJoinRequestDenied,
   parseBooleanLike,
@@ -269,6 +275,23 @@ async function requestProjectJoin(
         joinRequestId: joinRequest.id,
         message,
       });
+      notifySilently(
+        notifyProjectOwner({
+          projectId: project.id,
+          type: "project.join_request_pending",
+          title: `New join request for ${project.title}`,
+          body: message || "A player requested to join your wyrld.",
+          link: `/wyrld/settings?id=${project.id}`,
+          data: {
+            projectId: Number(project.id),
+            requestId: Number(joinRequest.id),
+            requesterUserId: Number(userId),
+          },
+          excludeUserIds: [userId],
+        }),
+        "Failed to create in-app notification for pending join request",
+        { projectId: project.id, joinRequestId: joinRequest.id, requesterUserId: userId },
+      );
       res.status(201).send(data.rows[0]);
     } catch (dbErr) {
       const pgErr = dbErr as { code?: string };
@@ -363,6 +386,22 @@ async function cancelProjectJoinRequest(
         joinRequestId: joinRequest.id,
       },
       "Project join request cancelled",
+    );
+    notifySilently(
+      notifyProjectOwner({
+        projectId: joinRequest.project_id,
+        type: "project.join_request_cancelled",
+        title: "A join request was cancelled",
+        body: "A pending requester cancelled their join request.",
+        link: `/wyrld/settings?id=${joinRequest.project_id}`,
+        data: {
+          projectId: Number(joinRequest.project_id),
+          requestId: Number(joinRequest.id),
+          requesterUserId: Number(joinRequest.requester_user_id),
+        },
+      }),
+      "Failed to create in-app notification for cancelled join request",
+      { projectId: joinRequest.project_id, joinRequestId: joinRequest.id },
     );
     res.status(200).send(data.rows[0]);
   } catch (err) {
@@ -518,6 +557,48 @@ async function respondProjectJoinRequest(
       reviewerUserId: ownerRole.userId,
       status,
     });
+    notifySilently(
+      Promise.all([
+        notifyUser({
+          userId: joinRequest.requester_user_id,
+          type:
+            status === "approved"
+              ? "project.join_request_approved"
+              : "project.join_request_rejected",
+          title:
+            status === "approved"
+              ? "Your join request was approved"
+              : "Your join request was rejected",
+          body:
+            status === "approved"
+              ? "You can now access the wyrld."
+              : "The owner declined this request.",
+          link:
+            status === "approved"
+              ? `/wyrld?id=${joinRequest.project_id}`
+              : `/wyrlds/public`,
+          data: {
+            projectId: Number(joinRequest.project_id),
+            requestId: Number(joinRequest.id),
+            reviewerUserId: Number(ownerRole.userId),
+            status,
+          },
+        }),
+        joined
+          ? notifyCapacityStateForOwner({
+              projectId: joinRequest.project_id,
+              trigger: "member_joined",
+            })
+          : Promise.resolve(),
+      ]),
+      "Failed to create in-app notification for join request review",
+      {
+        projectId: joinRequest.project_id,
+        joinRequestId: joinRequest.id,
+        requesterUserId: joinRequest.requester_user_id,
+        status,
+      },
+    );
 
     res.status(200).send({
       request: updatedData.rows[0],
