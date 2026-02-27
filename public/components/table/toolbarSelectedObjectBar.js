@@ -160,7 +160,72 @@ function renderSelectedLocationPinBar(toolbar, obj, pin) {
   ]);
 }
 
+function renderMultiSelectionBar(toolbar, selectedObjects) {
+  const actionable = selectedObjects.filter((obj) => obj && !obj.isLocationPin);
+  if (!actionable.length) return toolbar.hiddenElement();
+
+  const allLocked = actionable.every((obj) => !!obj.lockInPosition);
+  const allHidden = actionable.every((obj) => !!obj.hiddenFromPlayers);
+
+  const controls = [
+    createElement("small", {}, `${actionable.length} selected`),
+  ];
+
+  if (toolbar.can("canDeleteCanvasObjects")) {
+    controls.push(
+      createElement(
+        "button",
+        {
+          type: "button",
+          class: "vtt-lock-toggle-btn",
+          title: allLocked ? "Unlock all selected objects" : "Lock all selected objects",
+        },
+        allLocked ? "Unlock selected" : "Lock selected",
+        {
+          type: "click",
+          event: async () => {
+            await toolbar.setObjectsLockInPosition(actionable, !allLocked);
+          },
+        },
+      ),
+    );
+
+    controls.push(
+      createElement(
+        "button",
+        {
+          type: "button",
+          class: "vtt-lock-toggle-btn",
+          title: allHidden
+            ? "Show all selected objects to players"
+            : "Hide all selected objects from players",
+        },
+        allHidden ? "Show selected" : "Hide selected",
+        {
+          type: "click",
+          event: async () => {
+            await toolbar.setObjectsVisibilityForPlayers(actionable, allHidden);
+          },
+        },
+      ),
+    );
+  }
+
+  return createElement("div", { class: "vtt-draw-bar" }, controls);
+}
+
 export async function renderSelectedObjectBar(toolbar) {
+  const selectedObjects = toolbar.getActiveObjects();
+  if (selectedObjects.length > 1) {
+    return renderMultiSelectionBar(toolbar, selectedObjects);
+  }
+  if (selectedObjects.length === 1) {
+    const onlyObj = selectedObjects[0];
+    if (onlyObj) {
+      toolbar.tableApp.currentSelectedObject = onlyObj;
+    }
+  }
+
   const obj = toolbar.tableApp.getCurrentSelectedObject();
   if (!obj) return toolbar.hiddenElement();
 

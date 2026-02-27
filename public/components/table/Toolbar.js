@@ -102,6 +102,10 @@ export default class Toolbar {
     return this.can("canDeleteCanvasObjects");
   };
 
+  getActiveObjects = () => {
+    return this.tableApp?.canvasLayer?.canvasEngine?.getActiveObjects?.() || [];
+  };
+
   hiddenElement = () => createElement("div", { class: "d-none" });
 
   layerStyles = LAYER_STYLES;
@@ -162,6 +166,25 @@ export default class Toolbar {
     }
     this.tableApp.canvasRenderAll();
     socketIntegration.imageMoved(obj);
+    await this.tableApp.canvasLayer.saveToDatabase();
+    await this.updateObjectSelection();
+  };
+
+  setObjectsLockInPosition = async (objects, shouldLock) => {
+    if (!Array.isArray(objects) || !objects.length) return;
+    let changed = false;
+    for (const obj of objects) {
+      if (!obj || !this.canLockObject(obj)) continue;
+      obj.set("lockInPosition", !!shouldLock);
+      this.tableApp.canvasLayer.updateObjectProperties(obj);
+      if (obj.isLocationPin) {
+        this.tableApp.enforceLocationPinConstraints(obj);
+      }
+      socketIntegration.imageMoved(obj);
+      changed = true;
+    }
+    if (!changed) return;
+    this.tableApp.canvasRenderAll();
     await this.tableApp.canvasLayer.saveToDatabase();
     await this.updateObjectSelection();
   };
@@ -236,6 +259,22 @@ export default class Toolbar {
     this.tableApp.canvasLayer.updateObjectProperties(obj);
     this.tableApp.canvasRenderAll();
     socketIntegration.imageMoved(obj);
+    await this.tableApp.canvasLayer.saveToDatabase();
+    await this.updateObjectSelection();
+  };
+
+  setObjectsVisibilityForPlayers = async (objects, isVisibleToPlayers) => {
+    if (!Array.isArray(objects) || !objects.length) return;
+    let changed = false;
+    for (const obj of objects) {
+      if (!obj || !this.canManageVisibility(obj)) continue;
+      obj.set("hiddenFromPlayers", !isVisibleToPlayers);
+      this.tableApp.canvasLayer.updateObjectProperties(obj);
+      socketIntegration.imageMoved(obj);
+      changed = true;
+    }
+    if (!changed) return;
+    this.tableApp.canvasRenderAll();
     await this.tableApp.canvasLayer.saveToDatabase();
     await this.updateObjectSelection();
   };

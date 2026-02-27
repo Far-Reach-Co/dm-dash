@@ -180,6 +180,8 @@ export default class CanvasLayer {
     // Interactions
     this.canvasEngine.on("mouse:dblclick", this.handleDoubleClick);
     this.canvasEngine.on("path:created", this.handlePathCreated);
+    this.canvasEngine.on("selection:created", this.handleSelectionChanged);
+    this.canvasEngine.on("selection:updated", this.handleSelectionChanged);
     this.canvasEngine.on("selection:cleared", () => {
       this.tableApp.setCurrentSelectedObject(null);
     });
@@ -199,6 +201,8 @@ export default class CanvasLayer {
     this.canvasEngine.off("touch:drag", this.handleTouchDrag);
     this.canvasEngine.off("mouse:dblclick", this.handleDoubleClick);
     this.canvasEngine.off("path:created", this.handlePathCreated);
+    this.canvasEngine.off("selection:created", this.handleSelectionChanged);
+    this.canvasEngine.off("selection:updated", this.handleSelectionChanged);
     this.canvasEngine.off("selection:cleared");
 
     this.canvasEngine.dispose();
@@ -348,6 +352,23 @@ export default class CanvasLayer {
     this.registerDrawUndo(path.id);
     socketIntegration.imageAdded(path);
     this.saveToDatabase();
+  };
+
+  handleSelectionChanged = (options) => {
+    const target = options?.target || null;
+    if (!target) {
+      this.tableApp.setCurrentSelectedObject(null);
+      return;
+    }
+
+    if (target.type === "activeSelection" && Array.isArray(target._objects)) {
+      if (target._objects.length === 1) {
+        this.tableApp.setCurrentSelectedObject(target._objects[0]);
+        return;
+      }
+    }
+
+    this.tableApp.setCurrentSelectedObject(target);
   };
 
   setupObjectEventListeners = (obj) => {
