@@ -39,6 +39,7 @@ export function updateCanvasObjectProperties({
   object,
   gridManager,
   currentLayer,
+  capabilities,
 }) {
   const gridObject = gridManager?.getGroup?.();
   if (gridObject && object === gridObject) {
@@ -50,9 +51,25 @@ export function updateCanvasObjectProperties({
 
   const objectLayer = object.layer;
   const isActiveLayer = objectLayer === currentLayer;
+  const canSeeHiddenObjects = !!capabilities?.canDeleteCanvasObjects;
+  const isHiddenFromPlayers = !!object.hiddenFromPlayers;
   if (typeof object.lockInPosition !== "boolean") {
     object.lockInPosition = false;
   }
+  if (typeof object.hiddenFromPlayers !== "boolean") {
+    object.hiddenFromPlayers = false;
+  }
+
+  if (isHiddenFromPlayers && !canSeeHiddenObjects) {
+    object.visible = false;
+    object.selectable = false;
+    object.evented = false;
+    object.lockMovementX = true;
+    object.lockMovementY = true;
+    return;
+  }
+
+  object.visible = true;
 
   object.selectable = isActiveLayer;
   object.evented = isActiveLayer;
@@ -63,5 +80,9 @@ export function updateCanvasObjectProperties({
     object.opacity = currentLayer === "Fog" ? "0.5" : "1";
   } else {
     object.opacity = isActiveLayer ? "1" : "0.5";
+  }
+
+  if (isHiddenFromPlayers && canSeeHiddenObjects) {
+    object.opacity = "0.65";
   }
 }

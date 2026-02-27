@@ -37,7 +37,7 @@
         {
           "@type": "HowToStep",
           "name": "Navigating the Canvas",
-          "text": "Pan by clicking and dragging empty space. Zoom with scroll wheel or pinch gesture"
+          "text": "Pan by clicking and dragging empty space. Zoom with scroll wheel, pinch gesture, or toolbar zoom controls"
         },
         {
           "@type": "HowToStep",
@@ -185,7 +185,7 @@
       <h3>Desktop</h3>
       <ul>
         <li><strong>Pan</strong> &mdash; Click and drag on empty canvas space to move around.</li>
-        <li><strong>Zoom</strong> &mdash; Use the scroll wheel to zoom in and out.</li>
+        <li><strong>Zoom</strong> &mdash; Use the scroll wheel or toolbar zoom controls (<strong>- / + / Reset</strong>) to zoom in and out. Zoom is capped at <strong>300%</strong>.</li>
         <li><strong>Select</strong> &mdash; Click on any object to select it. A selected object shows handles for resizing and rotating.</li>
         <li><strong>Move</strong> &mdash; Click and drag a selected object to reposition it (if the object is unlocked).</li>
         <li><strong>Lock State</strong> &mdash; Selected objects show <strong>Locked / Unlocked</strong> status in the object panel below the toolbar.</li>
@@ -225,6 +225,7 @@
         <li>Use any of these methods: click an image thumbnail to place it at the center of your view, click the + button on an image row, or click + drag to drop it in a specific spot.</li>
         <li>Once placed, click on the token to select it. You can then move, resize, or rotate it using the handles.</li>
         <li>Managers can use the <strong>Lock / Unlock</strong> control in the selected object panel to keep objects fixed in place.</li>
+        <li>Managers can use <strong>Hide from players / Show to players</strong> in the selected object panel to control per-object player visibility.</li>
         <li>Use the <strong>Delete</strong> toolbar button or the Delete/Backspace key to remove a selected object.</li>
         <li>Use the <strong>Move to Top</strong> toolbar button to bring a selected object to the front of its layer.</li>
       </ul>
@@ -263,11 +264,12 @@
     <!-- 9. Drawing Tools -->
     <section id="drawing">
       <h2>Drawing Tools</h2>
-      <p>Draw freehand lines directly on the canvas. Useful for marking paths, highlighting areas, or quick sketches.</p>
+      <p>Draw and annotate directly on the canvas. Useful for marking paths, highlights, and quick notes.</p>
       <ul>
         <li>Click the <strong>Pencil</strong> button on the toolbar to toggle draw mode.</li>
-        <li>When draw mode is active, a sub-bar appears where you can set the <strong>color</strong> and <strong>width</strong> of your brush.</li>
-        <li>Click and drag on the canvas to draw. Lines are placed as objects that other users can see.</li>
+        <li>When draw mode is active, a sub-bar appears where you can choose a <strong>tool</strong> (Freehand, Line, Rectangle, Ellipse, Text) and set <strong>color</strong> and <strong>width</strong>.</li>
+        <li>In draw mode, existing objects are not selectable, which prevents accidental token/object edits while sketching.</li>
+        <li>Use <strong>Ctrl/Cmd + Z</strong> (or the <strong>Undo</strong> button in the draw bar) to undo the most recent drawing object while draw mode is active.</li>
         <li>Click the pencil button again to exit draw mode and return to normal selection.</li>
       </ul>
     </section>
@@ -382,11 +384,16 @@
             <td>Duplicate selected object(s), placing copies nearby</td>
           </tr>
           <tr>
+            <td><strong>Ctrl/Cmd + Z</strong></td>
+            <td>Undo most recent drawing object (while draw mode is active)</td>
+          </tr>
+          <tr>
             <td><strong>Scroll Wheel</strong></td>
             <td>Zoom in / out on the canvas</td>
           </tr>
         </tbody>
       </table>
+      <p><small>On macOS, use <strong>Cmd</strong> in place of Ctrl.</small></p>
     </section>
 
     <!-- 14. Tips & Tricks -->
@@ -395,6 +402,8 @@
       <ul>
         <li><strong>Auras</strong> &mdash; Select a token and use the aura color picker (in the object info panel) to give it a glowing halo. Great for marking spell effects, conditions, or highlighting the active character.</li>
         <li><strong>Pings</strong> &mdash; Double-click on empty canvas space to send a ping animation visible to all users. Use this to draw attention to a specific spot.</li>
+        <li><strong>Bulk Object Actions</strong> &mdash; Multi-select objects to unlock/lock or hide/show the whole selection in one step from the object panel.</li>
+        <li><strong>Staging Hidden Content</strong> &mdash; Managers can keep objects hidden from players while still seeing them (with a visual indicator) to prep reveals mid-session.</li>
         <li><strong>Canvas Log</strong> &mdash; Open the info modal and click <strong>Open Log</strong> to view a list of every object on the canvas. Click an entry to select it, useful for finding hidden or overlapping objects.</li>
         <li><strong>Linking Records</strong> &mdash; If an image is associated with a Record that has "Make Public" enabled, selecting that token on the canvas will show a link to the record. This is great for linking character sheets or monster stat blocks to their tokens.</li>
         <li><strong>Pin Portals</strong> &mdash; Chain pins with portals to build interconnected dungeons. Place a pin on a doorway, attach the destination table as a portal, and your players can hop between rooms with a single click.</li>

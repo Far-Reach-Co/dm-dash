@@ -97,6 +97,15 @@ export default class Toolbar {
     return this.can("canDeleteCanvasObjects");
   };
 
+  canManageVisibility = (obj) => {
+    if (!obj || obj.isLocationPin) return false;
+    return this.can("canDeleteCanvasObjects");
+  };
+
+  getActiveObjects = () => {
+    return this.tableApp?.canvasLayer?.canvasEngine?.getActiveObjects?.() || [];
+  };
+
   hiddenElement = () => createElement("div", { class: "d-none" });
 
   layerStyles = LAYER_STYLES;
@@ -161,6 +170,25 @@ export default class Toolbar {
     await this.updateObjectSelection();
   };
 
+  setObjectsLockInPosition = async (objects, shouldLock) => {
+    if (!Array.isArray(objects) || !objects.length) return;
+    let changed = false;
+    for (const obj of objects) {
+      if (!obj || !this.canLockObject(obj)) continue;
+      obj.set("lockInPosition", !!shouldLock);
+      this.tableApp.canvasLayer.updateObjectProperties(obj);
+      if (obj.isLocationPin) {
+        this.tableApp.enforceLocationPinConstraints(obj);
+      }
+      socketIntegration.imageMoved(obj);
+      changed = true;
+    }
+    if (!changed) return;
+    this.tableApp.canvasRenderAll();
+    await this.tableApp.canvasLayer.saveToDatabase();
+    await this.updateObjectSelection();
+  };
+
   renderObjectLockControls = (
     obj,
     { withSeparator = false, includeStatus = true, includeButton = true } = {},
@@ -216,6 +244,81 @@ export default class Toolbar {
             type: "click",
             event: async () => {
               await this.setObjectLockInPosition(obj, !isLocked);
+            },
+          },
+        ),
+      );
+    }
+
+    return controls;
+  };
+
+  setObjectVisibilityForPlayers = async (obj, isVisibleToPlayers) => {
+    if (!obj || !this.canManageVisibility(obj)) return;
+    obj.set("hiddenFromPlayers", !isVisibleToPlayers);
+    this.tableApp.canvasLayer.updateObjectProperties(obj);
+    this.tableApp.canvasRenderAll();
+    socketIntegration.imageMoved(obj);
+    await this.tableApp.canvasLayer.saveToDatabase();
+    await this.updateObjectSelection();
+  };
+
+  setObjectsVisibilityForPlayers = async (objects, isVisibleToPlayers) => {
+    if (!Array.isArray(objects) || !objects.length) return;
+    let changed = false;
+    for (const obj of objects) {
+      if (!obj || !this.canManageVisibility(obj)) continue;
+      obj.set("hiddenFromPlayers", !isVisibleToPlayers);
+      this.tableApp.canvasLayer.updateObjectProperties(obj);
+      socketIntegration.imageMoved(obj);
+      changed = true;
+    }
+    if (!changed) return;
+    this.tableApp.canvasRenderAll();
+    await this.tableApp.canvasLayer.saveToDatabase();
+    await this.updateObjectSelection();
+  };
+
+  renderObjectVisibilityControls = (
+    obj,
+    { withSeparator = false, includeStatus = true, includeButton = true } = {},
+  ) => {
+    if (!obj || !this.canManageVisibility(obj)) return [];
+    const isVisibleToPlayers = !obj.hiddenFromPlayers;
+    const controls = [];
+
+    if (withSeparator) {
+      controls.push(createElement("div", { class: "vtt-toolbar-sep" }));
+    }
+
+    if (includeStatus) {
+      controls.push(
+        createElement(
+          "small",
+          {
+            style: `color: ${isVisibleToPlayers ? "var(--green)" : "var(--orange3)"};`,
+          },
+          isVisibleToPlayers ? "Visible to players" : "Hidden from players",
+        ),
+      );
+    }
+
+    if (includeButton) {
+      controls.push(
+        createElement(
+          "button",
+          {
+            type: "button",
+            class: "vtt-lock-toggle-btn",
+            title: isVisibleToPlayers
+              ? "Hide this object from players"
+              : "Show this object to players",
+          },
+          isVisibleToPlayers ? "Hide from players" : "Show to players",
+          {
+            type: "click",
+            event: async () => {
+              await this.setObjectVisibilityForPlayers(obj, !isVisibleToPlayers);
             },
           },
         ),
