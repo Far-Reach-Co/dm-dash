@@ -188,4 +188,15 @@ router.get(
   },
 );
 
+router.get(
+  "/play-dungeons-and-dragons-online",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("play-dungeons-and-dragons-online", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 export default router;
