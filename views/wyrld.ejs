@@ -791,56 +791,53 @@
           <small>Control whether this wyrld appears in the public directory for logged-in users.</small>
           <small class="d-block mt-1">Use a featured record to introduce your wyrld and onboarding expectations.</small>
           <hr />
-          <% if (!project.is_pro) { %>
-            <small>Public Discovery is available on Pro Wyrlds.</small>
-            <small class="d-block mt-1">Upgrade this wyrld to Pro to list it publicly and feature an onboarding record.</small>
-            <small class="d-block mt-2"><a href="/public-wyrlds-admin-guide">Public Wyrlds Setup Guide</a></small>
-          <% } else { %>
-            <div class="settings-form-row">
-              <div class="settings-toggle">
-                <input
-                  type="checkbox"
-                  id="settings-public-listed"
-                  <%= project.is_public_listed ? 'checked' : '' %>
-                />
-                <span class="settings-toggle-slider"></span>
-              </div>
-              <label class="settings-inline-label" for="settings-public-listed">List this wyrld publicly</label>
-            </div>
-            <div class="settings-form-row mt-2">
-              <label class="settings-inline-label" for="settings-public-join-mode">Join Mode:</label>
-              <select id="settings-public-join-mode" class="settings-input">
-                <option value="invite_only" <%= project.public_join_mode === 'invite_only' ? 'selected' : '' %>>Invite Only</option>
-                <option value="request" <%= project.public_join_mode === 'request' ? 'selected' : '' %>>Request to Join</option>
-              </select>
-            </div>
-            <div class="settings-form-row mt-2">
-              <label class="settings-inline-label" for="settings-public-capacity">Capacity:</label>
+          <div class="settings-form-row">
+            <div class="settings-toggle">
               <input
-                id="settings-public-capacity"
-                class="settings-input"
-                type="number"
-                min="1"
-                placeholder="No limit"
-                value="<%= project.public_join_capacity ? project.public_join_capacity : '' %>"
+                type="checkbox"
+                id="settings-public-listed"
+                <%= project.is_public_listed ? 'checked' : '' %>
               />
-              <small>Current members: <%= memberCount %></small>
+              <span class="settings-toggle-slider"></span>
             </div>
-            <div class="settings-form-row mt-2">
-              <label class="settings-inline-label" for="settings-featured-record-id">Featured Record:</label>
-              <select id="settings-featured-record-id" class="settings-input">
-                <option value="">None</option>
-                <% recordsSorted.forEach(function(record) { %>
-                  <option value="<%= record.id %>" <%= project.featured_record_id === record.id ? 'selected' : '' %>><%= record.title %><%= record.is_public ? '' : ' (private)' %></option>
-                <% }); %>
-              </select>
-            </div>
-            <small class="d-block mt-1">Only the selected featured record is exposed in public discovery.</small>
-            <button class="modal-form-button mt-2" id="settings-public-save">Save Public Settings</button>
-            <small class="success-message" id="settings-public-msg"></small>
-            <small class="d-block mt-2"><a href="/wyrlds/public">Open Public Directory</a></small>
-            <small class="d-block"><a href="/public-wyrlds-admin-guide">Public Wyrlds Setup Guide</a></small>
+            <label class="settings-inline-label" for="settings-public-listed">List this wyrld publicly</label>
+          </div>
+          <div class="settings-form-row mt-2">
+            <label class="settings-inline-label" for="settings-public-join-mode">Join Mode:</label>
+            <select id="settings-public-join-mode" class="settings-input">
+              <option value="invite_only" <%= project.public_join_mode === 'invite_only' ? 'selected' : '' %>>Invite Only</option>
+              <option value="request" <%= project.public_join_mode === 'request' ? 'selected' : '' %>>Request to Join</option>
+            </select>
+          </div>
+          <div class="settings-form-row mt-2">
+            <label class="settings-inline-label" for="settings-public-capacity">Capacity:</label>
+            <input
+              id="settings-public-capacity"
+              class="settings-input"
+              type="number"
+              min="1"
+              placeholder="No limit"
+              value="<%= project.public_join_capacity ? project.public_join_capacity : '' %>"
+            />
+            <small>Current members: <%= memberCount %></small>
+          </div>
+          <div class="settings-form-row mt-2">
+            <label class="settings-inline-label" for="settings-featured-record-id">Featured Record:</label>
+            <select id="settings-featured-record-id" class="settings-input">
+              <option value="">None</option>
+              <% recordsSorted.forEach(function(record) { %>
+                <option value="<%= record.id %>" <%= project.featured_record_id === record.id ? 'selected' : '' %>><%= record.title %><%= record.is_public ? '' : ' (private)' %></option>
+              <% }); %>
+            </select>
+          </div>
+          <small class="d-block mt-1">Only the selected featured record is exposed in public discovery.</small>
+          <% if (project.is_pro) { %>
+            <small class="d-block mt-1">Pro Wyrlds auto-reject pending join requests after 7 days without response.</small>
           <% } %>
+          <button class="modal-form-button mt-2" id="settings-public-save">Save Public Settings</button>
+          <small class="success-message" id="settings-public-msg"></small>
+          <small class="d-block mt-2"><a href="/wyrlds/public">Open Public Directory</a></small>
+          <small class="d-block"><a href="/public-wyrlds-admin-guide">Public Wyrlds Setup Guide</a></small>
         </section>
 
         <section class="dashboard-card settings-card">
@@ -1104,10 +1101,6 @@
                   body: JSON.stringify(payload),
                 });
                 var data = await res.json().catch(function() { return null; });
-                if (res.status === 402 && data && data.error && data.error.message === 'PROJECT_IS_NOT_PRO') {
-                  showProjectProWarning();
-                  return;
-                }
                 if (!res.ok || (data && data.error)) {
                   throw new Error((data && data.error && data.error.message) || 'Failed to save public settings');
                 }

@@ -310,6 +310,40 @@ async function notifyProjectJoinRequestReviewed(params: {
   });
 }
 
+async function notifyProjectJoinRequestExpired(params: {
+  projectId: string | number;
+  requesterUserId: string | number;
+}) {
+  const { projectId, requesterUserId } = params;
+  const requesterUserIdNum = Number(requesterUserId);
+
+  const [projectData, users] = await Promise.all([
+    getProjectQuery(projectId),
+    getUsersByIds([requesterUserIdNum]),
+  ]);
+  const project = projectData.rows[0];
+  if (!project) return;
+
+  const requester = users[0];
+  if (!requester || !shouldReceiveNotification(requester, "notify_wyrld_join")) return;
+
+  const projectTitle = project.title || `Wyrld #${project.id}`;
+  const directoryUrl = `${getPublicAppUrl()}/wyrlds/public`;
+
+  await sendNotificationEmail({
+    recipient: requester,
+    subject: `Join request expired for ${projectTitle}`,
+    message: /*html*/ `
+      <p>
+        Your request to join <strong>${escapeHtml(projectTitle)}</strong> was
+        marked as <strong>rejected</strong> due to no response.
+      </p>
+      <p>You can browse other campaigns or submit a new request later.</p>
+      <p><a href="${directoryUrl}">Browse Public Wyrlds</a></p>
+    `,
+  });
+}
+
 async function notifyProjectUserRemoved(params: {
   projectId: string | number;
   removedUserId: string | number;
@@ -383,6 +417,18 @@ export function notifyProjectJoinRequestReviewedAsync(params: {
     logger.error(
       { err, params },
       "Failed to send project join request reviewed email notification",
+    );
+  });
+}
+
+export function notifyProjectJoinRequestExpiredAsync(params: {
+  projectId: string | number;
+  requesterUserId: string | number;
+}): void {
+  notifyProjectJoinRequestExpired(params).catch((err) => {
+    logger.error(
+      { err, params },
+      "Failed to send project join request expiration email notification",
     );
   });
 }

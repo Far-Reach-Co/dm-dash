@@ -22,13 +22,13 @@ import {
   requireApiUser,
   requireProjectOwnerAccess,
 } from "./accessControl";
-import { userSubscriptionStatus } from "../../lib/enums.js";
 import { EventType, logEventAsync } from "../../lib/eventLogger";
 import logger from "../../lib/logger.js";
 import {
   notifyProjectJoinRequestCreatedAsync,
   notifyProjectJoinRequestReviewedAsync,
 } from "../../lib/emailNotifications";
+import { expireStaleProJoinRequests } from "../../lib/projectJoinRequestExpiry";
 import {
   getProjectMemberCount,
   logJoinRequestDenied,
@@ -47,6 +47,7 @@ async function getPublicWyrldDirectory(
 ) {
   try {
     const userId = requireApiUser(req);
+    await expireStaleProJoinRequests({ req, requesterUserId: userId });
     const search =
       typeof req.query.q === "string" ? req.query.q.trim().toLowerCase() : "";
     const limit = parseBoundedInt(req.query.limit, 40, 1, 200);
@@ -123,7 +124,7 @@ async function requestProjectJoin(
       });
       throw { status: 409, message: "You already own this wyrld" };
     }
-    if (!project.is_pro || !project.is_public_listed) {
+    if (!project.is_public_listed) {
       logJoinRequestDenied({
         req,
         userId,
@@ -134,6 +135,11 @@ async function requestProjectJoin(
       });
       throw { status: 403, message: "This wyrld is not listed publicly" };
     }
+    await expireStaleProJoinRequests({
+      req,
+      projectId: project.id,
+      requesterUserId: userId,
+    });
     if (project.public_join_mode !== "request") {
       logJoinRequestDenied({
         req,
@@ -298,6 +304,7 @@ async function cancelProjectJoinRequest(
 ) {
   try {
     const userId = requireApiUser(req);
+    await expireStaleProJoinRequests({ req, requestId: req.params.id });
     const joinRequestData = await getProjectJoinRequestQuery(req.params.id);
     const joinRequest = joinRequestData.rows[0];
     if (!joinRequest) {
@@ -369,6 +376,7 @@ async function getProjectJoinRequestsByProject(
   next: NextFunction,
 ) {
   try {
+    await expireStaleProJoinRequests({ req, projectId: req.params.project_id });
     await requireProjectOwnerAccess(req, req.params.project_id);
     const [rowsData, countData] = await Promise.all([
       getPendingProjectJoinRequestsByProjectQuery(req.params.project_id),
@@ -398,6 +406,7 @@ async function respondProjectJoinRequest(
       throw { status: 400, message: "action must be 'approve' or 'reject'" };
     }
 
+    await expireStaleProJoinRequests({ req, requestId: req.params.id });
     const joinRequestData = await getProjectJoinRequestQuery(req.params.id);
     const joinRequest = joinRequestData.rows[0];
     if (!joinRequest) {
@@ -551,10 +560,6 @@ async function editProjectPublicSettings(
       req.body?.featured_record_id,
       project.featured_record_id,
     );
-
-    if (!project.is_pro && is_public_listed) {
-      throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
-    }
 
     const memberCount = await getProjectMemberCount(project.id);
     if (

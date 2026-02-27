@@ -5,6 +5,7 @@ export interface PublicWyrldDirectoryRow {
   title: string;
   description: string;
   user_id: number;
+  is_pro: boolean;
   is_public_listed: boolean;
   public_join_mode: "invite_only" | "request";
   public_join_capacity: number | null;
@@ -31,6 +32,7 @@ async function getPublicWyrldDirectoryQuery(params?: {
         p.title,
         p.description,
         p.user_id,
+        p.is_pro,
         p.is_public_listed,
         p.public_join_mode,
         p.public_join_capacity,
@@ -51,7 +53,6 @@ async function getPublicWyrldDirectoryQuery(params?: {
         on fr.id = p.featured_record_id
         and fr.project_id = p.id
       where p.is_public_listed = true
-        and p.is_pro = true
         and ($1 = '' or lower(p.title) like '%' || $1 || '%')
       order by p.id desc
       limit $2

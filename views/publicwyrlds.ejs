@@ -20,6 +20,7 @@
           <a href="<%= isAuthenticated ? '/dash/wyrlds' : '/index' %>"><%= isAuthenticated ? 'Back to My Wyrlds' : 'Back to Home' %></a>
         </div>
         <small>Discover listed wyrlds. Joining is controlled by each wyrld owner.</small>
+        <small class="d-block mt-1">Listings with a <strong>Pro</strong> tag are run on Pro Wyrlds.</small>
         <small class="d-block mt-1">
           <a href="/public-wyrlds-guide">What are Public Wyrlds?</a>
           |
@@ -47,6 +48,9 @@
                 <div class="dashboard-card-header">
                   <div class="dash-detail-title">
                     <a href="<%= project.publicPath || ('/wyrlds/public/' + project.id) %>"><%= project.title %></a>
+                    <% if (project.is_pro) { %>
+                      <span class="record-badge record-badge-wyrld" style="margin-left:6px;">Pro</span>
+                    <% } %>
                   </div>
                   <div class="dash-detail-meta">Owner: <%= project.owner_username %></div>
                 </div>
