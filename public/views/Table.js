@@ -424,24 +424,57 @@ class Table {
   };
 
   setupDocumentEventListeners = () => {
+    const isTypingInDomInput = (target) => {
+      if (!target) return false;
+      const tagName = (target.tagName || "").toLowerCase();
+      return (
+        tagName === "input" ||
+        tagName === "textarea" ||
+        target.isContentEditable
+      );
+    };
+
+    const isEditingCanvasText = () => {
+      const activeObject = this.canvasLayer?.canvasEngine
+        ?.getActiveObjects?.()
+        ?.find((obj) => obj);
+      if (!activeObject) return false;
+      const isTextObject =
+        activeObject.type === "i-text" ||
+        activeObject.type === "textbox" ||
+        activeObject.type === "text";
+      return isTextObject && !!activeObject.isEditing;
+    };
+
     // KEYS
     const onKeydown = (e) => {
+      const key = (e.key || "").toLowerCase();
+
       // alt key change cursor
       if (e.altKey) {
         this.canvasLayer.setCursorCrosshair();
       }
 
       // duplicate
-      if (e.ctrlKey && e.key == "d") {
+      if ((e.ctrlKey || e.metaKey) && key === "d") {
         this.canvasLayer.duplicateObject();
       }
 
       // move to top
-      if (e.ctrlKey && e.key == "t") {
+      if ((e.ctrlKey || e.metaKey) && key === "t") {
         if (this.can("canManageLayers")) {
           this.canvasLayer.moveObjectToTop();
         }
       }
+
+      // draw undo
+      if ((e.ctrlKey || e.metaKey) && key === "z") {
+        if (this.can("canDeleteCanvasObjects") && this.canvasLayer.isDrawingMode()) {
+          e.preventDefault();
+          this.canvasLayer.undoLastDraw();
+        }
+      }
+
     };
     document.addEventListener("keydown", onKeydown);
     this.documentListeners.push({ type: "keydown", handler: onKeydown });
@@ -450,7 +483,11 @@ class Table {
       var key = e.key;
 
       if (key === "Backspace" || key === "Delete") {
-        if (this.can("canDeleteCanvasObjects")) {
+        if (
+          this.can("canDeleteCanvasObjects") &&
+          !isTypingInDomInput(e.target) &&
+          !isEditingCanvasText()
+        ) {
           this.canvasLayer.removeObjects();
         }
       }

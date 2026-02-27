@@ -31,6 +31,8 @@ import {
 import throttle from "../../lib/throttle.js";
 import detectMob from "../../lib/detectMobile.js";
 
+const TEXTBOX_MIN_WIDTH = 180;
+
 export default class CanvasLayer {
   constructor(props) {
     // setup table views and saved state
@@ -40,6 +42,15 @@ export default class CanvasLayer {
     this.gridManager = null;
     this.canvasEngine = null;
     this.layerStack = null;
+    this.drawingModeEnabled = false;
+    this.drawingTool = "freehand";
+    this.shapeDrawing = {
+      startX: 0,
+      startY: 0,
+      activeShape: null,
+    };
+    this.drawUndoStack = [];
+    this.maxDrawUndoDepth = 100;
 
     this.throttleImageMoved = throttle((obj) => {
       socketIntegration.imageMoved(obj);
@@ -232,10 +243,12 @@ export default class CanvasLayer {
 
   handleMouseWheel = (opt) => {
     handleMouseWheelZoom(this.canvasEngine, opt);
+    this.notifyZoomChanged();
   };
 
   handlePinchZoom = (opt) => {
     handlePinchZoomGesture(this.canvasEngine, opt);
+    this.notifyZoomChanged();
   };
 
   handleMouseDown = (opt) => {
@@ -246,7 +259,17 @@ export default class CanvasLayer {
       this.handleMobileDoubleTap(evt);
     }
 
-    if (evt.altKey || this.canvasEngine.isDrawingMode()) return;
+    if (evt.altKey) return;
+    if (this.drawingModeEnabled) {
+      if (this.drawingTool === "text") {
+        this.addTextAtPointer(evt);
+        return;
+      }
+      if (this.drawingTool !== "freehand") {
+        this.startShapeDrawing(evt);
+      }
+      return;
+    }
 
     // Begin drag if empty space or unselectable object
     if (!opt.target || !opt.target.selectable) {
@@ -280,6 +303,14 @@ export default class CanvasLayer {
   };
 
   handleMouseMove = (opt) => {
+    if (
+      this.drawingModeEnabled &&
+      this.drawingTool !== "freehand" &&
+      this.shapeDrawing.activeShape
+    ) {
+      this.updateShapeDrawing(opt.e);
+      return;
+    }
     if (detectMob() || !this.canvasEngine.isDragging()) return;
     handleMousePan(this.canvasEngine, opt);
   };
@@ -290,6 +321,14 @@ export default class CanvasLayer {
   };
 
   handleMouseUp = () => {
+    if (
+      this.drawingModeEnabled &&
+      this.drawingTool !== "freehand" &&
+      this.shapeDrawing.activeShape
+    ) {
+      this.finishShapeDrawing();
+      return;
+    }
     endCanvasDrag(this.canvasEngine);
   };
 
@@ -305,16 +344,38 @@ export default class CanvasLayer {
     this.placeObjectOnLayer(path);
     this.updateObjectProperties(path);
     this.setupObjectEventListeners(path);
+    this.registerDrawUndo(path.id);
     socketIntegration.imageAdded(path);
+    this.saveToDatabase();
   };
 
   setupObjectEventListeners = (obj) => {
+    this.enforceTextboxVisuals(obj);
+
     obj.on("selected", (options) => {
       const obj = options.target;
 
       // display top layer viewport for object
       this.tableApp.setCurrentSelectedObject(obj);
     });
+
+    if (obj.type === "i-text" || obj.type === "textbox" || obj.type === "text") {
+      const syncTextChanges = throttle(() => {
+        this.enforceTextboxVisuals(obj);
+        socketIntegration.imageMoved(obj);
+        this.saveToDatabase();
+      }, 350);
+
+      obj.on("changed", () => {
+        syncTextChanges();
+      });
+
+      obj.on("editing:exited", () => {
+        this.enforceTextboxVisuals(obj);
+        socketIntegration.imageMoved(obj);
+        this.saveToDatabase();
+      });
+    }
   };
 
   setCursorCrosshair = () => {
@@ -322,18 +383,81 @@ export default class CanvasLayer {
     this.canvasEngine.setCursor("crosshair");
   };
 
-  setCursorDefault = () => {
+  getDrawModeCursor = () => {
+    if (this.drawingTool === "text") return "text";
+    return "crosshair";
+  };
+
+  applyCurrentCursor = () => {
+    if (this.drawingModeEnabled) {
+      const cursor = this.getDrawModeCursor();
+      this.canvasEngine.setDefaultCursor(cursor);
+      this.canvasEngine.setCursor(cursor);
+      if (this.canvas) {
+        this.canvas.freeDrawingCursor = cursor;
+      }
+      return;
+    }
+
     this.canvasEngine.setDefaultCursor("grab");
     this.canvasEngine.setCursor("grab");
+    if (this.canvas) {
+      this.canvas.freeDrawingCursor = "crosshair";
+    }
+  };
+
+  setCursorDefault = () => {
+    this.applyCurrentCursor();
   };
 
   isDrawingMode = () => {
-    return this.canvasEngine?.isDrawingMode?.() || false;
+    return !!this.drawingModeEnabled;
   };
 
   setDrawingMode = (enabled) => {
     if (!this.canvas) return;
-    this.canvas.isDrawingMode = !!enabled;
+    const nextEnabled = !!enabled;
+    if (!nextEnabled && this.shapeDrawing.activeShape) {
+      this.canvasEngine.removeObject(this.shapeDrawing.activeShape);
+      this.shapeDrawing.activeShape = null;
+      this.canvasEngine.requestRender();
+    }
+    this.drawingModeEnabled = nextEnabled;
+    this.canvas.isDrawingMode = nextEnabled && this.drawingTool === "freehand";
+    if (nextEnabled) {
+      this.canvas.selection = false;
+      this.canvas.skipTargetFind = true;
+      this.canvasEngine.discardActiveObject();
+      this.canvasEngine.requestRender();
+    } else {
+      this.canvas.selection = true;
+      this.canvas.skipTargetFind = false;
+      this.canvasEngine.getObjects().forEach((object) => {
+        this.updateObjectProperties(object);
+      });
+      this.canvasEngine.requestRender();
+    }
+    this.applyCurrentCursor();
+  };
+
+  getDrawingTool = () => {
+    return this.drawingTool;
+  };
+
+  setDrawingTool = (tool) => {
+    const allowedTools = new Set(["freehand", "line", "rect", "ellipse", "text"]);
+    if (!allowedTools.has(tool)) return;
+    if (this.shapeDrawing.activeShape) {
+      this.canvasEngine.removeObject(this.shapeDrawing.activeShape);
+      this.shapeDrawing.activeShape = null;
+      this.canvasEngine.requestRender();
+    }
+    this.drawingTool = tool;
+    if (this.canvas) {
+      this.canvas.isDrawingMode =
+        this.drawingModeEnabled && this.drawingTool === "freehand";
+    }
+    this.applyCurrentCursor();
   };
 
   getDrawingBrushColor = () => {
@@ -352,6 +476,211 @@ export default class CanvasLayer {
   setDrawingBrushWidth = (width) => {
     if (!this.canvas?.freeDrawingBrush) return;
     this.canvas.freeDrawingBrush.width = width;
+  };
+
+  addTextAtPointer = (evt) => {
+    const pointer = this.canvasEngine.getPointer(evt);
+    const text = this.canvasEngine.createTextbox("Text", {
+      id: uuidv4(),
+      left: pointer.x,
+      top: pointer.y,
+      fill: this.getDrawingBrushColor(),
+      fontSize: Math.max(12, this.getDrawingBrushWidth() * 3),
+      fontFamily: "YoungSerif, serif",
+      width: TEXTBOX_MIN_WIDTH,
+      backgroundColor: "rgba(24, 32, 41, 0.45)",
+      textBackgroundColor: "rgba(24, 32, 41, 0.45)",
+      hasControls: true,
+      hasBorders: true,
+      borderColor: "rgba(222, 199, 174, 0.9)",
+      padding: 6,
+      layer: this.tableApp.currentLayer,
+      lockInPosition: false,
+    });
+
+    this.canvasEngine.addObject(text);
+    this.placeObjectOnLayer(text);
+    this.updateObjectProperties(text);
+    this.setupObjectEventListeners(text);
+    this.canvasEngine.setActiveObject(text);
+    this.canvasEngine.requestRender();
+    text.enterEditing?.();
+    text.selectAll?.();
+    this.registerDrawUndo(text.id);
+    socketIntegration.imageAdded(text);
+    this.saveToDatabase();
+  };
+
+  enforceTextboxVisuals = (obj) => {
+    if (!obj) return;
+    if (obj.type !== "textbox" && obj.type !== "i-text" && obj.type !== "text") return;
+
+    const nextWidth = Math.max(TEXTBOX_MIN_WIDTH, obj.width || TEXTBOX_MIN_WIDTH);
+    obj.set({
+      width: nextWidth,
+      backgroundColor: obj.backgroundColor || "rgba(24, 32, 41, 0.45)",
+      textBackgroundColor: obj.textBackgroundColor || "rgba(24, 32, 41, 0.45)",
+      hasBorders: true,
+      borderColor: obj.borderColor || "rgba(222, 199, 174, 0.9)",
+      padding: typeof obj.padding === "number" ? obj.padding : 6,
+    });
+    obj.setCoords?.();
+  };
+
+  startShapeDrawing = (evt) => {
+    const pointer = this.canvasEngine.getPointer(evt);
+    const color = this.getDrawingBrushColor();
+    const strokeWidth = this.getDrawingBrushWidth();
+
+    this.shapeDrawing.startX = pointer.x;
+    this.shapeDrawing.startY = pointer.y;
+
+    const commonProps = {
+      left: pointer.x,
+      top: pointer.y,
+      stroke: color,
+      strokeWidth,
+      fill: "rgba(0,0,0,0)",
+      selectable: false,
+      evented: false,
+      layer: this.tableApp.currentLayer,
+      lockInPosition: false,
+    };
+
+    let shape = null;
+    if (this.drawingTool === "line") {
+      shape = this.canvasEngine.createLine(
+        [pointer.x, pointer.y, pointer.x, pointer.y],
+        commonProps,
+      );
+    } else if (this.drawingTool === "rect") {
+      shape = this.canvasEngine.createRect({
+        ...commonProps,
+        width: 0,
+        height: 0,
+      });
+    } else if (this.drawingTool === "ellipse") {
+      shape = this.canvasEngine.createEllipse({
+        ...commonProps,
+        rx: 0,
+        ry: 0,
+        originX: "center",
+        originY: "center",
+      });
+    }
+
+    if (!shape) return;
+    this.shapeDrawing.activeShape = shape;
+    this.canvasEngine.addObject(shape);
+    this.canvasEngine.requestRender();
+  };
+
+  updateShapeDrawing = (evt) => {
+    const shape = this.shapeDrawing.activeShape;
+    if (!shape) return;
+
+    const pointer = this.canvasEngine.getPointer(evt);
+    const startX = this.shapeDrawing.startX;
+    const startY = this.shapeDrawing.startY;
+
+    if (this.drawingTool === "line") {
+      shape.set({ x2: pointer.x, y2: pointer.y });
+    } else if (this.drawingTool === "rect") {
+      const normalized = this.getNormalizedRectBounds(startX, startY, pointer.x, pointer.y);
+      shape.set({
+        left: normalized.left,
+        top: normalized.top,
+        width: normalized.width,
+        height: normalized.height,
+      });
+    } else if (this.drawingTool === "ellipse") {
+      const centerX = (startX + pointer.x) / 2;
+      const centerY = (startY + pointer.y) / 2;
+      shape.set({
+        left: centerX,
+        top: centerY,
+        rx: Math.abs(pointer.x - startX) / 2,
+        ry: Math.abs(pointer.y - startY) / 2,
+      });
+    }
+
+    shape.setCoords();
+    this.canvasEngine.requestRender();
+  };
+
+  finishShapeDrawing = () => {
+    const shape = this.shapeDrawing.activeShape;
+    this.shapeDrawing.activeShape = null;
+    if (!shape) return;
+
+    const isTinyShape =
+      (this.drawingTool === "line" &&
+        Math.abs((shape.x2 || 0) - (shape.x1 || 0)) < 1 &&
+        Math.abs((shape.y2 || 0) - (shape.y1 || 0)) < 1) ||
+      (this.drawingTool === "rect" &&
+        (shape.width || 0) < 1 &&
+        (shape.height || 0) < 1) ||
+      (this.drawingTool === "ellipse" &&
+        (shape.rx || 0) < 1 &&
+        (shape.ry || 0) < 1);
+
+    if (isTinyShape) {
+      this.canvasEngine.removeObject(shape);
+      this.canvasEngine.requestRender();
+      return;
+    }
+
+    shape.set("id", uuidv4());
+    shape.set("layer", this.tableApp.currentLayer);
+    shape.set("lockInPosition", false);
+    shape.set("selectable", true);
+    shape.set("evented", true);
+
+    this.placeObjectOnLayer(shape);
+    this.updateObjectProperties(shape);
+    this.setupObjectEventListeners(shape);
+    this.registerDrawUndo(shape.id);
+    socketIntegration.imageAdded(shape);
+    this.canvasEngine.requestRender();
+    this.saveToDatabase();
+  };
+
+  getNormalizedRectBounds = (x1, y1, x2, y2) => {
+    return {
+      left: Math.min(x1, x2),
+      top: Math.min(y1, y2),
+      width: Math.abs(x2 - x1),
+      height: Math.abs(y2 - y1),
+    };
+  };
+
+  registerDrawUndo = (objectId) => {
+    if (!objectId) return;
+    this.drawUndoStack.push(objectId);
+    if (this.drawUndoStack.length > this.maxDrawUndoDepth) {
+      this.drawUndoStack.shift();
+    }
+  };
+
+  pruneDrawUndo = (objectId) => {
+    if (!objectId) return;
+    this.drawUndoStack = this.drawUndoStack.filter((id) => id !== objectId);
+  };
+
+  undoLastDraw = async () => {
+    if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return false;
+
+    while (this.drawUndoStack.length) {
+      const objectId = this.drawUndoStack.pop();
+      const object = this.getObjectById(objectId);
+      if (!object || object.isLocationPin) continue;
+      this.canvasEngine.removeObject(object);
+      socketIntegration.imageRemoved(object.id);
+      this.canvasEngine.requestRender();
+      await this.saveToDatabase();
+      return true;
+    }
+    return false;
   };
 
   getObjects = () => {
@@ -515,11 +844,13 @@ export default class CanvasLayer {
           for (var subObj of object._objects) {
             if (subObj.isLocationPin) continue;
             this.canvasEngine.removeObject(subObj);
+            this.pruneDrawUndo(subObj.id);
             socketIntegration.imageRemoved(subObj.id);
           }
           return this.saveToDatabase();
         } else {
           this.canvasEngine.removeObject(object);
+          this.pruneDrawUndo(object.id);
           socketIntegration.imageRemoved(object.id);
           return this.saveToDatabase();
         }
@@ -567,6 +898,45 @@ export default class CanvasLayer {
         this.centerViewOnObject(obj);
       }
     });
+  };
+
+  getZoomLevel = () => {
+    return this.canvasEngine?.getZoom?.() || 1;
+  };
+
+  zoomToLevel = (targetZoom) => {
+    if (!this.canvasEngine) return;
+    const clampedZoom = Math.max(0.25, Math.min(3, targetZoom));
+    const center = this.canvasEngine.createPoint(
+      this.canvasEngine.getWidth() / 2,
+      this.canvasEngine.getHeight() / 2,
+    );
+    this.canvasEngine.zoomToPoint(center, clampedZoom);
+    this.canvasEngine.requestRender();
+    this.notifyZoomChanged();
+  };
+
+  zoomIn = () => {
+    this.zoomToLevel(this.getZoomLevel() * 1.15);
+  };
+
+  zoomOut = () => {
+    this.zoomToLevel(this.getZoomLevel() / 1.15);
+  };
+
+  resetZoom = () => {
+    this.zoomToLevel(1);
+  };
+
+  notifyZoomChanged = () => {
+    document.dispatchEvent(
+      new CustomEvent("vtt:zoom-changed", {
+        detail: {
+          tableId: this.tableApp?.tableId || null,
+          zoom: this.getZoomLevel(),
+        },
+      }),
+    );
   };
 
   // Also can be used to place image at top of layer

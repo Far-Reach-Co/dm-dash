@@ -5,6 +5,38 @@ export function getCanvasSaveEndpoint(tableView) {
   );
 }
 
+function sanitizeTextObjectForFabric(object) {
+  if (!object || typeof object !== "object") return;
+
+  const isTextType =
+    object.type === "i-text" ||
+    object.type === "textbox" ||
+    object.type === "text";
+
+  if (isTextType) {
+    if (typeof object.text !== "string") {
+      object.text = "";
+    }
+    if (!object.styles || typeof object.styles !== "object") {
+      object.styles = {};
+    }
+  }
+
+  if (Array.isArray(object.objects)) {
+    object.objects.forEach((child) => sanitizeTextObjectForFabric(child));
+  }
+}
+
+function sanitizeCanvasDataForFabric(data) {
+  if (!data || typeof data !== "object") return data;
+
+  if (Array.isArray(data.objects)) {
+    data.objects.forEach((object) => sanitizeTextObjectForFabric(object));
+  }
+
+  return data;
+}
+
 export async function saveCanvasState(canvasEngine, tableView) {
   const saveEndpoint = getCanvasSaveEndpoint(tableView);
   if (!saveEndpoint || !canvasEngine) return null;
@@ -34,7 +66,8 @@ export async function saveCanvasState(canvasEngine, tableView) {
 
 export function loadCanvasFromData(canvasEngine, data, onObjectLoaded) {
   return new Promise((resolve) => {
-    canvasEngine.loadFromJSON(data, () => {
+    const sanitizedData = sanitizeCanvasDataForFabric(data);
+    canvasEngine.loadFromJSON(sanitizedData, () => {
       canvasEngine.getObjects().forEach((object) => {
         onObjectLoaded?.(object);
       });

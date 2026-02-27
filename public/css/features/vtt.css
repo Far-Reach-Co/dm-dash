@@ -78,6 +78,43 @@
   flex-shrink: 0;
 }
 
+.vtt-zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: var(--space-xs);
+}
+
+.vtt-zoom-btn,
+.vtt-zoom-reset {
+  height: 28px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  background: rgba(24, 32, 41, 0.65);
+  color: var(--main-white);
+  cursor: pointer;
+}
+
+.vtt-zoom-btn {
+  width: 28px;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.vtt-zoom-reset {
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.vtt-zoom-value {
+  min-width: 52px;
+  text-align: center;
+  color: var(--orange3);
+  font-size: 12px;
+  font-weight: 700;
+}
+
 /* Vertical separator between tool groups */
 .vtt-toolbar-sep {
   width: 1px;
@@ -166,6 +203,31 @@
   color: var(--orange3);
   font-weight: bold;
   margin-bottom: 0;
+}
+
+.vtt-draw-control {
+  height: 28px;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+  background: rgba(24, 32, 41, 0.65);
+  color: var(--main-white);
+}
+
+.vtt-draw-select {
+  min-width: 130px;
+  padding: 0 8px;
+  margin-right: var(--space-sm);
+}
+
+.vtt-draw-width {
+  width: 54px;
+  padding: 2px 6px;
+}
+
+.vtt-draw-undo {
+  padding: 0 10px;
+  margin-left: var(--space-sm);
+  cursor: pointer;
 }
 
 /* selected-obj-info-elem — removed, now rendered inside toolbar panel */

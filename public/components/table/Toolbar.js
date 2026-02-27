@@ -35,6 +35,7 @@ export default class Toolbar {
     this._clickAwayBound = false;
     this._selectedObjectBarUpdateId = 0;
     this._onPointerDown = null;
+    this._onZoomChanged = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -115,10 +116,25 @@ export default class Toolbar {
     document.addEventListener("pointerdown", this._onPointerDown);
   };
 
+  setupZoomListener = () => {
+    if (this._onZoomChanged) return;
+    this._onZoomChanged = (event) => {
+      if (!event?.detail) return;
+      const { tableId } = event.detail;
+      if (tableId !== this.tableApp?.tableId) return;
+      this._updateZoomControls();
+    };
+    document.addEventListener("vtt:zoom-changed", this._onZoomChanged);
+  };
+
   destroy = () => {
     if (this._onPointerDown) {
       document.removeEventListener("pointerdown", this._onPointerDown);
       this._onPointerDown = null;
+    }
+    if (this._onZoomChanged) {
+      document.removeEventListener("vtt:zoom-changed", this._onZoomChanged);
+      this._onZoomChanged = null;
     }
     this._clickAwayBound = false;
     this.activePanel = null;
@@ -331,6 +347,55 @@ export default class Toolbar {
     });
   };
 
+  renderZoomControls = () => {
+    const canvasLayer = this.tableApp.canvasLayer;
+    const zoom = canvasLayer?.getZoomLevel?.() || 1;
+    const zoomPct = `${Math.round(zoom * 100)}%`;
+
+    return createElement("div", { class: "vtt-zoom-controls" }, [
+      createElement(
+        "button",
+        {
+          type: "button",
+          class: "vtt-zoom-btn",
+          title: "Zoom out",
+        },
+        "−",
+        {
+          type: "click",
+          event: () => canvasLayer?.zoomOut?.(),
+        },
+      ),
+      createElement("span", { class: "vtt-zoom-value", title: "Current zoom" }, zoomPct),
+      createElement(
+        "button",
+        {
+          type: "button",
+          class: "vtt-zoom-btn",
+          title: "Zoom in",
+        },
+        "+",
+        {
+          type: "click",
+          event: () => canvasLayer?.zoomIn?.(),
+        },
+      ),
+      createElement(
+        "button",
+        {
+          type: "button",
+          class: "vtt-zoom-reset",
+          title: "Reset zoom to 100%",
+        },
+        "Reset",
+        {
+          type: "click",
+          event: () => canvasLayer?.resetZoom?.(),
+        },
+      ),
+    ]);
+  };
+
   // ---------------------------------------------------------------------------
   // Object action buttons (delete, move up)
   // ---------------------------------------------------------------------------
@@ -414,6 +479,10 @@ export default class Toolbar {
     this._sidebarSlot.replaceChildren(this.renderSidebarToggle());
   };
 
+  _updateZoomControls = () => {
+    this._zoomSlot.replaceChildren(this.renderZoomControls());
+  };
+
   _updateDrawBar = () => {
     this._drawBarSlot.replaceChildren(this.renderDrawBar());
   };
@@ -437,6 +506,7 @@ export default class Toolbar {
 
   build = () => {
     this.setupClickAway();
+    this.setupZoomListener();
 
     // Persistent slot containers — display:contents makes them transparent to flex
     this._drawToggleSlot = createElement("div", {
@@ -451,6 +521,7 @@ export default class Toolbar {
     this._objectActionsSlot = createElement("div", {
       style: "display: contents;",
     });
+    this._zoomSlot = createElement("div", { style: "display: contents;" });
     this._sidebarSlot = createElement("div", { style: "display: contents;" });
     this._drawBarSlot = createElement("div");
     this._selectedObjectBarSlot = createElement("div");
@@ -464,6 +535,7 @@ export default class Toolbar {
       this._layersAnchorSlot,
       this._gridAnchorSlot,
       this._objectActionsSlot,
+      this._zoomSlot,
       createElement("div", { style: "flex: 1;" }),
       this._sidebarSlot,
     ]);
@@ -480,6 +552,7 @@ export default class Toolbar {
     this._updateLayersAnchor();
     this._updateGridAnchor();
     this._updateObjectActions();
+    this._updateZoomControls();
     this._updateSidebarToggle();
     this._updateDrawBar();
     await this._updateSelectedObjectBar();
