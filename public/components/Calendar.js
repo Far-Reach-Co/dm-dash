@@ -1,6 +1,7 @@
 import createElement from "./createElement.js";
 import listItemTitle from "./listItemTitle.js";
-import { deleteThing, postThing } from "../lib/apiUtils.js";
+import { apiDelete, apiPost } from "../lib/apiUtils.js";
+import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
 import modal from "./modal.js";
 
@@ -38,6 +39,17 @@ export default class Calendar {
   toggleLoading = () => {
     this.loading = !this.loading;
     this.render();
+  };
+
+  handleApiError = (result, fallbackMessage = "Request failed") => {
+    if (!result?.ok) {
+      handleApiFailure(result, {
+        fallbackMessage,
+        includeResultMessage: true,
+      });
+      return true;
+    }
+    return false;
   };
 
   calculateCurrentDayOfTheWeek = () => {
@@ -104,7 +116,8 @@ export default class Calendar {
     // update UI
     this.title = formProps.title;
     this.year = formProps.year;
-    await postThing(`/api/edit_calendar/${this.id}`, formProps);
+    const result = await apiPost(`/api/edit_calendar/${this.id}`, formProps);
+    if (this.handleApiError(result, "Failed to save calendar")) return;
     // update wyrlds calendar list UI
     const elem = document.querySelector(`#calendar-title-${this.id}`);
     if (elem) {
@@ -113,37 +126,51 @@ export default class Calendar {
   };
 
   newMonth = async () => {
-    const data = await postThing("/api/add_month", {
+    const dataResult = await apiPost("/api/add_month", {
       calendar_id: this.id,
       index: this.months.length + 1,
       title: `Month(${this.months.length + 1})`,
       number_of_days: 30,
     });
+    if (this.handleApiError(dataResult, "Failed to add month")) return;
+    const data = dataResult.ok ? dataResult.data : null;
     if (data) this.months.push(data);
   };
 
   newDay = async () => {
-    const data = await postThing("/api/add_day", {
+    const dataResult = await apiPost("/api/add_day", {
       calendar_id: this.id,
       index: this.daysOfTheWeek.length + 1,
       title: `Day(${this.daysOfTheWeek.length + 1})`,
     });
+    if (this.handleApiError(dataResult, "Failed to add day")) return;
+    const data = dataResult.ok ? dataResult.data : null;
     if (data) this.daysOfTheWeek.push(data);
   };
 
   updateMonths = async () => {
     const monthUpdateSuccessList = [];
+    let firstError = null;
 
     await Promise.all(
       this.months.map(async (month) => {
-        const resData = await postThing(`/api/edit_month/${month.id}`, {
+        const resDataResult = await apiPost(`/api/edit_month/${month.id}`, {
           title: month.title,
           index: month.index,
           number_of_days: month.number_of_days,
         });
+        if (!resDataResult.ok && !firstError) {
+          firstError = resDataResult;
+          return;
+        }
+        const resData = resDataResult.ok ? resDataResult.data : null;
         if (resData) monthUpdateSuccessList.push(resData);
       })
     );
+    if (firstError) {
+      this.handleApiError(firstError, "Failed to update months");
+      return;
+    }
     const successListSortedByIndex = monthUpdateSuccessList.sort(
       (a, b) => a.index - b.index
     );
@@ -153,16 +180,26 @@ export default class Calendar {
 
   updateDays = async () => {
     const dayUpdateSuccessList = [];
+    let firstError = null;
 
     await Promise.all(
       this.daysOfTheWeek.map(async (day) => {
-        const resData = await postThing(`/api/edit_day/${day.id}`, {
+        const resDataResult = await apiPost(`/api/edit_day/${day.id}`, {
           title: day.title,
           index: day.index,
         });
+        if (!resDataResult.ok && !firstError) {
+          firstError = resDataResult;
+          return;
+        }
+        const resData = resDataResult.ok ? resDataResult.data : null;
         if (resData) dayUpdateSuccessList.push(resData);
       })
     );
+    if (firstError) {
+      this.handleApiError(firstError, "Failed to update days");
+      return;
+    }
     const successListSortedByIndex = dayUpdateSuccessList.sort(
       (a, b) => a.index - b.index
     );
@@ -179,10 +216,11 @@ export default class Calendar {
     this.currentDay = dayNumber;
     this.render();
     // then send data call
-    await postThing(`/api/edit_calendar/${this.id}`, {
+    const result = await apiPost(`/api/edit_calendar/${this.id}`, {
       current_day: dayNumber,
       current_month_id: this.monthBeingViewed.id,
     });
+    this.handleApiError(result, "Failed to update current day");
   };
 
   renderManageDays = () => {
@@ -215,8 +253,9 @@ export default class Calendar {
           { class: "btn-red" },
           "Remove Day"
         );
-        removeDayBtn.addEventListener("click", () => {
-          deleteThing(`/api/remove_day/${day.id}`);
+        removeDayBtn.addEventListener("click", async () => {
+          const result = await apiDelete(`/api/remove_day/${day.id}`);
+          if (this.handleApiError(result, "Failed to remove day")) return;
           this.daysOfTheWeek.splice(this.daysOfTheWeek.indexOf(day), 1);
           this.render();
         });
@@ -330,8 +369,9 @@ export default class Calendar {
           { class: "btn-red" },
           "Remove Month"
         );
-        removeMonthBtn.addEventListener("click", () => {
-          deleteThing(`/api/remove_month/${month.id}`);
+        removeMonthBtn.addEventListener("click", async () => {
+          const result = await apiDelete(`/api/remove_month/${month.id}`);
+          if (this.handleApiError(result, "Failed to remove month")) return;
           this.months.splice(this.months.indexOf(month), 1);
           this.render();
         });
@@ -503,7 +543,8 @@ export default class Calendar {
       );
       if (!confirmed) return;
 
-      deleteThing(`/api/remove_calendar/${this.id}`);
+      const result = await apiDelete(`/api/remove_calendar/${this.id}`);
+      if (this.handleApiError(result, "Failed to remove calendar")) return;
       this.toggleEdit();
       this.domComponent.remove();
       modal.hide();

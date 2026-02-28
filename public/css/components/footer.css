@@ -98,7 +98,7 @@ footer {
 }
 
 .footer-social[aria-label="YouTube"]:hover {
-  background-color: #ff0000;
+  background-color: #f00;
   color: white;
 }
 

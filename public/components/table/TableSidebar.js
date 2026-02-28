@@ -2,7 +2,8 @@ import createElement from "../createElement.js";
 import TableSidebarImageComponent from "./TableSidebarImageComponent.js";
 import { copyTextToClipboard } from "../../lib/clipboard.js";
 import modal from "../modal.js";
-import { postThing } from "../../lib/apiUtils.js";
+import { apiPost } from "../../lib/apiUtils.js";
+import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import TableSidebarFolderComponent from "./TableSidebarFolderComponent.js";
 import { getCurrentProjectId } from "./tableApi.js";
 import { renderUploadImageModal } from "./tableSidebarUploadModal.js";
@@ -179,12 +180,12 @@ export default class TableSidebar {
   // Helper to handle project vs user API routing
   postByContext = (projectEndpoint, userEndpoint, data) => {
     if (this.projectId) {
-      return postThing(projectEndpoint, {
+      return apiPost(projectEndpoint, {
         ...data,
         project_id: this.projectId,
       });
     }
-    return postThing(userEndpoint, data);
+    return apiPost(userEndpoint, data);
   };
 
   uploadTableImage = async (file, signal = null) => {
@@ -200,7 +201,7 @@ export default class TableSidebar {
 
     if (!newImage) return null;
 
-    const tableImage = await this.postByContext(
+    const tableImageResult = await this.postByContext(
       "/api/add_table_image_by_project",
       "/api/add_table_image_by_user",
       {
@@ -210,7 +211,11 @@ export default class TableSidebar {
       },
     );
 
-    return { image: newImage, tableImage };
+    if (!tableImageResult.ok) {
+      handleApiFailure(tableImageResult, { includeResultMessage: true });
+      return null;
+    }
+    return { image: newImage, tableImage: tableImageResult.data };
   };
 
   resetUploadQueue = () => {

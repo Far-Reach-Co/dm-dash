@@ -1,5 +1,6 @@
 import createElement from "../createElement.js";
-import { getThings, postThing } from "../../lib/apiUtils.js";
+import { apiGet, apiPost } from "../../lib/apiUtils.js";
+import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import renderFolderSelect from "../table/folderSelect.js";
 import renderRecordSelect from "../table/recordSelect.js";
 import parseUrlTextContent from "../parseUrlTextContent.js";
@@ -106,11 +107,12 @@ export default async function renderImageSettingsModal({
             event: async () => {
               const nextName = String(nameInput.value || "");
               const prevName = state.image.original_name;
-              const response = await postThing(`/api/edit_image_name/${imageId}`, {
+              const response = await apiPost(`/api/edit_image_name/${imageId}`, {
                 original_name: nextName,
                 ...(tableViewId ? { table_view_id: tableViewId } : {}),
               });
-              if (!response) {
+              if (!response.ok) {
+                handleApiFailure(response, { includeResultMessage: true });
                 state.image.original_name = prevName;
                 requestRender();
                 return;
@@ -144,12 +146,16 @@ export default async function renderImageSettingsModal({
         ? [
             {
               type: "focusout",
-              event: (e) => {
+              event: async (e) => {
                 state.image.notes = e.target.textContent;
-                postThing(`/api/edit_image_notes/${imageId}`, {
+                const result = await apiPost(`/api/edit_image_notes/${imageId}`, {
                   notes: e.target.textContent,
                   ...(tableViewId ? { table_view_id: tableViewId } : {}),
                 });
+                if (!result.ok) {
+                  handleApiFailure(result, { includeResultMessage: true });
+                  return;
+                }
                 notifyGeneralUpdate();
               },
             },
@@ -175,10 +181,14 @@ export default async function renderImageSettingsModal({
       folderSelectElem.addEventListener("change", async (e) => {
         const value = e.target.value;
         state.image.folder_id = value == 0 ? null : value;
-        await postThing(`/api/edit_table_image/${tableImageId}`, {
+        const result = await apiPost(`/api/edit_table_image/${tableImageId}`, {
           folder_id: value,
           ...(tableViewId ? { table_view_id: tableViewId } : {}),
         });
+        if (!result.ok) {
+          handleApiFailure(result, { includeResultMessage: true });
+          return;
+        }
         notifyGeneralUpdate();
       });
     } else {
@@ -192,12 +202,17 @@ export default async function renderImageSettingsModal({
   };
 
   const linkImageToRecord = async (recordId) => {
-    await postThing("/api/add_record_image", {
+    const linkResult = await apiPost("/api/add_record_image", {
       record_id: recordId,
       image_id: imageId,
     });
-    const record = await getThings(`/api/get_record/${recordId}`);
-    if (!record) return;
+    if (!linkResult.ok) {
+      handleApiFailure(linkResult, { includeResultMessage: true });
+      return;
+    }
+    const recordResult = await apiGet(`/api/get_record/${recordId}`);
+    if (!recordResult.ok || !recordResult.data) return;
+    const record = recordResult.data;
 
     state.image.record_id = record.id;
     state.image.record_title = record.title;
@@ -212,8 +227,14 @@ export default async function renderImageSettingsModal({
       description: state.image.description || "Placeholder text...",
       is_public: false,
     };
-    const newRecord = await postThing(getAddRecordEndpoint(projectId), data);
-    if (!newRecord) return;
+    const newRecordResult = await apiPost(getAddRecordEndpoint(projectId), data);
+    if (!newRecordResult.ok || !newRecordResult.data) {
+      if (!newRecordResult.ok) {
+        handleApiFailure(newRecordResult, { includeResultMessage: true });
+      }
+      return;
+    }
+    const newRecord = newRecordResult.data;
 
     await linkImageToRecord(newRecord.id);
   };

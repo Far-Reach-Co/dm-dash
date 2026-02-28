@@ -55,8 +55,9 @@
 <script type="module">
   import createElement from "/components/createElement.js";
   import {
-    postThing
+    apiPost
   } from "/lib/apiUtils.js";
+  import { handleApiFailure } from "/lib/apiUiFeedback.js";
   import {
     uploadProjectImage
   } from "/lib/imageUtils.js";
@@ -95,9 +96,23 @@
       is_public: checkbox.checked
     }
 
+    function throwHandled(result, fallbackMessage) {
+      const handled = handleApiFailure(result, {
+        fallbackMessage,
+        includeResultMessage: true,
+      });
+      const err = new Error(result?.error || fallbackMessage);
+      err.handled = handled;
+      throw err;
+    }
+
     try {
       // create a new record
-      const newRecord = await postThing(`/api/add_record_by_project/${projectId}`, data);
+      const newRecordResult = await apiPost(`/api/add_record_by_project/${projectId}`, data);
+      if (!newRecordResult.ok || !newRecordResult.data) {
+        throwHandled(newRecordResult, "Failed to create record");
+      }
+      const newRecord = newRecordResult.data;
 
       // upload images
       const imagesInput = document.getElementById("image");
@@ -107,27 +122,42 @@
           await Promise.all(
             Array.from(imagesInput.files).map(async (file) => {
               const newImage = await uploadImage(file);
+              if (!newImage) return;
 
               // create new record image
-              await postThing(`/api/add_record_image`, {
+              const recordImageResult = await apiPost(`/api/add_record_image`, {
                 record_id: newRecord.id,
                 image_id: newImage.id
-              })
+              });
+              if (!recordImageResult.ok) {
+                throwHandled(recordImageResult, "Failed to attach image");
+              }
             })
           );
         } else {
           const newImage = await uploadImage(imagesInput.files[0]);
+          if (!newImage) {
+            throw new Error("Failed to upload image");
+          }
           // create new record image
-          await postThing(`/api/add_record_image`, {
+          const recordImageResult = await apiPost(`/api/add_record_image`, {
             record_id: newRecord.id,
             image_id: newImage.id
-          })
+          });
+          if (!recordImageResult.ok) {
+            throwHandled(recordImageResult, "Failed to attach image");
+          }
         }
       }
 
       window.location.href = `/wyrld?id=${projectId}`
     } catch (error) {
       console.log(error)
+      if (!error?.handled) {
+        window.customAlertError(
+          error && error.message ? error.message : "Failed to create record",
+        );
+      }
       e.target.disabled = false;
       document.body.style.cursor = "default";
     }
@@ -138,13 +168,21 @@
     const newImage = await uploadProjectImage(file, projectId, false);
     if (newImage) {
       // create new table image
-      await postThing(`/api/add_table_image_by_project`, {
+      const tableImageResult = await apiPost(`/api/add_table_image_by_project`, {
         project_id: projectId,
         image_id: newImage.id,
         folder_id: null
       });
+      if (!tableImageResult.ok) {
+        handleApiFailure(tableImageResult, {
+          fallbackMessage: "Failed to attach uploaded image to library",
+          includeResultMessage: true,
+        });
+        return null;
+      }
       return newImage;
     }
+    return null;
   }
 </script>
 

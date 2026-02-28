@@ -1,5 +1,7 @@
-@import url("/css/components/folder-tree.css");
-@import url("/css/components/upload-queue.css");
+@layer reset, base, components, features, utilities, overrides;
+
+@import url("/css/components/folder-tree.css") layer(components);
+@import url("/css/components/upload-queue.css") layer(components);
 
 * {
   user-select: none;
@@ -292,6 +294,9 @@
   padding: 0;
   margin: 0;
   background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .table-settings-modal .input-container input {
@@ -1239,12 +1244,4 @@
 
 .guest-welcome-dismiss:hover {
   color: var(--main-white);
-}
-
-@media (max-width: 680px) {
-  .library-upload-actions .label-btn,
-  .library-upload-actions .new-btn {
-    width: 100%;
-    text-align: center;
-  }
 }

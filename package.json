@@ -21,6 +21,8 @@
     "dev:tsc": "tsc -p tsconfig.json --watch",
     "dev:client": "npm run build:client:watch",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint:css": "stylelint \"public/css/base/variables.css\" \"public/css/components/{dashboard.css,dashboard-core.css,dashboard-settings.css,dashboard-wyrld.css,pack-primitives.css,sidebar.css,sidebar-packs.css,upload-queue.css}\" \"public/css/features/{info.css,info-base.css,info-srd-core.css,info-srd-advanced.css,library.css,library-packs.css,vtt.css}\"",
+    "lint:css:all": "stylelint \"public/css/**/*.css\"",
     "lint": "npm run typecheck",
     "test": "node --test",
     "check": "npm run lint && npm run test",
@@ -109,6 +111,8 @@
     "dotenv-cli": "^10.0.0",
     "pino-pretty": "^13.1.3",
     "rollup": "^3.28.1",
+    "stylelint": "^17.4.0",
+    "stylelint-config-standard": "^40.0.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }

@@ -1,4 +1,4 @@
-import { getThings } from "../../lib/apiUtils.js";
+import { apiGet } from "../../lib/apiUtils.js";
 import createElement from "../createElement.js";
 import socketIntegration from "./socketIntegration.js";
 import truncateString from "../../lib/truncateString.js";
@@ -69,9 +69,10 @@ export default class Toolbar {
       searchParams.set("table_view_id", this.tableApp.tableView.id);
     }
     const queryString = searchParams.toString();
-    const image = await getThings(
+    const imageResult = await apiGet(
       `/api/get_image/${obj.imageId}${queryString ? `?${queryString}` : ""}`
     );
+    const image = imageResult.ok ? imageResult.data : null;
     if (!image) {
       info.displayName = "Image";
       info.imageSrc =

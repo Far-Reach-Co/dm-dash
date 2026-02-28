@@ -7,14 +7,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Far Reach Co. | Wyrlds</title>
   <link rel="stylesheet" href="/style.css" />
-  <script src="/lib/MobileNavHandler.js" defer></script>
-  <script type="module" src="/components/Calendar.js" defer></script>
-  <script src="/components/modal.js" type="module"></script>
-  <script src="/lib/newResourceModals.js" type="module"></script>
-  <script type="module" src="/components/loadingWithMessage.js"></script>
-  <script src="/lib/searchDashElements.js" defer></script>
   <script src="/lib/htmx.min.js"></script>
-  <script src="/lib/clipboard.js" type="module" defer></script>
+  <script type="module" src="/views/wyrld/index.js" defer></script>
+
   <%- include('./partials/icons') %>
 </head>
 <%- include('./partials/google') %>
@@ -22,7 +17,7 @@
 <body>
   <%- include('./partials/nav') %>
   <% const formatDate = (value) => value ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "N/A"; %>
-  <div class="mt-5 px-2 dashboard-shell">
+  <div id="wyrld-page-root" class="mt-5 px-2 dashboard-shell">
     <aside class="dashboard-sidebar">
       <div class="dashboard-sidebar-card">
         <div class="dashboard-sidebar-title"><%= project.title %></div>
@@ -55,7 +50,7 @@
           <span class="radio-link-text">Host a Channel</span>
           <span class="radio-link-icon">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
             </svg>
           </span>
           <span class="radio-link-arrow">&rarr;</span>
@@ -64,9 +59,7 @@
     </aside>
     <main class="dashboard-main">
       <% if (section !== 'community') { %>
-      <div
-        class="p-3 wyrld-status mx-2 <%= project.is_pro && projectBannerSrc ? 'wyrld-status--with-banner' : '' %>"
-      >
+      <div class="p-3 wyrld-status mx-2 <%= project.is_pro && projectBannerSrc ? 'wyrld-status--with-banner' : '' %>">
         <% if (project.is_pro && projectBannerSrc) { %>
         <img class="wyrld-status-banner-media" src="<%= projectBannerSrc %>" alt="" aria-hidden="true" />
         <div class="wyrld-status-banner-overlay" aria-hidden="true"></div>
@@ -351,29 +344,25 @@
           <small>Browse current threads and open one to join the discussion.</small>
           <hr />
           <% if (!discussionThreads.length) { %>
-            <small>No threads yet. Start the first discussion.</small>
+          <small>No threads yet. Start the first discussion.</small>
           <% } else { %>
-            <div class="dashboard-list community-thread-list">
-              <% discussionThreads.forEach(function(thread) { %>
-                <% const isSelectedThread = selectedDiscussionThread && Number(selectedDiscussionThread.id) === Number(thread.id); %>
-                <div
-                  class="dash-detail-row community-thread-row <%= isSelectedThread ? 'community-thread-row-selected' : '' %>"
-                  onclick="openDiscussionThread('<%= thread.id %>')"
-                  title="Open discussion thread"
-                >
-                  <div class="dash-detail-title community-thread-list-title">
-                    <%= thread.is_pinned ? '[Pinned] ' : '' %><%= thread.title %>
-                  </div>
-                  <div class="dash-detail-meta community-thread-meta">
-                    <span><%= thread.reply_count %> replies</span>
-                    <% if (thread.is_locked) { %>
-                      <span>&bull;</span>
-                      <span>Locked</span>
-                    <% } %>
-                  </div>
-                </div>
-              <% }); %>
+          <div class="dashboard-list community-thread-list">
+            <% discussionThreads.forEach(function(thread) { %>
+            <% const isSelectedThread = selectedDiscussionThread && Number(selectedDiscussionThread.id) === Number(thread.id); %>
+            <div class="dash-detail-row community-thread-row <%= isSelectedThread ? 'community-thread-row-selected' : '' %>" onclick="openDiscussionThread('<%= thread.id %>')" title="Open discussion thread">
+              <div class="dash-detail-title community-thread-list-title">
+                <%= thread.is_pinned ? '[Pinned] ' : '' %><%= thread.title %>
+              </div>
+              <div class="dash-detail-meta community-thread-meta">
+                <span><%= thread.reply_count %> replies</span>
+                <% if (thread.is_locked) { %>
+                <span>&bull;</span>
+                <span>Locked</span>
+                <% } %>
+              </div>
             </div>
+            <% }); %>
+          </div>
           <% } %>
 
           <hr />
@@ -399,284 +388,77 @@
 
         <section class="dashboard-card community-main">
           <% if (!selectedDiscussionThread) { %>
-            <h2>Thread</h2>
-            <small>Select a thread from the left to view and reply.</small>
+          <h2>Thread</h2>
+          <small>Select a thread from the left to view and reply.</small>
           <% } else { %>
-            <div class="dashboard-card-header community-main-header">
-              <h2 class="community-thread-title"><%= selectedDiscussionThread.title %></h2>
-              <small class="community-thread-state"><%= selectedDiscussionThread.is_locked ? 'Locked' : 'Open' %></small>
-            </div>
-            <small class="community-thread-author-line">
-              Started by <%= selectedDiscussionThread.creator_username %> on
-              <%= formatDate(selectedDiscussionThread.created_at) %>
-            </small>
-            <div class="mt-2 community-thread-body"><%= selectedDiscussionThread.body %></div>
+          <div class="dashboard-card-header community-main-header">
+            <h2 class="community-thread-title"><%= selectedDiscussionThread.title %></h2>
+            <small class="community-thread-state"><%= selectedDiscussionThread.is_locked ? 'Locked' : 'Open' %></small>
+          </div>
+          <small class="community-thread-author-line">
+            Started by <%= selectedDiscussionThread.creator_username %> on
+            <%= formatDate(selectedDiscussionThread.created_at) %>
+          </small>
+          <div class="mt-2 community-thread-body"><%= selectedDiscussionThread.body %></div>
 
-            <div class="settings-form-row mt-2 community-thread-actions">
-              <% const canModerateThread = projectAuth; %>
-              <% const canDeleteThread = canModerateThread || String(selectedDiscussionThread.creator_user_id) === String(auth); %>
-              <% if (canModerateThread) { %>
-                <button
-                  class="modal-form-button"
-                  type="button"
-                  onclick="toggleDiscussionThreadLock('<%= selectedDiscussionThread.id %>')"
-                >
-                  <%= selectedDiscussionThread.is_locked ? 'Unlock Thread' : 'Lock Thread' %>
-                </button>
-              <% } %>
-              <% if (canDeleteThread) { %>
-                <button
-                  class="btn-red"
-                  type="button"
-                  onclick="deleteDiscussionThread('<%= selectedDiscussionThread.id %>')"
-                >
-                  Delete Thread
-                </button>
-              <% } %>
-            </div>
-
-            <hr />
-            <h3>Replies</h3>
-            <% if (!selectedDiscussionPosts.length) { %>
-              <small>No replies yet.</small>
-            <% } else { %>
-              <div class="dashboard-list community-post-list">
-                <% selectedDiscussionPosts.forEach(function(post) { %>
-                  <% const canDeletePost = projectAuth || String(post.user_id) === String(auth); %>
-                  <div class="community-post-row">
-                    <div class="community-post-header">
-                      <div class="community-post-author"><%= post.username %></div>
-                      <div class="dash-detail-meta community-post-header-actions">
-                        <span><%= formatDate(post.created_at) %></span>
-                        <% if (canDeletePost) { %>
-                          <button
-                            class="settings-remove-btn community-delete-reply-btn"
-                            type="button"
-                            title="Delete reply"
-                            onclick="deleteDiscussionPost('<%= post.id %>')"
-                          >&times;</button>
-                        <% } %>
-                      </div>
-                    </div>
-                    <div class="community-post-content"><%= post.content %></div>
-                  </div>
-                <% }); %>
-              </div>
+          <div class="settings-form-row mt-2 community-thread-actions">
+            <% const canModerateThread = projectAuth; %>
+            <% const canDeleteThread = canModerateThread || String(selectedDiscussionThread.creator_user_id) === String(auth); %>
+            <% if (canModerateThread) { %>
+            <button class="modal-form-button" type="button" onclick="toggleDiscussionThreadLock('<%= selectedDiscussionThread.id %>')">
+              <%= selectedDiscussionThread.is_locked ? 'Unlock Thread' : 'Lock Thread' %>
+            </button>
             <% } %>
-
-            <% if (!selectedDiscussionThread.is_locked || projectAuth) { %>
-              <hr />
-              <div class="settings-form-row community-compose">
-                <textarea
-                  id="community-reply-content"
-                  class="settings-input"
-                  rows="4"
-                  maxlength="4000"
-                  placeholder="Write a reply..."
-                ></textarea>
-              </div>
-              <div class="settings-form-row mt-2">
-                <button
-                  class="modal-form-button"
-                  id="community-reply-submit"
-                  data-thread-id="<%= selectedDiscussionThread.id %>"
-                >
-                  Post Reply
-                </button>
-                <small class="success-message" id="community-reply-msg"></small>
-              </div>
-            <% } else { %>
-              <hr />
-              <small>This thread is locked. Managers can unlock it to allow new replies.</small>
+            <% if (canDeleteThread) { %>
+            <button class="btn-red" type="button" onclick="deleteDiscussionThread('<%= selectedDiscussionThread.id %>')">
+              Delete Thread
+            </button>
             <% } %>
+          </div>
+
+          <hr />
+          <h3>Replies</h3>
+          <% if (!selectedDiscussionPosts.length) { %>
+          <small>No replies yet.</small>
+          <% } else { %>
+          <div class="dashboard-list community-post-list">
+            <% selectedDiscussionPosts.forEach(function(post) { %>
+            <% const canDeletePost = projectAuth || String(post.user_id) === String(auth); %>
+            <div class="community-post-row">
+              <div class="community-post-header">
+                <div class="community-post-author"><%= post.username %></div>
+                <div class="dash-detail-meta community-post-header-actions">
+                  <span><%= formatDate(post.created_at) %></span>
+                  <% if (canDeletePost) { %>
+                  <button class="settings-remove-btn community-delete-reply-btn" type="button" title="Delete reply" onclick="deleteDiscussionPost('<%= post.id %>')">&times;</button>
+                  <% } %>
+                </div>
+              </div>
+              <div class="community-post-content"><%= post.content %></div>
+            </div>
+            <% }); %>
+          </div>
+          <% } %>
+
+          <% if (!selectedDiscussionThread.is_locked || projectAuth) { %>
+          <hr />
+          <div class="settings-form-row community-compose">
+            <textarea id="community-reply-content" class="settings-input" rows="4" maxlength="4000" placeholder="Write a reply..."></textarea>
+          </div>
+          <div class="settings-form-row mt-2">
+            <button class="modal-form-button" id="community-reply-submit" data-thread-id="<%= selectedDiscussionThread.id %>">
+              Post Reply
+            </button>
+            <small class="success-message" id="community-reply-msg"></small>
+          </div>
+          <% } else { %>
+          <hr />
+          <small>This thread is locked. Managers can unlock it to allow new replies.</small>
+          <% } %>
           <% } %>
         </section>
       </div>
 
-      <script>
-        (function() {
-          var projectId = '<%= project.id %>';
-          var openCreateThreadModalButton = document.getElementById('community-open-create-modal');
-          var replyButton = document.getElementById('community-reply-submit');
-          var replyMessageElem = document.getElementById('community-reply-msg');
-
-          function setCommunityMessage(elem, message, isError) {
-            if (!elem) return;
-            elem.textContent = message;
-            elem.style.color = isError ? 'var(--red)' : 'var(--green)';
-            if (message) {
-              setTimeout(function() { elem.textContent = ''; }, 3000);
-            }
-          }
-
-          async function submitDiscussionThread(title, body) {
-            var res = await fetch('/api/add_project_discussion_thread/' + projectId, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ title: title, body: body }),
-            });
-            var data = await res.json().catch(function() { return null; });
-            if (!res.ok || (data && data.error)) {
-              throw new Error((data && data.error && data.error.message) || 'Failed to create thread');
-            }
-            return data;
-          }
-
-          function openCreateThreadModal() {
-            if (!window.modal) return;
-
-            var container = document.createElement('div');
-            container.className = 'modal-form';
-
-            var heading = document.createElement('h2');
-            heading.textContent = 'Create Discussion Thread';
-            container.appendChild(heading);
-
-            var titleInput = document.createElement('input');
-            titleInput.type = 'text';
-            titleInput.className = 'modal-form-input';
-            titleInput.maxLength = 140;
-            titleInput.placeholder = 'Thread title';
-            titleInput.required = true;
-            container.appendChild(titleInput);
-
-            var bodyInput = document.createElement('textarea');
-            bodyInput.className = 'modal-form-input';
-            bodyInput.rows = 6;
-            bodyInput.maxLength = 5000;
-            bodyInput.placeholder = 'Start the discussion...';
-            bodyInput.required = true;
-            container.appendChild(bodyInput);
-
-            var messageElem = document.createElement('small');
-            messageElem.className = 'success-message';
-            container.appendChild(messageElem);
-
-            var submitButton = document.createElement('button');
-            submitButton.type = 'button';
-            submitButton.className = 'modal-form-button';
-            submitButton.textContent = 'Post Thread';
-            submitButton.addEventListener('click', async function() {
-              var title = titleInput.value.trim();
-              var body = bodyInput.value.trim();
-              if (!title || !body) {
-                setCommunityMessage(messageElem, 'Title and content are required', true);
-                return;
-              }
-
-              submitButton.disabled = true;
-              submitButton.textContent = 'Posting...';
-              try {
-                var data = await submitDiscussionThread(title, body);
-                window.location.href = (data && data.redirect) || ('/wyrld/community?id=' + projectId);
-              } catch (err) {
-                setCommunityMessage(messageElem, (err && err.message) || 'Failed to create thread', true);
-                submitButton.disabled = false;
-                submitButton.textContent = 'Post Thread';
-              }
-            });
-            container.appendChild(submitButton);
-
-            window.modal.show(container);
-            titleInput.focus();
-          }
-
-          if (openCreateThreadModalButton) {
-            openCreateThreadModalButton.addEventListener('click', function() {
-              openCreateThreadModal();
-            });
-          }
-
-          if (replyButton) {
-            replyButton.addEventListener('click', async function() {
-              var threadId = replyButton.dataset.threadId;
-              var replyInput = document.getElementById('community-reply-content');
-              var content = replyInput ? replyInput.value.trim() : '';
-              if (!threadId) return;
-
-              try {
-                var res = await fetch('/api/add_project_discussion_post/' + threadId, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ content: content }),
-                });
-                var data = await res.json().catch(function() { return null; });
-                if (!res.ok || (data && data.error)) {
-                  throw new Error((data && data.error && data.error.message) || 'Failed to post reply');
-                }
-                window.location.reload();
-              } catch (err) {
-                setCommunityMessage(replyMessageElem, (err && err.message) || 'Failed to post reply', true);
-              }
-            });
-          }
-
-          window.openDiscussionThread = function(threadId) {
-            if (!threadId) return;
-            window.location.href = '/wyrld/community?id=' + projectId + '&thread=' + threadId;
-          };
-
-          window.toggleDiscussionThreadLock = async function(threadId) {
-            if (!threadId) return;
-            try {
-              var res = await fetch('/api/toggle_project_discussion_thread_lock/' + threadId, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({}),
-              });
-              var data = await res.json().catch(function() { return null; });
-            if (!res.ok || (data && data.error)) {
-                throw new Error((data && data.error && data.error.message) || 'Failed to update thread');
-              }
-              window.location.reload();
-            } catch (err) {
-              window.customAlertError((err && err.message) || 'Failed to update thread');
-            }
-          };
-
-          window.deleteDiscussionThread = async function(threadId) {
-            if (!threadId) return;
-            var confirmed = await window.customConfirm(
-              'Delete this discussion thread and all replies?',
-              { confirmText: 'Delete', danger: true }
-            );
-            if (!confirmed) return;
-            try {
-              var res = await fetch('/api/remove_project_discussion_thread/' + threadId, {
-                method: 'DELETE',
-              });
-              var data = await res.json().catch(function() { return null; });
-              if (!res.ok || (data && data.error)) {
-                throw new Error((data && data.error && data.error.message) || 'Failed to delete thread');
-              }
-              window.location.href = '/wyrld/community?id=' + projectId;
-            } catch (err) {
-              window.customAlertError((err && err.message) || 'Failed to delete thread');
-            }
-          };
-
-          window.deleteDiscussionPost = async function(postId) {
-            if (!postId) return;
-            var confirmed = await window.customConfirm('Delete this reply?', {
-              confirmText: 'Delete',
-              danger: true
-            });
-            if (!confirmed) return;
-            try {
-              var res = await fetch('/api/remove_project_discussion_post/' + postId, {
-                method: 'DELETE',
-              });
-              var data = await res.json().catch(function() { return null; });
-              if (!res.ok || (data && data.error)) {
-                throw new Error((data && data.error && data.error.message) || 'Failed to delete reply');
-              }
-              window.location.reload();
-            } catch (err) {
-              window.customAlertError((err && err.message) || 'Failed to delete reply');
-            }
-          };
-        })();
-      </script>
       <% } %>
 
       <% if (section === 'activity') { %>
@@ -723,13 +505,7 @@
           <small>Update the summary shown in public discovery.</small>
           <hr />
           <div class="settings-form-row">
-            <textarea
-              id="settings-description-input"
-              class="settings-input"
-              rows="4"
-              maxlength="1200"
-              placeholder="Write a short introduction for your wyrld..."
-            ><%= project.description || '' %></textarea>
+            <textarea id="settings-description-input" class="settings-input" rows="4" maxlength="1200" placeholder="Write a short introduction for your wyrld..."><%= project.description || '' %></textarea>
           </div>
           <div class="settings-form-row">
             <small id="settings-description-count"><%= (project.description || '').length %>/1200</small>
@@ -814,11 +590,7 @@
           <hr />
           <div class="settings-form-row">
             <div class="settings-toggle">
-              <input
-                type="checkbox"
-                id="settings-public-listed"
-                <%= project.is_public_listed ? 'checked' : '' %>
-              />
+              <input type="checkbox" id="settings-public-listed" <%= project.is_public_listed ? 'checked' : '' %> />
               <span class="settings-toggle-slider"></span>
             </div>
             <label class="settings-inline-label" for="settings-public-listed">List this wyrld publicly</label>
@@ -832,14 +604,7 @@
           </div>
           <div class="settings-form-row mt-2">
             <label class="settings-inline-label" for="settings-public-capacity">Capacity:</label>
-            <input
-              id="settings-public-capacity"
-              class="settings-input"
-              type="number"
-              min="1"
-              placeholder="No limit"
-              value="<%= project.public_join_capacity ? project.public_join_capacity : '' %>"
-            />
+            <input id="settings-public-capacity" class="settings-input" type="number" min="1" placeholder="No limit" value="<%= project.public_join_capacity ? project.public_join_capacity : '' %>" />
             <small>Current members: <%= memberCount %></small>
           </div>
           <div class="settings-form-row mt-2">
@@ -847,13 +612,13 @@
             <select id="settings-featured-record-id" class="settings-input">
               <option value="">None</option>
               <% recordsSorted.forEach(function(record) { %>
-                <option value="<%= record.id %>" <%= project.featured_record_id === record.id ? 'selected' : '' %>><%= record.title %><%= record.is_public ? '' : ' (private)' %></option>
+              <option value="<%= record.id %>" <%= project.featured_record_id === record.id ? 'selected' : '' %>><%= record.title %><%= record.is_public ? '' : ' (private)' %></option>
               <% }); %>
             </select>
           </div>
           <small class="d-block mt-1">Only the selected featured record is exposed in public discovery.</small>
           <% if (project.is_pro) { %>
-            <small class="d-block mt-1">Pro Wyrlds auto-reject pending join requests after 7 days without response.</small>
+          <small class="d-block mt-1">Pro Wyrlds auto-reject pending join requests after 7 days without response.</small>
           <% } %>
           <button class="modal-form-button mt-2" id="settings-public-save">Save Public Settings</button>
           <small class="success-message" id="settings-public-msg"></small>
@@ -867,24 +632,24 @@
           <hr />
           <div id="settings-join-requests-list">
             <% if (!pendingJoinRequests.length) { %>
-              <small>No pending join requests.</small>
+            <small>No pending join requests.</small>
             <% } else { %>
-              <% pendingJoinRequests.forEach(function(joinRequest) { %>
-                <div class="settings-user-row" id="join-request-<%= joinRequest.id %>">
-                  <div class="settings-user-info" style="flex-direction: column; align-items: flex-start;">
-                    <span><strong><%= joinRequest.requester_username %></strong></span>
-                    <% if (joinRequest.message) { %>
-                      <small><%= joinRequest.message %></small>
-                    <% } else { %>
-                      <small>No message provided.</small>
-                    <% } %>
-                  </div>
-                  <div class="settings-form-row">
-                    <button class="modal-form-button settings-join-approve" data-id="<%= joinRequest.id %>" type="button">Approve</button>
-                    <button class="btn-red settings-join-reject" data-id="<%= joinRequest.id %>" type="button">Reject</button>
-                  </div>
-                </div>
-              <% }); %>
+            <% pendingJoinRequests.forEach(function(joinRequest) { %>
+            <div class="settings-user-row" id="join-request-<%= joinRequest.id %>">
+              <div class="settings-user-info" style="flex-direction: column; align-items: flex-start;">
+                <span><strong><%= joinRequest.requester_username %></strong></span>
+                <% if (joinRequest.message) { %>
+                <small><%= joinRequest.message %></small>
+                <% } else { %>
+                <small>No message provided.</small>
+                <% } %>
+              </div>
+              <div class="settings-form-row">
+                <button class="modal-form-button settings-join-approve" data-id="<%= joinRequest.id %>" type="button">Approve</button>
+                <button class="btn-red settings-join-reject" data-id="<%= joinRequest.id %>" type="button">Reject</button>
+              </div>
+            </div>
+            <% }); %>
             <% } %>
           </div>
           <small class="success-message" id="settings-join-msg"></small>
@@ -898,349 +663,6 @@
         </section>
       </div>
 
-      <script>
-        (function() {
-          var projectId = '<%= project.id %>';
-          var projectTitle = '<%= project.title.replace(/\x27/g, "\\x27") %>';
-          var projectIsPro = <%= project.is_pro ? 'true' : 'false' %>;
-          var defaultBannerAlt = '<%= (project.title + " banner").replace(/\x27/g, "\\x27") %>';
-
-          function setSettingsMessage(elemId, message, isError) {
-            var msg = document.getElementById(elemId);
-            if (!msg) return;
-            msg.textContent = message;
-            msg.style.color = isError ? 'var(--red)' : 'var(--green)';
-            if (message) {
-              setTimeout(function() {
-                msg.textContent = '';
-              }, 3000);
-            }
-          }
-
-          function showProjectProWarning() {
-            if (typeof renderTierLimitWarning === 'function') {
-              renderTierLimitWarning('This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.');
-            } else {
-              window.customAlertError('This Wyrld feature requires Pro.');
-            }
-          }
-
-          function showProjectDataHardLimitWarning() {
-            if (typeof renderTierLimitWarning === 'function') {
-              renderTierLimitWarning('This Wyrld is at its hard image data cap. Remove unused images to free space.');
-            } else {
-              window.customAlertError('This Wyrld is at its hard image data cap. Remove unused images to free space.');
-            }
-          }
-
-          function renderBannerPreview(src, altText) {
-            var preview = document.getElementById('settings-banner-preview');
-            if (!preview) return;
-            preview.textContent = '';
-            if (src) {
-              var img = document.createElement('img');
-              img.id = 'settings-banner-image';
-              img.src = src;
-              img.alt = altText || defaultBannerAlt;
-              preview.appendChild(img);
-            } else {
-              var empty = document.createElement('small');
-              empty.id = 'settings-banner-empty';
-              empty.textContent = 'No banner selected.';
-              preview.appendChild(empty);
-            }
-            var clearButton = document.getElementById('settings-banner-clear');
-            if (clearButton) clearButton.disabled = !src;
-          }
-
-          async function setProjectBanner(imageId) {
-            var res = await fetch('/api/edit_project_banner_image/' + projectId, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ image_id: imageId })
-            });
-            var data = await res.json().catch(function() { return null; });
-            if (res.status === 402 && data && data.error && data.error.message === 'PROJECT_IS_NOT_PRO') {
-              showProjectProWarning();
-              return null;
-            }
-            if (!res.ok || (data && data.error)) {
-              throw new Error((data && data.error && data.error.message) || 'Failed to save banner image');
-            }
-            return data;
-          }
-
-          // Edit Title
-          document.getElementById('settings-title-save').addEventListener('click', async function() {
-            var title = document.getElementById('settings-title-input').value.trim();
-            if (!title) return;
-            var res = await fetch('/api/edit_project_title/' + projectId, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ title: title })
-            });
-            if (res.ok) {
-              setSettingsMessage('settings-title-msg', 'Saved', false);
-            } else {
-              setSettingsMessage('settings-title-msg', 'Error saving title', true);
-            }
-          });
-
-          var settingsDescriptionInput = document.getElementById('settings-description-input');
-          var settingsDescriptionCount = document.getElementById('settings-description-count');
-          if (settingsDescriptionInput && settingsDescriptionCount) {
-            settingsDescriptionInput.addEventListener('input', function() {
-              settingsDescriptionCount.textContent = settingsDescriptionInput.value.length + '/1200';
-            });
-          }
-
-          document.getElementById('settings-description-save').addEventListener('click', async function() {
-            var description = document.getElementById('settings-description-input').value.trim();
-            var res = await fetch('/api/edit_project_description/' + projectId, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ description: description })
-            });
-            if (res.ok) {
-              setSettingsMessage('settings-description-msg', 'Saved', false);
-            } else {
-              var data = await res.json().catch(function() { return null; });
-              setSettingsMessage(
-                'settings-description-msg',
-                (data && data.error && data.error.message) || 'Error saving description',
-                true
-              );
-            }
-          });
-
-          if (projectIsPro) {
-            var bannerUploadInput = document.getElementById('settings-banner-upload');
-            var bannerClearButton = document.getElementById('settings-banner-clear');
-
-            if (bannerUploadInput) {
-              bannerUploadInput.addEventListener('change', async function(event) {
-                var file = event.target.files && event.target.files[0];
-                if (!file) return;
-                bannerUploadInput.disabled = true;
-                if (bannerClearButton) bannerClearButton.disabled = true;
-                setSettingsMessage('settings-banner-msg', 'Uploading banner...', false);
-
-                try {
-                  var formData = new FormData();
-                  formData.append('file', file);
-                  formData.append('bucket_name', 'wyrld');
-                  formData.append('folder_name', 'images');
-                  formData.append('project_id', projectId);
-
-                  var uploadRes = await fetch('/api/new_image_for_project', {
-                    method: 'POST',
-                    body: formData
-                  });
-                  var uploadData = await uploadRes.json().catch(function() { return null; });
-
-                  if (uploadRes.status === 402 && uploadData && uploadData.error && uploadData.error.message === 'PROJECT_IS_NOT_PRO') {
-                    showProjectProWarning();
-                    setSettingsMessage('settings-banner-msg', '', false);
-                    return;
-                  }
-                  if (uploadRes.status === 413 && uploadData && uploadData.error && uploadData.error.message === 'PROJECT_DATA_HARD_LIMIT_REACHED') {
-                    showProjectDataHardLimitWarning();
-                    setSettingsMessage('settings-banner-msg', '', false);
-                    return;
-                  }
-                  if (!uploadRes.ok || !uploadData || uploadData.error) {
-                    throw new Error((uploadData && uploadData.error && uploadData.error.message) || 'Banner upload failed');
-                  }
-
-                  var linkRes = await fetch('/api/add_table_image_by_project', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      project_id: projectId,
-                      image_id: uploadData.id,
-                      folder_id: null
-                    })
-                  });
-                  var linkData = await linkRes.json().catch(function() { return null; });
-                  if (!linkRes.ok || (linkData && linkData.error)) {
-                    throw new Error((linkData && linkData.error && linkData.error.message) || 'Failed to link uploaded image to this wyrld');
-                  }
-
-                  var bannerData = await setProjectBanner(uploadData.id);
-                  if (!bannerData) return;
-                  renderBannerPreview(bannerData.src || uploadData.src || null, bannerData.original_name || uploadData.original_name || defaultBannerAlt);
-                  setSettingsMessage('settings-banner-msg', 'Banner updated', false);
-                } catch (err) {
-                  console.log(err);
-                  setSettingsMessage('settings-banner-msg', 'Error updating banner', true);
-                } finally {
-                  bannerUploadInput.disabled = false;
-                  bannerUploadInput.value = '';
-                  if (bannerClearButton && document.getElementById('settings-banner-image')) {
-                    bannerClearButton.disabled = false;
-                  }
-                }
-              });
-            }
-
-            if (bannerClearButton) {
-              bannerClearButton.addEventListener('click', async function() {
-                if (bannerClearButton.disabled) return;
-                try {
-                  bannerClearButton.disabled = true;
-                  var bannerData = await setProjectBanner(null);
-                  if (!bannerData) return;
-                  renderBannerPreview(null, null);
-                  setSettingsMessage('settings-banner-msg', 'Banner removed', false);
-                } catch (err) {
-                  console.log(err);
-                  setSettingsMessage('settings-banner-msg', 'Error clearing banner', true);
-                  bannerClearButton.disabled = false;
-                }
-              });
-            }
-          }
-
-          var savePublicSettingsBtn = document.getElementById('settings-public-save');
-          if (savePublicSettingsBtn) {
-            savePublicSettingsBtn.addEventListener('click', async function() {
-              var isPublicListed = document.getElementById('settings-public-listed').checked;
-              var joinMode = document.getElementById('settings-public-join-mode').value;
-              var capacityInput = document.getElementById('settings-public-capacity').value.trim();
-              var featuredRecordIdValue = document.getElementById('settings-featured-record-id').value;
-              var payload = {
-                is_public_listed: isPublicListed,
-                public_join_mode: joinMode,
-                public_join_capacity: capacityInput ? Number(capacityInput) : null,
-                featured_record_id: featuredRecordIdValue ? Number(featuredRecordIdValue) : null,
-              };
-
-              try {
-                var res = await fetch('/api/edit_project_public_settings/' + projectId, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(payload),
-                });
-                var data = await res.json().catch(function() { return null; });
-                if (!res.ok || (data && data.error)) {
-                  throw new Error((data && data.error && data.error.message) || 'Failed to save public settings');
-                }
-                setSettingsMessage('settings-public-msg', 'Saved', false);
-              } catch (err) {
-                console.log(err);
-                setSettingsMessage('settings-public-msg', (err && err.message) || 'Error saving public settings', true);
-              }
-            });
-          }
-
-          async function respondJoinRequest(requestId, action) {
-            var res = await fetch('/api/respond_project_join_request/' + requestId, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: action }),
-            });
-            var data = await res.json().catch(function() { return null; });
-            if (!res.ok || (data && data.error)) {
-              throw new Error((data && data.error && data.error.message) || 'Failed to update join request');
-            }
-            return data;
-          }
-
-          function removeJoinRequestRow(requestId) {
-            var row = document.getElementById('join-request-' + requestId);
-            if (row) row.remove();
-            var remaining = document.querySelectorAll('[id^="join-request-"]');
-            if (!remaining.length) {
-              var list = document.getElementById('settings-join-requests-list');
-              if (list) list.innerHTML = '<small>No pending join requests.</small>';
-            }
-          }
-
-          document.querySelectorAll('.settings-join-approve').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-              var id = btn.dataset.id;
-              try {
-                await respondJoinRequest(id, 'approve');
-                removeJoinRequestRow(id);
-                setSettingsMessage('settings-join-msg', 'Request approved', false);
-              } catch (err) {
-                console.log(err);
-                setSettingsMessage('settings-join-msg', (err && err.message) || 'Failed to approve request', true);
-              }
-            });
-          });
-
-          document.querySelectorAll('.settings-join-reject').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-              var id = btn.dataset.id;
-              try {
-                await respondJoinRequest(id, 'reject');
-                removeJoinRequestRow(id);
-                setSettingsMessage('settings-join-msg', 'Request rejected', false);
-              } catch (err) {
-                console.log(err);
-                setSettingsMessage('settings-join-msg', (err && err.message) || 'Failed to reject request', true);
-              }
-            });
-          });
-
-          // Manage Users — toggle editor
-          document.querySelectorAll('.settings-editor-toggle').forEach(function(cb) {
-            cb.addEventListener('change', async function() {
-              var id = cb.dataset.id;
-              await fetch('/api/edit_project_user_is_editor/' + id, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ is_editor: cb.checked })
-              });
-            });
-          });
-
-          // Manage Users — remove
-          document.querySelectorAll('.settings-remove-btn').forEach(function(btn) {
-            btn.addEventListener('click', async function() {
-              var id = btn.dataset.id;
-              var name = btn.dataset.name;
-              var confirmed = await window.customConfirm(
-                'Are you sure you want to remove ' + name + '?',
-                { confirmText: 'Remove', danger: true }
-              );
-              if (!confirmed) return;
-              var res = await fetch('/api/remove_project_user/' + id, {
-                method: 'DELETE'
-              });
-              if (res.ok) {
-                var row = document.getElementById('settings-user-' + id);
-                if (row) row.remove();
-                var remaining = document.querySelectorAll('.settings-user-row');
-                if (remaining.length === 0) {
-                  var list = document.getElementById('settings-users-list');
-                  list.textContent = '';
-                  var empty = document.createElement('small');
-                  empty.textContent = 'No users have joined yet...';
-                  list.appendChild(empty);
-                }
-              }
-            });
-          });
-
-          // Delete Wyrld
-          document.getElementById('settings-delete-wyrld').addEventListener('click', async function() {
-            var confirmed = await window.customConfirm(
-              'Are you sure you want to delete ' + projectTitle + '? This cannot be undone.',
-              { confirmText: 'Delete Wyrld', danger: true }
-            );
-            if (!confirmed) return;
-            var res = await fetch('/api/remove_project/' + projectId, {
-              method: 'DELETE'
-            });
-            if (res.ok) {
-              var data = await res.json();
-              window.location.href = data.redirect || '/dash';
-            }
-          });
-        })();
-      </script>
       <% } %>
 
       <% if (section === 'settings' && !isOwner) { %>
@@ -1268,92 +690,9 @@
         </section>
       </div>
 
-      <script>
-        (function() {
-          var projectId = '<%= project.id %>';
-          var projectTitle = '<%= project.title.replace(/\x27/g, "\\x27") %>';
-          var leaveBtn = document.getElementById('settings-leave-wyrld');
-          var leaveMsg = document.getElementById('settings-leave-msg');
-
-          function setLeaveMessage(message, isError) {
-            if (!leaveMsg) return;
-            leaveMsg.textContent = message;
-            leaveMsg.style.color = isError ? 'var(--red)' : 'var(--green)';
-          }
-
-          if (leaveBtn) {
-            leaveBtn.addEventListener('click', async function() {
-              var confirmed = await window.customConfirm(
-                'Leave ' + projectTitle + '? You will lose access to this wyrld.',
-                { confirmText: 'Leave Wyrld', danger: true }
-              );
-              if (!confirmed) return;
-              leaveBtn.disabled = true;
-              setLeaveMessage('Leaving wyrld...', false);
-              try {
-                var res = await fetch('/api/leave_project/' + projectId, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({}),
-                });
-                var data = await res.json().catch(function() { return null; });
-                if (!res.ok || (data && data.error)) {
-                  throw new Error((data && data.error && data.error.message) || 'Failed to leave wyrld');
-                }
-                window.location.href = (data && data.redirect) || '/dash/wyrlds';
-              } catch (err) {
-                setLeaveMessage((err && err.message) || 'Failed to leave wyrld', true);
-                leaveBtn.disabled = false;
-              }
-            });
-          }
-        })();
-      </script>
       <% } %>
     </main>
   </div>
 </body>
-<script>
-  function handleSheetClick(id, projectID) {
-    window.open(`/5eplayer?id=${id}&project=${projectID}`, "_blank").focus();
-  }
-
-  function handleTableClick(uuid, projectID) {
-    window.open(`/vtt?uuid=${uuid}&project=${projectID}`, "_blank").focus();
-  }
-
-  function handleRecordClick(id, projectID) {
-    window.open(`/record?id=${id}&project_id=${projectID}`, "_blank").focus();
-  }
-
-  const projectAuth = <%= projectAuth %>;
-
-  async function openCalendar(id) {
-    modal.show(renderLoadingWithMessage(""));
-    const res = await fetch(`/api/get_calendar/${id}`)
-    if (res.status === 200) {
-      const calendar = await res.json();
-      if (calendar) {
-        const elem = document.createElement("div");
-        elem.className = "p-3 calendar";
-
-        new Calendar({
-          domComponent: elem,
-          projectAuth,
-          id: calendar.id,
-          projectId: calendar.project_id,
-          year: calendar.year,
-          currentMonthId: calendar.current_month_id,
-          currentDay: calendar.current_day,
-          title: calendar.title,
-          months: calendar.months,
-          daysOfTheWeek: calendar.days_of_the_week
-        })
-        // show in modal
-        modal.show(elem)
-      }
-    } else modal.hide()
-  }
-</script>
 
 </html>

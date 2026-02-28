@@ -1,5 +1,5 @@
 import createElement from "../createElement.js";
-import { getThings, postThing } from "../../lib/apiUtils.js";
+import { apiGet, apiPost } from "../../lib/apiUtils.js";
 import tableSelect from "./tableSelect.js";
 import socketIntegration from "./socketIntegration.js";
 
@@ -33,8 +33,8 @@ async function saveTemplate(sidebar, scope) {
     scope === "project" && sidebar.projectId
       ? `/api/add_table_view_template_by_project/${sidebar.projectId}/${sidebar.tableView.id}`
       : `/api/add_table_view_template_by_user/${sidebar.tableView.id}`;
-  const res = await postThing(endpoint, { title });
-  if (!res) return;
+  const res = await apiPost(endpoint, { title });
+  if (!res.ok) return;
   window.customAlert(
     scope === "project" ? "Saved wyrld template." : "Saved user template.",
   );
@@ -54,13 +54,13 @@ async function loadTemplateIntoCurrentTable(sidebar) {
   );
   if (!confirmed) return;
 
-  const res = await postThing(`/api/apply_table_view_template/${templateId}`, {
+  const res = await apiPost(`/api/apply_table_view_template/${templateId}`, {
     table_view_id: sidebar.tableView.id,
   });
-  if (!res) return;
+  if (!res.ok || !res.data) return;
 
-  sidebar.tableView.data = res.data;
-  sidebar.tableView.mode = res.mode;
+  sidebar.tableView.data = res.data.data;
+  sidebar.tableView.mode = res.data.mode;
 
   const app = socketIntegration.tableApp;
   if (!app) {
@@ -69,7 +69,7 @@ async function loadTemplateIntoCurrentTable(sidebar) {
   }
 
   const tableId = app.tableId;
-  socketIntegration.tableModeChanged(res.mode);
+  socketIntegration.tableModeChanged(res.data.mode);
   app.teardown();
   app.loadTable(tableId);
 }
@@ -122,12 +122,12 @@ async function handleDetailsSave(sidebar) {
     }
   }
 
-  const res = await postThing(`/api/edit_table_view/${sidebar.tableView.id}`, {
+  const res = await apiPost(`/api/edit_table_view/${sidebar.tableView.id}`, {
     title,
     is_public: isPublic,
     mode: newMode,
   });
-  if (!res) return;
+  if (!res.ok) return;
 
   const titleUpdateMessageElem = document.querySelector(`#${IDS.titleSuccess}`);
   if (titleUpdateMessageElem) {
@@ -351,13 +351,18 @@ function renderDetailsSection(sidebar) {
 }
 
 async function loadTemplates(sidebar) {
+  const userTemplatesResult = await apiGet("/api/get_table_view_templates_by_user");
   const userTemplates =
-    (await getThings("/api/get_table_view_templates_by_user")) || [];
-  const projectTemplates = sidebar.projectId
-    ? (await getThings(
-        `/api/get_table_view_templates_by_project/${sidebar.projectId}`,
-      )) || []
-    : [];
+    userTemplatesResult.ok && Array.isArray(userTemplatesResult.data)
+      ? userTemplatesResult.data
+      : [];
+  const projectTemplatesResult = sidebar.projectId
+    ? await apiGet(`/api/get_table_view_templates_by_project/${sidebar.projectId}`)
+    : null;
+  const projectTemplates =
+    projectTemplatesResult?.ok && Array.isArray(projectTemplatesResult.data)
+      ? projectTemplatesResult.data
+      : [];
   return [...projectTemplates, ...userTemplates];
 }
 

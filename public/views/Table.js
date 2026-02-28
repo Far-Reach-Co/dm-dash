@@ -1,5 +1,5 @@
 import createElement from "../components/createElement.js";
-import { getThings } from "../lib/apiUtils.js";
+import { apiGet } from "../lib/apiUtils.js";
 import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/table/TableSidebar.js";
 import CanvasLayer from "../components/table/CanvasLayer.js";
@@ -73,11 +73,12 @@ class Table {
     this.tableId = tableUUID;
 
     const tableEndpoint = getTableViewEndpoint(this.tableId, this.isGuestSandbox);
-    const tableView = await getThings(tableEndpoint);
-    if (!tableView) {
+    const tableViewResult = await apiGet(tableEndpoint);
+    if (!tableViewResult.ok || !tableViewResult.data) {
       window.location.href = "/forbidden";
       return;
     }
+    const tableView = tableViewResult.data;
     // TODO: error handling no table view by id
 
     this.tableView = tableView;
@@ -85,7 +86,8 @@ class Table {
 
     // Handle user or anonymous
     if (!this.user) {
-      let user = await getThings("/api/get_user");
+      const userResult = await apiGet("/api/get_user");
+      let user = userResult.ok ? userResult.data : null;
       if (!user) {
         user = createGuestFallbackUser();
       }

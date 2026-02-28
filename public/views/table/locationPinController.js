@@ -1,4 +1,4 @@
-import { getThings, postThing } from "../../lib/apiUtils.js";
+import { apiDelete, apiGet, apiPost } from "../../lib/apiUtils.js";
 import { getPresignedUrlsForImages } from "../../lib/imageUtils.js";
 import showLocationPinModal from "../../components/table/locationPinModal.js";
 import socketIntegration from "../../components/table/socketIntegration.js";
@@ -18,7 +18,8 @@ export default class LocationPinController {
     this.tableApp.locationPins = [];
     this.tableApp.locationPinsByObjectId = new Map();
 
-    const pins = await getThings(`/api/get_location_pins/${tableViewId}`);
+    const pinsResult = await apiGet(`/api/get_location_pins/${tableViewId}`);
+    const pins = pinsResult.ok ? pinsResult.data : null;
     if (!pins?.length) {
       this.applyLocationPinMetadata();
       return;
@@ -140,21 +141,17 @@ export default class LocationPinController {
     });
     if (!confirmed) return;
 
-    try {
-      const res = await fetch(`/api/remove_location_pin/${pin.id}`, {
-        method: "DELETE",
-      });
-      if (res.status !== 204) throw new Error("delete failed");
-      this.removeLocationPinObject(object);
-      socketIntegration.imageRemoved(object.id);
-      await this.tableApp.canvasLayer.saveToDatabase();
-      this.tableApp.setCurrentSelectedObject(null);
-      await this.reloadLocationPins();
-      socketIntegration.locationPinsUpdated();
-    } catch (err) {
-      console.error(err);
+    const res = await apiDelete(`/api/remove_location_pin/${pin.id}`);
+    if (!(res.ok && res.status === 204)) {
       window.customAlertError("Failed to delete the location pin.");
+      return;
     }
+    this.removeLocationPinObject(object);
+    socketIntegration.imageRemoved(object.id);
+    await this.tableApp.canvasLayer.saveToDatabase();
+    this.tableApp.setCurrentSelectedObject(null);
+    await this.reloadLocationPins();
+    socketIntegration.locationPinsUpdated();
   };
 
   applyLocationPinHighlight = (object) => {
@@ -203,7 +200,8 @@ export default class LocationPinController {
   };
 
   getAttachmentTables = async () => {
-    const tables = await getThings(getTablesEndpoint());
+    const tablesResult = await apiGet(getTablesEndpoint());
+    const tables = tablesResult.ok ? tablesResult.data : [];
     return (tables || []).filter((table) => table.id !== this.tableApp.tableView?.id);
   };
 
@@ -220,7 +218,7 @@ export default class LocationPinController {
     });
     if (!object) return;
 
-    const response = await postThing("/api/add_location_pin", {
+    const response = await apiPost("/api/add_location_pin", {
       title: "New Pin",
       description: "",
       portal_table_view_ids: [],
@@ -228,12 +226,12 @@ export default class LocationPinController {
       canvas_object_id: object.id,
     });
 
-    if (!response) {
+    if (!response.ok || !response.data) {
       this.removeLocationPinObject(object);
       return;
     }
 
-    object.pinId = response.id;
+    object.pinId = response.data.id;
     await this.reloadLocationPins();
     await this.tableApp.canvasLayer.saveToDatabase();
     socketIntegration.pinAdded(object);
@@ -267,8 +265,8 @@ export default class LocationPinController {
       description: formValues.description,
       portal_table_view_ids: formValues.portal_table_view_ids,
     };
-    const response = await postThing(`/api/edit_location_pin/${pinData.id}`, payload);
-    if (!response) return;
+    const response = await apiPost(`/api/edit_location_pin/${pinData.id}`, payload);
+    if (!response.ok) return;
 
     await this.reloadLocationPins();
     await this.tableApp.canvasLayer.saveToDatabase();
@@ -299,10 +297,8 @@ export default class LocationPinController {
   };
 
   deleteOrphanedPin = async (pinId) => {
-    const res = await fetch(`/api/remove_location_pin/${pinId}`, {
-      method: "DELETE",
-    });
-    if (res.status !== 204) throw new Error("delete failed");
+    const res = await apiDelete(`/api/remove_location_pin/${pinId}`);
+    if (!(res.ok && res.status === 204)) throw new Error("delete failed");
     await this.reloadLocationPins();
     socketIntegration.locationPinsUpdated();
   };
@@ -315,13 +311,13 @@ export default class LocationPinController {
     marker.pinId = pin.id;
     marker.isLocationPin = true;
 
-    const res = await postThing(`/api/edit_location_pin/${pin.id}`, {
+    const res = await apiPost(`/api/edit_location_pin/${pin.id}`, {
       title: pin.title,
       description: pin.description,
       portal_table_view_ids: (pin.attachments || []).map((a) => a.id),
       canvas_object_id: marker.id,
     });
-    if (!res) return;
+    if (!res.ok) return;
 
     await this.reloadLocationPins();
     await this.tableApp.canvasLayer.saveToDatabase();

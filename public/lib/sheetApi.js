@@ -1,4 +1,22 @@
-import { getThings, postThing } from "./apiUtils.js";
+import { apiGet, apiPost } from "./apiUtils.js";
+import { handleApiFailure } from "./apiUiFeedback.js";
+
+let lastSheetErrorKey = null;
+let lastSheetErrorAt = 0;
+
+function notifySheetFailure(result, fallbackMessage) {
+  const errorKey = `${result?.code || ""}:${result?.error || fallbackMessage}`;
+  const now = Date.now();
+  if (lastSheetErrorKey === errorKey && now - lastSheetErrorAt < 2000) {
+    return false;
+  }
+  lastSheetErrorKey = errorKey;
+  lastSheetErrorAt = now;
+  return handleApiFailure(result, {
+    fallbackMessage,
+    includeResultMessage: true,
+  });
+}
 
 function isRecordObject(value) {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -8,8 +26,12 @@ function getSheetApiPath(generalId) {
   return `/api/sheets/${generalId}`;
 }
 
-async function getSheet(generalId) {
-  return await getThings(getSheetApiPath(generalId));
+async function getSheet(generalId, options = {}) {
+  const result = await apiGet(getSheetApiPath(generalId));
+  if (!result.ok && options.notifyOnError !== false) {
+    notifySheetFailure(result, "Failed to load character sheet data");
+  }
+  return result.ok ? result.data : null;
 }
 
 function readSheet(response) {
@@ -36,33 +58,37 @@ function sortByNumericId(rows) {
   return [...rows].sort((a, b) => Number(a?.id || 0) - Number(b?.id || 0));
 }
 
-async function applySheetOps(generalId, ops) {
-  return await postThing(`${getSheetApiPath(generalId)}/ops`, { ops });
+async function applySheetOps(generalId, ops, options = {}) {
+  const result = await apiPost(`${getSheetApiPath(generalId)}/ops`, { ops });
+  if (!result.ok && options.notifyOnError !== false) {
+    notifySheetFailure(result, "Failed to save character sheet changes");
+  }
+  return result.ok ? result.data : null;
 }
 
-async function insertSheetItem(generalId, sectionKey, value) {
+async function insertSheetItem(generalId, sectionKey, value, options = {}) {
   return await applySheetOps(generalId, [
     { op: "insert", path: sectionKey, value },
-  ]);
+  ], options);
 }
 
-async function updateSheetItem(generalId, sectionKey, id, patch) {
+async function updateSheetItem(generalId, sectionKey, id, patch, options = {}) {
   return await applySheetOps(generalId, [
     { op: "updateWhereId", path: sectionKey, id, patch },
-  ]);
+  ], options);
 }
 
-async function removeSheetItem(generalId, sectionKey, id) {
+async function removeSheetItem(generalId, sectionKey, id, options = {}) {
   return await applySheetOps(generalId, [
     { op: "removeWhereId", path: sectionKey, id },
-  ]);
+  ], options);
 }
 
-async function setSheetValue(generalId, path, value) {
-  return await applySheetOps(generalId, [{ op: "set", path, value }]);
+async function setSheetValue(generalId, path, value, options = {}) {
+  return await applySheetOps(generalId, [{ op: "set", path, value }], options);
 }
 
-async function patchSheetObject(generalId, sectionKey, patch) {
+async function patchSheetObject(generalId, sectionKey, patch, options = {}) {
   const keys = Object.keys(patch || {});
   if (!keys.length) return null;
   return await applySheetOps(
@@ -72,6 +98,7 @@ async function patchSheetObject(generalId, sectionKey, patch) {
       path: `${sectionKey}.${key}`,
       value: patch[key],
     })),
+    options,
   );
 }
 

@@ -1,111 +1,91 @@
-import toast from "../components/Toast.js";
-import renderTierLimitWarning from "../components/renderTierLimitWarning.js";
+function parseJsonSafe(res) {
+  return res.json().catch(() => null);
+}
 
-async function getThings(endpoint) {
+function readMessage(data, fallback = "Request failed") {
+  return data?.error?.message || data?.message || fallback;
+}
+
+function readErrorCode(data) {
+  return data?.error?.code || data?.error?.message || null;
+}
+
+function resultOk(status, data) {
+  return {
+    ok: true,
+    status,
+    data,
+    error: null,
+    code: null,
+  };
+}
+
+function resultErr(status, error, data = null, code = null) {
+  return {
+    ok: false,
+    status,
+    data,
+    error,
+    code,
+  };
+}
+
+async function requestJson(endpoint, options = {}) {
   try {
-    const res = await fetch(endpoint, { cache: "no-store" });
-    const data = await res.json().catch(() => null);
-    if (res.status === 200) {
-      return data;
-    } else if (
-      res.status === 402 &&
-      data?.error?.message === "USER_IS_NOT_PRO"
-    ) {
-      renderTierLimitWarning(
-        'You have reached the limit for this feature on your account. Please subscribe to our "Pro User" package to increase the limit.'
-      );
-      return null;
-    } else if (
-      res.status === 402 &&
-      data?.error?.message === "PROJECT_IS_NOT_PRO"
-    ) {
-      renderTierLimitWarning(
-        'This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.'
-      );
-      return null;
-    } else {
-      const message = data?.error?.message || data?.message || "Request failed";
-      console.error(`GET ${endpoint} -> ${res.status}: ${message}`);
-      throw new Error(message);
-    }
+    const res = await fetch(endpoint, options);
+    const data = await parseJsonSafe(res);
+    if (res.ok) return resultOk(res.status, data);
+
+    const message = readMessage(data);
+    const code = readErrorCode(data);
+
+    console.error(
+      `${options.method || "GET"} ${endpoint} -> ${res.status}: ${message}`,
+    );
+    return resultErr(res.status, message, data, code);
   } catch (err) {
     console.log(err);
-    return null;
+    return resultErr(
+      0,
+      err?.message || "Network request failed",
+      null,
+      "NETWORK_ERROR",
+    );
   }
 }
 
-async function deleteThing(endpoint) {
-  try {
-    const res = await fetch(endpoint, {
-      method: "DELETE",
-    });
-    if (res.status === 204) {
-      toast.show("Removed");
-    } else {
-      throw new Error();
-    }
-  } catch (err) {
-    toast.error("Error");
-    console.log(err);
-  }
+async function apiGet(endpoint, options = {}) {
+  return await requestJson(endpoint, {
+    cache: "no-store",
+    ...options,
+    method: "GET",
+  });
 }
 
-async function postThing(endpoint, body) {
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-    const data = await res.json().catch(() => null);
-    if (res.status === 200 || res.status === 201) {
-      // toast.show("Success");
-      return data;
-    } else if (res.status === 402 && data.error.message === "USER_IS_NOT_PRO") {
-      renderTierLimitWarning(
-        'You have reached the limit for this feature on your account. Please subscribe to our "Pro User" package to increase the limit.'
-      );
-      return null;
-    } else if (
-      res.status === 413 &&
-      data.error.message === "USER_DATA_HARD_LIMIT_REACHED"
-    ) {
-      renderTierLimitWarning(
-        "This account is at its hard image data cap. Remove unused images to free space."
-      );
-      return null;
-    } else if (
-      res.status === 402 &&
-      data.error.message === "PROJECT_IS_NOT_PRO"
-    ) {
-      renderTierLimitWarning(
-        'This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.'
-      );
-      return null;
-    } else if (
-      res.status === 413 &&
-      data.error.message === "PROJECT_DATA_HARD_LIMIT_REACHED"
-    ) {
-      renderTierLimitWarning(
-        "This Wyrld is at its hard image data cap. Remove unused images to free space."
-      );
-      return null;
-    } else {
-      let error = new Error(data?.error?.message || data?.message || "Request failed");
-      if (data && data.error) error = data.error;
-      console.error(
-        `POST ${endpoint} -> ${res.status}: ${data?.error?.message || data?.message || "Request failed"}`,
-      );
-      throw error;
-    }
-  } catch (err) {
-    console.log(err);
-    toast.error("Error");
-
-    return null;
-  }
+async function apiPost(endpoint, body, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  const payload =
+    typeof body === "undefined" ? undefined : JSON.stringify(body);
+  return await requestJson(endpoint, {
+    ...options,
+    method: "POST",
+    headers,
+    body: payload,
+  });
 }
 
-export { getThings, deleteThing, postThing };
+async function apiDelete(endpoint, options = {}) {
+  return await requestJson(endpoint, {
+    ...options,
+    method: "DELETE",
+  });
+}
+
+export {
+  apiDelete,
+  apiGet,
+  apiPost,
+};

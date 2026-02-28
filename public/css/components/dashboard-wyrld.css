@@ -1,0 +1,396 @@
+/* ==========================================================================
+   Dashboard Columns — Responsive Grid
+   ========================================================================== */
+
+.dash-column {
+  flex: 1 1 300px;
+  min-width: 280px;
+  max-width: 100%;
+  background: linear-gradient(175deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.35) 100%);
+  border: 1px solid var(--border-ornate);
+  border-radius: var(--border-radius-lg);
+  margin: var(--space-sm);
+  box-shadow: var(--shadow-sm), var(--shadow-warm-sm);
+  transition:
+    box-shadow var(--transition-smooth),
+    border-color var(--transition-smooth);
+}
+
+.dash-column:hover {
+  box-shadow: var(--shadow-md), var(--shadow-warm-md);
+  border-color: var(--border-ornate-hover);
+}
+
+@media (min-width: 1200px) {
+  .dash-column {
+    max-width: 400px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dash-column {
+    flex: 1 1 100%;
+    min-width: 100%;
+    margin: var(--space-sm) 0;
+  }
+}
+
+/* ==========================================================================
+   Dashboard List Items (legacy column-based)
+   ========================================================================== */
+
+.dash-list-title-container {
+  cursor: pointer;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  border-left: 2px solid transparent;
+  transition:
+    background-color var(--transition-normal),
+    border-color var(--transition-normal);
+  width: 100%;
+}
+
+.dash-list-title-container:hover {
+  background-color: var(--glow-warm);
+  border-left-color: var(--orange2);
+}
+
+.dash-list-title-container:hover .dash-list-title {
+  text-decoration: none;
+  color: var(--orange3);
+}
+.dash-list-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  transition: color var(--transition-normal);
+}
+
+/* ==========================================================================
+   Dashboard Headers & Description (legacy column-based)
+   ========================================================================== */
+
+.dash-column h2 {
+  margin-bottom: var(--space-sm);
+  font-size: 1.35rem;
+}
+
+.dash-column h3 {
+  color: var(--orange2);
+  margin-top: var(--space-md);
+  margin-bottom: var(--space-sm);
+  font-size: 1rem;
+}
+
+.dash-column small {
+  color: var(--light-gray);
+  line-height: 1.6;
+}
+
+.dash-column hr {
+  border: none;
+  height: 1px;
+  margin: var(--space-md) 0;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--border-ornate-hover) 20%,
+      var(--orange2) 50%,
+      var(--border-ornate-hover) 80%,
+      transparent 100%);
+  opacity: 0.4;
+}
+
+/* ==========================================================================
+   Wyrld Status Section
+   ========================================================================== */
+
+.wyrld-status {
+  background: linear-gradient(160deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.5) 60%,
+      rgba(165, 79, 4, 0.04) 100%);
+  border: 1px solid var(--border-ornate);
+  border-radius: var(--border-radius-lg);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-lg);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: var(--shadow-sm), var(--shadow-warm-sm);
+}
+
+.wyrld-status > * {
+  position: relative;
+  z-index: 3;
+}
+
+.wyrld-status--with-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: clamp(260px, 34vw, 380px);
+  padding-top: clamp(48px, 9vw, 92px);
+  padding-bottom: clamp(28px, 7vw, 64px);
+}
+
+.wyrld-status-banner-media {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 22%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wyrld-status-banner-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+      rgba(9, 16, 24, 0.03) 0%,
+      rgba(9, 16, 24, 0.22) 48%,
+      rgba(9, 16, 24, 0.52) 100%);
+}
+
+.wyrld-status--with-banner .invite-section {
+  margin-top: auto;
+  contain: paint;
+}
+
+/* Warm top edge accent */
+.wyrld-status::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 5%;
+  right: 5%;
+  z-index: 2;
+  height: 1px;
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--orange) 20%,
+      var(--orange2) 50%,
+      var(--orange) 80%,
+      transparent 100%);
+  opacity: 0.45;
+}
+
+.wyrld-status h1 {
+  font-size: 1.85rem;
+  letter-spacing: 0.6px;
+}
+
+.wyrld-title {
+  font-family: Brookshire, YoungSerif, Georgia, serif;
+  font-size: clamp(2.3rem, 5vw, 3.6rem);
+  line-height: 1;
+  letter-spacing: 0.3px;
+  color: var(--orange3);
+  margin: 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.wyrld-status-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.wyrld-status-item h3 {
+  color: var(--light-gray);
+  font-size: 0.88rem;
+  font-weight: normal;
+  margin: 0;
+}
+
+.wyrld-status-item p {
+  color: var(--bright-white);
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+/* ==========================================================================
+   Invite Section
+   ========================================================================== */
+
+.invite-section {
+  width: fit-content;
+  margin-top: var(--space-lg);
+  padding: var(--space-md);
+  background: linear-gradient(135deg,
+      var(--surface-2) 0%,
+      rgba(43, 64, 83, 0.6) 100%);
+  border: 1px solid var(--border-ornate);
+  border-radius: var(--border-radius);
+}
+
+.invite-section label {
+  display: block;
+  color: var(--light-gray);
+  font-size: 0.85rem;
+  margin-bottom: var(--space-xs);
+}
+
+.invite-section input[readonly] {
+  background-color: var(--main-dark);
+  border: 1px solid rgba(116, 167, 215, 0.2);
+  color: var(--bright-white);
+  padding: var(--space-sm);
+  border-radius: var(--border-radius);
+  width: 100%;
+  max-width: 400px;
+  font-size: 0.85rem;
+  transition: border-color var(--transition-normal);
+}
+
+.invite-section input[readonly]:focus {
+  border-color: var(--orange2);
+  outline: none;
+}
+
+/* Chromium stability: prevent expensive hover/compositor work in banner header */
+.wyrld-status--with-banner button,
+.wyrld-status--with-banner .label-btn,
+.wyrld-status--with-banner input[readonly] {
+  transition: none !important;
+}
+
+.wyrld-status--with-banner button:active,
+.wyrld-status--with-banner .label-btn:active {
+  transform: none !important;
+}
+
+.wyrld-status--with-banner button:hover,
+.wyrld-status--with-banner .label-btn:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+/* ==========================================================================
+   New Item Links
+   ========================================================================== */
+
+.dash-column>a[href^="/new"] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 500;
+  padding: var(--space-sm) 0;
+  transition: color var(--transition-normal);
+}
+
+.dash-column>a[href^="/new"]:hover {
+  color: var(--orange3);
+}
+
+/* ==========================================================================
+   Search Input Styling
+   ========================================================================== */
+
+.dashboard-card input[type="text"] {
+  display: block;
+  background-color: var(--main-dark);
+  border: 1px solid var(--border-ornate);
+  color: var(--bright-white);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--border-radius);
+  font-size: 0.88rem;
+  font-family: inherit;
+  width: 50%;
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.dashboard-card input[type="text"]::placeholder {
+  color: var(--main-gray);
+  letter-spacing: 0.2px;
+}
+
+.dashboard-card input[type="text"]:focus {
+  outline: none;
+  border-color: var(--orange2);
+  box-shadow: var(--focus-ring-warm);
+}
+
+/* ==========================================================================
+   Empty State Polish
+   ========================================================================== */
+
+.dashboard-list>small {
+  display: block;
+  padding: var(--space-md) var(--space-sm);
+  color: var(--main-gray);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+/* ==========================================================================
+   Image Library Card & Link
+   ========================================================================== */
+
+.library-card {
+  background: linear-gradient(155deg,
+      var(--surface-1) 0%,
+      rgba(43, 64, 83, 0.45) 50%,
+      rgba(165, 79, 4, 0.06) 100%);
+  border-color: var(--border-ornate);
+}
+
+/* Warmer, brighter top accent for library card */
+.library-card::before {
+  background: linear-gradient(90deg,
+      transparent 0%,
+      var(--orange) 25%,
+      var(--orange2) 50%,
+      var(--orange) 75%,
+      transparent 100%);
+  opacity: 0.45;
+}
+
+.library-link {
+  background: linear-gradient(135deg,
+      rgba(165, 79, 4, 0.06) 0%,
+      rgba(209, 158, 116, 0.04) 50%,
+      rgba(165, 79, 4, 0.08) 100%);
+  color: var(--orange3);
+}
+
+.library-link:hover {
+  border-color: var(--border-ornate-hover);
+  background: linear-gradient(135deg,
+      rgba(165, 79, 4, 0.1) 0%,
+      rgba(209, 158, 116, 0.07) 50%,
+      rgba(165, 79, 4, 0.12) 100%);
+  color: var(--bright-white);
+}
+
+.library-link-count {
+  font-size: 0.78rem;
+  color: var(--light-gray);
+  background: rgba(116, 167, 215, 0.08);
+  padding: 1px 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(116, 167, 215, 0.12);
+  letter-spacing: 0.2px;
+  transition:
+    color var(--transition-normal),
+    background var(--transition-normal),
+    border-color var(--transition-normal);
+}
+
+.library-link:hover .library-link-count {
+  color: var(--orange3);
+  background: rgba(209, 158, 116, 0.08);
+  border-color: var(--border-ornate);
+}
+
+.library-link:hover .library-link-arrow {
+  color: var(--orange3);
+}

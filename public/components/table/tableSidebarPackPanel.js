@@ -1,6 +1,7 @@
 import createElement from "../createElement.js";
 import modal from "../modal.js";
-import { getThings, postThing } from "../../lib/apiUtils.js";
+import { apiDelete, apiGet, apiPost } from "../../lib/apiUtils.js";
+import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import detectMob from "../../lib/detectMobile.js";
 import {
   formatPackTags,
@@ -118,13 +119,14 @@ export default class TableSidebarPackPanel {
       ? `/api/get_owned_library_packs_by_project/${this.projectId}`
       : "/api/get_owned_library_packs_by_user";
     const [owned, installed, discovered] = await Promise.all([
-      getThings(ownedEndpoint),
-      getThings(installedEndpoint),
+      apiGet(ownedEndpoint),
+      apiGet(installedEndpoint),
       allowDiscover ? this.fetchDiscoverPacks(this.searchQuery) : Promise.resolve(null),
     ]);
 
-    this.ownedPacks = Array.isArray(owned) ? owned : [];
-    this.installedPacks = Array.isArray(installed) ? installed : [];
+    this.ownedPacks = owned.ok && Array.isArray(owned.data) ? owned.data : [];
+    this.installedPacks =
+      installed.ok && Array.isArray(installed.data) ? installed.data : [];
     this.discoveredPacks = allowDiscover && Array.isArray(discovered) ? discovered : [];
     this.loading = false;
     this.render();
@@ -157,8 +159,8 @@ export default class TableSidebarPackPanel {
       params.set("q", q);
     }
     const endpoint = `/api/discover_library_packs?${params.toString()}`;
-    const data = await getThings(endpoint);
-    return Array.isArray(data) ? data : [];
+    const result = await apiGet(endpoint);
+    return result.ok && Array.isArray(result.data) ? result.data : [];
   };
 
   installPackForScope = async (packId, { includeDiscover = false } = {}) => {
@@ -168,8 +170,11 @@ export default class TableSidebarPackPanel {
     const endpoint = this.projectId
       ? `/api/install_library_pack_by_project/${this.projectId}/${packId}`
       : `/api/install_library_pack_by_user/${packId}`;
-    const res = await postThing(endpoint, {});
-    if (!res) return;
+    const res = await apiPost(endpoint, {});
+    if (!res.ok) {
+      handleApiFailure(res, { includeResultMessage: true });
+      return;
+    }
     await this.refreshData({ includeDiscover });
   };
 
@@ -177,23 +182,24 @@ export default class TableSidebarPackPanel {
     if (this.isSandboxMode) return;
     if (!this.canManageInstalls()) return;
 
-    try {
-      const endpoint = this.projectId
-        ? `/api/uninstall_library_pack_by_project/${this.projectId}/${packId}`
-        : `/api/uninstall_library_pack_by_user/${packId}`;
-      const res = await fetch(endpoint, { method: "DELETE" });
-      if (res.status !== 200) throw new Error(`uninstall failed: ${res.status}`);
-      const key = String(packId);
-      delete this.imageCache[key];
-      delete this.imageLoading[key];
-      if (this.expandedInstalledPackId === key) {
-        this.expandedInstalledPackId = null;
-      }
-      await this.refreshData({ includeDiscover });
-    } catch (err) {
-      console.log(err);
-      window.customAlertError("Could not uninstall pack");
+    const endpoint = this.projectId
+      ? `/api/uninstall_library_pack_by_project/${this.projectId}/${packId}`
+      : `/api/uninstall_library_pack_by_user/${packId}`;
+    const res = await apiDelete(endpoint);
+    if (!(res.ok && res.status === 200)) {
+      handleApiFailure(res, {
+        includeResultMessage: true,
+        fallbackMessage: "Could not uninstall pack",
+      });
+      return;
     }
+    const key = String(packId);
+    delete this.imageCache[key];
+    delete this.imageLoading[key];
+    if (this.expandedInstalledPackId === key) {
+      this.expandedInstalledPackId = null;
+    }
+    await this.refreshData({ includeDiscover });
   };
 
   toggleInstalledPack = async (packId) => {
@@ -214,13 +220,14 @@ export default class TableSidebarPackPanel {
     if (!Array.isArray(this.imageCache[key])) {
       this.imageLoading[key] = true;
       this.render();
-      const images = await getThings(this.getPackImagesEndpoint(packId));
-      this.imageCache[key] = Array.isArray(images)
-        ? images.map((image) => ({
+      const imagesResult = await apiGet(this.getPackImagesEndpoint(packId));
+      const images = imagesResult.ok && Array.isArray(imagesResult.data)
+        ? imagesResult.data
+        : [];
+      this.imageCache[key] = images.map((image) => ({
             ...image,
             id: image.image_id ?? image.id,
-          }))
-        : [];
+          }));
       this.imageLoading[key] = false;
     }
     this.render();
@@ -428,8 +435,11 @@ export default class TableSidebarPackPanel {
       renderModal();
       return;
     }
-    const images = await getThings(this.getPackImagesEndpoint(pack.id));
-    state.images = Array.isArray(images) ? images : [];
+    const imagesResult = await apiGet(this.getPackImagesEndpoint(pack.id));
+    state.images =
+      imagesResult.ok && Array.isArray(imagesResult.data)
+        ? imagesResult.data
+        : [];
     state.loading = false;
     renderModal();
   };

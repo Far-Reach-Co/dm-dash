@@ -15,7 +15,7 @@
   --blue2: rgb(107, 131, 154);
   --blue3: #1f2531;
   --blue4: rgb(43, 64, 83);
-  --blue5: rgb(47, 64, 84);
+  --blue5: rgb(42, 56, 72);
   --blue6: rgb(116, 167, 215);
   --link-blue: rgb(158, 197, 235);
 
@@ -37,6 +37,29 @@
   --red1: rgb(206, 101, 101);
   --red2: rgb(120, 51, 51);
   --red3: rgb(241, 143, 143);
+  --red: var(--red1);
+
+  /* Shared Semantic Tokens */
+  --pack-title-text: #f1f5fb;
+  --pack-meta-text: #c3d0df;
+  --pack-description-text: #d7dee8;
+  --pack-tag-text: #d4b58f;
+  --pack-pill-owned-text: #f3d4ad;
+  --pack-pill-installed-text: #c6e2ff;
+  --pack-pill-locked-text: #ffd8a8;
+  --focus-ring-warm: 0 0 12px rgba(209, 158, 116, 0.08);
+  --focus-ring-warm-strong: 0 0 12px rgba(209, 158, 116, 0.1);
+  --success-grad-start: #2d5a3d;
+  --success-grad-end: #1e3d29;
+  --success-grad-hover: #3d7a4d;
+  --form-label-text: #d7b58f;
+  --form-label-text-focus: #ecd2b3;
+  --form-label-chip-bg: rgba(24, 32, 41, 0.94);
+  --form-label-chip-border: rgba(116, 167, 215, 0.2);
+  --form-legend-text: #e7d0b2;
+  --form-legend-border: rgba(209, 158, 116, 0.26);
+  --form-fieldset-bg: rgba(24, 32, 41, 0.32);
+  --form-fieldset-border: rgba(116, 167, 215, 0.16);
 
   /* Layout */
   --border-radius: 5px;
@@ -50,6 +73,12 @@
   --space-lg: 16px;
   --space-xl: 24px;
   --space-2xl: 32px;
+
+  /* Shared Control Sizing */
+  --control-md-height: 32px;
+  --control-md-pad-y: 5px;
+  --control-md-pad-x: 12px;
+  --control-font-size: 14px;
 
   /* Transitions */
   --transition-fast: 0.15s ease;

@@ -1,10 +1,12 @@
 import createElement from "../createElement.js";
-import { postThing } from "../../lib/apiUtils.js";
+import { apiPost } from "../../lib/apiUtils.js";
+import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import modal from "../modal.js";
 import { uploadImageWithContext } from "../../lib/imageUtils.js";
 import { filterFabricCompatibleImageFiles } from "../shared/fabricUploadUtils.js";
 import { dedupeUploadFiles } from "../shared/uploadQueueUtils.js";
+import { renderUploadQueueModal } from "../shared/uploadQueueModal.js";
 
 export default class LibrarySidebar {
   constructor(props) {
@@ -28,7 +30,6 @@ export default class LibrarySidebar {
       running: false,
       cancelling: false,
       activeController: null,
-      completed: 0,
     };
   }
 
@@ -44,9 +45,9 @@ export default class LibrarySidebar {
 
   postByContext = (projectEndpoint, userEndpoint, data) => {
     if (this.projectId) {
-      return postThing(projectEndpoint, { ...data, project_id: this.projectId });
+      return apiPost(projectEndpoint, { ...data, project_id: this.projectId });
     }
-    return postThing(userEndpoint, data);
+    return apiPost(userEndpoint, data);
   };
 
   uploadImage = async (file, signal = null) => {
@@ -59,13 +60,19 @@ export default class LibrarySidebar {
 
     if (!newImage) return null;
 
-    const tableImage = await this.postByContext(
+    const tableImageResult = await this.postByContext(
       "/api/add_table_image_by_project",
       "/api/add_table_image_by_user",
       { image_id: newImage.id, folder_id: this.getCurrentFolderId() }
     );
 
-    return tableImage ? { image: newImage, tableImage } : null;
+    if (!tableImageResult.ok) {
+      handleApiFailure(tableImageResult, { includeResultMessage: true });
+      return null;
+    }
+    return tableImageResult.ok
+      ? { image: newImage, tableImage: tableImageResult.data }
+      : null;
   };
 
   addFilesToQueue = (files) => {
@@ -111,7 +118,6 @@ export default class LibrarySidebar {
     this.uploadState.running = false;
     this.uploadState.cancelling = false;
     this.uploadState.activeController = null;
-    this.uploadState.completed = 0;
   };
 
   retryFailedUploads = () => {
@@ -121,287 +127,39 @@ export default class LibrarySidebar {
   };
 
   renderUploadModal = () => {
-    this.resetQueue();
-    const state = this.uploadState;
-    let renderVersion = 0;
-
-    const renderModal = () => {
-      const version = ++renderVersion;
-      const currentFolder = this.libraryApp.currentFolder;
-      const folderNotice = currentFolder
-        ? createElement(
-            "small",
-            { class: "modal-subtitle" },
-            `Uploading to folder: "${currentFolder.title}"`,
-          )
-        : createElement("div", { class: "d-none" });
-
-      const items = state.items;
-      const total = items.length;
-      const completed = items.filter((item) => item.status === "done").length;
-      const failed = items.filter((item) => item.status === "failed").length;
-      const cancelled = items.filter((item) => item.status === "cancelled").length;
-      const inFlight = items.filter((item) => item.status === "uploading").length;
-      const settled = completed + failed + cancelled;
-      const pct = total ? Math.round((settled / total) * 100) : 0;
-
-      const queueRows = items.length
-        ? items.map((item) =>
-            createElement("div", { class: "library-upload-item" }, [
-              createElement("div", { class: "library-upload-item-name" }, item.file.name),
-              createElement(
-                "div",
-                { class: `library-upload-item-status status-${item.status}` },
-                item.status === "failed"
-                  ? `failed${item.error ? `: ${item.error}` : ""}`
-                  : item.status,
-              ),
-            ]),
-          )
-        : [
-            createElement(
-              "div",
-              { class: "library-pack-empty" },
-              "Add image files or a whole folder to begin.",
-            ),
-          ];
-
-      const content = createElement("div", { class: "help-content library-upload-modal" }, [
-        createElement("h1", {}, "Upload Images"),
-        folderNotice,
-        createElement(
+    return renderUploadQueueModal({
+      state: this.uploadState,
+      resetQueue: this.resetQueue,
+      addFilesToQueue: this.addFilesToQueue,
+      retryFailedUploads: this.retryFailedUploads,
+      uploadFile: (file, signal) => this.uploadImage(file, signal),
+      onUploadStart: () => {
+        this.libraryApp.grid.showLoading();
+      },
+      onUploadComplete: async ({ stats }) => {
+        if (stats.completed > 0) {
+          await this.libraryApp.refreshImagesForCurrentScope();
+        } else {
+          this.libraryApp.grid.hideLoading();
+        }
+      },
+      renderContextNotice: () => {
+        const currentFolder = this.libraryApp.currentFolder;
+        if (!currentFolder) return createElement("div", { class: "d-none" });
+        return createElement(
           "small",
           { class: "modal-subtitle" },
-          "Folder upload adds all image files found in that folder tree.",
-        ),
-        createElement("h2", {}, "Options"),
-        createElement(
-          "div",
-          {
-            class: "d-flex align-items-center justify-content-center ms-1",
-            title: "Resizes image width to 100px while maintaining aspect ratio.",
-          },
-          [
-            createElement("small", { class: "me-3" }, "Make image small (100px): "),
-            createElement(
-              "input",
-              { type: "checkbox", ...(this.makeImageSmall ? { checked: true } : {}) },
-              null,
-              {
-                type: "change",
-                event: (e) => {
-                  this.makeImageSmall = e.target.checked;
-                },
-              },
-            ),
-          ],
-        ),
-        createElement("div", { class: "library-upload-actions" }, [
-          createElement(
-            "input",
-            {
-              id: "library-image-upload-files",
-              type: "file",
-              accept: "image/*",
-              class: "file-input-hidden",
-              multiple: true,
-            },
-            null,
-            {
-              type: "change",
-              event: async (e) => {
-                await this.addFilesToQueue(e.target.files);
-                e.target.value = "";
-                if (version !== renderVersion) return;
-                renderModal();
-              },
-            },
-          ),
-          createElement(
-            "input",
-            {
-              id: "library-image-upload-folder",
-              type: "file",
-              accept: "image/*",
-              class: "file-input-hidden",
-              multiple: true,
-              webkitdirectory: "true",
-              directory: "true",
-            },
-            null,
-            {
-              type: "change",
-              event: async (e) => {
-                await this.addFilesToQueue(e.target.files);
-                e.target.value = "";
-                if (version !== renderVersion) return;
-                renderModal();
-              },
-            },
-          ),
-          createElement(
-            "label",
-            {
-              for: "library-image-upload-files",
-              class: "label-btn",
-              title: "Choose image files",
-            },
-            "Choose Files",
-          ),
-          createElement(
-            "label",
-            {
-              for: "library-image-upload-folder",
-              class: "label-btn",
-              title: "Choose a folder",
-            },
-            "Choose Folder",
-          ),
-          createElement(
-            "button",
-            {
-              class: "new-btn",
-              type: "button",
-              ...(state.running || !items.some((item) => item.status === "queued")
-                ? { disabled: true }
-                : {}),
-            },
-            "Start Upload",
-            {
-              type: "click",
-              event: async () => {
-                if (state.running) return;
-                state.running = true;
-                state.cancelling = false;
-                renderModal();
-                this.libraryApp.grid.showLoading();
-
-                try {
-                  for (const item of state.items) {
-                    if (state.cancelling) break;
-                    if (item.status !== "queued") continue;
-
-                    item.status = "uploading";
-                    renderModal();
-
-                    const controller = new AbortController();
-                    state.activeController = controller;
-                    try {
-                      const result = await this.uploadImage(item.file, controller.signal);
-                      if (!result) {
-                        item.status = "failed";
-                        item.error = "upload failed";
-                      } else {
-                        item.status = "done";
-                        item.result = result;
-                      }
-                    } catch (err) {
-                      if (err?.name === "AbortError") {
-                        item.status = "cancelled";
-                        item.error = "cancelled";
-                      } else {
-                        item.status = "failed";
-                        item.error = "upload failed";
-                        console.log(err);
-                      }
-                    } finally {
-                      state.activeController = null;
-                      renderModal();
-                    }
-                  }
-                } finally {
-                  state.running = false;
-                  const finished = state.items.filter((item) => item.status === "done").length;
-                  if (finished > 0) {
-                    await this.libraryApp.refreshImagesForCurrentScope();
-                  } else {
-                    this.libraryApp.grid.hideLoading();
-                  }
-                  renderModal();
-                }
-              },
-            },
-          ),
-          createElement(
-            "button",
-            {
-              class: "new-btn",
-              type: "button",
-              ...(!state.running ? { disabled: true } : {}),
-            },
-            "Cancel",
-            {
-              type: "click",
-              event: () => {
-                state.cancelling = true;
-                if (state.activeController) state.activeController.abort();
-                state.items = state.items.map((item) =>
-                  item.status === "queued"
-                    ? { ...item, status: "cancelled", error: "cancelled" }
-                    : item,
-                );
-                renderModal();
-              },
-            },
-          ),
-          createElement(
-            "button",
-            {
-              class: "new-btn",
-              type: "button",
-              ...(state.running || !items.some((item) => item.status === "failed")
-                ? { disabled: true }
-                : {}),
-            },
-            "Retry Failed",
-            {
-              type: "click",
-              event: () => {
-                this.retryFailedUploads();
-                renderModal();
-              },
-            },
-          ),
-          createElement(
-            "button",
-            {
-              class: "new-btn",
-              type: "button",
-              ...(state.running || !items.length ? { disabled: true } : {}),
-            },
-            "Clear Queue",
-            {
-              type: "click",
-              event: () => {
-                state.items = [];
-                renderModal();
-              },
-            },
-          ),
-        ]),
-        createElement(
-          "small",
-          { class: "library-upload-progress-text" },
-          total
-            ? `${completed} done • ${failed} failed • ${cancelled} cancelled • ${inFlight} uploading • ${total} total`
-            : "No files queued",
-        ),
-        createElement("div", { class: "library-upload-progress-bar" }, [
-          createElement("div", {
-            class: "library-upload-progress-fill",
-            style: `width:${pct}%`,
-          }),
-        ]),
-        createElement("div", { class: "library-upload-queue-wrap" }, [
-          createElement("div", { class: "library-upload-queue" }, queueRows),
-        ]),
-      ]);
-
-      modal.show(content);
-    };
-
-    renderModal();
-    return createElement("div");
+          `Uploading to folder: "${currentFolder.title}"`,
+        );
+      },
+      getMakeImageSmall: () => this.makeImageSmall,
+      setMakeImageSmall: (checked) => {
+        this.makeImageSmall = checked;
+      },
+      filesInputId: "library-image-upload-files",
+      folderInputId: "library-image-upload-folder",
+      resizeOptionTitle: "Resizes image width to 100px while maintaining aspect ratio.",
+    });
   };
 
   renderSearchSection = ({ isImagesTab }) => {

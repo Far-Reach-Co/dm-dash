@@ -1,5 +1,5 @@
 import createElement from "../createElement.js";
-import { getThings } from "../../lib/apiUtils.js";
+import { apiGet } from "../../lib/apiUtils.js";
 import { getRecordsEndpoint } from "./tableApi.js";
 
 async function renderRecordSelectOptions(recordsData) {
@@ -14,7 +14,11 @@ async function renderRecordSelectOptions(recordsData) {
 }
 
 export default async function renderRecordSelect(projectId) {
-  const recordsData = (await getThings(getRecordsEndpoint(projectId))) || [];
+  const recordsResult = await apiGet(getRecordsEndpoint(projectId));
+  const recordsData =
+    recordsResult.ok && Array.isArray(recordsResult.data)
+      ? recordsResult.data
+      : [];
 
   // populate options
   const optionsElems = await renderRecordSelectOptions(recordsData);
