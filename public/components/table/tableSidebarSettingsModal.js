@@ -313,7 +313,7 @@ function renderDetailsSection(sidebar) {
           type: "checkbox",
           name: "is_public",
           id: IDS.isPublic,
-          checked: !!sidebar.tableView.is_public,
+          ...(sidebar.tableView.is_public ? { checked: true } : {}),
         }),
       ]),
       createElement("div", { class: "table-settings-toggle-row" }, [
@@ -322,7 +322,7 @@ function renderDetailsSection(sidebar) {
           type: "checkbox",
           name: "mode",
           id: IDS.mode,
-          checked: sidebar.tableView.mode === "sandbox",
+          ...(sidebar.tableView.mode === "sandbox" ? { checked: true } : {}),
         }),
       ]),
       createElement("div", { class: "table-settings-actions" }, [

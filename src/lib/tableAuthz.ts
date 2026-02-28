@@ -1,6 +1,7 @@
 import { Request } from "express";
 import { getProjectAccess, requireUser } from "./authz";
 import { forbiddenError } from "./httpErrors";
+import { getUserByIdQuery } from "../api/queries/users.js";
 
 export type TableMode = "standard" | "sandbox";
 
@@ -15,6 +16,9 @@ export interface TableViewAuthResource {
 export interface TableCapabilities {
   mode: TableMode;
   canPlaceImagesFromSidebar: boolean;
+  canUseLibraryPacks: boolean;
+  canDiscoverLibraryPacks: boolean;
+  canManageLibraryPackInstalls: boolean;
   canEditTableData: boolean;
   canManagePins: boolean;
   canUsePinPortals: boolean;
@@ -61,12 +65,15 @@ export function buildTableCapabilities(
   overrides: TableCapabilityOverrides = {},
 ): TableCapabilities {
   const baseCapabilities: TableCapabilities = !canEdit
-      ? {
-          mode,
-          canPlaceImagesFromSidebar: false,
-          canEditTableData: false,
-          canManagePins: false,
-          canUsePinPortals: false,
+    ? {
+        mode,
+        canPlaceImagesFromSidebar: false,
+        canUseLibraryPacks: false,
+        canDiscoverLibraryPacks: false,
+        canManageLibraryPackInstalls: false,
+        canEditTableData: false,
+        canManagePins: false,
+        canUsePinPortals: false,
         canChangeTable: false,
         canManageLayers: false,
         canManageGrid: false,
@@ -76,10 +83,13 @@ export function buildTableCapabilities(
         canDeleteCanvasObjects: false,
         canManageTableSettings: false,
       }
-      : mode === "sandbox"
+    : mode === "sandbox"
       ? {
           mode,
           canPlaceImagesFromSidebar: true,
+          canUseLibraryPacks: true,
+          canDiscoverLibraryPacks: false,
+          canManageLibraryPackInstalls: false,
           canEditTableData: true,
           canManagePins: false,
           canUsePinPortals: false,
@@ -95,6 +105,9 @@ export function buildTableCapabilities(
       : {
           mode,
           canPlaceImagesFromSidebar: true,
+          canUseLibraryPacks: true,
+          canDiscoverLibraryPacks: true,
+          canManageLibraryPackInstalls: true,
           canEditTableData: true,
           canManagePins: true,
           canUsePinPortals: true,
@@ -127,6 +140,12 @@ export async function resolveTableAuth(
       const isOwner = String(table.user_id) === String(userId);
       if (!isOwner) throw forbiddenError();
       const capabilities = buildTableCapabilities(mode, true);
+      const userData = await getUserByIdQuery(userId);
+      const userIsPro = !!userData.rows[0]?.is_pro;
+      const canUseLibraryPacks = capabilities.canUseLibraryPacks && userIsPro;
+      capabilities.canUseLibraryPacks = canUseLibraryPacks;
+      capabilities.canDiscoverLibraryPacks = canUseLibraryPacks && mode !== "sandbox";
+      capabilities.canManageLibraryPackInstalls = canUseLibraryPacks && mode !== "sandbox";
       return {
         table,
         mode,
@@ -144,6 +163,15 @@ export async function resolveTableAuth(
       String(table.user_id) === String(currentUser);
     const canEdit = isOwner || mode === "sandbox";
     const capabilities = buildTableCapabilities(mode, canEdit);
+    let userIsPro = false;
+    if (typeof currentUser !== "undefined") {
+      const userData = await getUserByIdQuery(currentUser);
+      userIsPro = !!userData.rows[0]?.is_pro;
+    }
+    const canUseLibraryPacks = capabilities.canUseLibraryPacks && userIsPro;
+    capabilities.canUseLibraryPacks = canUseLibraryPacks;
+    capabilities.canDiscoverLibraryPacks = canUseLibraryPacks && mode !== "sandbox";
+    capabilities.canManageLibraryPackInstalls = canUseLibraryPacks && mode !== "sandbox";
     if (mode === "sandbox" && !isOwner) {
       capabilities.canManageTableSettings = false;
     }
@@ -171,6 +199,10 @@ export async function resolveTableAuth(
 
   const canEdit = mode === "sandbox" ? access.isMember : access.isEditor;
   const capabilities = buildTableCapabilities(mode, canEdit);
+  const canUseLibraryPacks = capabilities.canUseLibraryPacks && !!access.project.is_pro;
+  capabilities.canUseLibraryPacks = canUseLibraryPacks;
+  capabilities.canDiscoverLibraryPacks = canUseLibraryPacks && mode !== "sandbox";
+  capabilities.canManageLibraryPackInstalls = canUseLibraryPacks && mode !== "sandbox";
   if (mode === "sandbox" && !access.isEditor) {
     capabilities.canManageTableSettings = false;
   }
@@ -221,6 +253,9 @@ export function hasTableCapability(
 export function hasAnyTableEditCapability(capabilities: TableCapabilities) {
   return (
     hasTableCapability(capabilities, "canEditTableData") ||
+    hasTableCapability(capabilities, "canUseLibraryPacks") ||
+    hasTableCapability(capabilities, "canDiscoverLibraryPacks") ||
+    hasTableCapability(capabilities, "canManageLibraryPackInstalls") ||
     hasTableCapability(capabilities, "canManagePins") ||
     hasTableCapability(capabilities, "canUsePinPortals") ||
     hasTableCapability(capabilities, "canChangeTable") ||
@@ -249,6 +284,9 @@ export function assertTableCapabilities(
 
 export function buildGuestSandboxCapabilities(): TableCapabilities {
   return buildTableCapabilities("sandbox", true, {
+    canUseLibraryPacks: false,
+    canDiscoverLibraryPacks: false,
+    canManageLibraryPackInstalls: false,
     canDeleteCanvasObjects: true,
     canManageTableSettings: false,
   });

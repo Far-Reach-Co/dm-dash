@@ -203,7 +203,7 @@ export function renderInfoMenu(toolbar) {
           createElement(
             "small",
             {},
-            " - Image/folder management, location pins/portals, and Change Table are disabled.",
+            " - Image/folder management, library pack discovery/install/search, location pins/portals, and Change Table are disabled.",
           ),
           createElement("br"),
           createElement("b", {}, "Guest Sandbox Link"),
@@ -260,6 +260,12 @@ export function renderInfoMenu(toolbar) {
             "small",
             {},
             "Upload images, create folders to organize them, adjust table settings, and copy the share link for players.",
+          ),
+          createElement("br"),
+          createElement(
+            "small",
+            {},
+            "Library Packs are Pro-only: Pro User for personal tables and Pro Wyrld for project tables.",
           ),
           createElement("br"),
           createElement("br"),

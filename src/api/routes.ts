@@ -41,6 +41,7 @@ import {
   editUsername,
   editEmailPreferences,
 } from "./controllers/users.js";
+import { getFrontendAuthState } from "./controllers/frontendAuth.js";
 import {
   getCalendars,
   addCalendar,
@@ -83,6 +84,25 @@ import {
   getLibraryImageCountsByUser,
   getLibraryImageCountsByProject,
 } from "./controllers/library.js";
+import {
+  addLibraryPackByProject,
+  addLibraryPackByUser,
+  addLibraryPackImage,
+  discoverLibraryPacks,
+  editLibraryPack,
+  getInstalledLibraryPacksByProject,
+  getInstalledLibraryPacksByUser,
+  getOwnedLibraryPacksByProject,
+  getOwnedLibraryPacksByUser,
+  getLibraryPackMembershipsByImage,
+  getLibraryPackImages,
+  installLibraryPackByProject,
+  installLibraryPackByUser,
+  removeLibraryPack,
+  removeLibraryPackImage,
+  uninstallLibraryPackByProject,
+  uninstallLibraryPackByUser,
+} from "./controllers/libraryPacks.js";
 // for uploading files
 import {
   add5eChar,
@@ -303,6 +323,38 @@ router.get(
   "/get_library_images_by_project_in_folder/:project_id/:folder_id",
   getLibraryImagesByProjectInFolder
 );
+router.post("/add_library_pack_by_user", addLibraryPackByUser);
+router.post("/add_library_pack_by_project/:project_id", addLibraryPackByProject);
+router.post("/edit_library_pack/:id", editLibraryPack);
+router.delete("/remove_library_pack/:id", removeLibraryPack);
+router.post("/add_library_pack_image", addLibraryPackImage);
+router.delete("/remove_library_pack_image/:id", removeLibraryPackImage);
+router.get("/get_library_pack_images/:pack_id", getLibraryPackImages);
+router.get(
+  "/get_library_pack_memberships_by_image/:image_id",
+  getLibraryPackMembershipsByImage,
+);
+router.get("/discover_library_packs", discoverLibraryPacks);
+router.post("/install_library_pack_by_user/:pack_id", installLibraryPackByUser);
+router.post(
+  "/install_library_pack_by_project/:project_id/:pack_id",
+  installLibraryPackByProject,
+);
+router.delete("/uninstall_library_pack_by_user/:pack_id", uninstallLibraryPackByUser);
+router.delete(
+  "/uninstall_library_pack_by_project/:project_id/:pack_id",
+  uninstallLibraryPackByProject,
+);
+router.get("/get_installed_library_packs_by_user", getInstalledLibraryPacksByUser);
+router.get("/get_owned_library_packs_by_user", getOwnedLibraryPacksByUser);
+router.get(
+  "/get_installed_library_packs_by_project/:project_id",
+  getInstalledLibraryPacksByProject,
+);
+router.get(
+  "/get_owned_library_packs_by_project/:project_id",
+  getOwnedLibraryPacksByProject,
+);
 
 // records
 router.post("/add_record_by_user", addRecordByUser);
@@ -521,6 +573,7 @@ const requestResetLimiter = rateLimit({
 });
 
 router.get("/get_user", getUserBySession);
+router.get("/get_frontend_auth_state", getFrontendAuthState);
 router.post(
   "/register",
   csrfProtection,

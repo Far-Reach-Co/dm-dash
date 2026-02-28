@@ -1,4 +1,5 @@
 @import url("/css/components/folder-tree.css");
+@import url("/css/components/upload-queue.css");
 
 * {
   user-select: none;
@@ -1238,4 +1239,12 @@
 
 .guest-welcome-dismiss:hover {
   color: var(--main-white);
+}
+
+@media (max-width: 680px) {
+  .library-upload-actions .label-btn,
+  .library-upload-actions .new-btn {
+    width: 100%;
+    text-align: center;
+  }
 }

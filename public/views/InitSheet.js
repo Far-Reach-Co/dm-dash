@@ -1,4 +1,5 @@
 import { getThings, postThing } from "../lib/apiUtils.js";
+import { loadFrontendAuthState } from "../lib/frontendAuthState.js";
 import FiveEPlayerSheet from "../components/character_sheet/5ePlayerSheet.js";
 
 function toObject(value) {
@@ -62,6 +63,7 @@ class InitSheet {
     this.appComponent = document.getElementById("app");
     this.elem = document.createElement("div");
     this.appComponent.appendChild(this.elem);
+    this.currentUserId = null;
     this.init();
   }
 
@@ -130,7 +132,17 @@ class InitSheet {
     return null;
   };
 
+  isCurrentUserOwner = (ownerId) => {
+    if (!this.currentUserId || ownerId === null || typeof ownerId === "undefined") {
+      return false;
+    }
+    return String(this.currentUserId) === String(ownerId);
+  };
+
   init = async () => {
+    const authState = await loadFrontendAuthState();
+    this.currentUserId = authState.userId;
+
     const searchParams = new URLSearchParams(window.location.search);
     const id = searchParams.get("id");
     if (!id) {
@@ -153,7 +165,7 @@ class InitSheet {
 
     // handle invite
     // don't allow owner to become a playerUser of their own sheet
-    if (USERID != generalData.user_id) {
+    if (!this.isCurrentUserOwner(generalData.user_id)) {
       const invite = searchParams.get("invite");
       if (invite) {
         const inviteValid = await getThings(
@@ -182,6 +194,7 @@ class InitSheet {
     new FiveEPlayerSheet({
       domComponent: this.elem,
       params: { content: generalData },
+      currentUserId: this.currentUserId,
     });
     // stop initial spinner
     this.removeInitialSpinner();

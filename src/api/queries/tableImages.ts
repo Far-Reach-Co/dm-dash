@@ -121,6 +121,30 @@ async function removeTableImageQuery(id: string | number) {
   return await db.query<TableImage>(query)
 }
 
+async function removeTableImagesByProjectAndImageQuery(
+  project_id: string | number,
+  image_id: string | number,
+) {
+  const query = {
+    text: /*sql*/ `delete from public."TableImage" where project_id = $1 and image_id = $2 returning *`,
+    values: [project_id, image_id],
+  };
+
+  return await db.query<TableImage>(query);
+}
+
+async function removeTableImagesByUserAndImageQuery(
+  user_id: string | number,
+  image_id: string | number,
+) {
+  const query = {
+    text: /*sql*/ `delete from public."TableImage" where user_id = $1 and image_id = $2 returning *`,
+    values: [user_id, image_id],
+  };
+
+  return await db.query<TableImage>(query);
+}
+
 async function editTableImageQuery(id: string | number, data: any) {
   const query = buildUpdateQuery("TableImage", data, id);
   return await db.query<TableImage>(query);
@@ -356,6 +380,8 @@ export {
   getTableImagesByFolderQuery,
   getTableImageQuery,
   removeTableImageQuery,
+  removeTableImagesByProjectAndImageQuery,
+  removeTableImagesByUserAndImageQuery,
   editTableImageQuery,
   getTableImagesWithImageByProjectQuery,
   getTableImagesWithImageByUserQuery,

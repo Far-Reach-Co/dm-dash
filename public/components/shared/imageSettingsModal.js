@@ -32,8 +32,15 @@ export default async function renderImageSettingsModal({
   tableImageId,
   onDelete,
   onUpdate,
+  onPackUpdate = null,
   tableViewId = null,
   capabilities = null,
+  packOptions = null,
+  onAddToPack = null,
+  currentPackMemberships = null,
+  onRemoveFromPack = null,
+  showFolderField = true,
+  canLinkRecord = null,
 }) {
   const imageId = image.image_id ?? image.id;
   const canEditImageMetadata = capabilities
@@ -43,152 +50,202 @@ export default async function renderImageSettingsModal({
   const canManageImageAssets = capabilities
     ? !!capabilities.canManageImageAssets
     : true;
+  const canLinkRecordToImage =
+    typeof canLinkRecord === "boolean"
+      ? canLinkRecord
+      : canEditImageMetadata;
 
-  const thumb = image.src
-    ? createElement("div", { class: "library-detail-thumb-frame" }, [
-        createElement("img", {
-          class: "library-detail-thumb",
-          src: image.src,
-          alt: image.original_name,
-        }),
-      ])
-    : createElement("div");
+  const state = {
+    image: {
+      ...image,
+      id: imageId,
+      image_id: imageId,
+    },
+    renderToken: 0,
+  };
 
-  const nameInput = createElement("input", {
-    value: image.original_name,
-    class: "library-search-input",
-    ...(canEditImageMetadata ? {} : { disabled: true }),
+  const modalContent = createElement("div", {
+    class: "help-content library-detail-modal",
   });
-  const renameField = createElement("div", { class: "library-detail-field" }, [
-    createElement("h3", {}, "Name"),
-    nameInput,
-    ...(canEditImageMetadata
+
+  const notifyNameUpdate = (name) => {
+    if (!onUpdate) return;
+    onUpdate({
+      type: "name",
+      imageId,
+      originalName: name,
+    });
+  };
+
+  const notifyGeneralUpdate = () => {
+    if (onUpdate) onUpdate();
+  };
+
+  const renderThumb = () => {
+    if (!state.image.src) return createElement("div");
+    return createElement("div", { class: "library-detail-thumb-frame" }, [
+      createElement("img", {
+        class: "library-detail-thumb",
+        src: state.image.src,
+        alt: state.image.original_name,
+      }),
+    ]);
+  };
+
+  const renderRenameField = () => {
+    const nameInput = createElement("input", {
+      value: state.image.original_name,
+      class: "library-search-input",
+      ...(canEditImageMetadata ? {} : { disabled: true }),
+    });
+
+    const saveBtn = canEditImageMetadata
       ? [
           createElement("button", { class: "new-btn mt-1" }, "Save Name", {
             type: "click",
             event: async () => {
-              const nextName = nameInput.value;
-              const prevName = image.original_name;
+              const nextName = String(nameInput.value || "");
+              const prevName = state.image.original_name;
               const response = await postThing(`/api/edit_image_name/${imageId}`, {
                 original_name: nextName,
                 ...(tableViewId ? { table_view_id: tableViewId } : {}),
               });
               if (!response) {
-                image.original_name = prevName;
-                nameInput.value = prevName;
+                state.image.original_name = prevName;
+                requestRender();
                 return;
               }
-              image.original_name = nextName;
-              if (onUpdate) {
-                onUpdate({
-                  type: "name",
-                  imageId,
-                  originalName: nextName,
-                });
-              }
+              state.image.original_name = nextName;
+              notifyNameUpdate(nextName);
+              requestRender();
             },
           }),
         ]
-      : []),
-  ]);
+      : [];
 
-  const notesElem = createElement(
-    "div",
-    {
-      contenteditable: true,
-      class: "image-notes",
-    },
-    image.notes ? parseUrlTextContent(image.notes) : "Placeholder text...",
-    ...(canEditImageMetadata
-      ? [
-          {
-            type: "focusout",
-            event: (e) => {
-              image.notes = e.target.textContent;
-              postThing(`/api/edit_image_notes/${imageId}`, {
-                notes: e.target.textContent,
-                ...(tableViewId ? { table_view_id: tableViewId } : {}),
-              });
-              if (onUpdate) onUpdate();
-            },
-          },
-        ]
-      : []),
-  );
-  if (!canEditImageMetadata) {
-    notesElem.setAttribute("contenteditable", "false");
-  }
-  const notesField = createElement("div", { class: "library-detail-field" }, [
-    createElement("h3", {}, "Notes"),
-    notesElem,
-  ]);
+    return createElement("div", { class: "library-detail-field" }, [
+      createElement("h3", {}, "Name"),
+      nameInput,
+      ...saveBtn,
+    ]);
+  };
 
-  const folderSelectElem = await renderFolderSelect(
-    { id: tableImageId, folder_id: image.folder_id },
-    projectId,
-  );
-  if (canManageFolders) {
-    folderSelectElem.addEventListener("change", async (e) => {
-      const value = e.target.value;
-      image.folder_id = value == 0 ? null : value;
-      await postThing(`/api/edit_table_image/${tableImageId}`, {
-        folder_id: value,
-        ...(tableViewId ? { table_view_id: tableViewId } : {}),
-      });
-      if (onUpdate) onUpdate();
-    });
-  } else {
-    folderSelectElem.disabled = true;
-  }
-  const folderField = createElement("div", { class: "library-detail-field" }, [
-    createElement("h3", {}, "Folder"),
-    folderSelectElem,
-  ]);
-
-  const recordContent = createElement("div");
-  if (image.record_id || !canEditImageMetadata) {
-    recordContent.append(
-      image.record_id
-        ? createElement(
-            "a",
+  const renderNotesField = () => {
+    const notesElem = createElement(
+      "div",
+      {
+        contenteditable: canEditImageMetadata ? "true" : "false",
+        class: "image-notes",
+      },
+      state.image.notes
+        ? parseUrlTextContent(state.image.notes)
+        : "Placeholder text...",
+      ...(canEditImageMetadata
+        ? [
             {
-              href: buildRecordHref(image.record_id, projectId),
-              target: "_blank",
-              rel: "noopener noreferrer",
+              type: "focusout",
+              event: (e) => {
+                state.image.notes = e.target.textContent;
+                postThing(`/api/edit_image_notes/${imageId}`, {
+                  notes: e.target.textContent,
+                  ...(tableViewId ? { table_view_id: tableViewId } : {}),
+                });
+                notifyGeneralUpdate();
+              },
             },
-            image.record_title || "View Record",
-          )
-        : createElement("small", {}, "None"),
+          ]
+        : []),
     );
-  } else {
+
+    return createElement("div", { class: "library-detail-field" }, [
+      createElement("h3", {}, "Notes"),
+      notesElem,
+    ]);
+  };
+
+  const renderFolderField = async () => {
+    if (!showFolderField || !tableImageId) return null;
+
+    const folderSelectElem = await renderFolderSelect(
+      { id: tableImageId, folder_id: state.image.folder_id },
+      projectId,
+    );
+
+    if (canManageFolders) {
+      folderSelectElem.addEventListener("change", async (e) => {
+        const value = e.target.value;
+        state.image.folder_id = value == 0 ? null : value;
+        await postThing(`/api/edit_table_image/${tableImageId}`, {
+          folder_id: value,
+          ...(tableViewId ? { table_view_id: tableViewId } : {}),
+        });
+        notifyGeneralUpdate();
+      });
+    } else {
+      folderSelectElem.disabled = true;
+    }
+
+    return createElement("div", { class: "library-detail-field" }, [
+      createElement("h3", {}, "Folder"),
+      folderSelectElem,
+    ]);
+  };
+
+  const linkImageToRecord = async (recordId) => {
+    await postThing("/api/add_record_image", {
+      record_id: recordId,
+      image_id: imageId,
+    });
+    const record = await getThings(`/api/get_record/${recordId}`);
+    if (!record) return;
+
+    state.image.record_id = record.id;
+    state.image.record_title = record.title;
+    state.image.record_desc = record.description;
+    notifyGeneralUpdate();
+    requestRender();
+  };
+
+  const createAndLinkRecord = async () => {
+    const data = {
+      title: getTitleFromImageName(state.image.original_name || "New Record"),
+      description: state.image.description || "Placeholder text...",
+      is_public: false,
+    };
+    const newRecord = await postThing(getAddRecordEndpoint(projectId), data);
+    if (!newRecord) return;
+
+    await linkImageToRecord(newRecord.id);
+  };
+
+  const renderRecordField = async () => {
+    const hasRecord = !!state.image.record_id;
+    const children = [createElement("h3", {}, "Linked Record")];
+
+    if (hasRecord || !canLinkRecordToImage) {
+      children.push(
+        hasRecord
+          ? createElement(
+              "a",
+              {
+                href: buildRecordHref(state.image.record_id, projectId),
+                target: "_blank",
+                rel: "noopener noreferrer",
+              },
+              state.image.record_title || "View Record",
+            )
+          : createElement("small", {}, "None"),
+      );
+      return createElement("div", { class: "library-detail-field" }, children);
+    }
+
     const recordSelectElem = await renderRecordSelect(projectId);
     recordSelectElem.addEventListener("change", async (e) => {
       const recordId = e.target.value;
       if (recordId == 0) return;
-      await postThing("/api/add_record_image", {
-        record_id: recordId,
-        image_id: imageId,
-      });
-      const record = await getThings(`/api/get_record/${recordId}`);
-      if (record) {
-        image.record_id = record.id;
-        image.record_title = record.title;
-        image.record_desc = record.description;
-        recordContent.innerHTML = "";
-        recordContent.append(
-          createElement(
-            "a",
-            {
-              href: buildRecordHref(image.record_id, projectId),
-              target: "_blank",
-              rel: "noopener noreferrer",
-            },
-            image.record_title || "View Record",
-          ),
-        );
-        if (onUpdate) onUpdate();
-      }
+      await linkImageToRecord(recordId);
     });
+
     const createRecordBtn = createElement(
       "button",
       { class: "new-btn mt-1" },
@@ -196,41 +253,12 @@ export default async function renderImageSettingsModal({
       {
         type: "click",
         event: async () => {
-          const data = {
-            title: getTitleFromImageName(image.original_name || "New Record"),
-            description: image.description || "Placeholder text...",
-            is_public: false,
-          };
-          const newRecord = await postThing(
-            getAddRecordEndpoint(projectId),
-            data,
-          );
-          if (newRecord) {
-            await postThing("/api/add_record_image", {
-              record_id: newRecord.id,
-              image_id: imageId,
-            });
-            image.record_id = newRecord.id;
-            image.record_title = newRecord.title;
-            image.record_desc = newRecord.description;
-            recordContent.innerHTML = "";
-            recordContent.append(
-              createElement(
-                "a",
-                {
-                  href: buildRecordHref(image.record_id, projectId),
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                },
-                image.record_title || "View Record",
-              ),
-            );
-            if (onUpdate) onUpdate();
-          }
+          await createAndLinkRecord();
         },
       },
     );
-    recordContent.append(
+
+    children.push(
       createElement("small", {}, "None"),
       createElement("br"),
       createElement("div", { class: "modal-record-actions" }, [
@@ -238,39 +266,173 @@ export default async function renderImageSettingsModal({
         recordSelectElem,
       ]),
     );
-  }
-  const recordField = createElement(
-    "div",
-    { class: "library-detail-field" },
-    [createElement("h3", {}, "Linked Record"), recordContent],
-  );
 
-  const sizeField = createElement("div", { class: "library-detail-field" }, [
-    createElement("h3", {}, "File Size"),
-    createElement("small", {}, formatFileSize(image.size)),
-  ]);
+    return createElement("div", { class: "library-detail-field" }, children);
+  };
 
-  const deleteBtn = canManageImageAssets
-    ? createElement("button", { class: "btn-red" }, "Delete Image", {
+  const renderSizeField = () => {
+    return createElement("div", { class: "library-detail-field" }, [
+      createElement("h3", {}, "File Size"),
+      createElement("small", {}, formatFileSize(state.image.size)),
+    ]);
+  };
+
+  const renderPackField = () => {
+    if (!Array.isArray(packOptions) || !onAddToPack) return null;
+
+    const selectablePacks = packOptions.filter((pack) => pack && pack.id);
+    const memberships = Array.isArray(currentPackMemberships)
+      ? currentPackMemberships.filter((m) => m && m.pack_image_id)
+      : [];
+    const inPackIds = new Set(memberships.map((m) => String(m.pack_id)));
+    const addablePacks = selectablePacks.filter(
+      (pack) => !inPackIds.has(String(pack.id)),
+    );
+
+    const select = createElement(
+      "select",
+      {
+        class: "library-sort-select",
+        ...(addablePacks.length ? {} : { disabled: true }),
+      },
+      [
+        createElement("option", { value: "" }, "Select pack..."),
+        ...addablePacks.map((pack) =>
+          createElement(
+            "option",
+            { value: String(pack.id) },
+            pack.title || `Pack ${pack.id}`,
+          ),
+        ),
+      ],
+    );
+
+    const addBtn = createElement(
+      "button",
+      {
+        class: "new-btn mt-1",
+        ...(addablePacks.length ? {} : { disabled: true }),
+      },
+      "Add to Pack",
+      {
         type: "click",
-        event: () => {
-          if (onDelete) onDelete();
+        event: async () => {
+          const value = select.value;
+          if (!value) {
+            window.customAlertError("Choose a pack first");
+            return;
+          }
+          const didAdd = await onAddToPack(value, imageId);
+          if (didAdd && onPackUpdate) onPackUpdate();
         },
-      })
-    : createElement("div");
+      },
+    );
 
-  return createElement("div", { class: "help-content library-detail-modal" }, [
-    thumb,
-    renameField,
-    createElement("div", { class: "modal-divider" }),
-    notesField,
-    createElement("div", { class: "modal-divider" }),
-    folderField,
-    createElement("div", { class: "modal-divider" }),
-    recordField,
-    createElement("div", { class: "modal-divider" }),
-    sizeField,
-    createElement("div", { class: "modal-divider" }),
-    deleteBtn,
-  ]);
+    const membershipRows = memberships.length
+      ? memberships.map((membership) =>
+          createElement("div", { class: "library-pack-membership-row" }, [
+            createElement(
+              "div",
+              { class: "library-pack-membership-title" },
+              membership.pack_title || `Pack ${membership.pack_id}`,
+            ),
+            createElement(
+              "button",
+              { class: "btn-red", type: "button" },
+              "Remove",
+              {
+                type: "click",
+                event: async () => {
+                  if (!onRemoveFromPack) return;
+                  const didRemove = await onRemoveFromPack(
+                    membership.pack_image_id,
+                  );
+                  if (didRemove && onPackUpdate) onPackUpdate();
+                },
+              },
+            ),
+          ]),
+        )
+      : [
+          createElement(
+            "small",
+            {},
+            "This image is not in any editable packs yet.",
+          ),
+        ];
+
+    return createElement("div", { class: "library-detail-field" }, [
+      createElement("h3", {}, "Library Packs"),
+      select,
+      addBtn,
+      createElement("div", { class: "library-pack-membership-list mt-2" }, [
+        createElement("small", {}, "Currently in packs:"),
+        ...membershipRows,
+      ]),
+      addablePacks.length
+        ? createElement(
+            "small",
+            {},
+            "Only packs you can edit are listed here.",
+          )
+        : createElement(
+            "small",
+            {},
+            "No editable packs found. Create one in Library Packs first.",
+          ),
+    ]);
+  };
+
+  const renderDeleteButton = () => {
+    if (!canManageImageAssets) return createElement("div");
+    return createElement("button", { class: "btn-red" }, "Delete Image", {
+      type: "click",
+      event: () => {
+        if (onDelete) onDelete();
+      },
+    });
+  };
+
+  const buildSections = async () => {
+    const sections = [
+      renderThumb(),
+      renderRenameField(),
+      createElement("div", { class: "modal-divider" }),
+      renderNotesField(),
+    ];
+
+    const folderField = await renderFolderField();
+    if (folderField) {
+      sections.push(createElement("div", { class: "modal-divider" }), folderField);
+    }
+
+    sections.push(
+      createElement("div", { class: "modal-divider" }),
+      await renderRecordField(),
+      createElement("div", { class: "modal-divider" }),
+      renderSizeField(),
+    );
+
+    const packField = renderPackField();
+    if (packField) {
+      sections.push(createElement("div", { class: "modal-divider" }), packField);
+    }
+
+    sections.push(
+      createElement("div", { class: "modal-divider" }),
+      renderDeleteButton(),
+    );
+
+    return sections;
+  };
+
+  const requestRender = async () => {
+    const token = ++state.renderToken;
+    const sections = await buildSections();
+    if (token !== state.renderToken) return;
+    modalContent.replaceChildren(...sections);
+  };
+
+  await requestRender();
+  return modalContent;
 }

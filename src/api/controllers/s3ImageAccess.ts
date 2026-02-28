@@ -4,6 +4,10 @@ import {
   getTableImagesByProjectQuery,
   getTableImagesByUserQuery,
 } from "../queries/tableImages";
+import {
+  isImageInInstalledPacksByProjectQuery,
+  isImageInInstalledPacksByUserQuery,
+} from "../queries/libraryPacks";
 import { getProjectAccess, requireUser } from "../../lib/authz";
 import { requireGuestSandboxAccess } from "../../lib/guestSandbox.js";
 import {
@@ -215,6 +219,10 @@ export async function ensureImageViewable(
   if (scope.kind === "tableProject") {
     const imageIdNumber = Number(imageId);
     if (scope.tableDataImageIds.has(imageIdNumber)) return;
+    const isInstalled = (
+      await isImageInInstalledPacksByProjectQuery(scope.projectId, imageId)
+    ).rows[0]?.is_installed_image;
+    if (isInstalled) return;
     await ensureImageLinkedToProject(imageId, scope.projectId);
     return;
   }
@@ -222,6 +230,10 @@ export async function ensureImageViewable(
   if (scope.kind === "tableUser") {
     const imageIdNumber = Number(imageId);
     if (scope.tableDataImageIds.has(imageIdNumber)) return;
+    const isInstalled = (
+      await isImageInInstalledPacksByUserQuery(scope.userId, imageId)
+    ).rows[0]?.is_installed_image;
+    if (isInstalled) return;
     await ensureImageLinkedToUser(imageId, scope.userId);
     return;
   }

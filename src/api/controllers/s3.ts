@@ -4,7 +4,6 @@ import {
   editImageQuery,
   getImageQuery,
   getImagesQuery,
-  removeImageQuery,
   Image,
 } from "../queries/images";
 import { getProjectQuery, editProjectQuery } from "../queries/projects";
@@ -18,6 +17,7 @@ import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { redisClient } from "../../lib/socketUsers";
 import logger from "../../lib/logger.js";
 import { requireProjectEditor, requireUser } from "../../lib/authz";
+import { unlinkImageAndDeleteIfOrphaned } from "../../lib/imageLifecycle";
 import {
   assertProjectIdMatchesTable,
   requireProjectIdFromTable,
@@ -306,24 +306,30 @@ async function removeImageByProject(
       assertProjectIdMatchesTable(req.params.project_id, tableProjectId);
     }
     await ensureImageLinkedToProject(req.params.image_id, req.params.project_id);
-    const imageData = await getImageQuery(req.params.image_id);
-    const image = getImageOrThrow(imageData);
-
-    await deleteFromS3("wyrld/images", image.file_name);
-    await removeImageQuery(req.params.image_id);
-
-    invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-      logger.warn(
-        { err, imageId: req.params.image_id },
-        "Failed to invalidate signed URL cache",
-      ),
-    );
+    const result = await unlinkImageAndDeleteIfOrphaned({
+      imageId: req.params.image_id,
+      unlinkScope: {
+        type: "project",
+        projectId: req.params.project_id,
+      },
+      ownerScope: {
+        type: "project",
+        projectId: req.params.project_id,
+      },
+    });
+    const { image, orphaned } = result;
+    if (orphaned) {
+      await removeImageFromBucket("wyrld/images", image);
+      invalidateSignedUrlCache(req.params.image_id).catch((err) =>
+        logger.warn(
+          { err, imageId: req.params.image_id },
+          "Failed to invalidate signed URL cache",
+        ),
+      );
+    }
 
     const projectData = await getProjectQuery(req.params.project_id);
     const project = projectData.rows[0];
-    await editProjectQuery(project.id, {
-      used_data_in_bytes: project.used_data_in_bytes - image.size,
-    });
     if (String(project.image_id) === String(req.params.image_id)) {
       await editProjectQuery(project.id, {
         image_id: null,
@@ -366,24 +372,27 @@ async function removeImageByTableUser(
     const tableUserId = requireUserIdFromTable(tableForAuth, "table_id");
 
     await ensureImageLinkedToUser(req.params.image_id, tableUserId);
-    const imageData = await getImageQuery(req.params.image_id);
-    const image = getImageOrThrow(imageData);
-
-    await deleteFromS3("wyrld/images", image.file_name);
-    await removeImageQuery(req.params.image_id);
-
-    invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-      logger.warn(
-        { err, imageId: req.params.image_id },
-        "Failed to invalidate signed URL cache",
-      ),
-    );
-
-    const userData = await getUserByIdQuery(tableUserId);
-    const user = userData.rows[0];
-    await editUserQuery(user.id, {
-      used_data_in_bytes: user.used_data_in_bytes - image.size,
+    const result = await unlinkImageAndDeleteIfOrphaned({
+      imageId: req.params.image_id,
+      unlinkScope: {
+        type: "user",
+        userId: tableUserId,
+      },
+      ownerScope: {
+        type: "user",
+        userId: tableUserId,
+      },
     });
+    const { image, orphaned } = result;
+    if (orphaned) {
+      await removeImageFromBucket("wyrld/images", image);
+      invalidateSignedUrlCache(req.params.image_id).catch((err) =>
+        logger.warn(
+          { err, imageId: req.params.image_id },
+          "Failed to invalidate signed URL cache",
+        ),
+      );
+    }
 
     logEventAsync({
       userId: req.session.user,
@@ -418,24 +427,27 @@ async function removeImageByUser(
     }
 
     await ensureImageLinkedToUser(req.params.image_id, userId);
-    const imageData = await getImageQuery(req.params.image_id);
-    const image = getImageOrThrow(imageData);
-
-    await deleteFromS3("wyrld/images", image.file_name);
-    await removeImageQuery(req.params.image_id);
-
-    invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-      logger.warn(
-        { err, imageId: req.params.image_id },
-        "Failed to invalidate signed URL cache",
-      ),
-    );
-
-    const userData = await getUserByIdQuery(userId);
-    const user = userData.rows[0];
-    await editUserQuery(user.id, {
-      used_data_in_bytes: user.used_data_in_bytes - image.size,
+    const result = await unlinkImageAndDeleteIfOrphaned({
+      imageId: req.params.image_id,
+      unlinkScope: {
+        type: "user",
+        userId,
+      },
+      ownerScope: {
+        type: "user",
+        userId,
+      },
     });
+    const { image, orphaned } = result;
+    if (orphaned) {
+      await removeImageFromBucket("wyrld/images", image);
+      invalidateSignedUrlCache(req.params.image_id).catch((err) =>
+        logger.warn(
+          { err, imageId: req.params.image_id },
+          "Failed to invalidate signed URL cache",
+        ),
+      );
+    }
 
     logEventAsync({
       userId: req.session.user,

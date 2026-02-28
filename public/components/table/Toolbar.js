@@ -72,14 +72,25 @@ export default class Toolbar {
     const image = await getThings(
       `/api/get_image/${obj.imageId}${queryString ? `?${queryString}` : ""}`
     );
+    if (!image) {
+      info.displayName = "Image";
+      info.imageSrc =
+        obj?._element?.currentSrc ||
+        obj?._element?.src ||
+        obj?._originalElement?.currentSrc ||
+        obj?._originalElement?.src ||
+        "";
+      return info;
+    }
     info.displayName = truncateString(image.original_name, 12);
     info.imageSrc = image.src;
 
-    const records = image.records || [];
+    const records = Array.isArray(image.records) ? image.records : [];
     const publicRecord = records.find((r) => r.is_public);
-    if (publicRecord) {
-      info.recordTitle = truncateString(publicRecord.title, 12);
-      info.recordHref = this.getRecordHref(publicRecord.id);
+    const selectedRecord = publicRecord || records[0];
+    if (selectedRecord) {
+      info.recordTitle = truncateString(selectedRecord.title, 12);
+      info.recordHref = this.getRecordHref(selectedRecord.id);
     }
 
     return info;

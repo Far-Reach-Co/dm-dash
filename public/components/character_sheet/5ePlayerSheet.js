@@ -33,6 +33,7 @@ export default class FiveEPlayerSheet {
       "d-flex flex-column align-items-center justify-content-center";
     this.navigate = props.navigate;
     this.generalData = props.params.content;
+    this.currentUserId = props.currentUserId || null;
     // general, background, etc
     this.mainView = "general";
     this.generalPatchQueue = Promise.resolve();
@@ -42,6 +43,7 @@ export default class FiveEPlayerSheet {
     this.sheetSettings = new SheetSettings({
       domComponent: createElement("div"),
       generalData: this.generalData,
+      currentUserId: this.currentUserId,
     });
 
     this.render();
@@ -681,10 +683,15 @@ export default class FiveEPlayerSheet {
     this.domComponent.append(this.spellsComponent.domComponent);
   };
 
+  isCurrentUserOwner = () => {
+    if (!this.currentUserId) return false;
+    return String(this.currentUserId) === String(this.generalData.user_id);
+  };
+
   renderSettingsOrNot = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const project = searchParams.get("project");
-    if (!project || USERID == this.generalData.user_id) {
+    if (!project || this.isCurrentUserOwner()) {
       return createElement(
         "div",
         {

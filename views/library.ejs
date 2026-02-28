@@ -9,14 +9,6 @@
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/library.css" />
   <%- include('./partials/icons') %>
-  <script>
-    const USERID = "<%= auth %>";
-    <% if (projectId) { %>
-    const PROJECTID = "<%= projectId %>";
-    <% } else { %>
-    const PROJECTID = null;
-    <% } %>
-  </script>
   <script src="/lib/MobileNavHandler.js" defer></script>
   <script src="/dist/bundleLibrary.js" defer type="module"></script>
 </head>
