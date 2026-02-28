@@ -48,6 +48,19 @@
         </a>
       </div>
       <% } %>
+      <div class="dashboard-sidebar-card dashboard-sidebar-card-spaced radio-card">
+        <div class="dashboard-sidebar-title">FRC Radio</div>
+        <small>Stream background music for your tabletop sessions.</small>
+        <a class="radio-link" href="https://radio.farreachco.com" target="_blank" rel="noopener">
+          <span class="radio-link-text">Host a Channel</span>
+          <span class="radio-link-icon">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+            </svg>
+          </span>
+          <span class="radio-link-arrow">&rarr;</span>
+        </a>
+      </div>
     </aside>
     <main class="dashboard-main">
       <% if (section !== 'community') { %>
@@ -182,7 +195,11 @@
           <% } %>
         </div>
         <small>These tables are shared by the members of the wyrld. Wyrld managers can upload images and manage the map layer.</small>
-        <small class="d-block mt-1"><a href="/sandbox-mode-guide">Sandbox Mode Guide</a></small>
+        <small class="d-block mt-1">
+          <a href="/sandbox-mode-guide">Sandbox Mode Guide</a>
+          |
+          <a href="/vtt-guide">VTT Guide</a>
+        </small>
         <hr />
         <% if (tablesSorted.length === 0) { %>
         <small>No tables yet...</small>
@@ -214,7 +231,9 @@
         <% if (recordsSorted.length === 0) { %>
         <small>No records yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <input id="search-record-elements-input" type="text" placeholder="Search Records">
+        <br>
+        <div id="record-elements-list" class="dashboard-list">
           <% recordsSorted.forEach(function(record) { %>
           <div class="dash-detail-row" onclick="handleRecordClick('<%= record.id %>', '<%= project.id %>')" title="Open record in new tab">
             <div class="dash-detail-title"><%= record.title %></div>
@@ -253,7 +272,9 @@
         <% if (sheetsSorted.length === 0) { %>
         <small>No sheets have been connected to this wyrld yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <input id="search-sheet-elements-input" type="text" placeholder="Search Character Sheets">
+        <br>
+        <div id="sheet-elements-list" class="dashboard-list">
           <% sheetsSorted.forEach(function(sheet) { %>
           <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')" title="Open character sheet in new tab">
             <div class="dash-detail-title"><%= sheet.name %></div>
