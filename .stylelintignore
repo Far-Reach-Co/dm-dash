@@ -1,0 +1,4 @@
+node_modules/
+dist/
+public/dist/
+file_uploads/

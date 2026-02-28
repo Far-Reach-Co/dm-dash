@@ -1,0 +1,125 @@
+/* ==========================================================================
+   Pack UI Primitives
+   Shared styles used by library pack views and VTT sidebar pack views.
+   ========================================================================== */
+
+.library-pack-action-btn,
+.sidebar-pack-btn {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+  background: rgba(116, 167, 215, 0.08);
+  color: var(--main-white);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.library-pack-action-btn:hover,
+.sidebar-pack-btn:hover {
+  background: rgba(116, 167, 215, 0.12);
+  border-color: rgba(116, 167, 215, 0.25);
+}
+
+.library-pack-card-badges,
+.sidebar-pack-badges {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.library-pack-pill,
+.sidebar-pack-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  border: 1px solid var(--surface-border);
+  color: var(--main-gray);
+}
+
+.library-pack-pill.owned,
+.sidebar-pack-pill.owned {
+  color: var(--pack-pill-owned-text);
+  border-color: rgba(165, 79, 4, 0.35);
+  background: rgba(165, 79, 4, 0.18);
+}
+
+.library-pack-pill.installed,
+.sidebar-pack-pill.installed {
+  color: var(--pack-pill-installed-text);
+  border-color: rgba(116, 167, 215, 0.35);
+  background: rgba(116, 167, 215, 0.14);
+}
+
+.library-pack-pill.shared,
+.sidebar-pack-pill.shared {
+  color: var(--main-gray);
+  background: rgba(31, 37, 49, 0.9);
+}
+
+.library-pack-pill.locked,
+.sidebar-pack-pill.locked {
+  color: var(--pack-pill-locked-text);
+  border-color: rgba(178, 92, 8, 0.45);
+  background: rgba(178, 92, 8, 0.2);
+}
+
+.library-pack-tags,
+.sidebar-pack-tags {
+  margin-top: 4px;
+  color: var(--pack-tag-text);
+  font-size: 0.72rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.library-pack-empty,
+.sidebar-pack-empty {
+  color: var(--main-gray);
+}
+
+.library-pack-item,
+.sidebar-pack-card {
+  border: 1px solid rgba(116, 167, 215, 0.25);
+  border-radius: var(--border-radius);
+  background: rgba(17, 22, 30, 0.95);
+}
+
+.library-pack-item-head,
+.sidebar-pack-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.library-pack-item-main,
+.sidebar-pack-card-main {
+  min-width: 0;
+  flex: 1;
+}
+
+.library-pack-item-actions,
+.sidebar-pack-card-actions {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+}
+
+.library-pack-image-row,
+.sidebar-pack-image-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.library-pack-image-thumb,
+.sidebar-pack-image-thumb {
+  object-fit: cover;
+}

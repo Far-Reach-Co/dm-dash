@@ -1,0 +1,205 @@
+/* ===== SRD Navigation Lists ===== */
+.info-container>ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px 24px;
+  padding: 0;
+  list-style: none;
+  margin: 1.5rem 0;
+}
+
+.info-container>ul>li {
+  margin: 0;
+  padding: 4px 8px 4px 0;
+  border-bottom: 1px solid rgba(72, 99, 125, 0.25);
+  border-radius: 4px;
+  transition: background 0.12s ease, padding-left 0.12s ease;
+}
+
+.info-container>ul>li:hover {
+  background: rgba(47, 64, 84, 0.45);
+  padding-left: 8px;
+}
+
+.info-container>ul>li>a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--link-blue);
+  text-decoration: none;
+  font-size: 1.05rem;
+  transition: color 0.2s ease;
+}
+
+.info-container>ul>li>a::before {
+  content: "◆";
+  margin-right: 10px;
+  font-size: 0.6rem;
+  color: var(--green);
+  transition: color 0.2s ease;
+}
+
+.info-container>ul>li:nth-child(odd)>a::before {
+  color: var(--blue6);
+}
+
+.info-container>ul>li:nth-child(3n)>a::before {
+  color: var(--orange2);
+}
+
+.info-container>ul>li:nth-child(4n)>a::before {
+  color: var(--purple);
+}
+
+.info-container>ul>li>a:hover {
+  color: var(--orange3);
+}
+
+.info-container>ul>li>a:hover::before {
+  color: var(--orange3);
+}
+
+/* ===== SRD Content Headings ===== */
+.info-container>h2 {
+  color: var(--orange2);
+  font-size: 1.85rem;
+  margin: 2.5rem 0 1.25rem;
+}
+
+.info-container>h3 {
+  color: var(--green);
+  font-size: 1.4rem;
+  margin: 2rem 0 1rem;
+  padding-left: 14px;
+  border-left: 4px solid var(--blue6);
+  font-weight: 600;
+}
+
+.info-container>h4 {
+  color: var(--pink);
+  font-size: 1.2rem;
+  margin: 1.5rem 0 0.75rem;
+  font-weight: 600;
+}
+
+.info-container>h5 {
+  color: var(--blue6);
+  font-size: 1.05rem;
+  margin: 1.25rem 0 0.5rem;
+  font-weight: 600;
+}
+
+/* ===== Detail Page H1 ===== */
+.info-container > h1 {
+  font-size: 2.2rem;
+  margin: 1.25rem 0 0.5rem;
+  background: linear-gradient(120deg, var(--orange3) 0%, var(--orange2) 60%, var(--blue6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+/* ===== Tables ===== */
+table {
+  width: fit-content;
+  max-width: 100%;
+  border-collapse: collapse;
+  font-size: small;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+th,
+td {
+  border: 1px solid var(--blue);
+  padding: 10px 14px;
+}
+
+th {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--blue4) 100%);
+  color: var(--light-gray);
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Alternate row colors */
+tr:nth-child(even) {
+  background-color: var(--blue3);
+}
+
+tr:nth-child(odd) {
+  background-color: var(--blue5);
+}
+
+tr:hover {
+  background-color: var(--blue4);
+}
+
+/* ===== SRD Content Blocks ===== */
+.info-container>p {
+  line-height: 1.7;
+  margin-bottom: 1rem;
+}
+
+.info-container>ul:not(:first-of-type) ul,
+.info-container section ul ul {
+  margin-top: 0.5rem;
+  padding-left: 20px;
+}
+
+/* ===== Horizontal Rule ===== */
+.info-container hr {
+  border: none;
+  height: 0;
+  margin: 1.75rem 0;
+  position: relative;
+  overflow: visible;
+  background: none;
+}
+
+.info-container hr::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(72, 99, 125, 0.4), transparent);
+}
+
+.info-container hr::after {
+  content: '✦';
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.6rem;
+  color: rgba(116, 167, 215, 0.35);
+  background: var(--main-dark);
+  padding: 0 10px;
+  letter-spacing: 0;
+}
+
+.info-container hr.w-75 {
+  width: 75%;
+  margin-left: 0;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.info-container hr.w-75::after,
+.info-container hr.w-50::after {
+  display: none;
+}
+
+.info-container hr.w-50 {
+  width: 50%;
+  margin-left: 0;
+  margin-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+

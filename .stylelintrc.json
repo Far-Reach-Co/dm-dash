@@ -1,0 +1,40 @@
+{
+  "extends": [
+    "stylelint-config-standard"
+  ],
+  "ignoreFiles": [
+    "node_modules/**",
+    "dist/**",
+    "public/dist/**",
+    "file_uploads/**"
+  ],
+  "rules": {
+    "alpha-value-notation": null,
+    "color-function-alias-notation": null,
+    "color-function-notation": null,
+    "hue-degree-notation": null,
+    "media-feature-range-notation": null,
+    "comment-empty-line-before": null,
+    "rule-empty-line-before": null,
+    "declaration-empty-line-before": null,
+    "no-descending-specificity": null,
+    "no-duplicate-selectors": null,
+    "selector-class-pattern": null,
+    "selector-not-notation": null,
+    "selector-pseudo-element-colon-notation": null,
+    "selector-no-vendor-prefix": null,
+    "keyframes-name-pattern": null,
+    "custom-property-pattern": null,
+    "property-no-vendor-prefix": null,
+    "property-no-deprecated": null,
+    "declaration-block-no-redundant-longhand-properties": null,
+    "declaration-block-no-duplicate-properties": null,
+    "declaration-block-no-shorthand-property-overrides": null,
+    "declaration-property-value-no-unknown": null,
+    "shorthand-property-no-redundant-values": null,
+    "length-zero-no-unit": null,
+    "font-family-name-quotes": null,
+    "font-family-no-missing-generic-family-keyword": null,
+    "value-keyword-case": null
+  }
+}
