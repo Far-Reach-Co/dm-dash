@@ -90,6 +90,14 @@ router.get("/vtt-guide", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get("/library-guide", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.render("library-guide", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get(
   "/public-wyrlds-guide",
   (req: Request, res: Response, next: NextFunction) => {

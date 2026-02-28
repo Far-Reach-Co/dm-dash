@@ -1,5 +1,8 @@
 const SIDEBAR_CAPABILITY_KEYS = [
   "canPlaceImagesFromSidebar",
+  "canUseLibraryPacks",
+  "canDiscoverLibraryPacks",
+  "canManageLibraryPackInstalls",
   "canManageTableSettings",
   "canManageImageAssets",
   "canManageFolders",

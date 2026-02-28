@@ -515,11 +515,26 @@ class Table {
       // handle adding new image
       if (imageFollowingCursor.isOnPage) {
         // Drop succeeds unless mouse is still over the sidebar
-        if (!e.target.closest(".sidebar"))
+        if (!e.target.closest(".sidebar")) {
+          const pointer = this.canvasLayer?.canvasEngine?.getPointer?.(e);
+          const hasPointer =
+            pointer &&
+            Number.isFinite(pointer.x) &&
+            Number.isFinite(pointer.y);
           this.canvasLayer.addImageToTable(
             this.sidebar.tableSidebarImageComponent.currentMouseDownImage,
+            hasPointer
+              ? {
+                  broadcast: true,
+                  centerInViewport: false,
+                  left: pointer.x,
+                  top: pointer.y,
+                }
+              : undefined,
           );
+        }
       }
+      this.sidebar.tableSidebarImageComponent.currentMouseDownImage = null;
       imageFollowingCursor.remove();
     };
     document.addEventListener("mouseup", onMouseupDrop);

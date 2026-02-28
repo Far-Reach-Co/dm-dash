@@ -90,7 +90,7 @@ export default class TableSidebarImageComponent {
     return "Click to place, click + drag to drop where you want";
   };
 
-  renderImage = async (image) => {
+  renderImageThumb = async (image) => {
     if (image.src && this.can("canPlaceImagesFromSidebar")) {
       this.downloadedImageSourceList[image.id] = image.src;
 
@@ -98,7 +98,6 @@ export default class TableSidebarImageComponent {
       const handlers = [];
 
       if (!isMobile) {
-        // Desktop: drag to place
         handlers.push({
           type: "mousedown",
           event: () => {
@@ -107,7 +106,6 @@ export default class TableSidebarImageComponent {
         });
       }
 
-      // Click/tap to place quickly
       handlers.push({
         type: "click",
         event: (e) => {
@@ -116,7 +114,6 @@ export default class TableSidebarImageComponent {
         },
       });
 
-      // Keyboard placement for accessibility
       handlers.push({
         type: "keydown",
         event: (e) => {
@@ -140,7 +137,7 @@ export default class TableSidebarImageComponent {
           src: image.src,
           height: "38px",
           draggable: "false",
-          style: `${isMobile ? "" : "pointer-events: none;"} max-width: 38px;`, // ✨ Only apply pointer-events:none if NOT mobile
+          style: `${isMobile ? "" : "pointer-events: none;"} max-width: 38px;`,
         }),
         handlers,
       );
@@ -218,6 +215,35 @@ export default class TableSidebarImageComponent {
       },
       tableViewId: this.tableView?.id,
       capabilities: this.capabilities,
+    });
+  };
+
+  renderPackImageSettings = async (image, onUpdate = null) => {
+    const params = new URLSearchParams();
+    if (this.tableView?.id) {
+      params.set("table_view_id", String(this.tableView.id));
+    }
+    const endpoint = `/api/get_image/${image.id}${params.toString() ? `?${params.toString()}` : ""}`;
+    const fetched = await getThings(endpoint);
+    const modalImage = fetched
+      ? { ...image, ...fetched, id: image.id }
+      : image;
+
+    return await renderImageSettingsModal({
+      image: modalImage,
+      projectId: this.projectId,
+      tableImageId: null,
+      onDelete: null,
+      onUpdate,
+      tableViewId: this.tableView?.id,
+      capabilities: {
+        ...this.capabilities,
+        canEditImageMetadata: false,
+        canManageFolders: false,
+        canManageImageAssets: false,
+      },
+      showFolderField: false,
+      canLinkRecord: !!this.capabilities?.canEditImageMetadata,
     });
   };
 
@@ -490,7 +516,7 @@ export default class TableSidebarImageComponent {
           class: "d-flex align-items-center cursor-pointer flex-1",
         },
         [
-          await this.renderImage(image),
+          await this.renderImageThumb(image),
           editableNameInput,
         ],
       ),

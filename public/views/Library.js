@@ -1,5 +1,6 @@
 import createElement from "../components/createElement.js";
-import { getThings } from "../lib/apiUtils.js";
+import { getThings, postThing } from "../lib/apiUtils.js";
+import { loadFrontendAuthState } from "../lib/frontendAuthState.js";
 import LibrarySidebar from "../components/library/LibrarySidebar.js";
 import LibraryGrid from "../components/library/LibraryGrid.js";
 
@@ -10,11 +11,15 @@ class Library {
     this.grid = null;
     this.folders = [];
     this.currentFolder = null;
+    this.packs = [];
+    this.currentSidebarTab = "images";
 
     const searchParams = new URLSearchParams(window.location.search);
-    this.projectId =
-      searchParams.get("wyrld") ||
-      (typeof PROJECTID !== "undefined" ? PROJECTID : null);
+    this.requestedProjectId = searchParams.get("wyrld");
+    this.projectId = this.requestedProjectId || null;
+    this.canUseLibraryPacks = false;
+    this.scopeName = this.projectId ? "Wyrld Library" : "My Library";
+    this.scopeType = this.projectId ? "project" : "user";
 
     this.init();
   }
@@ -38,7 +43,7 @@ class Library {
     }
     if (this.grid) {
       this.grid.pruneExpandedFolderIds(this.folders);
-      this.grid.renderFolderTree();
+      this.grid.render();
     }
   };
 
@@ -46,6 +51,21 @@ class Library {
     this.currentFolder = folder;
     if (this.grid) {
       this.grid.filterByFolder(folder);
+    }
+  };
+
+  setSidebarTab = (tab) => {
+    this.currentSidebarTab =
+      tab === "packs" && this.canUseLibraryPacks ? "packs" : "images";
+    if (this.currentSidebarTab === "packs") {
+      this.discoverPacks(this.grid?.packLibraryQuery || "");
+      this.loadInstalledPacks();
+    }
+    if (this.grid) {
+      this.grid.setViewMode(this.currentSidebarTab);
+    }
+    if (this.sidebar) {
+      this.sidebar.setActiveTab(this.currentSidebarTab);
     }
   };
 
@@ -116,6 +136,220 @@ class Library {
     }
   };
 
+  getCreatePackEndpoint = () => {
+    return this.projectId
+      ? `/api/add_library_pack_by_project/${this.projectId}`
+      : "/api/add_library_pack_by_user";
+  };
+
+  createPack = async (payload) => {
+    return await postThing(this.getCreatePackEndpoint(), payload);
+  };
+
+  editPack = async (packId, payload) => {
+    return await postThing(`/api/edit_library_pack/${packId}`, payload);
+  };
+
+  getDiscoverPacksEndpoint = (
+    query = "",
+    limit = 50,
+    offset = 0,
+    options = {},
+  ) => {
+    const { publishedOnly = false } = options || {};
+    const params = new URLSearchParams();
+    params.set("limit", String(limit));
+    params.set("offset", String(offset));
+    if (publishedOnly) {
+      params.set("published", "true");
+    }
+    if (this.projectId) {
+      params.set("project_id", String(this.projectId));
+    }
+    if (query.trim()) {
+      params.set("q", query.trim());
+    }
+    return `/api/discover_library_packs?${params.toString()}`;
+  };
+
+  discoverPacks = async (query = "", options = {}) => {
+    if (!this.canUseLibraryPacks) {
+      this.packs = [];
+      if (this.grid) {
+        this.grid.setPacks([]);
+      }
+      return [];
+    }
+    const data = await getThings(
+      this.getDiscoverPacksEndpoint(query, 100, 0, options),
+    );
+    this.packs = Array.isArray(data) ? data : [];
+    if (this.grid) {
+      this.grid.setPacks(this.packs);
+    }
+    return this.packs;
+  };
+
+  getInstalledPacksEndpoint = () => {
+    return this.projectId
+      ? `/api/get_installed_library_packs_by_project/${this.projectId}`
+      : "/api/get_installed_library_packs_by_user";
+  };
+
+  loadInstalledPacks = async () => {
+    if (!this.canUseLibraryPacks) {
+      if (this.grid) {
+        this.grid.setInstalledPacks([]);
+      }
+      return [];
+    }
+    const data = await getThings(this.getInstalledPacksEndpoint());
+    const installed = Array.isArray(data) ? data : [];
+    if (this.grid) {
+      this.grid.setInstalledPacks(installed);
+    }
+    return installed;
+  };
+
+  installPack = async (packId) => {
+    if (this.projectId) {
+      return await postThing(
+        `/api/install_library_pack_by_project/${this.projectId}/${packId}`,
+        {},
+      );
+    }
+    return await postThing(`/api/install_library_pack_by_user/${packId}`, {});
+  };
+
+  uninstallPack = async (packId) => {
+    try {
+      const endpoint = this.projectId
+        ? `/api/uninstall_library_pack_by_project/${this.projectId}/${packId}`
+        : `/api/uninstall_library_pack_by_user/${packId}`;
+      const res = await fetch(endpoint, { method: "DELETE" });
+      return res.status === 200;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
+  removePack = async (packId) => {
+    try {
+      const res = await fetch(`/api/remove_library_pack/${packId}`, {
+        method: "DELETE",
+      });
+      return res.status === 200;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
+  getPackImages = async (packId) => {
+    const params = new URLSearchParams();
+    if (this.projectId) {
+      params.set("project_id", String(this.projectId));
+    }
+    const endpoint = `/api/get_library_pack_images/${packId}${
+      params.toString() ? `?${params.toString()}` : ""
+    }`;
+    const data = await getThings(endpoint);
+    return Array.isArray(data) ? data : [];
+  };
+
+  getImagePackMemberships = async (imageId) => {
+    const params = new URLSearchParams();
+    if (this.projectId) {
+      params.set("project_id", String(this.projectId));
+    }
+    const qs = params.toString();
+    const endpoint = `/api/get_library_pack_memberships_by_image/${imageId}${
+      qs ? `?${qs}` : ""
+    }`;
+    const data = await getThings(endpoint);
+    return Array.isArray(data) ? data : [];
+  };
+
+  addImageToPack = async (packId, imageId, options = {}) => {
+    const payload = {
+      pack_id: packId,
+      image_id: imageId,
+    };
+    if (typeof options.sort_order === "number") {
+      payload.sort_order = options.sort_order;
+    }
+    return await postThing("/api/add_library_pack_image", payload);
+  };
+
+  removeImageFromPack = async (packImageId) => {
+    try {
+      const res = await fetch(`/api/remove_library_pack_image/${packImageId}`, {
+        method: "DELETE",
+      });
+      return res.status === 200;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
+  getRemoveImageEndpoint = (imageId) => {
+    return this.projectId
+      ? `/api/remove_image_by_project/${imageId}/${this.projectId}`
+      : `/api/remove_image_by_user/${imageId}`;
+  };
+
+  removeImageById = async (imageId) => {
+    try {
+      const res = await fetch(this.getRemoveImageEndpoint(imageId), {
+        method: "DELETE",
+      });
+      return res.status === 204;
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
+  };
+
+  setImageFolder = async (tableImageId, folderId) => {
+    const payload = {
+      folder_id: folderId === null ? 0 : folderId,
+    };
+    const res = await postThing(`/api/edit_table_image/${tableImageId}`, payload);
+    return !!res;
+  };
+
+  addImagesToPack = async (packId, imageIds) => {
+    const results = await Promise.all(
+      imageIds.map((imageId) => this.addImageToPack(packId, imageId)),
+    );
+    return {
+      success: results.filter(Boolean).length,
+      total: imageIds.length,
+    };
+  };
+
+  moveImagesToFolder = async (tableImageIds, folderId) => {
+    const results = await Promise.all(
+      tableImageIds.map((tableImageId) => this.setImageFolder(tableImageId, folderId)),
+    );
+    return {
+      success: results.filter(Boolean).length,
+      total: tableImageIds.length,
+    };
+  };
+
+  removeImages = async (imageIds) => {
+    const results = await Promise.all(
+      imageIds.map((imageId) => this.removeImageById(imageId)),
+    );
+    return {
+      success: results.filter(Boolean).length,
+      total: imageIds.length,
+    };
+  };
+
   refreshImagesForCurrentScope = async () => {
     if (this.grid.showAllImages) {
       await this.loadImages(true);
@@ -132,16 +366,34 @@ class Library {
   };
 
   init = async () => {
+    const authState = await loadFrontendAuthState({
+      projectId: this.requestedProjectId,
+    });
+    this.projectId = authState.projectId || this.requestedProjectId || null;
+    this.canUseLibraryPacks = !!authState.canUseLibraryPacks;
+    this.scopeName =
+      authState.scopeName ||
+      (this.projectId ? "Wyrld Library" : "My Library");
+    this.scopeType =
+      authState.scopeType || (this.projectId ? "project" : "user");
+    document.title = `Image Library · ${this.scopeName} | Far Reach Co.`;
+
     this.sidebar = new LibrarySidebar({
       domComponent: createElement("div"),
       libraryApp: this,
       projectId: this.projectId,
+      activeTab: this.currentSidebarTab,
+      canUseLibraryPacks: this.canUseLibraryPacks,
     });
 
     this.grid = new LibraryGrid({
       domComponent: createElement("div"),
       libraryApp: this,
       projectId: this.projectId,
+      viewMode: this.currentSidebarTab,
+      canUseLibraryPacks: this.canUseLibraryPacks,
+      scopeName: this.scopeName,
+      scopeType: this.scopeType,
     });
 
     this.render();
@@ -150,6 +402,14 @@ class Library {
     await this.loadFolders();
     await this.loadImages();
     await this.loadImageCounts();
+    if (this.canUseLibraryPacks) {
+      await this.discoverPacks();
+      await this.loadInstalledPacks();
+    } else {
+      this.packs = [];
+      this.grid.setPacks([]);
+      this.grid.setInstalledPacks([]);
+    }
   };
 
   render = () => {

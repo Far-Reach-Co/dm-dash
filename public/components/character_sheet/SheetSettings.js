@@ -7,9 +7,15 @@ export default class SheetSettings {
   constructor(props) {
     this.domComponent = props.domComponent;
     this.generalData = props.generalData;
+    this.currentUserId = props.currentUserId || null;
 
     this.render();
   }
+
+  isCurrentUserOwner = () => {
+    if (!this.currentUserId) return false;
+    return String(this.currentUserId) === String(this.generalData.user_id);
+  };
 
   addInviteLink = async () => {
     try {
@@ -255,7 +261,7 @@ export default class SheetSettings {
 
     const exportSection = this.renderExportSection();
 
-    if (USERID != this.generalData.user_id) {
+    if (!this.isCurrentUserOwner()) {
       return this.domComponent.append(
         exportSection,
         createElement("div", { class: "form-section" }, [

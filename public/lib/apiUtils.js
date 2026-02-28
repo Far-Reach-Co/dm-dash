@@ -3,10 +3,26 @@ import renderTierLimitWarning from "../components/renderTierLimitWarning.js";
 
 async function getThings(endpoint) {
   try {
-    const res = await fetch(endpoint, {});
+    const res = await fetch(endpoint, { cache: "no-store" });
     const data = await res.json().catch(() => null);
     if (res.status === 200) {
       return data;
+    } else if (
+      res.status === 402 &&
+      data?.error?.message === "USER_IS_NOT_PRO"
+    ) {
+      renderTierLimitWarning(
+        'You have reached the limit for this feature on your account. Please subscribe to our "Pro User" package to increase the limit.'
+      );
+      return null;
+    } else if (
+      res.status === 402 &&
+      data?.error?.message === "PROJECT_IS_NOT_PRO"
+    ) {
+      renderTierLimitWarning(
+        'This Wyrld has reached the limit for this feature. Please subscribe to our "Pro Wyrld" package to increase the limit.'
+      );
+      return null;
     } else {
       const message = data?.error?.message || data?.message || "Request failed";
       console.error(`GET ${endpoint} -> ${res.status}: ${message}`);
