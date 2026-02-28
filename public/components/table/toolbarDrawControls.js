@@ -3,7 +3,7 @@ import { ICONS } from "./toolbarConfig.js";
 
 export function renderDrawModeToggle(toolbar) {
   const isDrawing = toolbar.tableApp.canvasLayer.isDrawingMode();
-  return toolbar.renderToolbarButton(ICONS.pencil, "Toggle draw mode", {
+  return toolbar.renderToolbarButton(ICONS.pencil(), "Toggle draw mode", {
     active: isDrawing,
     onClick: () => {
       toolbar.clearSelection();

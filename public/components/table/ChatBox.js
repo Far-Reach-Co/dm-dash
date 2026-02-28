@@ -2,6 +2,16 @@ import createElement from "../createElement.js";
 import isoDateFormat from "../../lib/isoDateFormat.js";
 import socketIntegration from "./socketIntegration.js";
 import { createValidatedImage, isImageUrl } from "../../lib/imageValidation.js";
+import { createSvgIconFactoryMap } from "../svgIcon.js";
+
+const CHAT_ICON_MARKUP = {
+  show: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  hide: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/></svg>`,
+  send: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+  users: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+};
+
+const CHAT_ICONS = createSvgIconFactoryMap(CHAT_ICON_MARKUP);
 
 export default class ChatBoxComponent {
   constructor(props) {
@@ -29,16 +39,13 @@ export default class ChatBoxComponent {
 
   renderHideChatButton = () => {
     const isHidden = this.chatBoxMessagesComponent.hidden;
-    // Static SVG icons — safe, no user input
-    const showIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
-    const hideIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="9" y1="10" x2="15" y2="10"/></svg>`;
-    const icon = isHidden ? showIcon : hideIcon;
+    const iconFactory = isHidden ? CHAT_ICONS.show : CHAT_ICONS.hide;
     const label = isHidden ? " Chat" : " Hide";
 
     return createElement(
       "div",
       { class: "chat-box-toggle" },
-      icon + label,
+      [iconFactory(), label],
       { type: "click", event: this.toggleChatVisibility }
     );
   };
@@ -69,7 +76,7 @@ export default class ChatBoxComponent {
           createElement(
             "button",
             { class: "chat-box-btn", title: "Send message" },
-            `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`,
+            CHAT_ICONS.send(),
           ),
         ],
         {
@@ -226,11 +233,10 @@ class OnlineUsersComponent {
 
   renderToggleButton = () => {
     const count = this.usersList.length;
-    const usersIcon = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`;
     return createElement(
       "div",
       { class: "chat-box-toggle online-toggle" + (this.isOpen ? " active" : "") },
-      usersIcon + ` ${count}`,
+      [CHAT_ICONS.users(), ` ${count}`],
       { type: "click", event: this.toggle }
     );
   };

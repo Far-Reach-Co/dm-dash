@@ -10,7 +10,7 @@ export function renderLayersButton(toolbar) {
   if (!toolbar.can("canManageLayers")) return toolbar.hiddenElement();
 
   const layerColor = toolbar.layerStyles[toolbar.tableApp.currentLayer]?.color;
-  return toolbar.renderToolbarButton(ICONS.layers, "Layers", {
+  return toolbar.renderToolbarButton(ICONS.layers(), "Layers", {
     active: toolbar.activePanel === "layers",
     layerColor,
     onClick: () => {
