@@ -1,28 +1,51 @@
-function searchTableElement() {
-  const searchElement = document.getElementById("search-table-elements-input");
+function initDashSearch({ inputId, listIds }) {
+  const searchElement = document.getElementById(inputId);
   if (!searchElement) return;
-  const tableElementsList = document.getElementById("table-elements-list");
-  if (!tableElementsList) return;
 
-  const originalTableElementsListChildrenArray = Array.from(
-    tableElementsList.children
-  );
+  const lists = listIds
+    .map((listId) => document.getElementById(listId))
+    .filter(Boolean);
+  if (!lists.length) return;
+
+  const originalItemsByList = new Map();
+  lists.forEach((listElem) => {
+    originalItemsByList.set(listElem, Array.from(listElem.children));
+  });
 
   searchElement.addEventListener("input", () => {
     const searchTerm = searchElement.value.toLowerCase().trim();
-    // first remove all elements
-    while (tableElementsList.firstChild) {
-      tableElementsList.removeChild(tableElementsList.firstChild);
-    }
-    // check
-    originalTableElementsListChildrenArray.forEach((elem) => {
-      if (
-        elem.firstElementChild &&
-        elem.firstElementChild.innerText.toLowerCase().includes(searchTerm)
-      ) {
-        tableElementsList.appendChild(elem);
+
+    lists.forEach((listElem) => {
+      const originalItems = originalItemsByList.get(listElem) || [];
+      while (listElem.firstChild) {
+        listElem.removeChild(listElem.firstChild);
       }
+
+      originalItems.forEach((elem) => {
+        const titleElem =
+          elem.querySelector(".dash-detail-title") || elem.firstElementChild;
+        const titleText = (titleElem?.innerText || "").toLowerCase();
+        if (titleText.includes(searchTerm)) {
+          listElem.appendChild(elem);
+        }
+      });
     });
   });
 }
-searchTableElement();
+
+document.addEventListener("DOMContentLoaded", () => {
+  initDashSearch({
+    inputId: "search-table-elements-input",
+    listIds: ["table-elements-list"],
+  });
+
+  initDashSearch({
+    inputId: "search-record-elements-input",
+    listIds: ["record-elements-list"],
+  });
+
+  initDashSearch({
+    inputId: "search-sheet-elements-input",
+    listIds: ["sheet-elements-list", "shared-sheet-elements-list"],
+  });
+});

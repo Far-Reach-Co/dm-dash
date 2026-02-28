@@ -182,7 +182,11 @@
           <% } %>
         </div>
         <small>These tables are shared by the members of the wyrld. Wyrld managers can upload images and manage the map layer.</small>
-        <small class="d-block mt-1"><a href="/sandbox-mode-guide">Sandbox Mode Guide</a></small>
+        <small class="d-block mt-1">
+          <a href="/sandbox-mode-guide">Sandbox Mode Guide</a>
+          |
+          <a href="/vtt-guide">VTT Guide</a>
+        </small>
         <hr />
         <% if (tablesSorted.length === 0) { %>
         <small>No tables yet...</small>
@@ -214,7 +218,9 @@
         <% if (recordsSorted.length === 0) { %>
         <small>No records yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <input id="search-record-elements-input" type="text" placeholder="Search Records">
+        <br>
+        <div id="record-elements-list" class="dashboard-list">
           <% recordsSorted.forEach(function(record) { %>
           <div class="dash-detail-row" onclick="handleRecordClick('<%= record.id %>', '<%= project.id %>')" title="Open record in new tab">
             <div class="dash-detail-title"><%= record.title %></div>
@@ -253,7 +259,9 @@
         <% if (sheetsSorted.length === 0) { %>
         <small>No sheets have been connected to this wyrld yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <input id="search-sheet-elements-input" type="text" placeholder="Search Character Sheets">
+        <br>
+        <div id="sheet-elements-list" class="dashboard-list">
           <% sheetsSorted.forEach(function(sheet) { %>
           <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>', '<%= project.id %>')" title="Open character sheet in new tab">
             <div class="dash-detail-title"><%= sheet.name %></div>

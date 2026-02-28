@@ -141,7 +141,11 @@
           <a onclick="openNewTableModal()" title="Create a new virtual table" style="cursor:pointer">+ New Table</a>
         </div>
         <small>Real-time virtual tables that support images and drawing. Invite others to join your table by copying the share link.</small>
-        <small class="d-block mt-1"><a href="/sandbox-mode-guide">Sandbox Mode Guide</a></small>
+        <small class="d-block mt-1">
+          <a href="/sandbox-mode-guide">Sandbox Mode Guide</a>
+          |
+          <a href="/vtt-guide">VTT Guide</a>
+        </small>
         <hr />
         <% if (tablesSorted.length === 0) { %>
         <small>No tables yet...</small>
@@ -171,7 +175,9 @@
         <% if (recordsSorted.length === 0) { %>
         <small>No records yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <input id="search-record-elements-input" type="text" placeholder="Search Records">
+        <br>
+        <div id="record-elements-list" class="dashboard-list">
           <% recordsSorted.forEach(function(record) { %>
           <div class="dash-detail-row" onclick="handleRecordClick('<%= record.id %>')" title="Open record in new tab">
             <div class="dash-detail-title"><%= record.title %></div>
@@ -191,11 +197,16 @@
         </div>
         <small>We currently offer Dungeons and Dragons 5e sheets. You can invite others to view/edit your character sheet from the settings tab.</small>
         <hr />
+        <% const hasAnySheets = sheetsSorted.length > 0 || sharedSheetsSorted.length > 0; %>
+        <% if (hasAnySheets) { %>
+        <input id="search-sheet-elements-input" type="text" placeholder="Search Character Sheets">
+        <br>
+        <% } %>
         <h3>Created</h3>
         <% if (sheetsSorted.length === 0) { %>
         <small>No sheets yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <div id="sheet-elements-list" class="dashboard-list">
           <% sheetsSorted.forEach(function(sheet) { %>
           <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
             <div class="dash-detail-title"><%= sheet.name %></div>
@@ -208,7 +219,7 @@
         <% if (sharedSheetsSorted.length === 0) { %>
         <small>No shared sheets yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <div id="shared-sheet-elements-list" class="dashboard-list">
           <% sharedSheetsSorted.forEach(function(sheet) { %>
           <div class="dash-detail-row" onclick="handleSheetClick('<%= sheet.id %>')" title="Open character sheet in new tab">
             <div class="dash-detail-title"><%= sheet.name %></div>
