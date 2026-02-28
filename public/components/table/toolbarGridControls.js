@@ -5,7 +5,7 @@ import { ICONS } from "./toolbarConfig.js";
 export function renderGridButton(toolbar) {
   if (!toolbar.can("canManageGrid")) return toolbar.hiddenElement();
 
-  return toolbar.renderToolbarButton(ICONS.grid, "Grid control", {
+  return toolbar.renderToolbarButton(ICONS.grid(), "Grid control", {
     active: toolbar.activePanel === "grid",
     onClick: () => {
       toolbar.clearSelection();

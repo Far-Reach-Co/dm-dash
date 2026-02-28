@@ -2,13 +2,15 @@ export default function createElement(
   element,
   attributes,
   inner,
-  eventListeners
+  eventListeners,
+  options = {}
 ) {
   if (typeof element === "undefined") {
     return false;
   }
 
   var el = document.createElement(element);
+  var allowHtml = !!options.allowHtml;
 
   if (typeof attributes === "object") {
     for (var attribute in attributes) {
@@ -17,11 +19,10 @@ export default function createElement(
   }
 
   if (inner) {
-    if (typeof inner === "string" && /<[^>]+>/.test(inner)) {
-      // If inner is a string containing HTML tags, set it as innerHTML
+    if (typeof inner === "string" && allowHtml) {
+      // Explicit opt-in: caller is responsible for trusted/sanitized HTML.
       el.innerHTML = inner;
     } else {
-      // Handle non-HTML strings and elements as before
       if (!Array.isArray(inner)) {
         inner = [inner];
       }

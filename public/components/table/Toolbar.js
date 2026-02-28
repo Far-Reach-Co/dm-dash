@@ -206,7 +206,7 @@ export default class Toolbar {
   ) => {
     if (!obj) return [];
     const isLocked = !!obj.lockInPosition;
-    const icon = isLocked ? ICONS.lock : ICONS.unlock;
+    const iconFactory = isLocked ? ICONS.lock : ICONS.unlock;
     const controls = [];
 
     if (withSeparator) {
@@ -221,7 +221,7 @@ export default class Toolbar {
             class: `vtt-lock-status ${isLocked ? "is-locked" : "is-unlocked"}`,
           },
           [
-            createElement("span", { class: "vtt-lock-status-icon" }, icon),
+            createElement("span", { class: "vtt-lock-status-icon" }, iconFactory()),
             createElement(
               "span",
               { class: "vtt-lock-status-text" },
@@ -244,7 +244,7 @@ export default class Toolbar {
               : "Lock this object in place on the canvas",
           },
           [
-            createElement("span", { class: "vtt-lock-toggle-icon" }, icon),
+            createElement("span", { class: "vtt-lock-toggle-icon" }, iconFactory()),
             createElement(
               "span",
               { class: "vtt-lock-toggle-label" },
@@ -415,7 +415,7 @@ export default class Toolbar {
     if (!this.can("canManagePins")) {
       return this.hiddenElement();
     }
-    return this.renderToolbarButton(ICONS.pin, "Add a location pin", {
+    return this.renderToolbarButton(ICONS.pin(), "Add a location pin", {
       onClick: async () => {
         this.clearSelection();
         await this.tableApp.createLocationPin();
@@ -427,7 +427,7 @@ export default class Toolbar {
     if (!this.can("canManagePins")) {
       return this.hiddenElement();
     }
-    return this.renderToolbarButton(ICONS.list, "Manage location pins", {
+    return this.renderToolbarButton(ICONS.list(), "Manage location pins", {
       onClick: () => {
         this.clearSelection();
         this.showManagePinsModal();
@@ -447,7 +447,7 @@ export default class Toolbar {
     const sidebar = this.tableApp.sidebar;
     if (!sidebar) return this.hiddenElement();
 
-    return this.renderToolbarButton(ICONS.sidebar, "Toggle sidebar", {
+    return this.renderToolbarButton(ICONS.sidebar(), "Toggle sidebar", {
       active: sidebar.isVisible,
       onClick: () => {
         this.clearSelection();
@@ -525,7 +525,7 @@ export default class Toolbar {
 
     if (canDelete) {
       actions.push(
-        this.renderToolbarButton(ICONS.trash, "Remove selected object", {
+        this.renderToolbarButton(ICONS.trash(), "Remove selected object", {
           danger: true,
           onClick: () => this.tableApp.canvasLayer.removeObjects(),
         }),
@@ -534,7 +534,7 @@ export default class Toolbar {
 
     if (canManageLayers) {
       actions.push(
-        this.renderToolbarButton(ICONS.chevronUp, "Move to top of layer", {
+        this.renderToolbarButton(ICONS.chevronUp(), "Move to top of layer", {
           onClick: () => this.tableApp.canvasLayer.moveObjectToTop(),
         }),
       );

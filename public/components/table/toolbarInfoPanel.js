@@ -45,7 +45,7 @@ export function renderCanvasObjectList(toolbar, canvasObjectList) {
 }
 
 export function renderInfoMenu(toolbar) {
-  return toolbar.renderToolbarButton(ICONS.info, "Info & key commands", {
+  return toolbar.renderToolbarButton(ICONS.info(), "Info & key commands", {
     onClick: () => {
       modal.show(
         createElement("div", { class: "help-content" }, [

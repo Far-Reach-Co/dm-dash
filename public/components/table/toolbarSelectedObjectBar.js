@@ -51,7 +51,7 @@ function renderSelectedLocationPinBar(toolbar, obj, pin) {
         alt: pin.title || "Location pin image",
         loading: "lazy",
       })
-    : createElement("div", { class: "location-pin-icon" }, ICONS.pin);
+    : createElement("div", { class: "location-pin-icon" }, ICONS.pin());
 
   const infoChildren = [
     createElement(
