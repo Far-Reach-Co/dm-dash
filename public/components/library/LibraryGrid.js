@@ -2,7 +2,7 @@ import createElement from "../createElement.js";
 import modal from "../modal.js";
 import renderImageSettingsModal from "../shared/imageSettingsModal.js";
 import renderSpinner from "../spinner.js";
-import { deleteThing } from "../../lib/apiUtils.js";
+import { apiDelete } from "../../lib/apiUtils.js";
 import { buildFolderTree } from "../shared/folderTreeUtils.js";
 import {
   formatPackTags as formatPackTagsShared,
@@ -278,7 +278,11 @@ export default class LibraryGrid {
     );
     if (!confirmed) return;
 
-    await deleteThing(`/api/remove_table_folder/${folder.id}`);
+    const result = await apiDelete(`/api/remove_table_folder/${folder.id}`);
+    if (!(result.ok && result.status === 204)) {
+      window.customAlertError("Could not remove folder.");
+      return;
+    }
 
     if (this.currentFolder && this.currentFolder.id == folder.id) {
       if (folder.parent_folder_id) {

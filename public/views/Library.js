@@ -1,5 +1,6 @@
 import createElement from "../components/createElement.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { apiDelete, apiGet, apiPost } from "../lib/apiUtils.js";
+import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import { loadFrontendAuthState } from "../lib/frontendAuthState.js";
 import LibrarySidebar from "../components/library/LibrarySidebar.js";
 import LibraryGrid from "../components/library/LibraryGrid.js";
@@ -31,8 +32,8 @@ class Library {
   };
 
   loadFolders = async () => {
-    const data = await getThings(this.getFoldersEndpoint());
-    this.folders = data || [];
+    const result = await apiGet(this.getFoldersEndpoint());
+    this.folders = result.ok && Array.isArray(result.data) ? result.data : [];
     // Reconcile current folder with fresh data (handles deleted/moved folders)
     if (this.currentFolder) {
       const fresh = this.folders.find((f) => f.id == this.currentFolder.id);
@@ -103,9 +104,9 @@ class Library {
       this.grid.showLoading();
     }
 
-    const data = await getThings(this.getImagesEndpoint(50, 0));
-    if (data) {
-      this.grid.setImages(data);
+    const result = await apiGet(this.getImagesEndpoint(50, 0));
+    if (result.ok && result.data) {
+      this.grid.setImages(result.data);
     } else {
       this.grid.hideLoading();
     }
@@ -113,26 +114,26 @@ class Library {
 
   loadImagesForFolder = async (folderId) => {
     this.grid.showLoading();
-    const data = await getThings(this.getFolderImagesEndpoint(folderId));
-    if (data) {
-      this.grid.setImages(data);
+    const result = await apiGet(this.getFolderImagesEndpoint(folderId));
+    if (result.ok && result.data) {
+      this.grid.setImages(result.data);
     } else {
       this.grid.hideLoading();
     }
   };
 
   loadImageCounts = async () => {
-    const data = await getThings(this.getImageCountsEndpoint());
-    if (data && this.grid) {
-      this.grid.setCounts(data);
+    const result = await apiGet(this.getImageCountsEndpoint());
+    if (result.ok && result.data && this.grid) {
+      this.grid.setCounts(result.data);
     }
   };
 
   loadMore = async () => {
     const nextOffset = this.grid.images.length;
-    const data = await getThings(this.getImagesEndpoint(50, nextOffset));
-    if (data) {
-      this.grid.appendImages(data);
+    const result = await apiGet(this.getImagesEndpoint(50, nextOffset));
+    if (result.ok && result.data) {
+      this.grid.appendImages(result.data);
     }
   };
 
@@ -143,11 +144,21 @@ class Library {
   };
 
   createPack = async (payload) => {
-    return await postThing(this.getCreatePackEndpoint(), payload);
+    const result = await apiPost(this.getCreatePackEndpoint(), payload);
+    if (!result.ok) {
+      handleApiFailure(result, { includeResultMessage: true });
+      return null;
+    }
+    return result.ok ? result.data : null;
   };
 
   editPack = async (packId, payload) => {
-    return await postThing(`/api/edit_library_pack/${packId}`, payload);
+    const result = await apiPost(`/api/edit_library_pack/${packId}`, payload);
+    if (!result.ok) {
+      handleApiFailure(result, { includeResultMessage: true });
+      return null;
+    }
+    return result.ok ? result.data : null;
   };
 
   getDiscoverPacksEndpoint = (
@@ -180,10 +191,10 @@ class Library {
       }
       return [];
     }
-    const data = await getThings(
+    const result = await apiGet(
       this.getDiscoverPacksEndpoint(query, 100, 0, options),
     );
-    this.packs = Array.isArray(data) ? data : [];
+    this.packs = result.ok && Array.isArray(result.data) ? result.data : [];
     if (this.grid) {
       this.grid.setPacks(this.packs);
     }
@@ -203,8 +214,9 @@ class Library {
       }
       return [];
     }
-    const data = await getThings(this.getInstalledPacksEndpoint());
-    const installed = Array.isArray(data) ? data : [];
+    const result = await apiGet(this.getInstalledPacksEndpoint());
+    const installed =
+      result.ok && Array.isArray(result.data) ? result.data : [];
     if (this.grid) {
       this.grid.setInstalledPacks(installed);
     }
@@ -213,37 +225,43 @@ class Library {
 
   installPack = async (packId) => {
     if (this.projectId) {
-      return await postThing(
+      const result = await apiPost(
         `/api/install_library_pack_by_project/${this.projectId}/${packId}`,
         {},
       );
+      if (!result.ok) {
+        handleApiFailure(result, { includeResultMessage: true });
+        return null;
+      }
+      return result.ok ? result.data : null;
     }
-    return await postThing(`/api/install_library_pack_by_user/${packId}`, {});
+    const result = await apiPost(`/api/install_library_pack_by_user/${packId}`, {});
+    if (!result.ok) {
+      handleApiFailure(result, { includeResultMessage: true });
+      return null;
+    }
+    return result.ok ? result.data : null;
   };
 
   uninstallPack = async (packId) => {
-    try {
-      const endpoint = this.projectId
-        ? `/api/uninstall_library_pack_by_project/${this.projectId}/${packId}`
-        : `/api/uninstall_library_pack_by_user/${packId}`;
-      const res = await fetch(endpoint, { method: "DELETE" });
-      return res.status === 200;
-    } catch (err) {
-      console.log(err);
+    const endpoint = this.projectId
+      ? `/api/uninstall_library_pack_by_project/${this.projectId}/${packId}`
+      : `/api/uninstall_library_pack_by_user/${packId}`;
+    const result = await apiDelete(endpoint);
+    if (!result.ok) {
+      handleApiFailure(result, { includeResultMessage: true });
       return false;
     }
+    return result.ok && result.status === 200;
   };
 
   removePack = async (packId) => {
-    try {
-      const res = await fetch(`/api/remove_library_pack/${packId}`, {
-        method: "DELETE",
-      });
-      return res.status === 200;
-    } catch (err) {
-      console.log(err);
+    const result = await apiDelete(`/api/remove_library_pack/${packId}`);
+    if (!result.ok) {
+      handleApiFailure(result, { includeResultMessage: true });
       return false;
     }
+    return result.ok && result.status === 200;
   };
 
   getPackImages = async (packId) => {
@@ -254,8 +272,8 @@ class Library {
     const endpoint = `/api/get_library_pack_images/${packId}${
       params.toString() ? `?${params.toString()}` : ""
     }`;
-    const data = await getThings(endpoint);
-    return Array.isArray(data) ? data : [];
+    const result = await apiGet(endpoint);
+    return result.ok && Array.isArray(result.data) ? result.data : [];
   };
 
   getImagePackMemberships = async (imageId) => {
@@ -267,8 +285,8 @@ class Library {
     const endpoint = `/api/get_library_pack_memberships_by_image/${imageId}${
       qs ? `?${qs}` : ""
     }`;
-    const data = await getThings(endpoint);
-    return Array.isArray(data) ? data : [];
+    const result = await apiGet(endpoint);
+    return result.ok && Array.isArray(result.data) ? result.data : [];
   };
 
   addImageToPack = async (packId, imageId, options = {}) => {
@@ -279,19 +297,17 @@ class Library {
     if (typeof options.sort_order === "number") {
       payload.sort_order = options.sort_order;
     }
-    return await postThing("/api/add_library_pack_image", payload);
+    const result = await apiPost("/api/add_library_pack_image", payload);
+    return result.ok ? result.data : null;
   };
 
   removeImageFromPack = async (packImageId) => {
-    try {
-      const res = await fetch(`/api/remove_library_pack_image/${packImageId}`, {
-        method: "DELETE",
-      });
-      return res.status === 200;
-    } catch (err) {
-      console.log(err);
+    const result = await apiDelete(`/api/remove_library_pack_image/${packImageId}`);
+    if (!result.ok) {
+      handleApiFailure(result, { includeResultMessage: true });
       return false;
     }
+    return result.ok && result.status === 200;
   };
 
   getRemoveImageEndpoint = (imageId) => {
@@ -301,23 +317,16 @@ class Library {
   };
 
   removeImageById = async (imageId) => {
-    try {
-      const res = await fetch(this.getRemoveImageEndpoint(imageId), {
-        method: "DELETE",
-      });
-      return res.status === 204;
-    } catch (err) {
-      console.log(err);
-      return false;
-    }
+    const result = await apiDelete(this.getRemoveImageEndpoint(imageId));
+    return result.ok && result.status === 204;
   };
 
   setImageFolder = async (tableImageId, folderId) => {
     const payload = {
       folder_id: folderId === null ? 0 : folderId,
     };
-    const res = await postThing(`/api/edit_table_image/${tableImageId}`, payload);
-    return !!res;
+    const result = await apiPost(`/api/edit_table_image/${tableImageId}`, payload);
+    return result.ok;
   };
 
   addImagesToPack = async (packId, imageIds) => {

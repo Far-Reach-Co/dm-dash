@@ -1,5 +1,5 @@
 import createElement from "../createElement.js";
-import { getThings } from "../../lib/apiUtils.js";
+import { apiDelete, apiGet } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import { buildFolderTree } from "../shared/folderTreeUtils.js";
 import {
@@ -101,13 +101,16 @@ export default class TableSidebarFolderComponent {
       return;
     }
 
-    const foldersData = await getThings(
+    const foldersDataResult = await apiGet(
       getTableFoldersEndpoint({
         projectId: this.projectId,
         tableViewId: this.tableView?.id,
       }),
     );
-    this.folders = foldersData || [];
+    this.folders =
+      foldersDataResult.ok && Array.isArray(foldersDataResult.data)
+        ? foldersDataResult.data
+        : [];
     this.pruneExpandedFolderIds(this.folders);
   };
 
@@ -133,15 +136,8 @@ export default class TableSidebarFolderComponent {
     this.render();
 
     const suffix = buildTableViewQuerySuffix(this.tableView?.id);
-    try {
-      const res = await fetch(`/api/remove_table_folder/${folder.id}${suffix}`, {
-        method: "DELETE",
-      });
-      if (res.status !== 204) {
-        throw new Error(`remove folder failed with status ${res.status}`);
-      }
-    } catch (err) {
-      console.log(err);
+    const deleteResult = await apiDelete(`/api/remove_table_folder/${folder.id}${suffix}`);
+    if (!(deleteResult.ok && deleteResult.status === 204)) {
       window.customAlertError("Failed to remove folder.");
       this.folderLoading = false;
       this.render();

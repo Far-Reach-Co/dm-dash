@@ -2,7 +2,8 @@ import createElement from "./createElement.js";
 import msToTime from "../lib/msToTime.js";
 import state from "../lib/state.js";
 import listItemTitle from "../lib/listItemTitle.js";
-import { deleteThing, postThing } from "../lib/apiUtils.js";
+import { apiDelete, apiPost } from "../lib/apiUtils.js";
+import { handleApiFailure } from "../lib/apiUiFeedback.js";
 
 export default class Clock {
   constructor(props) {
@@ -76,11 +77,19 @@ export default class Clock {
     this.currentTimeDiv.innerHTML = /*html*/ `<div>${twentyFourHourTime}</div> <div style="color: var(--light-gray);">${twelveHourTime}</div>`;
   };
 
-  saveClock = async () => {
-    await postThing(`/api/edit_clock/${this.id}`, {
+  saveClock = async ({ notifyOnError = false } = {}) => {
+    const result = await apiPost(`/api/edit_clock/${this.id}`, {
       title: this.title,
       current_time_in_milliseconds: this.currentTimeInMilliseconds,
     });
+    if (!result.ok && notifyOnError) {
+      handleApiFailure(result, {
+        fallbackMessage: "Failed to save clock",
+        includeResultMessage: true,
+      });
+      return false;
+    }
+    return result.ok;
   };
 
   renderEditClock = () => {
@@ -112,7 +121,7 @@ export default class Clock {
     doneButton.addEventListener("click", async () => {
       this.editTitle(titleInput.value);
       this.toggleEdit();
-      this.saveClock();
+      await this.saveClock({ notifyOnError: true });
     });
     const removeButton = createElement(
       "button",
@@ -126,7 +135,14 @@ export default class Clock {
       );
       if (!confirmed) return;
 
-      deleteThing(`/api/remove_clock/${this.id}`);
+      const result = await apiDelete(`/api/remove_clock/${this.id}`);
+      if (!result.ok) {
+        handleApiFailure(result, {
+          fallbackMessage: "Failed to remove clock",
+          includeResultMessage: true,
+        });
+        return;
+      }
       this.domComponent.remove();
       this.toggleEdit();
     });
@@ -144,7 +160,7 @@ export default class Clock {
 
       this.reset();
       this.toggleEdit();
-      this.saveClock();
+      await this.saveClock({ notifyOnError: true });
     });
     // append
     this.domComponent.append(

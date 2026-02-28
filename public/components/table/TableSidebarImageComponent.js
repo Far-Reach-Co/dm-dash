@@ -1,5 +1,5 @@
 import createElement from "../createElement.js";
-import { getThings, postThing } from "../../lib/apiUtils.js";
+import { apiGet, apiPost } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import imageFollowingCursor from "../imageFollowingCursor.js";
 import detectMob from "../../lib/detectMobile.js";
@@ -224,7 +224,8 @@ export default class TableSidebarImageComponent {
       params.set("table_view_id", String(this.tableView.id));
     }
     const endpoint = `/api/get_image/${image.id}${params.toString() ? `?${params.toString()}` : ""}`;
-    const fetched = await getThings(endpoint);
+    const fetchedResult = await apiGet(endpoint);
+    const fetched = fetchedResult.ok ? fetchedResult.data : null;
     const modalImage = fetched
       ? { ...image, ...fetched, id: image.id }
       : image;
@@ -333,9 +334,9 @@ export default class TableSidebarImageComponent {
 
   updateCountsFromServer = async () => {
     if (!this.onCountsUpdated) return;
-    const counts = await getThings(this.getCountsEndpoint());
-    if (counts) {
-      this.onCountsUpdated(counts);
+    const countsResult = await apiGet(this.getCountsEndpoint());
+    if (countsResult.ok && countsResult.data) {
+      this.onCountsUpdated(countsResult.data);
     }
   };
 
@@ -405,12 +406,13 @@ export default class TableSidebarImageComponent {
       this.activeQueryKey = requestKey;
     }
 
-    const data = await getThings(this.getPaginatedImagesEndpoint(offset));
+    const dataResult = await apiGet(this.getPaginatedImagesEndpoint(offset));
     this.loadingPage = false;
 
-    if (!data || this.activeQueryKey !== requestKey) {
+    if (!dataResult.ok || !dataResult.data || this.activeQueryKey !== requestKey) {
       return;
     }
+    const data = dataResult.data;
 
     const imageList = await Promise.all(
       (data.images || []).map(async (tableImage) => {
@@ -448,11 +450,11 @@ export default class TableSidebarImageComponent {
             event: async (e) => {
               const nextName = e.target.value;
               const prevName = image.original_name;
-              const response = await postThing(`/api/edit_image_name/${image.id}`, {
+              const response = await apiPost(`/api/edit_image_name/${image.id}`, {
                 original_name: e.target.value,
                 table_view_id: this.tableView?.id,
               });
-              if (!response) {
+              if (!response.ok) {
                 image.original_name = prevName;
                 e.target.value = prevName;
                 return;

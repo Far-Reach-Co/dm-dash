@@ -1,5 +1,6 @@
 import createElement from "../createElement.js";
-import { postThing } from "../../lib/apiUtils.js";
+import { apiPost } from "../../lib/apiUtils.js";
+import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import modal from "../modal.js";
 import { uploadImageWithContext } from "../../lib/imageUtils.js";
@@ -44,9 +45,9 @@ export default class LibrarySidebar {
 
   postByContext = (projectEndpoint, userEndpoint, data) => {
     if (this.projectId) {
-      return postThing(projectEndpoint, { ...data, project_id: this.projectId });
+      return apiPost(projectEndpoint, { ...data, project_id: this.projectId });
     }
-    return postThing(userEndpoint, data);
+    return apiPost(userEndpoint, data);
   };
 
   uploadImage = async (file, signal = null) => {
@@ -59,13 +60,19 @@ export default class LibrarySidebar {
 
     if (!newImage) return null;
 
-    const tableImage = await this.postByContext(
+    const tableImageResult = await this.postByContext(
       "/api/add_table_image_by_project",
       "/api/add_table_image_by_user",
       { image_id: newImage.id, folder_id: this.getCurrentFolderId() }
     );
 
-    return tableImage ? { image: newImage, tableImage } : null;
+    if (!tableImageResult.ok) {
+      handleApiFailure(tableImageResult, { includeResultMessage: true });
+      return null;
+    }
+    return tableImageResult.ok
+      ? { image: newImage, tableImage: tableImageResult.data }
+      : null;
   };
 
   addFilesToQueue = (files) => {

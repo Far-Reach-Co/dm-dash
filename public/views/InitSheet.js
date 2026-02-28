@@ -1,4 +1,5 @@
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { apiGet, apiPost } from "../lib/apiUtils.js";
+import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import { loadFrontendAuthState } from "../lib/frontendAuthState.js";
 import FiveEPlayerSheet from "../components/character_sheet/5ePlayerSheet.js";
 
@@ -118,8 +119,11 @@ class InitSheet {
   };
 
   loadGeneralData = async (id, maxAttempts = 3) => {
+    let lastResult = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const sheetDoc = await getThings(`/api/sheets/${id}`);
+      const sheetDocResult = await apiGet(`/api/sheets/${id}`);
+      lastResult = sheetDocResult;
+      const sheetDoc = sheetDocResult.ok ? sheetDocResult.data : null;
       if (sheetDoc) {
         const generalData = normalizeSheetDocToLegacyGeneralData(sheetDoc, id);
         return ensureLegacyGeneralDataShape(generalData, id);
@@ -128,6 +132,12 @@ class InitSheet {
       if (attempt < maxAttempts) {
         await this.sleep(200 * attempt);
       }
+    }
+    if (lastResult && !lastResult.ok) {
+      handleApiFailure(lastResult, {
+        fallbackMessage: "Unable to load character sheet",
+        includeResultMessage: true,
+      });
     }
     return null;
   };
@@ -168,16 +178,41 @@ class InitSheet {
     if (!this.isCurrentUserOwner(generalData.user_id)) {
       const invite = searchParams.get("invite");
       if (invite) {
-        const inviteValid = await getThings(
+        const inviteValidResult = await apiGet(
           `/api/get_player_invite_by_uuid/${invite}`
         );
+        if (!inviteValidResult.ok) {
+          handleApiFailure(inviteValidResult, {
+            fallbackMessage: "Failed to validate invite link",
+            includeResultMessage: true,
+          });
+          return;
+        }
+        const inviteValid = inviteValidResult.ok ? inviteValidResult.data : null;
         if (inviteValid) {
           // check if user is already a playerUser
-          const playerUser = await getThings(
+          const playerUserResult = await apiGet(
             `/api/get_player_user_by_user_and_player/${id}`
           );
+          if (!playerUserResult.ok) {
+            handleApiFailure(playerUserResult, {
+              fallbackMessage: "Failed to verify invite access",
+              includeResultMessage: true,
+            });
+            return;
+          }
+          const playerUser = playerUserResult.ok ? playerUserResult.data : null;
           if (!playerUser) {
-            await postThing("/api/add_player_user", { player_id: id });
+            const addPlayerUserResult = await apiPost("/api/add_player_user", {
+              player_id: id,
+            });
+            if (!addPlayerUserResult.ok) {
+              handleApiFailure(addPlayerUserResult, {
+                fallbackMessage: "Failed to join this character sheet",
+                includeResultMessage: true,
+              });
+              return;
+            }
           }
           // clean params
           searchParams.delete("invite");

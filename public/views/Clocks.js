@@ -1,5 +1,6 @@
 import Clock from "../components/Clock.js";
-import { getThings, postThing } from "../lib/apiUtils.js";
+import { apiGet, apiPost } from "../lib/apiUtils.js";
+import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import createElement from "./createElement.js";
 import renderLoadingWithMessage from "../lib/loadingWithMessage.js";
 import state from "../lib/state.js";
@@ -20,7 +21,17 @@ export default class ClocksView {
     const clockElements = [];
 
     var projectId = state.currentProject.id;
-    const clockData = await getThings(`/api/get_clocks/${projectId}`);
+    const clockDataResult = await apiGet(`/api/get_clocks/${projectId}`);
+    if (!clockDataResult.ok) {
+      handleApiFailure(clockDataResult, {
+        fallbackMessage: "Failed to load clocks",
+        includeResultMessage: true,
+      });
+    }
+    const clockData =
+      clockDataResult.ok && Array.isArray(clockDataResult.data)
+        ? clockDataResult.data
+        : [];
     if (clockData) state.clocks = clockData;
     // render
     clockData.forEach((clock) => {
@@ -46,11 +57,19 @@ export default class ClocksView {
     if (!state.clocks) return;
 
     var projectId = state.currentProject.id;
-    const resData = await postThing("/api/add_clock", {
+    const resDataResult = await apiPost("/api/add_clock", {
       title: "New Clock",
       current_time_in_milliseconds: 0,
       project_id: projectId,
     });
+    if (!resDataResult.ok) {
+      handleApiFailure(resDataResult, {
+        fallbackMessage: "Failed to create clock",
+        includeResultMessage: true,
+      });
+      return;
+    }
+    const resData = resDataResult.ok ? resDataResult.data : null;
     if (resData) {
       const clock = resData;
       const clockComponentDomElement = createElement("div", {

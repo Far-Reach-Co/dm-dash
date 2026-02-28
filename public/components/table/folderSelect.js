@@ -1,5 +1,5 @@
 import createElement from "../createElement.js";
-import { getThings } from "../../lib/apiUtils.js";
+import { apiGet } from "../../lib/apiUtils.js";
 import { getTableFoldersEndpoint } from "./tableApi.js";
 
 async function renderFolderSelectOptions(foldersData) {
@@ -14,8 +14,11 @@ async function renderFolderSelectOptions(foldersData) {
 }
 
 export default async function renderFolderSelect(tableImage, projectId) {
+  const foldersResult = await apiGet(getTableFoldersEndpoint({ projectId }));
   const foldersData =
-    (await getThings(getTableFoldersEndpoint({ projectId }))) || [];
+    foldersResult.ok && Array.isArray(foldersResult.data)
+      ? foldersResult.data
+      : [];
 
   // get current value
   let currentFolderValue = 0;

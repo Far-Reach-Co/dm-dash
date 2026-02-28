@@ -1,5 +1,6 @@
 import createElement from "../../components/createElement.js";
-import { deleteThing, getThings, postThing } from "../../lib/apiUtils.js";
+import { apiDelete, apiGet, apiPost } from "../../lib/apiUtils.js";
+import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import projectSelect from "../../components/projectSelect.js";
 import { copyTextToClipboard } from "../../lib/clipboard.js";
 
@@ -18,29 +19,26 @@ export default class SheetSettings {
   };
 
   addInviteLink = async () => {
-    try {
-      const res = await fetch(`/api/add_player_invite`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          player_id: this.generalData.id,
-        }),
+    const res = await apiPost(`/api/add_player_invite`, {
+      player_id: this.generalData.id,
+    });
+    if (res.ok && res.status === 201) {
+      this.render();
+      return;
+    }
+    if (!res.ok) {
+      handleApiFailure(res, {
+        fallbackMessage: "There was a problem creating your invite link",
+        includeResultMessage: true,
       });
-      if (res.status === 201) {
-        this.render();
-      } else throw new Error();
-    } catch (err) {
-      console.log(err);
-      window.customAlertError("There was a problem creating your invite link");
     }
   };
 
   renderInviteLinkComponent = async () => {
-    const playerInvite = await getThings(
+    const playerInviteResult = await apiGet(
       `/api/get_player_invite_by_player/${this.generalData.id}`,
     );
+    const playerInvite = playerInviteResult.ok ? playerInviteResult.data : null;
     if (!playerInvite) {
       return createElement("div", { class: "form-section" }, [
         createElement("h2", { class: "text-orange" }, "Share Invite Link"),
@@ -58,10 +56,16 @@ export default class SheetSettings {
           }),
           createElement("button", { class: "btn-red" }, "Revoke Access", {
             type: "click",
-            event: () => {
-              deleteThing(
+            event: async () => {
+              const result = await apiDelete(
                 `/api/remove_player_users_by_player/${this.generalData.id}`,
               );
+              if (!result.ok) {
+                handleApiFailure(result, {
+                  fallbackMessage: "Failed to revoke access",
+                  includeResultMessage: true,
+                });
+              }
             },
           }),
         ]),
@@ -103,7 +107,14 @@ export default class SheetSettings {
         );
         if (!confirmed) return;
 
-        await deleteThing(`/api/remove_player_invite/${playerInvite.id}`);
+        const result = await apiDelete(`/api/remove_player_invite/${playerInvite.id}`);
+        if (!result.ok) {
+          handleApiFailure(result, {
+            fallbackMessage: "Failed to delete invite link",
+            includeResultMessage: true,
+          });
+          return;
+        }
         this.render();
       });
 
@@ -129,10 +140,16 @@ export default class SheetSettings {
         createElement("div", { class: "form-actions", style: "margin-top: var(--space-md);" }, [
           createElement("button", { class: "btn-red" }, "Revoke Access", {
             type: "click",
-            event: () => {
-              deleteThing(
+            event: async () => {
+              const result = await apiDelete(
                 `/api/remove_player_users_by_player/${this.generalData.id}`,
               );
+              if (!result.ok) {
+                handleApiFailure(result, {
+                  fallbackMessage: "Failed to revoke access",
+                  includeResultMessage: true,
+                });
+              }
             },
           }),
         ]),
@@ -146,17 +163,35 @@ export default class SheetSettings {
   };
 
   renderCurrentConnections = async () => {
-    const projectPlayerIds = await getThings(
+    const projectPlayerIdsResult = await apiGet(
       `/api/get_project_players_by_player/${this.generalData.id}`,
     );
+    if (!projectPlayerIdsResult.ok) {
+      handleApiFailure(projectPlayerIdsResult, {
+        fallbackMessage: "Failed to load connected Wyrlds",
+        includeResultMessage: true,
+      });
+    }
+    const projectPlayerIds =
+      projectPlayerIdsResult.ok && Array.isArray(projectPlayerIdsResult.data)
+        ? projectPlayerIdsResult.data
+        : [];
     if (!projectPlayerIds.length)
       return [createElement("small", {}, "None...")];
 
     return await Promise.all(
       projectPlayerIds.map(async (projectPlayer) => {
-        const project = await getThings(
+        const projectResult = await apiGet(
           `/api/get_project/${projectPlayer.project_id}`,
         );
+        if (!projectResult.ok) {
+          handleApiFailure(projectResult, {
+            fallbackMessage: "Failed to load Wyrld details",
+            includeResultMessage: true,
+          });
+          return null;
+        }
+        const project = projectResult.ok ? projectResult.data : null;
         if (project) {
           const elem = createElement(
             "div",
@@ -173,9 +208,16 @@ export default class SheetSettings {
                 {
                   type: "click",
                   event: async () => {
-                    deleteThing(
+                    const result = await apiDelete(
                       `/api/remove_project_player/${projectPlayer.id}`,
                     );
+                    if (!result.ok) {
+                      handleApiFailure(result, {
+                        fallbackMessage: "Failed to remove connection",
+                        includeResultMessage: true,
+                      });
+                      return;
+                    }
                     elem.remove();
                   },
                 },
@@ -193,7 +235,13 @@ export default class SheetSettings {
     const formProps = Object.fromEntries(formData);
     formProps.player_id = this.generalData.id;
     if (Object.values(formProps)[0] != 0) {
-      await postThing(`/api/add_project_player`, formProps);
+      const result = await apiPost(`/api/add_project_player`, formProps);
+      if (!result.ok) {
+        handleApiFailure(result, {
+          fallbackMessage: "Failed to add connection",
+          includeResultMessage: true,
+        });
+      }
     }
   };
 
@@ -283,9 +331,16 @@ export default class SheetSettings {
                 );
                 if (!confirmed) return;
 
-                await deleteThing(
-                  `/api/remove_player_user_by_user_and_player${this.generalData.id}`,
+                const result = await apiDelete(
+                  `/api/remove_player_user_by_user_and_player/${this.generalData.id}`,
                 );
+                if (!result.ok) {
+                  handleApiFailure(result, {
+                    fallbackMessage: "Failed to disconnect character sheet",
+                    includeResultMessage: true,
+                  });
+                  return;
+                }
                 window.location.pathname = "/dash";
               },
             }),
@@ -313,15 +368,19 @@ export default class SheetSettings {
         createElement("button", {}, "Duplicate", {
           type: "click",
           event: async () => {
-            const res = await postThing("/api/duplicate_5e_character", {
+            const res = await apiPost("/api/duplicate_5e_character", {
               general_id: this.generalData.id,
             });
-            if (res.general_id) {
+            if (res.ok && res.data?.general_id) {
               window.customAlert(
                 "Your character sheet has been successfully duplicated!",
               );
-            } else
-              window.customAlertError("Something went wrong when attempting to duplicate!");
+            } else {
+              handleApiFailure(res, {
+                fallbackMessage: "Something went wrong when attempting to duplicate!",
+                includeResultMessage: true,
+              });
+            }
           },
         }),
       ]),
@@ -389,9 +448,16 @@ export default class SheetSettings {
             );
             if (!confirmed) return;
 
-            await deleteThing(
+            const result = await apiDelete(
               `/api/remove_5e_character/${this.generalData.id}`,
             );
+            if (!result.ok) {
+              handleApiFailure(result, {
+                fallbackMessage: "Failed to delete character",
+                includeResultMessage: true,
+              });
+              return;
+            }
             window.location.pathname = "/dash";
           },
         }),

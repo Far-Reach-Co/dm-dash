@@ -1,10 +1,14 @@
 import createElement from "../createElement.js";
-import { getThings } from "../../lib/apiUtils.js";
+import { apiGet } from "../../lib/apiUtils.js";
 import { getTablesEndpoint } from "./tableApi.js";
 
 export default async function tableSelect() {
   async function renderTableSelectOptions() {
-    const tables = (await getThings(getTablesEndpoint())) || [];
+    const tablesResult = await apiGet(getTablesEndpoint());
+    const tables =
+      tablesResult.ok && Array.isArray(tablesResult.data)
+        ? tablesResult.data
+        : [];
 
     const tableElemList = [];
 

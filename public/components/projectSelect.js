@@ -1,9 +1,13 @@
 import createElement from "./createElement.js";
-import { getThings } from "../lib/apiUtils.js";
+import { apiGet } from "../lib/apiUtils.js";
 
 export default async function projectSelect() {
   async function renderProjectSelectOptions() {
-    let projects = await getThings(`/api/get_projects`);
+    const projectsResult = await apiGet(`/api/get_projects`);
+    const projects =
+      projectsResult.ok && Array.isArray(projectsResult.data)
+        ? projectsResult.data
+        : [];
 
     const projectElemList = [];
 
