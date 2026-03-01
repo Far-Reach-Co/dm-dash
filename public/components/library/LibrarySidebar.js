@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import { apiPost } from "../../lib/apiUtils.js";
 import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
@@ -7,11 +7,16 @@ import { uploadImageWithContext } from "../../lib/imageUtils.js";
 import { filterFabricCompatibleImageFiles } from "../shared/fabricUploadUtils.js";
 import { dedupeUploadFiles } from "../shared/uploadQueueUtils.js";
 import { renderUploadQueueModal } from "../shared/uploadQueueModal.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class LibrarySidebar {
+export default class LibrarySidebar extends Component {
   constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "library-sidebar";
+    super({
+      domElem: props.domElem,
+      autoInit: false,
+      autoRender: false,
+    });
+    this.domElem.className = "library-sidebar";
     this.libraryApp = props.libraryApp;
     this.projectId = props.projectId;
     this.activeTab = props.activeTab || "images";
@@ -365,14 +370,8 @@ export default class LibrarySidebar {
   };
 
   render = async () => {
-    // Clear children safely using DOM API
-    while (this.domComponent.firstChild) {
-      this.domComponent.removeChild(this.domComponent.firstChild);
-    }
-
     if (this.folderLoading) {
-      this.domComponent.append(renderLoadingWithMessage(""));
-      return;
+      return [renderLoadingWithMessage("")];
     }
 
     if (!this.canUseLibraryPacks && this.activeTab === "packs") {
@@ -381,9 +380,9 @@ export default class LibrarySidebar {
 
     const isImagesTab = this.activeTab === "images" || !this.canUseLibraryPacks;
     const isSelectMode = !!this.libraryApp?.grid?.selectMode;
-    this.domComponent.append(
+    return [
       this.renderSearchSection({ isImagesTab }),
       this.renderActionsSection({ isImagesTab, isSelectMode }),
-    );
+    ];
   };
 }

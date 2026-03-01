@@ -1,13 +1,16 @@
-import createElement from "../components/createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
 import { apiDelete, apiGet, apiPost } from "../lib/apiUtils.js";
 import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import { loadFrontendAuthState } from "../lib/frontendAuthState.js";
 import LibrarySidebar from "../components/library/LibrarySidebar.js";
 import LibraryGrid from "../components/library/LibraryGrid.js";
+import Component from "../lib/salt-lib/Component.js";
 
-class Library {
+class Library extends Component {
   constructor() {
-    this.domComponent = document.getElementById("app");
+    super({
+      domElem: document.getElementById("app"),
+    });
     this.sidebar = null;
     this.grid = null;
     this.folders = [];
@@ -21,9 +24,57 @@ class Library {
     this.canUseLibraryPacks = false;
     this.scopeName = this.projectId ? "Wyrld Library" : "My Library";
     this.scopeType = this.projectId ? "project" : "user";
-
-    this.init();
   }
+
+  ensureSidebar = () => {
+    const sidebar = this.useChild(
+      "library-sidebar",
+      () =>
+        new LibrarySidebar({
+          domElem: createElement("div"),
+          libraryApp: this,
+          projectId: this.projectId,
+          activeTab: this.currentSidebarTab,
+          canUseLibraryPacks: this.canUseLibraryPacks,
+        }),
+      (child) => {
+        child.libraryApp = this;
+        child.projectId = this.projectId;
+        child.activeTab = this.currentSidebarTab;
+        child.canUseLibraryPacks = this.canUseLibraryPacks;
+      },
+    );
+
+    this.sidebar = sidebar;
+    return sidebar;
+  };
+
+  ensureGrid = () => {
+    const grid = this.useChild(
+      "library-grid",
+      () =>
+        new LibraryGrid({
+          domElem: createElement("div"),
+          libraryApp: this,
+          projectId: this.projectId,
+          viewMode: this.currentSidebarTab,
+          canUseLibraryPacks: this.canUseLibraryPacks,
+          scopeName: this.scopeName,
+          scopeType: this.scopeType,
+        }),
+      (child) => {
+        child.libraryApp = this;
+        child.projectId = this.projectId;
+        child.viewMode = this.currentSidebarTab;
+        child.canUseLibraryPacks = this.canUseLibraryPacks;
+        child.scopeName = this.scopeName;
+        child.scopeType = this.scopeType;
+      },
+    );
+
+    this.grid = grid;
+    return grid;
+  };
 
   getFoldersEndpoint = () => {
     return this.projectId
@@ -387,27 +438,9 @@ class Library {
       authState.scopeType || (this.projectId ? "project" : "user");
     document.title = `Image Library · ${this.scopeName} | Far Reach Co.`;
 
-    this.sidebar = new LibrarySidebar({
-      domComponent: createElement("div"),
-      libraryApp: this,
-      projectId: this.projectId,
-      activeTab: this.currentSidebarTab,
-      canUseLibraryPacks: this.canUseLibraryPacks,
-    });
-
-    this.grid = new LibraryGrid({
-      domComponent: createElement("div"),
-      libraryApp: this,
-      projectId: this.projectId,
-      viewMode: this.currentSidebarTab,
-      canUseLibraryPacks: this.canUseLibraryPacks,
-      scopeName: this.scopeName,
-      scopeType: this.scopeType,
-    });
-
-    this.render();
-    await this.sidebar.render();
-    this.grid.render();
+    this.ensureSidebar();
+    this.ensureGrid();
+    await this.render();
     await this.loadFolders();
     await this.loadImages();
     await this.loadImageCounts();
@@ -421,18 +454,19 @@ class Library {
     }
   };
 
-  render = () => {
-    // Clear children safely using DOM API
-    while (this.domComponent.firstChild) {
-      this.domComponent.removeChild(this.domComponent.firstChild);
-    }
+  render = async () => {
+    const sidebar = this.ensureSidebar();
+    const grid = this.ensureGrid();
+
+    await sidebar.render();
+    await grid.render();
 
     const layout = createElement("div", { class: "library-layout" }, [
-      this.sidebar.domComponent,
-      this.grid.domComponent,
+      sidebar.domElem,
+      grid.domElem,
     ]);
 
-    this.domComponent.append(layout);
+    return [layout];
   };
 }
 

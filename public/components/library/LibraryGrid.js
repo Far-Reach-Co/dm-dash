@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import modal from "../modal.js";
 import renderImageSettingsModal from "../shared/imageSettingsModal.js";
 import { apiDelete } from "../../lib/apiUtils.js";
@@ -21,11 +21,16 @@ import {
   isPackLockedForScope as isPackLockedForScopeShared,
   isPackOwnedByScope,
 } from "../shared/libraryPackUtils.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class LibraryGrid {
+export default class LibraryGrid extends Component {
   constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "library-content";
+    super({
+      domElem: props.domElem,
+      autoInit: false,
+      autoRender: false,
+    });
+    this.domElem.className = "library-content";
     this.libraryApp = props.libraryApp;
     this.projectId = props.projectId;
     this.scopeName =
@@ -779,25 +784,32 @@ export default class LibraryGrid {
 
   renderGridElement = () => {
     if (this.loading) {
-      const skeletons = [];
-      const skeletonCount = 12;
-      for (let i = 0; i < skeletonCount; i += 1) {
-        skeletons.push(
-          createElement(
-            "div",
-            { class: "library-card library-skeleton" },
-            [
-              createElement("div", {
-                class: "library-card-thumb library-skeleton-thumb",
-              }),
-              createElement("div", { class: "library-card-info" }, [
-                createElement("div", { class: "library-skeleton-line" }),
-                createElement("div", { class: "library-skeleton-line short" }),
-              ]),
-            ],
-          ),
-        );
-      }
+      const skeletons = this.useMemo(
+        "loading-skeletons",
+        () => {
+          const nextSkeletons = [];
+          const skeletonCount = 12;
+          for (let i = 0; i < skeletonCount; i += 1) {
+            nextSkeletons.push(
+              createElement(
+                "div",
+                { class: "library-card library-skeleton" },
+                [
+                  createElement("div", {
+                    class: "library-card-thumb library-skeleton-thumb",
+                  }),
+                  createElement("div", { class: "library-card-info" }, [
+                    createElement("div", { class: "library-skeleton-line" }),
+                    createElement("div", { class: "library-skeleton-line short" }),
+                  ]),
+                ],
+              ),
+            );
+          }
+          return nextSkeletons;
+        },
+        [],
+      );
       return createElement("div", { class: "library-grid" }, skeletons);
     }
 
@@ -835,22 +847,16 @@ export default class LibraryGrid {
   };
 
   render = () => {
-    while (this.domComponent.firstChild) {
-      this.domComponent.removeChild(this.domComponent.firstChild);
-    }
-
     const packsMode = this.viewMode === "packs";
-    this.domComponent.append(this.renderHeader());
-
     if (packsMode) {
-      this.domComponent.append(this.renderPacksSectionElement());
-      return;
+      return [this.renderHeader(), this.renderPacksSectionElement()];
     }
 
-    this.domComponent.append(
+    return [
+      this.renderHeader(),
       this.renderBulkToolbarElement(),
       this.renderFolderTreeElement(),
       this.renderGridElement(),
-    );
+    ];
   };
 }
