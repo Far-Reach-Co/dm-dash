@@ -1,12 +1,17 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import { apiDelete, apiGet, apiPost } from "../../lib/apiUtils.js";
 import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import projectSelect from "../../components/projectSelect.js";
 import { copyTextToClipboard } from "../../lib/clipboard.js";
 
-export default class SheetSettings {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class SheetSettings extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.currentUserId = props.currentUserId || null;
 
@@ -303,14 +308,13 @@ export default class SheetSettings {
   };
 
   render = async () => {
-    this.domComponent.replaceChildren();
-    this.domComponent.className = "page-form";
-    this.domComponent.style.maxWidth = "480px";
+    this.domElem.className = "page-form";
+    this.domElem.style.maxWidth = "480px";
 
     const exportSection = this.renderExportSection();
 
     if (!this.isCurrentUserOwner()) {
-      return this.domComponent.append(
+      return [
         exportSection,
         createElement("div", { class: "form-section" }, [
           createElement("h2", { class: "text-orange" }, "Disconnect"),
@@ -346,7 +350,7 @@ export default class SheetSettings {
             }),
           ]),
         ]),
-      );
+      ];
     }
 
     if (this.connect) {
@@ -464,12 +468,12 @@ export default class SheetSettings {
       ]),
     ]);
 
-    this.domComponent.append(
+    return [
       exportSection,
       inviteSection,
       duplicateSection,
       connectionsSection,
       deleteSection,
-    );
+    ];
   };
 }

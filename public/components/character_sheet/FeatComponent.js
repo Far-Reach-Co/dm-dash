@@ -1,5 +1,6 @@
 import getDataByQuery from "../../lib/getDataByQuery.js";
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import {
   getSheet,
@@ -24,12 +25,16 @@ fetch("/lib/data/2014/5e-srd-traits.json")
     featSuggestions = [...featSuggestions, ...data];
   });
 
-export default class FeatComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className =
+export default class FeatComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
+    this.domElem.className =
       "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
-    this.domComponent.style = "max-width: 100%;";
+    this.domElem.style = "max-width: 100%;";
     this.general_id = props.general_id;
 
     this.newLoading = false;
@@ -83,19 +88,19 @@ export default class FeatComponent {
   renderFeatElems = async () => {
     // check if we have some components instantiated already
     if (this.featElements.length) {
-      return this.featElements.map((item) => item.domComponent);
+      return this.featElements.map((item) => item.domElem);
     }
 
     const sheetData = await getSheet(this.general_id);
     const featsData = sortByNumericId(readSheetArraySection(sheetData, "feats"));
-    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    this.domElem.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!featsData.length) return [createElement("small", {}, "None...")];
 
     return featsData.map((item) => {
       const elem = createElement("div");
       const featElement = new SingleFeatComponent({
         parentRemoveItem: this.removeItem,
-        domComponent: elem,
+        domElem: elem,
         renderTypeSelectOptions: this.renderTypeSelectOptions,
         general_id: this.general_id,
         id: item.id,
@@ -111,13 +116,11 @@ export default class FeatComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+      return [renderLoadingWithMessage("Loading...")];
     }
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         {
@@ -161,13 +164,17 @@ export default class FeatComponent {
           event: this.newFeat,
         },
       ),
-    );
+    ];
   };
 }
 
-class SingleFeatComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+class SingleFeatComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.parentRemoveItem = props.parentRemoveItem;
     this.renderTypeSelectOptions = props.renderTypeSelectOptions;
     this.general_id = props.general_id;
@@ -347,12 +354,10 @@ class SingleFeatComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     // dynamically create suggestion divs on document body
     this.renderSuggestionElem();
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         {
@@ -472,6 +477,6 @@ class SingleFeatComponent {
           createElement("hr"),
         ],
       ),
-    );
+    ];
   };
 }

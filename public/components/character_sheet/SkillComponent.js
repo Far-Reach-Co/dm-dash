@@ -1,10 +1,15 @@
-import createElement from "../createElement";
-import calculateColorMod from "./calculateColorMod";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
+import calculateColorMod from "./calculateColorMod.js";
 
-export default class SkillComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "proficiency-item";
+export default class SkillComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+      className: "proficiency-item",
+    });
+
     this.updateProficiencyInfo = props.updateProficiencyInfo;
     this.calculateProficiency = props.calculateProficiency;
 
@@ -21,7 +26,7 @@ export default class SkillComponent {
   };
 
   renderModView = () => {
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         {
@@ -87,17 +92,17 @@ export default class SkillComponent {
           createElement("small", { class: "font-smaller" }, ` (mod)`),
         ]
       )
-    );
+    ];
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
+    this.domElem.className = "proficiency-item";
 
     if (this.modView) {
       return this.renderModView();
     }
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         {
@@ -162,6 +167,6 @@ export default class SkillComponent {
           ` (${this.skill.ability.substring(0, 3)})`
         ),
       ])
-    );
+    ];
   };
 }

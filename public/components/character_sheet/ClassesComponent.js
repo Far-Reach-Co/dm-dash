@@ -1,4 +1,5 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
 import {
   getSheet,
@@ -9,10 +10,14 @@ import {
   updateSheetItem,
 } from "../../lib/sheetApi.js";
 
-export default class ClassesComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className =
+export default class ClassesComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
+    this.domElem.className =
       "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
     this.general_id = props.general_id;
 
@@ -73,7 +78,7 @@ export default class ClassesComponent {
   renderClassesElems = async () => {
     const sheetData = await getSheet(this.general_id);
     const classesData = sortByNumericId(readSheetArraySection(sheetData, "classes"));
-    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    this.domElem.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!classesData.length) return [createElement("small", {}, "None...")];
 
     this.classesData = classesData;
@@ -214,13 +219,11 @@ export default class ClassesComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+      return [renderLoadingWithMessage("Loading...")];
     }
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         { class: "special-font align-self-center" },
@@ -256,6 +259,6 @@ export default class ClassesComponent {
           event: this.newClassItem,
         },
       ),
-    );
+    ];
   };
 }

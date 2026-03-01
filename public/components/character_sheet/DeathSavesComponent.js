@@ -1,8 +1,13 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class DeathSavesComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class DeathSavesComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateGeneralValue = props.updateGeneralValue;
 
@@ -16,10 +21,9 @@ export default class DeathSavesComponent {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.className = "cp-info-container-column";
+    this.domElem.className = "cp-info-container-column";
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         { class: "special-font align-self-center" },
@@ -95,6 +99,6 @@ export default class DeathSavesComponent {
           ),
         ]),
       ])
-    );
+    ];
   };
 }

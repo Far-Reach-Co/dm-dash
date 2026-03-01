@@ -1,12 +1,17 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import {
   calculateAbilityScoreModifier,
   calculateProBonus,
 } from "./characterCalculations.js";
 
-export default class SavingThrowsComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class SavingThrowsComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateProficiencyInfo = props.updateProficiencyInfo;
     this.onUpdate = props.onUpdate;
@@ -26,8 +31,7 @@ export default class SavingThrowsComponent {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.className = "cp-info-container-column";
+    this.domElem.className = "cp-info-container-column";
 
     const savingThrows = [
       { title: "Strength", key: "sv_str", ability: "strength" },
@@ -38,13 +42,13 @@ export default class SavingThrowsComponent {
       { title: "Charisma", key: "sv_cha", ability: "charisma" },
     ];
 
-    this.domComponent.appendChild(
+    const rows = [
       createElement(
         "div",
         { class: "special-font align-self-center" },
         "Saving Throws"
       )
-    );
+    ];
 
     savingThrows.forEach((save) => {
       const elem = createElement("div", { class: "proficiency-item" }, [
@@ -75,7 +79,9 @@ export default class SavingThrowsComponent {
         ),
         createElement("small", { class: "proficiency-item-title" }, save.title),
       ]);
-      this.domComponent.appendChild(elem);
+      rows.push(elem);
     });
+
+    return rows;
   };
 }

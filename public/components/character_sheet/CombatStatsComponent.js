@@ -1,8 +1,13 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class CombatStatsComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class CombatStatsComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateGeneralValue = props.updateGeneralValue;
     this.hpComponent = props.hpComponent;
@@ -33,10 +38,9 @@ export default class CombatStatsComponent {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.className = "cp-info-container-column";
+    this.domElem.className = "cp-info-container-column";
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         { class: "d-flex flex-wrap justify-content-center" },
@@ -121,9 +125,9 @@ export default class CombatStatsComponent {
             ),
             createElement("small", {}, "Hit Dice"),
           ]),
-          this.hpComponent.domComponent,
+          this.hpComponent.domElem,
         ]
       )
-    );
+    ];
   };
 }

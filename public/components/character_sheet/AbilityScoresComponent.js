@@ -1,9 +1,14 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import { calculateAbilityScoreModifier } from "./characterCalculations.js";
 
-export default class AbilityScoresComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class AbilityScoresComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateGeneralValue = props.updateGeneralValue;
     this.onUpdate = props.onUpdate;
@@ -12,8 +17,7 @@ export default class AbilityScoresComponent {
   }
 
   render = () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.className = "d-flex flex-wrap mb-3";
+    this.domElem.className = "d-flex flex-wrap mb-3";
 
     const abilityScores = [
       { title: "Strength", key: "strength" },
@@ -24,7 +28,7 @@ export default class AbilityScoresComponent {
       { title: "Charisma", key: "charisma" },
     ];
 
-    const elements = abilityScores.map((ability) => {
+    return abilityScores.map((ability) => {
       return createElement(
         "div",
         { class: "cp-content-container-center border-rounded" },
@@ -57,7 +61,5 @@ export default class AbilityScoresComponent {
         ]
       );
     });
-
-    elements.forEach((el) => this.domComponent.appendChild(el));
   };
 }

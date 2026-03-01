@@ -1,4 +1,5 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
 import {
   getSheet,
@@ -9,10 +10,14 @@ import {
   updateSheetItem,
 } from "../../lib/sheetApi.js";
 
-export default class OtherProLangComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className =
+export default class OtherProLangComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
+    this.domElem.className =
       "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
     this.general_id = props.general_id;
 
@@ -55,7 +60,7 @@ export default class OtherProLangComponent {
     const otherProLangsData = sortByNumericId(
       readSheetArraySection(sheetData, "otherProLangs"),
     );
-    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    this.domElem.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!otherProLangsData.length)
       return [createElement("small", {}, "None...")];
 
@@ -140,13 +145,11 @@ export default class OtherProLangComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+      return [renderLoadingWithMessage("Loading...")];
     }
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         { class: "special-font align-self-center" },
@@ -175,6 +178,6 @@ export default class OtherProLangComponent {
           event: this.newOtherProLang,
         },
       ),
-    );
+    ];
   };
 }

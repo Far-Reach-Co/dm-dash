@@ -1,7 +1,9 @@
+import createElement from "../lib/salt-lib/createElement.js";
 import { apiGet, apiPost } from "../lib/apiUtils.js";
 import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import { loadFrontendAuthState } from "../lib/frontendAuthState.js";
 import FiveEPlayerSheet from "../components/character_sheet/5ePlayerSheet.js";
+import Component from "../lib/salt-lib/Component.js";
 
 function toObject(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return {};
@@ -59,13 +61,18 @@ function ensureLegacyGeneralDataShape(generalData, fallbackId) {
   };
 }
 
-class InitSheet {
+class InitSheet extends Component {
   constructor() {
-    this.appComponent = document.getElementById("app");
-    this.elem = document.createElement("div");
-    this.appComponent.appendChild(this.elem);
+    const appElem = document.getElementById("app");
+    if (!appElem) {
+      throw new Error("InitSheet requires #app");
+    }
+
+    super({ domElem: appElem });
+
     this.currentUserId = null;
-    this.init();
+    this.generalData = null;
+    this.loadErrorId = null;
   }
 
   sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -75,47 +82,67 @@ class InitSheet {
     if (spinner) spinner.remove();
   };
 
+  setLoadError = (id) => {
+    this.generalData = null;
+    this.loadErrorId = id ?? null;
+  };
+
   renderLoadError = (id) => {
-    this.elem.innerHTML = "";
-    this.elem.style.maxWidth = "720px";
-    this.elem.style.margin = "48px auto";
-    this.elem.style.padding = "20px";
-    this.elem.style.border = "1px solid var(--blue-muted)";
-    this.elem.style.borderRadius = "8px";
-    this.elem.style.background = "var(--blue-main)";
+    const query = id ? `?id=${encodeURIComponent(String(id))}` : "";
 
-    const title = document.createElement("h2");
-    title.textContent = "Unable to Load Character Sheet";
-    title.style.marginBottom = "8px";
-
-    const body = document.createElement("p");
-    body.textContent =
-      "The page could not load sheet data right now. This can happen during rapid refreshes or a temporary API failure.";
-    body.style.marginBottom = "16px";
-
-    const actions = document.createElement("div");
-    actions.style.display = "flex";
-    actions.style.gap = "12px";
-    actions.style.flexWrap = "wrap";
-
-    const retryBtn = document.createElement("button");
-    retryBtn.className = "modal-form-button";
-    retryBtn.textContent = "Retry";
-    retryBtn.addEventListener("click", () => {
-      const query = id ? `?id=${encodeURIComponent(String(id))}` : "";
-      window.location.href = `/5eplayer${query}`;
-    });
-
-    const dashBtn = document.createElement("button");
-    dashBtn.className = "modal-form-button";
-    dashBtn.textContent = "Back To Dashboard";
-    dashBtn.addEventListener("click", () => {
-      window.location.href = "/dash";
-    });
-
-    actions.append(retryBtn, dashBtn);
-    this.elem.append(title, body, actions);
-    this.removeInitialSpinner();
+    return createElement(
+      "div",
+      {
+        style: {
+          maxWidth: "720px",
+          margin: "48px auto",
+          padding: "20px",
+          border: "1px solid var(--blue-muted)",
+          borderRadius: "8px",
+          background: "var(--blue-main)",
+        },
+      },
+      [
+        createElement(
+          "h2",
+          { style: { marginBottom: "8px" } },
+          "Unable to Load Character Sheet",
+        ),
+        createElement(
+          "p",
+          { style: { marginBottom: "16px" } },
+          "The page could not load sheet data right now. This can happen during rapid refreshes or a temporary API failure.",
+        ),
+        createElement(
+          "div",
+          { style: { display: "flex", gap: "12px", flexWrap: "wrap" } },
+          [
+            createElement(
+              "button",
+              { className: "modal-form-button" },
+              "Retry",
+              {
+                type: "click",
+                event: () => {
+                  window.location.href = `/5eplayer${query}`;
+                },
+              },
+            ),
+            createElement(
+              "button",
+              { className: "modal-form-button" },
+              "Back To Dashboard",
+              {
+                type: "click",
+                event: () => {
+                  window.location.href = "/dash";
+                },
+              },
+            ),
+          ],
+        ),
+      ],
+    );
   };
 
   loadGeneralData = async (id, maxAttempts = 3) => {
@@ -150,89 +177,124 @@ class InitSheet {
   };
 
   init = async () => {
-    const authState = await loadFrontendAuthState();
-    this.currentUserId = authState.userId;
+    let id = null;
 
-    const searchParams = new URLSearchParams(window.location.search);
-    const id = searchParams.get("id");
-    if (!id) {
-      if (window.customAlertError) {
-        window.customAlertError("Missing character sheet ID");
-      }
-      this.renderLoadError(id);
-      return;
-    }
+    try {
+      const authState = await loadFrontendAuthState();
+      this.currentUserId = authState.userId;
 
-    const generalData = await this.loadGeneralData(id);
-
-    if (!generalData) {
-      if (window.customAlertError) {
-        window.customAlertError("Unable to load character sheet");
-      }
-      this.renderLoadError(id);
-      return;
-    }
-
-    // handle invite
-    // don't allow owner to become a playerUser of their own sheet
-    if (!this.isCurrentUserOwner(generalData.user_id)) {
-      const invite = searchParams.get("invite");
-      if (invite) {
-        const inviteValidResult = await apiGet(
-          `/api/get_player_invite_by_uuid/${invite}`
-        );
-        if (!inviteValidResult.ok) {
-          handleApiFailure(inviteValidResult, {
-            fallbackMessage: "Failed to validate invite link",
-            includeResultMessage: true,
-          });
-          return;
+      const searchParams = new URLSearchParams(window.location.search);
+      id = searchParams.get("id");
+      if (!id) {
+        if (window.customAlertError) {
+          window.customAlertError("Missing character sheet ID");
         }
-        const inviteValid = inviteValidResult.ok ? inviteValidResult.data : null;
-        if (inviteValid) {
-          // check if user is already a playerUser
-          const playerUserResult = await apiGet(
-            `/api/get_player_user_by_user_and_player/${id}`
+        this.setLoadError(id);
+        return;
+      }
+
+      const generalData = await this.loadGeneralData(id);
+
+      if (!generalData) {
+        if (window.customAlertError) {
+          window.customAlertError("Unable to load character sheet");
+        }
+        this.setLoadError(id);
+        return;
+      }
+
+      // Handle invite flow: owner should never auto-add themselves as a player user.
+      if (!this.isCurrentUserOwner(generalData.user_id)) {
+        const invite = searchParams.get("invite");
+        if (invite) {
+          const inviteValidResult = await apiGet(
+            `/api/get_player_invite_by_uuid/${invite}`,
           );
-          if (!playerUserResult.ok) {
-            handleApiFailure(playerUserResult, {
-              fallbackMessage: "Failed to verify invite access",
+          if (!inviteValidResult.ok) {
+            handleApiFailure(inviteValidResult, {
+              fallbackMessage: "Failed to validate invite link",
               includeResultMessage: true,
             });
+            this.setLoadError(id);
             return;
           }
-          const playerUser = playerUserResult.ok ? playerUserResult.data : null;
-          if (!playerUser) {
-            const addPlayerUserResult = await apiPost("/api/add_player_user", {
-              player_id: id,
-            });
-            if (!addPlayerUserResult.ok) {
-              handleApiFailure(addPlayerUserResult, {
-                fallbackMessage: "Failed to join this character sheet",
+          const inviteValid = inviteValidResult.ok ? inviteValidResult.data : null;
+          if (inviteValid) {
+            const playerUserResult = await apiGet(
+              `/api/get_player_user_by_user_and_player/${id}`,
+            );
+            if (!playerUserResult.ok) {
+              handleApiFailure(playerUserResult, {
+                fallbackMessage: "Failed to verify invite access",
                 includeResultMessage: true,
               });
+              this.setLoadError(id);
               return;
             }
+            const playerUser = playerUserResult.ok ? playerUserResult.data : null;
+            if (!playerUser) {
+              const addPlayerUserResult = await apiPost("/api/add_player_user", {
+                player_id: id,
+              });
+              if (!addPlayerUserResult.ok) {
+                handleApiFailure(addPlayerUserResult, {
+                  fallbackMessage: "Failed to join this character sheet",
+                  includeResultMessage: true,
+                });
+                this.setLoadError(id);
+                return;
+              }
+            }
+
+            searchParams.delete("invite");
+            const query = searchParams.toString();
+            const newRelativePathQuery = query
+              ? `${window.location.pathname}?${query}`
+              : window.location.pathname;
+            history.replaceState(null, "", newRelativePathQuery);
+          } else {
+            window.customAlertError("Invalid invite link");
+            window.location.pathname = "/";
+            return;
           }
-          // clean params
-          searchParams.delete("invite");
-          const newRelativePathQuery =
-            window.location.pathname + "?" + searchParams.toString();
-          history.replaceState(null, "", newRelativePathQuery);
-        } else {
-          window.customAlertError("Invalid invite link");
-          window.location.pathname = "/";
         }
       }
+
+      this.generalData = generalData;
+      this.loadErrorId = null;
+    } catch (error) {
+      console.error(error);
+      this.setLoadError(id);
+    } finally {
+      // The server template spinner is independent from this component tree.
+      this.removeInitialSpinner();
+    }
+  };
+
+  renderSheet = async () => {
+    if (!this.generalData) return [];
+
+    return this.childElem(
+      "5e-player-sheet",
+      () =>
+        new FiveEPlayerSheet({
+          domElem: createElement("div"),
+          params: { content: this.generalData },
+          currentUserId: this.currentUserId,
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.currentUserId = this.currentUserId;
+      },
+    );
+  };
+
+  render = async () => {
+    if (!this.generalData) {
+      return this.renderLoadError(this.loadErrorId);
     }
 
-    new FiveEPlayerSheet({
-      domComponent: this.elem,
-      params: { content: generalData },
-      currentUserId: this.currentUserId,
-    });
-    // stop initial spinner
-    this.removeInitialSpinner();
+    return this.renderSheet();
   };
 }
 

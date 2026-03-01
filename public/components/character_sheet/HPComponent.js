@@ -1,9 +1,14 @@
 import calculateColorMod from "./calculateColorMod.js";
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class HPComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class HPComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.max_hp = props.max_hp;
     this.current_hp = props.current_hp;
     this.temp_hp = props.temp_hp;
@@ -36,137 +41,131 @@ export default class HPComponent {
   };
 
   renderTempView = () => {
-    this.domComponent.append(
-      createElement("div", { class: "cp-content-container-center" }, [
-        createElement(
-          "img",
-          {
-            class: "edit-hp",
-            src: "/assets/gears.svg",
-            title: "Close temporary HP view",
+    return createElement("div", { class: "cp-content-container-center" }, [
+      createElement(
+        "img",
+        {
+          class: "edit-hp",
+          src: "/assets/gears.svg",
+          title: "Close temporary HP view",
+        },
+        null,
+        {
+          type: "click",
+          event: () => {
+            this.toggleTempView();
           },
-          null,
-          {
-            type: "click",
-            event: () => {
-              this.toggleTempView();
-            },
-          }
-        ),
-        createElement(
-          "input",
-          {
-            class: "cp-input-no-border cp-input-large",
-            type: "number",
-            name: "temp_hp",
-            value: this.temp_hp ? this.temp_hp : 0,
+        }
+      ),
+      createElement(
+        "input",
+        {
+          class: "cp-input-no-border cp-input-large",
+          type: "number",
+          name: "temp_hp",
+          value: this.temp_hp ? this.temp_hp : 0,
+        },
+        null,
+        {
+          type: "focusout",
+          event: (e) => {
+            if (e.target.value === "") e.target.value = 0;
+            this.temp_hp = e.target.valueAsNumber;
+            this.updateGeneralValue("temp_hp", e.target.valueAsNumber);
           },
-          null,
-          {
-            type: "focusout",
-            event: (e) => {
-              if (e.target.value === "") e.target.value = 0;
-              this.temp_hp = e.target.valueAsNumber;
-              this.updateGeneralValue("temp_hp", e.target.valueAsNumber);
-            },
-          }
-        ),
-        createElement("small", { class: "text-pink" }, "Temporary HP"),
-      ])
-    );
+        }
+      ),
+      createElement("small", { class: "text-pink" }, "Temporary HP"),
+    ]);
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-
     if (this.tempView) {
       return this.renderTempView();
     }
 
-    this.domComponent.append(
-      createElement("div", { class: "cp-content-container-center" }, [
-        createElement(
-          "img",
-          {
-            class: "edit-hp",
-            src: "/assets/gears.svg",
-            title: "Open temporary HP view",
-          },
-          null,
-          {
-            type: "click",
-            event: this.toggleTempView,
-          }
-        ),
-        createElement(
-          "div",
-          {
-            class: "d-flex align-items-center justify-content-center",
-          },
-          [
-            createElement("small", {}, "Max"),
-            createElement(
-              "input",
-              {
-                class: "cp-input-no-border-small",
-                type: "number",
-                name: "max_hp",
-                value: this.max_hp ? this.max_hp : 0,
-              },
-              null,
-              {
-                type: "focusout",
-                event: (e) => {
-                  this.max_hp = e.target.valueAsNumber;
-                  this.updateGeneralValue(
-                    e.target.name,
-                    e.target.valueAsNumber
-                  );
-                },
-              }
-            ),
-          ]
-        ),
-        createElement(
-          "input",
-          {
-            class: "cp-input-no-border cp-input-large",
-            style: `color: ${calculateColorMod(this.current_hp, this.temp_hp)}`,
-            type: "number",
-            name: "current_hp",
-            value: this.calculateCurrentHP() ? this.calculateCurrentHP() : 0,
-          },
-          null,
-          {
-            type: "focusout",
-            event: (e) => {
-              const previousHP = this.calculateCurrentHP();
-              const currentHP = e.target.valueAsNumber;
-              if (currentHP < previousHP && this.temp_hp > 0) {
-                if (previousHP - currentHP <= this.temp_hp) {
-                  this.temp_hp -= previousHP - currentHP;
-                  this.updateGeneralValue("temp_hp", this.temp_hp);
-                } else {
-                  this.temp_hp = 0;
-                  this.updateGeneralValue("temp_hp", this.temp_hp);
-                  this.current_hp = currentHP;
-                  this.updateGeneralValue(e.target.name, this.current_hp);
-                }
-              } else {
-                if (currentHP >= previousHP && this.temp_hp > 0) {
-                  this.current_hp = currentHP - this.temp_hp;
-                  this.updateGeneralValue(e.target.name, this.current_hp);
-                } else {
-                  this.current_hp = currentHP;
-                  this.updateGeneralValue(e.target.name, this.current_hp);
-                }
-              }
-              this.render();
+    return createElement("div", { class: "cp-content-container-center" }, [
+      createElement(
+        "img",
+        {
+          class: "edit-hp",
+          src: "/assets/gears.svg",
+          title: "Open temporary HP view",
+        },
+        null,
+        {
+          type: "click",
+          event: this.toggleTempView,
+        }
+      ),
+      createElement(
+        "div",
+        {
+          class: "d-flex align-items-center justify-content-center",
+        },
+        [
+          createElement("small", {}, "Max"),
+          createElement(
+            "input",
+            {
+              class: "cp-input-no-border-small",
+              type: "number",
+              name: "max_hp",
+              value: this.max_hp ? this.max_hp : 0,
             },
-          }
-        ),
-        createElement("small", {}, "Hit Points"),
-      ])
-    );
+            null,
+            {
+              type: "focusout",
+              event: (e) => {
+                this.max_hp = e.target.valueAsNumber;
+                this.updateGeneralValue(
+                  e.target.name,
+                  e.target.valueAsNumber
+                );
+              },
+            }
+          ),
+        ]
+      ),
+      createElement(
+        "input",
+        {
+          class: "cp-input-no-border cp-input-large",
+          style: `color: ${calculateColorMod(this.current_hp, this.temp_hp)}`,
+          type: "number",
+          name: "current_hp",
+          value: this.calculateCurrentHP() ? this.calculateCurrentHP() : 0,
+        },
+        null,
+        {
+          type: "focusout",
+          event: (e) => {
+            const previousHP = this.calculateCurrentHP();
+            const currentHP = e.target.valueAsNumber;
+            if (currentHP < previousHP && this.temp_hp > 0) {
+              if (previousHP - currentHP <= this.temp_hp) {
+                this.temp_hp -= previousHP - currentHP;
+                this.updateGeneralValue("temp_hp", this.temp_hp);
+              } else {
+                this.temp_hp = 0;
+                this.updateGeneralValue("temp_hp", this.temp_hp);
+                this.current_hp = currentHP;
+                this.updateGeneralValue(e.target.name, this.current_hp);
+              }
+            } else {
+              if (currentHP >= previousHP && this.temp_hp > 0) {
+                this.current_hp = currentHP - this.temp_hp;
+                this.updateGeneralValue(e.target.name, this.current_hp);
+              } else {
+                this.current_hp = currentHP;
+                this.updateGeneralValue(e.target.name, this.current_hp);
+              }
+            }
+            this.render();
+          },
+        }
+      ),
+      createElement("small", {}, "Hit Points"),
+    ]);
   };
 }

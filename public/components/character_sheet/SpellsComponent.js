@@ -1,4 +1,5 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import getDataByQuery from "../../lib/getDataByQuery.js";
 import {
@@ -18,9 +19,13 @@ fetch("/lib/data/2014/5e-srd-spells.json")
     spellSuggestions = data;
   });
 
-export default class SpellsComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class SpellsComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.general_id = props.general_id || props.generalData?.id;
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
@@ -92,7 +97,7 @@ export default class SpellsComponent {
       elem.className = "cp-info-container-column cp-info-container-pulsate";
 
       const component = new SingleSpell({
-        domComponent: elem,
+        domElem: elem,
         general_id: this.generalData?.id || this.general_id,
         generalData: this.generalData,
         spellSlot: spellSlot,
@@ -109,7 +114,7 @@ export default class SpellsComponent {
     elem.className = "cp-info-container-column cp-info-container-pulsate";
 
     this.cantripComponent = new SingleSpell({
-      domComponent: elem,
+      domElem: elem,
       general_id: this.generalData?.id || this.general_id,
       spellSlot: { title: "cantrip" },
       generalData: this.generalData,
@@ -120,16 +125,14 @@ export default class SpellsComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+      return [renderLoadingWithMessage("Loading...")];
     }
 
     // Initialize or re-render SpellInfoComponent
     if (!this.spellInfoComponent) {
       this.spellInfoComponent = new SpellInfoComponent({
-        domComponent: createElement("div"),
+        domElem: createElement("div"),
         generalData: this.generalData,
         updateSpellSlotValue: this.updateSpellSlotValue,
         calculateSpellSaveDC: this.calculateSpellSaveDC,
@@ -158,21 +161,25 @@ export default class SpellsComponent {
       });
     }
 
-    this.domComponent.append(
+    return [
       createElement("div", {}, [
-        this.spellInfoComponent.domComponent,
+        this.spellInfoComponent.domElem,
         createElement("div", { class: "d-flex flex-wrap" }, [
-          this.cantripComponent.domComponent,
-          ...this.spellSlotComponents.map((c) => c.domComponent),
+          this.cantripComponent.domElem,
+          ...this.spellSlotComponents.map((c) => c.domElem),
         ]),
       ]),
-    );
+    ];
   };
 }
 
-class SpellInfoComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+class SpellInfoComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateSpellSlotValue = props.updateSpellSlotValue;
     this.calculateSpellSaveDC = props.calculateSpellSaveDC;
@@ -204,9 +211,7 @@ class SpellInfoComponent {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
+    return [
       createElement("div", {}, [
         createElement(
           "div",
@@ -291,13 +296,17 @@ class SpellInfoComponent {
           ],
         ),
       ]),
-    );
+    ];
   };
 }
 
-class SingleSpell {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+class SingleSpell extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.general_id = props.general_id || props.generalData?.id;
     this.spellSlot = props.spellSlot;
     this.generalData = props.generalData;
@@ -313,7 +322,7 @@ class SingleSpell {
     this.newLoading = false;
 
     this.expendedElement = new ExpendedElement({
-      domComponent: createElement("div"),
+      domElem: createElement("div"),
       totalSpellSlotCount: parseInt(
         this.generalData.spell_slots[this.spellSlot.totalKey],
       ),
@@ -391,7 +400,7 @@ class SingleSpell {
     return this.spells.map((spell) => {
       const elem = createElement("div");
       const spellElem = new SingleSpellElement({
-        domComponent: elem,
+        domElem: elem,
         general_id: this.generalData?.id || this.general_id,
         id: spell.id,
         title: spell.title,
@@ -411,17 +420,14 @@ class SingleSpell {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    this.domElem.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
 
     if (this.newLoading) {
-      return this.domComponent.append(
-        renderLoadingWithMessage("Creating New Spell..."),
-      );
+      return [renderLoadingWithMessage("Creating New Spell...")];
     }
 
     if (this.isCantrip) {
-      return this.domComponent.append(
+      return [
         createElement("div", { class: "special-font" }, "Cantrips"),
         createElement("a", { class: "font-small mt-1" }, "+ Expand all", {
           type: "click",
@@ -449,10 +455,10 @@ class SingleSpell {
             event: () => this.newSpell("cantrip"),
           },
         ),
-      );
+      ];
     }
 
-    this.domComponent.append(
+    return [
       createElement("div", { class: "special-font" }, this.spellSlot.title),
       createElement("a", { class: "font-small mt-1" }, "+ Expand all", {
         type: "click",
@@ -542,7 +548,7 @@ class SingleSpell {
           {
             class: "d-flex align-items-center justify-content-center",
           },
-          this.expendedElement.domComponent,
+          this.expendedElement.domElem,
         ),
       ]),
       createElement("hr"),
@@ -559,13 +565,17 @@ class SingleSpell {
           event: () => this.newSpell(this.spellSlot.title),
         },
       ),
-    );
+    ];
   };
 }
 
-class SingleSpellElement {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+class SingleSpellElement extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.general_id = props.general_id;
     this.id = props.id;
     this.title = props.title;
@@ -938,12 +948,10 @@ class SingleSpellElement {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-
     // dynamically create suggestion divs on document body
     this.renderSuggestionElem();
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         {
@@ -1031,15 +1039,18 @@ class SingleSpellElement {
           createElement("hr"),
         ],
       ),
-    );
+    ];
   };
 }
 
-class ExpendedElement {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className =
-      "d-flex align-items-center justify-content-center flex-wrap";
+class ExpendedElement extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+      className: "d-flex align-items-center justify-content-center flex-wrap",
+    });
+
     this.totalSpellSlotCount = props.totalSpellSlotCount;
     this.expendedSpellSlotCount = props.expendedSpellSlotCount;
     this.expendedKey = props.expendedKey;
@@ -1113,12 +1124,10 @@ class ExpendedElement {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-
     if (!this.elems.length) {
       this.elems = this.createElems();
     }
 
-    this.domComponent.append(...this.elems);
+    return this.elems;
   };
 }

@@ -1,8 +1,13 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class ResourcesComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class ResourcesComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateGeneralValue = props.updateGeneralValue;
 
@@ -78,10 +83,9 @@ export default class ResourcesComponent {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.className = "cp-info-container-row";
+    this.domElem.className = "cp-info-container-row";
 
-    this.domComponent.append(
+    return [
       this.renderResourceBlock(
         "class_resource_total",
         "class_resource",
@@ -94,6 +98,6 @@ export default class ResourcesComponent {
         "other_resource_title",
         "Other Resource"
       )
-    );
+    ];
   };
 }
