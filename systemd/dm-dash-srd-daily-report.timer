@@ -1,0 +1,11 @@
+[Unit]
+Description=Run dm-dash daily SRD intent report email
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=30m
+Persistent=true
+Unit=dm-dash-srd-daily-report.service
+
+[Install]
+WantedBy=timers.target
