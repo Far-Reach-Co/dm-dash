@@ -39,6 +39,8 @@
     "sitemap:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/generate-sitemap.js",
     "srd:download": "tsx src/tools/download-5e-srd.ts",
     "srd:download:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/download-5e-srd.js",
+    "srd:hotspots": "bash ./scripts/ops/run_with_env.sh tsx src/tools/reportSrdQuestionHotspots.ts",
+    "srd:hotspots:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/reportSrdQuestionHotspots.js",
     "email:product-update": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendProductUpdateEmail.js",
     "email:monthly-report": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendMonthlyLogReportEmail.js",
     "email:monthly-report:force": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendMonthlyLogReportEmail.js --force",
