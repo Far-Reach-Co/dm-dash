@@ -117,15 +117,30 @@ fi
 
 if [[ "$INSTALL_UNITS" == "1" ]]; then
   echo "Installing systemd units..."
-  if [[ -f "$REMOTE_DIR/systemd/dm-dash.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.service" && -f "$REMOTE_DIR/systemd/dm-dash-backup.timer" && -f "$REMOTE_DIR/systemd/dm-dash-monthly-report.service" && -f "$REMOTE_DIR/systemd/dm-dash-monthly-report.timer" ]]; then
-    cp "$REMOTE_DIR/systemd/dm-dash.service" /etc/systemd/system/dm-dash.service
-    cp "$REMOTE_DIR/systemd/dm-dash-backup.service" /etc/systemd/system/dm-dash-backup.service
-    cp "$REMOTE_DIR/systemd/dm-dash-backup.timer" /etc/systemd/system/dm-dash-backup.timer
-    cp "$REMOTE_DIR/systemd/dm-dash-monthly-report.service" /etc/systemd/system/dm-dash-monthly-report.service
-    cp "$REMOTE_DIR/systemd/dm-dash-monthly-report.timer" /etc/systemd/system/dm-dash-monthly-report.timer
+  units=(
+    "dm-dash.service"
+    "dm-dash-backup.service"
+    "dm-dash-backup.timer"
+    "dm-dash-monthly-report.service"
+    "dm-dash-monthly-report.timer"
+    "dm-dash-srd-daily-report.service"
+    "dm-dash-srd-daily-report.timer"
+  )
+
+  installed_any_unit=0
+  for unit in "${units[@]}"; do
+    if [[ -f "$REMOTE_DIR/systemd/$unit" ]]; then
+      cp "$REMOTE_DIR/systemd/$unit" "/etc/systemd/system/$unit"
+      installed_any_unit=1
+    else
+      echo "systemd/$unit not found in repo; skipping install for this unit."
+    fi
+  done
+
+  if [[ "$installed_any_unit" == "1" ]]; then
     systemctl daemon-reload
   else
-    echo "systemd unit files not found in repo; keeping currently installed units."
+    echo "No systemd unit files installed; keeping currently installed units."
   fi
 else
   echo "Skipping systemd unit install (DM_DASH_INSTALL_UNITS=$INSTALL_UNITS)."
@@ -133,12 +148,14 @@ fi
 
 if [[ "$RESTART_SERVICES" == "1" ]]; then
   echo "Restarting services..."
-  systemctl enable dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer
+  systemctl enable dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer dm-dash-srd-daily-report.timer
   systemctl restart dm-dash.service
   systemctl restart dm-dash-backup.timer
   systemctl restart dm-dash-monthly-report.timer
+  systemctl restart dm-dash-srd-daily-report.timer
   systemctl stop dm-dash-backup.service || true
   systemctl stop dm-dash-monthly-report.service || true
+  systemctl stop dm-dash-srd-daily-report.service || true
 
   echo "Service status:"
   # status returns non-zero for inactive one-shot units; print status without failing deploy
@@ -147,6 +164,8 @@ if [[ "$RESTART_SERVICES" == "1" ]]; then
   systemctl --no-pager --full status dm-dash-backup.timer | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-monthly-report.service | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-monthly-report.timer | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-srd-daily-report.service | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-srd-daily-report.timer | sed -n '1,24p' || true
 else
   echo "Skipping service restarts (DM_DASH_RESTART_SERVICES=$RESTART_SERVICES)."
 fi
