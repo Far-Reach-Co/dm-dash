@@ -44,26 +44,15 @@ export function buildSocketEventHandlers(integration) {
     },
 
     "current-users": (list) => {
-      const onlineUsers = integration.tableApp?.chatBoxComponent?.onlineUsersComponent;
-      if (!onlineUsers) return;
-      onlineUsers.usersList = list;
-      onlineUsers.render();
+      integration.tableApp?.chatBoxComponent?.setOnlineUsers?.(list);
     },
 
     "table-messages": (messages) => {
-      const chatMessages = integration.tableApp?.chatBoxComponent?.chatBoxMessagesComponent;
-      if (!chatMessages) return;
-      chatMessages.chatBoxMessages = messages;
-      chatMessages.render();
-      chatMessages.scrollDown();
+      integration.tableApp?.chatBoxComponent?.setMessages?.(messages);
     },
 
     message: (message) => {
-      const chatMessages = integration.tableApp?.chatBoxComponent?.chatBoxMessagesComponent;
-      if (!chatMessages) return;
-      chatMessages.chatBoxMessages.push(message);
-      chatMessages.render();
-      chatMessages.scrollDown();
+      integration.tableApp?.chatBoxComponent?.appendMessage?.(message);
     },
 
     "grid-toggle": (gridState) => {

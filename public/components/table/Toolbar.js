@@ -1,5 +1,6 @@
 import { apiGet } from "../../lib/apiUtils.js";
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import socketIntegration from "./socketIntegration.js";
 import truncateString from "../../lib/truncateString.js";
 import { ICONS, LAYER_STYLES } from "./toolbarConfig.js";
@@ -27,15 +28,48 @@ import {
   renderGridPanel as renderGridPanelUI,
 } from "./toolbarGridControls.js";
 
-export default class Toolbar {
-  constructor({ tableApp }) {
+class ToolbarSlot extends Component {
+  constructor({ domElem, renderContent }) {
+    super({
+      domElem,
+      autoInit: false,
+      autoRender: false,
+    });
+    this.renderContent = renderContent;
+  }
+
+  render = async () => {
+    if (typeof this.renderContent !== "function") return [];
+    const content = await this.renderContent();
+    if (Array.isArray(content)) return content;
+    return [content];
+  };
+}
+
+export default class Toolbar extends Component {
+  constructor({ tableApp, domElem } = {}) {
+    super({
+      domElem: domElem || createElement("div"),
+      autoInit: false,
+      autoRender: false,
+    });
+
     this.tableApp = tableApp;
 
     this.activePanel = null;
     this._clickAwayBound = false;
-    this._selectedObjectBarUpdateId = 0;
     this._onPointerDown = null;
     this._onZoomChanged = null;
+    this.toolbarElem = null;
+
+    this._drawToggleSlot = null;
+    this._layersAnchorSlot = null;
+    this._gridAnchorSlot = null;
+    this._objectActionsSlot = null;
+    this._zoomSlot = null;
+    this._sidebarSlot = null;
+    this._drawBarSlot = null;
+    this._selectedObjectBarSlot = null;
   }
 
   // ---------------------------------------------------------------------------
@@ -129,8 +163,8 @@ export default class Toolbar {
     this._onPointerDown = (e) => {
       if (this.activePanel && !e.target.closest(".vtt-toolbar")) {
         this.activePanel = null;
-        this._updateLayersAnchor();
-        this._updateGridAnchor();
+        void this._updateLayersAnchor();
+        void this._updateGridAnchor();
       }
     };
 
@@ -143,7 +177,7 @@ export default class Toolbar {
       if (!event?.detail) return;
       const { tableId } = event.detail;
       if (tableId !== this.tableApp?.tableId) return;
-      this._updateZoomControls();
+      void this._updateZoomControls();
     };
     document.addEventListener("vtt:zoom-changed", this._onZoomChanged);
   };
@@ -159,7 +193,26 @@ export default class Toolbar {
     }
     this._clickAwayBound = false;
     this.activePanel = null;
-    this._selectedObjectBarUpdateId = 0;
+
+    this._drawToggleSlot?.destroy?.();
+    this._layersAnchorSlot?.destroy?.();
+    this._gridAnchorSlot?.destroy?.();
+    this._objectActionsSlot?.destroy?.();
+    this._zoomSlot?.destroy?.();
+    this._sidebarSlot?.destroy?.();
+    this._drawBarSlot?.destroy?.();
+    this._selectedObjectBarSlot?.destroy?.();
+
+    this.toolbarElem = null;
+    this._drawToggleSlot = null;
+    this._layersAnchorSlot = null;
+    this._gridAnchorSlot = null;
+    this._objectActionsSlot = null;
+    this._zoomSlot = null;
+    this._sidebarSlot = null;
+    this._drawBarSlot = null;
+    this._selectedObjectBarSlot = null;
+    this.clear({ deep: true });
   };
 
   clearSelection = () => {
@@ -457,7 +510,7 @@ export default class Toolbar {
         } else {
           sidebar.open();
         }
-        this._updateSidebarToggle();
+        void this._updateSidebarToggle();
       },
     });
   };
@@ -568,46 +621,44 @@ export default class Toolbar {
   // Slot update methods (each section manages its own DOM)
   // ---------------------------------------------------------------------------
 
-  _updateDrawToggle = () => {
-    this._drawToggleSlot.replaceChildren(this.renderDrawModeToggle());
+  _updateDrawToggle = async () => {
+    if (!this._drawToggleSlot) return;
+    await this._drawToggleSlot.render();
   };
 
-  _updateLayersAnchor = () => {
-    this._layersAnchorSlot.replaceChildren(
-      this.renderLayersButton(),
-      this.renderLayersPanel(),
-    );
+  _updateLayersAnchor = async () => {
+    if (!this._layersAnchorSlot) return;
+    await this._layersAnchorSlot.render();
   };
 
-  _updateGridAnchor = () => {
-    this._gridAnchorSlot.replaceChildren(
-      this.renderGridButton(),
-      this.renderGridPanel(),
-    );
+  _updateGridAnchor = async () => {
+    if (!this._gridAnchorSlot) return;
+    await this._gridAnchorSlot.render();
   };
 
-  _updateObjectActions = () => {
-    this._objectActionsSlot.replaceChildren(...this.renderImageOptionButtons());
+  _updateObjectActions = async () => {
+    if (!this._objectActionsSlot) return;
+    await this._objectActionsSlot.render();
   };
 
-  _updateSidebarToggle = () => {
-    this._sidebarSlot.replaceChildren(this.renderSidebarToggle());
+  _updateSidebarToggle = async () => {
+    if (!this._sidebarSlot) return;
+    await this._sidebarSlot.render();
   };
 
-  _updateZoomControls = () => {
-    this._zoomSlot.replaceChildren(this.renderZoomControls());
+  _updateZoomControls = async () => {
+    if (!this._zoomSlot) return;
+    await this._zoomSlot.render();
   };
 
-  _updateDrawBar = () => {
-    this._drawBarSlot.replaceChildren(this.renderDrawBar());
+  _updateDrawBar = async () => {
+    if (!this._drawBarSlot) return;
+    await this._drawBarSlot.render();
   };
 
   _updateSelectedObjectBar = async () => {
-    const updateId = ++this._selectedObjectBarUpdateId;
-    const el = await this.renderSelectedObjectBar();
-    if (updateId === this._selectedObjectBarUpdateId) {
-      this._selectedObjectBarSlot.replaceChildren(el);
-    }
+    if (!this._selectedObjectBarSlot) return;
+    await this._selectedObjectBarSlot.render();
   };
 
   // ---------------------------------------------------------------------------
@@ -615,61 +666,98 @@ export default class Toolbar {
   // ---------------------------------------------------------------------------
 
   updateObjectSelection = async () => {
-    this._updateObjectActions();
+    this._ensureLayout();
+    await this._updateObjectActions();
     await this._updateSelectedObjectBar();
   };
 
-  build = () => {
+  _buildLayout = () => {
     this.setupClickAway();
     this.setupZoomListener();
 
-    // Persistent slot containers — display:contents makes them transparent to flex
-    this._drawToggleSlot = createElement("div", {
-      style: "display: contents;",
+    // Persistent slot components.
+    this._drawToggleSlot = new ToolbarSlot({
+      domElem: createElement("div", {
+        style: "display: contents;",
+      }),
+      renderContent: () => this.renderDrawModeToggle(),
     });
-    this._layersAnchorSlot = createElement("div", {
-      class: "vtt-toolbar-panel-anchor",
+    this._layersAnchorSlot = new ToolbarSlot({
+      domElem: createElement("div", {
+        class: "vtt-toolbar-panel-anchor",
+      }),
+      renderContent: () => [this.renderLayersButton(), this.renderLayersPanel()],
     });
-    this._gridAnchorSlot = createElement("div", {
-      class: "vtt-toolbar-panel-anchor",
+    this._gridAnchorSlot = new ToolbarSlot({
+      domElem: createElement("div", {
+        class: "vtt-toolbar-panel-anchor",
+      }),
+      renderContent: () => [this.renderGridButton(), this.renderGridPanel()],
     });
-    this._objectActionsSlot = createElement("div", {
-      style: "display: contents;",
+    this._objectActionsSlot = new ToolbarSlot({
+      domElem: createElement("div", {
+        style: "display: contents;",
+      }),
+      renderContent: () => this.renderImageOptionButtons(),
     });
-    this._zoomSlot = createElement("div", { style: "display: contents;" });
-    this._sidebarSlot = createElement("div", { style: "display: contents;" });
-    this._drawBarSlot = createElement("div");
-    this._selectedObjectBarSlot = createElement("div");
+    this._zoomSlot = new ToolbarSlot({
+      domElem: createElement("div", { style: "display: contents;" }),
+      renderContent: () => this.renderZoomControls(),
+    });
+    this._sidebarSlot = new ToolbarSlot({
+      domElem: createElement("div", { style: "display: contents;" }),
+      renderContent: () => this.renderSidebarToggle(),
+    });
+    this._drawBarSlot = new ToolbarSlot({
+      domElem: createElement("div"),
+      renderContent: () => this.renderDrawBar(),
+    });
+    this._selectedObjectBarSlot = new ToolbarSlot({
+      domElem: createElement("div"),
+      renderContent: async () => this.renderSelectedObjectBar(),
+    });
 
     const toolbarRow = createElement("div", { class: "vtt-toolbar-row" }, [
       this.renderInfoMenu(),
-      this._drawToggleSlot,
+      this._drawToggleSlot.domElem,
       createElement("div", { class: "vtt-toolbar-sep" }),
       this.renderLocationPinButton(),
       this.renderManagePinsButton(),
-      this._layersAnchorSlot,
-      this._gridAnchorSlot,
-      this._objectActionsSlot,
-      this._zoomSlot,
+      this._layersAnchorSlot.domElem,
+      this._gridAnchorSlot.domElem,
+      this._objectActionsSlot.domElem,
+      this._zoomSlot.domElem,
       createElement("div", { style: "flex: 1;" }),
-      this._sidebarSlot,
+      this._sidebarSlot.domElem,
     ]);
 
-    return createElement("div", { class: "vtt-toolbar" }, [
+    this.toolbarElem = createElement("div", { class: "vtt-toolbar" }, [
       toolbarRow,
-      this._drawBarSlot,
-      this._selectedObjectBarSlot,
+      this._drawBarSlot.domElem,
+      this._selectedObjectBarSlot.domElem,
     ]);
   };
 
+  _ensureLayout = () => {
+    if (this.toolbarElem) return;
+    this._buildLayout();
+  };
+
+  build = () => {
+    this._ensureLayout();
+    return this.toolbarElem;
+  };
+
   render = async () => {
-    this._updateDrawToggle();
-    this._updateLayersAnchor();
-    this._updateGridAnchor();
-    this._updateObjectActions();
-    this._updateZoomControls();
-    this._updateSidebarToggle();
-    this._updateDrawBar();
+    this._ensureLayout();
+    await this._updateDrawToggle();
+    await this._updateLayersAnchor();
+    await this._updateGridAnchor();
+    await this._updateObjectActions();
+    await this._updateZoomControls();
+    await this._updateSidebarToggle();
+    await this._updateDrawBar();
     await this._updateSelectedObjectBar();
+    return [this.toolbarElem];
   };
 }

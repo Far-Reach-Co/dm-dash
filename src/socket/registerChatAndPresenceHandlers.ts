@@ -45,7 +45,8 @@ export function registerChatAndPresenceHandlers(params: {
   socket.on("get-messages", async ({ table }: { table: string }) => {
     const canViewTable = await authorizeSocketTable(socket, table, "view");
     if (!canViewTable) return;
-    io.to(table).emit("table-messages", await getChatLog(table));
+    // Return chat history directly to the requester to avoid room-join timing races.
+    socket.emit("table-messages", await getChatLog(table));
   });
 
   socket.on("disconnect", async () => {

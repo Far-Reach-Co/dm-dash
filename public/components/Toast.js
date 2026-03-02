@@ -1,34 +1,38 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 
-class Toast {
+class Toast extends Component {
   constructor() {
+    const existingElem = document.getElementById("toast-custom");
+    const domElem = existingElem || createElement("div", { id: "toast-custom" });
+    super({
+      domElem,
+      autoInit: false,
+      autoRender: false,
+    });
+
     this.isVisible = false;
     this.message = "";
-    this.domComponent = null;
     this.isError = false;
+    this.timer = null;
     this.init();
   }
 
-  init() {
-    // Check if toast element already exists
-    this.domComponent = document.getElementById("toast-custom");
-
-    if (!this.domComponent) {
-      // Create toast element dynamically
-      this.domComponent = createElement("div", { id: "toast-custom" });
-      document.body.appendChild(this.domComponent);
+  init = () => {
+    if (!this.domElem.parentNode) {
+      document.body.appendChild(this.domElem);
     }
 
-    this.domComponent.classList.remove("visible");
+    this.domElem.classList.remove("visible");
     this.render();
-  }
+  };
 
   show = (message) => {
-    if (!this.domComponent) this.init();
     this.isVisible = true;
     this.message = message;
     this.render();
-    this.domComponent.classList.add("visible");
+    this.domElem.classList.add("visible");
+    clearTimeout(this.timer);
     const timer = setTimeout(() => {
       this.hide();
     }, 4000);
@@ -36,36 +40,30 @@ class Toast {
   };
 
   error = (message) => {
-    if (!this.domComponent) this.init();
     this.isError = true;
     this.show(message);
   };
 
   hide = () => {
-    if (!this.domComponent) return;
+    if (!this.domElem) return;
     clearTimeout(this.timer);
+    this.timer = null;
     this.isVisible = false;
     this.isError = false;
     this.message = "";
-    this.domComponent.classList.remove("visible");
+    this.domElem.classList.remove("visible");
   };
 
   render = () => {
-    if (!this.domComponent) return;
-    this.domComponent.innerHTML = "";
-
     if (this.isError)
-      return this.domComponent.append(
+      return [
         createElement(
           "div",
           { class: "toast-custom toast-error" },
-          this.message
-        )
-      );
-    else
-      return this.domComponent.append(
-        createElement("div", { class: "toast-custom" }, this.message)
-      );
+          this.message,
+        ),
+      ];
+    else return [createElement("div", { class: "toast-custom" }, this.message)];
   };
 }
 

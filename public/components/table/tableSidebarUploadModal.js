@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import { renderUploadQueueModal } from "../shared/uploadQueueModal.js";
 
 function renderCreatingImageInFolderNotice(sidebar) {

@@ -1,23 +1,45 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 
-class Modal {
+class Modal extends Component {
   constructor() {
-    this.domComponent = null;
+    const existingElem = document.getElementById("modal-custom");
+    const domElem =
+      existingElem ||
+      createElement("div", { id: "modal-custom", class: "modal-custom" });
+
+    super({
+      domElem,
+      autoInit: false,
+      autoRender: false,
+    });
+
     this.domContent = null;
     this.closeButton = null;
+    this._onCloseClick = () => this.hide();
+    this._onBackdropClick = (e) => {
+      if (e.target === this.domElem) {
+        this.hide();
+      }
+    };
     this.init();
   }
 
-  init() {
-    // Check if modal already exists
-    this.domComponent = document.getElementById("modal-custom");
+  init = () => {
+    if (!this.domElem.parentNode) {
+      document.body.appendChild(this.domElem);
+    }
 
-    if (!this.domComponent) {
-      // Create modal elements dynamically
+    this.domElem.classList.add("modal-custom");
+
+    this.domContent = this.domElem.querySelector("#modal-custom-content");
+    this.closeButton = this.domElem.querySelector("#close-custom-modal");
+
+    if (!this.domContent || !this.closeButton) {
       this.closeButton = createElement(
         "div",
         { id: "close-custom-modal", class: "close-custom-modal" },
-        "x"
+        "x",
       );
 
       this.domContent = createElement("div", {
@@ -28,44 +50,42 @@ class Modal {
       const modalContainer = createElement(
         "div",
         { class: "modal-custom-container" },
-        [this.closeButton, this.domContent]
+        [this.closeButton, this.domContent],
       );
 
-      this.domComponent = createElement(
-        "div",
-        { id: "modal-custom", class: "modal-custom" },
-        modalContainer
-      );
-
-      document.body.appendChild(this.domComponent);
-    } else {
-      // Use existing elements
-      this.domContent = document.getElementById("modal-custom-content");
-      this.closeButton = document.getElementById("close-custom-modal");
+      this.domElem.replaceChildren(modalContainer);
     }
 
-    // Set up event listeners
-    if (this.closeButton) {
-      this.closeButton.addEventListener("click", this.hide);
-    }
+    this.closeButton.removeEventListener("click", this._onCloseClick);
+    this.closeButton.addEventListener("click", this._onCloseClick);
 
-    document.addEventListener("click", (e) => {
-      if (e.target.id === "modal-custom") {
-        this.hide();
-      }
-    });
-  }
+    this.domElem.removeEventListener("click", this._onBackdropClick);
+    this.domElem.addEventListener("click", this._onBackdropClick);
+  };
 
   show = (content) => {
-    if (!this.domComponent) this.init();
-    this.domComponent.classList.add("visible");
-    this.domContent.innerHTML = "";
-    this.domContent.append(content);
+    if (!this.domElem) return;
+    this.domElem.classList.add("visible");
+    this.domContent.replaceChildren();
+
+    if (Array.isArray(content)) {
+      this.domContent.append(...content);
+      return;
+    }
+
+    if (content instanceof Node) {
+      this.domContent.append(content);
+      return;
+    }
+
+    if (content !== null && typeof content !== "undefined") {
+      this.domContent.append(String(content));
+    }
   };
 
   hide = () => {
-    if (!this.domComponent) return;
-    this.domComponent.classList.remove("visible");
+    if (!this.domElem) return;
+    this.domElem.classList.remove("visible");
   };
 }
 

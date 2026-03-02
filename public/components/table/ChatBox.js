@@ -1,4 +1,5 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import isoDateFormat from "../../lib/isoDateFormat.js";
 import socketIntegration from "./socketIntegration.js";
 import { createValidatedImage, isImageUrl } from "../../lib/imageValidation.js";
@@ -13,32 +14,99 @@ const CHAT_ICON_MARKUP = {
 
 const CHAT_ICONS = createSvgIconFactoryMap(CHAT_ICON_MARKUP);
 
-export default class ChatBoxComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "chat-box-container";
+export default class ChatBoxComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+      className: "chat-box-container",
+    });
 
-    this.chatBoxMessagesComponent = new ChatBoxMessagesComponent({
-      domComponent: createElement("div", {
+    this.chatBoxMessagesComponent = null;
+    this.onlineUsersComponent = null;
+
+    // Ensure child instances exist early so socket handlers can write to them.
+    this.ensureChildComponents();
+  }
+
+  createChatMessagesComponent = () => {
+    return new ChatBoxMessagesComponent({
+      domElem: createElement("div", {
         class: "chat-box-messages",
         id: "chat-box-messages",
       }),
     });
+  };
 
-    this.onlineUsersComponent = new OnlineUsersComponent({
-      domComponent: createElement("div"),
+  createOnlineUsersComponent = () => {
+    return new OnlineUsersComponent({
+      domElem: createElement("div"),
       rerender: () => this.render(),
     });
-  }
+  };
+
+  ensureChildComponents = () => {
+    if (this._destroyed) {
+      return {
+        chatMessagesComponent: null,
+        onlineUsersComponent: null,
+      };
+    }
+
+    const chatMessagesComponent = this.useChild(
+      "chat-box-messages",
+      this.createChatMessagesComponent,
+    );
+    const onlineUsersComponent = this.useChild(
+      "online-users",
+      this.createOnlineUsersComponent,
+      (child) => {
+        child.rerender = () => this.render();
+      },
+    );
+
+    // Preserve existing external access used by socket handlers.
+    this.chatBoxMessagesComponent = chatMessagesComponent;
+    this.onlineUsersComponent = onlineUsersComponent;
+
+    return {
+      chatMessagesComponent,
+      onlineUsersComponent,
+    };
+  };
+
+  setOnlineUsers = (users) => {
+    const { onlineUsersComponent } = this.ensureChildComponents();
+    if (!onlineUsersComponent) return;
+    onlineUsersComponent.setUsers(users);
+  };
+
+  setMessages = (messages) => {
+    const { chatMessagesComponent } = this.ensureChildComponents();
+    if (!chatMessagesComponent) return;
+    chatMessagesComponent.setMessages(messages);
+  };
+
+  appendMessage = (message) => {
+    if (!message) return;
+    const { chatMessagesComponent } = this.ensureChildComponents();
+    if (!chatMessagesComponent) return;
+    chatMessagesComponent.appendMessage(message);
+  };
 
   toggleChatVisibility = () => {
-    this.chatBoxMessagesComponent.hidden = !this.chatBoxMessagesComponent.hidden;
-    this.chatBoxMessagesComponent.render();
-    this.render();
+    const { chatMessagesComponent } = this.ensureChildComponents();
+    if (!chatMessagesComponent) return;
+    chatMessagesComponent.hidden = !chatMessagesComponent.hidden;
+    void this.render();
   };
 
   renderHideChatButton = () => {
-    const isHidden = this.chatBoxMessagesComponent.hidden;
+    const { chatMessagesComponent } = this.ensureChildComponents();
+    if (!chatMessagesComponent) {
+      return createElement("div", { class: "chat-box-toggle d-none" });
+    }
+    const isHidden = chatMessagesComponent.hidden;
     const iconFactory = isHidden ? CHAT_ICONS.show : CHAT_ICONS.hide;
     const label = isHidden ? " Chat" : " Hide";
 
@@ -50,17 +118,31 @@ export default class ChatBoxComponent {
     );
   };
 
-  render = () => {
-    // clear — using replaceChildren for safe DOM reset (no user content)
-    this.domComponent.replaceChildren();
-    this.onlineUsersComponent.render();
-    // render
-    this.domComponent.append(
+  render = async () => {
+    const { chatMessagesComponent } = this.ensureChildComponents();
+    const onlineUsersElem = await this.childElem(
+      "online-users",
+      this.createOnlineUsersComponent,
+      (child) => {
+        child.rerender = () => this.render();
+        this.onlineUsersComponent = child;
+      },
+    );
+    const chatMessagesElem = await this.childElem(
+      "chat-box-messages",
+      this.createChatMessagesComponent,
+      (child) => {
+        this.chatBoxMessagesComponent = child;
+      },
+    );
+    queueMicrotask(() => chatMessagesComponent.scrollDown());
+
+    return [
       createElement("div", { class: "chat-box-top-row" }, [
-        this.onlineUsersComponent.domComponent,
+        onlineUsersElem,
         this.renderHideChatButton(),
       ]),
-      this.chatBoxMessagesComponent.domComponent,
+      chatMessagesElem,
       createElement(
         "form",
         { class: "chat-box-form" },
@@ -92,14 +174,23 @@ export default class ChatBoxComponent {
           },
         }
       )
-    );
-    this.chatBoxMessagesComponent.scrollDown();
+    ];
+  };
+
+  destroy = () => {
+    this.chatBoxMessagesComponent = null;
+    this.onlineUsersComponent = null;
+    super.destroy();
   };
 }
 
-class ChatBoxMessagesComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+class ChatBoxMessagesComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.chatBoxMessages = [];
     this.hidden = false;
 
@@ -107,7 +198,21 @@ class ChatBoxMessagesComponent {
   }
 
   scrollDown = () => {
-    this.domComponent.scrollTop = this.domComponent.scrollHeight;
+    this.domElem.scrollTop = this.domElem.scrollHeight;
+  };
+
+  setMessages = (messages) => {
+    // Keep message updates immutable so memo deps are reliable.
+    this.chatBoxMessages = Array.isArray(messages) ? [...messages] : [];
+    void this.render();
+    this.scrollDown();
+  };
+
+  appendMessage = (message) => {
+    if (!message) return;
+    this.chatBoxMessages = [...this.chatBoxMessages, message];
+    void this.render();
+    this.scrollDown();
   };
 
   formatShortTime = (isoDate) => {
@@ -187,27 +292,38 @@ class ChatBoxMessagesComponent {
   renderMessagesOrHidden = () => {
     if (this.hidden) {
       return [createElement("div", { class: "d-none" })];
-    } else
-      return [...this.chatBoxMessages.map((data) => this.createMessage(data))];
+    }
+
+    return this.useMemo(
+      "chat-message-nodes",
+      () => this.chatBoxMessages.map((data) => this.createMessage(data)),
+      () => [this.chatBoxMessages],
+    );
   };
 
   render = () => {
-    // clear — safe DOM reset, no user content involved
-    this.domComponent.replaceChildren();
-    // render
-    this.domComponent.append(...this.renderMessagesOrHidden());
+    return this.renderMessagesOrHidden();
   };
 }
 
-class OnlineUsersComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "online-users-wrapper";
+class OnlineUsersComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+      className: "online-users-wrapper",
+    });
+
     this.rerender = props.rerender;
 
     this.usersList = [];
     this.isOpen = false;
   }
+
+  setUsers = (users) => {
+    this.usersList = Array.isArray(users) ? users : [];
+    void this.render();
+  };
 
   toggle = () => {
     this.isOpen = !this.isOpen;
@@ -261,7 +377,6 @@ class OnlineUsersComponent {
   };
 
   render = () => {
-    this.domComponent.replaceChildren();
-    this.domComponent.append(this.renderPanel(), this.renderToggleButton());
+    return [this.renderPanel(), this.renderToggleButton()];
   };
 }

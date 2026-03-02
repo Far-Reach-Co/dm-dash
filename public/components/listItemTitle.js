@@ -1,4 +1,4 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
 import hidableEditLink from "./hidableEditLink.js";
 
 export default function listItemTitle(title, toggleEdit, auth) {

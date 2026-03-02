@@ -1,22 +1,33 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 
-class Tooltip {
+class Tooltip extends Component {
   constructor() {
-    this.tooltipElem = null;
+    const existingElem = document.getElementById("tooltip-hover");
+    const domElem =
+      existingElem ||
+      createElement("div", {
+        id: "tooltip-hover",
+      });
+
+    super({
+      domElem,
+      autoInit: false,
+      autoRender: false,
+    });
+
     this.init();
   }
 
-  init() {
-    // Create tooltip element if it doesn't exist
-    this.tooltipElem = document.getElementById("tooltip-hover");
-    if (!this.tooltipElem) {
-      this.tooltipElem = createElement("div", {
-        id: "tooltip-hover",
-        style: "display: none; position: absolute; z-index: 9999;",
-      });
-      document.body.appendChild(this.tooltipElem);
+  init = () => {
+    if (!this.domElem.parentNode) {
+      document.body.appendChild(this.domElem);
     }
-  }
+    this.domElem.id = "tooltip-hover";
+    this.domElem.style.display = "none";
+    this.domElem.style.position = "absolute";
+    this.domElem.style.zIndex = "9999";
+  };
 
   /**
    * Show tooltip with smart positioning
@@ -28,11 +39,11 @@ class Tooltip {
    * @param {number} options.offset - Offset from target in pixels (default: 5)
    */
   show({ content, event, target, maxWidth = 300, offset = 5 }) {
-    if (!this.tooltipElem) this.init();
+    if (!this.domElem) this.init();
 
     // Clear previous content
-    this.tooltipElem.innerHTML = "";
-    this.tooltipElem.style.display = "block";
+    this.domElem.replaceChildren();
+    this.domElem.style.display = "block";
 
     // Add content
     const contentWrapper = createElement(
@@ -49,7 +60,7 @@ class Tooltip {
       }
     }
 
-    this.tooltipElem.appendChild(contentWrapper);
+    this.domElem.appendChild(contentWrapper);
 
     // Calculate smart position
     const targetElem = target || event.target;
@@ -62,10 +73,10 @@ class Tooltip {
    * @param {number} offset - Offset in pixels
    */
   position(targetElem, offset = 5) {
-    if (!this.tooltipElem) return;
+    if (!this.domElem) return;
 
     const rect = targetElem.getBoundingClientRect();
-    const tooltipRect = this.tooltipElem.getBoundingClientRect();
+    const tooltipRect = this.domElem.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
 
@@ -93,24 +104,24 @@ class Tooltip {
     // Ensure tooltip doesn't go off left edge
     left = Math.max(10, left);
 
-    this.tooltipElem.style.top = top + "px";
-    this.tooltipElem.style.left = left + "px";
+    this.domElem.style.top = top + "px";
+    this.domElem.style.left = left + "px";
   }
 
   /**
    * Hide the tooltip
    */
   hide() {
-    if (!this.tooltipElem) return;
-    this.tooltipElem.style.display = "none";
-    this.tooltipElem.innerHTML = "";
+    if (!this.domElem) return;
+    this.domElem.style.display = "none";
+    this.domElem.replaceChildren();
   }
 
   /**
    * Check if tooltip is currently visible
    */
   isVisible() {
-    return this.tooltipElem && this.tooltipElem.style.display === "block";
+    return this.domElem && this.domElem.style.display === "block";
   }
 }
 

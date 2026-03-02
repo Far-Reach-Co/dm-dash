@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 
 export function renderLibraryBulkToolbar(grid) {
   if (grid.viewMode === "packs" || !grid.selectMode) {

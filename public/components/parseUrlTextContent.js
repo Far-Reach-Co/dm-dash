@@ -1,4 +1,4 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
 
 export default function parseUrlTextContent(content) {
   const urlRegexAll = /(https?:\/\/[^\s]+)/g;

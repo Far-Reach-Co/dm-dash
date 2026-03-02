@@ -1,4 +1,4 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
 
 export default function hidableEditLink(toggleEdit, auth) {
   if (!auth) {

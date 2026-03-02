@@ -1,5 +1,5 @@
 import modal from "../modal.js";
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import truncateString from "../../lib/truncateString.js";
 import { ICONS } from "./toolbarConfig.js";
 

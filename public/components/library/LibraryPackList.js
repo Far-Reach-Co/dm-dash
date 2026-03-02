@@ -1,83 +1,95 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 
 export function renderLibraryPackList(grid) {
   const q = grid.packLibraryQuery.trim().toLowerCase();
   const basePacks =
     grid.viewMode === "packs" ? grid.getPacksForCurrentFilter() : grid.getEditablePacks();
-  const filteredPacks = q
-    ? basePacks.filter((pack) => {
-        const title = String(pack.title || "").toLowerCase();
-        const desc = String(pack.description || "").toLowerCase();
-        return title.includes(q) || desc.includes(q);
-      })
-    : basePacks;
-  const visiblePacks =
-    grid.viewMode === "packs" ? filteredPacks : filteredPacks.slice(0, 6);
+  const filteredPacks = grid.useMemo(
+    "library-pack-list-filtered-packs",
+    () =>
+      q
+        ? basePacks.filter((pack) => {
+            const title = String(pack.title || "").toLowerCase();
+            const desc = String(pack.description || "").toLowerCase();
+            return title.includes(q) || desc.includes(q);
+          })
+        : basePacks,
+    () => [basePacks, q],
+  );
+  const visiblePacks = grid.useMemo(
+    "library-pack-list-visible-packs",
+    () => (grid.viewMode === "packs" ? filteredPacks : filteredPacks.slice(0, 6)),
+    () => [filteredPacks, grid.viewMode],
+  );
   const countLabel =
     grid.viewMode === "packs"
       ? `${filteredPacks.length} pack${filteredPacks.length === 1 ? "" : "s"}`
       : `${grid.packs.length} pack${grid.packs.length === 1 ? "" : "s"}`;
-  const cards =
-    visiblePacks.length > 0
-      ? visiblePacks.map((pack) =>
-          createElement(
-            "div",
-            { class: "library-pack-card" },
-            [
-              createElement(
-                "div",
-                { class: "library-pack-card-title" },
-                pack.title || "Untitled",
-              ),
-              createElement(
-                "div",
-                { class: "library-pack-card-meta" },
-                `${grid.getPackVisibilityLabel(pack)} • ${pack.image_count || 0} images`,
-              ),
-              createElement(
-                "small",
-                { class: "library-pack-tags" },
-                `Tags: ${grid.formatPackTags(grid.getPackTags(pack))}`,
-              ),
-              createElement("div", { class: "library-pack-card-badges" }, [
-                ...(grid.isPackEditable(pack)
-                  ? [createElement("span", { class: "library-pack-pill owned" }, "Owned")]
-                  : []),
-                ...(grid.isPackLockedForScope(pack)
-                  ? [
-                      createElement(
-                        "span",
-                        { class: "library-pack-pill locked" },
-                        grid.getPackLockLabel(pack),
-                      ),
-                    ]
-                  : []),
-                ...(grid.isPackInstalled(pack)
-                  ? [
-                      createElement(
-                        "span",
-                        { class: "library-pack-pill installed" },
-                        "Installed",
-                      ),
-                    ]
-                  : [createElement("span", { class: "library-pack-pill shared" }, "Shared")]),
-              ]),
-            ],
-            {
-              type: "click",
-              event: () => grid.renderPackImagesModal(pack),
-            },
-          ),
-        )
-      : [
-          createElement(
-            "div",
-            { class: "library-pack-empty" },
-            grid.viewMode === "packs"
-              ? "No packs for this filter yet. Create or discover packs."
-              : "No packs yet. Create your first pack.",
-          ),
-        ];
+  const cards = grid.useMemo(
+    "library-pack-list-card-nodes",
+    () =>
+      visiblePacks.length > 0
+        ? visiblePacks.map((pack) =>
+            createElement(
+              "div",
+              { class: "library-pack-card" },
+              [
+                createElement(
+                  "div",
+                  { class: "library-pack-card-title" },
+                  pack.title || "Untitled",
+                ),
+                createElement(
+                  "div",
+                  { class: "library-pack-card-meta" },
+                  `${grid.getPackVisibilityLabel(pack)} • ${pack.image_count || 0} images`,
+                ),
+                createElement(
+                  "small",
+                  { class: "library-pack-tags" },
+                  `Tags: ${grid.formatPackTags(grid.getPackTags(pack))}`,
+                ),
+                createElement("div", { class: "library-pack-card-badges" }, [
+                  ...(grid.isPackEditable(pack)
+                    ? [createElement("span", { class: "library-pack-pill owned" }, "Owned")]
+                    : []),
+                  ...(grid.isPackLockedForScope(pack)
+                    ? [
+                        createElement(
+                          "span",
+                          { class: "library-pack-pill locked" },
+                          grid.getPackLockLabel(pack),
+                        ),
+                      ]
+                    : []),
+                  ...(grid.isPackInstalled(pack)
+                    ? [
+                        createElement(
+                          "span",
+                          { class: "library-pack-pill installed" },
+                          "Installed",
+                        ),
+                      ]
+                    : [createElement("span", { class: "library-pack-pill shared" }, "Shared")]),
+                ]),
+              ],
+              {
+                type: "click",
+                event: () => grid.renderPackImagesModal(pack),
+              },
+            ),
+          )
+        : [
+            createElement(
+              "div",
+              { class: "library-pack-empty" },
+              grid.viewMode === "packs"
+                ? "No packs for this filter yet. Create or discover packs."
+                : "No packs yet. Create your first pack.",
+            ),
+          ],
+    () => [visiblePacks, grid.viewMode, grid.installedPacks, grid.projectId],
+  );
 
   return createElement("div", { class: "library-pack-section" }, [
     createElement("div", { class: "library-pack-section-header" }, [

@@ -1,34 +1,43 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 
-class ImageFollowingCursor {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+class ImageFollowingCursor extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("img", { id: "image-following-cursor" }),
+      autoInit: false,
+      autoRender: false,
+    });
 
     this.isOnPage = false;
+    this._onMouseMove = (e) => {
+      this.domElem.style.left = `${e.pageX}px`;
+      this.domElem.style.top = `${e.pageY}px`;
+    };
 
-    document.addEventListener("mousemove", (e) => {
-      this.domComponent.style.left = `${e.pageX}px`;
-      this.domComponent.style.top = `${e.pageY}px`;
-    });
+    document.addEventListener("mousemove", this._onMouseMove);
   }
 
   setImageSrc = (src) => {
-    this.domComponent.src = src;
+    this.domElem.src = src;
   };
 
   remove = () => {
-    this.domComponent.remove();
+    this.domElem.remove();
     this.isOnPage = false;
   };
 
   render = () => {
-    document.body.appendChild(this.domComponent);
+    document.body.appendChild(this.domElem);
     this.isOnPage = true;
+  };
+
+  destroy = () => {
+    document.removeEventListener("mousemove", this._onMouseMove);
+    this.remove();
   };
 }
 
-const imageFollowingCursor = new ImageFollowingCursor({
-  domComponent: createElement("img", { id: "image-following-cursor" }),
-});
+const imageFollowingCursor = new ImageFollowingCursor();
 
 export default imageFollowingCursor;

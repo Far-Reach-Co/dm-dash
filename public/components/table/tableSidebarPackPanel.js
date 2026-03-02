@@ -1,4 +1,5 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import modal from "../modal.js";
 import { apiDelete, apiGet, apiPost } from "../../lib/apiUtils.js";
 import { handleApiFailure } from "../../lib/apiUiFeedback.js";
@@ -12,8 +13,15 @@ import {
   isPackOwnedByScope,
 } from "../shared/libraryPackUtils.js";
 
-export default class TableSidebarPackPanel {
-  constructor(props) {
+export default class TableSidebarPackPanel extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoInit: false,
+      autoRender: false,
+      className: "table-sidebar-pack-panel",
+    });
+
     this.getProjectId = props.getProjectId;
     this.getIsSandboxMode = props.getIsSandboxMode;
     this.can = props.can;
@@ -28,8 +36,8 @@ export default class TableSidebarPackPanel {
     this.discoveredPacks = [];
     this.imageCache = {};
     this.imageLoading = {};
+    this.imageCacheVersion = 0;
     this.expandedInstalledPackId = null;
-    this.panelElem = null;
     this.searchDebounce = null;
   }
 
@@ -54,7 +62,7 @@ export default class TableSidebarPackPanel {
       clearTimeout(this.searchDebounce);
       this.searchDebounce = null;
     }
-    this.panelElem = null;
+    this.clear({ deep: true });
   };
 
   setMode = (mode) => {
@@ -94,11 +102,6 @@ export default class TableSidebarPackPanel {
     return isPackOwnedByScope(pack, { projectId: this.projectId });
   };
 
-  mount = (elem) => {
-    this.panelElem = elem;
-    this.panelElem.className = "table-sidebar-pack-panel";
-  };
-
   refreshData = async ({ includeDiscover = false } = {}) => {
     if (!this.canUseLibraryPacks()) {
       this.ownedPacks = [];
@@ -133,15 +136,21 @@ export default class TableSidebarPackPanel {
   };
 
   getUseModePacks = () => {
-    const merged = [...this.ownedPacks, ...this.installedPacks];
-    const byId = new Map();
-    for (const pack of merged) {
-      const key = String(pack.id);
-      if (!byId.has(key)) {
-        byId.set(key, pack);
-      }
-    }
-    return Array.from(byId.values());
+    return this.useMemo(
+      "table-sidebar-pack-use-mode-packs",
+      () => {
+        const merged = [...this.ownedPacks, ...this.installedPacks];
+        const byId = new Map();
+        for (const pack of merged) {
+          const key = String(pack.id);
+          if (!byId.has(key)) {
+            byId.set(key, pack);
+          }
+        }
+        return Array.from(byId.values());
+      },
+      () => [this.ownedPacks, this.installedPacks],
+    );
   };
 
   fetchDiscoverPacks = async (query = "") => {
@@ -196,6 +205,7 @@ export default class TableSidebarPackPanel {
     const key = String(packId);
     delete this.imageCache[key];
     delete this.imageLoading[key];
+    this.imageCacheVersion += 1;
     if (this.expandedInstalledPackId === key) {
       this.expandedInstalledPackId = null;
     }
@@ -228,6 +238,7 @@ export default class TableSidebarPackPanel {
             ...image,
             id: image.image_id ?? image.id,
           }));
+      this.imageCacheVersion += 1;
       this.imageLoading[key] = false;
     }
     this.render();
@@ -374,10 +385,21 @@ export default class TableSidebarPackPanel {
       return createElement("small", { class: "sidebar-pack-empty" }, "No images in this pack");
     }
 
+    const imageRows = this.useMemo(
+      `table-sidebar-pack-image-rows:${key}`,
+      () => images.map((image) => this.renderPackImageRow(image)),
+      () => [
+        images,
+        this.imageLoading[key],
+        this.imageCacheVersion,
+        this.can("canPlaceImagesFromSidebar"),
+      ],
+    );
+
     return createElement(
       "div",
       { class: "sidebar-pack-images-list" },
-      images.map((image) => this.renderPackImageRow(image)),
+      imageRows,
     );
   };
 
@@ -456,80 +478,92 @@ export default class TableSidebarPackPanel {
       ]);
     }
 
-    const installedIds = new Set(this.installedPacks.map((pack) => String(pack.id)));
-    const items = this.discoveredPacks.length
-      ? this.discoveredPacks.map((pack) => {
-          const isInstalled = installedIds.has(String(pack.id));
-          const isOwned = this.isOwnedPack(pack);
-          const isLocked = isPackLockedForScope(pack);
-          const canInstall = pack?.can_install !== false;
-          return createElement("div", { class: "sidebar-pack-card" }, [
-            createElement("div", { class: "sidebar-pack-card-head" }, [
-              createElement("div", { class: "sidebar-pack-card-main" }, [
-                createElement("div", { class: "sidebar-pack-card-title" }, pack.title || "Untitled"),
+    const items = this.useMemo(
+      "table-sidebar-pack-discover-items",
+      () => {
+        const installedIds = new Set(this.installedPacks.map((pack) => String(pack.id)));
+
+        return this.discoveredPacks.length
+          ? this.discoveredPacks.map((pack) => {
+              const isInstalled = installedIds.has(String(pack.id));
+              const isOwned = this.isOwnedPack(pack);
+              const isLocked = isPackLockedForScope(pack);
+              const canInstall = pack?.can_install !== false;
+              return createElement("div", { class: "sidebar-pack-card" }, [
+                createElement("div", { class: "sidebar-pack-card-head" }, [
+                  createElement("div", { class: "sidebar-pack-card-main" }, [
+                    createElement("div", { class: "sidebar-pack-card-title" }, pack.title || "Untitled"),
+                    createElement(
+                      "div",
+                      { class: "sidebar-pack-card-meta" },
+                      `${getPackVisibilityLabel(pack)} • ${pack.image_count || 0} images`,
+                    ),
+                  ]),
+                  createElement("div", { class: "sidebar-pack-card-actions" }, [
+                    createElement(
+                      "button",
+                      {
+                        class: "sidebar-pack-btn",
+                        type: "button",
+                        ...(isLocked ? { disabled: true } : {}),
+                      },
+                      "Preview",
+                      {
+                        type: "click",
+                        event: () => this.renderPackImagesModal(pack),
+                      },
+                    ),
+                    ...(!isOwned
+                      ? [
+                          createElement(
+                            "button",
+                            {
+                              class: "sidebar-pack-btn",
+                              type: "button",
+                              ...((!this.canManageInstalls() || (!isInstalled && (isLocked || !canInstall)))
+                                ? { disabled: true }
+                                : {}),
+                            },
+                            isInstalled
+                              ? "Remove"
+                              : isLocked
+                                ? getPackLockLabel(pack)
+                                : !canInstall
+                                  ? "Unavailable"
+                                  : "Install",
+                            {
+                              type: "click",
+                              event: () =>
+                                isInstalled
+                                  ? this.removePackForScope(pack.id, { includeDiscover: true })
+                                  : this.installPackForScope(pack.id, { includeDiscover: true }),
+                            },
+                          ),
+                        ]
+                      : []),
+                  ]),
+                ]),
                 createElement(
                   "div",
-                  { class: "sidebar-pack-card-meta" },
-                  `${getPackVisibilityLabel(pack)} • ${pack.image_count || 0} images`,
+                  { class: "sidebar-pack-description" },
+                  pack.description || "No description",
                 ),
-              ]),
-              createElement("div", { class: "sidebar-pack-card-actions" }, [
-                createElement(
-                  "button",
-                  {
-                    class: "sidebar-pack-btn",
-                    type: "button",
-                    ...(isLocked ? { disabled: true } : {}),
-                  },
-                  "Preview",
-                  {
-                    type: "click",
-                    event: () => this.renderPackImagesModal(pack),
-                  },
-                ),
-                ...(!isOwned
-                  ? [
-                      createElement(
-                        "button",
-                        {
-                          class: "sidebar-pack-btn",
-                          type: "button",
-                          ...((!this.canManageInstalls() || (!isInstalled && (isLocked || !canInstall)))
-                            ? { disabled: true }
-                            : {}),
-                        },
-                        isInstalled
-                          ? "Remove"
-                          : isLocked
-                            ? getPackLockLabel(pack)
-                            : !canInstall
-                              ? "Unavailable"
-                              : "Install",
-                        {
-                          type: "click",
-                          event: () =>
-                            isInstalled
-                              ? this.removePackForScope(pack.id, { includeDiscover: true })
-                              : this.installPackForScope(pack.id, { includeDiscover: true }),
-                        },
-                      ),
-                    ]
+                createElement("small", { class: "sidebar-pack-tags" }, `Tags: ${formatPackTags(pack)}`),
+                ...(isLocked
+                  ? [createElement("small", { class: "sidebar-pack-empty" }, getPackLockMessage(pack))]
                   : []),
-              ]),
-            ]),
-            createElement(
-              "div",
-              { class: "sidebar-pack-description" },
-              pack.description || "No description",
-            ),
-            createElement("small", { class: "sidebar-pack-tags" }, `Tags: ${formatPackTags(pack)}`),
-            ...(isLocked
-              ? [createElement("small", { class: "sidebar-pack-empty" }, getPackLockMessage(pack))]
-              : []),
-            this.renderPackBadges(pack, { installed: isInstalled }),
-          ]);
-        })
-      : [createElement("small", { class: "sidebar-pack-empty" }, "No packs found")];
+                this.renderPackBadges(pack, { installed: isInstalled }),
+              ]);
+            })
+          : [createElement("small", { class: "sidebar-pack-empty" }, "No packs found")];
+      },
+      () => [
+        this.discoveredPacks,
+        this.installedPacks,
+        this.projectId,
+        this.canManageInstalls(),
+      ],
+    );
 
     return createElement("div", { class: "sidebar-pack-section" }, [
       createElement("div", { class: "sidebar-header" }, "Discover Shared Packs"),
@@ -539,91 +573,99 @@ export default class TableSidebarPackPanel {
 
   renderInstalledSection = () => {
     const availablePacks = this.getUseModePacks();
-    const installedIds = new Set(this.installedPacks.map((pack) => String(pack.id)));
-
-    const renderPackRow = (pack) => {
-      const isExpanded = this.expandedInstalledPackId === String(pack.id);
-      const isLocked = isPackLockedForScope(pack);
-      const isInstalled = installedIds.has(String(pack.id));
-      return createElement("div", { class: "sidebar-pack-item" }, [
-        createElement("div", { class: "sidebar-pack-title" }, pack.title || "Untitled"),
-        createElement(
-          "div",
-          { class: "sidebar-pack-meta" },
-          `${getPackVisibilityLabel(pack)} • ${pack.image_count || 0} images`,
-        ),
-        createElement("small", { class: "sidebar-pack-tags" }, `Tags: ${formatPackTags(pack)}`),
-        this.renderPackBadges(pack, { installed: isInstalled }),
-        createElement("div", { class: "sidebar-pack-actions" }, [
-          createElement(
-            "button",
-            {
-              class: "sidebar-pack-btn",
-              type: "button",
-              ...(isLocked ? { disabled: true } : {}),
-            },
-            isLocked ? "Locked" : isExpanded ? "Collapse" : "Expand",
-            {
-              type: "click",
-              event: (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (isLocked) return;
-                this.toggleInstalledPack(pack.id);
-              },
-            },
-          ),
-          ...(isInstalled && !this.isOwnedPack(pack) && !this.isSandboxMode
-            ? [
-                createElement(
-                  "button",
-                  {
-                    class: "sidebar-pack-btn",
-                    type: "button",
-                    ...(!this.canManageInstalls() ? { disabled: true } : {}),
+    const rows = this.useMemo(
+      "table-sidebar-pack-installed-rows",
+      () => {
+        const installedIds = new Set(this.installedPacks.map((pack) => String(pack.id)));
+        return availablePacks.map((pack) => {
+          const isExpanded = this.expandedInstalledPackId === String(pack.id);
+          const isLocked = isPackLockedForScope(pack);
+          const isInstalled = installedIds.has(String(pack.id));
+          return createElement("div", { class: "sidebar-pack-item" }, [
+            createElement("div", { class: "sidebar-pack-title" }, pack.title || "Untitled"),
+            createElement(
+              "div",
+              { class: "sidebar-pack-meta" },
+              `${getPackVisibilityLabel(pack)} • ${pack.image_count || 0} images`,
+            ),
+            createElement("small", { class: "sidebar-pack-tags" }, `Tags: ${formatPackTags(pack)}`),
+            this.renderPackBadges(pack, { installed: isInstalled }),
+            createElement("div", { class: "sidebar-pack-actions" }, [
+              createElement(
+                "button",
+                {
+                  class: "sidebar-pack-btn",
+                  type: "button",
+                  ...(isLocked ? { disabled: true } : {}),
+                },
+                isLocked ? "Locked" : isExpanded ? "Collapse" : "Expand",
+                {
+                  type: "click",
+                  event: (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (isLocked) return;
+                    this.toggleInstalledPack(pack.id);
                   },
-                  "Remove",
-                  {
-                    type: "click",
-                    event: (e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      this.removePackForScope(pack.id);
-                    },
-                  },
-                ),
-              ]
-            : []),
-        ]),
-        ...(isLocked
-          ? [createElement("small", { class: "sidebar-pack-empty" }, getPackLockMessage(pack))]
-          : []),
-        ...(isExpanded ? [this.renderInstalledPackImages(pack)] : []),
-      ]);
-    };
+                },
+              ),
+              ...(isInstalled && !this.isOwnedPack(pack) && !this.isSandboxMode
+                ? [
+                    createElement(
+                      "button",
+                      {
+                        class: "sidebar-pack-btn",
+                        type: "button",
+                        ...(!this.canManageInstalls() ? { disabled: true } : {}),
+                      },
+                      "Remove",
+                      {
+                        type: "click",
+                        event: (e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          this.removePackForScope(pack.id);
+                        },
+                      },
+                    ),
+                  ]
+                : []),
+            ]),
+            ...(isLocked
+              ? [createElement("small", { class: "sidebar-pack-empty" }, getPackLockMessage(pack))]
+              : []),
+            ...(isExpanded ? [this.renderInstalledPackImages(pack)] : []),
+          ]);
+        });
+      },
+      () => [
+        availablePacks,
+        this.installedPacks,
+        this.expandedInstalledPackId,
+        this.imageCacheVersion,
+        this.projectId,
+        this.isSandboxMode,
+        this.canManageInstalls(),
+      ],
+    );
 
     return createElement("div", { class: "sidebar-pack-section" }, [
       createElement("div", { class: "sidebar-header" }, "Use Packs (Owned + Installed)"),
       ...(availablePacks.length
-        ? availablePacks.map((pack) => renderPackRow(pack))
+        ? rows
         : [createElement("small", { class: "sidebar-pack-empty" }, "No owned or installed packs")]),
     ]);
   };
 
   render = () => {
-    if (!this.panelElem) return;
-    this.panelElem.innerHTML = "";
-
     if (this.loading) {
-      this.panelElem.append(createElement("small", {}, "Loading packs..."));
-      return;
+      return [createElement("small", {}, "Loading packs...")];
     }
 
     if (this.mode === "discover") {
-      this.panelElem.append(this.renderDiscoverSection());
-      return;
+      return [this.renderDiscoverSection()];
     }
 
-    this.panelElem.append(this.renderInstalledSection());
+    return [this.renderInstalledSection()];
   };
 }
