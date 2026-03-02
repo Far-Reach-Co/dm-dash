@@ -46,7 +46,6 @@ export class Component {
     this._destroyed = false;
     this._renderSequence = 0;
     this._renderWrapperActive = false;
-    this._legacyRenderMode = props.legacyRender === true;
     this._userRender = NOOP_RENDER;
 
     const explicitDomElem = props.domElem || null;
@@ -96,14 +95,6 @@ export class Component {
     if (this._destroyed) return this;
 
     const renderSequence = ++this._renderSequence;
-
-    if (this._legacyRenderMode) {
-      await this._userRender.call(this, ...args);
-      if (this._destroyed || renderSequence !== this._renderSequence) {
-        return this;
-      }
-      return this;
-    }
 
     this.clear();
 
