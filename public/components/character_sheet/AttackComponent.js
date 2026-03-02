@@ -1,6 +1,7 @@
 import collectTextNodes from "../../lib/collectTextNodes.js";
 import isInsideSpan from "../../lib/isInsideSpan.js";
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import { setCaretStartAfter } from "../../lib/caretPositions.js";
 import safeMathEval from "../../lib/safeMathEval.js";
@@ -14,12 +15,16 @@ import {
   updateSheetItem,
 } from "../../lib/sheetApi.js";
 
-export default class AttackComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className =
+export default class AttackComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
+    this.domElem.className =
       "cp-info-container-column cp-info-container-pulsate"; // pulsate before content has loaded
-    this.domComponent.style = "max-width: 100%;";
+    this.domElem.style = "max-width: 100%;";
     this.generalData = props.generalData;
     this.calculateAbilityScoreModifier = props.calculateAbilityScoreModifier;
     this.calculateProBonus = props.calculateProBonus;
@@ -625,7 +630,7 @@ export default class AttackComponent {
   renderAttacksElems = async () => {
     const sheetData = await getSheet(this.generalData.id);
     const attacksData = sortByNumericId(readSheetArraySection(sheetData, "attacks"));
-    this.domComponent.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
+    this.domElem.className = "cp-info-container-column"; // set container styling to not include pulsate animation after loading
     if (!attacksData.length) return [createElement("small", {}, "None...")];
 
     return attacksData.map((item) => {
@@ -717,13 +722,11 @@ export default class AttackComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     if (this.newLoading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+      return [renderLoadingWithMessage("Loading...")];
     }
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         { class: "special-font align-self-center" },
@@ -767,6 +770,6 @@ export default class AttackComponent {
           event: this.newAttack,
         },
       ),
-    );
+    ];
   };
 }

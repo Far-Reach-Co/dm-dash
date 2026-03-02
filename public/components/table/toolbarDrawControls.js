@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import { ICONS } from "./toolbarConfig.js";
 
 export function renderDrawModeToggle(toolbar) {
@@ -8,8 +8,8 @@ export function renderDrawModeToggle(toolbar) {
     onClick: () => {
       toolbar.clearSelection();
       toolbar.tableApp.canvasLayer.setDrawingMode(!isDrawing);
-      toolbar._updateDrawToggle();
-      toolbar._updateDrawBar();
+      void toolbar._updateDrawToggle();
+      void toolbar._updateDrawBar();
     },
   });
 }
@@ -41,7 +41,7 @@ export function renderDrawBar(toolbar) {
         type: "change",
         event: (e) => {
           canvasLayer.setDrawingTool(e.target.value);
-          toolbar._updateDrawBar();
+          void toolbar._updateDrawBar();
         },
       },
     ),

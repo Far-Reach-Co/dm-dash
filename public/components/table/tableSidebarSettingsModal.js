@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import { apiGet, apiPost } from "../../lib/apiUtils.js";
 import tableSelect from "./tableSelect.js";
 import socketIntegration from "./socketIntegration.js";

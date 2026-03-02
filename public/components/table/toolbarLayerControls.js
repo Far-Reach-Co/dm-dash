@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import { ICONS } from "./toolbarConfig.js";
 
 export function renderStyledLayerInfoElem(toolbar) {
@@ -16,8 +16,8 @@ export function renderLayersButton(toolbar) {
     onClick: () => {
       toolbar.clearSelection();
       toolbar.activePanel = toolbar.activePanel === "layers" ? null : "layers";
-      toolbar._updateLayersAnchor();
-      toolbar._updateGridAnchor();
+      void toolbar._updateLayersAnchor();
+      void toolbar._updateGridAnchor();
     },
   });
 }
@@ -35,7 +35,7 @@ export function renderLayersPanel(toolbar) {
         type: "click",
         event: () => {
           toolbar.tableApp.changeLayer();
-          toolbar._updateLayersAnchor();
+          void toolbar._updateLayersAnchor();
         },
       },
     ),

@@ -1,11 +1,21 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 import { apiDelete, apiPost } from "../lib/apiUtils.js";
 import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
 
-export default class CreateCalendar {
+export default class CreateCalendar extends Component {
   constructor() {
-    this.domComponent = document.querySelector("#create-calendar");
+    const hostElem = document.querySelector("#create-calendar");
+    if (!hostElem) {
+      throw new Error("CreateCalendar requires #create-calendar");
+    }
+
+    super({
+      domElem: hostElem,
+      autoInit: false,
+      autoRender: false,
+    });
 
     // creation vars
     this.creatingNewMonths = false;
@@ -101,7 +111,7 @@ export default class CreateCalendar {
   };
 
   renderNewDaysInWeek = () => {
-    this.domComponent.innerHTML = "";
+    this.domElem.innerHTML = "";
 
     const titleOfForm = createElement(
       "div",
@@ -206,7 +216,7 @@ export default class CreateCalendar {
     });
 
     // append
-    this.domComponent.append(
+    this.domElem.append(
       titleOfForm,
       infoElem,
       createElement("br"),
@@ -257,7 +267,7 @@ export default class CreateCalendar {
   };
 
   renderNewMonths = async () => {
-    this.domComponent.innerHTML = "";
+    this.domElem.innerHTML = "";
 
     const titleOfForm = createElement(
       "div",
@@ -389,7 +399,7 @@ export default class CreateCalendar {
     });
 
     // append
-    this.domComponent.append(
+    this.domElem.append(
       titleOfForm,
       infoElem,
       createElement("br"),
@@ -400,7 +410,7 @@ export default class CreateCalendar {
   };
 
   renderNewCalendar = async () => {
-    this.domComponent.append(
+    this.domElem.append(
       createElement(
         "small",
         { style: "max-width: 600px;" },
@@ -455,11 +465,11 @@ export default class CreateCalendar {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
+    this.domElem.innerHTML = "";
 
     // keep this first
     if (this.loading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+      return this.domElem.append(renderLoadingWithMessage("Loading..."));
     }
 
     if (this.creatingNewMonths) {

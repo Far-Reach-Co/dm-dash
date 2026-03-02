@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import socketIntegration from "./socketIntegration.js";
 import { ICONS } from "./toolbarConfig.js";
 
@@ -10,8 +10,8 @@ export function renderGridButton(toolbar) {
     onClick: () => {
       toolbar.clearSelection();
       toolbar.activePanel = toolbar.activePanel === "grid" ? null : "grid";
-      toolbar._updateGridAnchor();
-      toolbar._updateLayersAnchor();
+      void toolbar._updateGridAnchor();
+      void toolbar._updateLayersAnchor();
     },
   });
 }
@@ -45,7 +45,7 @@ export function renderGridPanel(toolbar) {
             ? toolbar.tableApp.canvasLayer.hideGrid()
             : toolbar.tableApp.canvasLayer.showGrid();
           socketIntegration.gridToggle(!isVisible);
-          toolbar._updateGridAnchor();
+          void toolbar._updateGridAnchor();
         },
       },
     ),

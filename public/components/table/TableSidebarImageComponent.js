@@ -1,4 +1,5 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import { apiGet, apiPost } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import imageFollowingCursor from "../imageFollowingCursor.js";
@@ -13,10 +14,14 @@ import {
   getLibraryImagesEndpoint,
 } from "./tableApi.js";
 
-export default class TableSidebarImageComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "table-sidebar-image-component";
+export default class TableSidebarImageComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+      className: "table-sidebar-image-component",
+    });
+
     this.tableView = props.tableView;
     this.tableApp = props.tableApp;
     this.getCurrentFolder = props.getCurrentFolder;
@@ -36,6 +41,7 @@ export default class TableSidebarImageComponent {
     this.activeQueryKey = null;
     this.searchDebounceId = null;
     this.searchDebounceMs = 300;
+    this.pendingInitialFetch = false;
   }
 
   get guestSandboxId() {
@@ -58,12 +64,13 @@ export default class TableSidebarImageComponent {
     this.imageDataAndElems = null;
     this.imagesListContainer = null;
     this.loadMoreContainer = null;
+    this.pendingInitialFetch = false;
+    this.clear({ deep: true });
   };
 
   showLoading = () => {
     this.imageLoading = true;
-    this.domComponent.innerHTML = "";
-    this.domComponent.append(renderLoadingWithMessage(""));
+    this.render();
   };
 
   hideLoading = () => {
@@ -432,7 +439,12 @@ export default class TableSidebarImageComponent {
   };
 
   renderCurrentImages = async () => {
-    await Promise.all([this.updateCountsFromServer(), this.fetchImagesPage()]);
+    this.pendingInitialFetch = true;
+    try {
+      await Promise.all([this.updateCountsFromServer(), this.fetchImagesPage()]);
+    } finally {
+      this.pendingInitialFetch = false;
+    }
   };
 
   createImageListItem = async (tableImage, image) => {
@@ -537,6 +549,7 @@ export default class TableSidebarImageComponent {
   refreshFromServer = () => {
     this.imageDataAndElems = null;
     this.resetPagination();
+    this.pendingInitialFetch = false;
     this.render();
   };
 
@@ -559,10 +572,8 @@ export default class TableSidebarImageComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     if (this.imageLoading) {
-      return this.domComponent.append(renderLoadingWithMessage(""));
+      return [renderLoadingWithMessage("")];
     }
 
     this.imagesListContainer = createElement("div", {
@@ -622,15 +633,18 @@ export default class TableSidebarImageComponent {
       sortSelect,
     ]);
 
-    this.domComponent.append(filters, this.imagesListContainer, this.loadMoreContainer);
-
     if (this.imageDataAndElems) {
       this.renderListContents();
-      return;
+      return [filters, this.imagesListContainer, this.loadMoreContainer];
     }
 
     const spinner = renderLoadingWithMessage("");
     this.imagesListContainer.append(spinner);
-    await this.renderCurrentImages();
+    if (!this.pendingInitialFetch) {
+      queueMicrotask(async () => {
+        await this.renderCurrentImages();
+      });
+    }
+    return [filters, this.imagesListContainer, this.loadMoreContainer];
   };
 }

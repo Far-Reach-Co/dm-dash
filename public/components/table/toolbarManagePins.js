@@ -1,5 +1,5 @@
 import modal from "../modal.js";
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 
 export function showManagePinsModal(toolbar) {
   const pins = toolbar.tableApp.locationPins;

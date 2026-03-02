@@ -1,4 +1,5 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import TableSidebarImageComponent from "./TableSidebarImageComponent.js";
 import { copyTextToClipboard } from "../../lib/clipboard.js";
 import modal from "../modal.js";
@@ -23,10 +24,14 @@ const SIDEBAR_ICON_MARKUP = {
 
 const SIDEBAR_ICONS = createSvgIconFactoryMap(SIDEBAR_ICON_MARKUP);
 
-export default class TableSidebar {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "sidebar";
+export default class TableSidebar extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+      className: "sidebar",
+    });
+
     this.tableView = props.tableView;
     this.isVisible = false;
     this.tableApp = props.tableApp;
@@ -40,43 +45,11 @@ export default class TableSidebar {
       cancelling: false,
       activeController: null,
     };
+    this.tableSidebarFolderComponent = null;
+    this.tableSidebarImageComponent = null;
+    this.packPanel = null;
 
-    // table folders component
-    this.tableSidebarFolderComponent = new TableSidebarFolderComponent({
-      domComponent: createElement("div"),
-      tableView: this.tableView,
-      capabilities: this.capabilities,
-    });
-
-    // table sidebar component
-    this.tableSidebarImageComponent = new TableSidebarImageComponent({
-      domComponent: createElement("div"),
-      tableView: this.tableView,
-      tableApp: this.tableApp,
-      getCurrentFolder: () => {
-        return this.tableSidebarFolderComponent.currentFolder;
-      },
-      getFolderScope: () => {
-        return this.tableSidebarFolderComponent.getScope();
-      },
-      onCountsUpdated: (data) =>
-        this.tableSidebarFolderComponent.setCounts(data),
-      capabilities: this.capabilities,
-    });
-
-    this.packPanel = new TableSidebarPackPanel({
-      getProjectId: () => this.projectId,
-      getIsSandboxMode: () => this.isSandboxMode,
-      can: this.can,
-      canUseLibraryPacks: this.canUseLibraryPacks,
-      tableSidebarImageComponent: this.tableSidebarImageComponent,
-    });
-
-    // setup functions to allow folder component to call render on images
-    this.tableSidebarFolderComponent.updateImagesList =
-      this.tableSidebarImageComponent.updateImagesList;
-    this.tableSidebarFolderComponent.refreshImages =
-      this.tableSidebarImageComponent.refreshFromServer;
+    this.ensureChildComponents();
   }
 
   get projectId() {
@@ -97,7 +70,82 @@ export default class TableSidebar {
     return this.can("canUseLibraryPacks");
   };
 
+  createFolderComponent = () => {
+    return new TableSidebarFolderComponent({
+      domElem: createElement("div"),
+      tableView: this.tableView,
+      capabilities: this.capabilities,
+    });
+  };
+
+  createImageComponent = () => {
+    return new TableSidebarImageComponent({
+      domElem: createElement("div"),
+      tableView: this.tableView,
+      tableApp: this.tableApp,
+      getCurrentFolder: () => {
+        return this.tableSidebarFolderComponent?.currentFolder || null;
+      },
+      getFolderScope: () => {
+        return (
+          this.tableSidebarFolderComponent?.getScope?.() || {
+            showAllImages: false,
+            currentFolder: null,
+          }
+        );
+      },
+      onCountsUpdated: (data) =>
+        this.tableSidebarFolderComponent?.setCounts?.(data),
+      capabilities: this.capabilities,
+    });
+  };
+
+  createPackPanel = () => {
+    return new TableSidebarPackPanel({
+      domElem: createElement("div"),
+      getProjectId: () => this.projectId,
+      getIsSandboxMode: () => this.isSandboxMode,
+      can: this.can,
+      canUseLibraryPacks: this.canUseLibraryPacks,
+      tableSidebarImageComponent: this.tableSidebarImageComponent,
+    });
+  };
+
+  ensureChildComponents = () => {
+    const folderComponent = this.useChild(
+      "table-sidebar-folder-component",
+      this.createFolderComponent,
+    );
+    const imageComponent = this.useChild(
+      "table-sidebar-image-component",
+      this.createImageComponent,
+    );
+    const packPanel = this.useChild(
+      "table-sidebar-pack-panel",
+      this.createPackPanel,
+      (child) => {
+        child.tableSidebarImageComponent = imageComponent;
+      },
+    );
+
+    // Keep folder actions wired to image list refreshers.
+    folderComponent.updateImagesList = imageComponent.updateImagesList;
+    folderComponent.refreshImages = imageComponent.refreshFromServer;
+
+    // Preserve existing external property access.
+    this.tableSidebarFolderComponent = folderComponent;
+    this.tableSidebarImageComponent = imageComponent;
+    this.packPanel = packPanel;
+
+    return {
+      folderComponent,
+      imageComponent,
+      packPanel,
+    };
+  };
+
   setActiveTab = async (tab) => {
+    const { packPanel } = this.ensureChildComponents();
     if (tab === "installed_packs" && !this.canUseLibraryPacks()) {
       this.activeTab = "images";
       await this.render();
@@ -105,18 +153,19 @@ export default class TableSidebar {
     }
     this.activeTab = tab === "installed_packs" ? "installed_packs" : "images";
     if (this.activeTab === "installed_packs") {
-      await this.packPanel.refreshData({
-        includeDiscover: this.packPanel.mode === "discover",
+      await packPanel.refreshData({
+        includeDiscover: packPanel.mode === "discover",
       });
     }
     await this.render();
   };
 
   setPackPanelMode = async (mode) => {
-    this.packPanel.setMode(mode);
+    const { packPanel } = this.ensureChildComponents();
+    packPanel.setMode(mode);
     if (this.activeTab !== "installed_packs") return;
-    await this.packPanel.refreshData({
-      includeDiscover: this.packPanel.mode === "discover",
+    await packPanel.refreshData({
+      includeDiscover: packPanel.mode === "discover",
     });
     await this.render();
   };
@@ -148,7 +197,7 @@ export default class TableSidebar {
   close = () => {
     this.isVisible = false;
     if (this.container) this.container.classList.remove("open");
-    if (this.domComponent) this.domComponent.classList.remove("open");
+    if (this.domElem) this.domElem.classList.remove("open");
     // Update toolbar button active state
     if (this.tableApp?.topLayer) this.tableApp.topLayer.render();
   };
@@ -156,25 +205,25 @@ export default class TableSidebar {
   open = () => {
     this.isVisible = true;
     if (this.container) this.container.classList.add("open");
-    if (this.domComponent) this.domComponent.classList.add("open");
+    if (this.domElem) this.domElem.classList.add("open");
   };
 
   hide = () => {
     this.close();
-    this.domComponent.innerHTML = "";
+    this.clear({ deep: true });
   };
 
   destroy = () => {
-    this.tableSidebarImageComponent?.destroy?.();
-    this.tableSidebarFolderComponent?.destroy?.();
-    this.packPanel?.destroy?.();
     this.isVisible = false;
     this.container = null;
-    this.domComponent.replaceChildren();
+    this.tableSidebarImageComponent = null;
+    this.tableSidebarFolderComponent = null;
+    this.packPanel = null;
+    super.destroy();
   };
 
   getCurrentFolderId = () => {
-    return this.tableSidebarFolderComponent.currentFolder?.id ?? null;
+    return this.tableSidebarFolderComponent?.currentFolder?.id ?? null;
   };
 
   // Helper to handle project vs user API routing
@@ -516,24 +565,22 @@ export default class TableSidebar {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
+    const { folderComponent, imageComponent, packPanel } =
+      this.ensureChildComponents();
 
     if (this.activeTab === "installed_packs" && !this.canUseLibraryPacks()) {
       this.activeTab = "images";
     }
 
-    this.packPanel.setMode(this.packPanel.mode);
+    packPanel.setMode(packPanel.mode);
     const isPackTab = this.activeTab === "installed_packs";
-    const canShowDiscoverMode =
-      !this.isSandboxMode && this.packPanel.canDiscover();
+    const canShowDiscoverMode = !this.isSandboxMode && packPanel.canDiscover();
 
     if (!isPackTab) {
-      this.tableSidebarImageComponent.render();
-      this.tableSidebarFolderComponent.render();
+      await imageComponent.render();
+      await folderComponent.render();
     } else {
-      if (!this.packPanelElem) this.packPanelElem = createElement("div");
-      this.packPanel.mount(this.packPanelElem);
-      this.packPanel.render();
+      await packPanel.render();
     }
 
     const container = createElement("div", { class: "sidebar-container" }, [
@@ -541,15 +588,12 @@ export default class TableSidebar {
       this.renderSidebarTabs(),
       this.renderSidebarActions({ isPackTab, canShowDiscoverMode }),
       ...(this.activeTab === "images"
-        ? [
-            this.tableSidebarFolderComponent.domComponent,
-            this.tableSidebarImageComponent.domComponent,
-          ]
-        : [this.packPanelElem]),
+        ? [folderComponent.domElem, imageComponent.domElem]
+        : [packPanel.domElem]),
     ]);
 
     this.container = container;
     this.open();
-    return this.domComponent.append(container);
+    return [container];
   };
 }

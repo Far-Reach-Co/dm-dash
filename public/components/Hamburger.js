@@ -1,17 +1,27 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 
-export class Hamburger {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.id = "hamburger";
-    this.domComponent.className = "hamburger";
+export class Hamburger extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
+    this.domElem.id = "hamburger";
+    this.domElem.className = "hamburger";
     this.sidebar = props.sidebar;
 
-    this.domComponent.addEventListener("click", this.toggle);
+    this.domElem.addEventListener("click", this.toggle);
   }
 
   hide = () => {
-    this.domComponent.innerHTML = "";
+    this.domElem.innerHTML = "";
+  };
+
+  destroy = () => {
+    this.domElem.removeEventListener("click", this.toggle);
+    this.domElem.replaceChildren();
   };
 
   toggle = () => {
@@ -23,9 +33,7 @@ export class Hamburger {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
+    return [
       createElement(
         "img",
         {
@@ -37,6 +45,6 @@ export class Hamburger {
         },
         null,
       ),
-    );
+    ];
   };
 }

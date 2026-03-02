@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import modal from "../modal.js";
 import renderSpinner from "../spinner.js";
 

@@ -1,8 +1,13 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class BackgroundComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class BackgroundComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateBackgroundValue = props.updateBackgroundValue;
     this.onUpdate = props.onUpdate;
@@ -89,9 +94,7 @@ export default class BackgroundComponent {
   };
 
   render = () => {
-    this.domComponent.innerHTML = "";
-
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         { class: "d-flex flex-wrap", style: "flex: 1;" },
@@ -130,6 +133,6 @@ export default class BackgroundComponent {
           ]),
         ]
       )
-    );
+    ];
   };
 }

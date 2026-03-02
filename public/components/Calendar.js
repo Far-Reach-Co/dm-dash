@@ -1,14 +1,18 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 import listItemTitle from "./listItemTitle.js";
 import { apiDelete, apiPost } from "../lib/apiUtils.js";
 import { handleApiFailure } from "../lib/apiUiFeedback.js";
 import renderLoadingWithMessage from "./loadingWithMessage.js";
 import modal from "./modal.js";
 
-export default class Calendar {
+export default class Calendar extends Component {
   constructor(props) {
-    // domcomp
-    this.domComponent = props.domComponent;
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoInit: false,
+      autoRender: false,
+    });
 
     // values
     this.id = props.id;
@@ -316,7 +320,7 @@ export default class Calendar {
       createElement("div", { class: "calendar-edit-actions" }, [addBtn, doneBtn])
     );
     // append
-    this.domComponent.appendChild(mainDiv);
+    this.domElem.appendChild(mainDiv);
   };
 
   renderManageMonths = () => {
@@ -436,7 +440,7 @@ export default class Calendar {
       createElement("div", { class: "calendar-edit-actions" }, [addBtn, doneBtn])
     );
     // append
-    this.domComponent.appendChild(mainDiv);
+    this.domElem.appendChild(mainDiv);
   };
 
   renderManageCalendar = () => {
@@ -479,12 +483,12 @@ export default class Calendar {
       this.toggleLoading();
     });
 
-    this.domComponent.appendChild(form);
+    this.domElem.appendChild(form);
   };
 
   renderEdit = async () => {
     if (this.loading) {
-      return this.domComponent.append(renderLoadingWithMessage("Loading..."));
+      return this.domElem.append(renderLoadingWithMessage("Loading..."));
     }
 
     if (this.manageCalendar) {
@@ -546,11 +550,11 @@ export default class Calendar {
       const result = await apiDelete(`/api/remove_calendar/${this.id}`);
       if (this.handleApiError(result, "Failed to remove calendar")) return;
       this.toggleEdit();
-      this.domComponent.remove();
+      this.domElem.remove();
       modal.hide();
     });
 
-    this.domComponent.append(
+    this.domElem.append(
       createElement("div", { class: "component-title" }, `Edit ${this.title}`),
       createElement("br"),
       manageBtnContainer,
@@ -657,7 +661,7 @@ export default class Calendar {
       this.render();
     });
 
-    this.domComponent.append(
+    this.domElem.append(
       createElement("div", { class: "d-flex justify-content-between" }, [
         await listItemTitle(
           createElement("h1", { class: "text-green" }, this.title),
@@ -680,7 +684,7 @@ export default class Calendar {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
+    this.domElem.innerHTML = "";
 
     // edit
     if (this.edit) {

@@ -1,4 +1,4 @@
-import createElement from "../components/createElement.js";
+import createElement from "./salt-lib/createElement.js";
 import modal from "../components/modal.js";
 import renderTierLimitWarning from "../components/renderTierLimitWarning.js";
 

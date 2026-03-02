@@ -1,4 +1,5 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import SkillComponent from "./SkillComponent.js";
 import { calculateProficiency } from "./characterCalculations.js";
 
@@ -23,9 +24,13 @@ const SKILLS = [
   { title: "Survival", key: "survival", ability: "wisdom" },
 ];
 
-export default class SkillsListComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
+export default class SkillsListComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+    });
+
     this.generalData = props.generalData;
     this.updateProficiencyInfo = props.updateProficiencyInfo;
 
@@ -33,33 +38,33 @@ export default class SkillsListComponent {
   }
 
   render = () => {
-    this.domComponent.innerHTML = "";
-    this.domComponent.className = "cp-info-container-column";
+    this.domElem.className = "cp-info-container-column";
 
-    this.domComponent.appendChild(
+    const skillRows = [
       createElement(
         "div",
         { class: "special-font align-self-center" },
         "Skills"
-      )
-    );
+      ),
+    ];
 
     SKILLS.forEach((skill) => {
-      const elem = createElement("div");
-      const skillData = {
-        ...skill,
-        value: this.generalData.proficiencies[skill.key],
-        abilityValue: this.generalData[skill.ability],
-        mod: this.generalData.proficiencies[`${skill.key}_mod`],
-      };
-      new SkillComponent({
-        domComponent: elem,
+      const skillComponent = new SkillComponent({
+        domElem: createElement("div"),
         updateProficiencyInfo: this.updateProficiencyInfo,
         calculateProficiency: (ability, isPro, skillMod) =>
           calculateProficiency(ability, isPro, this.generalData.level, skillMod),
-        skill: skillData,
+        skill: {
+          ...skill,
+          value: this.generalData.proficiencies[skill.key],
+          abilityValue: this.generalData[skill.ability],
+          mod: this.generalData.proficiencies[`${skill.key}_mod`],
+        },
       });
-      this.domComponent.appendChild(elem);
+
+      skillRows.push(skillComponent.domElem);
     });
+
+    return skillRows;
   };
 }

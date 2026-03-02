@@ -1,5 +1,5 @@
 import modal from "./modal.js";
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
 // import { getPresignedForImageDownload } from "./imageUtils.js";
 
 async function handleImageClick(imageSource) {

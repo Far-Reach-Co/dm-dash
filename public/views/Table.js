@@ -1,4 +1,5 @@
-import createElement from "../components/createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
+import Component from "../lib/salt-lib/Component.js";
 import { apiGet } from "../lib/apiUtils.js";
 import { Hamburger } from "../components/Hamburger.js";
 import TableSidebar from "../components/table/TableSidebar.js";
@@ -21,9 +22,19 @@ import {
 } from "./table/urlState.js";
 import LocationPinController from "./table/locationPinController.js";
 
-class Table {
+class Table extends Component {
   constructor() {
-    this.domComponent = document.getElementById("app");
+    const appElem = document.getElementById("app");
+    if (!appElem) {
+      throw new Error("Table requires #app");
+    }
+
+    super({
+      domElem: appElem,
+      autoInit: false,
+      autoRender: false,
+    });
+
     this.canvasElem = createElement("canvas", { id: "canvas-layer" });
 
     this.canvasLayer = null;
@@ -105,12 +116,12 @@ class Table {
 
     // Init elements
     this.sidebar = new TableSidebar({
-      domComponent: createElement("div", {}),
+      domElem: createElement("div", {}),
       tableView,
       tableApp: this,
     });
     this.hamburger = new Hamburger({
-      domComponent: createElement("div", {}),
+      domElem: createElement("div", {}),
       sidebar: this.sidebar,
     });
 
@@ -119,25 +130,25 @@ class Table {
       tableApp: this,
     });
     this.topLayer = new TopLayer({
-      domComponent: createElement("div"),
+      domElem: createElement("div"),
       tableApp: this,
     });
     this.chatBoxComponent = new ChatBoxComponent({
-      domComponent: createElement("div"),
+      domElem: createElement("div"),
     });
+    this.registerTableSessionCleanup();
 
     // Rendering
-    this.render();
+    await this.render();
     await this.canvasLayer.init();
     await this.reloadLocationPins();
     this.setupDocumentEventListeners();
-    this.topLayer.render();
-    this.chatBoxComponent.render();
+    await this.topLayer.render();
+    await this.chatBoxComponent.render();
     socketIntegration.getMessages();
 
     // Render sidebar only when backend-granted capabilities require it
-    if (canRenderSidebarForTable(tableView))
-      this.renderSidebarAndHamburger();
+    if (this.canRenderSidebar()) await this.renderSidebarAndHamburger();
   };
 
   loadLocationPins = async (tableViewId) => {
@@ -174,14 +185,7 @@ class Table {
   };
 
   teardown = () => {
-    this.removeDocumentEventListeners();
-    imageFollowingCursor.remove();
-
-    this.resetLocationPinHighlight();
-
-    this.canvasLayer?.destroy?.();
-    this.sidebar?.destroy?.();
-    this.topLayer?.destroy?.();
+    this.runCleanup();
 
     this.currentSelectedObject = null;
     this.canvasLayer = null;
@@ -195,12 +199,31 @@ class Table {
     this.capabilities = {};
     this.isGuestSandbox = false;
     this.pendingReloadTableUUID = null;
-    window.clearTimeout(this.guestWelcomePromptTimer);
-    this.guestWelcomePromptTimer = null;
-    window.clearTimeout(this.guestRegisterPromptTimer);
-    this.guestRegisterPromptTimer = null;
 
-    this.domComponent.replaceChildren();
+    this.clear({ deep: true });
+  };
+
+  registerTableSessionCleanup = () => {
+    const canvasLayer = this.canvasLayer;
+    const sidebar = this.sidebar;
+    const topLayer = this.topLayer;
+    const chatBoxComponent = this.chatBoxComponent;
+    const hamburger = this.hamburger;
+
+    this.onCleanup(() => this.removeDocumentEventListeners());
+    this.onCleanup(() => imageFollowingCursor.remove());
+    this.onCleanup(() => this.resetLocationPinHighlight());
+    this.onCleanup(() => canvasLayer?.destroy?.());
+    this.onCleanup(() => sidebar?.destroy?.());
+    this.onCleanup(() => topLayer?.destroy?.());
+    this.onCleanup(() => chatBoxComponent?.destroy?.());
+    this.onCleanup(() => hamburger?.destroy?.());
+    this.onCleanup(() => {
+      window.clearTimeout(this.guestWelcomePromptTimer);
+      this.guestWelcomePromptTimer = null;
+      window.clearTimeout(this.guestRegisterPromptTimer);
+      this.guestRegisterPromptTimer = null;
+    });
   };
 
   scheduleGuestRegistrationPrompt = () => {
@@ -399,9 +422,14 @@ class Table {
     return this.locationPinController.openLocationPinModal(object);
   };
 
-  renderSidebarAndHamburger = () => {
-    this.domComponent.append(this.sidebar.domComponent);
-    this.sidebar.render();
+  canRenderSidebar = () => {
+    if (!this.sidebar || !this.tableView) return false;
+    return canRenderSidebarForTable(this.tableView);
+  };
+
+  renderSidebarAndHamburger = async () => {
+    if (!this.canRenderSidebar()) return;
+    await this.sidebar.render();
   };
 
   changeLayer = () => {
@@ -572,11 +600,10 @@ class Table {
   };
 
   render = async () => {
-    this.domComponent.append(
-      this.topLayer.domComponent,
-      this.chatBoxComponent.domComponent,
-      this.canvasElem,
-    );
+    const renderItems = [];
+    if (this.canRenderSidebar()) renderItems.push(this.sidebar.domElem);
+    renderItems.push(this.topLayer.domElem, this.chatBoxComponent.domElem, this.canvasElem);
+    return renderItems;
   };
 }
 

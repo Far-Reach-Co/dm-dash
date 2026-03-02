@@ -1,4 +1,4 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
 import renderSpinner from "./spinner.js";
 
 export default function renderLoadingWithMessage(message) {

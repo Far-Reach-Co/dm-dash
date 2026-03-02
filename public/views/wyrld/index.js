@@ -65,7 +65,7 @@ function mountGlobalActions(config, runtimeConfigPromise) {
     elem.className = "p-3 calendar";
 
     new Calendar({
-      domComponent: elem,
+      domElem: elem,
       projectAuth: !!runtimeConfig.projectAuth,
       id: calendar.id,
       projectId: calendar.project_id,

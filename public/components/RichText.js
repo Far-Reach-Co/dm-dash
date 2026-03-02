@@ -1,4 +1,4 @@
-import createElement from "./createElement.js";
+import createElement from "../lib/salt-lib/createElement.js";
 
 export default class RichText {
   constructor(props) {
@@ -52,14 +52,14 @@ export default class RichText {
 
     textAreaComponent.innerHTML = props.value ? props.value : null;
 
-    this.domComponent = createElement("div", { class: "rich-text-container" }, [
+    this.domElem = createElement("div", { class: "rich-text-container" }, [
       createElement("div", { class: "rich-text-option-container noselect" }, [
         ...this.renderActions(),
       ]),
       textAreaComponent,
     ]);
 
-    return this.domComponent;
+    return this.domElem;
   }
 
   renderActions = () => {

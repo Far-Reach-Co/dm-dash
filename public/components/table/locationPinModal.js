@@ -1,5 +1,5 @@
 import modal from "../modal.js";
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 
 export default function openLocationPinModal({ pin = null, attachments = [], templates = [] } = {}) {
   return new Promise((resolve) => {

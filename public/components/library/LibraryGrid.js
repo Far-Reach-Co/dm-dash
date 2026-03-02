@@ -1,4 +1,4 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
 import modal from "../modal.js";
 import renderImageSettingsModal from "../shared/imageSettingsModal.js";
 import { apiDelete } from "../../lib/apiUtils.js";
@@ -21,11 +21,16 @@ import {
   isPackLockedForScope as isPackLockedForScopeShared,
   isPackOwnedByScope,
 } from "../shared/libraryPackUtils.js";
+import Component from "../../lib/salt-lib/Component.js";
 
-export default class LibraryGrid {
+export default class LibraryGrid extends Component {
   constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "library-content";
+    super({
+      domElem: props.domElem,
+      autoInit: false,
+      autoRender: false,
+    });
+    this.domElem.className = "library-content";
     this.libraryApp = props.libraryApp;
     this.projectId = props.projectId;
     this.scopeName =
@@ -177,47 +182,63 @@ export default class LibraryGrid {
   };
 
   getFilteredImages = () => {
-    let filtered = this.images.slice();
+    return this.useMemo(
+      "library-grid-filtered-images",
+      () => {
+        let filtered = this.images.slice();
 
-    if (!this.showAllImages) {
-      if (this.currentFolder) {
-        filtered = filtered.filter(
-          (img) => img.folder_id && img.folder_id == this.currentFolder.id,
-        );
-      } else {
-        filtered = filtered.filter((img) => !img.folder_id);
-      }
-    }
+        if (!this.showAllImages) {
+          if (this.currentFolder) {
+            filtered = filtered.filter(
+              (img) => img.folder_id && img.folder_id == this.currentFolder.id,
+            );
+          } else {
+            filtered = filtered.filter((img) => !img.folder_id);
+          }
+        }
 
-    if (this.searchQuery) {
-      const q = this.searchQuery.toLowerCase();
-      filtered = filtered.filter((img) => {
-        const name = (img.original_name || "").toLowerCase();
-        const notes = (img.notes || "").toLowerCase();
-        return name.includes(q) || notes.includes(q);
-      });
-    }
+        if (this.searchQuery) {
+          const q = this.searchQuery.toLowerCase();
+          filtered = filtered.filter((img) => {
+            const name = (img.original_name || "").toLowerCase();
+            const notes = (img.notes || "").toLowerCase();
+            return name.includes(q) || notes.includes(q);
+          });
+        }
 
-    if (this.sortKey === "name") {
-      filtered.sort((a, b) =>
-        (a.original_name || "").localeCompare(b.original_name || ""),
-      );
-    } else if (this.sortKey === "size") {
-      filtered.sort((a, b) => (b.size || 0) - (a.size || 0));
-    } else {
-      filtered.sort((a, b) => {
-        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
-        if (aTime && bTime && aTime !== bTime) return bTime - aTime;
-        return (b.image_id || 0) - (a.image_id || 0);
-      });
-    }
+        if (this.sortKey === "name") {
+          filtered.sort((a, b) =>
+            (a.original_name || "").localeCompare(b.original_name || ""),
+          );
+        } else if (this.sortKey === "size") {
+          filtered.sort((a, b) => (b.size || 0) - (a.size || 0));
+        } else {
+          filtered.sort((a, b) => {
+            const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+            if (aTime && bTime && aTime !== bTime) return bTime - aTime;
+            return (b.image_id || 0) - (a.image_id || 0);
+          });
+        }
 
-    return filtered;
+        return filtered;
+      },
+      () => [
+        this.images,
+        this.showAllImages,
+        this.currentFolder?.id ?? null,
+        this.searchQuery,
+        this.sortKey,
+      ],
+    );
   };
 
   getEditablePacks = () => {
-    return this.packs.filter((pack) => this.isPackOwnedByCurrentScope(pack));
+    return this.useMemo(
+      "library-grid-editable-packs",
+      () => this.packs.filter((pack) => this.isPackOwnedByCurrentScope(pack)),
+      () => [this.packs, this.projectId],
+    );
   };
 
   isPackOwnedByCurrentScope = (pack) => {
@@ -225,26 +246,40 @@ export default class LibraryGrid {
   };
 
   getPacksForPacksView = () => {
-    const merged = [...this.getEditablePacks(), ...this.installedPacks];
-    const seen = new Set();
-    const deduped = [];
-    for (const pack of merged) {
-      const key = String(pack.id);
-      if (seen.has(key)) continue;
-      seen.add(key);
-      deduped.push(pack);
-    }
-    return deduped;
+    const editablePacks = this.getEditablePacks();
+    return this.useMemo(
+      "library-grid-packs-view-deduped",
+      () => {
+        const merged = [...editablePacks, ...this.installedPacks];
+        const seen = new Set();
+        const deduped = [];
+        for (const pack of merged) {
+          const key = String(pack.id);
+          if (seen.has(key)) continue;
+          seen.add(key);
+          deduped.push(pack);
+        }
+        return deduped;
+      },
+      () => [editablePacks, this.installedPacks],
+    );
   };
 
   getPacksForCurrentFilter = () => {
-    let packs = this.getPacksForPacksView();
-    if (this.packViewFilter === "owned") {
-      packs = packs.filter((pack) => this.isPackEditable(pack));
-    } else if (this.packViewFilter === "installed") {
-      packs = packs.filter((pack) => this.isPackInstalled(pack));
-    }
-    return packs;
+    const dedupedPacks = this.getPacksForPacksView();
+    return this.useMemo(
+      "library-grid-filtered-pack-view",
+      () => {
+        if (this.packViewFilter === "owned") {
+          return dedupedPacks.filter((pack) => this.isPackEditable(pack));
+        }
+        if (this.packViewFilter === "installed") {
+          return dedupedPacks.filter((pack) => this.isPackInstalled(pack));
+        }
+        return dedupedPacks;
+      },
+      () => [dedupedPacks, this.packViewFilter, this.installedPacks, this.projectId],
+    );
   };
 
   isPackInstalled = (pack) => {
@@ -779,25 +814,32 @@ export default class LibraryGrid {
 
   renderGridElement = () => {
     if (this.loading) {
-      const skeletons = [];
-      const skeletonCount = 12;
-      for (let i = 0; i < skeletonCount; i += 1) {
-        skeletons.push(
-          createElement(
-            "div",
-            { class: "library-card library-skeleton" },
-            [
-              createElement("div", {
-                class: "library-card-thumb library-skeleton-thumb",
-              }),
-              createElement("div", { class: "library-card-info" }, [
-                createElement("div", { class: "library-skeleton-line" }),
-                createElement("div", { class: "library-skeleton-line short" }),
-              ]),
-            ],
-          ),
-        );
-      }
+      const skeletons = this.useMemo(
+        "loading-skeletons",
+        () => {
+          const nextSkeletons = [];
+          const skeletonCount = 12;
+          for (let i = 0; i < skeletonCount; i += 1) {
+            nextSkeletons.push(
+              createElement(
+                "div",
+                { class: "library-card library-skeleton" },
+                [
+                  createElement("div", {
+                    class: "library-card-thumb library-skeleton-thumb",
+                  }),
+                  createElement("div", { class: "library-card-info" }, [
+                    createElement("div", { class: "library-skeleton-line" }),
+                    createElement("div", { class: "library-skeleton-line short" }),
+                  ]),
+                ],
+              ),
+            );
+          }
+          return nextSkeletons;
+        },
+        [],
+      );
       return createElement("div", { class: "library-grid" }, skeletons);
     }
 
@@ -814,43 +856,45 @@ export default class LibraryGrid {
       ]);
     }
 
-    const cards = filtered.map((image, index) => this.renderCard(image, index));
-    if (this.showAllImages && this.images.length < this.total) {
-      cards.push(
-        createElement("div", { class: "library-load-more" }, [
-          createElement(
-            "button",
-            { class: "library-load-more-btn" },
-            `Load More (${this.images.length} of ${this.total})`,
-            {
-              type: "click",
-              event: () => this.libraryApp.loadMore(),
-            },
-          ),
-        ]),
-      );
-    }
+    const selectedKey = Array.from(this.selectedImageIds).sort().join("|");
+    const cards = this.useMemo(
+      "library-grid-card-elements",
+      () => filtered.map((image, index) => this.renderCard(image, index)),
+      () => [filtered, this.selectMode, selectedKey],
+    );
 
-    return createElement("div", { class: "library-grid" }, cards);
+    const gridItems =
+      this.showAllImages && this.images.length < this.total
+        ? [
+            ...cards,
+            createElement("div", { class: "library-load-more" }, [
+              createElement(
+                "button",
+                { class: "library-load-more-btn" },
+                `Load More (${this.images.length} of ${this.total})`,
+                {
+                  type: "click",
+                  event: () => this.libraryApp.loadMore(),
+                },
+              ),
+            ]),
+          ]
+        : cards;
+
+    return createElement("div", { class: "library-grid" }, gridItems);
   };
 
   render = () => {
-    while (this.domComponent.firstChild) {
-      this.domComponent.removeChild(this.domComponent.firstChild);
-    }
-
     const packsMode = this.viewMode === "packs";
-    this.domComponent.append(this.renderHeader());
-
     if (packsMode) {
-      this.domComponent.append(this.renderPacksSectionElement());
-      return;
+      return [this.renderHeader(), this.renderPacksSectionElement()];
     }
 
-    this.domComponent.append(
+    return [
+      this.renderHeader(),
       this.renderBulkToolbarElement(),
       this.renderFolderTreeElement(),
       this.renderGridElement(),
-    );
+    ];
   };
 }

@@ -1,4 +1,5 @@
-import createElement from "../../components/createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import { patchSheetObject } from "../../lib/sheetApi.js";
 import HPComponent from "./HPComponent.js";
 import OtherProLangComponent from "./OtherProLangComponent.js";
@@ -26,28 +27,45 @@ import {
   calculateSpellAttackBonus,
 } from "./characterCalculations.js";
 
-export default class FiveEPlayerSheet {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className =
-      "d-flex flex-column align-items-center justify-content-center";
+export default class FiveEPlayerSheet extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      className: "d-flex flex-column align-items-center justify-content-center",
+    });
+
     this.navigate = props.navigate;
-    this.generalData = props.params.content;
+    this.generalData = props.params?.content || props.generalData || {};
     this.currentUserId = props.currentUserId || null;
     // general, background, etc
     this.mainView = "general";
     this.generalPatchQueue = Promise.resolve();
     this.spellSlotPatchQueue = Promise.resolve();
-
-    // settings view
-    this.sheetSettings = new SheetSettings({
-      domComponent: createElement("div"),
-      generalData: this.generalData,
-      currentUserId: this.currentUserId,
-    });
-
-    this.render();
+    this.sheetSettings = null;
   }
+
+  init = async () => {
+    this.ensureSheetSettings();
+  };
+
+  ensureSheetSettings = () => {
+    const sheetSettings = this.useChild(
+      "sheet-settings",
+      () =>
+        new SheetSettings({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          currentUserId: this.currentUserId,
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.currentUserId = this.currentUserId;
+      },
+    );
+
+    this.sheetSettings = sheetSettings;
+    return sheetSettings;
+  };
 
   updateGeneralValue = async (name, value) => {
     this.generalData[name] = value;
@@ -134,7 +152,7 @@ export default class FiveEPlayerSheet {
   renderPassivePerceptionComponent = () => {
     const elem = createElement("div");
     new PassivePerceptionComponent({
-      domComponent: elem,
+      domElem: elem,
       calculatePassivePerception: () =>
         calculatePassivePerception(this.generalData),
       wisdom: this.generalData.wisdom,
@@ -146,63 +164,87 @@ export default class FiveEPlayerSheet {
   };
 
   renderGeneralView = async () => {
-    if (!this.hpComponent) {
-      const HPComponentElem = createElement("div");
-      this.hpComponent = new HPComponent({
-        domComponent: HPComponentElem,
-        updateGeneralValue: this.updateGeneralValue,
-        max_hp: this.generalData.max_hp,
-        temp_hp: this.generalData.temp_hp,
-        current_hp: this.generalData.current_hp,
-      });
-    }
+    this.hpComponent = this.useChild(
+      "hp-component",
+      () =>
+        new HPComponent({
+          domElem: createElement("div"),
+          updateGeneralValue: this.updateGeneralValue,
+          max_hp: this.generalData.max_hp,
+          temp_hp: this.generalData.temp_hp,
+          current_hp: this.generalData.current_hp,
+        }),
+      (child) => {
+        child.updateGeneralValue = this.updateGeneralValue;
+      },
+    );
 
-    if (!this.classesComponent) {
-      const classesComponentElem = createElement("div");
-      this.classesComponent = new ClassesComponent({
-        domComponent: classesComponentElem,
-        general_id: this.generalData.id,
-      });
-    }
+    this.classesComponent = this.useChild(
+      "classes-component",
+      () =>
+        new ClassesComponent({
+          domElem: createElement("div"),
+          general_id: this.generalData.id,
+        }),
+      (child) => {
+        child.general_id = this.generalData.id;
+      },
+    );
 
-    if (!this.otherProLangComponent) {
-      const otherProLangComponentElem = createElement("div");
-      this.otherProLangComponent = new OtherProLangComponent({
-        domComponent: otherProLangComponentElem,
-        general_id: this.generalData.id,
-      });
-    }
+    this.otherProLangComponent = this.useChild(
+      "other-pro-lang-component",
+      () =>
+        new OtherProLangComponent({
+          domElem: createElement("div"),
+          general_id: this.generalData.id,
+        }),
+      (child) => {
+        child.general_id = this.generalData.id;
+      },
+    );
 
-    if (!this.attackComponent) {
-      const attackComponentElem = createElement("div");
-      this.attackComponent = new AttackComponent({
-        domComponent: attackComponentElem,
-        generalData: this.generalData,
-        calculateAbilityScoreModifier,
-        calculateProBonus: () => calculateProBonus(this.generalData.level),
-      });
-    }
+    this.attackComponent = this.useChild(
+      "attack-component",
+      () =>
+        new AttackComponent({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          calculateAbilityScoreModifier,
+          calculateProBonus: () => calculateProBonus(this.generalData.level),
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+      },
+    );
 
-    if (!this.equipmentComponent) {
-      const equipmentComponentElem = createElement("div");
-      this.equipmentComponent = new EquipmentComponent({
-        domComponent: equipmentComponentElem,
-        general_id: this.generalData.id,
-      });
-    }
+    this.equipmentComponent = this.useChild(
+      "equipment-component",
+      () =>
+        new EquipmentComponent({
+          domElem: createElement("div"),
+          general_id: this.generalData.id,
+        }),
+      (child) => {
+        child.general_id = this.generalData.id;
+      },
+    );
 
-    if (!this.featComponent) {
-      const featComponentElem = createElement("div");
-      this.featComponent = new FeatComponent({
-        domComponent: featComponentElem,
-        general_id: this.generalData.id,
-      });
-    }
+    this.featComponent = this.useChild(
+      "feat-component",
+      () =>
+        new FeatComponent({
+          domElem: createElement("div"),
+          general_id: this.generalData.id,
+        }),
+      (child) => {
+        child.general_id = this.generalData.id;
+      },
+    );
 
     // These components depend on ability scores/level and must refresh each render
     const abilityScoresElem = createElement("div");
     this.abilityScoresComponent = new AbilityScoresComponent({
-      domComponent: abilityScoresElem,
+      domElem: abilityScoresElem,
       generalData: this.generalData,
       updateGeneralValue: this.updateGeneralValue,
       onUpdate: () => this.render(),
@@ -210,68 +252,94 @@ export default class FiveEPlayerSheet {
 
     const savingThrowsElem = createElement("div");
     this.savingThrowsComponent = new SavingThrowsComponent({
-      domComponent: savingThrowsElem,
+      domElem: savingThrowsElem,
       generalData: this.generalData,
       updateProficiencyInfo: this.updateProficiencyInfo,
       onUpdate: () => this.render(),
     });
 
-    if (!this.deathSavesComponent) {
-      const deathSavesElem = createElement("div");
-      this.deathSavesComponent = new DeathSavesComponent({
-        domComponent: deathSavesElem,
-        generalData: this.generalData,
-        updateGeneralValue: this.updateGeneralValue,
-      });
-    }
+    this.deathSavesComponent = this.useChild(
+      "death-saves-component",
+      () =>
+        new DeathSavesComponent({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          updateGeneralValue: this.updateGeneralValue,
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.updateGeneralValue = this.updateGeneralValue;
+      },
+    );
 
-    if (!this.currencyComponent) {
-      const currencyElem = createElement("div");
-      this.currencyComponent = new CurrencyComponent({
-        domComponent: currencyElem,
-        generalData: this.generalData,
-        updateGeneralValue: this.updateGeneralValue,
-      });
-    }
+    this.currencyComponent = this.useChild(
+      "currency-component",
+      () =>
+        new CurrencyComponent({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          updateGeneralValue: this.updateGeneralValue,
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.updateGeneralValue = this.updateGeneralValue;
+      },
+    );
 
     // Skills depend on ability scores and level (proficiency bonus)
     const skillsListElem = createElement("div");
     this.skillsListComponent = new SkillsListComponent({
-      domComponent: skillsListElem,
+      domElem: skillsListElem,
       generalData: this.generalData,
       updateProficiencyInfo: this.updateProficiencyInfo,
     });
 
-    if (!this.resourcesComponent) {
-      const resourcesElem = createElement("div");
-      this.resourcesComponent = new ResourcesComponent({
-        domComponent: resourcesElem,
-        generalData: this.generalData,
-        updateGeneralValue: this.updateGeneralValue,
-      });
-    }
+    this.resourcesComponent = this.useChild(
+      "resources-component",
+      () =>
+        new ResourcesComponent({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          updateGeneralValue: this.updateGeneralValue,
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.updateGeneralValue = this.updateGeneralValue;
+      },
+    );
 
-    if (!this.combatStatsComponent) {
-      const combatStatsElem = createElement("div");
-      this.combatStatsComponent = new CombatStatsComponent({
-        domComponent: combatStatsElem,
-        generalData: this.generalData,
-        updateGeneralValue: this.updateGeneralValue,
-        hpComponent: this.hpComponent,
-      });
-    }
+    this.combatStatsComponent = this.useChild(
+      "combat-stats-component",
+      () =>
+        new CombatStatsComponent({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          updateGeneralValue: this.updateGeneralValue,
+          hpComponent: this.hpComponent,
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.updateGeneralValue = this.updateGeneralValue;
+        child.hpComponent = this.hpComponent;
+      },
+    );
 
-    if (!this.generalInfoComponent) {
-      const generalInfoElem = createElement("div");
-      this.generalInfoComponent = new GeneralInfoComponent({
-        domComponent: generalInfoElem,
-        generalData: this.generalData,
-        updateGeneralValue: this.updateGeneralValue,
-        onLevelChange: () => this.render(),
-      });
-    }
+    this.generalInfoComponent = this.useChild(
+      "general-info-component",
+      () =>
+        new GeneralInfoComponent({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          updateGeneralValue: this.updateGeneralValue,
+          onLevelChange: () => this.render(),
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.updateGeneralValue = this.updateGeneralValue;
+      },
+    );
 
-    this.domComponent.append(
+    return [
       createElement(
         "div",
         {
@@ -381,7 +449,7 @@ export default class FiveEPlayerSheet {
                 ]),
               ]),
             ]),
-            this.classesComponent.domComponent,
+            this.classesComponent.domElem,
           ]),
           createElement("div", { class: "d-flex flex-column" }, [
             createElement("div", { class: "cp-info-container-column" }, [
@@ -572,7 +640,7 @@ export default class FiveEPlayerSheet {
                       createElement("small", {}, "Hit Dice"),
                     ],
                   ),
-                  this.hpComponent.domComponent,
+                  this.hpComponent.domElem,
                 ],
               ),
             ]),
@@ -628,59 +696,71 @@ export default class FiveEPlayerSheet {
           ]),
         ],
       ),
-      this.abilityScoresComponent.domComponent,
+      this.abilityScoresComponent.domElem,
       createElement("div", { class: "d-flex flex-wrap" }, [
         createElement("div", { class: "d-flex flex-column" }, [
-          this.savingThrowsComponent.domComponent,
-          this.otherProLangComponent.domComponent,
-          this.resourcesComponent.domComponent,
-          this.deathSavesComponent.domComponent,
-          this.equipmentComponent.domComponent,
+          this.savingThrowsComponent.domElem,
+          this.otherProLangComponent.domElem,
+          this.resourcesComponent.domElem,
+          this.deathSavesComponent.domElem,
+          this.equipmentComponent.domElem,
         ]),
         createElement("div", { class: "d-flex flex-column" }, [
-          this.skillsListComponent.domComponent,
-          this.currencyComponent.domComponent,
+          this.skillsListComponent.domElem,
+          this.currencyComponent.domElem,
         ]),
         createElement("div", { class: "d-flex flex-column" }, [
-          this.attackComponent.domComponent,
-          this.featComponent.domComponent,
+          this.attackComponent.domElem,
+          this.featComponent.domElem,
         ]),
       ]),
-    );
+    ];
   };
 
   renderBackgroundView = async () => {
-    if (!this.backgroundComponent) {
-      const backgroundElem = createElement("div");
-      this.backgroundComponent = new BackgroundComponent({
-        domComponent: backgroundElem,
-        generalData: this.generalData,
-        updateBackgroundValue: this.updateBackgroundValue,
-        onUpdate: () => this.render(),
-      });
-    }
-    this.domComponent.append(this.backgroundComponent.domComponent);
+    this.backgroundComponent = this.useChild(
+      "background-component",
+      () =>
+        new BackgroundComponent({
+          domElem: createElement("div"),
+          generalData: this.generalData,
+          updateBackgroundValue: this.updateBackgroundValue,
+          onUpdate: () => this.render(),
+        }),
+      (child) => {
+        child.generalData = this.generalData;
+        child.updateBackgroundValue = this.updateBackgroundValue;
+      },
+    );
+
+    return this.backgroundComponent.domElem;
   };
 
   renderSpellsView = async () => {
-    if (!this.spellsComponent) {
-      const spellsComponentElem = createElement("div");
-      this.spellsComponent = new SpellsComponent({
-        domComponent: spellsComponentElem,
-        general_id: this.generalData.id,
-        generalData: this.generalData,
-        updateSpellSlotValue: this.updateSpellSlotValue,
-        updateSpellSlotValues: this.updateSpellSlotValues,
-        calculateAbilityScoreModifier,
-        calculateProBonus: () => calculateProBonus(this.generalData.level),
-        calculateSpellSaveDC: () => calculateSpellSaveDC(this.generalData),
-        calculateSpellAttackBonus: () =>
-          calculateSpellAttackBonus(this.generalData),
-      });
-    }
+    this.spellsComponent = this.useChild(
+      "spells-component",
+      () =>
+        new SpellsComponent({
+          domElem: createElement("div"),
+          general_id: this.generalData.id,
+          generalData: this.generalData,
+          updateSpellSlotValue: this.updateSpellSlotValue,
+          updateSpellSlotValues: this.updateSpellSlotValues,
+          calculateAbilityScoreModifier,
+          calculateProBonus: () => calculateProBonus(this.generalData.level),
+          calculateSpellSaveDC: () => calculateSpellSaveDC(this.generalData),
+          calculateSpellAttackBonus: () =>
+            calculateSpellAttackBonus(this.generalData),
+        }),
+      (child) => {
+        child.general_id = this.generalData.id;
+        child.generalData = this.generalData;
+      },
+    );
+
     this.spellsComponent.generalData = this.generalData;
     this.spellsComponent.render(); // This ensures we are updating the Spell Save DC and Attack Bonus when changed by level
-    this.domComponent.append(this.spellsComponent.domComponent);
+    return this.spellsComponent.domElem;
   };
 
   isCurrentUserOwner = () => {
@@ -711,11 +791,7 @@ export default class FiveEPlayerSheet {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
-    // char nav
-    this.domComponent.append(
-      createElement("div", { class: "cp-nav" }, [
+    const nav = createElement("div", { class: "cp-nav" }, [
         createElement(
           "div",
           {
@@ -766,23 +842,26 @@ export default class FiveEPlayerSheet {
           },
         ),
         this.renderSettingsOrNot(),
-      ]),
-    );
+      ]);
 
     if (this.mainView === "general") {
-      return this.renderGeneralView();
+      return [nav, await this.renderGeneralView()];
     }
 
     if (this.mainView === "background") {
-      return this.renderBackgroundView();
+      return [nav, await this.renderBackgroundView()];
     }
 
     if (this.mainView === "spells") {
-      return this.renderSpellsView();
+      return [nav, await this.renderSpellsView()];
     }
 
     if (this.mainView === "settings") {
-      return this.domComponent.append(this.sheetSettings.domComponent);
+      const sheetSettings = this.ensureSheetSettings();
+      sheetSettings.render();
+      return [nav, sheetSettings.domElem];
     }
+
+    return [nav];
   };
 }

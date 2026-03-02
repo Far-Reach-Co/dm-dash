@@ -1,4 +1,5 @@
-import createElement from "../createElement.js";
+import createElement from "../../lib/salt-lib/createElement.js";
+import Component from "../../lib/salt-lib/Component.js";
 import { apiDelete, apiGet } from "../../lib/apiUtils.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import { buildFolderTree } from "../shared/folderTreeUtils.js";
@@ -11,10 +12,14 @@ import {
   buildTableViewQuerySuffix,
 } from "./tableContext.js";
 
-export default class TableSidebarFolderComponent {
-  constructor(props) {
-    this.domComponent = props.domComponent;
-    this.domComponent.className = "table-sidebar-folder-component";
+export default class TableSidebarFolderComponent extends Component {
+  constructor(props = {}) {
+    super({
+      domElem: props.domElem || createElement("div"),
+      autoRender: false,
+      className: "table-sidebar-folder-component",
+    });
+
     this.updateImagesList = props.updateImagesList;
     this.refreshImages = props.refreshImages;
     this.tableView = props.tableView;
@@ -23,6 +28,7 @@ export default class TableSidebarFolderComponent {
     this.folderLoading = false;
     this.currentScope = { type: "all", folder: null };
     this.folders = [];
+    this.foldersHydrated = false;
     this.expandedFolderIds = new Set();
     this.imageCountsByFolder = {};
     this.unsortedCount = null;
@@ -72,9 +78,11 @@ export default class TableSidebarFolderComponent {
 
   destroy = () => {
     this.folders = [];
+    this.foldersHydrated = false;
     this.folderTreeContainer = null;
     this.expandedFolderIds.clear();
     this.setScopeAllImages();
+    this.clear({ deep: true });
   };
 
   setCounts = (data) => {
@@ -98,6 +106,7 @@ export default class TableSidebarFolderComponent {
     if (this.guestSandboxId) {
       this.folders = [];
       this.pruneExpandedFolderIds(this.folders);
+      this.foldersHydrated = true;
       return;
     }
 
@@ -112,6 +121,7 @@ export default class TableSidebarFolderComponent {
         ? foldersDataResult.data
         : [];
     this.pruneExpandedFolderIds(this.folders);
+    this.foldersHydrated = true;
   };
 
   countImagesInFolder = (folderId) => {
@@ -338,23 +348,24 @@ export default class TableSidebarFolderComponent {
   };
 
   render = async () => {
-    this.domComponent.innerHTML = "";
-
     if (this.folderLoading) {
-      return this.domComponent.append(renderLoadingWithMessage(""));
+      return [renderLoadingWithMessage("")];
     }
 
-    if (!this.folders.length) {
-      const loadingSpinner = renderLoadingWithMessage("");
-      this.domComponent.append(loadingSpinner);
-      await this.loadFolders();
-      loadingSpinner.remove();
+    if (!this.foldersHydrated) {
+      this.folderLoading = true;
+      queueMicrotask(async () => {
+        await this.loadFolders();
+        this.folderLoading = false;
+        await this.render();
+      });
+      return [renderLoadingWithMessage("")];
     }
 
     this.folderTreeContainer = createElement("div", {
       class: "library-folder-tree",
     });
-    this.domComponent.append(this.folderTreeContainer);
     this.renderFolderTree();
+    return [this.folderTreeContainer];
   };
 }
