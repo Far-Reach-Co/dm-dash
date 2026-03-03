@@ -1,31 +1,39 @@
 <%
-  const navLinks = typeof auth !== 'undefined'
+  const isAuthed = typeof auth !== 'undefined';
+  const primaryLinks = [
+    { href: '/whats-new', label: "What's New" },
+    { href: '/pricing', label: 'Pricing' },
+    { href: '/resources', label: 'Resources' },
+  ];
+  const productLinks = [
+    { href: '/simple-virtual-tabletop-no-player-accounts', label: 'VTT' },
+    { href: '/radio', label: 'Far Reach Radio' },
+    { href: '/wyrlds/public', label: 'Public Wyrlds' },
+  ];
+  const accountLinks = isAuthed
     ? [
-        { href: '/whats-new', label: "What's New" },
-        { href: '/pricing', label: 'Pricing' },
-        { href: '/resources', label: 'Resources' },
-        { href: '/wyrlds/public', label: 'Public Wyrlds' },
         { href: '/dash', label: 'Dashboard' },
         { href: '/account', label: 'Account' },
       ]
-    : [
-        { href: '/whats-new', label: "What's New" },
-        { href: '/pricing', label: 'Pricing' },
-        { href: '/wyrlds/public', label: 'Public Wyrlds' },
-        { href: '/resources', label: 'Resources' },
-        { href: '/login', label: 'Login' },
-      ];
+    : [{ href: '/login', label: 'Login' }];
 %>
 <script src="/lib/customUi.js"></script>
 <div id="nav-links-container-mobile">
-  <% if (typeof auth !== 'undefined') { %>
+  <% if (isAuthed) { %>
   <button id="mobile-notification-bell" class="top-nav-btn nav-bell-button" type="button" title="Notifications">
     <span class="nav-bell-icon" aria-hidden="true">&#128276;</span>
     <span class="nav-bell-label">Notifications</span>
     <span id="mobile-notification-count" class="nav-notification-count" style="display:none;">0</span>
   </button>
   <% } %>
-  <% navLinks.forEach((link) => { %>
+  <% primaryLinks.forEach((link) => { %>
+  <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+  <% }) %>
+  <span class="mobile-nav-section">Products</span>
+  <% productLinks.forEach((link) => { %>
+  <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+  <% }) %>
+  <% accountLinks.forEach((link) => { %>
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
   <% }) %>
 </div>
@@ -35,10 +43,24 @@
   </a>
   <img src="/assets/hamburger.svg" height="32" width="32" id="nav-ham" alt="" />
   <div id="nav-links-container" class="d-flex">
-    <% navLinks.forEach((link) => { %>
+    <% primaryLinks.forEach((link) => { %>
     <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
     <% }) %>
-    <% if (typeof auth !== 'undefined') { %>
+    <div class="nav-products-menu">
+      <button class="top-nav-btn nav-products-trigger" type="button" aria-haspopup="true">
+        Products
+        <span class="nav-products-caret" aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="nav-products-dropdown" role="menu">
+        <% productLinks.forEach((link) => { %>
+        <a class="nav-dropdown-link" href="<%= link.href %>" role="menuitem"><%= link.label %></a>
+        <% }) %>
+      </div>
+    </div>
+    <% accountLinks.forEach((link) => { %>
+    <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+    <% }) %>
+    <% if (isAuthed) { %>
     <button id="notification-bell" class="top-nav-btn nav-bell-button" type="button" title="Notifications">
       <span class="nav-bell-icon" aria-hidden="true">&#128276;</span>
       <span id="notification-count" class="nav-notification-count" style="display:none;">0</span>
