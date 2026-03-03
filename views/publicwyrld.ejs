@@ -5,18 +5,19 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Far Reach Co. | <%= project.title %></title>
+  <title><%= project.title %> | Public Campaign Listing | Far Reach Co.</title>
+  <meta name="description" content="<%= metaDescription %>" />
   <link rel="canonical" href="<%= canonicalUrl %>" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="<%= canonicalUrl %>" />
-  <meta property="og:title" content="<%= project.title %> | Public Wyrld" />
+  <meta property="og:title" content="<%= project.title %> | Join This Public Campaign" />
   <meta property="og:description" content="<%= metaDescription %>" />
   <meta property="og:site_name" content="Far Reach Co." />
   <% if (shareImage) { %>
   <meta property="og:image" content="<%= shareImage %>" />
   <% } %>
   <meta name="twitter:card" content="<%= shareImage ? 'summary_large_image' : 'summary' %>" />
-  <meta name="twitter:title" content="<%= project.title %> | Public Wyrld" />
+  <meta name="twitter:title" content="<%= project.title %> | Join This Public Campaign" />
   <meta name="twitter:description" content="<%= metaDescription %>" />
   <% if (shareImage) { %>
   <meta name="twitter:image" content="<%= shareImage %>" />
@@ -46,6 +47,28 @@
       display: block;
       min-height: 18px;
       color: var(--detail-color-light-blue);
+    }
+
+    .public-wyrld-host-cta {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid var(--blue);
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--blue3) 0%, var(--blue4) 100%);
+    }
+
+    .public-wyrld-host-cta p {
+      margin: 0 0 8px;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      color: var(--light-gray);
+    }
+
+    .public-wyrld-host-cta-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
     }
   </style>
 </head>
@@ -113,6 +136,16 @@
           <a class="dash-inline-action" href="/wyrlds/public">Back to Directory</a>
         </div>
         <small id="public-wyrld-share-feedback" class="public-wyrld-share-feedback" aria-live="polite"></small>
+
+        <div class="public-wyrld-host-cta">
+          <p>
+            <strong>Running your own campaign?</strong> Create a Public Wyrld listing and recruit players who are already searching for games.
+          </p>
+          <div class="public-wyrld-host-cta-links">
+            <a class="modal-form-button" href="<%= isAuthenticated ? '/newwyrld' : '/register' %>"><%= isAuthenticated ? 'Create a New Wyrld' : 'Create Free Account to Host' %></a>
+            <a class="dash-inline-action" href="/public-wyrlds-admin-guide">Host Setup Guide</a>
+          </div>
+        </div>
       </section>
 
       <% if (featuredRecord) { %>

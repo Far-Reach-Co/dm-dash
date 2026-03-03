@@ -5,18 +5,19 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Play Dungeons and Dragons Online | Find DnD Campaigns and Games</title>
-  <meta name="description" content="Play Dungeons and Dragons online with active Public Wyrlds. Find a DnD group, request to join a campaign, and start your own game as a DM or GM with fast tabletop and campaign tools." />
-  <meta name="keywords" content="play dungeons and dragons online, join dnd campaign, find dnd group online, dnd looking for group, online dnd games, online tabletop rpg games, beginner friendly dnd games, dm tools, gm tools" />
+  <title>Play Dungeons and Dragons Online | Find and Join D&amp;D Campaigns</title>
+  <meta name="description" content="Find and join online D&amp;D campaigns looking for players. Browse Public Wyrlds, request to join groups, or list your own campaign as a DM/GM on Far Reach Co." />
+  <meta name="keywords" content="play dungeons and dragons online, find and join dnd campaigns, dnd looking for group, online dnd games looking for players, join dnd campaign online, looking for dnd players, beginner friendly dnd campaigns" />
+  <link rel="canonical" href="https://farreachco.com/play-dungeons-and-dragons-online" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/play-dungeons-and-dragons-online" />
-  <meta property="og:title" content="Play Dungeons and Dragons Online | Find DnD Campaigns and Games" />
-  <meta property="og:description" content="Find DnD groups, request to join Public Wyrlds, or start your own campaign as a DM/GM." />
+  <meta property="og:title" content="Play Dungeons and Dragons Online | Find and Join D&amp;D Campaigns" />
+  <meta property="og:description" content="Find and join online D&amp;D campaigns looking for players, or list your own campaign as a DM/GM." />
   <meta property="og:site_name" content="Far Reach Co." />
   <meta property="og:image" content="https://farreachco.com/assets/landing/vtt_screenshot.png" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Play Dungeons and Dragons Online | Find DnD Campaigns and Games" />
-  <meta name="twitter:description" content="Find DnD groups, request to join Public Wyrlds, or start your own campaign as a DM/GM." />
+  <meta name="twitter:title" content="Play Dungeons and Dragons Online | Find and Join D&amp;D Campaigns" />
+  <meta name="twitter:description" content="Find and join online D&amp;D campaigns looking for players, or list your own campaign as a DM/GM." />
   <meta name="twitter:image" content="https://farreachco.com/assets/landing/vtt_screenshot.png" />
 
   <script type="application/ld+json">
@@ -50,11 +51,241 @@
       ]
     }
   </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "HowTo",
+          "name": "How to find and join an online Dungeons and Dragons campaign",
+          "description": "A quick player flow for finding a campaign, requesting access, and getting into a live game.",
+          "totalTime": "PT5M",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "name": "Browse the public directory",
+              "text": "Open the Public Wyrld Directory and search for campaign titles that match your play style.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#start-flow"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Review campaign expectations",
+              "text": "Read the campaign summary, join mode, and featured onboarding record before requesting access.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#find-join"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Request to join",
+              "text": "Create a free account and send a short join request with your availability and experience.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#find-join"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Join after approval",
+              "text": "Wait for DM or GM approval, then join the campaign workspace and session tools.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#start-now"
+            }
+          ]
+        },
+        {
+          "@type": "HowTo",
+          "name": "How to list your campaign and recruit players",
+          "description": "A host flow for creating a public campaign listing and reviewing incoming join requests.",
+          "totalTime": "PT5M",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "name": "Create your Wyrld",
+              "text": "Create a Wyrld and add a clear campaign title and summary.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#start-flow"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Enable public listing",
+              "text": "Turn on public discovery and choose join mode settings that match your campaign.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#become-dm"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Publish onboarding details",
+              "text": "Set a featured onboarding record so players understand expectations before requesting to join.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#become-dm"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Review and approve requests",
+              "text": "Review incoming player requests and approve the best-fit players for your table.",
+              "url": "https://farreachco.com/play-dungeons-and-dragons-online#start-now"
+            }
+          ]
+        }
+      ]
+    }
+  </script>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
   <%- include('./partials/icons') %>
+  <style>
+    .info-container .intro {
+      margin-bottom: 0.35rem;
+      padding: 0.9rem 0 0.4rem;
+    }
+
+    .info-container .intro p {
+      margin-bottom: 0.45rem;
+      max-width: 720px;
+      line-height: 1.5;
+    }
+
+    .info-container .quick-links {
+      gap: 6px;
+      margin-bottom: 1rem;
+    }
+
+    .info-container section {
+      padding: 20px 22px;
+      margin-bottom: 1rem;
+    }
+
+    .info-container section h2 {
+      margin-bottom: 0.7rem;
+    }
+
+    .info-container section p {
+      margin-bottom: 0.6rem;
+      line-height: 1.6;
+    }
+
+    .info-container section ul,
+    .info-container section ol {
+      margin: 0.7rem 0;
+      padding-left: 1.1rem;
+    }
+
+    .info-container section ul li,
+    .info-container section ol li {
+      margin-bottom: 0.45rem;
+      line-height: 1.55;
+      padding-left: 0;
+    }
+
+    .info-container section ul li::before {
+      left: -0.95rem;
+      top: 0.34rem;
+    }
+
+    .flow-grid {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .flow-card {
+      background: linear-gradient(145deg, var(--blue3) 0%, rgba(47, 64, 84, 0.75) 100%);
+      border: 1px solid var(--blue);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .flow-card h3 {
+      margin-top: 0;
+    }
+
+    .flow-card ol {
+      margin: 0.75rem 0 0;
+      padding-left: 1.4rem;
+    }
+
+    .flow-card ol li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .benefit-visual {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--blue);
+      margin-bottom: 0.6rem;
+    }
+
+    .benefit-visual--screenshot {
+      max-height: 360px;
+      object-fit: cover;
+    }
+
+    .benefit-visual--character {
+      display: block;
+      width: min(100%, 250px);
+      max-height: 250px;
+      margin-left: auto;
+      margin-right: auto;
+      object-fit: contain;
+      border: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    .benefits-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .benefits-media {
+      justify-self: end;
+      margin-top: 2px;
+    }
+
+    .benefit-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .benefit-item {
+      background: linear-gradient(135deg, var(--blue3) 0%, var(--blue4) 100%);
+      border: 1px solid var(--blue);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .benefit-item strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      color: var(--orange2);
+    }
+
+    @media (max-width: 700px) {
+      .benefit-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .info-container section {
+        padding: 16px 15px;
+      }
+
+      .benefit-visual--screenshot {
+        max-height: 260px;
+      }
+
+      .benefit-visual--character {
+        width: min(100%, 220px);
+        max-height: 220px;
+      }
+
+      .benefits-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .benefits-media {
+        justify-self: center;
+        order: -1;
+      }
+    }
+  </style>
 </head>
 <%- include('./partials/google') %>
 
@@ -62,15 +293,15 @@
   <%- include('./partials/nav') %>
   <div class="container-fluid p-3 info-container">
     <div class="intro">
-      <h1 class="text-center">Play Dungeons and Dragons Online</h1>
+      <h1 class="text-center">Find and Join Online Dungeons and Dragons Games</h1>
       <p>
-        Looking for a DnD group online? Browse active <strong>Public Wyrlds</strong>, request to join a campaign,
-        and start playing with people who match your style. If you want to run games, you can also launch your own
-        campaign as a DM or GM with tools built for long-term play. Far Reach Co. includes a fast browser-based
-        <strong>virtual tabletop system</strong> plus <strong>Far Reach Radio</strong> for shared session music.
+        Browse <strong>Public Wyrlds</strong> to find online D&amp;D campaigns, request to join, or list your own game as a host.
+        Far Reach Co. combines a fast browser VTT, persistent campaign spaces, and shared table audio.
       </p>
       <small>
         <a href="/wyrlds/public">Browse Public Wyrlds</a>
+        |
+        <a href="/public-wyrlds-admin-guide">How to Host and Recruit Players</a>
         |
         <a href="/register">Create Free Account</a>
       </small>
@@ -78,54 +309,73 @@
     </div>
 
     <div class="quick-links" aria-label="Page sections">
-      <a href="#find-games">Find Games</a>
-      <a href="#join-campaigns">Join Campaigns</a>
+      <a href="#start-flow">Start Flow</a>
+      <a href="#find-join">Find + Join</a>
       <a href="#new-players">New Players</a>
       <a href="#become-dm">Become a DM/GM</a>
+      <a href="#benefits">Why Far Reach Co.</a>
       <a href="#tools">Tools</a>
       <a href="#start-now">Start Now</a>
     </div>
 
-    <section id="find-games">
-      <h2>Find Online DnD Games and Campaigns</h2>
-      <p>
-        A <strong>Wyrld</strong> is a persistent campaign hub: the GM's home base for that game, including table maps,
-        lore records, onboarding notes, discussion threads, and linked character sheets. A <strong>Public Wyrld</strong>
-        is simply a Wyrld that the GM chooses to list so new players can discover it and request to join.
-      </p>
-      <ul>
-        <li>Search Wyrlds by title and read campaign summaries.</li>
-        <li>Check join mode: <strong>Request to Join</strong> or <strong>Invite Only</strong>.</li>
-        <li>Review the featured onboarding record to understand tone and expectations.</li>
-      </ul>
-      <p>
-        Explore campaigns here: <a href="/wyrlds/public">Public Wyrld Directory</a>.
-      </p>
+    <section id="start-flow">
+      <h2>How to Get Started in 5 Minutes</h2>
+      <img
+        class="benefit-visual benefit-visual--screenshot"
+        src="/assets/landing/vtt_screenshot.png"
+        alt="Far Reach Co virtual tabletop and campaign workspace preview"
+        loading="lazy"
+      />
+      <div class="flow-grid">
+        <article class="flow-card">
+          <h3>Player Flow: Find and Join a Game</h3>
+          <ol>
+            <li>Open the <a href="/wyrlds/public">Public Wyrld Directory</a>.</li>
+            <li>Read summary, join mode, and featured onboarding record.</li>
+            <li>Create a free account and send a short join request.</li>
+            <li>Join once approved.</li>
+          </ol>
+        </article>
+        <article class="flow-card">
+          <h3>Host Flow: Create a Listing and Recruit Players</h3>
+          <ol>
+            <li>Create your Wyrld and add a clear description.</li>
+            <li>Enable public listing and choose Request to Join or Invite Only.</li>
+            <li>Set a featured onboarding record.</li>
+            <li>Review requests and approve best-fit players.</li>
+          </ol>
+          <p class="mb-0">
+            Host setup walkthrough: <a href="/public-wyrlds-admin-guide">Public Wyrlds Admin Guide</a>.
+          </p>
+        </article>
+      </div>
     </section>
 
-    <section id="join-campaigns">
-      <h2>How to Join a DnD Campaign Online</h2>
+    <section id="find-join">
+      <h2>Find and Join DnD Campaigns Online</h2>
+      <p>
+        <strong>Public Wyrlds</strong> are campaign listings hosts choose to publish for player discovery.
+      </p>
       <ol>
-        <li>Create a free account so you can send join requests.</li>
-        <li>Browse listings and open campaigns that fit your schedule and play style.</li>
-        <li>Send a short intro message when requesting to join.</li>
-        <li>Wait for DM/GM approval and join the Wyrld when accepted.</li>
+        <li>Browse the <a href="/wyrlds/public">Public Wyrld Directory</a> and open matching listings.</li>
+        <li>Check join mode and read the featured onboarding record.</li>
+        <li>Create a free account and send a short intro request.</li>
+        <li>Join once approved by the host.</li>
       </ol>
       <p>
-        Need context first? Read the <a href="/public-wyrlds-guide">Public Wyrlds Guide</a>.
+        Need context first? Read the <a href="/public-wyrlds-guide">Public Wyrlds Guide</a>. Want host perspective?
+        <a href="/public-wyrlds-admin-guide">Read the admin guide</a>.
       </p>
     </section>
 
     <section id="new-players">
       <h2>New to Online Tabletop RPGs?</h2>
       <p>
-        If you are searching terms like <em>beginner DnD games</em>, <em>new player friendly DnD online</em>, or
-        <em>DnD looking for group</em>, start with campaigns that clearly explain session cadence, table rules, and
-        onboarding steps in their featured record.
+        Start with campaigns that clearly explain cadence, table rules, and onboarding in the featured record.
       </p>
       <ul>
         <li>Read campaign expectations before requesting to join.</li>
-        <li>Mention your experience level and what style of game you enjoy.</li>
+        <li>State your experience level and preferred play style.</li>
         <li>Start with one campaign and build consistency from there.</li>
       </ul>
     </section>
@@ -133,33 +383,68 @@
     <section id="become-dm">
       <h2>Want to Become a Game Master? Start Your Own Campaign</h2>
       <p>
-        Players who want more control can become organizers. Create your own Wyrld, publish it in public discovery,
-        and recruit players who are actively looking for online tabletop RPG games.
+        Create a Wyrld, list it publicly, and recruit players already searching for games.
       </p>
       <ul>
-        <li>Create a Wyrld and set up campaign details.</li>
+        <li>Create a Wyrld and set campaign basics.</li>
         <li>Enable public listing and choose your join mode.</li>
-        <li>Add an onboarding record so players know exactly what to expect.</li>
-        <li>Review incoming requests and build your party deliberately.</li>
+        <li>Add an onboarding record.</li>
+        <li>Review requests and build your party.</li>
       </ul>
       <p>
         Setup help: <a href="/public-wyrlds-admin-guide">Public Wyrlds Admin Guide</a>
       </p>
     </section>
 
+    <section id="benefits">
+      <h2>Why Players and Hosts Use Far Reach Co.</h2>
+      <div class="benefits-layout">
+        <div class="benefits-content">
+          <div class="benefit-grid">
+            <div class="benefit-item">
+              <strong>Campaign Persistence</strong>
+              Keep maps, records, and linked sheets in one campaign space.
+            </div>
+            <div class="benefit-item">
+              <strong>Recruitment Built In</strong>
+              Public listings connect hosts and players faster.
+            </div>
+            <div class="benefit-item">
+              <strong>Controlled Access</strong>
+              Choose request mode, invite-only, and capacity limits.
+            </div>
+            <div class="benefit-item">
+              <strong>Fast Session Setup</strong>
+              Browser VTT plus shared audio gets sessions running quickly.
+            </div>
+          </div>
+          <p class="mt-3 mb-0">
+            Need a quick platform overview? Read <a href="/what-is-frc">What is Far Reach Co?</a> or
+            <a href="/simple-virtual-tabletop-no-player-accounts">Simple Virtual Tabletop With No Player Accounts</a>.
+          </p>
+        </div>
+        <div class="benefits-media">
+          <img
+            class="benefit-visual benefit-visual--character"
+            src="/assets/landing/character.png"
+            alt="Far Reach Co character and campaign tools"
+            loading="lazy"
+          />
+        </div>
+      </div>
+    </section>
+
     <section id="tools">
       <h2>Tools for Running Online games Successfully</h2>
       <p>
-        Far Reach Co. is <strong>system-agnostic</strong> for tabletop RPG play, so you can run many TTRPG systems
-        on the same virtual table. We currently provide our deepest built-in support for <strong>D&amp;D 5E</strong>.
+        Run most tabletop systems with the same core workflow. Built-in support is deepest for <strong>D&amp;D 5E</strong>.
       </p>
       <ul>
-        <li><strong>Virtual tabletop system</strong> for maps, tokens, and shared play space.</li>
-        <li><strong>Far Reach Radio</strong> for synced, table-wide audio atmosphere during sessions.</li>
-        <li><strong>Records</strong> for lore, house rules, and campaign documentation.</li>
-        <li><strong>Discussion threads</strong> for in-campaign coordination.</li>
-        <li><strong>Linked character sheets</strong> with primary support for D&amp;D 5E campaigns.</li>
-        <li><strong>Public listing controls</strong> to manage campaign visibility and intake.</li>
+        <li><strong>VTT</strong> for maps, tokens, and shared play space.</li>
+        <li><strong>Far Reach Radio</strong> for synced session audio.</li>
+        <li><strong>Records and discussion</strong> for campaign coordination.</li>
+        <li><strong>Linked character sheets</strong> with strong D&amp;D 5E support.</li>
+        <li><strong>Public listing controls</strong> for visibility and intake.</li>
       </ul>
       <p>
         Learn the platform: <a href="/what-is-frc">What is Far Reach Co?</a>
@@ -171,6 +456,7 @@
         <p>Ready to play or run your own game?</p>
         <a class="seo-cta-primary" href="/register">Create Free Account</a>
         <a class="seo-cta-secondary" href="/wyrlds/public">Find Campaigns to Join</a>
+        <a class="seo-cta-secondary" href="/public-wyrlds-admin-guide">List Your Campaign and Find Players</a>
       </div>
     </section>
   </div>

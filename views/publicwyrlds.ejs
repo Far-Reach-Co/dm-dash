@@ -5,7 +5,39 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Far Reach Co. | Public Wyrlds</title>
+  <title>Find Online D&amp;D Campaigns Looking for Players | Public Wyrlds</title>
+  <meta name="description" content="Browse online D&amp;D and tabletop RPG campaigns looking for players. Search Public Wyrlds, review join modes, and request to join games that match your style." />
+  <meta name="keywords" content="find online dnd campaigns, dnd looking for group, join dnd campaign online, online dnd games looking for players, find tabletop rpg groups, public wyrlds" />
+  <link rel="canonical" href="https://farreachco.com/wyrlds/public" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/wyrlds/public" />
+  <meta property="og:title" content="Find Online D&amp;D Campaigns Looking for Players" />
+  <meta property="og:description" content="Browse Public Wyrlds to find online D&amp;D campaigns, request to join groups, and connect with DMs recruiting players." />
+  <meta property="og:site_name" content="Far Reach Co." />
+  <meta property="og:image" content="https://farreachco.com/assets/landing/vtt_screenshot.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Find Online D&amp;D Campaigns Looking for Players" />
+  <meta name="twitter:description" content="Browse Public Wyrlds to find online D&amp;D campaigns, request to join groups, and connect with DMs recruiting players." />
+  <meta name="twitter:image" content="https://farreachco.com/assets/landing/vtt_screenshot.png" />
+
+  <% const directorySchemaJson = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "Public Wyrld Directory",
+      url: "https://farreachco.com/wyrlds/public",
+      description:
+        "Directory of public online tabletop RPG campaigns where players can browse listings and request to join.",
+      mainEntity: {
+        "@type": "ItemList",
+        itemListElement: projects.slice(0, 12).map((project, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: project.title,
+          url: `https://farreachco.com${project.publicPath || (`/wyrlds/public/${project.id}`)}`,
+        })),
+      },
+    }).replace(/</g, "\\u003c"); %>
+  <script type="application/ld+json"><%- directorySchemaJson %></script>
   <link rel="stylesheet" href="/style.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
   <%- include('./partials/icons') %>
@@ -18,20 +50,24 @@
     <main class="dashboard-main" style="width: 100%;">
       <section class="dashboard-card">
         <div class="dashboard-card-header">
-          <h2>Public Wyrld Directory</h2>
+          <h1>Find Online D&amp;D Campaigns Looking for Players</h1>
           <a href="<%= isAuthenticated ? '/dash/wyrlds' : '/index' %>"><%= isAuthenticated ? 'Back to My Wyrlds' : 'Back to Home' %></a>
         </div>
+        <small class="d-block mt-1"><strong>Public Wyrld Directory:</strong> browse campaign listings, check join settings, and request to join groups that match your play style.</small>
         <small>
-          A <strong>Wyrld</strong> is a persistent campaign hub where a Game Master organizes tables, records, onboarding notes,
-          and member access for one ongoing game.
+          A <strong>Wyrld</strong> is a persistent campaign hub for one ongoing game.
         </small>
-        <small class="d-block mt-1">Discover listed wyrlds. Joining is controlled by each wyrld owner.</small>
+        <small class="d-block mt-1">Joining is always controlled by the campaign owner.</small>
         <small class="d-block mt-1">
-          Listings with a <strong>Pro</strong> tag are run on Pro Wyrlds. Pro status indicates the GM is actively
-          investing in their campaign setup and operations, which often correlates with higher responsiveness and
-          campaign consistency.
+          Listings with a <strong>Pro</strong> tag are run on Pro Wyrlds.
         </small>
         <small class="d-block mt-1">
+          Running a campaign and looking for players? <a href="<%= isAuthenticated ? '/newwyrld' : '/register' %>">Create a public listing</a> and follow the
+          <a href="/public-wyrlds-admin-guide">host setup guide</a>.
+        </small>
+        <small class="d-block mt-1">
+          <a href="/play-dungeons-and-dragons-online">How to find and join D&amp;D games online</a>
+          |
           <a href="/public-wyrlds-guide">What are Public Wyrlds?</a>
           |
           <a href="/public-wyrlds-admin-guide">How to set up Public Discovery</a>
@@ -39,9 +75,20 @@
         <hr />
 
         <form method="GET" action="/wyrlds/public" class="settings-form-row">
-          <input type="text" name="q" class="settings-input" placeholder="Search wyrlds by title" value="<%= query %>" />
+          <input type="text" name="q" class="settings-input" placeholder="Search online D&amp;D campaigns by title" value="<%= query %>" />
           <button class="modal-form-button" type="submit">Search</button>
         </form>
+
+        <div class="dash-detail-row mt-2" style="display:block;">
+          <div class="dash-detail-title">Start Here</div>
+          <small class="d-block mt-1"><strong>Players:</strong> open a listing, read the featured record, then request to join if spots are open.</small>
+          <small class="d-block mt-1"><strong>Hosts:</strong> create your Wyrld, enable public listing, and publish a clear onboarding record to attract better-fit players.</small>
+          <small class="d-block mt-1">
+            <a href="/play-dungeons-and-dragons-online">Full player flow</a>
+            |
+            <a href="/public-wyrlds-admin-guide">Full host flow</a>
+          </small>
+        </div>
 
         <% if (!projects.length) { %>
         <small>No public wyrlds found.</small>

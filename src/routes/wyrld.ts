@@ -339,7 +339,7 @@ router.get(
       const metaDescription =
         normalizeMetaDescription(project.description, 170) ||
         normalizeMetaDescription(featuredRecord?.description, 170) ||
-        `Discover ${project.title} on Far Reach Co.`;
+        `Join ${project.title}, an online tabletop RPG campaign looking for players on Far Reach Co.`;
 
       res.render("publicwyrld", {
         auth: userId || undefined,
