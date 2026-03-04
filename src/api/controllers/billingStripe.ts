@@ -27,6 +27,7 @@ import {
   recomputeUserProEntitlement,
 } from "../../lib/billingEntitlements";
 import { notifyAffiliateCommissionCreatedAsync } from "../../lib/emailNotifications";
+import { AFFILIATE_COMMISSION_PERCENT } from "../../lib/affiliateConfig";
 import { normalizeAffiliateCode } from "../../lib/affiliate";
 import { verifyStripeWebhookSignature } from "../../lib/stripeWebhookAuth";
 import logger from "../../lib/logger";
@@ -59,6 +60,11 @@ function readPositiveInt(value: unknown): number | null {
   return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
+function readNonNegativeInt(value: unknown): number | null {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
 function readScope(value: unknown): BillingScope | null {
   const scope = readOptionalString(value)?.toLowerCase();
   if (scope === "user" || scope === "project") return scope;
@@ -83,6 +89,40 @@ function normalizeStripeInterval(value: unknown): "monthly" | "yearly" | null {
   return null;
 }
 
+function readCheckoutSessionCommissionBaseAmountCents(session: any): number | null {
+  return (
+    readNonNegativeInt(session?.amount_subtotal) ??
+    readNonNegativeInt(session?.amount_total)
+  );
+}
+
+function readInvoiceCommissionBaseAmountCents(invoice: any): number | null {
+  return (
+    readNonNegativeInt(invoice?.subtotal) ??
+    readNonNegativeInt(invoice?.amount_paid) ??
+    readNonNegativeInt(invoice?.amount_due) ??
+    readNonNegativeInt(invoice?.total)
+  );
+}
+
+function readSubscriptionCommissionBaseAmountCents(subscription: any): number | null {
+  const firstItem = subscription?.items?.data?.[0];
+  const unitAmountCents =
+    readNonNegativeInt(firstItem?.price?.unit_amount) ??
+    readNonNegativeInt(firstItem?.plan?.amount);
+  if (unitAmountCents === null) return null;
+  const quantity = readPositiveInt(firstItem?.quantity) || 1;
+  return unitAmountCents * quantity;
+}
+
+function calculateAffiliateCommissionAmountCents(baseAmountCents: number | null) {
+  if (!baseAmountCents || baseAmountCents <= 0) return null;
+  const amountCents = Math.round(
+    (baseAmountCents * AFFILIATE_COMMISSION_PERCENT) / 100,
+  );
+  return amountCents > 0 ? amountCents : null;
+}
+
 function isCheckoutSessionPaymentSuccessful(paymentStatus: unknown) {
   const status = readOptionalString(paymentStatus)?.toLowerCase();
   return status === "paid" || status === "no_payment_required";
@@ -94,6 +134,7 @@ async function maybeCreateAffiliateCommission(params: {
   userId: number | null;
   scope: BillingScope | null;
   projectId: number | null;
+  commissionBaseAmountCents?: number | null;
   metadata: Record<string, unknown>;
 }) {
   if (!params.stripeSubscriptionId || !params.userId || !params.scope) return;
@@ -116,6 +157,24 @@ async function maybeCreateAffiliateCommission(params: {
   const code = codeData.rows[0];
   if (!code) return;
 
+  const commissionAmountCents = calculateAffiliateCommissionAmountCents(
+    params.commissionBaseAmountCents || null,
+  );
+  if (!commissionAmountCents) {
+    logger.warn(
+      {
+        stripeSubscriptionId: params.stripeSubscriptionId,
+        stripeInvoiceId: params.stripeInvoiceId,
+        scope: params.scope,
+        userId: params.userId,
+        commissionBaseAmountCents: params.commissionBaseAmountCents || null,
+        commissionPercent: AFFILIATE_COMMISSION_PERCENT,
+      },
+      "Skipped affiliate commission creation due to missing base amount",
+    );
+    return;
+  }
+
   try {
     const commissionData = await addAffiliateCommissionQuery({
       stripe_subscription_id: params.stripeSubscriptionId,
@@ -124,7 +183,7 @@ async function maybeCreateAffiliateCommission(params: {
       user_id: params.userId,
       project_id: params.scope === "project" ? params.projectId : null,
       scope: params.scope,
-      amount_cents: 500,
+      amount_cents: commissionAmountCents,
     });
     const commission = commissionData.rows[0];
     if (commission) {
@@ -193,6 +252,7 @@ async function handleStripeCheckoutSessionCompleted(session: any) {
     userId,
     scope,
     projectId,
+    commissionBaseAmountCents: readCheckoutSessionCommissionBaseAmountCents(session),
     metadata,
   });
 }
@@ -289,6 +349,9 @@ async function syncStripeSubscription(subscription: any) {
       userId,
       scope,
       projectId,
+      commissionBaseAmountCents: readSubscriptionCommissionBaseAmountCents(
+        subscription,
+      ),
       metadata: metadataForStorage,
     });
   }
@@ -360,6 +423,7 @@ async function handleStripeInvoiceEvent(invoice: any) {
     userId,
     scope,
     projectId,
+    commissionBaseAmountCents: readInvoiceCommissionBaseAmountCents(invoice),
     metadata,
   });
 
@@ -387,6 +451,7 @@ async function maybeCreateAffiliateCommissionForSubscription(
     userId: Number(subscription.user_id),
     scope: subscription.scope,
     projectId: subscription.project_id ? Number(subscription.project_id) : null,
+    commissionBaseAmountCents: readInvoiceCommissionBaseAmountCents(invoice),
     metadata,
   });
 }
