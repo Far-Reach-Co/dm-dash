@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout | Far Reach Co.</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="account-card">
+    <h1 class="account-title">Checkout</h1>
+
+    <div class="form-section">
+      <small>Start a new Stripe subscription.</small>
+      <small class="d-block mt-1"><a href="<%= backPath %>">Back</a></small>
+      <% if (affiliateMessage) { %>
+      <small class="d-block mt-1 <%= affiliateCode ? 'success-message' : '' %>"><%= affiliateMessage %></small>
+      <% } %>
+
+      <% if (checkoutStatus === "user_success" || checkoutStatus === "wyrld_success") { %>
+      <small class="success-message d-block mt-2">Checkout completed. Stripe webhook sync may take a few seconds.</small>
+      <% } %>
+      <% if (checkoutStatus === "user_cancel" || checkoutStatus === "wyrld_cancel") { %>
+      <small class="d-block mt-2">Checkout was cancelled.</small>
+      <% } %>
+    </div>
+
+    <div class="form-section">
+      <form id="checkout-form" method="post" action="/api/billing/stripe/checkout/user">
+        <input type="hidden" name="return_to" id="checkout-return-to" value="<%= returnPath %>" />
+        <input type="hidden" name="affiliate_code" id="checkout-affiliate-code" value="<%= affiliateCode || '' %>" />
+
+        <div class="input-container">
+          <h3>Plan</h3>
+          <select name="plan" id="checkout-plan">
+            <option value="user" <%= plan === 'user' ? 'selected' : '' %>>Pro User</option>
+            <option value="project" <%= plan === 'project' ? 'selected' : '' %>>Pro Wyrld</option>
+          </select>
+        </div>
+
+        <div class="input-container mt-2">
+          <h3>Interval</h3>
+          <select name="interval" id="checkout-interval">
+            <option value="monthly" <%= interval === 'monthly' ? 'selected' : '' %>>Monthly</option>
+            <option value="yearly" <%= interval === 'yearly' ? 'selected' : '' %>>Yearly</option>
+          </select>
+        </div>
+
+        <div class="input-container mt-2" id="checkout-project-row">
+          <h3>Wyrld (Owned or Joined)</h3>
+          <select name="project_id" id="checkout-project-id">
+            <% if (!availableProjects.length) { %>
+            <option value="">No joined or owned wyrlds available</option>
+            <% } else { %>
+            <% availableProjects.forEach(function(project) { %>
+            <option value="<%= project.id %>" data-is-pro="<%= project.is_pro ? '1' : '0' %>" <%= selectedProjectId === project.id ? 'selected' : '' %>><%= project.title %><%= project.relation === 'owner' ? ' (Owned)' : ' (Joined)' %><%= project.is_pro ? ' (Pro)' : '' %></option>
+            <% }); %>
+            <% } %>
+          </select>
+          <small class="d-block mt-1">Each Wyrld subscription is independent. Select one owned or joined Wyrld per checkout.</small>
+        </div>
+
+        <small id="checkout-warning" class="d-block mt-2"></small>
+
+        <div class="form-actions mt-2">
+          <button type="submit" id="checkout-submit">Continue to Stripe Checkout</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-section">
+      <h3>Existing Billing</h3>
+      <div class="form-actions">
+        <a class="label-btn" href="<%= billingPath %>">Manage Existing Billing</a>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <small><a href="/pricing">Pricing & Limits</a></small>
+    </div>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+<script>
+  (function() {
+    const formEl = document.getElementById("checkout-form");
+    const planEl = document.getElementById("checkout-plan");
+    const intervalEl = document.getElementById("checkout-interval");
+    const projectRowEl = document.getElementById("checkout-project-row");
+    const projectSelectEl = document.getElementById("checkout-project-id");
+    const warningEl = document.getElementById("checkout-warning");
+    const submitEl = document.getElementById("checkout-submit");
+    const returnInputEl = document.getElementById("checkout-return-to");
+    const affiliateCodeEl = document.getElementById("checkout-affiliate-code");
+    const source = "<%= source %>";
+    const affiliateCode = "<%= affiliateCode || '' %>";
+    const userIsPro = <%= userIsPro ? "true" : "false" %>;
+
+    function showError(message) {
+      if (window.customAlertError) {
+        window.customAlertError(message);
+        return;
+      }
+      window.alert(message);
+    }
+
+    function buildReturnPath() {
+      const query = new URLSearchParams();
+      query.set("from", source || "account");
+      query.set("plan", planEl.value || "user");
+      query.set("interval", intervalEl.value || "monthly");
+      if (planEl.value === "project" && projectSelectEl && projectSelectEl.value) {
+        query.set("project_id", projectSelectEl.value);
+      }
+      if (affiliateCode) {
+        query.set("ref", affiliateCode);
+      }
+      return `/checkout?${query.toString()}`;
+    }
+
+    function selectedProjectIsPro() {
+      if (!projectSelectEl) return false;
+      const selectedOption = projectSelectEl.options[projectSelectEl.selectedIndex];
+      return selectedOption ? selectedOption.getAttribute("data-is-pro") === "1" : false;
+    }
+
+    function setWarning(message) {
+      if (warningEl) warningEl.textContent = message || "";
+    }
+
+    function updateCheckoutForm() {
+      const plan = planEl.value;
+      const projectId = projectSelectEl ? projectSelectEl.value : "";
+      let warning = "";
+      let disabled = false;
+
+      if (projectRowEl) {
+        projectRowEl.style.display = plan === "project" ? "" : "none";
+      }
+
+      if (plan === "project") {
+        formEl.action = projectId
+          ? `/api/billing/stripe/checkout/project/${projectId}`
+          : "/api/billing/stripe/checkout/project/0";
+      } else {
+        formEl.action = "/api/billing/stripe/checkout/user";
+      }
+
+      if (returnInputEl) {
+        returnInputEl.value = buildReturnPath();
+      }
+      if (affiliateCodeEl) {
+        affiliateCodeEl.value = affiliateCode;
+      }
+
+      if (plan === "user" && userIsPro) {
+        disabled = true;
+        warning = "Pro User is already active. Use Manage Existing Billing for changes.";
+      }
+
+      if (plan === "project") {
+        if (!projectId) {
+          disabled = true;
+          const hasProjectOption =
+            projectSelectEl &&
+            Array.from(projectSelectEl.options).some((option) => option.value);
+          warning = hasProjectOption
+            ? "Select an owned or joined wyrld before starting Pro Wyrld checkout."
+            : "No joined or owned wyrlds are available. Join or create a Wyrld, then start Pro Wyrld checkout.";
+        } else if (selectedProjectIsPro()) {
+          disabled = true;
+          warning = "Selected wyrld is already Pro. Use Manage Existing Billing for changes.";
+        }
+      }
+
+      if (submitEl) {
+        submitEl.disabled = disabled;
+      }
+      setWarning(warning);
+    }
+
+    if (!formEl || !planEl || !intervalEl || !submitEl) {
+      return;
+    }
+
+    if (
+      planEl.value === "project" &&
+      projectSelectEl &&
+      !projectSelectEl.value &&
+      projectSelectEl.options.length
+    ) {
+      projectSelectEl.value = projectSelectEl.options[0].value;
+    }
+
+    planEl.addEventListener("change", updateCheckoutForm);
+    intervalEl.addEventListener("change", updateCheckoutForm);
+    if (projectSelectEl) {
+      projectSelectEl.addEventListener("change", updateCheckoutForm);
+    }
+
+    formEl.addEventListener("submit", function(event) {
+      updateCheckoutForm();
+      if (submitEl.disabled) {
+        event.preventDefault();
+        showError(warningEl && warningEl.textContent
+          ? warningEl.textContent
+          : "Unable to start checkout with current selection.");
+      }
+    });
+
+    updateCheckoutForm();
+  })();
+</script>
+
+</html>

@@ -3,12 +3,35 @@ import { get5eCharGeneralQuery } from "../api/queries/5eCharGeneral";
 import { getProjectUsersByProjectQuery } from "../api/queries/projectUsers";
 import { getProjectQuery } from "../api/queries/projects";
 import { getUsersByIdsQuery, User } from "../api/queries/users";
+import type { BillingScope } from "../api/queries/billingSubscriptions";
 import logger from "./logger";
 import { getEmailPreferenceLinks, getPublicAppUrl } from "./emailPreferences";
 
 type NotificationPreferenceKey = "notify_wyrld_join" | "notify_sheet_link";
 
 const SUPPORT_EMAIL = "farreachco@gmail.com";
+const DEFAULT_AFFILIATE_COMMISSION_ALERT_EMAIL = "farreachco@gmail.com";
+
+function getAffiliateCommissionAlertEmails(): string[] {
+  const raw =
+    process.env.AFFILIATE_COMMISSION_ALERT_EMAIL ||
+    process.env.AFFILIATE_COMMISSION_ALERT_EMAILS ||
+    DEFAULT_AFFILIATE_COMMISSION_ALERT_EMAIL;
+
+  const emails = raw
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter((email) => Boolean(email) && email.includes("@"));
+
+  return [...new Set(emails)];
+}
+
+function formatUtcDate(value: unknown): string {
+  if (typeof value !== "string" || !value.trim()) return "N/A";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return `${date.toISOString().replace("T", " ").replace("Z", " UTC")}`;
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -393,6 +416,74 @@ async function notifyProjectUserRemoved(params: {
   });
 }
 
+async function notifyAffiliateCommissionCreated(params: {
+  commissionId: number;
+  affiliateCode: string;
+  collaboratorName: string;
+  amountCents: number;
+  scope: BillingScope;
+  userId: number;
+  projectId: number | null;
+  stripeSubscriptionId: string;
+  stripeInvoiceId: string | null;
+  createdAt: string;
+}) {
+  const alertEmails = getAffiliateCommissionAlertEmails();
+  if (!alertEmails.length) return;
+
+  const [buyerData, projectData] = await Promise.all([
+    getUsersByIds([params.userId]),
+    params.projectId ? getProjectQuery(params.projectId) : Promise.resolve({ rows: [] }),
+  ]);
+  const buyer = buyerData[0] || null;
+  const project = projectData.rows[0] || null;
+
+  const amountUsd = (params.amountCents / 100).toFixed(2);
+  const planType = params.scope === "project" ? "Pro Wyrld signup" : "Pro User signup";
+  const projectLabel =
+    params.scope === "project"
+      ? project?.title || `Wyrld #${params.projectId || "unknown"}`
+      : "N/A";
+  const adminUrl = `${getPublicAppUrl()}/admin/affiliates`;
+
+  const message = /*html*/ `
+    <p>A new affiliate commission was created.</p>
+    <p>
+      <strong>Commission ID:</strong> ${params.commissionId}<br />
+      <strong>Status:</strong> pending<br />
+      <strong>Amount:</strong> $${amountUsd}<br />
+      <strong>Type:</strong> ${escapeHtml(planType)}<br />
+      <strong>Created:</strong> ${escapeHtml(formatUtcDate(params.createdAt))}
+    </p>
+    <p>
+      <strong>Affiliate Code:</strong> ${escapeHtml(params.affiliateCode)}<br />
+      <strong>Collaborator:</strong> ${escapeHtml(params.collaboratorName)}
+    </p>
+    <p>
+      <strong>Buyer:</strong> ${escapeHtml(
+        buyer?.username || `User #${params.userId}`,
+      )}<br />
+      <strong>Buyer ID:</strong> ${params.userId}<br />
+      <strong>Wyrld:</strong> ${escapeHtml(projectLabel)}
+    </p>
+    <p>
+      <strong>Stripe Subscription:</strong> ${escapeHtml(params.stripeSubscriptionId)}<br />
+      <strong>Stripe Invoice:</strong> ${escapeHtml(params.stripeInvoiceId || "N/A")}
+    </p>
+    <p><a href="${adminUrl}">Open Affiliate Admin</a></p>
+  `;
+
+  await Promise.all(
+    alertEmails.map((email) =>
+      mail.sendMessage({
+        user: { email },
+        title: `[Affiliate] New commission #${params.commissionId} ($${amountUsd})`,
+        message,
+      }),
+    ),
+  );
+}
+
 export function notifyProjectJoinRequestCreatedAsync(params: {
   projectId: string | number;
   requesterUserId: string | number;
@@ -440,5 +531,25 @@ export function notifyProjectUserRemovedAsync(params: {
 }): void {
   notifyProjectUserRemoved(params).catch((err) => {
     logger.error({ err, params }, "Failed to send project user removed email notification");
+  });
+}
+
+export function notifyAffiliateCommissionCreatedAsync(params: {
+  commissionId: number;
+  affiliateCode: string;
+  collaboratorName: string;
+  amountCents: number;
+  scope: BillingScope;
+  userId: number;
+  projectId: number | null;
+  stripeSubscriptionId: string;
+  stripeInvoiceId: string | null;
+  createdAt: string;
+}): void {
+  notifyAffiliateCommissionCreated(params).catch((err) => {
+    logger.error(
+      { err, params },
+      "Failed to send affiliate commission created email notification",
+    );
   });
 }

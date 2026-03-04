@@ -22,12 +22,8 @@
       <h1>Pricing & Plans</h1>
       <p>
         Standard account-style plans with separate entitlements for <strong>User</strong> and <strong>Wyrld</strong>.
-        Billing UI is still under construction, but all limits below are already enforced.
+        Use Checkout to start subscriptions and Billing to manage existing subscriptions. Both Pro User and Pro Wyrld are $10 monthly or $100 yearly.
       </p>
-      <div class="pricing-toggle" aria-hidden="true">
-        <span class="active">Monthly</span>
-        <span>Yearly</span>
-      </div>
     </div>
 
     <h2>Plans</h2>
@@ -52,7 +48,8 @@
       <article class="plan-card featured">
         <span class="plan-badge">Popular</span>
         <h3 class="plan-name">Pro User</h3>
-        <p class="plan-price">TBD <small>/month</small></p>
+        <p class="plan-price">$10 <small>/month</small></p>
+        <p class="plan-price">$100 <small>/year</small></p>
         <p class="plan-desc">For heavy individual usage across DM Dash and Radio.</p>
         <ul>
           <li>Own more than <strong><%= planLimits.user.freeWyrlds %></strong> Wyrlds</li>
@@ -62,15 +59,18 @@
           <li>FRC Radio: full playlist catalog (including Pro playlists)</li>
         </ul>
         <div class="plan-cta">
-          <a class="label-btn" href="/account">Choose Pro User</a>
+          <a class="label-btn" href="/checkout?from=account&plan=user">Choose Pro User</a>
         </div>
       </article>
 
       <article class="plan-card">
         <h3 class="plan-name">Pro Wyrld</h3>
-        <p class="plan-price">TBD <small>/wyrld/month</small></p>
-        <p class="plan-desc">For campaign owners who need larger Wyrld capacity and Pro signaling.</p>
+        <p class="plan-price">$10 <small>/wyrld/month</small></p>
+        <p class="plan-price">$100 <small>/wyrld/year</small></p>
+        <p class="plan-desc">For anyone in a campaign who wants to sponsor larger Wyrld capacity and Pro signaling.</p>
         <ul>
+          <li>Can be purchased per Wyrld you own or have joined</li>
+          <li>Multiple Wyrlds can be subscribed independently</li>
           <li>More than <strong><%= planLimits.wyrld.freeTables %></strong> tables in that Wyrld</li>
           <li>More than <strong><%= planLimits.wyrld.freeCharacterLinks %></strong> linked character sheets</li>
           <li>Library Packs in each Pro Wyrld library (discover/install/use)</li>
@@ -80,7 +80,7 @@
           <li>Wyrld image storage cap: <strong><%= planLimits.wyrld.proDataLimit %></strong> hard cap</li>
         </ul>
         <div class="plan-cta">
-          <a class="label-btn" href="/account">Choose Pro Wyrld</a>
+          <a class="label-btn" href="/checkout?from=account&plan=project">Choose Pro Wyrld</a>
         </div>
       </article>
     </div>
@@ -155,6 +155,10 @@
 
     <section>
       <h2>FAQ</h2>
+      <h3>How much are Pro plans?</h3>
+      <p>Pro User is $10 monthly or $100 yearly. Pro Wyrld is $10 monthly or $100 yearly per Wyrld subscription.</p>
+      <h3>Can I subscribe to Pro Wyrld for a joined Wyrld?</h3>
+      <p>Yes. You can subscribe Pro Wyrld for Wyrlds you own or have joined, and each Wyrld subscription is managed independently.</p>
       <h3>Can I bundle Pro User + Pro Wyrld?</h3>
       <p>Yes, that is planned. Initial implementation will likely support discounted Pro Wyrld pricing when you already have Pro User.</p>
       <h3>Does Pro remove all limits?</h3>

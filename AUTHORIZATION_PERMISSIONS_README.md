@@ -26,9 +26,10 @@ For a given Wyrld:
 
 - Owner:
   - Full control.
-  - Can manage members, roles, invites, public settings, banner, featured record, and join requests.
+  - Can manage members, roles, public settings, banner, featured record, and join requests.
 - Manager/editor:
   - Can edit shared Wyrld content (tables/records/calendars/sheets where editor access is required).
+  - Can create/revoke invite links.
   - Cannot manage owner-only settings like member role assignment or public discovery settings.
 - Member (non-editor):
   - Can access Wyrld pages as a participant.
@@ -42,7 +43,7 @@ Source: `src/api/controllers/publicWyrlds.ts`, `src/routes/wyrld.ts`
   - Allowed for guests and logged-in users.
 - Listing a Wyrld publicly:
   - Owner only.
-  - Pro required to set `is_public_listed = true`.
+  - Controlled by `is_public_listed` in owner-managed public settings.
 - Join mode:
   - `invite_only`: requests disabled.
   - `request`: logged-in users can submit request.
@@ -51,14 +52,14 @@ Source: `src/api/controllers/publicWyrlds.ts`, `src/routes/wyrld.ts`
 - Capacity:
   - If configured, approvals/requests are blocked when full.
 - Public Wyrld page visibility:
-  - Wyrld must be both `is_public_listed = true` and `is_pro = true`.
+  - Wyrld must have `is_public_listed = true`.
 
 ## Featured Record Visibility Rules
 
 Source: `src/lib/authz.ts`, `src/routes/wyrld.ts`
 
 - Owner selects `featured_record_id` in Wyrld public settings.
-- Non-members (including guests) can view only that selected record when the Wyrld is public + Pro.
+- Non-members (including guests) can view only that selected record when the Wyrld is publicly listed.
 - Other Wyrld records remain private to normal Wyrld access rules.
 
 ## Community Discussion Permissions
@@ -85,6 +86,7 @@ Source: `src/lib/tableAuthz.ts`, `src/api/controllers/tableViews.ts`
 - Project/Wyrld table, standard mode:
   - Managers/editors can edit.
   - Members can view only if table is public.
+  - For visible public tables, non-editors can edit table data but still do not get full editor/settings capabilities.
 - Project/Wyrld table, sandbox mode:
   - All Wyrld members can view and collaborate.
 
@@ -115,7 +117,7 @@ Source: `src/lib/authz.ts`, `src/api/controllers/accessControl.ts`
 - Wyrld record:
   - Editors can edit.
   - Members can view according to record/public rules and Wyrld membership.
-  - Featured-record exception applies for public Pro Wyrlds (see above).
+  - Featured-record exception applies for publicly listed Wyrlds (see above).
 
 ## Notes for User-Facing Docs
 

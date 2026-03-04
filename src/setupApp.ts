@@ -95,7 +95,16 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 app.set("view engine", "ejs");
 
 // fixing "413 Request Entity Too Large" errors
-app.use(bodyParser.json({ limit: "10mb" }));
+app.use(
+  bodyParser.json({
+    limit: "10mb",
+    verify: (req, _res, buf) => {
+      if (!buf?.length) return;
+      const requestWithRawBody = req as Request & { rawBody?: Buffer };
+      requestWithRawBody.rawBody = Buffer.from(buf);
+    },
+  }),
+);
 app.use(
   bodyParser.urlencoded({
     limit: "10mb",

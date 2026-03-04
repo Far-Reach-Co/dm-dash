@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Billing | Far Reach Co.</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="account-card">
+    <h1 class="account-title">Billing</h1>
+
+    <div class="form-section">
+      <small>Manage existing Stripe billing.</small>
+      <small class="d-block mt-1">Pro User and Pro Wyrld are independent subscriptions. You can have one user subscription and multiple Wyrld subscriptions.</small>
+      <small class="d-block mt-1"><a href="<%= backPath %>">Back</a></small>
+
+      <% if (billingStatus === "user_success" || billingStatus === "wyrld_success") { %>
+      <small class="success-message d-block mt-2">Checkout completed. Stripe webhook sync may take a few seconds.</small>
+      <% } %>
+      <% if (billingStatus === "user_cancel" || billingStatus === "wyrld_cancel") { %>
+      <small class="d-block mt-2">Checkout was cancelled.</small>
+      <% } %>
+      <% if (billingStatus === "portal_return") { %>
+      <small class="d-block mt-2">Returned from Stripe Customer Portal.</small>
+      <% } %>
+    </div>
+
+    <div class="form-section">
+      <div class="status-row">
+        <h3>Plan:</h3>
+        <p><%= contextPlanLabel %></p>
+      </div>
+      <% if (contextIntervalLabel) { %>
+      <div class="status-row">
+        <h3>Interval:</h3>
+        <p><%= contextIntervalLabel %></p>
+      </div>
+      <% } %>
+      <div class="status-row">
+        <h3>Status:</h3>
+        <p><%= contextStatusLabel %></p>
+      </div>
+      <% if (source === "wyrld" && selectedProjectTitle) { %>
+      <div class="status-row">
+        <h3>Wyrld:</h3>
+        <p><%= selectedProjectTitle %></p>
+      </div>
+      <% } %>
+    </div>
+
+    <div class="form-section">
+      <h3>All Subscriptions</h3>
+      <small class="d-block mt-1">Each Wyrld subscription is listed separately and managed independently in Stripe Customer Portal.</small>
+      <% if (subscriptionViews.length) { %>
+      <% subscriptionViews.forEach(function(subscription) { %>
+      <div class="status-row">
+        <h3>
+          <%= subscription.planLabel %><%= subscription.scope === "project" && subscription.projectTitle ? " (" + subscription.projectTitle + ")" : "" %>:
+        </h3>
+        <p><%= subscription.intervalLabel ? subscription.intervalLabel + " · " : "" %><%= subscription.statusLabel %></p>
+      </div>
+      <% }); %>
+      <% } else { %>
+      <small>No subscriptions found for this account.</small>
+      <% } %>
+    </div>
+
+    <div class="form-section">
+      <h3>Manage Existing Billing</h3>
+      <% if (hasBillingCustomer) { %>
+      <form method="post" action="/api/billing/stripe/portal" id="billing-portal-form">
+        <input type="hidden" name="return_to" value="<%= returnPath %>" />
+        <div class="form-actions">
+          <button type="submit">Open Stripe Customer Portal</button>
+        </div>
+      </form>
+      <% } else { %>
+      <small>No Stripe billing profile found yet for this account.</small>
+      <% } %>
+    </div>
+
+    <div class="form-section">
+      <h3>Start New Subscription</h3>
+      <div class="form-actions">
+        <a class="label-btn" href="<%= checkoutPath %>">Open Checkout</a>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <small><a href="/pricing">Pricing & Limits</a></small>
+    </div>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+</html>

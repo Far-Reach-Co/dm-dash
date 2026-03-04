@@ -27,8 +27,9 @@ This is good for runtime checks and should remain the source of truth for app au
   - More than 10 tables in that Wyrld
   - More than 5 Wyrld character links
   - Wyrld banner
-  - Public discovery listing / featured public record behavior
   - Wyrld image storage cap increase (now hard-capped)
+
+Current note: public discovery listing and featured-record public visibility are currently controlled by public listing settings, not by `Project.is_pro`.
 
 ## Stripe Product Catalog (Recommended)
 

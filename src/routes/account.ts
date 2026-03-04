@@ -4,6 +4,7 @@ import { humanFileSize } from "../lib/utils";
 import { csrfMiddleware } from "./csrf";
 import { requireUserOrRedirect } from "../lib/authz";
 import { getUserDataUsageLimitBytes } from "../lib/subscription";
+import { isAffiliateAdminEmail } from "../lib/affiliateAdminAuth";
 
 const router = Router();
 
@@ -17,6 +18,14 @@ router.get(
       const csrfToken = res.locals.csrfToken;
       const { rows } = await getUserByIdQuery(userId);
       const user = rows[0];
+      const rawBillingStatus =
+        typeof req.query.billing === "string" ? req.query.billing.trim() : "";
+      const billingStatus =
+        rawBillingStatus === "user_success" ||
+        rawBillingStatus === "user_cancel" ||
+        rawBillingStatus === "portal_return"
+          ? rawBillingStatus
+          : "";
 
       // calculate used data formatted
       const usedDataFormatted = humanFileSize(user.used_data_in_bytes);
@@ -27,6 +36,8 @@ router.get(
       res.render("account", {
         auth: userId,
         user,
+        isAffiliateAdmin: isAffiliateAdminEmail(user.email),
+        billingStatus,
         usedDataFormatted,
         userDataLimitFormatted,
         csrfToken,

@@ -25,6 +25,17 @@ import {
   removeProjectDiscussionThread,
   toggleProjectDiscussionThreadLock,
 } from "./controllers/projectDiscussion.js";
+import { handleStripeWebhook } from "./controllers/billingStripe.js";
+import {
+  createStripeCustomerPortal,
+  createStripeProjectCheckout,
+  createStripeUserCheckout,
+} from "./controllers/billingCheckout.js";
+import {
+  createAffiliateCode,
+  markAffiliateCommissionPaid,
+  toggleAffiliateCodeStatus,
+} from "./controllers/affiliateAdmin.js";
 import {
   getNotifications,
   getUnreadNotificationsCount,
@@ -198,7 +209,6 @@ import {
   getRecordsByProjectQuery,
   getRecordsByUserQuery,
 } from "./queries/record.js";
-
 // multer
 import multer from "multer";
 import {
@@ -220,6 +230,8 @@ const isHighFrequencySheetEndpoint = (path: string) => {
   return path.startsWith("/sheets/");
 };
 
+const isStripeWebhookEndpoint = (path: string) => path === "/stripe/webhook";
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 200, // 200 requests per 15 min per IP
@@ -227,12 +239,31 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
   // Character sheet UIs fire many API calls rapidly (autosave, quick refreshes).
   // Use a dedicated limiter for those endpoints instead of sharing the global bucket.
-  skip: (req) => isHighFrequencySheetEndpoint(req.path || ""),
+  skip: (req) =>
+    isHighFrequencySheetEndpoint(req.path || "") ||
+    isStripeWebhookEndpoint(req.path || ""),
   message: {
     message: "Too many requests, please try again later",
   },
 });
 router.use(apiLimiter);
+
+// stripe billing webhook
+router.post("/stripe/webhook", handleStripeWebhook);
+router.post("/billing/stripe/checkout/user", createStripeUserCheckout);
+router.post("/billing/stripe/checkout/project/:project_id", createStripeProjectCheckout);
+router.post("/billing/stripe/portal", createStripeCustomerPortal);
+router.post("/admin/affiliates/codes", csrfProtection, createAffiliateCode);
+router.post(
+  "/admin/affiliates/codes/:id/toggle",
+  csrfProtection,
+  toggleAffiliateCodeStatus,
+);
+router.post(
+  "/admin/affiliates/commissions/:id/pay",
+  csrfProtection,
+  markAffiliateCommissionPaid,
+);
 
 const sheetApiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
@@ -240,7 +271,9 @@ const sheetApiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    const userKey = req.session?.user ? `user:${req.session.user}` : `ip:${req.ip}`;
+    const userKey = req.session?.user
+      ? `user:${req.session.user}`
+      : `ip:${req.ip}`;
     return `${userKey}:sheet-api`;
   },
   message: {
@@ -264,7 +297,9 @@ const publicJoinRequestLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    const userKey = req.session?.user ? `user:${req.session.user}` : `ip:${req.ip}`;
+    const userKey = req.session?.user
+      ? `user:${req.session.user}`
+      : `ip:${req.ip}`;
     return `${userKey}:project:${req.params.project_id || "unknown"}`;
   },
   message: {
@@ -280,7 +315,7 @@ router.post(
   "/bot/interactions",
   raw({ type: "application/json" }),
   verifyKeyMiddleware(process.env.BOT_PUBLIC_KEY as string),
-  interactionsController
+  interactionsController,
 );
 
 // s3
@@ -289,18 +324,18 @@ router.post("/signed_URL_download_multi", getSignedUrlsHandler);
 router.post(
   "/new_image_for_project",
   upload.single("file"),
-  newImageForProject
+  newImageForProject,
 );
 router.post("/new_image_for_user", upload.single("file"), newImageForUser);
 router.post("/edit_image_name/:id", editImageName);
 router.post("/edit_image_notes/:id", editImageNotes);
 router.delete(
   "/remove_image_by_table_user/:image_id/:table_id",
-  removeImageByTableUser
+  removeImageByTableUser,
 );
 router.delete(
   "/remove_image_by_project/:image_id/:project_id",
-  removeImageByProject
+  removeImageByProject,
 );
 router.delete("/remove_image_by_user/:image_id", removeImageByUser);
 
@@ -308,23 +343,26 @@ router.delete("/remove_image_by_user/:image_id", removeImageByUser);
 router.get("/get_library_images_by_user", getLibraryImagesByUser);
 router.get(
   "/get_library_images_by_project/:project_id",
-  getLibraryImagesByProject
+  getLibraryImagesByProject,
 );
 router.get("/get_library_image_counts_by_user", getLibraryImageCountsByUser);
 router.get(
   "/get_library_image_counts_by_project/:project_id",
-  getLibraryImageCountsByProject
+  getLibraryImageCountsByProject,
 );
 router.get(
   "/get_library_images_by_user_in_folder/:folder_id",
-  getLibraryImagesByUserInFolder
+  getLibraryImagesByUserInFolder,
 );
 router.get(
   "/get_library_images_by_project_in_folder/:project_id/:folder_id",
-  getLibraryImagesByProjectInFolder
+  getLibraryImagesByProjectInFolder,
 );
 router.post("/add_library_pack_by_user", addLibraryPackByUser);
-router.post("/add_library_pack_by_project/:project_id", addLibraryPackByProject);
+router.post(
+  "/add_library_pack_by_project/:project_id",
+  addLibraryPackByProject,
+);
 router.post("/edit_library_pack/:id", editLibraryPack);
 router.delete("/remove_library_pack/:id", removeLibraryPack);
 router.post("/add_library_pack_image", addLibraryPackImage);
@@ -340,12 +378,18 @@ router.post(
   "/install_library_pack_by_project/:project_id/:pack_id",
   installLibraryPackByProject,
 );
-router.delete("/uninstall_library_pack_by_user/:pack_id", uninstallLibraryPackByUser);
+router.delete(
+  "/uninstall_library_pack_by_user/:pack_id",
+  uninstallLibraryPackByUser,
+);
 router.delete(
   "/uninstall_library_pack_by_project/:project_id/:pack_id",
   uninstallLibraryPackByProject,
 );
-router.get("/get_installed_library_packs_by_user", getInstalledLibraryPacksByUser);
+router.get(
+  "/get_installed_library_packs_by_user",
+  getInstalledLibraryPacksByUser,
+);
 router.get("/get_owned_library_packs_by_user", getOwnedLibraryPacksByUser);
 router.get(
   "/get_installed_library_packs_by_project/:project_id",
@@ -372,7 +416,7 @@ router.get("/get_record_images_by_record/:record_id", getRecordImagesByRecord);
 router.get("/get_record_images_by_image/:image_id", getRecordImagesByImage);
 router.delete(
   "/remove_record_image_by_image/:image_id",
-  removeRecordImageByImage
+  removeRecordImageByImage,
 );
 
 // table folders
@@ -381,7 +425,7 @@ router.post("/add_table_folder_by_project", addTableFolderByProject);
 router.get("/get_table_folders_by_user", getTableFoldersByUser);
 router.get(
   "/get_table_folders_by_project/:project_id",
-  getTableFoldersByProject
+  getTableFoldersByProject,
 );
 router.delete("/remove_table_folder/:id", removeTableFolder);
 router.post("/edit_table_folder_title/:id", editTableFolderTitle);
@@ -419,10 +463,7 @@ router.post(
 router.get("/get_guest_sandbox/:uuid", getGuestSandboxView);
 router.post("/edit_guest_sandbox_data/:uuid", editGuestSandboxData);
 router.get("/get_guest_sandbox_images/:uuid", getGuestSandboxImages);
-router.get(
-  "/get_guest_sandbox_image_counts/:uuid",
-  getGuestSandboxImageCounts,
-);
+router.get("/get_guest_sandbox_image_counts/:uuid", getGuestSandboxImageCounts);
 router.get("/get_location_pins/:table_view_id", getLocationPinsByTableView);
 router.post("/add_location_pin", addLocationPin);
 router.delete("/remove_location_pin/:id", removeLocationPin);
@@ -431,11 +472,11 @@ router.post("/edit_location_pin/:id", updateLocationPin);
 // table images
 router.get(
   "/get_table_images_with_urls_by_table_project/:table_id",
-  getTableImagesWithSignedUrlsByTableProject
+  getTableImagesWithSignedUrlsByTableProject,
 );
 router.get(
   "/get_table_images_with_urls_by_table_user/:table_id",
-  getTableImagesWithSignedUrlsByTableUser
+  getTableImagesWithSignedUrlsByTableUser,
 );
 router.post("/add_table_image_by_project", addTableImageByProject);
 router.post("/add_table_image_by_user", addTableImageByUser);
@@ -445,7 +486,7 @@ router.post("/edit_table_image/:id", editTableImage);
 // project players
 router.get(
   "/get_project_players_by_player/:player_id",
-  getProjectPlayersByPlayer
+  getProjectPlayersByPlayer,
 );
 router.post("/add_project_player", addProjectPlayer);
 router.delete("/remove_project_player/:id", removeProjectPlayer);
@@ -453,17 +494,17 @@ router.delete("/remove_project_player/:id", removeProjectPlayer);
 // player users
 router.get(
   "/get_player_user_by_user_and_player/:player_id",
-  getPlayerUserByUserAndPlayer
+  getPlayerUserByUserAndPlayer,
 );
 router.post("/add_player_user", addPlayerUser);
 router.delete("/remove_player_user/:id", removePlayerUser);
 router.delete(
   "/remove_player_user_by_user_and_player/:player_id",
-  removePlayerUserByUserAndPlayer
+  removePlayerUserByUserAndPlayer,
 );
 router.delete(
   "/remove_player_users_by_player/:player_id",
-  removePlayerUsersByPlayer
+  removePlayerUsersByPlayer,
 );
 
 // player invites
@@ -522,16 +563,40 @@ router.post(
   publicJoinRequestLimiter,
   requestProjectJoin,
 );
-router.get("/get_project_join_requests/:project_id", getProjectJoinRequestsByProject);
+router.get(
+  "/get_project_join_requests/:project_id",
+  getProjectJoinRequestsByProject,
+);
 router.post("/respond_project_join_request/:id", respondProjectJoinRequest);
 router.post("/cancel_project_join_request/:id", cancelProjectJoinRequest);
-router.get("/get_project_discussion_threads/:project_id", getProjectDiscussionThreads);
-router.get("/get_project_discussion_thread/:thread_id", getProjectDiscussionThreadWithPosts);
-router.post("/add_project_discussion_thread/:project_id", addProjectDiscussionThread);
-router.post("/add_project_discussion_post/:thread_id", addProjectDiscussionPost);
-router.post("/toggle_project_discussion_thread_lock/:thread_id", toggleProjectDiscussionThreadLock);
-router.delete("/remove_project_discussion_thread/:thread_id", removeProjectDiscussionThread);
-router.delete("/remove_project_discussion_post/:post_id", removeProjectDiscussionPost);
+router.get(
+  "/get_project_discussion_threads/:project_id",
+  getProjectDiscussionThreads,
+);
+router.get(
+  "/get_project_discussion_thread/:thread_id",
+  getProjectDiscussionThreadWithPosts,
+);
+router.post(
+  "/add_project_discussion_thread/:project_id",
+  addProjectDiscussionThread,
+);
+router.post(
+  "/add_project_discussion_post/:thread_id",
+  addProjectDiscussionPost,
+);
+router.post(
+  "/toggle_project_discussion_thread_lock/:thread_id",
+  toggleProjectDiscussionThreadLock,
+);
+router.delete(
+  "/remove_project_discussion_thread/:thread_id",
+  removeProjectDiscussionThread,
+);
+router.delete(
+  "/remove_project_discussion_post/:post_id",
+  removeProjectDiscussionPost,
+);
 router.get("/notifications", getNotifications);
 router.get("/notifications/unread-count", getUnreadNotificationsCount);
 router.post("/notifications/:id/read", markNotificationAsRead);
@@ -579,14 +644,14 @@ router.post(
   csrfProtection,
   registerLimiter,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
-  registerUser
+  registerUser,
 );
 router.post("/login", csrfProtection, loginLimiter, loginUser);
 router.post(
   "/request_reset_email",
   csrfProtection,
   requestResetLimiter,
-  requestResetEmail
+  requestResetEmail,
 );
 router.post("/user/reset_password", csrfProtection, resetPassword);
 router.post("/update_username", csrfProtection, editUsername);
@@ -594,7 +659,7 @@ router.post(
   "/update_email",
   csrfProtection,
   body("email").isEmail().withMessage("Invalid email format").normalizeEmail(),
-  editEmail
+  editEmail,
 );
 router.post("/update_email_preferences", csrfProtection, editEmailPreferences);
 
