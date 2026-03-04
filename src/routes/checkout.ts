@@ -3,6 +3,7 @@ import { getActiveAffiliateCodeByCodeQuery } from "../api/queries/affiliateCodes
 import { getProjectsByIdsQuery, getProjectsQuery } from "../api/queries/projects";
 import { getProjectUsersQuery } from "../api/queries/projectUsers";
 import { getUserByIdQuery } from "../api/queries/users";
+import { AFFILIATE_CUSTOMER_DISCOUNT_PERCENT } from "../lib/affiliateConfig";
 import { normalizeAffiliateCode } from "../lib/affiliate";
 import { requireUserOrRedirect } from "../lib/authz";
 
@@ -124,7 +125,7 @@ router.get("/checkout", async (req: Request, res: Response, next: NextFunction) 
     const affiliateCode = activeAffiliateCode?.code || null;
     const affiliateMessage = requestedAffiliateCode
       ? activeAffiliateCode
-        ? `Referral code applied (${activeAffiliateCode.code})`
+        ? `Referral code applied (${activeAffiliateCode.code}). ${AFFILIATE_CUSTOMER_DISCOUNT_PERCENT}% discount will be applied at Stripe checkout.`
         : "Referral code is invalid or inactive."
       : "";
 

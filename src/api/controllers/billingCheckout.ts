@@ -4,6 +4,7 @@ import {
   createStripeBillingPortalSession,
   createStripeCheckoutSession,
   parseBillingInterval,
+  readStripeAffiliateDiscountCouponId,
   resolveStripePriceIdForScope,
 } from "../../lib/stripeApi";
 import { getActiveAffiliateCodeByCodeQuery } from "../queries/affiliateCodes";
@@ -69,6 +70,9 @@ async function createStripeUserCheckout(req: Request, res: Response, next: NextF
 
     const interval = parseBillingInterval(req.body?.interval || req.query?.interval);
     const affiliateCode = await resolveAffiliateFromRequest(req);
+    const affiliateDiscountCouponId = affiliateCode
+      ? readStripeAffiliateDiscountCouponId()
+      : null;
     const priceId = await resolveStripePriceIdForScope({ scope: "user", interval });
     const customerData = await getBillingCustomerByUserIdQuery(user.id);
     const customer = customerData.rows[0] || null;
@@ -79,6 +83,7 @@ async function createStripeUserCheckout(req: Request, res: Response, next: NextF
       customerId: customer?.stripe_customer_id || null,
       customerEmail: customer ? null : user.email,
       clientReferenceId: String(user.id),
+      discountCouponId: affiliateDiscountCouponId,
       metadata: {
         user_id: String(user.id),
         scope: "user",
@@ -130,6 +135,9 @@ async function createStripeProjectCheckout(req: Request, res: Response, next: Ne
 
     const interval = parseBillingInterval(req.body?.interval || req.query?.interval);
     const affiliateCode = await resolveAffiliateFromRequest(req);
+    const affiliateDiscountCouponId = affiliateCode
+      ? readStripeAffiliateDiscountCouponId()
+      : null;
     const priceId = await resolveStripePriceIdForScope({ scope: "project", interval });
     const customerData = await getBillingCustomerByUserIdQuery(user.id);
     const customer = customerData.rows[0] || null;
@@ -144,6 +152,7 @@ async function createStripeProjectCheckout(req: Request, res: Response, next: Ne
       customerId: customer?.stripe_customer_id || null,
       customerEmail: customer ? null : user.email,
       clientReferenceId: String(user.id),
+      discountCouponId: affiliateDiscountCouponId,
       metadata: {
         user_id: String(user.id),
         scope: "project",

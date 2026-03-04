@@ -90,6 +90,18 @@ function buildStripeHeaders() {
   };
 }
 
+export function readStripeAffiliateDiscountCouponId() {
+  const couponId = process.env.STRIPE_AFFILIATE_DISCOUNT_COUPON_ID?.trim() || "";
+  if (!couponId) {
+    throw {
+      status: 503,
+      message:
+        "Affiliate discount coupon is not configured (STRIPE_AFFILIATE_DISCOUNT_COUPON_ID)",
+    };
+  }
+  return couponId;
+}
+
 async function stripeRequest(path: string, options: {
   method?: "GET" | "POST";
   searchParams?: URLSearchParams;
@@ -156,6 +168,7 @@ export async function createStripeCheckoutSession(params: {
   customerId?: string | null;
   customerEmail?: string | null;
   clientReferenceId?: string | null;
+  discountCouponId?: string | null;
   metadata?: Record<string, string | number>;
   subscriptionMetadata?: Record<string, string | number>;
   subscriptionDescription?: string | null;
@@ -167,7 +180,13 @@ export async function createStripeCheckoutSession(params: {
   body.set("mode", "subscription");
   body.set("line_items[0][price]", params.priceId);
   body.set("line_items[0][quantity]", "1");
-  body.set("allow_promotion_codes", "true");
+  const discountCouponId =
+    typeof params.discountCouponId === "string" ? params.discountCouponId.trim() : "";
+  if (discountCouponId) {
+    body.set("discounts[0][coupon]", discountCouponId);
+  } else {
+    body.set("allow_promotion_codes", "true");
+  }
   body.set(
     "success_url",
     `${baseUrl}${params.successPath}${params.successPath.includes("?") ? "&" : "?"}session_id={CHECKOUT_SESSION_ID}`,
