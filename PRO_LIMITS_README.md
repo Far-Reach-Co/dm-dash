@@ -98,7 +98,7 @@ Notes:
 - Clearing a banner (`image_id: null`) is allowed for the owner regardless of Pro status.
 - This is feature gating, not a numeric usage cap.
 
-## Public Wyrld Discovery Listing (Feature Gating Enforced)
+## Public Wyrld Discovery Listing (Current Enforcement)
 
 Sources:
 
@@ -106,22 +106,22 @@ Sources:
 - `src/api/queries/publicWyrlds.ts`
 - `src/routes/wyrld.ts`
 
-- Public listing is a Pro Wyrld feature.
+- Public listing is owner-controlled via public settings.
   - Function: `editProjectPublicSettings`
-  - Logic: If `is_public_listed` is set to true and `projects.is_pro` is false, reject with HTTP `402` and message `PROJECT_IS_NOT_PRO`.
-- Public directory only returns Pro listed Wyrlds.
+  - Logic: Owner can set `is_public_listed` without an `is_pro` check.
+- Public directory returns listed Wyrlds (no Pro filter).
   - Query: `getPublicWyrldDirectoryQuery`
-  - Logic: SQL filter requires `p.is_public_listed = true` and `p.is_pro = true`.
-- Public Wyrld page routes enforce Pro + listed checks.
+  - Logic: SQL filter requires `p.is_public_listed = true`.
+- Public Wyrld page routes enforce listed checks.
   - Routes: `/wyrlds/public/:id` and `/wyrlds/public/:id/:slug`
-  - Logic: non-Pro or non-listed Wyrlds redirect to `/404`.
+  - Logic: non-listed Wyrlds redirect to `/404`.
 
 Notes:
 
-- Owners can still edit join mode/capacity/featured record while not listed, but non-Pro Wyrlds cannot be listed publicly.
-- Join requests are blocked unless the target Wyrld is both Pro and publicly listed.
+- Owners can still edit join mode/capacity/featured record while not listed.
+- Join requests are blocked unless the target Wyrld is publicly listed and request mode is enabled.
 
-## Featured Record Public Visibility (Bound to Public Pro Listing)
+## Featured Record Public Visibility (Bound to Public Listing)
 
 Sources:
 
@@ -131,7 +131,6 @@ Sources:
 - Public viewers can only access one record per listed Wyrld: the selected featured record.
   - Function: `requireRecordAccessOrRedirect`
   - Logic: record can be viewed by non-members when all are true:
-    - `project.is_pro = true`
     - `project.is_public_listed = true`
     - `project.featured_record_id` matches the record id
 - Directory/public pages display this selected featured record as the onboarding entry.
@@ -140,6 +139,22 @@ Notes:
 
 - This is selective visibility control, not a separate quantity limit.
 - Other Wyrld records remain non-public unless user has normal Wyrld membership access.
+
+## Library Packs (Feature Gating Enforced)
+
+Sources:
+
+- `src/api/controllers/libraryPacks.ts`
+- `src/lib/tableAuthz.ts`
+
+- Creating packs is Pro-gated by scope.
+  - User scope: `addLibraryPackByUser` requires `users.is_pro = true`, else HTTP `402` + `USER_IS_NOT_PRO`.
+  - Wyrld scope: `addLibraryPackByProject` requires `projects.is_pro = true`, else HTTP `402` + `PROJECT_IS_NOT_PRO`.
+- Installing Pro/public_pro packs is Pro-gated by target scope.
+  - User install: `installLibraryPackByUser` requires user Pro for Pro-only/public_pro packs.
+  - Wyrld install: `installLibraryPackByProject` requires Wyrld Pro for Pro-only/public_pro packs.
+- Table capability exposure is Pro-gated.
+  - `resolveTableAuth` enables library pack capabilities only when user scope (personal table) or project scope (Wyrld table) is Pro.
 
 ## User-Facing Pro Docs
 

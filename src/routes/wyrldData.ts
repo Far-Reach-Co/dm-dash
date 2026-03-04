@@ -428,6 +428,15 @@ export async function loadWyrldData(
     }
   }
 
+  const rawBillingStatus =
+    typeof req.query.billing === "string" ? req.query.billing.trim() : "";
+  const billingStatus =
+    rawBillingStatus === "wyrld_success" ||
+    rawBillingStatus === "wyrld_cancel" ||
+    rawBillingStatus === "portal_return"
+      ? rawBillingStatus
+      : "";
+
   return {
     projectAuth,
     isOwner: userId == project.user_id,
@@ -456,6 +465,7 @@ export async function loadWyrldData(
     selectedDiscussionThread,
     selectedDiscussionPosts,
     activityEvents,
+    billingStatus,
     tablesSorted: sortByTitle(tables, (table) => (table as any).title),
     recordsSorted: sortByTitle(records, (record) => (record as any).title),
     sheetsSorted: sortByTitle(sheets, (sheet) => (sheet as any).name),

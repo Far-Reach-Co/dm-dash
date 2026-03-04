@@ -564,6 +564,32 @@ textarea:focus {
   font-size: 1.2rem;
 }
 
+/* Wider layout for affiliate admin so commission tables/ids remain readable. */
+.affiliate-admin-card {
+  max-width: 980px;
+  width: min(96vw, 980px);
+}
+
+.affiliate-admin-card small,
+.affiliate-admin-card p,
+.affiliate-admin-card h3 {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.affiliate-admin-card .status-row {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .affiliate-admin-card {
+    width: calc(100vw - 24px);
+    margin-left: 12px;
+    margin-right: 12px;
+    padding: var(--space-xl);
+  }
+}
+
 /* ==========================================================================
    Form Section (settings pages)
    Visual grouping for related form fields with divider
