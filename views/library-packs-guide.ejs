@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Library Packs Guide | Far Reach Co.</title>
+  <meta name="description" content="Learn how Library Packs work: sharing value, owned vs installed packs, discover/community sharing, publishing, and permissions." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">Library Packs Guide</h1>
+      <p>How packs work, what Discover means, and how sharing behaves across User and Wyrld libraries.</p>
+      <small>
+        <a href="/library-guide">Library Guide</a>
+        |
+        <a href="/vtt-guide">VTT Guide</a>
+      </small>
+      <hr>
+    </div>
+
+    <div class="quick-links" aria-label="Page sections">
+      <a href="#what">What Packs Are</a>
+      <a href="#value">Why They Matter</a>
+      <a href="#scope">Library Types</a>
+      <a href="#discover">Discover</a>
+      <a href="#owned-installed">Owned vs Installed</a>
+      <a href="#publish">Publishing</a>
+      <a href="#workflow">Workflow</a>
+      <a href="#permissions">Permissions</a>
+    </div>
+
+    <section id="what">
+      <h2>What Library Packs Are</h2>
+      <p>A library pack is a reusable bundle of images with a title, description, and tags.</p>
+      <ul>
+        <li>Use packs to group related assets like map sets, token kits, or encounter bundles.</li>
+        <li>Packs do not duplicate your base image files; they organize references to images.</li>
+        <li>Tags are pack-level metadata used for search and catalog readability.</li>
+      </ul>
+    </section>
+
+    <section id="value">
+      <h2>Why Library Packs Matter</h2>
+      <ul>
+        <li><strong>Share installable resources:</strong> curate once, publish once, then let other users and Wyrlds install immediately.</li>
+        <li><strong>Faster prep for everyone:</strong> avoid rebuilding the same encounter assets repeatedly.</li>
+        <li><strong>Consistency across games:</strong> keep map/token sets aligned across tables and campaigns.</li>
+        <li><strong>Owner convenience too:</strong> creators can still use their own packs directly in table sidebars.</li>
+        <li><strong>Cleaner libraries:</strong> separate ad-hoc uploads from durable, reusable content bundles.</li>
+      </ul>
+    </section>
+
+    <section id="scope">
+      <h2>Library Types</h2>
+      <p>Every library screen is in exactly one library type: User library or Wyrld library.</p>
+      <ul>
+        <li><strong>User library:</strong> personal account context.</li>
+        <li><strong>Wyrld library:</strong> shared manager/editor context for that Wyrld.</li>
+        <li><strong>Owned packs</strong> are library-specific: User library owns user packs; Wyrld library owns that Wyrld's packs.</li>
+        <li>You can still install packs across libraries, including your own packs from another library.</li>
+      </ul>
+    </section>
+
+    <section id="discover">
+      <h2>What Discover Means</h2>
+      <p>Discover is the community resource-sharing catalog.</p>
+      <ul>
+        <li>Discover shows published packs that are available to your current library.</li>
+        <li>Use preview before install to verify pack quality and contents.</li>
+        <li>Install adds that pack to the current library's installed list so it is usable in that library.</li>
+      </ul>
+    </section>
+
+    <section id="owned-installed">
+      <h2>Owned vs Installed</h2>
+      <ul>
+        <li><strong>Owned:</strong> packs created by this exact library.</li>
+        <li><strong>Installed:</strong> packs attached to this library for use, regardless of who published them.</li>
+        <li>Uninstall removes the pack from the current library install list.</li>
+        <li>Delete Pack removes the pack itself (and installs that depend on it).</li>
+      </ul>
+    </section>
+
+    <section id="publish">
+      <h2>Publishing and Visibility</h2>
+      <ul>
+        <li><strong>Private / Wyrld visibility</strong> keeps packs in non-public access paths.</li>
+        <li><strong>Public Pro + Published</strong> makes a pack discoverable for community use under pro gating.</li>
+        <li>Tags improve discoverability because pack search matches title, description, and tags.</li>
+      </ul>
+    </section>
+
+    <section id="workflow">
+      <h2>Recommended Workflow</h2>
+      <ol>
+        <li>Create a pack in your current library.</li>
+        <li>Add images and useful tags.</li>
+        <li>Optionally publish when ready for community sharing.</li>
+        <li>Use Discover to find and preview other creators' packs.</li>
+        <li>Install packs into the library where you want to use them.</li>
+      </ol>
+    </section>
+
+    <section id="permissions">
+      <h2>Permissions and Limits</h2>
+      <ul>
+        <li>Pack tooling is tied to pro capabilities in the active library context.</li>
+        <li>Sandbox mode disables discovery and install/uninstall management for packs.</li>
+        <li>Wyrld library actions follow Wyrld editor/manager permissions.</li>
+      </ul>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Product Guide | Far Reach Co.</title>
+  <meta name="description" content="Overview of Far Reach Co. products and how they connect: VTT, Wyrlds, Library, Character Sheets, SRD tools, and Radio." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">Product Guide</h1>
+      <p>An implementation-level map of Far Reach Co. products and how they fit together.</p>
+      <small>
+        <a href="/what-is-frc">What Is FRC?</a>
+        |
+        <a href="/pricing">Pricing</a>
+      </small>
+      <hr>
+    </div>
+
+    <div class="quick-links" aria-label="Page sections">
+      <a href="#stack">Product Stack</a>
+      <a href="#vtt">Virtual Tabletop</a>
+      <a href="#wyrlds">Wyrlds</a>
+      <a href="#library">Library App</a>
+      <a href="#sheets">Character Sheets</a>
+      <a href="#knowledge">SRD and Resources</a>
+      <a href="#radio">Far Reach Radio</a>
+      <a href="#paths">Suggested Paths</a>
+    </div>
+
+    <section id="stack">
+      <h2>Product Stack</h2>
+      <ul>
+        <li><strong>VTT:</strong> real-time table canvas with layers, drawing, grid, and sharing.</li>
+        <li><strong>Wyrlds:</strong> campaign spaces that organize tables, records, calendars, and linked sheets.</li>
+        <li><strong>Library:</strong> image and pack management across personal and Wyrld scope.</li>
+        <li><strong>5E Character Sheets:</strong> live editable sheets with sharing and Wyrld linking.</li>
+        <li><strong>SRD + Resources:</strong> rules reference, tutorials, downloads, and bot resources.</li>
+        <li><strong>Far Reach Radio:</strong> music channels for session ambience.</li>
+      </ul>
+    </section>
+
+    <section id="vtt">
+      <h2>Virtual Tabletop</h2>
+      <ul>
+        <li>Core play surface for maps, tokens, fog, and drawing tools.</li>
+        <li>Supports both standalone table workflows and Wyrld-linked table workflows.</li>
+        <li>Public/private behavior differs between user tables and Wyrld tables.</li>
+      </ul>
+      <p>Start here: <a href="/vtt-guide">VTT Guide</a>.</p>
+    </section>
+
+    <section id="wyrlds">
+      <h2>Wyrlds</h2>
+      <ul>
+        <li>Persistent campaign containers for teams.</li>
+        <li>Includes role-based permissions (owner, manager, member).</li>
+        <li>Supports public listing controls for discoverable campaigns.</li>
+      </ul>
+      <p>Start here: <a href="/public-wyrlds-guide">Public Wyrlds Guide</a> and <a href="/wyrld-permissions-guide">Wyrld Permissions Guide</a>.</p>
+    </section>
+
+    <section id="library">
+      <h2>Library App</h2>
+      <ul>
+        <li>Upload, organize, search, and sort image assets.</li>
+        <li>Use folders and multi-select actions for prep speed.</li>
+        <li>Library Packs add publish/install sharing workflows across scopes.</li>
+      </ul>
+      <p>Start here: <a href="/library-guide">Library Guide</a> and <a href="/library-packs-guide">Library Packs Guide</a>.</p>
+    </section>
+
+    <section id="sheets">
+      <h2>Character Sheets</h2>
+      <ul>
+        <li>D&D 5E sheet app with multi-section editing and auto-save behavior.</li>
+        <li>Invite-based collaboration and Wyrld editor access for linked sheets.</li>
+        <li>Built-in printable export and duplication controls.</li>
+      </ul>
+      <p>Start here: <a href="/character-sheet-guide">Character Sheet Guide</a>.</p>
+    </section>
+
+    <section id="knowledge">
+      <h2>SRD and Resource Layer</h2>
+      <ul>
+        <li>Integrated SRD compendium for in-session lookup.</li>
+        <li>Tutorials and downloadable assets for onboarding and faster prep.</li>
+        <li>Bot resources for Discord-integrated workflows.</li>
+      </ul>
+      <p>Start here: <a href="/resources/srd">SRD Compendium</a> and <a href="/resources/tutorials">Tutorials</a>.</p>
+    </section>
+
+    <section id="radio">
+      <h2>Far Reach Radio</h2>
+      <ul>
+        <li>Separate music service for channel-based session ambience.</li>
+        <li>Useful alongside live VTT sessions.</li>
+      </ul>
+      <p>Open: <a href="/radio">Far Reach Radio</a>.</p>
+    </section>
+
+    <section id="paths">
+      <h2>Suggested Starting Paths</h2>
+      <ol>
+        <li><strong>One-shot flow:</strong> Create table, upload assets in Library, run via VTT share link.</li>
+        <li><strong>Campaign flow:</strong> Create Wyrld, add tables/records, connect character sheets, organize shared Library assets.</li>
+        <li><strong>Prep flow:</strong> Build packs in Library, discover/install reusable packs, then launch VTT session.</li>
+      </ol>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>
