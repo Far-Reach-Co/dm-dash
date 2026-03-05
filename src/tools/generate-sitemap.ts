@@ -45,6 +45,7 @@ const staticPages: SitemapEntry[] = [
   { url: "/vtt-guide", priority: 0.8, changefreq: "monthly" },
   { url: "/library-guide", priority: 0.8, changefreq: "monthly" },
   { url: "/library-packs-guide", priority: 0.8, changefreq: "monthly" },
+  { url: "/community-library-packs", priority: 0.8, changefreq: "monthly" },
   { url: "/character-sheet-guide", priority: 0.8, changefreq: "monthly" },
   { url: "/product-guide", priority: 0.8, changefreq: "monthly" },
   { url: "/dnd-5e-character-sheets", priority: 0.9, changefreq: "monthly" },

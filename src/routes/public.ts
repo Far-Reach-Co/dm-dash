@@ -511,4 +511,15 @@ router.get(
   },
 );
 
+router.get(
+  "/community-library-packs",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("community-library-packs", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 export default router;
