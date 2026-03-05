@@ -1,6 +1,7 @@
 import {
   addProjectPlayerQuery,
   getProjectPlayerQuery,
+  getProjectPlayerByProjectAndPlayerQuery,
   getProjectPlayersByProjectQuery,
   removeProjectPlayerQuery,
   editProjectPlayerQuery,
@@ -38,6 +39,23 @@ async function addProjectPlayer(
     } else {
       await requireProjectEditorAccess(req, req.body.project_id);
     }
+
+    const existingProjectPlayerData = await getProjectPlayerByProjectAndPlayerQuery(
+      req.body.project_id,
+      req.body.player_id,
+    );
+    const existingProjectPlayer = existingProjectPlayerData.rows[0];
+    if (existingProjectPlayer) {
+      if (req.headers["hx-request"]) {
+        res
+          .set("HX-Redirect", `/wyrld?id=${req.body.project_id}`)
+          .send("Character linked successfully.");
+      } else {
+        res.status(200).json(existingProjectPlayer);
+      }
+      return;
+    }
+
     const projectPlayersData = await getProjectPlayersByProjectQuery(
       req.body.project_id
     );
@@ -51,8 +69,33 @@ async function addProjectPlayer(
       }
     }
 
-    const data = await addProjectPlayerQuery(req.body);
-    const projectPlayer = data.rows[0];
+    let projectPlayer:
+      | Awaited<ReturnType<typeof addProjectPlayerQuery>>["rows"][number]
+      | undefined;
+    try {
+      const data = await addProjectPlayerQuery(req.body);
+      projectPlayer = data.rows[0];
+    } catch (err: any) {
+      if (err?.code === "23505") {
+        const existingData = await getProjectPlayerByProjectAndPlayerQuery(
+          req.body.project_id,
+          req.body.player_id,
+        );
+        const existing = existingData.rows[0];
+        if (existing) {
+          if (req.headers["hx-request"]) {
+            res
+              .set("HX-Redirect", `/wyrld?id=${req.body.project_id}`)
+              .send("Character linked successfully.");
+          } else {
+            res.status(200).json(existing);
+          }
+          return;
+        }
+      }
+      throw err;
+    }
+    if (!projectPlayer) throw { status: 500, message: "Failed to link character" };
     const characterName = general.name || null;
     // Log project player creation event
     logEventAsync({

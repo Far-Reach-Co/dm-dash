@@ -19,8 +19,27 @@ async function addPlayerInvite(
 
   try {
     await requireSheetOwnerAccess(req, req.body.player_id);
-    const data = await addPlayerInviteQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    const existingInviteData = await getPlayerInviteByPlayerQuery(req.body.player_id);
+    const existingInvite = existingInviteData.rows[0];
+    if (existingInvite) {
+      res.status(200).json(existingInvite);
+      return;
+    }
+
+    try {
+      const data = await addPlayerInviteQuery(req.body);
+      res.status(201).json(data.rows[0]);
+    } catch (err: any) {
+      if (err?.code === "23505") {
+        const retryExistingData = await getPlayerInviteByPlayerQuery(req.body.player_id);
+        const retryExisting = retryExistingData.rows[0];
+        if (retryExisting) {
+          res.status(200).json(retryExisting);
+          return;
+        }
+      }
+      throw err;
+    }
   } catch (err) {
     next(err);
   }

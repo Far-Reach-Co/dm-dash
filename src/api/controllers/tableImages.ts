@@ -1,6 +1,8 @@
 import {
   addTableImageByUserQuery,
   addTableImageByProjectQuery,
+  getTableImageByProjectAndImageQuery,
+  getTableImageByUserAndImageQuery,
   getTableImageQuery,
   removeTableImageQuery,
   editTableImageQuery,
@@ -49,8 +51,33 @@ async function addTableImageByProject(
       if (!req.body.project_id) throw badRequestError("project_id is required");
       await requireProjectEditor(req, req.body.project_id);
     }
-    const data = await addTableImageByProjectQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    const existingData = await getTableImageByProjectAndImageQuery(
+      req.body.project_id,
+      req.body.image_id,
+    );
+    const existing = existingData.rows[0];
+    if (existing) {
+      res.status(200).json(existing);
+      return;
+    }
+
+    try {
+      const data = await addTableImageByProjectQuery(req.body);
+      res.status(201).json(data.rows[0]);
+    } catch (err: any) {
+      if (err?.code === "23505") {
+        const retryData = await getTableImageByProjectAndImageQuery(
+          req.body.project_id,
+          req.body.image_id,
+        );
+        const retryExisting = retryData.rows[0];
+        if (retryExisting) {
+          res.status(200).json(retryExisting);
+          return;
+        }
+      }
+      throw err;
+    }
   } catch (err) {
     next(err);
   }
@@ -69,8 +96,33 @@ async function addTableImageByUser(
     } else {
       req.body.user_id = userId;
     }
-    const data = await addTableImageByUserQuery(req.body);
-    res.status(201).json(data.rows[0]);
+    const existingData = await getTableImageByUserAndImageQuery(
+      req.body.user_id,
+      req.body.image_id,
+    );
+    const existing = existingData.rows[0];
+    if (existing) {
+      res.status(200).json(existing);
+      return;
+    }
+
+    try {
+      const data = await addTableImageByUserQuery(req.body);
+      res.status(201).json(data.rows[0]);
+    } catch (err: any) {
+      if (err?.code === "23505") {
+        const retryData = await getTableImageByUserAndImageQuery(
+          req.body.user_id,
+          req.body.image_id,
+        );
+        const retryExisting = retryData.rows[0];
+        if (retryExisting) {
+          res.status(200).json(retryExisting);
+          return;
+        }
+      }
+      throw err;
+    }
   } catch (err) {
     next(err);
   }

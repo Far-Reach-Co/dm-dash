@@ -41,6 +41,24 @@ async function getRecordImagesByImageQuery(id: number | string) {
   return await db.query<RecordImage>(query)
 }
 
+async function getRecordImageByRecordAndImageQuery(
+  recordId: number | string,
+  imageId: number | string,
+) {
+  const query = {
+    text: /*sql*/ `
+      select *
+      from public."RecordImage"
+      where record_id = $1
+        and image_id = $2
+      order by id desc
+      limit 1
+    `,
+    values: [recordId, imageId],
+  }
+  return await db.query<RecordImage>(query)
+}
+
 async function removeRecordImageQuery(id: number | string) {
   const query = {
     text: /*sql*/ `delete from public."RecordImage" where id = $1 returning *`,
@@ -55,5 +73,6 @@ export {
   getRecordImageQuery,
   getRecordImagesByRecordQuery,
   getRecordImagesByImageQuery,
+  getRecordImageByRecordAndImageQuery,
   removeRecordImageQuery
 }

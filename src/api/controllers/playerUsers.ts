@@ -25,13 +25,41 @@ async function addPlayerUser(req: Request, res: Response, next: NextFunction) {
     if (charData.rows[0].user_id == userId) {
       throw { message: "User is owner" };
     }
+    const existingMembershipData = await getPlayerUserByUserAndPlayerQuery(
+      userId,
+      req.body.player_id,
+    );
+    const existingMembership = existingMembershipData.rows[0];
+    if (existingMembership) {
+      res.status(200).json(existingMembership);
+      return;
+    }
     const inviteData = await getPlayerInviteByPlayerQuery(req.body.player_id);
     if (!inviteData.rows.length) {
       throw { status: 403, message: "Player invite required" };
     }
 
-    const data = await addPlayerUserQuery(req.body);
-    const playerUser = data.rows[0];
+    let playerUser:
+      | Awaited<ReturnType<typeof addPlayerUserQuery>>["rows"][number]
+      | undefined;
+    try {
+      const data = await addPlayerUserQuery(req.body);
+      playerUser = data.rows[0];
+    } catch (err: any) {
+      if (err?.code === "23505") {
+        const retryMembershipData = await getPlayerUserByUserAndPlayerQuery(
+          userId,
+          req.body.player_id,
+        );
+        const retryMembership = retryMembershipData.rows[0];
+        if (retryMembership) {
+          res.status(200).json(retryMembership);
+          return;
+        }
+      }
+      throw err;
+    }
+    if (!playerUser) throw { status: 500, message: "Failed to link player user" };
     // Log player user creation event
     logEventAsync({
       userId,
