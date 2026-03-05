@@ -10,9 +10,17 @@
     { href: '/radio', label: 'Far Reach Radio' },
     { href: '/wyrlds/public', label: 'Public Wyrlds' },
   ];
+  const dashboardLinks = isAuthed
+    ? [
+        { href: '/dash', label: 'Overview' },
+        { href: '/dash/tables', label: 'Tables' },
+        { href: '/dash/records', label: 'Records' },
+        { href: '/dash/sheets', label: 'Character Sheets' },
+        { href: '/dash/wyrlds', label: 'Wyrlds' },
+      ]
+    : [];
   const accountLinks = isAuthed
     ? [
-        { href: '/dash', label: 'Dashboard' },
         { href: '/account', label: 'Account' },
       ]
     : [{ href: '/login', label: 'Login' }];
@@ -33,6 +41,12 @@
   <% productLinks.forEach((link) => { %>
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
   <% }) %>
+  <% if (dashboardLinks.length) { %>
+  <span class="mobile-nav-section">Dashboard</span>
+  <% dashboardLinks.forEach((link) => { %>
+  <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+  <% }) %>
+  <% } %>
   <% accountLinks.forEach((link) => { %>
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
   <% }) %>
@@ -57,6 +71,19 @@
         <% }) %>
       </div>
     </div>
+    <% if (dashboardLinks.length) { %>
+    <div class="nav-products-menu">
+      <button class="top-nav-btn nav-products-trigger" type="button" aria-haspopup="true">
+        Dashboard
+        <span class="nav-products-caret" aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="nav-products-dropdown" role="menu">
+        <% dashboardLinks.forEach((link) => { %>
+        <a class="nav-dropdown-link" href="<%= link.href %>" role="menuitem"><%= link.label %></a>
+        <% }) %>
+      </div>
+    </div>
+    <% } %>
     <% accountLinks.forEach((link) => { %>
     <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
     <% }) %>
