@@ -268,6 +268,62 @@
   text-decoration-color: var(--orange2);
 }
 
+/* ===== Guide Screenshots ===== */
+.toolshot-grid {
+  display: grid;
+  gap: 14px;
+  margin: 1rem 0;
+}
+
+.toolshot-grid--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.toolshot-grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.toolshot-card {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(145deg, var(--blue3) 0%, rgba(22, 28, 39, 0.85) 100%);
+  border: 1px solid var(--blue);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+}
+
+.toolshot-card img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.toolshot-card figcaption {
+  padding: 10px 12px;
+  font-size: 0.87rem;
+  color: var(--light-gray);
+  line-height: 1.45;
+}
+
+.toolshot-card--smallshot img {
+  max-height: 320px;
+  object-fit: contain;
+  background: rgba(8, 14, 25, 0.6);
+}
+
+.toolshot-card--focus img {
+  max-height: 520px;
+  width: 100%;
+  object-fit: contain;
+  background: rgba(8, 14, 25, 0.6);
+}
+
+@media (max-width: 900px) {
+  .toolshot-grid--three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 article {
   display: flex;
   flex-direction: column;
@@ -395,6 +451,20 @@ article {
 }
 
 @media (max-width: 600px) {
+  .toolshot-grid--two,
+  .toolshot-grid--three {
+    grid-template-columns: 1fr;
+  }
+
+  .toolshot-card figcaption {
+    padding: 8px 10px;
+    font-size: 0.82rem;
+  }
+
+  .toolshot-card--smallshot img {
+    max-height: 240px;
+  }
+
   .resource-article {
     flex-direction: column;
     padding: 16px;
@@ -525,4 +595,3 @@ img {
   color: var(--green);
   font-weight: 500;
 }
-
