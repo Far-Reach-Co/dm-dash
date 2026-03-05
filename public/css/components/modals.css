@@ -7,6 +7,7 @@
   all: unset;
   visibility: hidden;
   opacity: 0;
+  pointer-events: none;
   position: fixed;
   z-index: 100;
   left: 0;
@@ -27,6 +28,7 @@
 .modal-custom.visible {
   visibility: visible;
   opacity: 1;
+  pointer-events: auto;
   transition: visibility 0s linear 0s, opacity var(--transition-normal);
 }
 

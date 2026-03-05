@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= guide.pageTitle %></title>
+  <meta name="description" content="<%= guide.metaDescription %>" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://farreachco.com/resources/<%= guide.slug %>" />
+  <meta property="og:title" content="<%= guide.pageTitle %>" />
+  <meta property="og:description" content="<%= guide.metaDescription %>" />
+  <meta property="og:site_name" content="Far Reach Co." />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= guide.pageTitle %>" />
+  <meta name="twitter:description" content="<%= guide.metaDescription %>" />
+  <% const resourceGuideLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": guide.heading,
+    "description": guide.metaDescription,
+    "url": `https://farreachco.com/resources/${guide.slug}`,
+    "author": {
+      "@type": "Organization",
+      "name": "Far Reach Co.",
+    },
+  }; %>
+  <script type="application/ld+json"><%- JSON.stringify(resourceGuideLd) %></script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center"><%= guide.heading %></h1>
+      <% if (guide.subtitle) { %>
+      <small><%= guide.subtitle %></small>
+      <% } %>
+      <hr>
+    </div>
+
+    <div class="breadcrumbs mb-3">
+      <a href="/resources/srd">Resources</a>
+      <span class="separator">/</span>
+      <span class="current"><%= guide.heading %></span>
+    </div>
+
+    <article class="resource-article">
+      <div class="resource-image">
+        <% if (guide.imageSrc) { %>
+        <img src="<%= guide.imageSrc %>" alt="<%= guide.imageAlt || guide.heading %>">
+        <% } else { %>
+        <svg viewBox="0 0 24 24" width="70" height="70" fill="var(--light-gray)">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
+          <path d="M8 12h8v2H8zm0 4h8v2H8zm0-8h3v2H8z" />
+        </svg>
+        <% } %>
+      </div>
+      <div class="resource-content">
+        <div class="inline-div">
+          <h2><%= guide.heading %></h2>
+          <% if (guide.subtitle) { %>
+          <small>- <%= guide.subtitle %></small>
+          <% } %>
+        </div>
+        <div class="indent">
+          <p><%= guide.summary %></p>
+        </div>
+      </div>
+    </article>
+
+    <% guide.sections.forEach(function(section) { %>
+    <section>
+      <h2><%= section.heading %></h2>
+      <% section.paragraphs.forEach(function(paragraph) { %>
+      <p><%= paragraph %></p>
+      <% }); %>
+
+      <% if (section.actions && section.actions.length) { %>
+      <div class="download-list">
+        <% section.actions.forEach(function(action) { %>
+        <a href="<%= action.href %>" class="resource-link <%= action.download ? 'download-link' : (action.external ? 'external-link' : '') %>" <% if (action.external) { %>target="_blank" rel="noopener"<% } %> <% if (action.download) { %>download<% } %> <% if (action.confirmDownload) { %>data-confirm-download="<%= action.confirmDownload %>"<% } %>>
+          <span><%= action.label %></span>
+          <% if (action.note) { %>
+          <small><%= action.note %></small>
+          <% } %>
+          <% if (action.external) { %>
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
+          </svg>
+          <% } %>
+        </a>
+        <% }); %>
+      </div>
+      <% } %>
+    </section>
+    <% }); %>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+<script>
+  (function bindDownloadConfirms() {
+    const links = document.querySelectorAll("[data-confirm-download]");
+    links.forEach(function(link) {
+      link.addEventListener("click", async function(event) {
+        event.preventDefault();
+        const message = link.getAttribute("data-confirm-download") || "Continue download?";
+        const confirmed = await window.customConfirm(message, {
+          confirmText: "Download",
+        });
+        if (!confirmed) return;
+
+        const tempLink = document.createElement("a");
+        tempLink.href = link.href;
+
+        const downloadAttr = link.getAttribute("download");
+        if (downloadAttr !== null) {
+          tempLink.setAttribute("download", downloadAttr);
+        }
+
+        const target = link.getAttribute("target");
+        if (target) {
+          tempLink.target = target;
+        }
+
+        const rel = link.getAttribute("rel");
+        if (rel) {
+          tempLink.rel = rel;
+        }
+
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        tempLink.remove();
+      });
+    });
+  })();
+</script>
+
+</html>

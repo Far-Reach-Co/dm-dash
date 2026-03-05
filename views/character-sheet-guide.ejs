@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Character Sheet Guide | Far Reach Co.</title>
+  <meta name="description" content="How the Far Reach Co. D&D 5E character sheet app works: creation, access, editing, sharing, Wyrld links, and exports." />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('./partials/icons') %>
+</head>
+<%- include('./partials/google') %>
+
+<body>
+  <%- include('./partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <div class="intro">
+      <h1 class="text-center">Character Sheet Guide</h1>
+      <p>How to create, share, edit, and manage Far Reach Co. D&D 5E sheets.</p>
+      <small>
+        <a href="/product-guide">Product Guide</a>
+        |
+        <a href="/vtt-guide">VTT Guide</a>
+      </small>
+      <hr>
+    </div>
+
+    <div class="quick-links" aria-label="Page sections">
+      <a href="#create">Creating Sheets</a>
+      <a href="#access">Access Model</a>
+      <a href="#views">Main Sheet Views</a>
+      <a href="#magic">Magic Numbers</a>
+      <a href="#srd-autofill">5E SRD Autofill</a>
+      <a href="#autosave">Auto-Save Behavior</a>
+      <a href="#sharing">Sharing and Invites</a>
+      <a href="#wyrlds">Wyrld Connections</a>
+      <a href="#exports">Export and Duplication</a>
+      <a href="#ownership">Ownership Controls</a>
+    </div>
+
+    <section id="create">
+      <h2>Creating Sheets</h2>
+      <ul>
+        <li>Create from Dashboard using <strong>New Sheet</strong>.</li>
+        <li>You can also create while targeting a Wyrld, which links the sheet during creation.</li>
+        <li>After creation, you are redirected to the live sheet editor.</li>
+      </ul>
+    </section>
+
+    <section id="access">
+      <h2>Access Model</h2>
+      <ul>
+        <li><strong>Owner:</strong> full access to all sheet content and settings.</li>
+        <li><strong>Invite members:</strong> can be linked via invite URL and then access the sheet.</li>
+        <li><strong>Wyrld editors/managers:</strong> can edit linked sheets when the sheet is connected to that Wyrld.</li>
+        <li>If a user has no valid owner/invite/Wyrld access path, sheet access is denied.</li>
+      </ul>
+    </section>
+
+    <section id="views">
+      <h2>Main Sheet Views</h2>
+      <ul>
+        <li><strong>General:</strong> core stats, classes, saves, skills, attacks, equipment, feats, resources.</li>
+        <li><strong>Background:</strong> personality and narrative fields.</li>
+        <li><strong>Spells:</strong> spell list plus slot tracking and spellcasting stats.</li>
+        <li><strong>Settings:</strong> invite link, access revocation, Wyrld links, export, duplicate, delete.</li>
+      </ul>
+    </section>
+
+    <section id="magic">
+      <h2>Magic Numbers and Calculations</h2>
+      <ul>
+        <li>In <strong>Attacks and Spellcasting</strong>, ATK Bonus supports magic keywords: <code>str</code>, <code>dex</code>, <code>con</code>, <code>int</code>, <code>wis</code>, <code>cha</code>, and <code>pro</code>.</li>
+        <li>You can type expressions like <code>dex+pro</code> and the UI calculates the current numeric result.</li>
+        <li>Calculated values stay linked to your stats; if ability modifiers or proficiency change, magic expressions update.</li>
+        <li>This keeps attack bonuses accurate as character stats evolve.</li>
+      </ul>
+    </section>
+
+    <section id="srd-autofill">
+      <h2>5E SRD Autofill</h2>
+      <ul>
+        <li><strong>Spells:</strong> title suggestions use 5E SRD spell data and can auto-fill casting time, duration, range, components, damage type, and description.</li>
+        <li><strong>Equipment:</strong> suggestions use 5E SRD equipment + magic item data.</li>
+        <li>Selecting an item can auto-fill fields and attach detailed description data, including SRD reference links when available.</li>
+        <li>This reduces manual entry and helps keep naming/details consistent with SRD content.</li>
+      </ul>
+    </section>
+
+    <section id="autosave">
+      <h2>Auto-Save Behavior</h2>
+      <ul>
+        <li>Most fields save on blur/input events without manual save buttons.</li>
+        <li>Sheet edits are sent as operation patches against the sheet data model.</li>
+        <li>Array sections (attacks, spells, classes, feats, etc.) are handled through insert/update/remove operations.</li>
+        <li>The UI retries key sheet loads and shows fallback actions when load fails.</li>
+      </ul>
+    </section>
+
+    <section id="sharing">
+      <h2>Sharing and Invites</h2>
+      <ul>
+        <li>Owners can generate a share invite link from Settings.</li>
+        <li>Anyone using a valid invite can be linked to the sheet for future access.</li>
+        <li>Owners can delete the invite link to block new joins.</li>
+        <li><strong>Revoke Access</strong> removes all invited user links from that sheet.</li>
+      </ul>
+    </section>
+
+    <section id="wyrlds">
+      <h2>Wyrld Connections</h2>
+      <ul>
+        <li>Owners can connect a sheet to Wyrlds from Settings.</li>
+        <li>If you own the sheet, you only need to be a Wyrld member to connect it.</li>
+        <li>For non-owner operations, Wyrld editor permissions are required.</li>
+        <li>Free Wyrlds have a character-link cap; Pro Wyrld expands that capacity.</li>
+      </ul>
+    </section>
+
+    <section id="exports">
+      <h2>Export and Duplication</h2>
+      <ul>
+        <li>Export to <strong>PDF</strong> for printable/reference output.</li>
+        <li>Duplicate creates a new sheet with copied character content.</li>
+      </ul>
+    </section>
+
+    <section id="ownership">
+      <h2>Ownership Controls</h2>
+      <ul>
+        <li>Only owners can manage invite links, Wyrld links, and deletion.</li>
+        <li>Non-owners see a simplified Settings view focused on export and disconnect.</li>
+        <li>Disconnect removes that user’s link to the sheet without affecting owner data.</li>
+      </ul>
+    </section>
+  </div>
+  <%- include('./partials/footer') %>
+</body>
+
+</html>

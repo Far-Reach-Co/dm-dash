@@ -1085,7 +1085,7 @@ export function openDiscoverPacksModal(grid) {
         createElement(
           "a",
           {
-            href: "/library-guide",
+            href: "/library-packs-guide",
             target: "_blank",
             rel: "noopener noreferrer",
             class: "library-pack-inline-link",

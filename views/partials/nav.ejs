@@ -3,16 +3,45 @@
   const primaryLinks = [
     { href: '/whats-new', label: "What's New" },
     { href: '/pricing', label: 'Pricing' },
-    { href: '/resources', label: 'Resources' },
+  ];
+  const resourceSections = [
+    {
+      label: "Resources",
+      links: [
+        { href: '/dnd/5e/srd/contents', label: 'D&D 5E SRD Compendium' },
+        { href: '/resources/tutorials', label: 'Tutorials' },
+        { href: '/resources/free-assets', label: 'Free Token & Map Images' },
+        { href: '/resources/character-sheets', label: 'Offline Character Sheets' },
+        { href: '/aether-bot', label: 'Aether Discord Bot' },
+        { href: 'https://5ebot.com', label: '5e Discord Bot' },
+        { href: '/resources/aethrend', label: 'Aethrend' },
+      ],
+    },
+    {
+      label: "Platform Guides",
+      links: [
+        { href: '/vtt-guide', label: 'VTT Guide' },
+        { href: '/library-guide', label: 'Library Guide' },
+        { href: '/library-packs-guide', label: 'Library Packs Guide' },
+        { href: '/character-sheet-guide', label: 'Character Sheet Guide' },
+        { href: '/product-guide', label: 'Product Guide' },
+        { href: '/sandbox-mode-guide', label: 'Sandbox Mode Guide' },
+        { href: '/wyrld-permissions-guide', label: 'Wyrld Permissions Guide' },
+        { href: '/public-wyrlds-guide', label: 'Public Wyrlds Guide' },
+        { href: '/public-wyrlds-admin-guide', label: 'Public Wyrlds Admin Guide' },
+      ],
+    },
   ];
   const productLinks = [
     { href: '/simple-virtual-tabletop-no-player-accounts', label: 'VTT' },
+    { href: '/dnd-5e-character-sheets', label: 'D&D 5E Sheets' },
     { href: '/radio', label: 'Far Reach Radio' },
     { href: '/wyrlds/public', label: 'Public Wyrlds' },
   ];
   const dashboardLinks = isAuthed
     ? [
         { href: '/dash', label: 'Overview' },
+        { href: '/library', label: 'Image Library' },
         { href: '/dash/tables', label: 'Tables' },
         { href: '/dash/records', label: 'Records' },
         { href: '/dash/sheets', label: 'Character Sheets' },
@@ -37,6 +66,13 @@
   <% primaryLinks.forEach((link) => { %>
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
   <% }) %>
+  <span class="mobile-nav-section">Resources</span>
+  <% resourceSections.forEach((section) => { %>
+  <span class="mobile-nav-subsection"><%= section.label %></span>
+  <% section.links.forEach((link) => { %>
+  <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
+  <% }) %>
+  <% }) %>
   <span class="mobile-nav-section">Products</span>
   <% productLinks.forEach((link) => { %>
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
@@ -60,6 +96,20 @@
     <% primaryLinks.forEach((link) => { %>
     <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
     <% }) %>
+    <div class="nav-products-menu">
+      <button class="top-nav-btn nav-products-trigger" type="button" aria-haspopup="true">
+        Resources
+        <span class="nav-products-caret" aria-hidden="true">&#9662;</span>
+      </button>
+      <div class="nav-products-dropdown nav-resources-dropdown" role="menu">
+        <% resourceSections.forEach((section) => { %>
+        <div class="nav-dropdown-section"><%= section.label %></div>
+        <% section.links.forEach((link) => { %>
+        <a class="nav-dropdown-link" href="<%= link.href %>" role="menuitem"><%= link.label %></a>
+        <% }) %>
+        <% }) %>
+      </div>
+    </div>
     <div class="nav-products-menu">
       <button class="top-nav-btn nav-products-trigger" type="button" aria-haspopup="true">
         Products

@@ -158,7 +158,7 @@ export function renderLibraryPackList(grid) {
         "a",
         {
           class: "library-pack-action-btn library-pack-action-link",
-          href: "/library-guide",
+          href: "/library-packs-guide",
           target: "_blank",
           rel: "noopener noreferrer",
         },

@@ -31,6 +31,7 @@ class Modal extends Component {
     }
 
     this.domElem.classList.add("modal-custom");
+    this.domElem.setAttribute("aria-hidden", "true");
 
     this.domContent = this.domElem.querySelector("#modal-custom-content");
     this.closeButton = this.domElem.querySelector("#close-custom-modal");
@@ -66,6 +67,7 @@ class Modal extends Component {
   show = (content) => {
     if (!this.domElem) return;
     this.domElem.classList.add("visible");
+    this.domElem.setAttribute("aria-hidden", "false");
     this.domContent.replaceChildren();
 
     if (Array.isArray(content)) {
@@ -86,6 +88,7 @@ class Modal extends Component {
   hide = () => {
     if (!this.domElem) return;
     this.domElem.classList.remove("visible");
+    this.domElem.setAttribute("aria-hidden", "true");
   };
 }
 
