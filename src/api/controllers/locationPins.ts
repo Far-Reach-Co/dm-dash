@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import {
   addLocationPinQuery,
   getLocationPinByIdQuery,
+  getLocationPinByTableViewAndCanvasObjectQuery,
   getLocationPinsByTableViewQuery,
   removeLocationPinQuery,
   updateLocationPinQuery,
@@ -58,8 +59,33 @@ async function addLocationPin(req: Request, res: Response, next: NextFunction) {
       "canManagePins",
     );
 
-    const data = await addLocationPinQuery(payload);
-    res.status(201).send(data.rows[0]);
+    const existingData = await getLocationPinByTableViewAndCanvasObjectQuery(
+      payload.table_view_id,
+      payload.canvas_object_id,
+    );
+    const existing = existingData.rows[0];
+    if (existing) {
+      res.status(200).send(existing);
+      return;
+    }
+
+    try {
+      const data = await addLocationPinQuery(payload);
+      res.status(201).send(data.rows[0]);
+    } catch (err: any) {
+      if (err?.code === "23505") {
+        const retryData = await getLocationPinByTableViewAndCanvasObjectQuery(
+          payload.table_view_id,
+          payload.canvas_object_id,
+        );
+        const retryExisting = retryData.rows[0];
+        if (retryExisting) {
+          res.status(200).send(retryExisting);
+          return;
+        }
+      }
+      throw err;
+    }
   } catch (err) {
     next(err);
   }

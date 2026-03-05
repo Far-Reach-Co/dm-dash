@@ -27,7 +27,13 @@ async function getPlayerInviteQuery(id: string) {
 
 async function getPlayerInviteByPlayerQuery(playerId: string | number) {
   const query = {
-    text: /*sql*/ `select * from public."PlayerInvite" where player_id = $1`,
+    text: /*sql*/ `
+      select *
+      from public."PlayerInvite"
+      where player_id = $1
+      order by id desc
+      limit 1
+    `,
     values: [playerId]
   }
   return await db.query<PlayerInvite>(query)

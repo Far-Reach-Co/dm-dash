@@ -26,6 +26,24 @@ async function getProjectPlayersByProjectQuery(projectId: string | number) {
   return await db.query<ProjectPlayer>(query)
 }
 
+async function getProjectPlayerByProjectAndPlayerQuery(
+  projectId: string | number,
+  playerId: string | number,
+) {
+  const query = {
+    text: /*sql*/ `
+      select *
+      from public."ProjectPlayer"
+      where project_id = $1
+        and player_id = $2
+      order by id desc
+      limit 1
+    `,
+    values: [projectId, playerId],
+  }
+  return await db.query<ProjectPlayer>(query)
+}
+
 async function getProjectPlayersByPlayerQuery(playerId: string | number) {
   const query = {
     text: /*sql*/ `select * from public."ProjectPlayer" where player_id = $1`,
@@ -59,6 +77,7 @@ async function editProjectPlayerQuery(id: string, data: any) {
 export {
   addProjectPlayerQuery,
   getProjectPlayerQuery,
+  getProjectPlayerByProjectAndPlayerQuery,
   getProjectPlayersByProjectQuery,
   getProjectPlayersByPlayerQuery,
   removeProjectPlayerQuery,

@@ -1,6 +1,7 @@
 import {
   addProjectInviteQuery,
   getProjectInviteQuery,
+  getProjectInviteByProjectQuery,
   getProjectInviteByUUIDQuery,
   removeProjectInviteQuery,
 } from "../queries/projectInvites.js";
@@ -8,6 +9,32 @@ import { v4 as uuidv4 } from "uuid";
 import { Request, Response, NextFunction } from "express";
 import { requireProjectEditorAccess } from "./accessControl";
 import { EventType, logEventAsync } from "../../lib/eventLogger";
+
+function resolveProjectInvitePartial(source: unknown) {
+  return source === "wyrld"
+    ? "partials/wyrld_invite_display"
+    : "partials/wyrld_settings/invite";
+}
+
+function sendProjectInviteResponse(
+  req: Request,
+  res: Response,
+  params: { inviteId: number; inviteUuid: string; projectId: number | string; status: number },
+) {
+  const inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${params.inviteUuid}`;
+  const payload = {
+    inviteLink,
+    inviteId: params.inviteId,
+    projectId: params.projectId,
+  };
+
+  if (req.body.source === "settings") {
+    res.status(params.status).json({ inviteLink: payload.inviteLink, inviteId: payload.inviteId });
+    return;
+  }
+
+  res.status(params.status).render(resolveProjectInvitePartial(req.body.source), payload);
+}
 
 async function addProjectInvite(
   req: Request,
@@ -20,12 +47,42 @@ async function addProjectInvite(
   try {
     if (!req.body.project_id) throw { status: 400, message: "project_id is required" };
     const editorRole = await requireProjectEditorAccess(req, req.body.project_id);
-    const data = await addProjectInviteQuery(req.body);
-    const invite = data.rows[0];
-    const inviteLink = `${req.protocol}://${req.get("host")}/invite?invite=${
-      invite.uuid
-    }`;
-    const inviteId = invite.id;
+    const existingInviteData = await getProjectInviteByProjectQuery(req.body.project_id);
+    const existingInvite = existingInviteData.rows[0];
+    if (existingInvite) {
+      sendProjectInviteResponse(req, res, {
+        inviteId: existingInvite.id,
+        inviteUuid: existingInvite.uuid,
+        projectId: existingInvite.project_id,
+        status: 200,
+      });
+      return;
+    }
+
+    let invite:
+      | Awaited<ReturnType<typeof addProjectInviteQuery>>["rows"][number]
+      | undefined;
+    try {
+      const data = await addProjectInviteQuery(req.body);
+      invite = data.rows[0];
+    } catch (err: any) {
+      if (err?.code === "23505") {
+        const retryExistingData = await getProjectInviteByProjectQuery(req.body.project_id);
+        const retryExisting = retryExistingData.rows[0];
+        if (retryExisting) {
+          sendProjectInviteResponse(req, res, {
+            inviteId: retryExisting.id,
+            inviteUuid: retryExisting.uuid,
+            projectId: retryExisting.project_id,
+            status: 200,
+          });
+          return;
+        }
+      }
+      throw err;
+    }
+    if (!invite) throw { status: 500, message: "Failed to create project invite" };
+
     logEventAsync({
       userId: editorRole.userId,
       projectId: invite.project_id,
@@ -39,21 +96,11 @@ async function addProjectInvite(
       },
       req,
     });
-
-    if (req.body.source === "settings") {
-      res.status(201).json({ inviteLink, inviteId });
-      return;
-    }
-
-    // Render different partial based on source
-    const partial = req.body.source === "wyrld"
-      ? "partials/wyrld_invite_display"
-      : "partials/wyrld_settings/invite";
-
-    res.render(partial, {
-      inviteLink,
-      inviteId,
-      projectId: req.body.project_id,
+    sendProjectInviteResponse(req, res, {
+      inviteId: invite.id,
+      inviteUuid: invite.uuid,
+      projectId: invite.project_id,
+      status: 201,
     });
   } catch (err) {
     next(err);

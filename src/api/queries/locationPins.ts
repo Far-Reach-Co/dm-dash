@@ -55,6 +55,24 @@ async function getLocationPinByIdQuery(id: number) {
   return await db.query<LocationPin>(query);
 }
 
+async function getLocationPinByTableViewAndCanvasObjectQuery(
+  tableViewId: number,
+  canvasObjectId: string,
+) {
+  const query = {
+    text: /*sql*/ `
+      SELECT *
+      FROM public."LocationPin"
+      WHERE table_view_id = $1
+        AND canvas_object_id = $2
+      ORDER BY id DESC
+      LIMIT 1
+    `,
+    values: [tableViewId, canvasObjectId],
+  };
+  return await db.query<LocationPin>(query);
+}
+
 async function addLocationPinQuery(data: {
   table_view_id: number;
   canvas_object_id: string;
@@ -108,4 +126,5 @@ export {
   removeLocationPinQuery,
   updateLocationPinQuery,
   getLocationPinByIdQuery,
+  getLocationPinByTableViewAndCanvasObjectQuery,
 };
