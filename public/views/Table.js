@@ -8,7 +8,6 @@ import socketIntegration from "../components/table/socketIntegration.js";
 import TopLayer from "../components/table/TopLayer.js";
 import ChatBoxComponent from "../components/table/ChatBox.js";
 import imageFollowingCursor from "../components/imageFollowingCursor.js";
-import throttle from "../lib/throttle.js";
 import modal from "../components/modal.js";
 import {
   canRenderSidebarForTable,
@@ -525,20 +524,6 @@ class Table extends Component {
     };
     document.addEventListener("keyup", onKeyup);
     this.documentListeners.push({ type: "keyup", handler: onKeyup });
-
-    // DOCUMENT MOUSE UP HACKS
-    // save data in db after mouse up
-    const onMouseupSave = throttle(async () => {
-      await this.canvasLayer.saveToDatabase();
-    }, 3000);
-    document.addEventListener("mouseup", onMouseupSave);
-    this.documentListeners.push({ type: "mouseup", handler: onMouseupSave });
-    // save data on touch screen up
-    const onTouchendSave = throttle(async () => {
-      await this.canvasLayer.saveToDatabase();
-    }, 3000);
-    document.addEventListener("touchend", onTouchendSave);
-    this.documentListeners.push({ type: "touchend", handler: onTouchendSave });
 
     // Allow for drag image to canvas
     const onMouseupDrop = (e) => {
