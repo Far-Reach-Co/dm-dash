@@ -32,6 +32,7 @@ import throttle from "../../lib/throttle.js";
 import detectMob from "../../lib/detectMobile.js";
 
 const TEXTBOX_MIN_WIDTH = 180;
+const SAVE_DEBOUNCE_MS = 500;
 
 export default class CanvasLayer {
   constructor(props) {
@@ -51,6 +52,10 @@ export default class CanvasLayer {
     };
     this.drawUndoStack = [];
     this.maxDrawUndoDepth = 100;
+    this.saveDebounceMs = SAVE_DEBOUNCE_MS;
+    this.pendingSaveToDatabase = false;
+    this.saveRequestInFlight = null;
+    this.saveDebounceTimer = null;
 
     this.throttleImageMoved = throttle((obj) => {
       socketIntegration.imageMoved(obj);
@@ -168,6 +173,7 @@ export default class CanvasLayer {
     this.canvasEngine.on("object:moving", this.handleObjectMoving);
     this.canvasEngine.on("object:rotating", this.handleObjectTransform);
     this.canvasEngine.on("object:scaling", this.handleObjectTransform);
+    this.canvasEngine.on("object:modified", this.handleObjectModified);
 
     // Zoom and pan
     this.canvasEngine.on("mouse:wheel", this.handleMouseWheel);
@@ -193,6 +199,7 @@ export default class CanvasLayer {
     this.canvasEngine.off("object:moving", this.handleObjectMoving);
     this.canvasEngine.off("object:rotating", this.handleObjectTransform);
     this.canvasEngine.off("object:scaling", this.handleObjectTransform);
+    this.canvasEngine.off("object:modified", this.handleObjectModified);
     this.canvasEngine.off("mouse:wheel", this.handleMouseWheel);
     this.canvasEngine.off("touch:gesture", this.handlePinchZoom);
     this.canvasEngine.off("mouse:down", this.handleMouseDown);
@@ -206,6 +213,12 @@ export default class CanvasLayer {
     this.canvasEngine.off("selection:cleared");
 
     this.canvasEngine.dispose();
+    if (this.saveDebounceTimer) {
+      clearTimeout(this.saveDebounceTimer);
+      this.saveDebounceTimer = null;
+    }
+    this.pendingSaveToDatabase = false;
+    this.saveRequestInFlight = null;
     this.canvas = null;
     this.canvasEngine = null;
     this.gridManager = null;
@@ -226,6 +239,11 @@ export default class CanvasLayer {
 
   handleObjectTransform = (options) => {
     this.throttleImageMoved(options.target);
+  };
+
+  handleObjectModified = (options) => {
+    if (!options?.target) return;
+    this.scheduleSaveToDatabase();
   };
 
   broadcastObjectMovement = (target) => {
@@ -351,7 +369,7 @@ export default class CanvasLayer {
     this.setupObjectEventListeners(path);
     this.registerDrawUndo(path.id);
     socketIntegration.imageAdded(path);
-    this.saveToDatabase();
+    this.scheduleSaveToDatabase();
   };
 
   handleSelectionChanged = (options) => {
@@ -385,7 +403,7 @@ export default class CanvasLayer {
       const syncTextChanges = throttle(() => {
         this.enforceTextboxVisuals(obj);
         socketIntegration.imageMoved(obj);
-        this.saveToDatabase();
+        this.scheduleSaveToDatabase();
       }, 350);
 
       obj.on("changed", () => {
@@ -395,7 +413,7 @@ export default class CanvasLayer {
       obj.on("editing:exited", () => {
         this.enforceTextboxVisuals(obj);
         socketIntegration.imageMoved(obj);
-        this.saveToDatabase();
+        this.scheduleSaveToDatabase();
       });
     }
   };
@@ -531,7 +549,7 @@ export default class CanvasLayer {
     text.selectAll?.();
     this.registerDrawUndo(text.id);
     socketIntegration.imageAdded(text);
-    this.saveToDatabase();
+    this.scheduleSaveToDatabase();
   };
 
   enforceTextboxVisuals = (obj) => {
@@ -667,7 +685,7 @@ export default class CanvasLayer {
     this.registerDrawUndo(shape.id);
     socketIntegration.imageAdded(shape);
     this.canvasEngine.requestRender();
-    this.saveToDatabase();
+    this.scheduleSaveToDatabase();
   };
 
   getNormalizedRectBounds = (x1, y1, x2, y2) => {
@@ -778,6 +796,7 @@ export default class CanvasLayer {
 
         // send to socket
         socketIntegration.imageAdded(clone);
+        this.scheduleSaveToDatabase();
       });
     }
   };
@@ -831,6 +850,8 @@ export default class CanvasLayer {
         if (options.broadcast !== false) {
           socketIntegration.imageAdded(newImg);
         }
+
+        this.scheduleSaveToDatabase();
 
         resolve(newImg);
       });
@@ -1013,7 +1034,62 @@ export default class CanvasLayer {
   };
 
   saveToDatabase = async () => {
-    return saveCanvasState(this.canvasEngine, this.tableView);
+    return this.scheduleSaveToDatabase({ immediate: true });
+  };
+
+  scheduleSaveToDatabase = ({ immediate = false } = {}) => {
+    this.pendingSaveToDatabase = true;
+
+    if (immediate) {
+      if (this.saveDebounceTimer) {
+        clearTimeout(this.saveDebounceTimer);
+        this.saveDebounceTimer = null;
+      }
+      return this.flushPendingCanvasSave();
+    }
+
+    if (this.saveDebounceTimer) {
+      clearTimeout(this.saveDebounceTimer);
+    }
+    this.saveDebounceTimer = setTimeout(() => {
+      this.saveDebounceTimer = null;
+      void this.flushPendingCanvasSave();
+    }, this.saveDebounceMs);
+
+    return null;
+  };
+
+  flushPendingCanvasSave = async () => {
+    if (this.saveRequestInFlight) {
+      await this.saveRequestInFlight;
+      if (this.pendingSaveToDatabase) {
+        return this.flushPendingCanvasSave();
+      }
+      return null;
+    }
+
+    if (!this.pendingSaveToDatabase || !this.canvasEngine) {
+      if (!this.canvasEngine) {
+        this.pendingSaveToDatabase = false;
+      }
+      return null;
+    }
+
+    this.pendingSaveToDatabase = false;
+    this.saveRequestInFlight = saveCanvasState(this.canvasEngine, this.tableView);
+
+    let result = null;
+    try {
+      result = await this.saveRequestInFlight;
+    } finally {
+      this.saveRequestInFlight = null;
+    }
+
+    if (this.pendingSaveToDatabase) {
+      return this.flushPendingCanvasSave();
+    }
+
+    return result;
   };
 
   restoreGridFromObject = (gridObject) => {
