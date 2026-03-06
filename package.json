@@ -39,6 +39,8 @@
     "sitemap:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/generate-sitemap.js",
     "srd:download": "tsx src/tools/download-5e-srd.ts",
     "srd:download:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/download-5e-srd.js",
+    "srd:popular-pages:update": "bash ./scripts/ops/run_with_env.sh tsx src/tools/updateSrdPopularPagesFromGsc.ts",
+    "srd:popular-pages:update:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/updateSrdPopularPagesFromGsc.js",
     "stripe:catalog:live": "npm run build:server && bash ./scripts/ops/run_with_env.sh node ./dist/tools/setupStripeLiveCatalog.js",
     "srd:hotspots": "bash ./scripts/ops/run_with_env.sh tsx src/tools/reportSrdQuestionHotspots.ts",
     "srd:hotspots:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/reportSrdQuestionHotspots.js",

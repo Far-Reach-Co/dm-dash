@@ -125,6 +125,8 @@ if [[ "$INSTALL_UNITS" == "1" ]]; then
     "dm-dash-monthly-report.timer"
     "dm-dash-srd-daily-report.service"
     "dm-dash-srd-daily-report.timer"
+    "dm-dash-srd-popular-pages.service"
+    "dm-dash-srd-popular-pages.timer"
   )
 
   installed_any_unit=0
@@ -148,14 +150,16 @@ fi
 
 if [[ "$RESTART_SERVICES" == "1" ]]; then
   echo "Restarting services..."
-  systemctl enable dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer dm-dash-srd-daily-report.timer
+  systemctl enable dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer dm-dash-srd-daily-report.timer dm-dash-srd-popular-pages.timer
   systemctl restart dm-dash.service
   systemctl restart dm-dash-backup.timer
   systemctl restart dm-dash-monthly-report.timer
   systemctl restart dm-dash-srd-daily-report.timer
+  systemctl restart dm-dash-srd-popular-pages.timer
   systemctl stop dm-dash-backup.service || true
   systemctl stop dm-dash-monthly-report.service || true
   systemctl stop dm-dash-srd-daily-report.service || true
+  systemctl stop dm-dash-srd-popular-pages.service || true
 
   echo "Service status:"
   # status returns non-zero for inactive one-shot units; print status without failing deploy
@@ -166,6 +170,8 @@ if [[ "$RESTART_SERVICES" == "1" ]]; then
   systemctl --no-pager --full status dm-dash-monthly-report.timer | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-srd-daily-report.service | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-srd-daily-report.timer | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-srd-popular-pages.service | sed -n '1,24p' || true
+  systemctl --no-pager --full status dm-dash-srd-popular-pages.timer | sed -n '1,24p' || true
 else
   echo "Skipping service restarts (DM_DASH_RESTART_SERVICES=$RESTART_SERVICES)."
 fi
