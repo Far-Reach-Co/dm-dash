@@ -1,7 +1,7 @@
 import createElement from "../../lib/salt-lib/createElement.js";
 import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
-import getDataByQuery from "../../lib/getDataByQuery.js";
+import getContextualSuggestions from "../../lib/getContextualSuggestions.js";
 import {
   getSheet,
   insertSheetItem,
@@ -402,6 +402,8 @@ class SingleSpell extends Component {
       const spellElem = new SingleSpellElement({
         domElem: elem,
         general_id: this.generalData?.id || this.general_id,
+        generalData: this.generalData,
+        spellType: this.spellSlot.title,
         id: spell.id,
         title: spell.title,
         castingTime: spell.casting_time,
@@ -577,6 +579,8 @@ class SingleSpellElement extends Component {
     });
 
     this.general_id = props.general_id;
+    this.generalData = props.generalData;
+    this.spellType = props.spellType;
     this.id = props.id;
     this.title = props.title;
     this.castingTime = props.castingTime;
@@ -729,8 +733,11 @@ class SingleSpellElement extends Component {
     if (item.desc) descriptionInput.value = item.desc.join("");
   };
 
-  showSpellSuggestions = (e) => {
+  showSpellSuggestions = async (e) => {
     const suggElem = document.getElementById(`suggestions-spells-${this.id}`);
+    if (!suggElem) return;
+
+    const query = String(e?.target?.value || "");
     suggElem.style.display = "block";
     // suggestion position relative the current component
     // Get the bounding box of the target element
@@ -742,11 +749,18 @@ class SingleSpellElement extends Component {
     if (spellSuggestions.length) {
       // clear
       suggElem.innerHTML = "";
-      // get suggestions form data
-      const searchSuggestionsList = getDataByQuery(
-        spellSuggestions,
-        e.target.value,
-      );
+      const searchSuggestionsList = await getContextualSuggestions({
+        data: spellSuggestions,
+        query,
+        domain: "spell",
+        generalId: this.general_id,
+        generalData: this.generalData,
+        metadata: { spellType: this.spellType },
+      });
+
+      // stale request guard
+      if (String(e?.target?.value || "") !== query) return;
+
       // populate list
       for (const item of searchSuggestionsList) {
         const elem = createElement(

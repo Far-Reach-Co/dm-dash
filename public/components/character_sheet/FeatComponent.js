@@ -1,4 +1,4 @@
-import getDataByQuery from "../../lib/getDataByQuery.js";
+import getContextualSuggestions from "../../lib/getContextualSuggestions.js";
 import createElement from "../../lib/salt-lib/createElement.js";
 import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
@@ -13,10 +13,23 @@ import {
 
 // load features for suggestions on input
 let featSuggestions = [];
+
+function isFilteredFeatureSuggestion(item) {
+  const name = String(item?.name || "").toLowerCase();
+  const index = String(item?.index || "").toLowerCase();
+  return (
+    name.includes("ability score improvement") ||
+    index.includes("ability-score-improvement")
+  );
+}
+
 fetch("/lib/data/2014/5e-srd-features.json")
   .then((res) => res.json())
   .then((data) => {
-    featSuggestions = [...featSuggestions, ...data];
+    const filteredFeatures = Array.isArray(data)
+      ? data.filter((item) => !isFilteredFeatureSuggestion(item))
+      : [];
+    featSuggestions = [...featSuggestions, ...filteredFeatures];
   });
 // add traits
 fetch("/lib/data/2014/5e-srd-traits.json")
@@ -284,8 +297,11 @@ class SingleFeatComponent extends Component {
     suggElem.style.display = "none";
   }
 
-  showFeatSuggestions = (e) => {
+  showFeatSuggestions = async (e) => {
     const suggElem = document.getElementById(`suggestions-feats-${this.id}`);
+    if (!suggElem) return;
+
+    const query = String(e?.target?.value || "");
     suggElem.style.display = "block";
     // suggestion position relative the current component
     // Get the bounding box of the target element
@@ -297,11 +313,17 @@ class SingleFeatComponent extends Component {
     if (featSuggestions.length) {
       // clear
       suggElem.innerHTML = "";
-      // get suggestions form data
-      const searchSuggestionsList = getDataByQuery(
-        featSuggestions,
-        e.target.value,
-      );
+      const searchSuggestionsList = await getContextualSuggestions({
+        data: featSuggestions,
+        query,
+        domain: "feat",
+        generalId: this.general_id,
+        metadata: { featType: this.type },
+      });
+
+      // stale request guard
+      if (String(e?.target?.value || "") !== query) return;
+
       // populate list
       for (const item of searchSuggestionsList) {
         const elem = createElement(
