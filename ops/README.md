@@ -65,7 +65,7 @@ Check status + logs:
 If units are stale:
 
 ```bash
-ssh "$DM_DASH_SERVER" "systemctl daemon-reload && systemctl restart dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer"
+ssh "$DM_DASH_SERVER" "systemctl daemon-reload && systemctl restart dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer dm-dash-srd-daily-report.timer dm-dash-srd-popular-pages.timer"
 ```
 
 ## Service Troubleshooting

@@ -49,6 +49,8 @@ npm run sitemap
 npm run sitemap:prod
 npm run srd:download -- 2014
 npm run srd:download:prod -- 2014
+npm run srd:popular-pages:update -- --dry-run
+npm run srd:popular-pages:update:prod
 npm run guest-sandbox:import-images -- --help
 npm run guest-sandbox:import-images:prod -- --help
 ```

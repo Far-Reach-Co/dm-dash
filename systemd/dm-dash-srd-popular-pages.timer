@@ -1,0 +1,11 @@
+[Unit]
+Description=Run dm-dash daily SRD popular pages sync
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=45m
+Persistent=true
+Unit=dm-dash-srd-popular-pages.service
+
+[Install]
+WantedBy=timers.target

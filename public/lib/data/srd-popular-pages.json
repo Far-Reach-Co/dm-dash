@@ -1,0 +1,357 @@
+{
+  "version": 1,
+  "source": "google-search-console",
+  "generatedAt": "2026-03-06T17:30:34.232Z",
+  "siteUrl": "sc-domain:farreachco.com",
+  "window": {
+    "startDate": "2026-02-02",
+    "endDate": "2026-03-03",
+    "days": 30
+  },
+  "sections": [
+    {
+      "key": "spells",
+      "title": "Spells",
+      "links": [
+        {
+          "href": "/dnd/5e/srd/spells/class/paladin",
+          "name": "Paladin Spells",
+          "clicks": 1,
+          "impressions": 161,
+          "ctr": 0.006211180124223602,
+          "position": 30.683229813664596
+        },
+        {
+          "href": "/dnd/5e/srd/spells/entangle",
+          "name": "Entangle",
+          "clicks": 1,
+          "impressions": 118,
+          "ctr": 0.00847457627118644,
+          "position": 11.5
+        },
+        {
+          "href": "/dnd/5e/srd/spells/heat-metal",
+          "name": "Heat Metal",
+          "clicks": 1,
+          "impressions": 192,
+          "ctr": 0.005208333333333333,
+          "position": 10.114583333333334
+        },
+        {
+          "href": "/dnd/5e/srd/spells/heroism",
+          "name": "Heroism",
+          "clicks": 1,
+          "impressions": 314,
+          "ctr": 0.0031847133757961785,
+          "position": 12.356687898089172
+        },
+        {
+          "href": "/dnd/5e/srd/spells/level/5",
+          "name": "Level 5 Spells",
+          "clicks": 1,
+          "impressions": 45,
+          "ctr": 0.022222222222222223,
+          "position": 18.644444444444446
+        },
+        {
+          "href": "/dnd/5e/srd/spells/mage-armor",
+          "name": "Mage Armor",
+          "clicks": 1,
+          "impressions": 84,
+          "ctr": 0.011904761904761904,
+          "position": 14.642857142857142
+        },
+        {
+          "href": "/dnd/5e/srd/spells/shatter",
+          "name": "Shatter",
+          "clicks": 1,
+          "impressions": 143,
+          "ctr": 0.006993006993006993,
+          "position": 10.181818181818182
+        },
+        {
+          "href": "/dnd/5e/srd/spells/acid-arrow",
+          "name": "Acid Arrow",
+          "clicks": 0,
+          "impressions": 2,
+          "ctr": 0,
+          "position": 5.5
+        },
+        {
+          "href": "/dnd/5e/srd/spells/acid-splash",
+          "name": "Acid Splash",
+          "clicks": 0,
+          "impressions": 453,
+          "ctr": 0,
+          "position": 9.483443708609272
+        },
+        {
+          "href": "/dnd/5e/srd/spells/alarm",
+          "name": "Alarm",
+          "clicks": 0,
+          "impressions": 11,
+          "ctr": 0,
+          "position": 4.636363636363637
+        }
+      ]
+    },
+    {
+      "key": "equipment",
+      "title": "Equipment",
+      "links": [
+        {
+          "href": "/dnd/5e/srd/magic-items/potion-of-mind-reading",
+          "name": "Potion Of Mind Reading",
+          "clicks": 3,
+          "impressions": 249,
+          "ctr": 0.012048192771084338,
+          "position": 7.658634538152611
+        },
+        {
+          "href": "/dnd/5e/srd/equipment/block-of-incense",
+          "name": "Block Of Incense",
+          "clicks": 2,
+          "impressions": 112,
+          "ctr": 0.017857142857142856,
+          "position": 7.821428571428571
+        },
+        {
+          "href": "/dnd/5e/srd/magic-items/hat-of-disguise",
+          "name": "Hat Of Disguise",
+          "clicks": 2,
+          "impressions": 400,
+          "ctr": 0.005,
+          "position": 8.530000000000001
+        },
+        {
+          "href": "/dnd/5e/srd/magic-items/manual-of-golems-clay",
+          "name": "Manual Of Golems Clay",
+          "clicks": 2,
+          "impressions": 130,
+          "ctr": 0.015384615384615385,
+          "position": 9.9
+        },
+        {
+          "href": "/dnd/5e/srd/equipment/book",
+          "name": "Book",
+          "clicks": 1,
+          "impressions": 5,
+          "ctr": 0.2,
+          "position": 4
+        },
+        {
+          "href": "/dnd/5e/srd/equipment/diplomats-pack",
+          "name": "Diplomats Pack",
+          "clicks": 1,
+          "impressions": 795,
+          "ctr": 0.0012578616352201257,
+          "position": 8.29685534591195
+        },
+        {
+          "href": "/dnd/5e/srd/equipment/explorers-pack",
+          "name": "Explorers Pack",
+          "clicks": 1,
+          "impressions": 3747,
+          "ctr": 0.0002668801708033093,
+          "position": 9.75473712303176
+        },
+        {
+          "href": "/dnd/5e/srd/equipment/mace",
+          "name": "Mace",
+          "clicks": 1,
+          "impressions": 89,
+          "ctr": 0.011235955056179775,
+          "position": 6.651685393258427
+        },
+        {
+          "href": "/dnd/5e/srd/equipment/poisoners-kit",
+          "name": "Poisoners Kit",
+          "clicks": 1,
+          "impressions": 9,
+          "ctr": 0.1111111111111111,
+          "position": 4.666666666666666
+        },
+        {
+          "href": "/dnd/5e/srd/equipment/scholars-pack",
+          "name": "Scholars Pack",
+          "clicks": 1,
+          "impressions": 492,
+          "ctr": 0.0020325203252032522,
+          "position": 9.607723577235772
+        }
+      ]
+    },
+    {
+      "key": "monsters",
+      "title": "Monsters",
+      "links": [
+        {
+          "href": "/dnd/5e/srd/monsters/panther",
+          "name": "Panther",
+          "clicks": 2,
+          "impressions": 189,
+          "ctr": 0.010582010582010581,
+          "position": 7.587301587301587
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/aboleth",
+          "name": "Aboleth",
+          "clicks": 1,
+          "impressions": 14,
+          "ctr": 0.07142857142857142,
+          "position": 8.285714285714285
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/acolyte",
+          "name": "Acolyte",
+          "clicks": 1,
+          "impressions": 176,
+          "ctr": 0.005681818181818182,
+          "position": 8.329545454545453
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/animated-armor",
+          "name": "Animated Armor",
+          "clicks": 1,
+          "impressions": 278,
+          "ctr": 0.0035971223021582736,
+          "position": 8.151079136690647
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/berserker",
+          "name": "Berserker",
+          "clicks": 1,
+          "impressions": 157,
+          "ctr": 0.006369426751592357,
+          "position": 15.10828025477707
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/centaur",
+          "name": "Centaur",
+          "clicks": 1,
+          "impressions": 36,
+          "ctr": 0.027777777777777776,
+          "position": 7.861111111111111
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/constrictor-snake",
+          "name": "Constrictor Snake",
+          "clicks": 1,
+          "impressions": 22,
+          "ctr": 0.045454545454545456,
+          "position": 7.7727272727272725
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/cr/10",
+          "name": "CR 10 Monsters",
+          "clicks": 1,
+          "impressions": 68,
+          "ctr": 0.014705882352941176,
+          "position": 10.735294117647058
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/cr/4",
+          "name": "CR 4 Monsters",
+          "clicks": 1,
+          "impressions": 82,
+          "ctr": 0.012195121951219513,
+          "position": 27.609756097560975
+        },
+        {
+          "href": "/dnd/5e/srd/monsters/cr/6",
+          "name": "CR 6 Monsters",
+          "clicks": 1,
+          "impressions": 179,
+          "ctr": 0.00558659217877095,
+          "position": 16.54189944134078
+        }
+      ]
+    },
+    {
+      "key": "rules",
+      "title": "Rules Reference",
+      "links": [
+        {
+          "href": "/dnd/5e/srd/damage-types",
+          "name": "Damage Types",
+          "clicks": 12,
+          "impressions": 4331,
+          "ctr": 0.002770722696836758,
+          "position": 9.132763795890094
+        },
+        {
+          "href": "/dnd/5e/srd/features/circle-of-the-land-coast",
+          "name": "Circle Of The Land Coast",
+          "clicks": 6,
+          "impressions": 61,
+          "ctr": 0.09836065573770492,
+          "position": 9.278688524590164
+        },
+        {
+          "href": "/dnd/5e/srd/features/destroy-undead-cr-2-or-below",
+          "name": "Destroy Undead Cr 2 Or Below",
+          "clicks": 3,
+          "impressions": 308,
+          "ctr": 0.00974025974025974,
+          "position": 6.9188311688311686
+        },
+        {
+          "href": "/dnd/5e/srd/features/channel-divinity-turn-undead",
+          "name": "Channel Divinity Turn Undead",
+          "clicks": 2,
+          "impressions": 249,
+          "ctr": 0.008032128514056224,
+          "position": 8.971887550200803
+        },
+        {
+          "href": "/dnd/5e/srd/features/hunters-prey-giant-killer",
+          "name": "Hunters Prey Giant Killer",
+          "clicks": 2,
+          "impressions": 128,
+          "ctr": 0.015625,
+          "position": 9.0703125
+        },
+        {
+          "href": "/dnd/5e/srd/features/natural-explorer-3-terrain-types",
+          "name": "Natural Explorer 3 Terrain Types",
+          "clicks": 2,
+          "impressions": 117,
+          "ctr": 0.017094017094017096,
+          "position": 7.35042735042735
+        },
+        {
+          "href": "/dnd/5e/srd/languages",
+          "name": "Languages",
+          "clicks": 2,
+          "impressions": 901,
+          "ctr": 0.0022197558268590455,
+          "position": 29.246392896781355
+        },
+        {
+          "href": "/dnd/5e/srd/features/arcane-tradition-improvement-3",
+          "name": "Arcane Tradition Improvement 3",
+          "clicks": 1,
+          "impressions": 12,
+          "ctr": 0.08333333333333333,
+          "position": 10.5
+        },
+        {
+          "href": "/dnd/5e/srd/features/circle-of-the-land-forest",
+          "name": "Circle Of The Land Forest",
+          "clicks": 1,
+          "impressions": 66,
+          "ctr": 0.015151515151515152,
+          "position": 9.227272727272727
+        },
+        {
+          "href": "/dnd/5e/srd/features/countercharm",
+          "name": "Countercharm",
+          "clicks": 1,
+          "impressions": 18,
+          "ctr": 0.05555555555555555,
+          "position": 8.722222222222221
+        }
+      ]
+    }
+  ]
+}

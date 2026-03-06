@@ -20,6 +20,7 @@ import {
   sortByName,
   toClassTablePartial,
 } from "./srdCatalog";
+import { getSrdPopularPagesData } from "./srdPopularPages";
 
 export function registerSrdContentRoutes(router: Router) {
   router.get(
@@ -29,6 +30,7 @@ export function registerSrdContentRoutes(router: Router) {
         res.render("dnd/5e/srd/contents", {
           auth: req.session.user,
           showSrdGrowthRail: false,
+          popularPages: getSrdPopularPagesData(),
         });
       } catch (err) {
         next(err);
