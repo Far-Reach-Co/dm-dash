@@ -70,11 +70,50 @@ export default class Toolbar extends Component {
     this._sidebarSlot = null;
     this._drawBarSlot = null;
     this._selectedObjectBarSlot = null;
+
+    this._selectedObjectInfoCache = new Map();
+    this._selectedObjectInfoInFlight = new Map();
+    this._selectedObjectInfoMaxAgeMs = 2 * 60 * 1000;
   }
 
   // ---------------------------------------------------------------------------
   // Helpers
   // ---------------------------------------------------------------------------
+
+  getSelectedObjectInfoCacheKey = (obj) => {
+    if (!obj?.imageId) return null;
+    const tableView = this.tableApp?.tableView;
+    if (!tableView) return `image:${obj.imageId}`;
+
+    if (tableView.is_guest_sandbox) {
+      const guestUuid = tableView.guest_sandbox_id || tableView.id || "none";
+      return `guest:${guestUuid}:image:${obj.imageId}`;
+    }
+
+    return `table:${tableView.id || "none"}:image:${obj.imageId}`;
+  };
+
+  getCachedSelectedObjectInfo = (cacheKey, { allowStale = false } = {}) => {
+    if (!cacheKey) return null;
+    const entry = this._selectedObjectInfoCache.get(cacheKey);
+    if (!entry?.info) return null;
+
+    const isFresh = Date.now() - entry.updatedAt <= this._selectedObjectInfoMaxAgeMs;
+    if (!allowStale && !isFresh) return null;
+    return { ...entry.info };
+  };
+
+  setCachedSelectedObjectInfo = (cacheKey, info) => {
+    if (!cacheKey || !info) return;
+    this._selectedObjectInfoCache.set(cacheKey, {
+      info: { ...info },
+      updatedAt: Date.now(),
+    });
+    if (this._selectedObjectInfoCache.size > 200) {
+      const oldestKey = this._selectedObjectInfoCache.keys().next().value;
+      if (oldestKey) this._selectedObjectInfoCache.delete(oldestKey);
+    }
+  };
 
   getRecordHref = (recordId) => {
     const base = `/record?id=${recordId}`;
@@ -93,44 +132,83 @@ export default class Toolbar extends Component {
     };
 
     if (!obj.imageId) return info;
-
     info.idPrefix = "img";
-    const searchParams = new URLSearchParams();
-    if (this.tableApp?.tableView?.is_guest_sandbox) {
-      const guestUuid =
-        this.tableApp?.tableView?.guest_sandbox_id || this.tableApp?.tableView?.id;
-      if (guestUuid) searchParams.set("guest_uuid", guestUuid);
-    } else if (this.tableApp?.tableView?.id) {
-      searchParams.set("table_view_id", this.tableApp.tableView.id);
+
+    const cacheKey = this.getSelectedObjectInfoCacheKey(obj);
+    const cachedInfo = this.getCachedSelectedObjectInfo(cacheKey);
+    if (cachedInfo) return cachedInfo;
+
+    const staleInfo = this.getCachedSelectedObjectInfo(cacheKey, {
+      allowStale: true,
+    });
+
+    if (cacheKey && this._selectedObjectInfoInFlight.has(cacheKey)) {
+      return await this._selectedObjectInfoInFlight.get(cacheKey);
     }
-    const queryString = searchParams.toString();
-    const imageResult = await apiGet(
-      `/api/get_image/${obj.imageId}${queryString ? `?${queryString}` : ""}`
-    );
-    const image = imageResult.ok ? imageResult.data : null;
-    if (!image) {
-      info.displayName = "Image";
-      info.imageSrc =
-        obj?._element?.currentSrc ||
-        obj?._element?.src ||
-        obj?._originalElement?.currentSrc ||
-        obj?._originalElement?.src ||
-        "";
+
+    const fetchSelectedObjectInfo = async () => {
+      const searchParams = new URLSearchParams();
+      if (this.tableApp?.tableView?.is_guest_sandbox) {
+        const guestUuid =
+          this.tableApp?.tableView?.guest_sandbox_id || this.tableApp?.tableView?.id;
+        if (guestUuid) searchParams.set("guest_uuid", guestUuid);
+      } else if (this.tableApp?.tableView?.id) {
+        searchParams.set("table_view_id", this.tableApp.tableView.id);
+      }
+      const queryString = searchParams.toString();
+      const imageResult = await apiGet(
+        `/api/get_image/${obj.imageId}${queryString ? `?${queryString}` : ""}`
+      );
+      const image = imageResult.ok ? imageResult.data : null;
+      if (!image) {
+        info.displayName = "Image";
+        info.imageSrc =
+          obj?._element?.currentSrc ||
+          obj?._element?.src ||
+          obj?._originalElement?.currentSrc ||
+          obj?._originalElement?.src ||
+          "";
+        this.setCachedSelectedObjectInfo(cacheKey, info);
+        return info;
+      }
+      info.displayName = truncateString(image.original_name, 12);
+      info.imageSrc = image.src;
+
+      const records = Array.isArray(image.records) ? image.records : [];
+      const publicRecord = records.find((r) => r.is_public);
+      const selectedRecord = publicRecord || records[0];
+      if (selectedRecord) {
+        info.recordTitle = truncateString(selectedRecord.title, 12);
+        info.recordTitleFull = selectedRecord.title;
+        info.recordHref = this.getRecordHref(selectedRecord.id);
+      }
+
+      this.setCachedSelectedObjectInfo(cacheKey, info);
       return info;
-    }
-    info.displayName = truncateString(image.original_name, 12);
-    info.imageSrc = image.src;
+    };
 
-    const records = Array.isArray(image.records) ? image.records : [];
-    const publicRecord = records.find((r) => r.is_public);
-    const selectedRecord = publicRecord || records[0];
-    if (selectedRecord) {
-      info.recordTitle = truncateString(selectedRecord.title, 12);
-      info.recordTitleFull = selectedRecord.title;
-      info.recordHref = this.getRecordHref(selectedRecord.id);
-    }
+    const requestPromise = fetchSelectedObjectInfo()
+      .catch(() => {
+        if (staleInfo) return staleInfo;
+        info.displayName = "Image";
+        info.imageSrc =
+          obj?._element?.currentSrc ||
+          obj?._element?.src ||
+          obj?._originalElement?.currentSrc ||
+          obj?._originalElement?.src ||
+          "";
+        return info;
+      })
+      .finally(() => {
+        if (cacheKey) {
+          this._selectedObjectInfoInFlight.delete(cacheKey);
+        }
+      });
 
-    return info;
+    if (cacheKey) {
+      this._selectedObjectInfoInFlight.set(cacheKey, requestPromise);
+    }
+    return await requestPromise;
   };
 
   can = (capability) => {
@@ -214,6 +292,8 @@ export default class Toolbar extends Component {
     this._sidebarSlot = null;
     this._drawBarSlot = null;
     this._selectedObjectBarSlot = null;
+    this._selectedObjectInfoCache.clear();
+    this._selectedObjectInfoInFlight.clear();
     this.clear({ deep: true });
   };
 
