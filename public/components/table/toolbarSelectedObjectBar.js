@@ -2,6 +2,7 @@ import createElement from "../../lib/salt-lib/createElement.js";
 import socketIntegration from "./socketIntegration.js";
 import truncateString from "../../lib/truncateString.js";
 import { ICONS } from "./toolbarConfig.js";
+import showRecordPreviewModal from "./recordPreviewModal.js";
 
 export function renderAuraColorPicker(toolbar, obj) {
   const setAura = (color) => {
@@ -235,7 +236,14 @@ export async function renderSelectedObjectBar(toolbar) {
     return renderSelectedLocationPinBar(toolbar, obj, pin);
   }
 
-  const { idPrefix, displayName, imageSrc, recordTitle, recordHref } =
+  const {
+    idPrefix,
+    displayName,
+    imageSrc,
+    recordTitle,
+    recordTitleFull,
+    recordHref,
+  } =
     await toolbar.getSelectedObjectInfo(obj);
 
   const thumbnailElem =
@@ -252,11 +260,26 @@ export async function renderSelectedObjectBar(toolbar) {
     ? createElement(
         "small",
         {},
-        createElement(
-          "a",
-          { href: recordHref, rel: "noopener noreferrer", target: "_blank" },
-          recordTitle,
-        ),
+        recordHref
+          ? createElement(
+              "button",
+              {
+                type: "button",
+                class: "vtt-record-link-btn",
+                title: recordTitleFull || recordTitle,
+              },
+              recordTitle,
+              {
+                type: "click",
+                event: async () => {
+                  await showRecordPreviewModal({
+                    recordHref,
+                    recordTitle: recordTitleFull || recordTitle,
+                  });
+                },
+              },
+            )
+          : recordTitle,
       )
     : createElement("small", {}, `"${displayName}"`);
 

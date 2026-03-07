@@ -233,6 +233,105 @@
   cursor: pointer;
 }
 
+.vtt-record-link-btn {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--link-blue);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.vtt-record-link-btn:hover {
+  color: var(--orange3);
+}
+
+.vtt-record-link-btn:focus-visible {
+  outline: 1px solid var(--orange3);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.vtt-record-modal {
+  width: min(900px, 92vw);
+  max-width: 92vw;
+  max-height: 84vh;
+  text-align: left;
+  position: relative;
+}
+
+.vtt-record-modal .record-page {
+  margin-top: 0;
+  max-width: none;
+  padding: 0;
+}
+
+.vtt-record-modal .record-body,
+.vtt-record-modal .record-body * {
+  user-select: text;
+}
+
+.vtt-record-modal .record-image-thumb {
+  cursor: zoom-in;
+}
+
+.vtt-record-modal-status {
+  color: var(--main-gray);
+  display: inline-block;
+  margin-top: var(--space-xs);
+}
+
+.vtt-record-lightbox {
+  display: none;
+  position: fixed;
+  z-index: 101;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-lg);
+}
+
+.vtt-record-lightbox.visible {
+  display: flex;
+}
+
+.vtt-record-lightbox-inner {
+  width: min(1000px, 90vw);
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vtt-record-lightbox-image {
+  max-width: 100%;
+  max-height: calc(90vh - 40px);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+}
+
+.vtt-record-lightbox-close {
+  position: absolute;
+  top: var(--space-md);
+  right: var(--space-md);
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  background: rgba(24, 32, 41, 0.85);
+  color: var(--main-white);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.vtt-record-lightbox-close:hover {
+  color: var(--red1);
+}
+
 /* selected-obj-info-elem — removed, now rendered inside toolbar panel */
 
 /* help-content styling is in modals.css */

@@ -88,6 +88,7 @@ export default class Toolbar extends Component {
       displayName: "",
       imageSrc: "",
       recordTitle: null,
+      recordTitleFull: null,
       recordHref: null,
     };
 
@@ -125,6 +126,7 @@ export default class Toolbar extends Component {
     const selectedRecord = publicRecord || records[0];
     if (selectedRecord) {
       info.recordTitle = truncateString(selectedRecord.title, 12);
+      info.recordTitleFull = selectedRecord.title;
       info.recordHref = this.getRecordHref(selectedRecord.id);
     }
 
