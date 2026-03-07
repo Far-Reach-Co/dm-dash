@@ -352,6 +352,7 @@ class Table extends Component {
 
     this.isReloading = true;
     try {
+      await this.canvasLayer?.prepareForTableReset?.();
       this.teardown();
       await this.loadTable(tableUUID, { historyMode });
     } finally {

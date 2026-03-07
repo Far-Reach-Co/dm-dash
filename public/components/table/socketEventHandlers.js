@@ -203,9 +203,10 @@ export function buildSocketEventHandlers(integration) {
       integration.tableApp?.reloadLocationPins?.();
     },
 
-    "table-mode-changed": () => {
+    "table-mode-changed": async () => {
       const app = integration.tableApp;
       if (!app) return;
+      await app.canvasLayer?.prepareForTableReset?.();
       const tableId = app.tableId;
       app.teardown();
       app.loadTable(tableId);

@@ -56,6 +56,8 @@ export default class CanvasLayer {
     this.pendingSaveToDatabase = false;
     this.saveRequestInFlight = null;
     this.saveDebounceTimer = null;
+    this.saveAbortController = null;
+    this.persistenceLocked = false;
 
     this.throttleImageMoved = throttle((obj) => {
       socketIntegration.imageMoved(obj);
@@ -196,6 +198,8 @@ export default class CanvasLayer {
   destroy = () => {
     if (!this.canvas) return;
 
+    this.lockPersistence({ abortInFlight: true });
+
     this.canvasEngine.off("object:moving", this.handleObjectMoving);
     this.canvasEngine.off("object:rotating", this.handleObjectTransform);
     this.canvasEngine.off("object:scaling", this.handleObjectTransform);
@@ -213,12 +217,8 @@ export default class CanvasLayer {
     this.canvasEngine.off("selection:cleared");
 
     this.canvasEngine.dispose();
-    if (this.saveDebounceTimer) {
-      clearTimeout(this.saveDebounceTimer);
-      this.saveDebounceTimer = null;
-    }
-    this.pendingSaveToDatabase = false;
     this.saveRequestInFlight = null;
+    this.saveAbortController = null;
     this.canvas = null;
     this.canvasEngine = null;
     this.gridManager = null;
@@ -1037,7 +1037,34 @@ export default class CanvasLayer {
     return this.scheduleSaveToDatabase({ immediate: true });
   };
 
+  lockPersistence = ({ abortInFlight = false } = {}) => {
+    this.persistenceLocked = true;
+    if (this.saveDebounceTimer) {
+      clearTimeout(this.saveDebounceTimer);
+      this.saveDebounceTimer = null;
+    }
+    this.pendingSaveToDatabase = false;
+    if (abortInFlight && this.saveAbortController) {
+      this.saveAbortController.abort();
+    }
+  };
+
+  unlockPersistence = () => {
+    this.persistenceLocked = false;
+  };
+
+  prepareForTableReset = async ({ waitForInFlight = false } = {}) => {
+    this.lockPersistence({ abortInFlight: !waitForInFlight });
+    if (!waitForInFlight || !this.saveRequestInFlight) return;
+    try {
+      await this.saveRequestInFlight;
+    } catch (_err) {
+      // Ignore save failures while preparing reset.
+    }
+  };
+
   scheduleSaveToDatabase = ({ immediate = false } = {}) => {
+    if (this.persistenceLocked) return null;
     this.pendingSaveToDatabase = true;
 
     if (immediate) {
@@ -1060,8 +1087,17 @@ export default class CanvasLayer {
   };
 
   flushPendingCanvasSave = async () => {
+    if (this.persistenceLocked) {
+      this.pendingSaveToDatabase = false;
+      return null;
+    }
+
     if (this.saveRequestInFlight) {
       await this.saveRequestInFlight;
+      if (this.persistenceLocked) {
+        this.pendingSaveToDatabase = false;
+        return null;
+      }
       if (this.pendingSaveToDatabase) {
         return this.flushPendingCanvasSave();
       }
@@ -1076,13 +1112,20 @@ export default class CanvasLayer {
     }
 
     this.pendingSaveToDatabase = false;
-    this.saveRequestInFlight = saveCanvasState(this.canvasEngine, this.tableView);
+    this.saveAbortController = new AbortController();
+    const savePromise = saveCanvasState(this.canvasEngine, this.tableView, {
+      signal: this.saveAbortController.signal,
+    });
+    this.saveRequestInFlight = savePromise;
 
     let result = null;
     try {
-      result = await this.saveRequestInFlight;
+      result = await savePromise;
     } finally {
-      this.saveRequestInFlight = null;
+      if (this.saveRequestInFlight === savePromise) {
+        this.saveRequestInFlight = null;
+      }
+      this.saveAbortController = null;
     }
 
     if (this.pendingSaveToDatabase) {

@@ -27,6 +27,18 @@ function getInputChecked(id) {
   return !!document.getElementById(id)?.checked;
 }
 
+async function prepareCanvasForTableReset({
+  waitForInFlight = false,
+} = {}) {
+  const canvasLayer = socketIntegration.tableApp?.canvasLayer;
+  if (!canvasLayer?.prepareForTableReset) return;
+  await canvasLayer.prepareForTableReset({ waitForInFlight });
+}
+
+function unlockCanvasPersistenceAfterResetCancel() {
+  socketIntegration.tableApp?.canvasLayer?.unlockPersistence?.();
+}
+
 async function saveTemplate(sidebar, scope) {
   const title = getInputValue(IDS.templateTitle);
   const endpoint =
@@ -54,10 +66,15 @@ async function loadTemplateIntoCurrentTable(sidebar) {
   );
   if (!confirmed) return;
 
+  await prepareCanvasForTableReset({ waitForInFlight: true });
+
   const res = await apiPost(`/api/apply_table_view_template/${templateId}`, {
     table_view_id: sidebar.tableView.id,
   });
-  if (!res.ok || !res.data) return;
+  if (!res.ok || !res.data) {
+    unlockCanvasPersistenceAfterResetCancel();
+    return;
+  }
 
   sidebar.tableView.data = res.data.data;
   sidebar.tableView.mode = res.data.mode;
@@ -145,9 +162,10 @@ async function handleDetailsSave(sidebar) {
 
   if (!modeChanged) return;
 
-  socketIntegration.tableModeChanged(newMode);
   const app = socketIntegration.tableApp;
   if (!app) return;
+  await prepareCanvasForTableReset();
+  socketIntegration.tableModeChanged(newMode);
   const tableId = app.tableId;
   app.teardown();
   app.loadTable(tableId);
