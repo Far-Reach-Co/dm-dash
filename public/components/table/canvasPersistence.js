@@ -37,7 +37,8 @@ function sanitizeCanvasDataForFabric(data) {
   return data;
 }
 
-export async function saveCanvasState(canvasEngine, tableView) {
+export async function saveCanvasState(canvasEngine, tableView, options = {}) {
+  const { signal } = options;
   const saveEndpoint = getCanvasSaveEndpoint(tableView);
   if (!saveEndpoint || !canvasEngine) return null;
 
@@ -48,6 +49,7 @@ export async function saveCanvasState(canvasEngine, tableView) {
       headers: {
         "Content-Type": "application/json",
       },
+      signal,
       body: JSON.stringify({ data: jsonCanvas }),
     });
     if (res.status === 200 || res.status === 201) {
@@ -59,6 +61,9 @@ export async function saveCanvasState(canvasEngine, tableView) {
     }
     throw new Error(`save failed with status ${res.status}`);
   } catch (err) {
+    if (err?.name === "AbortError") {
+      return null;
+    }
     console.log(err);
     return null;
   }
