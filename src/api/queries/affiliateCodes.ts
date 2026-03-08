@@ -5,8 +5,13 @@ export interface AffiliateCode {
   id: number;
   code: string;
   collaborator_name: string;
+  collaborator_email: string | null;
   notes: string | null;
   is_active: boolean;
+  stripe_connect_account_id: string | null;
+  stripe_connect_details_submitted: boolean;
+  stripe_connect_charges_enabled: boolean;
+  stripe_connect_payouts_enabled: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -48,6 +53,19 @@ async function getAffiliateCodeByIdQuery(id: string | number) {
   return await db.query<AffiliateCode>(query);
 }
 
+async function getAffiliateCodeByConnectAccountIdQuery(connectAccountId: string) {
+  const query = {
+    text: /*sql*/ `
+      select *
+      from public."AffiliateCode"
+      where stripe_connect_account_id = $1
+      limit 1
+    `,
+    values: [connectAccountId],
+  };
+  return await db.query<AffiliateCode>(query);
+}
+
 async function getActiveAffiliateCodeByCodeQuery(code: string) {
   const query = {
     text: /*sql*/ `
@@ -65,22 +83,46 @@ async function getActiveAffiliateCodeByCodeQuery(code: string) {
 async function addAffiliateCodeQuery(data: {
   code: string;
   collaborator_name: string;
+  collaborator_email?: string | null;
   notes?: string | null;
 }) {
   const query = {
     text: /*sql*/ `
-      insert into public."AffiliateCode" (code, collaborator_name, notes)
-      values ($1, $2, $3)
+      insert into public."AffiliateCode" (
+        code,
+        collaborator_name,
+        collaborator_email,
+        notes
+      )
+      values ($1, $2, $3, $4)
       returning *
     `,
-    values: [data.code, data.collaborator_name, data.notes || null],
+    values: [
+      data.code,
+      data.collaborator_name,
+      data.collaborator_email || null,
+      data.notes || null,
+    ],
   };
   return await db.query<AffiliateCode>(query);
 }
 
 async function editAffiliateCodeQuery(
   id: string | number,
-  data: Partial<Pick<AffiliateCode, "code" | "collaborator_name" | "notes" | "is_active">>,
+  data: Partial<
+    Pick<
+      AffiliateCode,
+      | "code"
+      | "collaborator_name"
+      | "collaborator_email"
+      | "notes"
+      | "is_active"
+      | "stripe_connect_account_id"
+      | "stripe_connect_details_submitted"
+      | "stripe_connect_charges_enabled"
+      | "stripe_connect_payouts_enabled"
+    >
+  >,
 ) {
   const query = buildUpdateQuery("AffiliateCode", data, id);
   return await db.query<AffiliateCode>(query);
@@ -93,4 +135,5 @@ export {
   getActiveAffiliateCodeByCodeQuery,
   addAffiliateCodeQuery,
   editAffiliateCodeQuery,
+  getAffiliateCodeByConnectAccountIdQuery,
 };

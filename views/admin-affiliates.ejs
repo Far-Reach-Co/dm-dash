@@ -8,6 +8,7 @@
   <title>Affiliate Admin | Far Reach Co.</title>
   <link rel="stylesheet" href="/style.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
+  <script src="/lib/affiliateAdminPage.js" defer></script>
   <%- include('./partials/icons') %>
 </head>
 <%- include('./partials/google') %>
@@ -27,44 +28,79 @@
   <div class="account-card affiliate-admin-card">
     <h1 class="account-title">Affiliate Admin</h1>
 
-    <div class="form-section">
+    <div class="form-section affiliate-admin-header">
       <small>Allowed admins only. Current user: <%= adminUser.email %></small>
       <small class="d-block mt-1"><a href="/account">Back to Account</a></small>
-      <% if (status === "code_created") { %>
-      <small class="success-message d-block mt-2">Affiliate code created.</small>
-      <% } %>
-      <% if (status === "code_enabled") { %>
-      <small class="success-message d-block mt-2">Affiliate code enabled.</small>
-      <% } %>
-      <% if (status === "code_disabled") { %>
-      <small class="success-message d-block mt-2">Affiliate code disabled.</small>
-      <% } %>
-      <% if (status === "commission_paid") { %>
-      <small class="success-message d-block mt-2">Commission marked as paid.</small>
-      <% } %>
+      <div class="affiliate-flash-stack">
+        <% if (status === "code_created") { %>
+        <small class="success-message d-block mt-2">Affiliate code created.</small>
+        <% } %>
+        <% if (status === "code_email_updated") { %>
+        <small class="success-message d-block mt-2">Collaborator email updated.</small>
+        <% } %>
+        <% if (status === "code_enabled") { %>
+        <small class="success-message d-block mt-2">Affiliate code enabled.</small>
+        <% } %>
+        <% if (status === "code_disabled") { %>
+        <small class="success-message d-block mt-2">Affiliate code disabled.</small>
+        <% } %>
+        <% if (status === "connect_return") { %>
+        <small class="success-message d-block mt-2">Returned from Stripe Connect onboarding. Status refreshed.</small>
+        <% } %>
+        <% if (status === "connect_link_expired") { %>
+        <small class="d-block mt-2">Stripe onboarding link expired. Generate a new one from the affiliate code row.</small>
+        <% } %>
+        <% if (status === "connect_ready") { %>
+        <small class="success-message d-block mt-2">Affiliate Stripe Connect account is payout-ready.</small>
+        <% } %>
+        <% if (status === "commission_paid") { %>
+        <small class="success-message d-block mt-2">Commission marked as paid.</small>
+        <% } %>
+        <% if (status === "payout_batch_processed") { %>
+        <small class="success-message d-block mt-2">Payout batch complete. Paid: <%= payoutSummary.paid %>, Failed: <%= payoutSummary.failed %>, Skipped: <%= payoutSummary.skipped %>.</small>
+        <% } %>
+        <% if (status === "payout_retry_paid") { %>
+        <small class="success-message d-block mt-2">Commission payout sent via Stripe Connect.</small>
+        <% } %>
+        <% if (status === "payout_retry_failed") { %>
+        <small class="d-block mt-2">Stripe payout failed. See payout error on the commission row.</small>
+        <% } %>
+        <% if (status === "payout_retry_skipped") { %>
+        <small class="d-block mt-2">Payout skipped (commission not pending or Connect not ready).</small>
+        <% } %>
+      </div>
     </div>
 
     <div class="form-section">
-      <h2>Create Affiliate Code</h2>
-      <form method="post" action="/api/admin/affiliates/codes">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <div class="input-container">
-          <h3>Code</h3>
-          <input type="text" name="code" required maxlength="32" placeholder="JANE5" />
-          <small class="d-block mt-1">Format: uppercase letters, numbers, underscore, dash (3-32 chars).</small>
+      <details class="affiliate-create-disclosure" <%= status === "code_created" ? "open" : "" %>>
+        <summary>Create Affiliate Code</summary>
+        <div class="affiliate-create-disclosure-body">
+          <form method="post" action="/api/admin/affiliates/codes">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="input-container">
+              <h3>Code</h3>
+              <input type="text" name="code" required maxlength="32" placeholder="JANE5" />
+              <small class="d-block mt-1">Format: uppercase letters, numbers, underscore, dash (3-32 chars).</small>
+            </div>
+            <div class="input-container mt-2">
+              <h3>Collaborator</h3>
+              <input type="text" name="collaborator_name" required maxlength="255" placeholder="Jane Doe" />
+            </div>
+            <div class="input-container mt-2">
+              <h3>Collaborator Email</h3>
+              <input type="email" name="collaborator_email" maxlength="255" placeholder="jane@example.com" />
+              <small class="d-block mt-1">Used to prefill Stripe Connect onboarding.</small>
+            </div>
+            <div class="input-container mt-2">
+              <h3>Notes</h3>
+              <textarea name="notes" rows="3" maxlength="2000" placeholder="Optional notes"></textarea>
+            </div>
+            <div class="form-actions mt-2">
+              <button type="submit">Create Code</button>
+            </div>
+          </form>
         </div>
-        <div class="input-container mt-2">
-          <h3>Collaborator</h3>
-          <input type="text" name="collaborator_name" required maxlength="255" placeholder="Jane Doe" />
-        </div>
-        <div class="input-container mt-2">
-          <h3>Notes</h3>
-          <textarea name="notes" rows="3" maxlength="2000" placeholder="Optional notes"></textarea>
-        </div>
-        <div class="form-actions mt-2">
-          <button type="submit">Create Code</button>
-        </div>
-      </form>
+      </details>
     </div>
 
     <div class="form-section">
@@ -72,66 +108,138 @@
       <% if (!codes.length) { %>
       <small>No affiliate codes yet.</small>
       <% } else { %>
-      <% codes.forEach(function(code) { %>
-      <% const referralPath = "/checkout?ref=" + encodeURIComponent(code.code); %>
-      <div class="status-row">
-        <h3><%= code.code %></h3>
-        <p><%= code.collaborator_name %> · <%= code.is_active ? "Active" : "Disabled" %></p>
+      <div class="affiliate-admin-list affiliate-admin-code-list">
+        <% codes.forEach(function(code) { %>
+        <% const referralPath = "/checkout?ref=" + encodeURIComponent(code.code); %>
+        <article class="affiliate-admin-item affiliate-code-item">
+          <div class="affiliate-admin-item-header">
+            <h3><%= code.code %></h3>
+            <span class="affiliate-pill <%= code.is_active ? 'affiliate-pill-active' : 'affiliate-pill-muted' %>"><%= code.is_active ? "Active" : "Disabled" %></span>
+          </div>
+          <p class="affiliate-admin-subtitle"><%= code.collaborator_name %></p>
+          <div class="affiliate-admin-item-meta">
+            <small><span>Referral link:</span> <a href="<%= referralPath %>" target="_blank" rel="noopener noreferrer"><%= publicBaseUrl %><%= referralPath %></a></small>
+            <small><span>Pending payout:</span> $<%= ((pendingByCode[code.id] || 0) / 100).toFixed(2) %></small>
+            <small><span>Collaborator email:</span> <%= code.collaborator_email || "N/A" %></small>
+            <small><span>Connect account:</span> <%= code.stripe_connect_account_id || "Not connected" %></small>
+            <small><span>Connect payout status:</span> <%= code.stripe_connect_payouts_enabled ? "Ready" : "Not ready" %></small>
+            <% if (code.notes) { %>
+            <small><span>Notes:</span> <%= code.notes %></small>
+            <% } %>
+          </div>
+          <div class="affiliate-admin-item-actions">
+            <form method="post" action="/api/admin/affiliates/codes/<%= code.id %>/email">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="email" name="collaborator_email" maxlength="255" value="<%= code.collaborator_email || '' %>" placeholder="Collaborator email" />
+              <div class="form-actions mt-1">
+                <button type="submit">Save Email</button>
+              </div>
+            </form>
+            <% if (code.stripe_connect_payouts_enabled) { %>
+            <small class="affiliate-connect-ready-message">Onboarding complete. Connect payouts are ready for this affiliate.</small>
+            <% } else { %>
+            <form method="post" action="/api/admin/affiliates/codes/<%= code.id %>/connect/start" target="_blank" data-connect-link-form>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="hidden" name="collaborator_email" value="<%= code.collaborator_email || '' %>" />
+              <div class="form-actions mt-1">
+                <button type="submit"><%= code.stripe_connect_account_id ? "Generate Onboarding Link" : "Create Connect Account + Generate Link" %></button>
+              </div>
+            </form>
+            <div class="affiliate-connect-link-panel" data-connect-link-panel hidden>
+              <small>Share this onboarding link with collaborator:</small>
+              <div class="affiliate-connect-link-row">
+                <input type="text" readonly value="" data-connect-link-input />
+                <button type="button" data-connect-link-copy>Copy</button>
+                <a href="#" target="_blank" rel="noopener noreferrer" data-connect-link-open>Open</a>
+              </div>
+              <small class="affiliate-connect-link-feedback" data-connect-link-feedback></small>
+            </div>
+            <% } %>
+            <form method="post" action="/api/admin/affiliates/codes/<%= code.id %>/toggle">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <input type="hidden" name="is_active" value="<%= code.is_active ? 'false' : 'true' %>" />
+              <button type="submit"><%= code.is_active ? "Disable Code" : "Enable Code" %></button>
+            </form>
+          </div>
+        </article>
+        <% }); %>
       </div>
-      <small class="d-block">Referral link: <a href="<%= referralPath %>" target="_blank" rel="noopener noreferrer"><%= publicBaseUrl %><%= referralPath %></a></small>
-      <small class="d-block">Pending payout: $<%= ((pendingByCode[code.id] || 0) / 100).toFixed(2) %></small>
-      <% if (code.notes) { %>
-      <small class="d-block"><%= code.notes %></small>
-      <% } %>
-      <form method="post" action="/api/admin/affiliates/codes/<%= code.id %>/toggle" class="mt-1">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <input type="hidden" name="is_active" value="<%= code.is_active ? 'false' : 'true' %>" />
-        <button type="submit"><%= code.is_active ? "Disable Code" : "Enable Code" %></button>
-      </form>
-      <hr />
-      <% }); %>
       <% } %>
     </div>
 
     <div class="form-section">
       <h2>Commissions</h2>
+      <% const pendingCommissionCount = commissions.filter((commission) => commission.status === "pending").length; %>
+      <div class="affiliate-commission-toolbar">
+        <small><%= commissions.length %> total · <%= pendingCommissionCount %> pending</small>
+        <form method="post" action="/api/admin/affiliates/payouts/process" class="mt-1">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+          <div class="form-actions mt-1">
+            <button type="submit">Process Pending Stripe Payouts</button>
+          </div>
+        </form>
+      </div>
       <% if (!commissions.length) { %>
       <small>No commission records yet.</small>
       <% } else { %>
-      <% commissions.forEach(function(commission) { %>
-      <% const scopeLabel = commission.scope === "project" ? "Pro Wyrld" : "Pro User"; %>
-      <% const commissionTypeLabel = commission.scope === "project" ? "One-time Pro Wyrld signup" : "One-time Pro User signup"; %>
-      <div class="status-row">
-        <h3><%= commission.affiliate_code %></h3>
-        <p>$<%= (commission.amount_cents / 100).toFixed(2) %> · <%= commission.status.toUpperCase() %></p>
-      </div>
-      <small class="d-block">Commission ID: <%= commission.id %></small>
-      <small class="d-block">Collaborator: <%= commission.collaborator_name %></small>
-      <small class="d-block">Type: <%= commissionTypeLabel %></small>
-      <small class="d-block">Buyer: <%= commission.buyer_username || ("User #" + commission.user_id) %></small>
-      <small class="d-block">Scope: <%= scopeLabel %><%= commission.project_title ? " (" + commission.project_title + ")" : "" %></small>
-      <small class="d-block">Created: <%= formatAdminDate(commission.created_at) %></small>
-      <small class="d-block">Updated: <%= formatAdminDate(commission.updated_at) %></small>
-      <% if (commission.paid_at) { %>
-      <small class="d-block">Paid: <%= formatAdminDate(commission.paid_at) %></small>
-      <% } %>
-      <small class="d-block">Subscription: <%= commission.stripe_subscription_id %></small>
-      <% if (commission.stripe_invoice_id) { %>
-      <small class="d-block">Invoice: <%= commission.stripe_invoice_id %></small>
-      <% } %>
-      <% if (commission.status === "pending") { %>
-      <form method="post" action="/api/admin/affiliates/commissions/<%= commission.id %>/pay" class="mt-1">
-        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-        <textarea name="payout_note" rows="2" maxlength="2000" placeholder="Payout note (optional)"></textarea>
-        <div class="form-actions mt-1">
-          <button type="submit">Mark Paid</button>
+      <div class="affiliate-commission-scroller">
+        <div class="affiliate-admin-list affiliate-admin-commission-list">
+          <% commissions.forEach(function(commission) { %>
+          <% const scopeLabel = commission.scope === "project" ? "Pro Wyrld" : "Pro User"; %>
+          <% const commissionTypeLabel = commission.scope === "project" ? "One-time Pro Wyrld signup" : "One-time Pro User signup"; %>
+          <article class="affiliate-admin-item affiliate-commission-item">
+            <div class="affiliate-admin-item-header">
+              <h3><%= commission.affiliate_code %></h3>
+              <p>$<%= (commission.amount_cents / 100).toFixed(2) %> · <%= commission.status.toUpperCase() %></p>
+            </div>
+            <div class="affiliate-admin-item-meta affiliate-admin-item-meta-tight">
+              <small><span>Commission ID:</span> <%= commission.id %></small>
+              <small><span>Collaborator:</span> <%= commission.collaborator_name %></small>
+              <small><span>Type:</span> <%= commissionTypeLabel %></small>
+              <small><span>Buyer:</span> <%= commission.buyer_username || ("User #" + commission.user_id) %></small>
+              <small><span>Scope:</span> <%= scopeLabel %><%= commission.project_title ? " (" + commission.project_title + ")" : "" %></small>
+              <small><span>Created:</span> <%= formatAdminDate(commission.created_at) %></small>
+              <small><span>Updated:</span> <%= formatAdminDate(commission.updated_at) %></small>
+              <% if (commission.paid_at) { %>
+              <small><span>Paid:</span> <%= formatAdminDate(commission.paid_at) %></small>
+              <% } %>
+              <small><span>Subscription:</span> <%= commission.stripe_subscription_id %></small>
+              <% if (commission.stripe_invoice_id) { %>
+              <small><span>Invoice:</span> <%= commission.stripe_invoice_id %></small>
+              <% } %>
+              <% if (commission.stripe_transfer_id) { %>
+              <small><span>Transfer:</span> <%= commission.stripe_transfer_id %></small>
+              <% } %>
+              <% if (commission.payout_attempted_at) { %>
+              <small><span>Payout Attempt:</span> <%= formatAdminDate(commission.payout_attempted_at) %></small>
+              <% } %>
+            </div>
+            <% if (commission.payout_error) { %>
+            <small class="affiliate-inline-alert"><span>Payout Error:</span> <%= commission.payout_error %></small>
+            <% } %>
+            <% if (commission.status === "pending") { %>
+            <div class="affiliate-admin-item-actions affiliate-admin-item-actions-tight">
+              <form method="post" action="/api/admin/affiliates/commissions/<%= commission.id %>/payout/retry">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <div class="form-actions mt-1">
+                  <button type="submit">Retry Stripe Payout</button>
+                </div>
+              </form>
+              <form method="post" action="/api/admin/affiliates/commissions/<%= commission.id %>/pay">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <textarea name="payout_note" rows="2" maxlength="2000" placeholder="Payout note (optional)"></textarea>
+                <div class="form-actions mt-1">
+                  <button type="submit">Mark Paid</button>
+                </div>
+              </form>
+            </div>
+            <% } else if (commission.payout_note) { %>
+            <small class="affiliate-inline-note"><span>Note:</span> <%= commission.payout_note %></small>
+            <% } %>
+          </article>
+          <% }); %>
         </div>
-      </form>
-      <% } else if (commission.payout_note) { %>
-      <small class="d-block">Note: <%= commission.payout_note %></small>
-      <% } %>
-      <hr />
-      <% }); %>
+      </div>
       <% } %>
     </div>
   </div>

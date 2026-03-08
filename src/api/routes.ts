@@ -34,7 +34,11 @@ import {
 import {
   createAffiliateCode,
   markAffiliateCommissionPaid,
+  processAffiliatePendingPayouts,
+  retryAffiliateCommissionPayout,
+  startAffiliateCodeConnectOnboarding,
   toggleAffiliateCodeStatus,
+  updateAffiliateCodeEmail,
 } from "./controllers/affiliateAdmin.js";
 import {
   getNotifications,
@@ -260,9 +264,29 @@ router.post(
   toggleAffiliateCodeStatus,
 );
 router.post(
+  "/admin/affiliates/codes/:id/email",
+  csrfProtection,
+  updateAffiliateCodeEmail,
+);
+router.post(
+  "/admin/affiliates/codes/:id/connect/start",
+  csrfProtection,
+  startAffiliateCodeConnectOnboarding,
+);
+router.post(
   "/admin/affiliates/commissions/:id/pay",
   csrfProtection,
   markAffiliateCommissionPaid,
+);
+router.post(
+  "/admin/affiliates/commissions/:id/payout/retry",
+  csrfProtection,
+  retryAffiliateCommissionPayout,
+);
+router.post(
+  "/admin/affiliates/payouts/process",
+  csrfProtection,
+  processAffiliatePendingPayouts,
 );
 
 const sheetApiLimiter = rateLimit({

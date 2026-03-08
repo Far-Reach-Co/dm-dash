@@ -11,11 +11,24 @@ function parseStatus(value: unknown) {
   const raw = typeof value === "string" ? value.trim() : "";
   const allowed = new Set([
     "code_created",
+    "code_email_updated",
     "code_enabled",
     "code_disabled",
+    "connect_ready",
+    "connect_return",
+    "connect_link_expired",
     "commission_paid",
+    "payout_batch_processed",
+    "payout_retry_paid",
+    "payout_retry_failed",
+    "payout_retry_skipped",
   ]);
   return allowed.has(raw) ? raw : "";
+}
+
+function parseNonNegativeInt(value: unknown) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : 0;
 }
 
 router.get(
@@ -44,6 +57,11 @@ router.get(
         csrfToken: res.locals.csrfToken,
         adminUser: user,
         status: parseStatus(req.query.status),
+        payoutSummary: {
+          paid: parseNonNegativeInt(req.query.paid),
+          failed: parseNonNegativeInt(req.query.failed),
+          skipped: parseNonNegativeInt(req.query.skipped),
+        },
         publicBaseUrl: getPublicAppUrl(),
         codes,
         commissions,

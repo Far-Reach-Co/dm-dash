@@ -25,6 +25,29 @@ interface StripePriceListResponse {
   data?: StripePrice[];
 }
 
+interface StripeTransfer {
+  id: string;
+  destination?: string;
+  metadata?: Record<string, string>;
+}
+
+interface StripeTransferListResponse {
+  data?: StripeTransfer[];
+  has_more?: boolean;
+}
+
+interface StripeConnectAccount {
+  id: string;
+  details_submitted?: boolean;
+  charges_enabled?: boolean;
+  payouts_enabled?: boolean;
+}
+
+function readStripeConnectDefaultCountry() {
+  const value = process.env.STRIPE_CONNECT_ACCOUNT_COUNTRY?.trim() || "US";
+  return value.toUpperCase();
+}
+
 function readStripeSecretKey() {
   const key = process.env.STRIPE_SECRET_KEY?.trim() || "";
   if (!key) {
@@ -106,13 +129,17 @@ async function stripeRequest(path: string, options: {
   method?: "GET" | "POST";
   searchParams?: URLSearchParams;
   body?: URLSearchParams;
+  headers?: Record<string, string>;
 }) {
   const method = options.method || "GET";
   const url = `${STRIPE_API_BASE_URL}${path}${options.searchParams ? `?${options.searchParams.toString()}` : ""}`;
 
   const response = await fetch(url, {
     method,
-    headers: buildStripeHeaders(),
+    headers: {
+      ...buildStripeHeaders(),
+      ...(options.headers || {}),
+    },
     body: options.body ? options.body.toString() : undefined,
   });
 
@@ -231,6 +258,183 @@ export async function createStripeCheckoutSession(params: {
   }
 
   return { url };
+}
+
+function readConnectAccountState(account: StripeConnectAccount) {
+  return {
+    detailsSubmitted: Boolean(account?.details_submitted),
+    chargesEnabled: Boolean(account?.charges_enabled),
+    payoutsEnabled: Boolean(account?.payouts_enabled),
+  };
+}
+
+export async function createStripeConnectExpressAccount(params?: {
+  email?: string | null;
+  metadata?: Record<string, string | number>;
+}) {
+  const body = new URLSearchParams();
+  body.set("type", "express");
+  body.set("country", readStripeConnectDefaultCountry());
+  body.set("capabilities[transfers][requested]", "true");
+
+  if (params?.email) {
+    const email = params.email.trim();
+    if (email) {
+      body.set("email", email);
+    }
+  }
+
+  const metadataEntries = Object.entries(params?.metadata || {});
+  for (const [key, value] of metadataEntries) {
+    body.set(`metadata[${key}]`, String(value));
+  }
+
+  const response = (await stripeRequest("/accounts", {
+    method: "POST",
+    body,
+  })) as StripeConnectAccount & Record<string, unknown>;
+
+  const id = typeof response.id === "string" ? response.id : "";
+  if (!id) {
+    throw { status: 502, message: "Stripe did not return a Connect account id" };
+  }
+
+  return {
+    id,
+    ...readConnectAccountState(response),
+  };
+}
+
+export async function retrieveStripeConnectAccount(accountId: string) {
+  const response = (await stripeRequest(`/accounts/${encodeURIComponent(accountId)}`, {
+    method: "GET",
+  })) as StripeConnectAccount & Record<string, unknown>;
+
+  const id = typeof response.id === "string" ? response.id : "";
+  if (!id) {
+    throw { status: 502, message: "Stripe did not return a Connect account id" };
+  }
+
+  return {
+    id,
+    ...readConnectAccountState(response),
+  };
+}
+
+export async function createStripeConnectOnboardingLink(params: {
+  accountId: string;
+  refreshPath: string;
+  returnPath: string;
+}) {
+  const baseUrl = getPublicAppUrl();
+  const body = new URLSearchParams();
+  body.set("account", params.accountId);
+  body.set("type", "account_onboarding");
+  body.set("refresh_url", `${baseUrl}${params.refreshPath}`);
+  body.set("return_url", `${baseUrl}${params.returnPath}`);
+
+  const response = await stripeRequest("/account_links", {
+    method: "POST",
+    body,
+  });
+
+  const url = typeof response.url === "string" ? response.url : "";
+  if (!url) {
+    throw { status: 502, message: "Stripe did not return a Connect onboarding URL" };
+  }
+
+  return { url };
+}
+
+export async function createStripeTransferToConnectedAccount(params: {
+  amountCents: number;
+  destinationAccountId: string;
+  currency?: string;
+  idempotencyKey: string;
+  description?: string;
+  metadata?: Record<string, string | number>;
+}) {
+  const body = new URLSearchParams();
+  body.set("amount", String(params.amountCents));
+  body.set("currency", (params.currency || "usd").toLowerCase());
+  body.set("destination", params.destinationAccountId);
+
+  if (params.description) {
+    const description = params.description.trim();
+    if (description) {
+      body.set("description", description);
+    }
+  }
+
+  const metadataEntries = Object.entries(params.metadata || {});
+  for (const [key, value] of metadataEntries) {
+    body.set(`metadata[${key}]`, String(value));
+  }
+
+  const response = await stripeRequest("/transfers", {
+    method: "POST",
+    body,
+    headers: {
+      "Idempotency-Key": params.idempotencyKey,
+    },
+  });
+
+  const id = typeof response.id === "string" ? response.id : "";
+  if (!id) {
+    throw { status: 502, message: "Stripe did not return a transfer id" };
+  }
+
+  return { id };
+}
+
+export async function findStripeTransferByAffiliateCommissionId(params: {
+  affiliateCommissionId: string | number;
+  destinationAccountId?: string | null;
+}) {
+  const targetCommissionId = String(params.affiliateCommissionId);
+  const targetDestination = params.destinationAccountId?.trim() || "";
+  let startingAfter: string | null = null;
+
+  for (let page = 0; page < 20; page++) {
+    const searchParams = new URLSearchParams();
+    searchParams.set("limit", "100");
+    if (startingAfter) {
+      searchParams.set("starting_after", startingAfter);
+    }
+
+    const response = (await stripeRequest("/transfers", {
+      method: "GET",
+      searchParams,
+    })) as StripeTransferListResponse;
+
+    const transfers = response.data || [];
+    for (const transfer of transfers) {
+      if (!transfer?.id) continue;
+      if (
+        String(transfer.metadata?.affiliate_commission_id || "") !==
+        targetCommissionId
+      ) {
+        continue;
+      }
+      if (
+        targetDestination &&
+        String(transfer.destination || "").trim() !== targetDestination
+      ) {
+        continue;
+      }
+      return { id: transfer.id };
+    }
+
+    if (!response.has_more || !transfers.length) {
+      return null;
+    }
+    startingAfter = transfers[transfers.length - 1]?.id || null;
+    if (!startingAfter) {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 export async function createStripeBillingPortalSession(params: {
