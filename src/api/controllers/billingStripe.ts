@@ -14,7 +14,9 @@ import {
 } from "../queries/affiliateCommissions";
 import {
   getAffiliateCodeByCodeQuery,
+  getAffiliateCodeByConnectAccountIdQuery,
   getAffiliateCodeByIdQuery,
+  editAffiliateCodeQuery,
 } from "../queries/affiliateCodes";
 import {
   BillingScope,
@@ -31,6 +33,10 @@ import { AFFILIATE_COMMISSION_PERCENT } from "../../lib/affiliateConfig";
 import { normalizeAffiliateCode } from "../../lib/affiliate";
 import { verifyStripeWebhookSignature } from "../../lib/stripeWebhookAuth";
 import logger from "../../lib/logger";
+import {
+  attemptAffiliateCommissionPayoutById,
+  processPendingAffiliateCommissionPayouts,
+} from "../../lib/affiliatePayouts";
 
 interface StripeWebhookEvent {
   id: string;
@@ -202,6 +208,18 @@ async function maybeCreateAffiliateCommission(params: {
         stripeInvoiceId: commission.stripe_invoice_id,
         createdAt: commission.created_at,
       });
+      try {
+        await attemptAffiliateCommissionPayoutById(commission.id);
+      } catch (payoutErr) {
+        logger.error(
+          {
+            err: payoutErr,
+            commissionId: commission.id,
+            stripeSubscriptionId: commission.stripe_subscription_id,
+          },
+          "Failed to attempt automatic affiliate payout after commission creation",
+        );
+      }
     }
   } catch (err: any) {
     if (err?.code === "23505") return;
@@ -456,6 +474,32 @@ async function maybeCreateAffiliateCommissionForSubscription(
   });
 }
 
+async function handleStripeAccountUpdated(account: any) {
+  const connectAccountId = readOptionalString(account?.id);
+  if (!connectAccountId) return;
+
+  const codeData = await getAffiliateCodeByConnectAccountIdQuery(connectAccountId);
+  const code = codeData.rows[0];
+  if (!code) return;
+
+  const detailsSubmitted = Boolean(account?.details_submitted);
+  const chargesEnabled = Boolean(account?.charges_enabled);
+  const payoutsEnabled = Boolean(account?.payouts_enabled);
+
+  await editAffiliateCodeQuery(code.id, {
+    stripe_connect_details_submitted: detailsSubmitted,
+    stripe_connect_charges_enabled: chargesEnabled,
+    stripe_connect_payouts_enabled: payoutsEnabled,
+  });
+
+  if (payoutsEnabled) {
+    await processPendingAffiliateCommissionPayouts({
+      affiliateCodeId: code.id,
+      limit: 500,
+    });
+  }
+}
+
 async function processStripeWebhookEvent(event: StripeWebhookEvent) {
   switch (event.type) {
     case "checkout.session.completed": {
@@ -474,20 +518,29 @@ async function processStripeWebhookEvent(event: StripeWebhookEvent) {
       await handleStripeInvoiceEvent(event.data?.object);
       return;
     }
+    case "account.updated": {
+      await handleStripeAccountUpdated(event.data?.object);
+      return;
+    }
     default:
       return;
   }
 }
 
-function readStripeWebhookSecret() {
-  const value = process.env.STRIPE_WEBHOOK_SECRET?.trim();
-  if (!value) {
+function readStripeWebhookSecrets() {
+  const accountWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim() || "";
+  const connectWebhookSecret =
+    process.env.STRIPE_CONNECT_WEBHOOK_SECRET?.trim() || "";
+
+  const secrets = [accountWebhookSecret, connectWebhookSecret].filter(Boolean);
+  if (!secrets.length) {
     throw {
       status: 503,
-      message: "STRIPE_WEBHOOK_SECRET is not configured",
+      message:
+        "Stripe webhook secret is not configured (STRIPE_WEBHOOK_SECRET or STRIPE_CONNECT_WEBHOOK_SECRET)",
     };
   }
-  return value;
+  return secrets;
 }
 
 function readStripeSignatureToleranceSeconds() {
@@ -498,7 +551,7 @@ function readStripeSignatureToleranceSeconds() {
 
 async function handleStripeWebhook(req: Request, res: Response, next: NextFunction) {
   try {
-    const webhookSecret = readStripeWebhookSecret();
+    const webhookSecrets = readStripeWebhookSecrets();
     const stripeSignature = req.headers["stripe-signature"];
     if (typeof stripeSignature !== "string" || !stripeSignature.trim()) {
       throw { status: 400, message: "Missing Stripe-Signature header" };
@@ -507,13 +560,17 @@ async function handleStripeWebhook(req: Request, res: Response, next: NextFuncti
     if (!req.rawBody || !req.rawBody.length) {
       throw { status: 400, message: "Missing raw webhook body" };
     }
+    const payload = req.rawBody;
 
-    const isValid = verifyStripeWebhookSignature({
-      payload: req.rawBody,
-      stripeSignatureHeader: stripeSignature,
-      webhookSecret,
-      toleranceSeconds: readStripeSignatureToleranceSeconds(),
-    });
+    const toleranceSeconds = readStripeSignatureToleranceSeconds();
+    const isValid = webhookSecrets.some((secret) =>
+      verifyStripeWebhookSignature({
+        payload,
+        stripeSignatureHeader: stripeSignature,
+        webhookSecret: secret,
+        toleranceSeconds,
+      }),
+    );
     if (!isValid) {
       throw { status: 400, message: "Invalid Stripe webhook signature" };
     }

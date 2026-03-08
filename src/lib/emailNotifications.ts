@@ -13,10 +13,24 @@ const SUPPORT_EMAIL = "farreachco@gmail.com";
 const DEFAULT_AFFILIATE_COMMISSION_ALERT_EMAIL = "farreachco@gmail.com";
 
 function getAffiliateCommissionAlertEmails(): string[] {
-  const raw =
+  const configuredRaw =
     process.env.AFFILIATE_COMMISSION_ALERT_EMAIL ||
     process.env.AFFILIATE_COMMISSION_ALERT_EMAILS ||
-    DEFAULT_AFFILIATE_COMMISSION_ALERT_EMAIL;
+    "";
+  const configuredValue = configuredRaw.trim().toLowerCase();
+  if (
+    configuredValue === "off" ||
+    configuredValue === "none" ||
+    configuredValue === "disabled" ||
+    configuredValue === "false" ||
+    configuredValue === "0"
+  ) {
+    return [];
+  }
+
+  const isDev = (process.env.SERVER_ENV || "").trim().toLowerCase() === "dev";
+  const raw =
+    configuredRaw || (isDev ? "" : DEFAULT_AFFILIATE_COMMISSION_ALERT_EMAIL);
 
   const emails = raw
     .split(",")
