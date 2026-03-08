@@ -52,7 +52,7 @@
       const err = await res.json();
       if (err.error?.message === "USER_IS_NOT_PRO") {
         renderTierLimitWarning(
-          'You have reached the table limit (10) for this account. Please subscribe to our "Pro User" package to increase the limit.'
+          'You have reached the table limit (5) for this account. Please subscribe to our "Pro User" package to increase the limit.'
         );
       }
     }

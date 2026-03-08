@@ -20,12 +20,13 @@ This is good for runtime checks and should remain the source of truth for app au
 
 - Pro User gates:
   - More than 2 owned Wyrlds
-  - More than 10 personal tables
+  - More than 5 personal tables
   - Account image storage cap increase (now hard-capped)
   - Radio Pro playlists (in `music_stream_server`)
 - Pro Wyrld gates:
-  - More than 10 tables in that Wyrld
+  - More than 5 tables in that Wyrld
   - More than 5 Wyrld character links
+  - VTT table templates in that Wyrld
   - Wyrld banner
   - Wyrld image storage cap increase (now hard-capped)
 

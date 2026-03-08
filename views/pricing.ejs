@@ -37,6 +37,7 @@
           <li>Create up to <strong><%= planLimits.user.freeTables %></strong> personal tables</li>
           <li>Account image storage: <strong><%= planLimits.user.freeDataLimit %></strong> hard cap</li>
           <li>Wyrld image storage: <strong><%= planLimits.wyrld.freeDataLimit %></strong> hard cap</li>
+          <li>Table templates: unavailable</li>
           <li>Library Packs: unavailable</li>
           <li>FRC Radio: standard playlist library</li>
         </ul>
@@ -54,6 +55,7 @@
         <ul>
           <li>Own more than <strong><%= planLimits.user.freeWyrlds %></strong> Wyrlds</li>
           <li>Create more than <strong><%= planLimits.user.freeTables %></strong> personal tables</li>
+          <li>Table templates in personal tables</li>
           <li>Higher account image storage cap: <strong><%= planLimits.user.proDataLimit %></strong> hard cap</li>
           <li>Library Packs in your personal library (discover/install/use)</li>
           <li>FRC Radio: full playlist catalog (including Pro playlists)</li>
@@ -73,6 +75,7 @@
           <li>Multiple Wyrlds can be subscribed independently</li>
           <li>More than <strong><%= planLimits.wyrld.freeTables %></strong> tables in that Wyrld</li>
           <li>More than <strong><%= planLimits.wyrld.freeCharacterLinks %></strong> linked character sheets</li>
+          <li>Table templates in that Wyrld's tables</li>
           <li>Library Packs in each Pro Wyrld library (discover/install/use)</li>
           <li>Wyrld banner support</li>
           <li>Pro tag in Public Wyrld directory listings</li>
@@ -127,7 +130,19 @@
           <td class="center">No</td>
         </tr>
         <tr>
+          <td>Table templates (personal tables)</td>
+          <td class="center">No</td>
+          <td class="center">Yes</td>
+          <td class="center">No</td>
+        </tr>
+        <tr>
           <td>Library Packs (Wyrld tables)</td>
+          <td class="center">No</td>
+          <td class="center">No</td>
+          <td class="center">Yes</td>
+        </tr>
+        <tr>
+          <td>Table templates (Wyrld tables)</td>
           <td class="center">No</td>
           <td class="center">No</td>
           <td class="center">Yes</td>

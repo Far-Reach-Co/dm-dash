@@ -17,6 +17,7 @@ export interface TableCapabilities {
   mode: TableMode;
   canPlaceImagesFromSidebar: boolean;
   canUseLibraryPacks: boolean;
+  canUseTableTemplates: boolean;
   canDiscoverLibraryPacks: boolean;
   canManageLibraryPackInstalls: boolean;
   canEditTableData: boolean;
@@ -69,6 +70,7 @@ export function buildTableCapabilities(
         mode,
         canPlaceImagesFromSidebar: false,
         canUseLibraryPacks: false,
+        canUseTableTemplates: false,
         canDiscoverLibraryPacks: false,
         canManageLibraryPackInstalls: false,
         canEditTableData: false,
@@ -88,6 +90,7 @@ export function buildTableCapabilities(
           mode,
           canPlaceImagesFromSidebar: true,
           canUseLibraryPacks: true,
+          canUseTableTemplates: true,
           canDiscoverLibraryPacks: false,
           canManageLibraryPackInstalls: false,
           canEditTableData: true,
@@ -106,6 +109,7 @@ export function buildTableCapabilities(
           mode,
           canPlaceImagesFromSidebar: true,
           canUseLibraryPacks: true,
+          canUseTableTemplates: true,
           canDiscoverLibraryPacks: true,
           canManageLibraryPackInstalls: true,
           canEditTableData: true,
@@ -144,6 +148,8 @@ export async function resolveTableAuth(
       const userIsPro = !!userData.rows[0]?.is_pro;
       const canUseLibraryPacks = capabilities.canUseLibraryPacks && userIsPro;
       capabilities.canUseLibraryPacks = canUseLibraryPacks;
+      capabilities.canUseTableTemplates =
+        capabilities.canManageTableSettings && userIsPro;
       capabilities.canDiscoverLibraryPacks = canUseLibraryPacks && mode !== "sandbox";
       capabilities.canManageLibraryPackInstalls = canUseLibraryPacks && mode !== "sandbox";
       return {
@@ -170,10 +176,13 @@ export async function resolveTableAuth(
     }
     const canUseLibraryPacks = capabilities.canUseLibraryPacks && userIsPro;
     capabilities.canUseLibraryPacks = canUseLibraryPacks;
+    capabilities.canUseTableTemplates =
+      capabilities.canManageTableSettings && userIsPro;
     capabilities.canDiscoverLibraryPacks = canUseLibraryPacks && mode !== "sandbox";
     capabilities.canManageLibraryPackInstalls = canUseLibraryPacks && mode !== "sandbox";
     if (mode === "sandbox" && !isOwner) {
       capabilities.canManageTableSettings = false;
+      capabilities.canUseTableTemplates = false;
     }
     if (!isOwner) {
       capabilities.canEditTableData = true;
@@ -201,10 +210,13 @@ export async function resolveTableAuth(
   const capabilities = buildTableCapabilities(mode, canEdit);
   const canUseLibraryPacks = capabilities.canUseLibraryPacks && !!access.project.is_pro;
   capabilities.canUseLibraryPacks = canUseLibraryPacks;
+  capabilities.canUseTableTemplates =
+    capabilities.canManageTableSettings && !!access.project.is_pro;
   capabilities.canDiscoverLibraryPacks = canUseLibraryPacks && mode !== "sandbox";
   capabilities.canManageLibraryPackInstalls = canUseLibraryPacks && mode !== "sandbox";
   if (mode === "sandbox" && !access.isEditor) {
     capabilities.canManageTableSettings = false;
+    capabilities.canUseTableTemplates = false;
   }
   if (!canEdit) {
     capabilities.canEditTableData = true;
@@ -254,6 +266,7 @@ export function hasAnyTableEditCapability(capabilities: TableCapabilities) {
   return (
     hasTableCapability(capabilities, "canEditTableData") ||
     hasTableCapability(capabilities, "canUseLibraryPacks") ||
+    hasTableCapability(capabilities, "canUseTableTemplates") ||
     hasTableCapability(capabilities, "canDiscoverLibraryPacks") ||
     hasTableCapability(capabilities, "canManageLibraryPackInstalls") ||
     hasTableCapability(capabilities, "canManagePins") ||
@@ -285,6 +298,7 @@ export function assertTableCapabilities(
 export function buildGuestSandboxCapabilities(): TableCapabilities {
   return buildTableCapabilities("sandbox", true, {
     canUseLibraryPacks: false,
+    canUseTableTemplates: false,
     canDiscoverLibraryPacks: false,
     canManageLibraryPackInstalls: false,
     canDeleteCanvasObjects: true,

@@ -3,8 +3,8 @@ import { megabytesInBytes } from "./enums";
 const subscriptionPlanLimits = {
   // Free-tier limits
   freeOwnedWyrlds: 2,
-  freeUserTables: 10,
-  freeWyrldTables: 10,
+  freeUserTables: 5,
+  freeWyrldTables: 5,
   freeWyrldCharacterLinks: 5,
   freeUserDataBytes: megabytesInBytes.fifty,
   freeWyrldDataBytes: megabytesInBytes.fifty,

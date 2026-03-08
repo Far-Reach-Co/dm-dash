@@ -1,5 +1,5 @@
 import createElement from "../../lib/salt-lib/createElement.js";
-import { apiGet, apiPost } from "../../lib/apiUtils.js";
+import { apiDelete, apiGet, apiPost } from "../../lib/apiUtils.js";
 import tableSelect from "./tableSelect.js";
 import socketIntegration from "./socketIntegration.js";
 
@@ -17,6 +17,34 @@ function sectionTitle(title, description) {
     createElement("h2", {}, title),
     createElement("small", { class: "table-settings-section-subtitle" }, description),
   ]);
+}
+
+function getTemplateProMessage(code) {
+  if (code === "PROJECT_IS_NOT_PRO") {
+    return 'Table templates require "Pro Wyrld" for this Wyrld.';
+  }
+  if (code === "USER_IS_NOT_PRO") {
+    return 'Table templates require "Pro User" for your account.';
+  }
+  return "";
+}
+
+function showTemplateRequestError(result, fallbackMessage) {
+  const proMessage = getTemplateProMessage(result?.code);
+  if (proMessage) {
+    window.customAlertError(proMessage);
+    return;
+  }
+  window.customAlertError(result?.error || fallbackMessage);
+}
+
+function getTemplateScope(sidebar) {
+  return sidebar.projectId ? "project" : "user";
+}
+
+function readTemplateCapability(sidebar) {
+  const value = sidebar?.capabilities?.canUseTableTemplates;
+  return typeof value === "boolean" ? value : null;
 }
 
 function getInputValue(id) {
@@ -46,7 +74,10 @@ async function saveTemplate(sidebar, scope) {
       ? `/api/add_table_view_template_by_project/${sidebar.projectId}/${sidebar.tableView.id}`
       : `/api/add_table_view_template_by_user/${sidebar.tableView.id}`;
   const res = await apiPost(endpoint, { title });
-  if (!res.ok) return;
+  if (!res.ok) {
+    showTemplateRequestError(res, "Failed to save template.");
+    return;
+  }
   window.customAlert(
     scope === "project" ? "Saved wyrld template." : "Saved user template.",
   );
@@ -73,6 +104,9 @@ async function loadTemplateIntoCurrentTable(sidebar) {
   });
   if (!res.ok || !res.data) {
     unlockCanvasPersistenceAfterResetCancel();
+    if (!res.ok) {
+      showTemplateRequestError(res, "Failed to load template.");
+    }
     return;
   }
 
@@ -104,16 +138,9 @@ async function deleteSelectedTemplate() {
   );
   if (!confirmed) return;
 
-  try {
-    const res = await fetch(`/api/remove_table_view_template/${templateId}`, {
-      method: "DELETE",
-    });
-    if (res.status !== 204) {
-      throw new Error(`remove template failed with status ${res.status}`);
-    }
-  } catch (err) {
-    console.log(err);
-    window.customAlertError("Failed to delete template.");
+  const res = await apiDelete(`/api/remove_table_view_template/${templateId}`);
+  if (!res.ok) {
+    showTemplateRequestError(res, "Failed to delete template.");
     return;
   }
 
@@ -221,6 +248,11 @@ async function renderChangeTableSection(sidebar) {
 }
 
 function renderTemplatesSection(sidebar, templates) {
+  const templateScope = getTemplateScope(sidebar);
+  const saveButtonLabel =
+    templateScope === "project" ? "Save as Wyrld Template" : "Save as User Template";
+  const templateLabel = templateScope === "project" ? "Wyrld Template" : "User Template";
+
   return createElement("section", { class: "table-settings-section" }, [
     sectionTitle(
       "Templates",
@@ -243,32 +275,16 @@ function renderTemplatesSection(sidebar, templates) {
         }),
       ]),
       createElement("div", { class: "table-settings-actions" }, [
-        createElement("button", { class: "new-btn" }, "Save as User Template", {
+        createElement("button", { class: "new-btn" }, saveButtonLabel, {
           type: "click",
           event: async (e) => {
             e.preventDefault();
-            await saveTemplate(sidebar, "user");
+            await saveTemplate(sidebar, templateScope);
           },
         }),
-        ...(sidebar.projectId
-          ? [
-              createElement(
-                "button",
-                { class: "new-btn" },
-                "Save as Wyrld Template",
-                {
-                  type: "click",
-                  event: async (e) => {
-                    e.preventDefault();
-                    await saveTemplate(sidebar, "project");
-                  },
-                },
-              ),
-            ]
-          : []),
       ]),
       createElement("div", { class: "table-settings-inline-group" }, [
-        createElement("small", { class: "table-settings-label" }, "Load Template"),
+        createElement("small", { class: "table-settings-label" }, `Load ${templateLabel}`),
         createElement(
           "select",
           {
@@ -282,7 +298,7 @@ function renderTemplatesSection(sidebar, templates) {
               createElement(
                 "option",
                 { value: template.id },
-                `${template.scope === "project" ? "Wyrld" : "User"}: ${template.title}`,
+                template.title,
               ),
             ),
           ],
@@ -302,6 +318,28 @@ function renderTemplatesSection(sidebar, templates) {
           },
         }),
       ]),
+    ]),
+  ]);
+}
+
+function renderTemplatesLockedSection(sidebar) {
+  const isWyrldScope = !!sidebar.projectId;
+  const planLabel = isWyrldScope ? "Pro Wyrld" : "Pro User";
+  const checkoutHref = isWyrldScope
+    ? `/checkout?from=vtt&plan=project&project_id=${encodeURIComponent(String(sidebar.projectId))}`
+    : "/checkout?from=vtt&plan=user";
+
+  return createElement("section", { class: "table-settings-section" }, [
+    sectionTitle(
+      "Templates (Pro)",
+      "Save/load table templates requires a Pro plan for this scope.",
+    ),
+    createElement("small", { class: "table-settings-label" }, [
+      `Templates are locked on Free. Upgrade to ${planLabel} to save, load, and delete templates.`,
+      " ",
+      createElement("a", { href: checkoutHref }, "Upgrade"),
+      " · ",
+      createElement("a", { href: "/pricing" }, "Pricing"),
     ]),
   ]);
 }
@@ -369,28 +407,46 @@ function renderDetailsSection(sidebar) {
 }
 
 async function loadTemplates(sidebar) {
-  const userTemplatesResult = await apiGet("/api/get_table_view_templates_by_user");
-  const userTemplates =
-    userTemplatesResult.ok && Array.isArray(userTemplatesResult.data)
-      ? userTemplatesResult.data
-      : [];
-  const projectTemplatesResult = sidebar.projectId
-    ? await apiGet(`/api/get_table_view_templates_by_project/${sidebar.projectId}`)
-    : null;
-  const projectTemplates =
-    projectTemplatesResult?.ok && Array.isArray(projectTemplatesResult.data)
-      ? projectTemplatesResult.data
-      : [];
-  return [...projectTemplates, ...userTemplates];
+  const templateScope = getTemplateScope(sidebar);
+  const endpoint =
+    templateScope === "project"
+      ? `/api/get_table_view_templates_by_project/${sidebar.projectId}`
+      : "/api/get_table_view_templates_by_user";
+  const templatesResult = await apiGet(endpoint);
+  if (!templatesResult.ok) {
+    if (
+      templatesResult.code === "USER_IS_NOT_PRO" ||
+      templatesResult.code === "PROJECT_IS_NOT_PRO"
+    ) {
+      return { templates: [], proLocked: true };
+    }
+    showTemplateRequestError(templatesResult, "Failed to load templates.");
+    return { templates: [], proLocked: false };
+  }
+  if (!Array.isArray(templatesResult.data)) {
+    return { templates: [], proLocked: false };
+  }
+  return { templates: templatesResult.data, proLocked: false };
 }
 
 export async function renderTableSettingsModal(sidebar) {
-  const templates = await loadTemplates(sidebar);
+  const templateCapability = readTemplateCapability(sidebar);
+  let templates = [];
+  let proLocked = templateCapability === false;
+
+  if (!proLocked) {
+    const loaded = await loadTemplates(sidebar);
+    templates = loaded.templates;
+    proLocked = loaded.proLocked;
+  }
+
   const changeSection = await renderChangeTableSection(sidebar);
   const sections = [
     createElement("h1", { class: "table-settings-title" }, "Table Settings"),
     ...(changeSection ? [changeSection] : []),
-    renderTemplatesSection(sidebar, templates),
+    proLocked
+      ? renderTemplatesLockedSection(sidebar)
+      : renderTemplatesSection(sidebar, templates),
     renderDetailsSection(sidebar),
   ];
   return createElement("div", { class: "help-content table-settings-modal" }, sections);
