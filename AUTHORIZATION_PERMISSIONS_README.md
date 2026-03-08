@@ -94,7 +94,18 @@ Source: `src/lib/tableAuthz.ts`, `src/api/controllers/tableViews.ts`
 
 - Sandbox collaborators can work on canvas and drag images from sidebar.
 - Regular sandbox collaborators do not get table settings menu access.
+- Because templates are gated by settings access, regular sandbox collaborators also cannot save/load/delete templates.
 - Image/folder management capabilities remain disabled for sandbox collaborators unless they are table owners/editors in non-sandbox/full-edit contexts.
+
+### Pro-gated table features
+
+- `canUseLibraryPacks`:
+  - Personal tables require `Pro User`.
+  - Wyrld tables require `Pro Wyrld` on that Wyrld.
+- `canUseTableTemplates`:
+  - Personal tables require `Pro User`.
+  - Wyrld tables require `Pro Wyrld` on that Wyrld.
+- Both capabilities are computed server-side in `resolveTableAuth` and returned on each table payload as part of `table.capabilities`.
 
 ## Member Management Permissions
 

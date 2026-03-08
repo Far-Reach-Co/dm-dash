@@ -22,8 +22,8 @@ Source of effective plan limits: `src/lib/subscription.ts`
 - Free Wyrld data cap: `50 MB`
 - Pro Wyrld hard data cap: `500 MB`
 - Free owned Wyrlds: `2`
-- Free personal tables: `10`
-- Free Wyrld tables: `10`
+- Free personal tables: `5`
+- Free Wyrld tables: `5`
 - Free Wyrld character links: `5`
 
 ## Image Upload Usage Limits (Enforced)
@@ -57,12 +57,12 @@ Source: `src/api/controllers/projects.ts`
 
 Source: `src/api/controllers/tableViews.ts`
 
-- Project tables cap: 10 tables per Wyrld for non‑Pro projects.
+- Project tables cap: 5 tables per Wyrld for non‑Pro projects.
   - Function: `addTableViewByProject`
-  - Logic: If table count `>= 10` and `projects.is_pro` is false, reject with HTTP `402` and message `PROJECT_IS_NOT_PRO`.
-- User tables cap: 10 tables per user for non‑Pro users.
+  - Logic: If table count `>= 5` and `projects.is_pro` is false, reject with HTTP `402` and message `PROJECT_IS_NOT_PRO`.
+- User tables cap: 5 tables per user for non‑Pro users.
   - Function: `addTableViewByUser`
-  - Logic: If table count `>= 10` and `users.is_pro` is false, reject with HTTP `402` and message `USER_IS_NOT_PRO`.
+  - Logic: If table count `>= 5` and `users.is_pro` is false, reject with HTTP `402` and message `USER_IS_NOT_PRO`.
 
 ## Wyrld Connections for Character Sheets (Enforced From Wyrld Side)
 
@@ -155,6 +155,25 @@ Sources:
   - Wyrld install: `installLibraryPackByProject` requires Wyrld Pro for Pro-only/public_pro packs.
 - Table capability exposure is Pro-gated.
   - `resolveTableAuth` enables library pack capabilities only when user scope (personal table) or project scope (Wyrld table) is Pro.
+
+## Table Templates (Feature Gating Enforced)
+
+Sources:
+
+- `src/api/controllers/tableViewTemplates.ts`
+- `src/lib/tableAuthz.ts`
+
+- Template actions are Pro-gated by scope.
+  - User scope: requires `users.is_pro = true`, else HTTP `402` + `USER_IS_NOT_PRO`.
+  - Wyrld scope: requires `projects.is_pro = true`, else HTTP `402` + `PROJECT_IS_NOT_PRO`.
+- Enforced actions:
+  - list templates (`getTableViewTemplatesByUser`, `getTableViewTemplatesByProject`)
+  - create template (`addTableViewTemplateByUser`, `addTableViewTemplateByProject`)
+  - apply template (`applyTableViewTemplate`)
+  - delete template (`removeTableViewTemplate`)
+- Table capability exposure is Pro-gated.
+  - `resolveTableAuth` sets `canUseTableTemplates` only when the current table scope is Pro and table settings access is allowed.
+  - In sandbox mode, non-owner/non-editor collaborators lose table settings access and therefore do not receive template capability.
 
 ## User-Facing Pro Docs
 

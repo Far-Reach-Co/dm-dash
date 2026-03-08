@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { requireProjectEditor, requireUser } from "../../lib/authz";
+import { userSubscriptionStatus } from "../../lib/enums";
 import { normalizeTableMode } from "../../lib/tableAuthz";
 import type { TableMode } from "../../lib/tableAuthz";
+import { getProjectQuery } from "../queries/projects.js";
 import { editTableViewQuery } from "../queries/tableViews.js";
 import {
   addTableViewTemplateByProjectQuery,
@@ -12,6 +14,7 @@ import {
   removeTableViewTemplateQuery,
   TableViewTemplate,
 } from "../queries/tableViewTemplates.js";
+import { getUserByIdQuery } from "../queries/users.js";
 import {
   badRequestError,
   notFoundError,
@@ -59,6 +62,32 @@ async function assertTemplateManageAccess(req: Request, template: TableViewTempl
   throw badRequestError("Invalid template scope");
 }
 
+async function assertUserTemplateProAccess(userId: string | number) {
+  const userData = await getUserByIdQuery(userId);
+  if (!userData.rows[0]?.is_pro) {
+    throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+  }
+}
+
+async function assertProjectTemplateProAccess(projectId: string | number) {
+  const projectData = await getProjectQuery(projectId);
+  if (!projectData.rows[0]?.is_pro) {
+    throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+  }
+}
+
+async function assertTemplateScopeProAccess(template: TableViewTemplate) {
+  if (template.project_id) {
+    await assertProjectTemplateProAccess(template.project_id);
+    return;
+  }
+  if (template.user_id) {
+    await assertUserTemplateProAccess(template.user_id);
+    return;
+  }
+  throw badRequestError("Invalid template scope");
+}
+
 async function addTableViewTemplateByUser(
   req: Request,
   res: Response,
@@ -74,6 +103,7 @@ async function addTableViewTemplateByUser(
     if (!table.user_id || String(table.user_id) !== String(userId)) {
       throw badRequestError("Only the table owner can save user templates");
     }
+    await assertUserTemplateProAccess(userId);
 
     const title = getTemplateTitle(req.body?.title, table.title || "Table");
     const mode: TableMode = normalizeTableMode(table.mode);
@@ -108,6 +138,7 @@ async function addTableViewTemplateByProject(
     if (!table.project_id || String(table.project_id) !== String(projectId)) {
       throw badRequestError("Table does not belong to this project");
     }
+    await assertProjectTemplateProAccess(projectId);
 
     const title = getTemplateTitle(req.body?.title, table.title || "Table");
     const mode: TableMode = normalizeTableMode(table.mode);
@@ -133,6 +164,7 @@ async function getTableViewTemplatesByUser(
 ) {
   try {
     const userId = requireUser(req);
+    await assertUserTemplateProAccess(userId);
     const data = await getTableViewTemplatesByUserQuery(userId);
     res.status(200).send(data.rows.map(mapTemplateResponse));
   } catch (err) {
@@ -146,8 +178,10 @@ async function getTableViewTemplatesByProject(
   next: NextFunction,
 ) {
   try {
-    await requireProjectEditor(req, req.params.project_id);
-    const data = await getTableViewTemplatesByProjectQuery(req.params.project_id);
+    const projectId = req.params.project_id;
+    await requireProjectEditor(req, projectId);
+    await assertProjectTemplateProAccess(projectId);
+    const data = await getTableViewTemplatesByProjectQuery(projectId);
     res.status(200).send(data.rows.map(mapTemplateResponse));
   } catch (err) {
     next(err);
@@ -168,6 +202,7 @@ async function applyTableViewTemplate(
 
     const template = await getTemplateByIdOrThrow(templateId);
     await assertTemplateManageAccess(req, template);
+    await assertTemplateScopeProAccess(template);
 
     const { table, auth } = await requireTablePermissionById(req, tableViewId, "view");
     if (!auth.capabilities.canManageTableSettings) {
@@ -198,6 +233,7 @@ async function removeTableViewTemplate(
   try {
     const template = await getTemplateByIdOrThrow(req.params.id);
     await assertTemplateManageAccess(req, template);
+    await assertTemplateScopeProAccess(template);
     await removeTableViewTemplateQuery(template.id);
     res.status(204).send();
   } catch (err) {

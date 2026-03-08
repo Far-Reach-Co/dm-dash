@@ -258,6 +258,15 @@ async function editTableView(req: Request, res: Response, next: NextFunction) {
     const data = await editTableViewQuery(req.params.id, payload);
     const updatedMode = normalizeTableMode(data.rows[0].mode);
     const updatedCapabilities = buildTableCapabilities(updatedMode, auth.canEdit);
+    const canUseLibraryPacks = !!auth.capabilities.canUseLibraryPacks;
+    const canUseTableTemplates = !!auth.capabilities.canUseTableTemplates;
+    updatedCapabilities.canUseLibraryPacks = canUseLibraryPacks;
+    updatedCapabilities.canUseTableTemplates =
+      canUseTableTemplates && updatedCapabilities.canManageTableSettings;
+    updatedCapabilities.canDiscoverLibraryPacks =
+      canUseLibraryPacks && updatedMode !== "sandbox";
+    updatedCapabilities.canManageLibraryPackInstalls =
+      canUseLibraryPacks && updatedMode !== "sandbox";
     res.status(200).send(
       withTableCapabilities(data.rows[0], updatedCapabilities),
     );
