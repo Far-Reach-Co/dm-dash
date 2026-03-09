@@ -1,5 +1,6 @@
 import { srdData } from "./data.js";
 import { SERIALIZERS, serializeGeneric } from "./serializers.js";
+import { normalizeSearchContextHint, type SearchContextHint } from "./context.js";
 
 // ── Entry text extraction ─────────────────────────────────────────────────────
 
@@ -198,6 +199,172 @@ function getEntryKey(category: string, entry: any): string {
   return `${category}:${fallbackName}`;
 }
 
+function resolveContextHint(context?: SearchContextHint): {
+  category: string | null;
+  entryKey: string | null;
+  index: string | null;
+} {
+  const normalizedContext = normalizeSearchContextHint(context);
+  if (!normalizedContext) return { category: null, entryKey: null, index: null };
+
+  const category = normalizedContext.category;
+  const rawIndex = String(normalizedContext.index || "");
+  const normalizedIndex = normalizeForMatch(rawIndex);
+  const entryKey = category && normalizedIndex ? `${category}:${normalizedIndex}` : null;
+
+  return { category, entryKey, index: normalizedIndex || null };
+}
+
+type QueryIntent = {
+  wantsFeatures: boolean;
+  wantsSpells: boolean;
+  wantsMonsterDetails: boolean;
+  asksSpellUsers: boolean;
+};
+
+const GENERIC_SCOPE_TOKENS = new Set<string>([
+  "who",
+  "what",
+  "which",
+  "where",
+  "when",
+  "why",
+  "how",
+  "can",
+  "could",
+  "should",
+  "would",
+  "this",
+  "that",
+  "these",
+  "those",
+  "use",
+  "using",
+  "get",
+  "gets",
+  "learn",
+  "learns",
+  "any",
+  "all",
+  "list",
+  "show",
+  "core",
+  "class",
+  "classes",
+  "feature",
+  "features",
+  "spell",
+  "spells",
+  "cantrip",
+  "cantrips",
+  "monster",
+  "monsters",
+  "creature",
+  "creatures",
+  "action",
+  "actions",
+  "attack",
+  "attacks",
+  "ability",
+  "abilities",
+  "stat",
+  "stats",
+  "ac",
+  "hp",
+  "speed",
+  "resistance",
+  "resistances",
+  "immunity",
+  "immunities",
+  "legendary",
+  "senses",
+  "equipment",
+  "item",
+  "items",
+  "race",
+  "races",
+  "background",
+  "backgrounds",
+  "feat",
+  "feats",
+  "condition",
+  "conditions",
+  "skill",
+  "skills",
+  "level",
+  "levels",
+  "subclass",
+  "subclasses",
+]);
+
+function isLikelyExplicitEntityQuery(queryTokens: string[]): boolean {
+  for (const token of queryTokens) {
+    if (token.length < 3) continue;
+    if (!GENERIC_SCOPE_TOKENS.has(token)) return true;
+  }
+  return false;
+}
+
+function detectQueryIntent(queryTokens: string[], normalizedQuery: string): QueryIntent {
+  const tokenSet = new Set(queryTokens);
+  const hasToken = (value: string) => tokenSet.has(value);
+  const hasPhrase = (value: string) => normalizedQuery.includes(value);
+
+  const wantsFeatures =
+    hasToken("feature") ||
+    hasToken("features") ||
+    hasToken("ability") ||
+    hasToken("abilities") ||
+    hasPhrase("core feature") ||
+    hasPhrase("core features") ||
+    hasPhrase("class feature") ||
+    hasPhrase("class features");
+  const wantsSpells =
+    hasToken("spell") ||
+    hasToken("spells") ||
+    hasToken("cantrip") ||
+    hasToken("cantrips") ||
+    hasToken("cast") ||
+    hasToken("casting") ||
+    hasPhrase("spell list");
+  const wantsMonsterDetails =
+    hasToken("action") ||
+    hasToken("actions") ||
+    hasToken("attack") ||
+    hasToken("attacks") ||
+    hasToken("legendary") ||
+    hasToken("resistance") ||
+    hasToken("resistances") ||
+    hasToken("immunity") ||
+    hasToken("immunities") ||
+    hasToken("senses") ||
+    hasToken("speed") ||
+    hasToken("ac") ||
+    hasToken("hp") ||
+    hasPhrase("armor class") ||
+    hasPhrase("hit points") ||
+    hasPhrase("challenge rating");
+  const asksSpellUsers =
+    hasPhrase("who can use") ||
+    hasPhrase("who can cast") ||
+    hasPhrase("who gets") ||
+    hasPhrase("which class") ||
+    hasPhrase("which classes") ||
+    hasPhrase("what class") ||
+    hasPhrase("what classes") ||
+    hasPhrase("which race") ||
+    hasPhrase("which races") ||
+    hasPhrase("what race") ||
+    hasPhrase("what races");
+
+  return {
+    wantsFeatures,
+    wantsSpells,
+    wantsMonsterDetails,
+    asksSpellUsers,
+  };
+}
+
 type TitleIndexRecord = {
   category: string;
   entry: any;
@@ -320,6 +487,11 @@ function scoreEntry(
   category: string,
   entry: any,
   boostedEntryKeys: Set<string>,
+  contextCategory: string | null,
+  contextEntryKey: string | null,
+  contextIndex: string | null,
+  applyContextBoost: boolean,
+  queryIntent: QueryIntent,
 ): number {
   const { name, desc } = getEntryText(entry);
   const nameLower = name.toLowerCase();
@@ -330,6 +502,70 @@ function scoreEntry(
   let score = 0;
 
   if (boostedEntryKeys.has(entryKey)) score += 140;
+  if (applyContextBoost && contextCategory && category === contextCategory) {
+    score += 7;
+  }
+  if (applyContextBoost && contextEntryKey && entryKey === contextEntryKey) {
+    score += 55;
+  }
+  if (
+    applyContextBoost &&
+    contextCategory === "classes" &&
+    contextIndex &&
+    category === "classes" &&
+    contextEntryKey &&
+    entryKey !== contextEntryKey
+  ) {
+    score -= 12;
+  }
+  if (applyContextBoost && contextCategory === "classes" && contextIndex) {
+    const entryClassIndex = normalizeForMatch(String(entry?.class?.index || ""));
+    const preferFeatures = queryIntent.wantsFeatures && !queryIntent.wantsSpells;
+    const preferSpells = queryIntent.wantsSpells && !queryIntent.wantsFeatures;
+
+    if (category === "spells") {
+      const hasClassTag = Array.isArray(entry?.classes)
+        ? entry.classes.some(
+            (cls: any) =>
+              normalizeForMatch(String(cls?.index || cls?.name || "")) === contextIndex,
+          )
+        : false;
+      if (hasClassTag) {
+        if (preferSpells) score += 95;
+        else if (preferFeatures) score += 5;
+        else score += 45;
+      }
+      else score -= 18;
+      if (preferFeatures) score -= 45;
+    } else if (category === "features" || category === "subclasses" || category === "levels") {
+      if (entryClassIndex && entryClassIndex === contextIndex) {
+        if (category === "features") {
+          score += preferFeatures ? 110 : 55;
+        } else if (category === "levels") {
+          score += preferFeatures ? 85 : 45;
+        } else {
+          score += preferFeatures ? 90 : 45;
+        }
+        if (preferSpells) score -= 20;
+      }
+      else score -= 8;
+    }
+  }
+  if (applyContextBoost && contextCategory === "spells") {
+    if (category === "spells" && contextEntryKey && entryKey === contextEntryKey) {
+      score += 110;
+    } else if (queryIntent.asksSpellUsers) {
+      if (category === "spells") score -= 35;
+      else score -= 12;
+    }
+  }
+  if (applyContextBoost && contextCategory === "monsters") {
+    if (category === "monsters" && contextEntryKey && entryKey === contextEntryKey) {
+      score += 120;
+    } else if (queryIntent.wantsMonsterDetails && category !== "monsters") {
+      score -= 20;
+    }
+  }
   if (normalizedQuery) {
     if (normalizedName === normalizedQuery) score += 120;
     if (normalizedIndex && normalizedIndex === normalizedQuery) score += 110;
@@ -356,12 +592,29 @@ function scoreEntry(
 // ~4 chars per token on average, budget ~8K tokens = ~32K chars
 const MAX_CONTEXT_CHARS = 32000;
 
-export function findRelevantEntries(query: string, categories: string[]): string {
+export function findRelevantEntries(
+  query: string,
+  categories: string[],
+  opts?: { context?: SearchContextHint },
+): string {
   const queryTokens = tokenize(query);
   const normalizedQuery = normalizeForMatch(query);
-  const { hintedCategories, boostedEntryKeys } = findTitleHints(query, queryTokens);
+  const queryIntent = detectQueryIntent(queryTokens, normalizedQuery);
+  const hasLikelyExplicitEntity = isLikelyExplicitEntityQuery(queryTokens);
+  const { hintedCategories, boostedEntryKeys } = hasLikelyExplicitEntity
+    ? findTitleHints(query, queryTokens)
+    : { hintedCategories: new Set<string>(), boostedEntryKeys: new Set<string>() };
+  const contextHint = resolveContextHint(opts?.context);
+  const hasCompetingExplicitEntity =
+    hasLikelyExplicitEntity &&
+    boostedEntryKeys.size > 0 &&
+    (!contextHint.entryKey ||
+      Array.from(boostedEntryKeys).some((entryKey) => entryKey !== contextHint.entryKey));
+  const applyContextBoost = Boolean((contextHint.category || contextHint.entryKey) && !hasCompetingExplicitEntity);
+
   const searchCategories = new Set<string>(categories || []);
   for (const category of hintedCategories) searchCategories.add(category);
+  if (applyContextBoost && contextHint.category) searchCategories.add(contextHint.category);
   if (isTitleLikeQuery(query, queryTokens) || searchCategories.size === 0) {
     for (const category of getAllSrdCategories()) searchCategories.add(category);
   }
@@ -379,6 +632,11 @@ export function findRelevantEntries(query: string, categories: string[]): string
         cat,
         entry,
         boostedEntryKeys,
+        contextHint.category,
+        contextHint.entryKey,
+        contextHint.index,
+        applyContextBoost,
+        queryIntent,
       );
       if (score > 0) {
         scored.push({ text: serialize(entry), score });

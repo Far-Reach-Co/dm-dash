@@ -14,6 +14,7 @@ import {
   getMagicItemsMap,
   getRacesData,
   getRacesMap,
+  getSpellCountForClass,
   getSpellsData,
   getSubracesMap,
   getTraitsMap,
@@ -207,9 +208,7 @@ export function registerSrdContentRoutes(router: Router) {
           }))
           .sort((a, b) => a.name.localeCompare(b.name));
 
-        const classSpellCount = getSpellsData().filter((spell: any) =>
-          (spell.classes || []).some((cls: any) => cls.index === classData.index),
-        ).length;
+        const classSpellCount = getSpellCountForClass(classData.index);
 
         res.render("dnd/5e/srd/class", {
           auth: req.session.user,
