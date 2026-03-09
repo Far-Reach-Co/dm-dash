@@ -1,6 +1,10 @@
 import fs from "fs";
 import path from "path";
 import https from "https";
+import {
+  buildSpellClassLevelIndex,
+  SPELL_CLASS_LEVEL_INDEX_FILE,
+} from "../dnd/srd/spellClassLevelIndex.js";
 
 const REPO_BASE =
   "https://raw.githubusercontent.com/5e-bits/5e-database/main/src";
@@ -33,6 +37,36 @@ const FILES: Record<string, string> = {
   "5e-SRD-Traits.json": "5e-srd-traits.json",
   "5e-SRD-Weapon-Properties.json": "5e-srd-weapon-properties.json",
 };
+
+const CLASSES_FILE = "5e-srd-classes.json";
+const SPELLS_FILE = "5e-srd-spells.json";
+
+function readJsonArray(filePath: string): any[] {
+  const raw = fs.readFileSync(filePath, "utf8");
+  const parsed = JSON.parse(raw);
+  if (!Array.isArray(parsed)) {
+    throw new Error(`Expected JSON array in ${filePath}`);
+  }
+  return parsed;
+}
+
+function generateSpellClassLevelIndex(outDir: string, edition: string) {
+  const classesPath = path.join(outDir, CLASSES_FILE);
+  const spellsPath = path.join(outDir, SPELLS_FILE);
+  const outputPath = path.join(outDir, SPELL_CLASS_LEVEL_INDEX_FILE);
+
+  const classesData = readJsonArray(classesPath);
+  const spellsData = readJsonArray(spellsPath);
+  const indexData = buildSpellClassLevelIndex(classesData, spellsData, {
+    source: `5e SRD ${edition}`,
+    generatedAt: new Date().toISOString(),
+  });
+
+  fs.writeFileSync(outputPath, `${JSON.stringify(indexData, null, 2)}\n`, "utf8");
+  console.log(
+    `Generated ${SPELL_CLASS_LEVEL_INDEX_FILE} (${Object.keys(indexData.classes).length} classes)`,
+  );
+}
 
 function download(url: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -86,6 +120,8 @@ async function main() {
 
   console.log(`\nDone: ${success} downloaded, ${failed} failed`);
   if (failed > 0) process.exit(1);
+
+  generateSpellClassLevelIndex(outDir, edition);
 }
 
 main();

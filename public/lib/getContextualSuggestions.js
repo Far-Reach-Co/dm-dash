@@ -2,6 +2,9 @@ import getDataByQuery from "./getDataByQuery.js";
 import { getSuggestionContext } from "./suggestionContext.js";
 
 const DEFAULT_LIMIT = 20;
+const SPELL_CLASS_LEVEL_INDEX_URL =
+  "/lib/data/2014/5e-srd-spell-class-level-index.json";
+let spellClassLevelIndexPromise = null;
 
 const SPELL_LEVEL_BY_TYPE = {
   cantrip: 0,
@@ -33,6 +36,22 @@ function parseNumber(value) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed)) return null;
   return parsed;
+}
+
+function normalizeSpellIndex(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+async function loadSpellClassLevelIndex() {
+  if (!spellClassLevelIndexPromise) {
+    spellClassLevelIndexPromise = fetch(SPELL_CLASS_LEVEL_INDEX_URL)
+      .then((res) => (res.ok ? res.json() : null))
+      .catch(() => null);
+  }
+  const data = await spellClassLevelIndexPromise;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
+  if (!data.classes || typeof data.classes !== "object") return null;
+  return data;
 }
 
 function tokenizeQuery(query) {
@@ -85,6 +104,44 @@ function inferSpellLevel(spellType) {
   const level = parseNumber(levelMatch[1]);
   if (level === null) return null;
   return level;
+}
+
+function getSpellIndexSetFromContext(indexData, context, metadata) {
+  if (!indexData || !indexData.classes || typeof indexData.classes !== "object") {
+    return null;
+  }
+
+  const contextClassIndexes = toArray(context?.classIndexes)
+    .map((value) => normalizeString(value))
+    .filter(Boolean);
+  if (!contextClassIndexes.length) return null;
+
+  const targetSpellLevel = inferSpellLevel(metadata?.spellType);
+  let foundAnyKnownClass = false;
+  const spellIndexSet = new Set();
+
+  for (const classIndex of contextClassIndexes) {
+    const classRecord = indexData.classes[classIndex];
+    if (!classRecord || typeof classRecord !== "object") continue;
+    foundAnyKnownClass = true;
+
+    const byLevel =
+      classRecord.spellIndexesByLevel &&
+      typeof classRecord.spellIndexesByLevel === "object"
+        ? classRecord.spellIndexesByLevel
+        : {};
+    const spellIndexes = targetSpellLevel !== null
+      ? toArray(byLevel[String(targetSpellLevel)])
+      : toArray(classRecord.spellIndexes);
+
+    for (const spellIndex of spellIndexes) {
+      const normalizedSpellIndex = normalizeSpellIndex(spellIndex);
+      if (normalizedSpellIndex) spellIndexSet.add(normalizedSpellIndex);
+    }
+  }
+
+  if (!foundAnyKnownClass) return null;
+  return spellIndexSet;
 }
 
 function scoreSpellContext(item, context, metadata) {
@@ -233,7 +290,24 @@ export default async function getContextualSuggestions({
       generalId,
       generalData,
     });
-    const ranked = rankSuggestions(data, query, domain, context, metadata);
+    let candidateData = data;
+    if (domain === "spell") {
+      const spellClassLevelIndex = await loadSpellClassLevelIndex();
+      const spellIndexSet = getSpellIndexSetFromContext(
+        spellClassLevelIndex,
+        context,
+        metadata,
+      );
+
+      if (spellIndexSet) {
+        if (!spellIndexSet.size) return [];
+        candidateData = data.filter((item) =>
+          spellIndexSet.has(normalizeSpellIndex(item?.index)),
+        );
+      }
+    }
+
+    const ranked = rankSuggestions(candidateData, query, domain, context, metadata);
     return ranked.slice(0, limit);
   } catch {
     // Hard fallback to current behavior when context/ranking fails.

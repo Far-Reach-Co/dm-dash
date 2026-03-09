@@ -3,6 +3,7 @@ import {
   getSpellClassOptions,
   getSpellLevelOptions,
   getSpellSchoolOptions,
+  getSpellsForClass,
   getSpellsData,
   getSpellsMap,
   sortByName,
@@ -87,11 +88,7 @@ export function registerSrdSpellRoutes(router: Router) {
           return res.status(404).render("404", { auth: req.session.user });
         }
 
-        const spellsData = sortByName(
-          getSpellsData().filter((spell: any) =>
-            (spell.classes || []).some((cls: any) => cls.index === classOption.index),
-          ),
-        );
+        const spellsData = sortByName(getSpellsForClass(classOption.index));
 
         res.render("dnd/5e/srd/spells-filter", {
           auth: req.session.user,

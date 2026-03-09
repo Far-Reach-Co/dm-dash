@@ -12,6 +12,8 @@
 
   var btn = form.querySelector("button");
   var lastFocusedElement = null;
+  var pageContext = getPageContext();
+  var contextEnabled = Boolean(pageContext && pageContext.isDetailPage);
 
   function clearResult() {
     results.textContent = "";
@@ -66,6 +68,145 @@
     }
   }
 
+  function normalizePath(pathname) {
+    if (!pathname || typeof pathname !== "string") return null;
+    var normalized = pathname.split(/[?#]/)[0].replace(/\/+$/, "");
+    if (!normalized.length) return null;
+    return normalized;
+  }
+
+  function getPageContext() {
+    var pathname = normalizePath(window.location.pathname || "");
+    if (!pathname || pathname.indexOf("/dnd/5e/srd/") !== 0) return null;
+
+    var segments = pathname.split("/").filter(Boolean).slice(3);
+    var category = String(segments[0] || "").trim().toLowerCase() || null;
+    var index =
+      segments.length === 2
+        ? String(segments[1] || "").trim().toLowerCase() || null
+        : null;
+    var title = resolveContextTitle(index, category);
+
+    if (!category && !index && pathname === "/dnd/5e/srd/contents") {
+      return {
+        path: pathname,
+        category: null,
+        index: null,
+        title: title || "SRD Contents",
+        isDetailPage: false,
+      };
+    }
+
+    if (!category) return null;
+
+    return {
+      path: pathname,
+      category: category,
+      index: index,
+      title: title,
+      isDetailPage: Boolean(index),
+    };
+  }
+
+  function normalizeLooseText(value) {
+    return String(value || "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim()
+      .replace(/\s+/g, " ");
+  }
+
+  function isGenericSrdTitle(value) {
+    var normalized = normalizeLooseText(value);
+    return (
+      normalized === "dungeons dragons fifth edition srd" ||
+      normalized === "dungeons and dragons fifth edition srd"
+    );
+  }
+
+  function titleCaseFromSlug(value) {
+    if (!value) return null;
+    var words = String(value)
+      .split("-")
+      .map(function (word) {
+        if (!word) return "";
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .filter(Boolean);
+    if (!words.length) return null;
+    return words.join(" ");
+  }
+
+  function getNodeText(selector) {
+    var node = document.querySelector(selector);
+    if (!node) return null;
+    var text = String(node.textContent || "").trim();
+    if (!text || isGenericSrdTitle(text)) return null;
+    return text.slice(0, 120);
+  }
+
+  function resolveContextTitle(index, category) {
+    var title =
+      getNodeText(".breadcrumbs .text-green") ||
+      getNodeText(".breadcrumbs .current") ||
+      getNodeText('.breadcrumbs [aria-current="page"]') ||
+      getNodeText(".info-container > h1") ||
+      getNodeText(".info-container h1") ||
+      getNodeText("h1");
+
+    if (title) return title;
+    if (index) return titleCaseFromSlug(index);
+    if (category) return titleCaseFromSlug(category);
+    return null;
+  }
+
+  function ensureContextToggle() {
+    if (!pageContext) return;
+    if (pageContext.path === "/dnd/5e/srd/contents") return;
+    if (document.getElementById("srd-search-context-checkbox")) return;
+
+    var wrapper = document.createElement("label");
+    wrapper.className = "srd-search-context-toggle";
+
+    var checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.id = "srd-search-context-checkbox";
+    checkbox.checked = contextEnabled;
+    checkbox.addEventListener("change", function (e) {
+      contextEnabled = Boolean(e.target && e.target.checked);
+    });
+
+    var labelText = document.createElement("span");
+    labelText.className = "srd-search-context-toggle-text";
+
+    if (pageContext.isDetailPage && pageContext.title) {
+      labelText.textContent = 'Use this page as context: "' + pageContext.title + '"';
+    } else if (pageContext.category) {
+      labelText.textContent = "Use this page as context";
+    } else {
+      labelText.textContent = "Use current page context";
+    }
+
+    wrapper.appendChild(checkbox);
+    wrapper.appendChild(labelText);
+
+    form.insertAdjacentElement("afterend", wrapper);
+  }
+
+  function buildSearchPayload(query) {
+    var payload = { query: query };
+    if (contextEnabled && pageContext) {
+      payload.context = {
+        path: pageContext.path,
+        category: pageContext.category || undefined,
+        index: pageContext.index || undefined,
+        title: pageContext.title || undefined,
+        enabled: true,
+      };
+    }
+    return payload;
+  }
+
   function runSearch(query) {
     if (!btn) return Promise.resolve();
     btn.disabled = true;
@@ -74,7 +215,7 @@
     return fetch("/dnd/5e/srd/search", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query: query }),
+      body: JSON.stringify(buildSearchPayload(query)),
     })
       .then(function (res) {
         if (res.status === 429) {
@@ -95,6 +236,8 @@
         btn.disabled = false;
       });
   }
+
+  ensureContextToggle();
 
   if (closeBtn && modal) {
     closeBtn.addEventListener("click", closeModal);

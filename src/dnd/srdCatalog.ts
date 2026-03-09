@@ -1,4 +1,11 @@
+import path = require("path");
+import fs = require("fs");
 import { srdData } from "./srd/data.js";
+import {
+  type SpellClassLevelIndexData,
+  SPELL_CLASS_LEVEL_INDEX_FILE,
+  normalizeClassIndex,
+} from "./srd/spellClassLevelIndex.js";
 
 const CLASS_TABLE_PARTIALS = new Set([
   "barbarian",
@@ -16,6 +23,7 @@ const CLASS_TABLE_PARTIALS = new Set([
 ]);
 
 export const DND_API_BASE = "https://www.dnd5eapi.co";
+const DATA_DIR = path.join(__dirname, "../../public/lib/data/2014");
 
 let equipmentDataCache: any[] | null = null;
 let magicItemsDataCache: any[] | null = null;
@@ -38,6 +46,45 @@ let racesMapCache: Map<string, any> | null = null;
 let backgroundsMapCache: Map<string, any> | null = null;
 let traitsMapCache: Map<string, any> | null = null;
 let subracesMapCache: Map<string, any> | null = null;
+let spellClassLevelIndexCache: SpellClassLevelIndexData | null = null;
+
+function loadSpellClassLevelIndexFile(): SpellClassLevelIndexData {
+  const filePath = path.join(DATA_DIR, SPELL_CLASS_LEVEL_INDEX_FILE);
+  let raw = "";
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(
+      `Missing ${SPELL_CLASS_LEVEL_INDEX_FILE} at ${filePath}. Run npm run srd:spell-class-index -- 2014.`,
+    );
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`Invalid JSON in ${SPELL_CLASS_LEVEL_INDEX_FILE}: ${filePath}`);
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    !("classes" in parsed) ||
+    typeof (parsed as any).classes !== "object" ||
+    Array.isArray((parsed as any).classes)
+  ) {
+    throw new Error(`Invalid spell class/level index shape in ${SPELL_CLASS_LEVEL_INDEX_FILE}`);
+  }
+
+  return parsed as SpellClassLevelIndexData;
+}
+
+export function getSpellClassLevelIndex(): SpellClassLevelIndexData {
+  if (spellClassLevelIndexCache) return spellClassLevelIndexCache;
+
+  spellClassLevelIndexCache = loadSpellClassLevelIndexFile();
+  return spellClassLevelIndexCache;
+}
 
 export function getEquipmentData(): any[] {
   if (!equipmentDataCache) equipmentDataCache = srdData["equipment"] || [];
@@ -224,22 +271,61 @@ export function getSpellSchoolOptions(): Array<{ index: string; label: string; c
 }
 
 export function getSpellClassOptions(): Array<{ index: string; label: string; count: number }> {
-  const counts = new Map<string, { label: string; count: number }>();
-  for (const spell of getSpellsData()) {
-    for (const cls of spell.classes || []) {
-      if (!cls?.index || !cls?.name) continue;
-      const existing = counts.get(cls.index);
-      if (existing) {
-        existing.count += 1;
-      } else {
-        counts.set(cls.index, { label: cls.name, count: 1 });
-      }
-    }
-  }
-
-  return Array.from(counts.entries())
-    .map(([index, value]) => ({ index, label: value.label, count: value.count }))
+  return Object.values(getSpellClassLevelIndex().classes)
+    .map((entry) => ({
+      index: entry.index,
+      label: entry.label,
+      count: entry.spellIndexes.length,
+    }))
+    .filter((entry) => entry.count > 0)
     .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function getSpellCountForClass(classIndex: string): number {
+  const normalized = normalizeClassIndex(classIndex);
+  if (!normalized) return 0;
+  const entry = getSpellClassLevelIndex().classes[normalized];
+  return entry ? entry.spellIndexes.length : 0;
+}
+
+export function getSpellLevelsForClass(classIndex: string): number[] {
+  const normalized = normalizeClassIndex(classIndex);
+  if (!normalized) return [];
+  const entry = getSpellClassLevelIndex().classes[normalized];
+  return entry ? entry.levels.slice() : [];
+}
+
+export function getSpellsForClass(classIndex: string): any[] {
+  const normalized = normalizeClassIndex(classIndex);
+  if (!normalized) return [];
+  const entry = getSpellClassLevelIndex().classes[normalized];
+  if (!entry || !entry.spellIndexes.length) return [];
+
+  const spellsMap = getSpellsMap();
+  const spells: any[] = [];
+  for (const spellIndex of entry.spellIndexes) {
+    const spell = spellsMap.get(spellIndex);
+    if (spell) spells.push(spell);
+  }
+  return spells;
+}
+
+export function getSpellsForClassAndLevel(classIndex: string, level: number): any[] {
+  const normalized = normalizeClassIndex(classIndex);
+  if (!normalized) return [];
+  const entry = getSpellClassLevelIndex().classes[normalized];
+  if (!entry) return [];
+
+  const spellIndexes = entry.spellIndexesByLevel[String(level)] || [];
+  if (!spellIndexes.length) return [];
+
+  const spellsMap = getSpellsMap();
+  const spells: any[] = [];
+  for (const spellIndex of spellIndexes) {
+    const spell = spellsMap.get(spellIndex);
+    if (spell) spells.push(spell);
+  }
+  return spells;
 }
 
 export function getSpellLevelOptions(): Array<{ value: number; label: string; count: number }> {

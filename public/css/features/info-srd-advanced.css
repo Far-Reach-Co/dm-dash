@@ -217,6 +217,25 @@
   transform: none;
 }
 
+.srd-search-context-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--main-gray);
+  font-size: 0.82rem;
+}
+
+.srd-search-context-toggle input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--blue6);
+}
+
+.srd-search-context-toggle-text {
+  line-height: 1.4;
+}
+
 .search-results {
   margin-top: 16px;
 }
