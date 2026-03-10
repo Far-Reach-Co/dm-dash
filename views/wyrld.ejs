@@ -82,7 +82,12 @@
         <section class="dashboard-card">
           <div class="dashboard-card-header">
             <h2>Recent Tables</h2>
-            <a href="/wyrld/tables?id=<%= project.id %>">View all</a>
+            <div class="dashboard-card-actions">
+              <% if (projectAuth) { %>
+              <a class="dashboard-primary-action" href="#" role="button" onclick="openNewWyrldTableModal('<%= project.id %>'); return false;" title="Create a new virtual table">+ New Table</a>
+              <% } %>
+              <a href="/wyrld/tables?id=<%= project.id %>">View all</a>
+            </div>
           </div>
           <small>Shared tables for this wyrld.</small>
           <div class="dashboard-list">
@@ -184,7 +189,7 @@
         <div class="dashboard-card-header">
           <h2>Wyrld Tables</h2>
           <% if (projectAuth) { %>
-          <a onclick="openNewWyrldTableModal('<%= project.id %>')" title="Create a new virtual table" style="cursor:pointer">+ New Wyrld Table</a>
+          <a class="dashboard-primary-action" href="#" role="button" onclick="openNewWyrldTableModal('<%= project.id %>'); return false;" title="Create a new virtual table">+ New Table</a>
           <% } %>
         </div>
         <small>These tables are shared by the members of the wyrld. Wyrld managers can upload images and manage the map layer.</small>
@@ -216,7 +221,7 @@
         <div class="dashboard-card-header">
           <h2>Records</h2>
           <% if (projectAuth) { %>
-          <a href="/newwyrldrecord?id=<%= project.id %>" title="Create a new wyrld record">+ New Wyrld Record</a>
+          <a class="dashboard-primary-action" href="/newwyrldrecord?id=<%= project.id %>" title="Create a new wyrld record">+ New Wyrld Record</a>
           <% } %>
         </div>
         <small>Resource pages for lore, notes, monster stat blocks and other useful data.</small>
@@ -242,7 +247,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Player Character Sheets</h2>
-          <a onclick="openNewSheetModal('<%= project.id %>', '<%= encodeURIComponent(project.title) %>')" title="Create a new character sheet for this wyrld" style="cursor:pointer">+ New Character Sheet</a>
+          <a class="dashboard-primary-action" href="#" role="button" onclick="openNewSheetModal('<%= project.id %>', '<%= encodeURIComponent(project.title) %>'); return false;" title="Create a new character sheet for this wyrld">+ New Character Sheet</a>
         </div>
         <small>We currently offer Dungeons and Dragons 5e sheets. Only the creator of the sheet and the wyrld managers can view these sheets.</small>
         <small class="d-block mt-1">To connect an existing character you already own, use the link form below.</small>
@@ -314,7 +319,7 @@
         <div class="dashboard-card-header">
           <h2>Calendars</h2>
           <% if (projectAuth) { %>
-          <a href="/newwyrldcalendar?id=<%= project.id %>" title="Create a new calendar">+ New Calendar</a>
+          <a class="dashboard-primary-action" href="/newwyrldcalendar?id=<%= project.id %>" title="Create a new calendar">+ New Calendar</a>
           <% } %>
         </div>
         <small>Custom calendars allow for general time-keeping of the various cultures in the wyrld.</small>
@@ -339,7 +344,7 @@
         <section class="dashboard-card community-sidebar">
           <div class="dashboard-card-header">
             <h2>Community Discussion</h2>
-            <a id="community-open-create-modal" title="Start a new discussion thread" style="cursor:pointer">+ New Thread</a>
+            <a class="dashboard-primary-action" id="community-open-create-modal" href="#" role="button" title="Start a new discussion thread">+ New Thread</a>
           </div>
           <small>Browse current threads and open one to join the discussion.</small>
           <hr />

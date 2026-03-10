@@ -106,7 +106,8 @@ export default function mountCommunitySection({ projectId }) {
   const replyMessageElem = document.getElementById("community-reply-msg");
 
   if (openCreateThreadModalButton) {
-    openCreateThreadModalButton.addEventListener("click", () => {
+    openCreateThreadModalButton.addEventListener("click", (event) => {
+      event.preventDefault();
       openCreateThreadModal(projectId);
     });
   }

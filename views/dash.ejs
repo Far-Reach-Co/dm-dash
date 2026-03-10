@@ -59,7 +59,10 @@
         <section class="dashboard-card">
           <div class="dashboard-card-header">
             <h2>Recent Tables</h2>
-            <a href="/dash/tables">View all</a>
+            <div class="dashboard-card-actions">
+              <a class="dashboard-primary-action" href="#" role="button" onclick="openNewTableModal(); return false;" title="Create a new virtual table">+ New Table</a>
+              <a href="/dash/tables">View all</a>
+            </div>
           </div>
           <small>Virtual tables you have created.</small>
           <div class="dashboard-list">
@@ -138,7 +141,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Tables</h2>
-          <a onclick="openNewTableModal()" title="Create a new virtual table" style="cursor:pointer">+ New Table</a>
+          <a class="dashboard-primary-action" href="#" role="button" onclick="openNewTableModal(); return false;" title="Create a new virtual table">+ New Table</a>
         </div>
         <small>Real-time virtual tables that support images and drawing. Invite others to join your table by copying the share link.</small>
         <small class="d-block mt-1">
@@ -168,7 +171,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Records</h2>
-          <a href="/newrecord" title="Create a new record">+ New Record</a>
+          <a class="dashboard-primary-action" href="/newrecord" title="Create a new record">+ New Record</a>
         </div>
         <small>Resource pages for lore, notes, monster stat blocks and other useful data.</small>
         <hr />
@@ -193,7 +196,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Player Character Sheets</h2>
-          <a onclick="openNewSheetModal()" title="Create a new player character sheet" style="cursor:pointer">+ New Sheet</a>
+          <a class="dashboard-primary-action" href="#" role="button" onclick="openNewSheetModal(); return false;" title="Create a new player character sheet">+ New Sheet</a>
         </div>
         <small>We currently offer Dungeons and Dragons 5e sheets. You can invite others to view/edit your character sheet from the settings tab.</small>
         <hr />
@@ -235,7 +238,7 @@
       <section class="dashboard-card">
         <div class="dashboard-card-header">
           <h2>Wyrlds</h2>
-          <a onclick="openNewWyrldModal()" title="Create a new wyrld" style="cursor:pointer">+ Wyrld</a>
+          <a class="dashboard-primary-action" href="#" role="button" onclick="openNewWyrldModal(); return false;" title="Create a new wyrld">+ New Wyrld</a>
         </div>
         <small>A Wyrld is a contained environment that associates tables and character sheets to create a more organized experience.</small>
         <small class="d-block mt-1"><a href="/wyrlds/public">Browse Public Wyrlds</a></small>
