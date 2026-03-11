@@ -1,0 +1,21 @@
+<%
+  const overviewHref = `/wyrld?id=${project.id}`;
+  const tablesHref = `/wyrld/tables?id=${project.id}`;
+  const communityHref = `/wyrld/community?id=${project.id}`;
+  const settingsHref = `/wyrld/settings?id=${project.id}`;
+  const createdLabel = typeof formatDate === "function" ? formatDate(project.date_created) : project.date_created;
+%>
+<article class="dash-wyrld-quick-card">
+  <div class="dash-wyrld-quick-header">
+    <div class="dash-wyrld-quick-copy">
+      <a class="dash-wyrld-quick-title" href="<%= overviewHref %>"><%= project.title %></a>
+      <div class="dash-detail-meta"><%= datePrefix %> <%= createdLabel %></div>
+    </div>
+  </div>
+  <div class="dash-wyrld-quick-links">
+    <a class="dash-wyrld-link-chip dash-wyrld-link-chip-primary" href="<%= overviewHref %>" aria-label="Open <%= project.title %> overview">Overview</a>
+    <a class="dash-wyrld-link-chip" href="<%= tablesHref %>" aria-label="Open <%= project.title %> tables">Tables</a>
+    <a class="dash-wyrld-link-chip" href="<%= communityHref %>" aria-label="Open <%= project.title %> community">Community</a>
+    <a class="dash-wyrld-link-chip" href="<%= settingsHref %>" aria-label="Open <%= project.title %> settings">Settings</a>
+  </div>
+</article>

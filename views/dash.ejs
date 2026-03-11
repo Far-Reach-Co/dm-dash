@@ -122,14 +122,12 @@
             <a href="/dash/wyrlds">View all</a>
           </div>
           <small>Campaign spaces you created or joined.</small>
-          <div class="dashboard-list">
+          <div class="dashboard-list dashboard-wyrld-list">
             <% if (recentWyrlds.length === 0) { %>
             <small>No Wyrlds yet...</small>
             <% } else { %>
             <% recentWyrlds.forEach(function(project) { %>
-            <div class="dash-detail-row" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
-              <div class="dash-detail-title"><%= project.title %></div>
-            </div>
+            <%- include('./partials/dashboard_wyrld_quick_card', { project, formatDate, datePrefix: 'Created' }) %>
             <% }); %>
             <% } %>
           </div>
@@ -247,15 +245,9 @@
         <% if (projectsSorted.length === 0) { %>
         <small>No Wyrlds yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <div class="dashboard-list dashboard-wyrld-list">
           <% projectsSorted.forEach(function(project) { %>
-          <div class="dash-detail-row" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
-            <div class="dash-detail-title"><%= project.title %></div>
-            <div class="dash-detail-actions">
-              <button class="dash-inline-action" type="button" onclick="event.stopPropagation(); handleWyrldSettingsClick('<%= project.id %>')">Settings</button>
-              <div class="dash-detail-meta">Created <%= formatDate(project.date_created) %></div>
-            </div>
-          </div>
+          <%- include('./partials/dashboard_wyrld_quick_card', { project, formatDate, datePrefix: 'Created' }) %>
           <% }); %>
         </div>
         <% } %>
@@ -263,15 +255,9 @@
         <% if (sharedProjectsSorted.length === 0) { %>
         <small>No Shared Wyrlds yet...</small>
         <% } else { %>
-        <div class="dashboard-list">
+        <div class="dashboard-list dashboard-wyrld-list">
           <% sharedProjectsSorted.forEach(function(project) { %>
-          <div class="dash-detail-row" onclick="handleWyrldClick('<%= project.id %>')" title="Open wyrld dashboard">
-            <div class="dash-detail-title"><%= project.title %></div>
-            <div class="dash-detail-actions">
-              <button class="dash-inline-action" type="button" onclick="event.stopPropagation(); handleSharedWyrldSettingsClick('<%= project.id %>')">Settings</button>
-              <div class="dash-detail-meta">Created <%= formatDate(project.date_created) %></div>
-            </div>
-          </div>
+          <%- include('./partials/dashboard_wyrld_quick_card', { project, formatDate, datePrefix: 'Created' }) %>
           <% }); %>
         </div>
         <% } %>
@@ -291,18 +277,6 @@
 
   function handleRecordClick(id) {
     window.open(`/record?id=${id}`, "_blank").focus();
-  }
-
-  function handleWyrldClick(id) {
-    window.location.href = `/wyrld?id=${id}`;
-  }
-
-  function handleWyrldSettingsClick(id) {
-    window.location.href = `/wyrld/settings?id=${id}`;
-  }
-
-  function handleSharedWyrldSettingsClick(id) {
-    window.location.href = `/wyrld/settings?id=${id}`;
   }
 </script>
 

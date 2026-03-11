@@ -625,6 +625,116 @@
   justify-content: flex-end;
 }
 
+.dashboard-wyrld-list {
+  gap: var(--space-sm);
+}
+
+.dash-wyrld-quick-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(116, 167, 215, 0.18);
+  background: linear-gradient(
+    165deg,
+    rgba(22, 30, 39, 0.98) 0%,
+    rgba(29, 42, 55, 0.96) 100%
+  );
+  box-shadow: inset 0 1px 0 rgba(243, 246, 219, 0.02);
+  transition:
+    border-color var(--transition-normal),
+    background-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform var(--transition-fast);
+}
+
+.dash-wyrld-quick-card:hover {
+  border-color: var(--border-ornate-hover);
+  background: linear-gradient(
+    165deg,
+    rgba(27, 36, 47, 0.99) 0%,
+    rgba(35, 50, 65, 0.98) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(243, 246, 219, 0.03),
+    0 12px 24px rgba(7, 10, 15, 0.18);
+  transform: translateY(-1px);
+}
+
+.dash-wyrld-quick-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.dash-wyrld-quick-copy {
+  min-width: 0;
+}
+
+.dash-wyrld-quick-title {
+  display: inline-block;
+  max-width: 100%;
+  color: var(--bright-white);
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color var(--transition-normal);
+}
+
+.dash-wyrld-quick-title:hover {
+  color: var(--orange3);
+}
+
+.dash-wyrld-quick-title:focus-visible,
+.dash-wyrld-link-chip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.dash-wyrld-quick-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dash-wyrld-link-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-ornate);
+  background: rgba(43, 64, 83, 0.22);
+  color: var(--light-gray);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+  transition:
+    color var(--transition-normal),
+    border-color var(--transition-normal),
+    background-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.dash-wyrld-link-chip:hover {
+  color: var(--bright-white);
+  border-color: var(--border-ornate-hover);
+  background: rgba(165, 79, 4, 0.12);
+  box-shadow: 0 0 12px rgba(209, 158, 116, 0.08);
+}
+
+.dash-wyrld-link-chip-primary {
+  color: var(--orange3);
+  border-color: rgba(209, 158, 116, 0.42);
+  background: rgba(165, 79, 4, 0.14);
+}
+
 /* ==========================================================================
    Inline Action Buttons
    ========================================================================== */
@@ -685,6 +795,10 @@
 
   .dashboard-list .dash-detail-row {
     animation: none;
+  }
+
+  .dash-wyrld-quick-card {
+    padding: var(--space-sm) var(--space-md);
   }
 
   .community-forum {
