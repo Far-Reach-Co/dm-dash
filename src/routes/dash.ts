@@ -15,6 +15,7 @@ import { requireUserOrRedirect } from "../lib/authz";
 const router = Router();
 
 const RECENT_LIMIT = 5;
+const RECENT_WYRLD_LIMIT = 2;
 
 const sortByDateDesc = <T>(
   items: T[],
@@ -128,7 +129,7 @@ async function loadDashData(userId: string | number) {
     getRecentlyViewedByUser(userId, "table", RECENT_LIMIT),
     getRecentlyViewedByUser(userId, "record", RECENT_LIMIT),
     getRecentlyViewedByUser(userId, "sheet", RECENT_LIMIT),
-    getRecentlyViewedByUser(userId, "wyrld", RECENT_LIMIT),
+    getRecentlyViewedByUser(userId, "wyrld", RECENT_WYRLD_LIMIT),
   ]);
 
   const allSheets = [...createdSheets, ...sharedSheets];
@@ -137,7 +138,7 @@ async function loadDashData(userId: string | number) {
   const recentTables = buildRecents(tables, rvTables.rows.map(r => r.entity_id), (t: any) => t.id, (t: any) => t.date_created, RECENT_LIMIT);
   const recentRecords = buildRecents(records, rvRecords.rows.map(r => r.entity_id), (r: any) => r.id, (r: any) => r.created_at, RECENT_LIMIT);
   const recentSheets = buildRecents(allSheets, rvSheets.rows.map(r => r.entity_id), (s: any) => s.id, (s: any) => s.created_at, RECENT_LIMIT);
-  const recentWyrlds = buildRecents(allWyrlds, rvWyrlds.rows.map(r => r.entity_id), (w: any) => w.id, (w: any) => w.date_created, RECENT_LIMIT);
+  const recentWyrlds = buildRecents(allWyrlds, rvWyrlds.rows.map(r => r.entity_id), (w: any) => w.id, (w: any) => w.date_created, RECENT_WYRLD_LIMIT);
 
   return {
     tables,
