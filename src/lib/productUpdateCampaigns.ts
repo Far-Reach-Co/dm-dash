@@ -115,6 +115,46 @@ const campaigns: ProductUpdateCampaign[] = [
     ctaText: "Start In Sandbox Mode",
     ctaUrl: "https://farreachco.com/vtt/guest/start",
   },
+  {
+    slug: "2026-03-vtt-workflow-updates",
+    subject:
+      "New in Far Reach Co: faster tables, smarter autofill, and better coordination",
+    intro:
+      "This update focuses on faster VTT setup, smoother in-session reference flow, and less friction moving between campaign tools.",
+    recent: [
+      {
+        title: "Faster VTT setup and control (Feb 25-27, 2026)",
+        body: 'Save reusable table templates, switch between Standard and Sandbox mode, use new shape/text draw tools, zoom with toolbar controls, and hide or reveal objects more cleanly during prep and play. Table templates are Pro by scope: Pro User for personal tables and Pro Wyrld for Wyrld tables.',
+        linkText: "Read the VTT guide",
+        linkUrl: "https://farreachco.com/vtt-guide#templates",
+      },
+      {
+        title: "Notifications bell and mention alerts (Feb 27, 2026)",
+        body: "The new notifications bell makes it easier to catch mentions and campaign activity without manually checking every discussion thread.",
+        linkText: "Open your dashboard",
+        linkUrl: "https://farreachco.com/dash",
+      },
+      {
+        title: "Library packs with table integration (Feb 27-28, 2026)",
+        body: "Library packs now connect more directly to VTT workflows, making reusable asset sets easier to organize, share, install, and use across sessions.",
+        linkText: "Read the library guide",
+        linkUrl: "https://farreachco.com/library-guide#packs",
+      },
+      {
+        title: "Smarter 5E autofill and in-VTT record preview (Mar 6, 2026)",
+        body: "5E autofill suggestions now use character sheet context for better matches, and linked records can open inside the VTT in a read-only modal so you can reference them without breaking flow.",
+        linkText: "Read the character sheet guide",
+        linkUrl: "https://farreachco.com/character-sheet-guide#srd-autofill",
+      },
+    ],
+    upcoming: [
+      "Continued VTT workflow polish around templates, canvas controls, and fast table setup.",
+      "More quality-of-life improvements for notifications and between-session coordination.",
+      "Further tuning for context-aware 5E and SRD suggestions during play and prep.",
+    ],
+    ctaText: "Open your dashboard",
+    ctaUrl: "https://farreachco.com/dash",
+  },
 ];
 
 export function getProductUpdateCampaigns(): ProductUpdateCampaign[] {
