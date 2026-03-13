@@ -345,6 +345,28 @@ router.get("/radio", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get(
+  "/discord-music-bot-alternative",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("discord-music-bot-alternative", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get(
+  "/syrinscape-alternative",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("syrinscape-alternative", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 router.get("/vtt-guide", (req: Request, res: Response, next: NextFunction) => {
   try {
     res.render("vtt-guide", { auth: req.session.user });

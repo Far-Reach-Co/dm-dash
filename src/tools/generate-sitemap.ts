@@ -41,6 +41,8 @@ const staticPages: SitemapEntry[] = [
   { url: "/wyrld-permissions-guide", priority: 0.75, changefreq: "monthly" },
   { url: "/sandbox-mode-guide", priority: 0.75, changefreq: "monthly" },
   { url: "/radio", priority: 0.9, changefreq: "monthly" },
+  { url: "/discord-music-bot-alternative", priority: 0.8, changefreq: "monthly" },
+  { url: "/syrinscape-alternative", priority: 0.8, changefreq: "monthly" },
   { url: "/preaethrend", priority: 0.8, changefreq: "monthly" },
   { url: "/aether-bot", priority: 0.8, changefreq: "monthly" },
   { url: "/vtt-guide", priority: 0.8, changefreq: "monthly" },
