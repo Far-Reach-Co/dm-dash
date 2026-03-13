@@ -72,6 +72,7 @@ echo "Syncing artifacts to $SERVER:$REMOTE_DIR ..."
 if [[ "$RSYNC_DELETE_ENABLED" == "1" ]]; then
   rsync -az --delete -e "$RSYNC_SSH" \
     --exclude ".env" \
+    --exclude "gsc-service-account.json" \
     --exclude "private_frc_cloudfront_key.pem" \
     --exclude "file_uploads/" \
     --rsync-path="mkdir -p '$REMOTE_DIR' && rsync" \
@@ -79,6 +80,7 @@ if [[ "$RSYNC_DELETE_ENABLED" == "1" ]]; then
 else
   rsync -az -e "$RSYNC_SSH" \
     --exclude ".env" \
+    --exclude "gsc-service-account.json" \
     --exclude "private_frc_cloudfront_key.pem" \
     --exclude "file_uploads/" \
     --rsync-path="mkdir -p '$REMOTE_DIR' && rsync" \
@@ -99,7 +101,7 @@ if [[ "$CREATE_RELEASE_ARCHIVE" == "1" ]]; then
   echo "Creating remote release archive..."
   mkdir -p "$REMOTE_DIR/releases"
   ARCHIVE_PATH="$REMOTE_DIR/releases/$ARCHIVE_NAME"
-  tar --exclude="./releases" --exclude="./.env" --exclude="./private_frc_cloudfront_key.pem" --exclude="./file_uploads" -czf "$ARCHIVE_PATH" .
+  tar --exclude="./releases" --exclude="./.env" --exclude="./gsc-service-account.json" --exclude="./private_frc_cloudfront_key.pem" --exclude="./file_uploads" -czf "$ARCHIVE_PATH" .
 else
   echo "Skipping remote release archive (DM_DASH_CREATE_RELEASE_ARCHIVE=$CREATE_RELEASE_ARCHIVE)."
 fi
