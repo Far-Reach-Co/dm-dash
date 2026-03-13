@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import fetch from "node-fetch";
 
 import {
   SRD_POPULAR_PAGES_FILE_PATH,
@@ -8,30 +7,21 @@ import {
   type SrdPopularPagesData,
   type SrdPopularPagesSection,
 } from "../dnd/srdPopularPages";
+import {
+  dayWindowUtc,
+  getAccessTokenFromServiceAccount,
+  getRequiredString,
+  loadServiceAccountCredentials,
+  normalizePathname,
+  querySearchAnalytics,
+  toFiniteNumber,
+  type SearchAnalyticsRow,
+} from "../lib/googleSearchConsole";
+import { hasFlag, parseFlagValue, parseIntFlag } from "./lib/cliFlags";
 
-const TOKEN_URL = "https://oauth2.googleapis.com/token";
-const SEARCH_ANALYTICS_ENDPOINT_BASE = "https://www.googleapis.com/webmasters/v3/sites/";
 const SRD_PATH_PREFIX = "/dnd/5e/srd/";
 
 type SectionKey = "spells" | "equipment" | "monsters" | "rules";
-
-type OAuthRefreshCredentials = {
-  clientId: string;
-  clientSecret: string;
-  refreshToken: string;
-};
-
-type SearchAnalyticsRow = {
-  keys?: string[];
-  clicks?: number;
-  impressions?: number;
-  ctr?: number;
-  position?: number;
-};
-
-type SearchAnalyticsResponse = {
-  rows?: SearchAnalyticsRow[];
-};
 
 const SECTION_TITLES: Record<SectionKey, string> = {
   spells: "Spells",
@@ -60,73 +50,9 @@ const INDEX_PAGE_TITLES: Record<string, string> = {
   "magic-items": "Magic Items",
 };
 
-function parseFlagValue(flag: string): string | undefined {
-  const idx = process.argv.indexOf(flag);
-  if (idx === -1) return undefined;
-  return process.argv[idx + 1];
-}
-
-function hasFlag(flag: string): boolean {
-  return process.argv.includes(flag);
-}
-
-function parseIntFlag(flag: string, fallback: number, min: number, max: number): number {
-  const raw = parseFlagValue(flag);
-  if (!raw) return fallback;
-  const parsed = Number(raw);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.max(min, Math.min(max, Math.trunc(parsed)));
-}
-
-function getRequiredString(value: string | undefined, name: string): string {
-  const trimmed = String(value || "").trim();
-  if (!trimmed) throw new Error(`${name} is required.`);
-  return trimmed;
-}
-
-function loadOAuthRefreshCredentials(): OAuthRefreshCredentials {
-  return {
-    clientId: getRequiredString(process.env.GSC_OAUTH_CLIENT_ID, "GSC_OAUTH_CLIENT_ID"),
-    clientSecret: getRequiredString(
-      process.env.GSC_OAUTH_CLIENT_SECRET,
-      "GSC_OAUTH_CLIENT_SECRET",
-    ),
-    refreshToken: getRequiredString(
-      process.env.GSC_OAUTH_REFRESH_TOKEN,
-      "GSC_OAUTH_REFRESH_TOKEN",
-    ),
-  };
-}
-
-function dayWindowUtc(days: number, lagDays: number): { startDate: string; endDate: string } {
-  const DAY_MS = 24 * 60 * 60 * 1000;
-  const now = new Date();
-  const todayUtc = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0),
-  );
-  const endDate = new Date(todayUtc.getTime() - lagDays * DAY_MS);
-  const startDate = new Date(endDate.getTime() - (days - 1) * DAY_MS);
-  return {
-    startDate: startDate.toISOString().slice(0, 10),
-    endDate: endDate.toISOString().slice(0, 10),
-  };
-}
-
 function normalizeSrdPath(raw: string): string | null {
-  const trimmed = String(raw || "").trim();
-  if (!trimmed) return null;
-
-  let pathname = trimmed;
-  if (/^https?:\/\//i.test(trimmed)) {
-    try {
-      pathname = new URL(trimmed).pathname;
-    } catch {
-      return null;
-    }
-  }
-
-  if (!pathname.startsWith("/")) return null;
-  const normalized = pathname.replace(/\/+$/, "");
+  const normalized = normalizePathname(raw);
+  if (!normalized) return null;
   const href = normalized || "/";
   if (href === "/dnd/5e/srd") return "/dnd/5e/srd/contents";
   if (!href.startsWith(SRD_PATH_PREFIX)) return null;
@@ -213,97 +139,6 @@ function displayNameFromPath(pathname: string): string {
   }
 
   return titleCaseSlug(rest[rest.length - 1]);
-}
-
-async function getAccessTokenFromRefreshToken(
-  credentials: OAuthRefreshCredentials,
-): Promise<string> {
-  const tokenBody = new URLSearchParams();
-  tokenBody.set("grant_type", "refresh_token");
-  tokenBody.set("client_id", credentials.clientId);
-  tokenBody.set("client_secret", credentials.clientSecret);
-  tokenBody.set("refresh_token", credentials.refreshToken);
-
-  const response = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: {
-      "content-type": "application/x-www-form-urlencoded",
-    },
-    body: tokenBody.toString(),
-  });
-
-  const bodyText = await response.text();
-  if (!response.ok) {
-    throw new Error(`OAuth refresh token exchange failed (${response.status}): ${bodyText}`);
-  }
-
-  let tokenData: any;
-  try {
-    tokenData = JSON.parse(bodyText);
-  } catch {
-    throw new Error("Failed to parse OAuth token response JSON.");
-  }
-
-  const accessToken = String(tokenData.access_token || "").trim();
-  if (!accessToken) {
-    throw new Error("OAuth refresh response did not include access_token.");
-  }
-  return accessToken;
-}
-
-async function querySearchAnalytics(params: {
-  accessToken: string;
-  siteUrl: string;
-  startDate: string;
-  endDate: string;
-  rowLimit: number;
-}): Promise<SearchAnalyticsRow[]> {
-  const endpoint = `${SEARCH_ANALYTICS_ENDPOINT_BASE}${encodeURIComponent(params.siteUrl)}/searchAnalytics/query`;
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      authorization: `Bearer ${params.accessToken}`,
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      startDate: params.startDate,
-      endDate: params.endDate,
-      dimensions: ["page"],
-      rowLimit: params.rowLimit,
-      type: "web",
-      dimensionFilterGroups: [
-        {
-          groupType: "and",
-          filters: [
-            {
-              dimension: "page",
-              operator: "contains",
-              expression: SRD_PATH_PREFIX,
-            },
-          ],
-        },
-      ],
-    }),
-  });
-
-  const bodyText = await response.text();
-  if (!response.ok) {
-    throw new Error(`Search Analytics query failed (${response.status}): ${bodyText}`);
-  }
-
-  let payload: SearchAnalyticsResponse;
-  try {
-    payload = JSON.parse(bodyText) as SearchAnalyticsResponse;
-  } catch {
-    throw new Error("Failed to parse Search Analytics response JSON.");
-  }
-
-  return Array.isArray(payload.rows) ? payload.rows : [];
-}
-
-function toFiniteNumber(value: unknown): number | undefined {
-  const num = typeof value === "number" ? value : Number(value);
-  return Number.isFinite(num) ? num : undefined;
 }
 
 function buildPopularPagesData(params: {
@@ -399,14 +234,27 @@ async function main() {
     `Querying Google Search Console for ${siteUrl} from ${startDate} to ${endDate}...`,
   );
 
-  const credentials = loadOAuthRefreshCredentials();
-  const accessToken = await getAccessTokenFromRefreshToken(credentials);
+  const credentials = loadServiceAccountCredentials();
+  const accessToken = await getAccessTokenFromServiceAccount(credentials);
   const rows = await querySearchAnalytics({
     accessToken,
     siteUrl,
     startDate,
     endDate,
+    dimensions: ["page"],
     rowLimit,
+    dimensionFilterGroups: [
+      {
+        groupType: "and",
+        filters: [
+          {
+            dimension: "page",
+            operator: "contains",
+            expression: SRD_PATH_PREFIX,
+          },
+        ],
+      },
+    ],
   });
   console.log(`Fetched ${rows.length} rows.`);
 
