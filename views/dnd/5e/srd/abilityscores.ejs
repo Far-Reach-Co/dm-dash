@@ -53,7 +53,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Ability Scores',
+      srdPageSummary: 'Quick-reference explanations for the six D&D 5E ability scores and what each one affects.'
+    }) %>
     <br />
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>

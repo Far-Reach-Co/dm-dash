@@ -16,21 +16,35 @@
 }
 
 .intro h1 {
-  font-size: 2.5rem;
+  font-size: 2.15rem;
+  line-height: 1.15;
   background: linear-gradient(135deg, var(--orange3) 0%, var(--orange2) 50%, var(--blue6) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-shadow: 0 2px 20px rgba(116, 167, 215, 0.2);
+  max-width: 720px;
 }
 
 .intro small,
 .intro p {
   color: var(--light-gray);
-  font-size: 1.1rem;
-  max-width: 600px;
+  font-size: 1rem;
+  max-width: 640px;
   text-align: center;
   line-height: 1.6;
+}
+
+.intro .intro-label {
+  color: var(--main-gray);
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  max-width: none;
+}
+
+.intro .intro-summary {
+  margin-top: 0.4rem;
 }
 
 .intro small a,

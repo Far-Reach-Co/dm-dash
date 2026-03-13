@@ -39,7 +39,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Equipment And Magic Items',
+      srdPageSummary: 'Browse D&D 5E SRD equipment and magic items with organized sections for armor, weapons, gear, tools, and treasures.'
+    }) %>
     <br />
 
     <div class="breadcrumbs">

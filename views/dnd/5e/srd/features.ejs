@@ -39,7 +39,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Features',
+      srdPageSummary: 'Browse D&D 5E SRD class features with links to related classes and subclasses.'
+    }) %>
     <br />
 
     <div class="breadcrumbs">

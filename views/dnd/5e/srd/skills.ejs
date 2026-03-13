@@ -64,7 +64,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Skills',
+      srdPageSummary: 'Browse the D&D 5E SRD skills with linked ability scores and quick-reference descriptions.'
+    }) %>
     <br />
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>

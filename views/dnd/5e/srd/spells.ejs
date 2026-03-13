@@ -39,7 +39,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Spells',
+      srdPageSummary: 'Browse the full D&D 5E SRD spell list with filters by level, school, and class.'
+    }) %>
     <br />
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
