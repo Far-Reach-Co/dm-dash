@@ -15,10 +15,22 @@
     };
     const levelDisplayShort = level => level === 0 ? 'Cantrip' : 'Level ' + level;
     const componentNames = { V: 'Verbal', S: 'Somatic', M: 'Material' };
+    const classesStr = spell.classes.map(c => c.name).join(', ');
+    const baseDamageAtCharacterLevel = spell.damage?.damage_at_character_level
+      ? Object.values(spell.damage.damage_at_character_level)[0]
+      : '';
+    const baseDamageAtSlotLevel = spell.damage?.damage_at_slot_level
+      ? Object.values(spell.damage.damage_at_slot_level)[0]
+      : '';
+    const baseDamage = baseDamageAtCharacterLevel || baseDamageAtSlotLevel || '';
+    const hasDamage = Boolean(spell.damage && spell.damage.damage_type && baseDamage);
+    const spellTitle = hasDamage
+      ? `${spell.name} 5e Spell: Damage, Range, and Rules`
+      : `${spell.name} 5e Spell: Range, Duration, and Rules`;
+    const spellSummary = `${spell.name} is a ${levelDisplay(spell.level)} ${spell.school.name} spell for ${classesStr}. Casting time: ${spell.casting_time}. Range: ${spell.range}. Duration: ${spell.duration}.${hasDamage ? ` It deals ${baseDamage} ${spell.damage.damage_type.name} damage at its base level.` : ''}`;
 
     // Build FAQ entries from spell data
     const faqs = [];
-    const classesStr = spell.classes.map(c => c.name).join(', ');
     if (spell.classes.length) {
       const subclassStr = spell.subclasses && spell.subclasses.length ? ` It is also available to: ${spell.subclasses.map(s => s.name).join(', ')}.` : '';
       faqs.push({
@@ -38,6 +50,19 @@
         ? `${spell.name} is a cantrip (0th-level) ${spell.school.name} spell.`
         : `${spell.name} is a ${levelDisplay(spell.level)} ${spell.school.name} spell.`
     });
+    if (hasDamage) {
+      const scalingParts = [];
+      if (spell.damage.damage_at_character_level) {
+        scalingParts.push('Its damage increases with character level.');
+      }
+      if (spell.damage.damage_at_slot_level) {
+        scalingParts.push('Its damage increases when you cast it with a higher-level slot.');
+      }
+      faqs.push({
+        q: `How much damage does ${spell.name} do in D&D 5e?`,
+        a: `${spell.name} deals ${baseDamage} ${spell.damage.damage_type.name} damage at its base level in D&D 5th Edition.${scalingParts.length ? ` ${scalingParts.join(' ')}` : ''}`
+      });
+    }
     faqs.push({
       q: `What is the range and casting time of ${spell.name} in D&D 5e?`,
       a: `${spell.name} has a range of ${spell.range} and a casting time of ${spell.casting_time} in D&D 5th Edition.`
@@ -50,33 +75,34 @@
     }
 
     // Build richer meta description
-    const spellMetaDesc = `${spell.name}: ${levelDisplay(spell.level)} ${spell.school.name} spell for ${classesStr}. Casting time: ${spell.casting_time}. Range: ${spell.range}.${spell.concentration ? ' Concentration.' : ''}${spell.ritual ? ' Ritual.' : ''} Full spell details and rules.`.substring(0, 160);
+    const damageSnippet = hasDamage ? ` Damage: ${baseDamage} ${spell.damage.damage_type.name}.` : '';
+    const spellMetaDesc = `${spell.name} in D&D 5e: ${levelDisplay(spell.level)} ${spell.school.name} spell for ${classesStr}.${damageSnippet} Casting time: ${spell.casting_time}. Range: ${spell.range}.${spell.concentration ? ' Concentration.' : ''}${spell.ritual ? ' Ritual.' : ''}`.substring(0, 160);
   %>
 
-  <title><%= spell.name %> - D&D 5E Spell | Far Reach Co.</title>
+  <title><%= spellTitle %> | Far Reach Co.</title>
   <meta name="description" content="<%= spellMetaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>" />
-  <meta property="og:title" content="<%= spell.name %> - D&D 5E Spell" />
-  <meta property="og:description" content="<%= levelDisplay(spell.level) %> <%= spell.school.name %> spell. Casting time: <%= spell.casting_time %>. Range: <%= spell.range %>." />
+  <meta property="og:title" content="<%= spellTitle %>" />
+  <meta property="og:description" content="<%= spellMetaDesc %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="<%= spell.name %> - D&D 5E Spell" />
-  <meta name="twitter:description" content="<%= levelDisplay(spell.level) %> <%= spell.school.name %> spell. Casting time: <%= spell.casting_time %>." />
+  <meta name="twitter:title" content="<%= spellTitle %>" />
+  <meta name="twitter:description" content="<%= spellMetaDesc %>" />
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Article",
-      "name": "<%= spell.name %> - D&D 5E Spell",
+      "name": "<%= spellTitle %>",
       "headline": "<%= spell.name %>",
-      "description": "<%= levelDisplay(spell.level) %> <%= spell.school.name %> spell for <%= spell.classes.map(c => c.name).join(', ') %>",
+      "description": "<%= spellMetaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/spells/<%= spell.index %>",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -138,7 +164,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: spellTitle,
+      srdPageSummary: spellSummary
+    }) %>
     <br />
     <!-- Breadcrumb -->
     <div class="breadcrumbs">
@@ -151,7 +180,7 @@
     <hr />
 
     <!-- Spell Header -->
-    <h1><%= spell.name %></h1>
+    <h2><%= spell.name %></h2>
     <div class="inline-div">
       <i><a href="/dnd/5e/srd/spells/level/<%= spell.level %>"><%= levelDisplay(spell.level) %></a></i>
       <i><a href="/dnd/5e/srd/spells/school/<%= spell.school.index %>"><%= spell.school.name %></a></i>
@@ -312,6 +341,7 @@
       <a href="/dnd/5e/srd/spells">&larr; Back to Spell List</a>
     </div>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

@@ -5,20 +5,20 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D 5E Damage Types Reference | Far Reach Co.</title>
-  <meta name="description" content="Complete D&D 5E damage types reference including Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder damage with descriptions." />
+  <title>D&D 5E Damage Types List: Resistance, Immunity, Vulnerability | Far Reach Co.</title>
+  <meta name="description" content="Full list of damage types in D&D 5E, including Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder, plus resistance, immunity, and vulnerability rules." />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/damage-types" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/damage-types" />
-  <meta property="og:title" content="D&D 5E Damage Types Reference" />
-  <meta property="og:description" content="Complete D&D 5E damage types reference with descriptions." />
+  <meta property="og:title" content="D&D 5E Damage Types List: Resistance, Immunity, Vulnerability" />
+  <meta property="og:description" content="Full list of damage types in D&D 5E with quick rules for resistance, immunity, and vulnerability." />
   <meta property="og:site_name" content="Far Reach Co." />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "D&D 5E Damage Types Reference",
+      "name": "D&D 5E Damage Types List: Resistance, Immunity, Vulnerability",
       "url": "https://farreachco.com/dnd/5e/srd/damage-types",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -88,8 +88,8 @@
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro', {
-      srdPageHeading: 'D&D 5E Damage Types Reference',
-      srdPageSummary: 'Quick-reference descriptions for all 13 D&D 5E damage types, plus the core resistance, immunity, and vulnerability rules that affect them.'
+      srdPageHeading: 'D&D 5E Damage Types',
+      srdPageSummary: 'Use this full D&D 5E damage types list to compare every type of damage in the SRD, plus the core resistance, immunity, and vulnerability rules.'
     }) %>
     <br />
     <div class="breadcrumbs">
@@ -98,8 +98,9 @@
       <span class="current">Damage Types</span>
     </div>
     <hr />
-    <h2>Damage Types Overview</h2>
-    <p>D&D 5e has <strong>13 damage types</strong>: Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder. Every source of damage — weapons, spells, traps, and monster abilities — deals one of these types. Creatures can have <strong>resistance</strong> (half damage), <strong>immunity</strong> (no damage), or <strong>vulnerability</strong> (double damage) to specific types.</p>
+    <h2>Full List of D&D 5E Damage Types</h2>
+    <p>D&D 5e has <strong>13 damage types</strong>: Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder. Every source of damage in D&D 5e — weapons, spells, traps, and monster abilities — deals one of these types. Creatures can have <strong>resistance</strong> (half damage), <strong>immunity</strong> (no damage), or <strong>vulnerability</strong> (double damage) to specific types.</p>
+    <p>The three physical damage types in D&D 5e are <strong>Bludgeoning</strong>, <strong>Piercing</strong>, and <strong>Slashing</strong>. The other ten damage types are magical, elemental, or supernatural: Acid, Cold, Fire, Force, Lightning, Necrotic, Poison, Psychic, Radiant, and Thunder.</p>
     <ul>
       <% data.forEach(function(dType){ %>
       <li>
@@ -119,6 +120,10 @@
       </div>
     </div>
     <% }); %>
+
+    <hr class="w-75" />
+    <h2>Resistance, Immunity, and Vulnerability</h2>
+    <p>When players ask about the different types of damage in D&D 5e, they usually also need the core modifiers that interact with them. <strong>Resistance</strong> halves damage from a type. <strong>Immunity</strong> reduces that damage to zero. <strong>Vulnerability</strong> doubles the damage taken from that type after other modifiers are applied.</p>
 
     <hr class="w-75" />
     <section class="srd-faq">
@@ -143,8 +148,13 @@
         <summary>What damage types bypass physical resistance in D&D 5e?</summary>
         <p>Many monsters resist Bludgeoning, Piercing, and Slashing from non-magical weapons. Magical weapons bypass this. Spells dealing Fire, Radiant, Force, or other elemental damage types are unaffected by physical resistance entirely.</p>
       </details>
+      <details>
+        <summary>What are the physical damage types in D&D 5e?</summary>
+        <p>The physical damage types in D&D 5e are Bludgeoning, Piercing, and Slashing. Many monsters resist these types when they come from non-magical weapons.</p>
+      </details>
     </section>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

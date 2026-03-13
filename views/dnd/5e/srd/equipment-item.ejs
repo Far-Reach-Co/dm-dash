@@ -10,6 +10,12 @@
     const category = item.equipment_category?.name || 'Equipment';
     const subCategory = item.category_range || item.armor_category || item.gear_category?.name || '';
     const costStr = item.cost ? `${item.cost.quantity} ${item.cost.unit}` : '';
+    const hasContents = Boolean(item.contents && item.contents.length);
+    const isArmor = Boolean(item.armor_class);
+    const isWeapon = Boolean(item.damage || item.properties?.length || item.weapon_category);
+    const visibleContents = hasContents
+      ? item.contents.slice(0, 6).map((c) => c.quantity > 1 ? `${c.quantity}x ${c.item.name}` : c.item.name)
+      : [];
 
     // Build FAQ entries from available item data
     const faqs = [];
@@ -57,9 +63,17 @@
       });
     }
 
-    // Build richer meta description
+    let pageTitle = `${item.name} 5e Equipment Stats`;
+    if (hasContents) {
+      pageTitle = `${item.name} 5e: Cost, Contents, and Weight`;
+    } else if (isArmor) {
+      pageTitle = `${item.name} 5e Armor Stats: AC, Cost, and Weight`;
+    } else if (isWeapon) {
+      pageTitle = `${item.name} 5e Weapon Stats: Damage, Cost, and Range`;
+    }
+
     const descParts = [];
-    if (item.contents && item.contents.length) {
+    if (hasContents) {
       const names = item.contents.slice(0, 4).map(c => c.item.name).join(', ');
       descParts.push(`Contains ${names}${item.contents.length > 4 ? ' & more' : ''}.`);
     }
@@ -68,33 +82,50 @@
     if (item.range) descParts.push(`Range ${item.range.normal}/${item.range.long || item.range.normal} ft.`);
     if (costStr) descParts.push(`Cost: ${costStr}.`);
     if (item.weight) descParts.push(`Weight: ${item.weight} lb.`);
-    const metaDesc = `${item.name} D&D 5e stats: ${descParts.join(' ')} Complete reference for ${subCategory || category}.`.substring(0, 160);
+    const metaDesc = `${item.name} in D&D 5e: ${descParts.join(' ')} Full ${subCategory || category} stats, rules, and quick answers.`.substring(0, 160);
+
+    const summaryParts = [];
+    if (costStr) summaryParts.push(`costs ${costStr}`);
+    if (hasContents) {
+      summaryParts.push(`contains ${visibleContents.join(', ')}${item.contents.length > visibleContents.length ? ', and more' : ''}`);
+    }
+    if (item.weight) summaryParts.push(`weighs ${item.weight} lb.`);
+    if (item.damage) summaryParts.push(`deals ${item.damage.damage_dice} ${item.damage.damage_type.name} damage`);
+    if (item.armor_class) {
+      summaryParts.push(`provides AC ${item.armor_class.base}${item.armor_class.dex_bonus ? ' + Dex' : ''}`);
+    }
+    if (item.range) {
+      summaryParts.push(`has a range of ${item.range.normal}${item.range.long ? `/${item.range.long}` : ''} ft.`);
+    }
+    const summaryText = summaryParts.length
+      ? `${item.name} in D&D 5e ${summaryParts.join(', ')}.`
+      : `${item.name} is a D&D 5e ${subCategory || category.toLowerCase()} entry with SRD rules and stats.`;
   %>
 
-  <title><%= item.name %> - D&D 5E <%= category %> | Far Reach Co.</title>
+  <title><%= pageTitle %> | Far Reach Co.</title>
   <meta name="description" content="<%= metaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>" />
-  <meta property="og:title" content="<%= item.name %> - D&D 5E <%= category %>" />
-  <meta property="og:description" content="<%= subCategory || category %>. <%= costStr ? 'Cost: ' + costStr : '' %>" />
+  <meta property="og:title" content="<%= pageTitle %>" />
+  <meta property="og:description" content="<%= metaDesc %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="<%= item.name %> - D&D 5E <%= category %>" />
-  <meta name="twitter:description" content="<%= subCategory || category %>. <%= costStr ? 'Cost: ' + costStr : '' %>" />
+  <meta name="twitter:title" content="<%= pageTitle %>" />
+  <meta name="twitter:description" content="<%= metaDesc %>" />
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Article",
-      "name": "<%= item.name %> - D&D 5E <%= category %>",
+      "name": "<%= pageTitle %>",
       "headline": "<%= item.name %>",
-      "description": "<%= subCategory || category %> for D&D 5th Edition",
+      "description": "<%= metaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/equipment/<%= item.index %>",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -156,7 +187,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: pageTitle,
+      srdPageSummary: summaryText
+    }) %>
     <br />
     <!-- Breadcrumb -->
     <div class="breadcrumbs">
@@ -169,7 +203,7 @@
     <hr />
 
     <!-- Item Header -->
-    <h1><%= item.name %></h1>
+    <h2><%= item.name %></h2>
     <div class="inline-div">
       <i><%= category %></i>
       <% if (subCategory) { %><i>- <%= subCategory %></i><% } %>
@@ -316,6 +350,7 @@
       <a href="/dnd/5e/srd/equipment">&larr; Back to Equipment List</a>
     </div>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

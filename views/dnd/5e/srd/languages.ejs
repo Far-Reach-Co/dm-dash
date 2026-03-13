@@ -5,20 +5,20 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D 5E Languages Reference | Far Reach Co.</title>
-  <meta name="description" content="Complete D&D 5E languages reference including Common, Dwarvish, Elvish, Giant, Gnomish, Goblin, Halfling, Orc, Abyssal, Celestial, Draconic, Deep Speech, Infernal, Primordial, Sylvan, and Undercommon." />
+  <title>D&D 5E Languages List: Standard and Exotic Languages | Far Reach Co.</title>
+  <meta name="description" content="Full D&D 5E languages list, including Standard and Exotic languages like Common, Elvish, Draconic, Infernal, and Undercommon, plus typical speakers and scripts." />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/languages" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/languages" />
-  <meta property="og:title" content="D&D 5E Languages Reference" />
-  <meta property="og:description" content="Complete D&D 5E languages reference with standard and exotic languages." />
+  <meta property="og:title" content="D&D 5E Languages List: Standard and Exotic Languages" />
+  <meta property="og:description" content="Full D&D 5E language list with Standard and Exotic languages, typical speakers, and scripts." />
   <meta property="og:site_name" content="Far Reach Co." />
   <meta name="twitter:card" content="summary" />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "D&D 5E Languages Reference",
+      "name": "D&D 5E Languages List: Standard and Exotic Languages",
       "url": "https://farreachco.com/dnd/5e/srd/languages",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -73,6 +73,11 @@
           "@type": "Question",
           "name": "What is the difference between Standard and Exotic languages in D&D 5e?",
           "acceptedAnswer": { "@type": "Answer", "text": "Standard languages are spoken by common humanoid races and are widely available as starting languages. Exotic languages are associated with monsters, outsiders, or ancient cultures — they typically require a special background, race, or DM approval to learn." }
+        },
+        {
+          "@type": "Question",
+          "name": "What languages can player characters start with in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Most player characters start with Common plus any additional languages granted by their race, background, or class features. Elves usually start with Common and Elvish, dwarves with Common and Dwarvish, and similar race-based language pairs." }
         }
       ]
     }
@@ -88,8 +93,8 @@
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro', {
-      srdPageHeading: 'D&D 5E SRD Languages',
-      srdPageSummary: 'Browse D&D 5E SRD languages with script, speaker, and lore notes where available.'
+      srdPageHeading: 'D&D 5E Languages List',
+      srdPageSummary: 'Use this D&D 5E language list to browse every Standard and Exotic SRD language, plus scripts, speakers, and quick lore notes.'
     }) %>
     <br />
     <div class="breadcrumbs">
@@ -98,8 +103,17 @@
       <span class="current">Languages</span>
     </div>
     <hr />
-    <h2>Languages</h2>
+    <h2>Full List of D&D 5E Languages</h2>
     <p>D&D 5e includes <strong>16 languages</strong> split into two categories. <strong>Standard languages</strong> (Common, Dwarvish, Elvish, Giant, Gnomish, Goblin, Halfling, Orc) are spoken by common races and are the most likely to be encountered in everyday play. <strong>Exotic languages</strong> (Abyssal, Celestial, Draconic, Deep Speech, Infernal, Primordial, Sylvan, Undercommon) are associated with monsters, outsiders, and ancient cultures. Most characters start with Common plus any languages granted by their race or background.</p>
+    <p>When people search for D&D languages, they usually want the full language list first, then who speaks each language and what script it uses. This page is built to answer that directly.</p>
+    <div class="inline-div">
+      <b>Standard Languages:</b>
+      <div>Common, Dwarvish, Elvish, Giant, Gnomish, Goblin, Halfling, Orc</div>
+    </div>
+    <div class="inline-div">
+      <b>Exotic Languages:</b>
+      <div>Abyssal, Celestial, Draconic, Deep Speech, Infernal, Primordial, Sylvan, Undercommon</div>
+    </div>
     <ul>
       <% data.forEach(function(language){ %>
       <li>
@@ -152,8 +166,13 @@
         <summary>What is the difference between Standard and Exotic languages in D&D 5e?</summary>
         <p>Standard languages are spoken by common humanoid races and widely available as starting languages. Exotic languages are tied to monsters, outsiders, or ancient cultures and typically require a special race, background, or DM permission to learn.</p>
       </details>
+      <details>
+        <summary>What languages can player characters start with in D&D 5e?</summary>
+        <p>Most player characters start with Common plus any additional languages granted by their race, background, or class features. For example, elves usually start with Common and Elvish, while dwarves start with Common and Dwarvish.</p>
+      </details>
     </section>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 
