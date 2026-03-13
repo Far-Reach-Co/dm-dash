@@ -5,19 +5,22 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D 5E Ability Scores Reference | Far Reach Co.</title>
-  <meta name="description" content="Complete D&D 5E ability scores reference including Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma with descriptions, modifiers, and associated skills." />
+  <title>D&D 5E Ability Scores: Modifiers, Checks, and Skills | Far Reach Co.</title>
+  <meta name="description" content="Learn the six D&D 5E ability scores: Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma, plus ability modifiers, ability checks, saving throws, and associated skills." />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/ability-scores" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/ability-scores" />
-  <meta property="og:title" content="D&D 5E Ability Scores Reference" />
+  <meta property="og:title" content="D&D 5E Ability Scores: Modifiers, Checks, and Skills" />
+  <meta property="og:description" content="Learn what each ability score does in D&D 5E, how modifiers work, and which skills use Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma." />
   <meta property="og:site_name" content="Far Reach Co." />
   <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Ability Scores: Modifiers, Checks, and Skills" />
+  <meta name="twitter:description" content="Learn what each D&D 5E ability score does, how modifiers are calculated, and how ability checks and skills use them." />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "D&D 5E Ability Scores Reference",
+      "name": "D&D 5E Ability Scores: Modifiers, Checks, and Skills",
       "url": "https://farreachco.com/dnd/5e/srd/ability-scores",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -43,6 +46,39 @@
       }
     }
   </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What are the six ability scores in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "The six ability scores in D&D 5e are Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma." }
+        },
+        {
+          "@type": "Question",
+          "name": "How do ability modifiers work in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "An ability modifier is based on your score. In D&D 5e, you subtract 10 from the ability score, divide by 2, and round down. A score of 10 or 11 gives a +0 modifier, 12 or 13 gives +1, 14 or 15 gives +2, and so on." }
+        },
+        {
+          "@type": "Question",
+          "name": "What is an ability check in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "An ability check in D&D 5e is a d20 roll that uses one of the six ability modifiers. Skill checks are a type of ability check, often adding proficiency if your character is trained in that skill." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does Strength do in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Strength measures bodily power, athletic training, and raw force. It affects Athletics checks, carrying capacity, jumping distance, and many melee attack and damage rolls." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does Dexterity do in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Dexterity measures agility, reflexes, and balance. It affects Armor Class, initiative, Dexterity saving throws, ranged attacks, finesse weapons, and skills like Acrobatics, Sleight of Hand, and Stealth." }
+        }
+      ]
+    }
+  </script>
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
   <script src="/lib/MobileNavHandler.js" defer></script>
@@ -54,8 +90,8 @@
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro', {
-      srdPageHeading: 'D&D 5E SRD Ability Scores',
-      srdPageSummary: 'Quick-reference explanations for the six D&D 5E ability scores and what each one affects.'
+      srdPageHeading: 'D&D 5E Ability Scores',
+      srdPageSummary: 'Learn what each D&D 5E ability score does, how ability modifiers work, and which skills and checks use Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma.'
     }) %>
     <br />
     <div class="breadcrumbs">
@@ -64,7 +100,17 @@
       <span class="current">Ability Scores</span>
     </div>
     <hr />
-    <h2>Ability Scores</h2>
+    <h2>The Six Ability Scores in D&D 5E</h2>
+    <p>The six D&D 5e ability scores are <strong>Strength</strong>, <strong>Dexterity</strong>, <strong>Constitution</strong>, <strong>Intelligence</strong>, <strong>Wisdom</strong>, and <strong>Charisma</strong>. These scores define what your character is naturally good at and feed into attack rolls, spellcasting, skills, saving throws, and class features.</p>
+    <p>Each ability score also gives you an <strong>ability modifier</strong>. In D&D 5e, the modifier is calculated by subtracting 10 from the score, dividing by 2, and rounding down. That modifier is what you usually add to ability checks, skill checks, saving throws, and many attacks.</p>
+    <div class="inline-div">
+      <b>Ability Checks:</b>
+      <div>An ability check is a d20 roll using one of these six modifiers. Skills like Stealth, Perception, and Athletics are ability checks tied to specific abilities.</div>
+    </div>
+    <div class="inline-div">
+      <b>Saving Throws:</b>
+      <div>Each ability also has a matching saving throw that helps resist spells, traps, poison, fear, grapples, and other threats.</div>
+    </div>
     <ul>
       <% data.forEach(function(score){ %>
       <li>
@@ -82,6 +128,7 @@
           <% score.desc.forEach((str, index) => { %>
           <p><%= str %></p>
           <% }) %>
+          <p><b>Ability checks using <%= score.full_name %>:</b> <%= score.skills.map((skill) => skill.name).join(', ') || 'None listed in the SRD skill set.' %></p>
           <br />
           <ul>
             <% score.skills.forEach(function(skill){ %>
@@ -95,7 +142,33 @@
       </div>
     </div>
     <% }); %>
+
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <details>
+        <summary>What are the six ability scores in D&D 5e?</summary>
+        <p>The six ability scores in D&D 5e are Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma.</p>
+      </details>
+      <details>
+        <summary>How do ability modifiers work in D&D 5e?</summary>
+        <p>An ability modifier is based on your score. Subtract 10 from the ability score, divide by 2, and round down. A score of 10 or 11 gives a +0 modifier, 12 or 13 gives +1, 14 or 15 gives +2, and so on.</p>
+      </details>
+      <details>
+        <summary>What is an ability check in D&D 5e?</summary>
+        <p>An ability check in D&D 5e is a d20 roll using one of your six ability modifiers. Skill checks are a specific kind of ability check, and you add proficiency if your character is trained in that skill.</p>
+      </details>
+      <details>
+        <summary>What does Strength do in D&D 5e?</summary>
+        <p>Strength measures bodily power, athletic training, and raw force. It affects Athletics checks, carrying capacity, jumping, and many melee weapon attacks and damage rolls.</p>
+      </details>
+      <details>
+        <summary>What does Dexterity do in D&D 5e?</summary>
+        <p>Dexterity measures agility, reflexes, and balance. It affects Armor Class, initiative, Dexterity saving throws, ranged attacks, finesse weapons, and skills like Acrobatics, Sleight of Hand, and Stealth.</p>
+      </details>
+    </section>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

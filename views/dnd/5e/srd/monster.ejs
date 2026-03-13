@@ -28,6 +28,8 @@
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
     const monsterImage = monster.image ? imageBaseUrl + monster.image : null;
+    const monsterTitle = `${monster.name} 5e Stat Block: AC, HP, CR, and Actions`;
+    const monsterSummary = `${monster.name} is a ${monster.size} ${monster.type} with ${monster.alignment} alignment and Challenge Rating ${crDisplay(monster.challenge_rating)} in D&D 5e. This stat block includes AC ${monster.armor_class[0]?.value}, ${monster.hit_points} hit points, speeds, traits, and actions.`;
 
     // Build FAQ entries from monster data
     const faqs = [];
@@ -64,15 +66,15 @@
     }
   %>
 
-  <title><%= monster.name %> - D&D 5E Monster Stats | Far Reach Co.</title>
-  <meta name="description" content="<%= monster.name %> is a <%= monster.size %> <%= monster.type %> with CR <%= crDisplay(monster.challenge_rating) %>. Complete stat block with AC <%= monster.armor_class[0]?.value %>, HP <%= monster.hit_points %>, abilities, actions, and more." />
+  <title><%= monsterTitle %> | Far Reach Co.</title>
+  <meta name="description" content="<%= monster.name %> is a <%= monster.size %> <%= monster.type %> with CR <%= crDisplay(monster.challenge_rating) %>. Complete 5e stat block with AC <%= monster.armor_class[0]?.value %>, HP <%= monster.hit_points %>, abilities, actions, and more." />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>" />
-  <meta property="og:title" content="<%= monster.name %> - D&D 5E Stats" />
-  <meta property="og:description" content="<%= monster.size %> <%= monster.type %>, CR <%= crDisplay(monster.challenge_rating) %>. AC <%= monster.armor_class[0]?.value %>, HP <%= monster.hit_points %>." />
+  <meta property="og:title" content="<%= monsterTitle %>" />
+  <meta property="og:description" content="<%= monsterSummary %>" />
   <meta property="og:site_name" content="Far Reach Co." />
   <% if (monsterImage) { %>
   <meta property="og:image" content="<%= monsterImage %>" />
@@ -80,8 +82,8 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="<%= monsterImage ? 'summary_large_image' : 'summary' %>" />
-  <meta name="twitter:title" content="<%= monster.name %> - D&D 5E Stats" />
-  <meta name="twitter:description" content="<%= monster.size %> <%= monster.type %>, CR <%= crDisplay(monster.challenge_rating) %>." />
+  <meta name="twitter:title" content="<%= monsterTitle %>" />
+  <meta name="twitter:description" content="<%= monsterSummary %>" />
   <% if (monsterImage) { %>
   <meta name="twitter:image" content="<%= monsterImage %>" />
   <% } %>
@@ -91,9 +93,9 @@
     {
       "@context": "https://schema.org",
       "@type": "Article",
-      "name": "<%= monster.name %> - D&D 5E Stats",
+      "name": "<%= monsterTitle %>",
       "headline": "<%= monster.name %>",
-      "description": "<%= monster.size %> <%= monster.type %> with Challenge Rating <%= crDisplay(monster.challenge_rating) %>",
+      "description": "<%= monsterSummary %>",
       "url": "https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>",
       <% if (monsterImage) { %> "image": "<%= monsterImage %>",
       <% } %> "breadcrumb": {
@@ -156,7 +158,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: monsterTitle,
+      srdPageSummary: monsterSummary
+    }) %>
     <br />
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
@@ -177,7 +182,7 @@
       </div>
       <% } %>
       <div style="flex: 1; min-width: 300px;">
-        <h1><%= monster.name %></h1>
+        <h2><%= monster.name %></h2>
         <div class="inline-div">
           <i><%= monster.size %>,</i>
           <i><a href="/dnd/5e/srd/monsters/type/<%= typeSlug %>"><%= monster.type %></a>,</i>
@@ -561,6 +566,7 @@
       </div>
     </div>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

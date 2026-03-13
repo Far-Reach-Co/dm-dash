@@ -12,9 +12,17 @@
     const typeAttunementLine = item.desc && item.desc.length ? item.desc[0] : '';
     const requiresAttunement = typeAttunementLine.toLowerCase().includes('attunement');
     const descBody = item.desc && item.desc.length > 1 ? item.desc[1] : (item.desc && item.desc.length ? item.desc[0] : '');
+    const firstRuleSentence = String(descBody || '').split(/(?<=[.!?])\s+/)[0] || `${item.name} has a full SRD rules entry on this page.`;
+    const variantNames = item.variants && item.variants.length
+      ? item.variants.map((variant) => variant.name)
+      : [];
 
     // Build FAQ entries
     const faqs = [];
+    faqs.push({
+      q: `What does the ${item.name} do in D&D 5e?`,
+      a: firstRuleSentence
+    });
     faqs.push({
       q: `What rarity is the ${item.name} in D&D 5e?`,
       a: `The ${item.name} is a ${rarity} magic item in D&D 5th Edition.`
@@ -36,34 +44,37 @@
       });
     }
 
-    // Richer meta description
-    const metaDesc = `${item.name} — ${rarity} ${category} in D&D 5e.${requiresAttunement ? ' Requires attunement.' : ''} ${descBody.substring(0, 110)}`.substring(0, 160);
+    const pageTitle = variantNames.length
+      ? `${item.name} 5e Magic Item: Variants, Attunement, and Rules`
+      : `${item.name} 5e Magic Item: Rarity, Attunement, and Rules`;
+    const metaDesc = `${item.name} in D&D 5e: ${rarity} ${category}.${variantNames.length ? ` Variants: ${variantNames.join(', ')}.` : ''}${requiresAttunement ? ' Requires attunement.' : ''} ${firstRuleSentence}`.substring(0, 160);
+    const summaryText = `${item.name} is a ${rarity.toLowerCase()} ${category.toLowerCase()} in D&D 5e.${variantNames.length ? ` Known variants include ${variantNames.join(', ')}.` : ''}${requiresAttunement ? ' It requires attunement.' : ' It does not require attunement.'}`;
   %>
 
-  <title><%= item.name %> - D&D 5E Magic Item | Far Reach Co.</title>
+  <title><%= pageTitle %> | Far Reach Co.</title>
   <meta name="description" content="<%= metaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/magic-items/<%= item.index %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/magic-items/<%= item.index %>" />
-  <meta property="og:title" content="<%= item.name %> - D&D 5E Magic Item" />
-  <meta property="og:description" content="<%= rarity %> magic item. <%= category %>." />
+  <meta property="og:title" content="<%= pageTitle %>" />
+  <meta property="og:description" content="<%= metaDesc %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="<%= item.name %> - D&D 5E Magic Item" />
-  <meta name="twitter:description" content="<%= rarity %> magic item. <%= category %>." />
+  <meta name="twitter:title" content="<%= pageTitle %>" />
+  <meta name="twitter:description" content="<%= metaDesc %>" />
 
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Article",
-      "name": "<%= item.name %> - D&D 5E Magic Item",
+      "name": "<%= pageTitle %>",
       "headline": "<%= item.name %>",
-      "description": "<%= rarity %> <%= category %> for D&D 5th Edition",
+      "description": "<%= metaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/magic-items/<%= item.index %>",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -125,7 +136,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: pageTitle,
+      srdPageSummary: summaryText
+    }) %>
     <br />
     <!-- Breadcrumb -->
     <div class="breadcrumbs">
@@ -138,7 +152,7 @@
     <hr />
 
     <!-- Item Header -->
-    <h1><%= item.name %></h1>
+    <h2><%= item.name %></h2>
     <div class="inline-div">
       <i><%= category %></i>
       <i class="text-purple">- <%= rarity %></i>
@@ -188,6 +202,7 @@
       <a href="/dnd/5e/srd/equipment">&larr; Back to Equipment List</a>
     </div>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

@@ -5,31 +5,79 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= classData.name %> - D&D 5E Class | Far Reach Co.</title>
-  <meta name="description" content="<%= classData.name %> class reference for D&D 5E SRD including progression table, proficiencies, starting equipment, and class features." />
+  <%
+    const savingThrowNames = (classData.saving_throws || []).map((score) => score.name);
+    const proficiencyNames = (classData.proficiencies || [])
+      .map((prof) => String(prof.name || '').replace(/^Skill:\s*/, ''))
+      .filter(Boolean);
+    const spellListLabel = classSpellCount > 0 ? `${classSpellCount} class spells` : 'no spell list';
+    const classTitle = classSpellCount > 0
+      ? `${classData.name} 5e Class: Features, Hit Die, and Spell List`
+      : `${classData.name} 5e Class: Features, Hit Die, and Proficiencies`;
+    const classMetaDesc = `${classData.name} in D&D 5e: hit die d${classData.hit_die}, saving throws ${savingThrowNames.join(' and ')}.${classSpellCount > 0 ? ` Includes the ${classData.name.toLowerCase()} spell list with ${classSpellCount} SRD spells.` : ''} Full class features, proficiencies, and starting equipment.`.substring(0, 160);
+    const classSummary = `${classData.name} is a D&D 5e class with a d${classData.hit_die} hit die and ${savingThrowNames.join(' and ')} saving throws.${classSpellCount > 0 ? ` This page also links the full ${classData.name.toLowerCase()} spell list.` : ''}`;
+    const classFaqs = [
+      {
+        q: `What hit die does the ${classData.name} use in D&D 5e?`,
+        a: `The ${classData.name} uses a d${classData.hit_die} hit die in D&D 5e.`
+      },
+      {
+        q: `What saving throws does the ${classData.name} get in D&D 5e?`,
+        a: savingThrowNames.length
+          ? `The ${classData.name} is proficient in ${savingThrowNames.join(' and ')} saving throws in D&D 5e.`
+          : `See the class details on this page for the ${classData.name}'s saving throw proficiencies in D&D 5e.`
+      },
+      {
+        q: `What proficiencies does the ${classData.name} start with in D&D 5e?`,
+        a: proficiencyNames.length
+          ? `The ${classData.name} starts with proficiencies such as ${proficiencyNames.slice(0, 6).join(', ')}${proficiencyNames.length > 6 ? ', and more' : ''}.`
+          : `See the starting proficiencies section on this page for the ${classData.name}'s SRD proficiencies.`
+      }
+    ];
+    if (classSpellCount > 0) {
+      classFaqs.push({
+        q: `Does the ${classData.name} have spells in D&D 5e?`,
+        a: `Yes. The ${classData.name} has a D&D 5e spell list, and this page links ${classSpellCount} SRD ${classData.name.toLowerCase()} spells.`
+      });
+    }
+  %>
+  <title><%= classTitle %> | Far Reach Co.</title>
+  <meta name="description" content="<%= classMetaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/classes/<%= classData.index %>" />
 
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/classes/<%= classData.index %>" />
-  <meta property="og:title" content="<%= classData.name %> - D&D 5E Class" />
-  <meta property="og:description" content="SRD class page for <%= classData.name %> with progression, proficiencies, and features." />
+  <meta property="og:title" content="<%= classTitle %>" />
+  <meta property="og:description" content="<%= classMetaDesc %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="<%= classData.name %> - D&D 5E Class" />
-  <meta name="twitter:description" content="SRD class page for <%= classData.name %> with progression and features." />
+  <meta name="twitter:title" content="<%= classTitle %>" />
+  <meta name="twitter:description" content="<%= classMetaDesc %>" />
 
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Article",
       "headline": "<%= classData.name %>",
-      "name": "<%= classData.name %> - D&D 5E Class",
+      "name": "<%= classTitle %>",
+      "description": "<%= classMetaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/classes/<%= classData.index %>",
       "about": {
         "@type": "Game",
         "name": "Dungeons & Dragons 5th Edition"
       }
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(classFaqs.map((faq) => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+      }))) %>
     }
   </script>
 
@@ -43,7 +91,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: `${classData.name} 5E Class`,
+      srdPageSummary: classSummary
+    }) %>
     <br />
 
     <div class="breadcrumbs">
@@ -56,6 +107,7 @@
     <hr />
 
     <h1><%= classData.name %></h1>
+    <p><%= classSummary %></p>
 
     <div class="inline-div">
       <b>Hit Die:</b>
@@ -83,6 +135,17 @@
       <a href="/dnd/5e/srd/races">Races</a>,
       <a href="/dnd/5e/srd/backgrounds">Backgrounds</a>
     </div>
+
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% classFaqs.forEach((faq) => { %>
+        <details>
+          <summary><%= faq.q %></summary>
+          <p><%= faq.a %></p>
+        </details>
+      <% }) %>
+    </section>
 
     <hr class="w-75" />
 
@@ -199,6 +262,7 @@
       <% }) %>
     <% } %>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

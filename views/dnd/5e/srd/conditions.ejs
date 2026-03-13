@@ -5,20 +5,22 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>D&D 5E Conditions Reference | Far Reach Co.</title>
-  <meta name="description" content="Complete D&D 5E conditions reference including Blinded, Charmed, Deafened, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, and Unconscious with full descriptions and effects." />
+  <title>D&D 5E Conditions List: Effects and Status Rules | Far Reach Co.</title>
+  <meta name="description" content="Full D&D 5E conditions list covering Blinded, Charmed, Exhaustion, Grappled, Invisible, Paralyzed, Poisoned, Prone, Restrained, Stunned, Unconscious, and the rest, with each condition's effects and rules." />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/conditions" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/conditions" />
-  <meta property="og:title" content="D&D 5E Conditions Reference" />
-  <meta property="og:description" content="Complete D&D 5E conditions reference with full descriptions and effects." />
+  <meta property="og:title" content="D&D 5E Conditions List: Effects and Status Rules" />
+  <meta property="og:description" content="Full D&D 5E conditions list with the rules and effects for each status condition." />
   <meta property="og:site_name" content="Far Reach Co." />
   <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="D&D 5E Conditions List: Effects and Status Rules" />
+  <meta name="twitter:description" content="Full D&D 5E conditions list with the rules and effects for Blinded, Grappled, Paralyzed, Restrained, Stunned, and more." />
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebPage",
-      "name": "D&D 5E Conditions Reference",
+      "name": "D&D 5E Conditions List: Effects and Status Rules",
       "url": "https://farreachco.com/dnd/5e/srd/conditions",
       "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -73,6 +75,16 @@
           "@type": "Question",
           "name": "How is the Exhaustion condition removed in D&D 5e?",
           "acceptedAnswer": { "@type": "Answer", "text": "Each long rest reduces a creature's exhaustion level by 1, provided it has food and water. The Greater Restoration spell can also remove one exhaustion level." }
+        },
+        {
+          "@type": "Question",
+          "name": "Are conditions the same as status effects in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "Yes. In D&D 5e, conditions are the game's standard status effects. Terms like stunned, restrained, blinded, and poisoned refer to official conditions with specific rules text." }
+        },
+        {
+          "@type": "Question",
+          "name": "What does the Stunned condition do in D&D 5e?",
+          "acceptedAnswer": { "@type": "Answer", "text": "A Stunned creature is incapacitated, can't move, can speak only falteringly, automatically fails Strength and Dexterity saving throws, and attack rolls against it have advantage." }
         }
       ]
     }
@@ -88,8 +100,8 @@
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro', {
-      srdPageHeading: 'D&D 5E SRD Conditions',
-      srdPageSummary: 'Quick-reference descriptions of every D&D 5E SRD condition and how each one affects play.'
+      srdPageHeading: 'D&D 5E Conditions List',
+      srdPageSummary: 'Use this D&D 5E conditions list to check what each condition does, how the main 5E status effects work, and how they change movement, attacks, and saving throws.'
     }) %>
     <br />
     <div class="breadcrumbs">
@@ -98,8 +110,9 @@
       <span class="current">Conditions</span>
     </div>
     <hr />
-    <h2>Conditions</h2>
+    <h2>Full List of D&D 5E Conditions</h2>
     <p>D&D 5e has <strong>14 conditions</strong> that alter a creature's capabilities during play: Blinded, Charmed, Deafened, Exhaustion, Frightened, Grappled, Incapacitated, Invisible, Paralyzed, Petrified, Poisoned, Prone, Restrained, Stunned, and Unconscious. Conditions are caused by spells, monster abilities, environmental hazards, and class features. A condition lasts until it is removed — either by the effect that imposed it ending, a saving throw, or a spell like <a href="/dnd/5e/srd/spells/lesser-restoration">Lesser Restoration</a>.</p>
+    <p>Conditions are the main <strong>status effects</strong> in D&D 5e. When players ask what <strong>stunned</strong>, <strong>restrained</strong>, <strong>blinded</strong>, or other 5e status effects do, they are usually asking about these official conditions and their exact rules text.</p>
     <ul>
       <% data.forEach(function(condition){ %>
       <li>
@@ -144,8 +157,17 @@
         <summary>How is Exhaustion removed in D&D 5e?</summary>
         <p>Each long rest removes one level of exhaustion, provided the creature has food and water. The Greater Restoration spell also removes one exhaustion level. A creature dies if it reaches exhaustion level 6.</p>
       </details>
+      <details>
+        <summary>Are conditions the same as status effects in D&D 5e?</summary>
+        <p>Yes. In D&D 5e, conditions are the game's standard status effects. Terms like stunned, restrained, blinded, and poisoned refer to official conditions with specific rules text and gameplay effects.</p>
+      </details>
+      <details>
+        <summary>What does the Stunned condition do in D&D 5e?</summary>
+        <p>A Stunned creature is incapacitated, can't move, can speak only falteringly, automatically fails Strength and Dexterity saving throws, and attack rolls against it have advantage.</p>
+      </details>
     </section>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

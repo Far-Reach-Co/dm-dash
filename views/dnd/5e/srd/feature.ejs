@@ -5,27 +5,65 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= feature.name %> - D&D 5E Feature | Far Reach Co.</title>
-  <meta name="description" content="<%= feature.name %> feature for D&D 5E SRD (<%= feature.class.name %><% if (feature.level) { %> level <%= feature.level %><% } %>) with full rules text." />
+  <%
+    const featureOwner = feature.subclass ? `${feature.subclass.name} ${feature.class.name}` : feature.class.name;
+    const firstParagraph = Array.isArray(feature.desc) && feature.desc.length ? String(feature.desc[0]) : '';
+    const firstSentence = firstParagraph.split(/(?<=[.!?])\s+/)[0] || `${feature.name} has full SRD rules text on this page.`;
+    const featureTitle = `${feature.name} 5e: ${featureOwner} Feature`;
+    const featureMetaDesc = `${feature.name} in D&D 5e: ${featureOwner}${feature.level ? ` level ${feature.level}` : ''} feature. ${firstSentence}`.substring(0, 160);
+    const featureSummary = `${feature.name} is a ${featureOwner} feature${feature.level ? ` gained at level ${feature.level}` : ''} in D&D 5e. ${firstSentence}`;
+    const faqs = [
+      {
+        q: `What does ${feature.name} do in D&D 5e?`,
+        a: firstSentence
+      },
+      {
+        q: `What level do you get ${feature.name} in D&D 5e?`,
+        a: feature.level
+          ? `You gain ${feature.name} at level ${feature.level}${feature.subclass ? ` as part of the ${feature.subclass.name}` : ''} ${feature.class.name} progression.`
+          : `${feature.name} is a ${feature.class.name} feature in D&D 5e. See the class progression for when it becomes available.`
+      },
+      {
+        q: `Is ${feature.name} a ${feature.class.name} feature in D&D 5e?`,
+        a: feature.subclass
+          ? `Yes. ${feature.name} is part of the ${feature.subclass.name} subclass for the ${feature.class.name} in D&D 5e.`
+          : `Yes. ${feature.name} is a ${feature.class.name} class feature in D&D 5e.`
+      }
+    ];
+  %>
+  <title><%= featureTitle %> | Far Reach Co.</title>
+  <meta name="description" content="<%= featureMetaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/features/<%= feature.index %>" />
 
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/features/<%= feature.index %>" />
-  <meta property="og:title" content="<%= feature.name %> - D&D 5E Feature" />
-  <meta property="og:description" content="Standalone SRD page for <%= feature.name %>." />
+  <meta property="og:title" content="<%= featureTitle %>" />
+  <meta property="og:description" content="<%= featureMetaDesc %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="<%= feature.name %> - D&D 5E Feature" />
-  <meta name="twitter:description" content="Standalone SRD page for <%= feature.name %>." />
+  <meta name="twitter:title" content="<%= featureTitle %>" />
+  <meta name="twitter:description" content="<%= featureMetaDesc %>" />
 
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Article",
       "headline": "<%= feature.name %>",
-      "name": "<%= feature.name %> - D&D 5E Feature",
+      "name": "<%= featureTitle %>",
+      "description": "<%= featureMetaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/features/<%= feature.index %>"
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(faqs.map((faq) => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+      }))) %>
     }
   </script>
 
@@ -39,7 +77,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: featureTitle,
+      srdPageSummary: featureSummary
+    }) %>
     <br />
 
     <div class="breadcrumbs">
@@ -51,7 +92,7 @@
     </div>
     <hr />
 
-    <h1><%= feature.name %></h1>
+    <h2><%= feature.name %></h2>
 
     <div class="inline-div">
       <b>Class:</b>
@@ -75,6 +116,17 @@
     <% (feature.desc || []).forEach((paragraph) => { %>
       <p><%= paragraph %></p>
     <% }) %>
+
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% faqs.forEach((faq) => { %>
+        <details>
+          <summary><%= faq.q %></summary>
+          <p><%= faq.a %></p>
+        </details>
+      <% }) %>
+    </section>
 
     <% if (feature.parent) { %>
       <hr class="w-75" />
@@ -117,6 +169,7 @@
       </div>
     <% } %>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

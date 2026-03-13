@@ -5,19 +5,79 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= background.name %> - D&D 5E Background | Far Reach Co.</title>
-  <meta name="description" content="<%= background.name %> background for D&D 5E SRD with proficiencies, equipment, feature text, and roleplay traits." />
+  <%
+    const backgroundProficiencies = (background.starting_proficiencies || [])
+      .map((prof) => String(prof.name || '').replace(/^Skill:\s*/, ''))
+      .filter(Boolean);
+    const backgroundEquipment = (background.starting_equipment || [])
+      .map((item) => item.quantity > 1 ? `${item.quantity}x ${item.equipment.name}` : item.equipment.name)
+      .filter(Boolean);
+    const backgroundFeatureName = background.feature?.name || '';
+    const backgroundTitle = `${background.name} 5e Background: Skills, Equipment, and Feature`;
+    const backgroundMetaDesc = `${background.name} in D&D 5e: background proficiencies ${backgroundProficiencies.slice(0, 4).join(', ')}.${backgroundEquipment.length ? ` Starting equipment includes ${backgroundEquipment.slice(0, 4).join(', ')}${backgroundEquipment.length > 4 ? ', and more' : ''}.` : ''}${backgroundFeatureName ? ` Feature: ${backgroundFeatureName}.` : ''}`.substring(0, 160);
+    const backgroundSummary = `${background.name} is a D&D 5e background with ${backgroundProficiencies.slice(0, 4).join(', ') || 'SRD proficiencies'},${backgroundEquipment.length ? ` starting equipment like ${backgroundEquipment.slice(0, 3).join(', ')},` : ''}${backgroundFeatureName ? ` and the ${backgroundFeatureName} feature.` : ' and SRD roleplay traits.'}`;
+    const backgroundFaqs = [
+      {
+        q: `What proficiencies does the ${background.name} background get in D&D 5e?`,
+        a: backgroundProficiencies.length
+          ? `The ${background.name} background grants proficiencies such as ${backgroundProficiencies.join(', ')} in D&D 5e.`
+          : `See the starting proficiencies section on this page for the ${background.name} background's D&D 5e proficiencies.`
+      },
+      {
+        q: `What equipment does the ${background.name} background start with in D&D 5e?`,
+        a: backgroundEquipment.length
+          ? `The ${background.name} background starts with ${backgroundEquipment.join(', ')} in D&D 5e.`
+          : `See the starting equipment section on this page for the ${background.name} background's starting gear.`
+      }
+    ];
+    if (backgroundFeatureName) {
+      backgroundFaqs.push({
+        q: `What feature does the ${background.name} background get in D&D 5e?`,
+        a: `The ${background.name} background gets the ${backgroundFeatureName} feature in D&D 5e.`
+      });
+    }
+    if (background.language_options) {
+      backgroundFaqs.push({
+        q: `Does the ${background.name} background grant extra languages in D&D 5e?`,
+        a: `Yes. The ${background.name} background lets you choose ${background.language_options.choose} additional language${background.language_options.choose === 1 ? '' : 's'} in D&D 5e.`
+      });
+    }
+  %>
+  <title><%= backgroundTitle %> | Far Reach Co.</title>
+  <meta name="description" content="<%= backgroundMetaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/backgrounds/<%= background.index %>" />
 
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/backgrounds/<%= background.index %>" />
-  <meta property="og:title" content="<%= background.name %> - D&D 5E Background" />
-  <meta property="og:description" content="Standalone SRD page for the <%= background.name %> background." />
+  <meta property="og:title" content="<%= backgroundTitle %>" />
+  <meta property="og:description" content="<%= backgroundMetaDesc %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="<%= background.name %> - D&D 5E Background" />
-  <meta name="twitter:description" content="Standalone SRD page for the <%= background.name %> background." />
+  <meta name="twitter:title" content="<%= backgroundTitle %>" />
+  <meta name="twitter:description" content="<%= backgroundMetaDesc %>" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "<%= background.name %>",
+      "name": "<%= backgroundTitle %>",
+      "description": "<%= backgroundMetaDesc %>",
+      "url": "https://farreachco.com/dnd/5e/srd/backgrounds/<%= background.index %>"
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(backgroundFaqs.map((faq) => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+      }))) %>
+    }
+  </script>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
@@ -29,7 +89,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: `${background.name} 5E Background`,
+      srdPageSummary: backgroundSummary
+    }) %>
     <br />
 
     <div class="breadcrumbs">
@@ -42,6 +105,17 @@
     <hr />
 
     <h1><%= background.name %></h1>
+    <p><%= backgroundSummary %></p>
+
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% backgroundFaqs.forEach((faq) => { %>
+        <details>
+          <summary><%= faq.q %></summary>
+          <p><%= faq.a %></p>
+        </details>
+      <% }) %>
+    </section>
 
     <h2>Starting Proficiencies</h2>
     <ul>
@@ -138,6 +212,7 @@
       <a href="/dnd/5e/srd/classes">Classes</a>
     </div>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 

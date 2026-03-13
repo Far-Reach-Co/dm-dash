@@ -67,6 +67,37 @@
   border-radius: 2px;
 }
 
+.srd-disclosure-wrap {
+  max-width: 900px;
+  margin: 2rem auto 0;
+  padding: 0 1rem;
+}
+
+.srd-disclosure {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.srd-disclosure small {
+  color: var(--main-gray);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+  max-width: 640px;
+}
+
+.srd-disclosure a {
+  color: var(--orange2);
+}
+
+.srd-disclosure a:hover {
+  color: var(--orange3);
+}
+
 /* ===== Quick Links Navigation ===== */
 .quick-links {
   display: flex;

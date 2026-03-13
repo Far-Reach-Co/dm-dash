@@ -5,27 +5,72 @@
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= race.name %> - D&D 5E Race | Far Reach Co.</title>
-  <meta name="description" content="<%= race.name %> race for D&D 5E SRD with racial traits, ability bonuses, subraces, and language details." />
+  <%
+    const raceAbilityBonuses = (race.ability_bonuses || [])
+      .map((bonus) => `${bonus.ability_score.name} +${bonus.bonus}`);
+    const raceLanguages = (race.languages || []).map((lang) => lang.name);
+    const hasSubraces = Boolean(subraceDetails.length);
+    const raceTitle = `${race.name} 5e Race: Traits, Ability Scores, and Languages`;
+    const raceMetaDesc = `${race.name} in D&D 5e: ${race.size} race with speed ${race.speed} ft.${raceAbilityBonuses.length ? ` Ability bonuses: ${raceAbilityBonuses.join(', ')}.` : ''}${raceLanguages.length ? ` Languages: ${raceLanguages.join(', ')}.` : ''}${hasSubraces ? ' Includes subraces and racial traits.' : ' Includes racial traits and rules.'}`.substring(0, 160);
+    const raceSummary = `${race.name} is a ${race.size.toLowerCase()} D&D 5e race with a speed of ${race.speed} feet.${raceAbilityBonuses.length ? ` Its SRD ability bonuses are ${raceAbilityBonuses.join(', ')}.` : ''}${raceLanguages.length ? ` It typically speaks ${raceLanguages.join(' and ')}.` : ''}`;
+    const raceFaqs = [
+      {
+        q: `What ability bonuses does the ${race.name} get in D&D 5e?`,
+        a: raceAbilityBonuses.length
+          ? `The ${race.name} gets the following ability bonuses in D&D 5e: ${raceAbilityBonuses.join(', ')}.`
+          : `See the ability bonus section on this page for the ${race.name}'s D&D 5e racial bonuses.`
+      },
+      {
+        q: `What languages does the ${race.name} speak in D&D 5e?`,
+        a: raceLanguages.length
+          ? `The ${race.name} speaks ${raceLanguages.join(' and ')} in D&D 5e.`
+          : `See the language section on this page for the ${race.name}'s D&D 5e languages.`
+      },
+      {
+        q: `What size and speed is the ${race.name} in D&D 5e?`,
+        a: `The ${race.name} is ${race.size.toLowerCase()} and has a speed of ${race.speed} feet in D&D 5e.`
+      }
+    ];
+    if (hasSubraces) {
+      raceFaqs.push({
+        q: `Does the ${race.name} have subraces in D&D 5e?`,
+        a: `Yes. The ${race.name} has ${subraceDetails.length} subrace option${subraceDetails.length === 1 ? '' : 's'} in this SRD page: ${subraceDetails.map((subrace) => subrace.name).join(', ')}.`
+      });
+    }
+  %>
+  <title><%= raceTitle %> | Far Reach Co.</title>
+  <meta name="description" content="<%= raceMetaDesc %>" />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/races/<%= race.index %>" />
 
   <meta property="og:type" content="article" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/races/<%= race.index %>" />
-  <meta property="og:title" content="<%= race.name %> - D&D 5E Race" />
-  <meta property="og:description" content="Standalone SRD page for the <%= race.name %> race." />
+  <meta property="og:title" content="<%= raceTitle %>" />
+  <meta property="og:description" content="<%= raceMetaDesc %>" />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="<%= race.name %> - D&D 5E Race" />
-  <meta name="twitter:description" content="Standalone SRD page for the <%= race.name %> race." />
+  <meta name="twitter:title" content="<%= raceTitle %>" />
+  <meta name="twitter:description" content="<%= raceMetaDesc %>" />
 
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "Article",
       "headline": "<%= race.name %>",
-      "name": "<%= race.name %> - D&D 5E Race",
+      "name": "<%= raceTitle %>",
+      "description": "<%= raceMetaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/races/<%= race.index %>"
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(raceFaqs.map((faq) => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+      }))) %>
     }
   </script>
 
@@ -39,7 +84,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: `${race.name} 5E Race`,
+      srdPageSummary: raceSummary
+    }) %>
     <br />
 
     <div class="breadcrumbs">
@@ -52,6 +100,7 @@
     <hr />
 
     <h1><%= race.name %></h1>
+    <p><%= raceSummary %></p>
 
     <div class="inline-div">
       <b>Size:</b>
@@ -83,6 +132,17 @@
         </span>
       </div>
     <% } %>
+
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% raceFaqs.forEach((faq) => { %>
+        <details>
+          <summary><%= faq.q %></summary>
+          <p><%= faq.a %></p>
+        </details>
+      <% }) %>
+    </section>
 
     <hr class="w-75" />
 
@@ -191,6 +251,7 @@
       <a href="/dnd/5e/srd/backgrounds">Backgrounds</a>
     </div>
   </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 
