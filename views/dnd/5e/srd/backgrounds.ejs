@@ -29,7 +29,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Backgrounds',
+      srdPageSummary: 'Browse the D&D 5E SRD backgrounds with proficiency, equipment, and feature details.'
+    }) %>
     <br />
 
     <div class="breadcrumbs">

@@ -87,7 +87,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E Damage Types Reference',
+      srdPageSummary: 'Quick-reference descriptions for all 13 D&D 5E damage types, plus the core resistance, immunity, and vulnerability rules that affect them.'
+    }) %>
     <br />
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>
@@ -95,7 +98,7 @@
       <span class="current">Damage Types</span>
     </div>
     <hr />
-    <h2>Damage Types</h2>
+    <h2>Damage Types Overview</h2>
     <p>D&D 5e has <strong>13 damage types</strong>: Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder. Every source of damage — weapons, spells, traps, and monster abilities — deals one of these types. Creatures can have <strong>resistance</strong> (half damage), <strong>immunity</strong> (no damage), or <strong>vulnerability</strong> (double damage) to specific types.</p>
     <ul>
       <% data.forEach(function(dType){ %>

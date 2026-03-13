@@ -39,7 +39,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: heading,
+      srdPageSummary: intro
+    }) %>
     <br />
 
     <div class="breadcrumbs">

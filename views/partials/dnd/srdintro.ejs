@@ -1,5 +1,25 @@
+<%
+  const introLabel =
+    typeof srdSectionLabel === 'string' && srdSectionLabel.trim()
+      ? srdSectionLabel
+      : 'Dungeons & Dragons Fifth Edition SRD';
+  const introHeading =
+    typeof srdPageHeading === 'string' && srdPageHeading.trim()
+      ? srdPageHeading
+      : introLabel;
+  const introSummary =
+    typeof srdPageSummary === 'string' && srdPageSummary.trim()
+      ? srdPageSummary
+      : '';
+%>
 <div class="intro">
-  <h1 class="text-center">Dungeons & Dragons Fifth Edition SRD</h1>
+  <% if (introHeading !== introLabel) { %>
+    <small class="text-center intro-label"><%= introLabel %></small>
+  <% } %>
+  <h1 class="text-center"><%= introHeading %></h1>
+  <% if (introSummary) { %>
+    <p class="text-center intro-summary"><%= introSummary %></p>
+  <% } %>
   <small class="text-center">This resource contains useful selections. You can find the complete
     documentation here:
     <a href="https://dnd.wizards.com/resources/systems-reference-document">System Reference Document</a>.</small>

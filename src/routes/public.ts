@@ -353,6 +353,25 @@ router.get("/vtt-guide", (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+router.get(
+  "/virtual-tabletop-for-dnd-5e",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.render("virtual-tabletop-for-dnd-5e", { auth: req.session.user });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+router.get("/roll20-alternative", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.render("roll20-alternative", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get("/library-guide", (req: Request, res: Response, next: NextFunction) => {
   try {
     res.render("library-guide", { auth: req.session.user });
@@ -386,6 +405,14 @@ router.get(
 router.get("/product-guide", (req: Request, res: Response, next: NextFunction) => {
   try {
     res.render("product-guide", { auth: req.session.user });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get("/wyrlds", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.render("wyrlds", { auth: req.session.user });
   } catch (err) {
     next(err);
   }

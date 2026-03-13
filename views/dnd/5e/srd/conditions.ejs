@@ -87,7 +87,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Conditions',
+      srdPageSummary: 'Quick-reference descriptions of every D&D 5E SRD condition and how each one affects play.'
+    }) %>
     <br />
     <div class="breadcrumbs">
       <a href="/dnd/5e/srd/contents">Contents</a>

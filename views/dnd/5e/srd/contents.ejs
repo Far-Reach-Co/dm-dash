@@ -47,7 +47,10 @@
 <body>
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
-    <%- include('../../../partials/dnd/srdintro') %>
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: 'D&D 5E SRD Contents',
+      srdPageSummary: 'Use this hub to browse the main D&D 5E SRD categories, popular pages, and rules lookup tools.'
+    }) %>
 
     <div class="srd-search">
       <h3>Ask the Archives</h3>
