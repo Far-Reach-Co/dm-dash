@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    >
+    <meta
+      name="description"
+      content="Monster Codex is a retro-styled SRD monster browser with scanner controls, filters, and local persistence."
+    >
+    <title>Monster Codex</title>
+    <script>
+      window.MONSTER_CODEX_ASSET_ROOT =
+        window.location.protocol === "file:" ? "." : "/5e-monster-codex";
+
+      const stylesheet = document.createElement("link");
+      stylesheet.rel = "stylesheet";
+      stylesheet.href = `${window.MONSTER_CODEX_ASSET_ROOT}/styles.css`;
+      document.head.appendChild(stylesheet);
+    </script>
+  </head>
+  <body>
+    <main id="app" class="monster-codex-root">
+      <noscript>
+        <section class="no-script">
+          <h1>Monster Codex</h1>
+          <p>This static app needs JavaScript enabled to load the monster index.</p>
+        </section>
+      </noscript>
+    </main>
+    <script type="module">
+      import(`${window.MONSTER_CODEX_ASSET_ROOT}/app.js`);
+    </script>
+  </body>
+</html>

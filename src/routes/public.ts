@@ -1,9 +1,12 @@
-import { Router, Request, Response, NextFunction } from "express";
+import express, { Router, Request, Response, NextFunction } from "express";
+import path from "path";
 import { humanFileSize } from "../lib/utils";
 import { subscriptionPlanLimits } from "../lib/subscription";
 import { getProductUpdateCampaigns } from "../lib/productUpdateCampaigns";
 
 const router = Router();
+const monsterCodexStaticDir = path.join(process.cwd(), "public", "monster-codex");
+const monsterCodexIndexFile = path.join(monsterCodexStaticDir, "index.html");
 
 type ResourceAction = {
   href: string;
@@ -297,6 +300,27 @@ router.get("/resources", (req: Request, res: Response, next: NextFunction) => {
     next(err);
   }
 });
+
+router.get("/5e-monster-codex", (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.sendFile(monsterCodexIndexFile);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.use("/5e-monster-codex", express.static(monsterCodexStaticDir));
+
+router.get(
+  "/resources/5e-monster-codex",
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.redirect(301, "/5e-monster-codex");
+    } catch (err) {
+      next(err);
+    }
+  },
+);
 
 router.get(
   "/resources/:slug",
