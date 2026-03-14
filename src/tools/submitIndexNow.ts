@@ -11,7 +11,7 @@ function usage() {
 Options:
   --dry-run                 Generate the sitemap and print the IndexNow payload summary without submitting
   --key <value>             Override INDEXNOW_KEY
-  --key-path <path>         Override INDEXNOW_KEY_PATH (default: /indexnow/{key}.txt)
+  --key-path <path>         Override INDEXNOW_KEY_PATH (default: /{key}.txt)
   --site-url <value>        Override INDEXNOW_SITE_URL (default: https://farreachco.com)
   --endpoint <value>        Override INDEXNOW_ENDPOINT
   --help, -h                Show this help

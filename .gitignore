@@ -2,6 +2,9 @@ notes
 DS_Store
 node_modules
 public/.well-known/acme-challenge/*
+public/*.txt
+!public/llms.txt
+!public/robots.txt
 public/indexnow/*
 
 private_frc_cloudfront_key.pem
