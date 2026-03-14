@@ -3,7 +3,7 @@ import path from "path";
 import zlib from "zlib";
 import { SitemapStream, streamToPromise } from "sitemap";
 
-const HOSTNAME = "https://farreachco.com";
+const DEFAULT_HOSTNAME = "https://farreachco.com";
 const OUTPUT_PATH = path.join(__dirname, "../../public/sitemap.xml");
 const OUTPUT_PATH_GZ = path.join(__dirname, "../../public/sitemap.xml.gz");
 const DATA_DIR = path.join(__dirname, "../../public/lib/data/2014");
@@ -19,6 +19,14 @@ interface DynamicRoute {
   dataFile: string;
   priority: number;
   changefreq: "daily" | "weekly" | "monthly" | "yearly";
+}
+
+export interface GenerateSitemapResult {
+  hostname: string;
+  outputPath: string;
+  outputPathGz: string;
+  totalUrls: number;
+  urls: string[];
 }
 
 const staticPages: SitemapEntry[] = [
@@ -238,10 +246,7 @@ function generateMonsterFilterEntries(): SitemapEntry[] {
   return entries;
 }
 
-async function generateSitemap(): Promise<void> {
-  const stream = new SitemapStream({ hostname: HOSTNAME });
-  const lastmod = new Date().toISOString();
-
+function buildUniqueSitemapEntries(): SitemapEntry[] {
   const entries: SitemapEntry[] = [
     ...staticPages,
     ...dynamicRoutes.flatMap(expandDynamicRoute),
@@ -255,6 +260,16 @@ async function generateSitemap(): Promise<void> {
     seen.add(entry.url);
     return true;
   });
+
+  return uniqueEntries;
+}
+
+export async function generateSitemap(
+  hostname: string = DEFAULT_HOSTNAME,
+): Promise<GenerateSitemapResult> {
+  const stream = new SitemapStream({ hostname });
+  const lastmod = new Date().toISOString();
+  const uniqueEntries = buildUniqueSitemapEntries();
 
   console.log(`Generating sitemap with ${uniqueEntries.length} URLs...`);
 
@@ -284,9 +299,19 @@ async function generateSitemap(): Promise<void> {
   console.log(`  - ${OUTPUT_PATH} (${xmlSizeKB} KB)`);
   console.log(`  - ${OUTPUT_PATH_GZ} (${gzSizeKB} KB)`);
   console.log(`  - ${uniqueEntries.length} total URLs`);
+
+  return {
+    hostname,
+    outputPath: OUTPUT_PATH,
+    outputPathGz: OUTPUT_PATH_GZ,
+    totalUrls: uniqueEntries.length,
+    urls: uniqueEntries.map((entry) => new URL(entry.url, hostname).toString()),
+  };
 }
 
-generateSitemap().catch((err) => {
-  console.error("Failed to generate sitemap:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  generateSitemap().catch((err) => {
+    console.error("Failed to generate sitemap:", err);
+    process.exit(1);
+  });
+}

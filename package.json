@@ -37,6 +37,8 @@
     "migrate:create": "node-pg-migrate create",
     "sitemap": "tsx src/tools/generate-sitemap.ts",
     "sitemap:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/generate-sitemap.js",
+    "indexnow:all": "bash ./scripts/ops/run_with_env.sh tsx src/tools/submitIndexNow.ts",
+    "indexnow:all:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/submitIndexNow.js",
     "gsc:product-surface": "bash ./scripts/ops/run_with_env.sh tsx src/tools/reportProductSurfaceFromGsc.ts",
     "gsc:product-surface:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/reportProductSurfaceFromGsc.js",
     "srd:download": "tsx src/tools/download-5e-srd.ts",
