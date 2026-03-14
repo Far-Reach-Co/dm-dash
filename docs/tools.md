@@ -61,4 +61,4 @@ npm run guest-sandbox:import-images:prod -- --help
 
 `srd:download` and `srd:download:prod` now regenerate `5e-srd-spell-class-level-index.json` automatically after a successful download.
 
-`indexnow:all` and `indexnow:all:prod` regenerate `public/sitemap.xml`, write the IndexNow key file under `public/indexnow/`, and submit the full sitemap URL list to IndexNow. Configure `INDEXNOW_KEY` first.
+`indexnow:all` and `indexnow:all:prod` regenerate `public/sitemap.xml`, write the IndexNow key file at the site root under `public/`, and submit the full sitemap URL list to IndexNow. Configure `INDEXNOW_KEY` first.

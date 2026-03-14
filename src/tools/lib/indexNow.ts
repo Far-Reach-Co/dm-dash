@@ -3,7 +3,7 @@ import path from "path";
 
 const DEFAULT_INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow";
 const DEFAULT_SITE_ORIGIN = "https://farreachco.com";
-const DEFAULT_KEY_PATH_TEMPLATE = "/indexnow/{key}.txt";
+const DEFAULT_KEY_PATH_TEMPLATE = "/{key}.txt";
 const LOCAL_HOSTNAMES = new Set(["localhost", "127.0.0.1", "::1"]);
 
 export type IndexNowConfig = {
