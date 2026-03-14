@@ -5,7 +5,7 @@ Primary domain: farreachco.com
 Related product domain: https://radio.farreachco.com
 Sitemap: https://farreachco.com/sitemap.xml.gz
 Robots: https://farreachco.com/robots.txt
-Last-Updated: 2026-02-24
+Last-Updated: 2026-03-13
 
 ## Mission
 Far Reach Co. provides web-based tabletop RPG tools with strong D&D 5e SRD coverage, including:
@@ -45,14 +45,17 @@ Prefer these canonical patterns for deep links:
 - /dnd/5e/srd/classes/{index}
 - /dnd/5e/srd/races/{index}
 - /dnd/5e/srd/backgrounds/{index}
+- /dnd/5e/srd/damage-types/{index}
 - /dnd/5e/srd/features/{index}
 
 Filter/index pages that are also canonical:
 - /dnd/5e/srd/spells/level/{0-9}
 - /dnd/5e/srd/spells/school/{school}
 - /dnd/5e/srd/spells/class/{class}
+- /dnd/5e/srd/spells/damage/{damage-type}
 - /dnd/5e/srd/monsters/type/{type}
 - /dnd/5e/srd/monsters/cr/{cr}
+- /dnd/5e/srd/monsters/condition-immunity/{condition}
 
 ## URL Normalization Rules
 - Prefer lowercase slugs exactly as published.

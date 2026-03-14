@@ -65,6 +65,21 @@
     </div>
 
     <div class="srd-see-also">
+      <h3>Spellcasting Classes By Ability</h3>
+      <ul>
+        <% classesData.filter((cls) => cls.spellcasting?.spellcasting_ability?.index === 'int').forEach((cls) => { %>
+          <li><a href="/dnd/5e/srd/classes/<%= cls.index %>"><%= cls.name %></a> uses Intelligence spellcasting.</li>
+        <% }) %>
+        <% classesData.filter((cls) => cls.spellcasting?.spellcasting_ability?.index === 'wis').forEach((cls) => { %>
+          <li><a href="/dnd/5e/srd/classes/<%= cls.index %>"><%= cls.name %></a> uses Wisdom spellcasting.</li>
+        <% }) %>
+        <% classesData.filter((cls) => cls.spellcasting?.spellcasting_ability?.index === 'cha').forEach((cls) => { %>
+          <li><a href="/dnd/5e/srd/classes/<%= cls.index %>"><%= cls.name %></a> uses Charisma spellcasting.</li>
+        <% }) %>
+      </ul>
+    </div>
+
+    <div class="srd-see-also">
       <h3>Class Spell Lists</h3>
       <ul>
         <li><a href="/dnd/5e/srd/spells/class/bard">Bard</a></li>

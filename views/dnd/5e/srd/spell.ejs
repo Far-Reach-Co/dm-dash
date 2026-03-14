@@ -16,6 +16,8 @@
     const levelDisplayShort = level => level === 0 ? 'Cantrip' : 'Level ' + level;
     const componentNames = { V: 'Verbal', S: 'Somatic', M: 'Material' };
     const classesStr = spell.classes.map(c => c.name).join(', ');
+    const raceNames = (raceAccess && raceAccess.races) ? raceAccess.races : [];
+    const subraceNames = (raceAccess && raceAccess.subraces) ? raceAccess.subraces : [];
     const baseDamageAtCharacterLevel = spell.damage?.damage_at_character_level
       ? Object.values(spell.damage.damage_at_character_level)[0]
       : '';
@@ -32,10 +34,21 @@
     // Build FAQ entries from spell data
     const faqs = [];
     if (spell.classes.length) {
-      const subclassStr = spell.subclasses && spell.subclasses.length ? ` It is also available to: ${spell.subclasses.map(s => s.name).join(', ')}.` : '';
+      const subclassStr = spell.subclasses && spell.subclasses.length ? ` It is also available to these subclasses: ${spell.subclasses.map(s => s.name).join(', ')}.` : '';
+      const raceStr = raceNames.length ? ` SRD races with trait-based access include ${raceNames.join(', ')}.` : '';
+      const subraceStr = subraceNames.length ? ` SRD subraces with trait-based access include ${subraceNames.join(', ')}.` : '';
       faqs.push({
         q: `Who can cast ${spell.name} in D&D 5e?`,
-        a: `${spell.name} is available to the following classes: ${classesStr}.${subclassStr}`
+        a: `${spell.name} is available to the following classes: ${classesStr}.${subclassStr}${raceStr}${subraceStr}`
+      });
+    }
+    if (raceNames.length || subraceNames.length) {
+      const raceParts = [];
+      if (raceNames.length) raceParts.push(`races: ${raceNames.join(', ')}`);
+      if (subraceNames.length) raceParts.push(`subraces: ${subraceNames.join(', ')}`);
+      faqs.push({
+        q: `Are there SRD races or subraces that can use ${spell.name} in D&D 5e?`,
+        a: `Yes. Trait-based SRD access for ${spell.name} includes ${raceParts.join('; ')}.`
       });
     }
     faqs.push({
@@ -240,7 +253,11 @@
       <% if (spell.damage && spell.damage.damage_type) { %>
       <div class="inline-div">
         <b>Damage Type:</b>
-        <a href="/dnd/5e/srd/damage-types#<%= spell.damage.damage_type.index %>"><%= spell.damage.damage_type.name %></a>
+        <a href="/dnd/5e/srd/damage-types/<%= spell.damage.damage_type.index %>"><%= spell.damage.damage_type.name %></a>
+        <span>
+          &ensp;&middot;&ensp;
+          <a href="/dnd/5e/srd/spells/damage/<%= spell.damage.damage_type.index %>"><%= spell.damage.damage_type.name %> Damage Spells</a>
+        </span>
       </div>
       <% } %>
 
@@ -320,6 +337,21 @@
         <% spell.subclasses.forEach((sub, idx) => { %>
         <span><%= sub.name %></span><%= idx < spell.subclasses.length - 1 ? ', ' : '' %>
         <% }) %>
+      </div>
+    </div>
+    <% } %>
+
+    <% if (raceNames.length || subraceNames.length) { %>
+    <div class="spell-subclasses">
+      <b>SRD Race Access:</b>
+      <div class="indent">
+        <% if (raceNames.length) { %>
+          <span>Races: <%= raceNames.join(', ') %></span>
+        <% } %>
+        <% if (raceNames.length && subraceNames.length) { %><br /><% } %>
+        <% if (subraceNames.length) { %>
+          <span>Subraces: <%= subraceNames.join(', ') %></span>
+        <% } %>
       </div>
     </div>
     <% } %>

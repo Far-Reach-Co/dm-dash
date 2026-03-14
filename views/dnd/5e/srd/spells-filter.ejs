@@ -87,6 +87,17 @@
       </div>
     </div>
 
+    <% if (spellDamageTypeOptions && spellDamageTypeOptions.length) { %>
+      <div class="srd-filter-group">
+        <div class="srd-filter-label">Browse by Damage Type</div>
+        <div class="srd-filter-pills">
+          <% spellDamageTypeOptions.forEach((opt) => { %>
+            <a href="/dnd/5e/srd/spells/damage/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
     <hr />
     <ul class="srd-col-list-3">
       <% spellsData.forEach((spell) => { %>

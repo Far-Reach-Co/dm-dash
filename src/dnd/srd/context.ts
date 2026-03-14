@@ -16,8 +16,8 @@ export type NormalizedSearchContext = {
 
 const SRD_PATH_PREFIX = "/dnd/5e/srd/";
 const NON_DETAIL_SUBROUTES: Record<string, ReadonlySet<string>> = {
-  spells: new Set(["level", "school", "class"]),
-  monsters: new Set(["type", "cr"]),
+  spells: new Set(["level", "school", "class", "damage"]),
+  monsters: new Set(["type", "cr", "condition-immunity"]),
 };
 
 function normalizeText(value: unknown, maxLength: number): string | null {

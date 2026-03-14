@@ -5,6 +5,7 @@ import {
   buildSpellClassLevelIndex,
   SPELL_CLASS_LEVEL_INDEX_FILE,
 } from "../dnd/srd/spellClassLevelIndex.js";
+import { generateSrdDerivedDatasets } from "./generateSrdDerivedDatasets.js";
 
 const REPO_BASE =
   "https://raw.githubusercontent.com/5e-bits/5e-database/main/src";
@@ -122,6 +123,7 @@ async function main() {
   if (failed > 0) process.exit(1);
 
   generateSpellClassLevelIndex(outDir, edition);
+  generateSrdDerivedDatasets(edition);
 }
 
 main();

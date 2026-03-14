@@ -1,0 +1,467 @@
+{
+  "version": 1,
+  "traits": {
+    "darkvision": {
+      "index": "darkvision",
+      "label": "Darkvision",
+      "raceIndexes": [
+        "dwarf",
+        "elf",
+        "gnome",
+        "half-elf",
+        "half-orc",
+        "tiefling"
+      ],
+      "subraceIndexes": []
+    },
+    "dwarven-resilience": {
+      "index": "dwarven-resilience",
+      "label": "Dwarven Resilience",
+      "raceIndexes": [
+        "dwarf"
+      ],
+      "subraceIndexes": []
+    },
+    "stonecunning": {
+      "index": "stonecunning",
+      "label": "Stonecunning",
+      "raceIndexes": [
+        "dwarf"
+      ],
+      "subraceIndexes": []
+    },
+    "dwarven-combat-training": {
+      "index": "dwarven-combat-training",
+      "label": "Dwarven Combat Training",
+      "raceIndexes": [
+        "dwarf"
+      ],
+      "subraceIndexes": []
+    },
+    "tool-proficiency": {
+      "index": "tool-proficiency",
+      "label": "Tool Proficiency",
+      "raceIndexes": [
+        "dwarf"
+      ],
+      "subraceIndexes": []
+    },
+    "fey-ancestry": {
+      "index": "fey-ancestry",
+      "label": "Fey Ancestry",
+      "raceIndexes": [
+        "elf",
+        "half-elf"
+      ],
+      "subraceIndexes": []
+    },
+    "trance": {
+      "index": "trance",
+      "label": "Trance",
+      "raceIndexes": [
+        "elf"
+      ],
+      "subraceIndexes": []
+    },
+    "keen-senses": {
+      "index": "keen-senses",
+      "label": "Keen Senses",
+      "raceIndexes": [
+        "elf"
+      ],
+      "subraceIndexes": []
+    },
+    "brave": {
+      "index": "brave",
+      "label": "Brave",
+      "raceIndexes": [
+        "halfling"
+      ],
+      "subraceIndexes": []
+    },
+    "halfling-nimbleness": {
+      "index": "halfling-nimbleness",
+      "label": "Halfling Nimbleness",
+      "raceIndexes": [
+        "halfling"
+      ],
+      "subraceIndexes": []
+    },
+    "lucky": {
+      "index": "lucky",
+      "label": "Lucky",
+      "raceIndexes": [
+        "halfling"
+      ],
+      "subraceIndexes": []
+    },
+    "draconic-ancestry": {
+      "index": "draconic-ancestry",
+      "label": "Draconic Ancestry",
+      "raceIndexes": [
+        "dragonborn"
+      ],
+      "subraceIndexes": []
+    },
+    "breath-weapon": {
+      "index": "breath-weapon",
+      "label": "Breath Weapon",
+      "raceIndexes": [
+        "dragonborn"
+      ],
+      "subraceIndexes": []
+    },
+    "damage-resistance": {
+      "index": "damage-resistance",
+      "label": "Damage Resistance",
+      "raceIndexes": [
+        "dragonborn"
+      ],
+      "subraceIndexes": []
+    },
+    "gnome-cunning": {
+      "index": "gnome-cunning",
+      "label": "Gnome Cunning",
+      "raceIndexes": [
+        "gnome"
+      ],
+      "subraceIndexes": []
+    },
+    "skill-versatility": {
+      "index": "skill-versatility",
+      "label": "Skill Versatility",
+      "raceIndexes": [
+        "half-elf"
+      ],
+      "subraceIndexes": []
+    },
+    "savage-attacks": {
+      "index": "savage-attacks",
+      "label": "Savage Attacks",
+      "raceIndexes": [
+        "half-orc"
+      ],
+      "subraceIndexes": []
+    },
+    "relentless-endurance": {
+      "index": "relentless-endurance",
+      "label": "Relentless Endurance",
+      "raceIndexes": [
+        "half-orc"
+      ],
+      "subraceIndexes": []
+    },
+    "menacing": {
+      "index": "menacing",
+      "label": "Menacing",
+      "raceIndexes": [
+        "half-orc"
+      ],
+      "subraceIndexes": []
+    },
+    "hellish-resistance": {
+      "index": "hellish-resistance",
+      "label": "Hellish Resistance",
+      "raceIndexes": [
+        "tiefling"
+      ],
+      "subraceIndexes": []
+    },
+    "infernal-legacy": {
+      "index": "infernal-legacy",
+      "label": "Infernal Legacy",
+      "raceIndexes": [
+        "tiefling"
+      ],
+      "subraceIndexes": []
+    },
+    "dwarven-toughness": {
+      "index": "dwarven-toughness",
+      "label": "Dwarven Toughness",
+      "raceIndexes": [],
+      "subraceIndexes": [
+        "hill-dwarf"
+      ]
+    },
+    "elf-weapon-training": {
+      "index": "elf-weapon-training",
+      "label": "Elf Weapon Training",
+      "raceIndexes": [],
+      "subraceIndexes": [
+        "high-elf"
+      ]
+    },
+    "high-elf-cantrip": {
+      "index": "high-elf-cantrip",
+      "label": "High Elf Cantrip",
+      "raceIndexes": [],
+      "subraceIndexes": [
+        "high-elf"
+      ]
+    },
+    "extra-language": {
+      "index": "extra-language",
+      "label": "Extra Language",
+      "raceIndexes": [],
+      "subraceIndexes": [
+        "high-elf"
+      ]
+    },
+    "naturally-stealthy": {
+      "index": "naturally-stealthy",
+      "label": "Naturally Stealthy",
+      "raceIndexes": [],
+      "subraceIndexes": [
+        "lightfoot-halfling"
+      ]
+    },
+    "artificers-lore": {
+      "index": "artificers-lore",
+      "label": "Artificer's Lore",
+      "raceIndexes": [],
+      "subraceIndexes": [
+        "rock-gnome"
+      ]
+    },
+    "tinker": {
+      "index": "tinker",
+      "label": "Tinker",
+      "raceIndexes": [],
+      "subraceIndexes": [
+        "rock-gnome"
+      ]
+    }
+  },
+  "languages": {
+    "common": {
+      "index": "common",
+      "label": "Common",
+      "raceIndexes": [
+        "dragonborn",
+        "dwarf",
+        "elf",
+        "gnome",
+        "half-elf",
+        "half-orc",
+        "halfling",
+        "human",
+        "tiefling"
+      ]
+    },
+    "dwarvish": {
+      "index": "dwarvish",
+      "label": "Dwarvish",
+      "raceIndexes": [
+        "dwarf"
+      ]
+    },
+    "elvish": {
+      "index": "elvish",
+      "label": "Elvish",
+      "raceIndexes": [
+        "elf",
+        "half-elf"
+      ]
+    },
+    "halfling": {
+      "index": "halfling",
+      "label": "Halfling",
+      "raceIndexes": [
+        "halfling"
+      ]
+    },
+    "draconic": {
+      "index": "draconic",
+      "label": "Draconic",
+      "raceIndexes": [
+        "dragonborn"
+      ]
+    },
+    "gnomish": {
+      "index": "gnomish",
+      "label": "Gnomish",
+      "raceIndexes": [
+        "gnome"
+      ]
+    },
+    "orc": {
+      "index": "orc",
+      "label": "Orc",
+      "raceIndexes": [
+        "half-orc"
+      ]
+    },
+    "infernal": {
+      "index": "infernal",
+      "label": "Infernal",
+      "raceIndexes": [
+        "tiefling"
+      ]
+    }
+  },
+  "abilityBonuses": {
+    "con": {
+      "index": "con",
+      "label": "CON",
+      "races": [
+        {
+          "index": "dwarf",
+          "bonus": 2
+        },
+        {
+          "index": "half-orc",
+          "bonus": 1
+        },
+        {
+          "index": "human",
+          "bonus": 1
+        }
+      ],
+      "subraces": [
+        {
+          "index": "rock-gnome",
+          "bonus": 1,
+          "raceIndex": "gnome",
+          "raceName": "Gnome"
+        }
+      ]
+    },
+    "dex": {
+      "index": "dex",
+      "label": "DEX",
+      "races": [
+        {
+          "index": "elf",
+          "bonus": 2
+        },
+        {
+          "index": "halfling",
+          "bonus": 2
+        },
+        {
+          "index": "human",
+          "bonus": 1
+        }
+      ],
+      "subraces": []
+    },
+    "str": {
+      "index": "str",
+      "label": "STR",
+      "races": [
+        {
+          "index": "dragonborn",
+          "bonus": 2
+        },
+        {
+          "index": "half-orc",
+          "bonus": 2
+        },
+        {
+          "index": "human",
+          "bonus": 1
+        }
+      ],
+      "subraces": []
+    },
+    "int": {
+      "index": "int",
+      "label": "INT",
+      "races": [
+        {
+          "index": "gnome",
+          "bonus": 2
+        },
+        {
+          "index": "human",
+          "bonus": 1
+        },
+        {
+          "index": "tiefling",
+          "bonus": 1
+        }
+      ],
+      "subraces": [
+        {
+          "index": "high-elf",
+          "bonus": 1,
+          "raceIndex": "elf",
+          "raceName": "Elf"
+        }
+      ]
+    },
+    "wis": {
+      "index": "wis",
+      "label": "WIS",
+      "races": [
+        {
+          "index": "human",
+          "bonus": 1
+        }
+      ],
+      "subraces": [
+        {
+          "index": "hill-dwarf",
+          "bonus": 1,
+          "raceIndex": "dwarf",
+          "raceName": "Dwarf"
+        }
+      ]
+    },
+    "cha": {
+      "index": "cha",
+      "label": "CHA",
+      "races": [
+        {
+          "index": "dragonborn",
+          "bonus": 1
+        },
+        {
+          "index": "half-elf",
+          "bonus": 2
+        },
+        {
+          "index": "human",
+          "bonus": 1
+        },
+        {
+          "index": "tiefling",
+          "bonus": 2
+        }
+      ],
+      "subraces": [
+        {
+          "index": "lightfoot-halfling",
+          "bonus": 1,
+          "raceIndex": "halfling",
+          "raceName": "Halfling"
+        }
+      ]
+    }
+  },
+  "sizes": {
+    "medium": {
+      "index": "medium",
+      "label": "Medium",
+      "raceIndexes": [
+        "dragonborn",
+        "dwarf",
+        "elf",
+        "half-elf",
+        "half-orc",
+        "human",
+        "tiefling"
+      ]
+    },
+    "small": {
+      "index": "small",
+      "label": "Small",
+      "raceIndexes": [
+        "gnome",
+        "halfling"
+      ]
+    }
+  },
+  "source": "5e SRD 2014",
+  "generatedAt": "2026-03-14T04:52:31.349Z"
+}
