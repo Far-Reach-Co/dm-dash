@@ -2,6 +2,20 @@ import path = require("path");
 import fs = require("fs");
 import { srdData } from "./srd/data.js";
 import {
+  type ClassRelationshipsData,
+  type DamageTypeRelationshipsData,
+  type EquipmentFacetsData,
+  type MonsterFacetsData,
+  type RaceRelationshipsData,
+  type SpellFacetsData,
+  CLASS_RELATIONSHIPS_FILE,
+  DAMAGE_TYPE_RELATIONSHIPS_FILE,
+  EQUIPMENT_FACETS_FILE,
+  MONSTER_FACETS_FILE,
+  RACE_RELATIONSHIPS_FILE,
+  SPELL_FACETS_FILE,
+} from "./srd/derivedDatasets.js";
+import {
   type SpellClassLevelIndexData,
   SPELL_CLASS_LEVEL_INDEX_FILE,
   normalizeClassIndex,
@@ -47,6 +61,12 @@ let backgroundsMapCache: Map<string, any> | null = null;
 let traitsMapCache: Map<string, any> | null = null;
 let subracesMapCache: Map<string, any> | null = null;
 let spellClassLevelIndexCache: SpellClassLevelIndexData | null = null;
+let damageTypeRelationshipsCache: DamageTypeRelationshipsData | null = null;
+let spellFacetsCache: SpellFacetsData | null = null;
+let classRelationshipsCache: ClassRelationshipsData | null = null;
+let monsterFacetsCache: MonsterFacetsData | null = null;
+let equipmentFacetsCache: EquipmentFacetsData | null = null;
+let raceRelationshipsCache: RaceRelationshipsData | null = null;
 
 function loadSpellClassLevelIndexFile(): SpellClassLevelIndexData {
   const filePath = path.join(DATA_DIR, SPELL_CLASS_LEVEL_INDEX_FILE);
@@ -84,6 +104,201 @@ export function getSpellClassLevelIndex(): SpellClassLevelIndexData {
 
   spellClassLevelIndexCache = loadSpellClassLevelIndexFile();
   return spellClassLevelIndexCache;
+}
+
+function loadDamageTypeRelationshipsFile(): DamageTypeRelationshipsData {
+  const filePath = path.join(DATA_DIR, DAMAGE_TYPE_RELATIONSHIPS_FILE);
+  let raw = "";
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(
+      `Missing ${DAMAGE_TYPE_RELATIONSHIPS_FILE} at ${filePath}. Run npm run srd:derived-datasets -- 2014.`,
+    );
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`Invalid JSON in ${DAMAGE_TYPE_RELATIONSHIPS_FILE}: ${filePath}`);
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    !("damageTypes" in parsed) ||
+    typeof (parsed as any).damageTypes !== "object" ||
+    Array.isArray((parsed as any).damageTypes)
+  ) {
+    throw new Error(
+      `Invalid damage type relationships shape in ${DAMAGE_TYPE_RELATIONSHIPS_FILE}`,
+    );
+  }
+
+  return parsed as DamageTypeRelationshipsData;
+}
+
+export function getDamageTypeRelationships(): DamageTypeRelationshipsData {
+  if (damageTypeRelationshipsCache) return damageTypeRelationshipsCache;
+
+  damageTypeRelationshipsCache = loadDamageTypeRelationshipsFile();
+  return damageTypeRelationshipsCache;
+}
+
+export function getDamageTypeRelationship(index: string) {
+  const normalized = String(index || "").trim().toLowerCase();
+  if (!normalized) return null;
+  return getDamageTypeRelationships().damageTypes[normalized] || null;
+}
+
+function loadSpellFacetsFile(): SpellFacetsData {
+  const filePath = path.join(DATA_DIR, SPELL_FACETS_FILE);
+  let raw = "";
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(
+      `Missing ${SPELL_FACETS_FILE} at ${filePath}. Run npm run srd:derived-datasets -- 2014.`,
+    );
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`Invalid JSON in ${SPELL_FACETS_FILE}: ${filePath}`);
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    !("damageTypes" in parsed) ||
+    typeof (parsed as any).damageTypes !== "object"
+  ) {
+    throw new Error(`Invalid spell facets shape in ${SPELL_FACETS_FILE}`);
+  }
+
+  return parsed as SpellFacetsData;
+}
+
+export function getSpellFacets(): SpellFacetsData {
+  if (spellFacetsCache) return spellFacetsCache;
+
+  spellFacetsCache = loadSpellFacetsFile();
+  return spellFacetsCache;
+}
+
+function loadClassRelationshipsFile(): ClassRelationshipsData {
+  const filePath = path.join(DATA_DIR, CLASS_RELATIONSHIPS_FILE);
+  let raw = "";
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(
+      `Missing ${CLASS_RELATIONSHIPS_FILE} at ${filePath}. Run npm run srd:derived-datasets -- 2014.`,
+    );
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`Invalid JSON in ${CLASS_RELATIONSHIPS_FILE}: ${filePath}`);
+  }
+  if (
+    !parsed ||
+    typeof parsed !== "object" ||
+    Array.isArray(parsed) ||
+    !("classes" in parsed) ||
+    typeof (parsed as any).classes !== "object"
+  ) {
+    throw new Error(`Invalid class relationships shape in ${CLASS_RELATIONSHIPS_FILE}`);
+  }
+
+  return parsed as ClassRelationshipsData;
+}
+
+export function getClassRelationships(): ClassRelationshipsData {
+  if (classRelationshipsCache) return classRelationshipsCache;
+
+  classRelationshipsCache = loadClassRelationshipsFile();
+  return classRelationshipsCache;
+}
+
+function loadMonsterFacetsFile(): MonsterFacetsData {
+  const filePath = path.join(DATA_DIR, MONSTER_FACETS_FILE);
+  let raw = "";
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(
+      `Missing ${MONSTER_FACETS_FILE} at ${filePath}. Run npm run srd:derived-datasets -- 2014.`,
+    );
+  }
+
+  const parsed = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || !parsed.types) {
+    throw new Error(`Invalid monster facets shape in ${MONSTER_FACETS_FILE}`);
+  }
+  return parsed as MonsterFacetsData;
+}
+
+export function getMonsterFacets(): MonsterFacetsData {
+  if (monsterFacetsCache) return monsterFacetsCache;
+
+  monsterFacetsCache = loadMonsterFacetsFile();
+  return monsterFacetsCache;
+}
+
+function loadEquipmentFacetsFile(): EquipmentFacetsData {
+  const filePath = path.join(DATA_DIR, EQUIPMENT_FACETS_FILE);
+  let raw = "";
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(
+      `Missing ${EQUIPMENT_FACETS_FILE} at ${filePath}. Run npm run srd:derived-datasets -- 2014.`,
+    );
+  }
+
+  const parsed = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || !parsed.categories) {
+    throw new Error(`Invalid equipment facets shape in ${EQUIPMENT_FACETS_FILE}`);
+  }
+  return parsed as EquipmentFacetsData;
+}
+
+export function getEquipmentFacets(): EquipmentFacetsData {
+  if (equipmentFacetsCache) return equipmentFacetsCache;
+
+  equipmentFacetsCache = loadEquipmentFacetsFile();
+  return equipmentFacetsCache;
+}
+
+function loadRaceRelationshipsFile(): RaceRelationshipsData {
+  const filePath = path.join(DATA_DIR, RACE_RELATIONSHIPS_FILE);
+  let raw = "";
+  try {
+    raw = fs.readFileSync(filePath, "utf8");
+  } catch {
+    throw new Error(
+      `Missing ${RACE_RELATIONSHIPS_FILE} at ${filePath}. Run npm run srd:derived-datasets -- 2014.`,
+    );
+  }
+
+  const parsed = JSON.parse(raw);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || !parsed.traits) {
+    throw new Error(`Invalid race relationships shape in ${RACE_RELATIONSHIPS_FILE}`);
+  }
+  return parsed as RaceRelationshipsData;
+}
+
+export function getRaceRelationships(): RaceRelationshipsData {
+  if (raceRelationshipsCache) return raceRelationshipsCache;
+
+  raceRelationshipsCache = loadRaceRelationshipsFile();
+  return raceRelationshipsCache;
 }
 
 export function getEquipmentData(): any[] {
@@ -234,6 +449,52 @@ export function toMonsterTypeSlug(typeName: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+function escapeForRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function extractSpellIndexesFromTraitSpecific(node: any, out: Set<string>) {
+  if (!node) return;
+  if (Array.isArray(node)) {
+    for (const item of node) extractSpellIndexesFromTraitSpecific(item, out);
+    return;
+  }
+  if (typeof node !== "object") return;
+
+  const candidateItem = (node as any).item;
+  if (candidateItem && typeof candidateItem === "object") {
+    const index = String(candidateItem.index || "").trim().toLowerCase();
+    const url = String(candidateItem.url || "").trim().toLowerCase();
+    if (index && url.includes("/spells/")) {
+      out.add(index);
+    }
+  }
+
+  for (const value of Object.values(node)) {
+    extractSpellIndexesFromTraitSpecific(value, out);
+  }
+}
+
+function traitReferencesSpell(
+  trait: any,
+  spellIndex: string,
+  spellName: string,
+): boolean {
+  const spellIndexes = new Set<string>();
+  extractSpellIndexesFromTraitSpecific(trait?.trait_specific, spellIndexes);
+  if (spellIndexes.has(spellIndex)) return true;
+
+  const descText = Array.isArray(trait?.desc)
+    ? trait.desc.join(" ")
+    : String(trait?.desc || "");
+  const normalizedDesc = descText.toLowerCase();
+  if (!normalizedDesc) return false;
+
+  const namePattern = new RegExp(`\\b${escapeForRegex(spellName.toLowerCase())}\\b`, "i");
+  if (!namePattern.test(normalizedDesc)) return false;
+  return /\b(cast|know|learn|prepared|spell|cantrip)\b/i.test(normalizedDesc);
+}
+
 function toCrSlug(crValue: string): string {
   if (crValue === "0.125") return "1-8";
   if (crValue === "0.25") return "1-4";
@@ -268,6 +529,21 @@ export function getSpellSchoolOptions(): Array<{ index: string; label: string; c
   return Array.from(counts.entries())
     .map(([index, value]) => ({ index, label: value.label, count: value.count }))
     .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function getSpellDamageTypeOptions(): Array<{
+  index: string;
+  label: string;
+  count: number;
+}> {
+  return Object.values(getSpellFacets().damageTypes)
+    .map((entry) => ({
+      index: entry.index,
+      label: entry.label,
+      count: entry.spellIndexes.length,
+    }))
+    .filter((entry) => entry.count > 0)
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
 export function getSpellClassOptions(): Array<{ index: string; label: string; count: number }> {
@@ -328,6 +604,21 @@ export function getSpellsForClassAndLevel(classIndex: string, level: number): an
   return spells;
 }
 
+export function getSpellsForDamageType(damageTypeIndex: string): any[] {
+  const normalized = String(damageTypeIndex || "").trim().toLowerCase();
+  if (!normalized) return [];
+  const entry = getSpellFacets().damageTypes[normalized];
+  if (!entry || !entry.spellIndexes.length) return [];
+
+  const spellsMap = getSpellsMap();
+  const spells: any[] = [];
+  for (const spellIndex of entry.spellIndexes) {
+    const spell = spellsMap.get(spellIndex);
+    if (spell) spells.push(spell);
+  }
+  return spells;
+}
+
 export function getSpellLevelOptions(): Array<{ value: number; label: string; count: number }> {
   const counts = new Map<number, number>();
   for (const spell of getSpellsData()) {
@@ -343,6 +634,59 @@ export function getSpellLevelOptions(): Array<{ value: number; label: string; co
       label: value === 0 ? "Cantrips" : `Level ${value}`,
     }))
     .sort((a, b) => a.value - b.value);
+}
+
+export function getSpellDamageTypeOptionsForClass(classIndex: string): Array<{
+  index: string;
+  label: string;
+  count: number;
+}> {
+  const classSpellIndexes = new Set(
+    (getSpellClassLevelIndex().classes[normalizeClassIndex(classIndex)]?.spellIndexes || []).slice(),
+  );
+  if (!classSpellIndexes.size) return [];
+
+  return Object.values(getSpellFacets().damageTypes)
+    .map((entry) => {
+      let count = 0;
+      for (const spellIndex of entry.spellIndexes) {
+        if (classSpellIndexes.has(spellIndex)) count += 1;
+      }
+      return {
+        index: entry.index,
+        label: entry.label,
+        count,
+      };
+    })
+    .filter((entry) => entry.count > 0)
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+}
+
+export function getSpellSchoolOptionsForClass(classIndex: string): Array<{
+  index: string;
+  label: string;
+  count: number;
+}> {
+  const counts = new Map<string, { label: string; count: number }>();
+  for (const spell of getSpellsForClass(classIndex)) {
+    const schoolIndex = String(spell?.school?.index || "").trim().toLowerCase();
+    const schoolName = String(spell?.school?.name || "").trim();
+    if (!schoolIndex || !schoolName) continue;
+    const existing = counts.get(schoolIndex);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      counts.set(schoolIndex, { label: schoolName, count: 1 });
+    }
+  }
+
+  return Array.from(counts.entries())
+    .map(([index, value]) => ({
+      index,
+      label: value.label,
+      count: value.count,
+    }))
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 }
 
 export function getMonsterTypeOptions(): Array<{
@@ -369,6 +713,86 @@ export function getMonsterTypeOptions(): Array<{
       count,
     }))
     .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+function getMonsterFacetOptions(
+  facets: Record<string, { index: string; label: string; monsterIndexes: string[] }>,
+): Array<{ index: string; label: string; count: number }> {
+  return Object.values(facets)
+    .map((entry) => ({
+      index: String(entry?.index || "").trim().toLowerCase(),
+      label: String(entry?.label || entry?.index || "").trim(),
+      count: Array.isArray(entry?.monsterIndexes) ? entry.monsterIndexes.length : 0,
+    }))
+    .filter((entry) => entry.index && entry.label && entry.count > 0)
+    .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+}
+
+function getMonstersForFacetMonsterIndexes(monsterIndexes: string[]): any[] {
+  if (!Array.isArray(monsterIndexes) || !monsterIndexes.length) return [];
+  const monstersMap = getMonstersMap();
+  const monsters: any[] = [];
+  for (const monsterIndex of monsterIndexes) {
+    const monster = monstersMap.get(monsterIndex);
+    if (monster) monsters.push(monster);
+  }
+  return monsters;
+}
+
+export function getMonsterConditionImmunityOptions(): Array<{
+  index: string;
+  label: string;
+  count: number;
+}> {
+  return getMonsterFacetOptions(getMonsterFacets().conditionImmunities);
+}
+
+export function getMonstersForConditionImmunity(conditionIndex: string): any[] {
+  const normalized = String(conditionIndex || "").trim().toLowerCase();
+  if (!normalized) return [];
+  const entry = getMonsterFacets().conditionImmunities[normalized];
+  if (!entry || !entry.monsterIndexes.length) return [];
+  return getMonstersForFacetMonsterIndexes(entry.monsterIndexes);
+}
+
+export function getMonsterSenseOptions(): Array<{
+  index: string;
+  label: string;
+  count: number;
+}> {
+  return getMonsterFacetOptions(getMonsterFacets().senses);
+}
+
+export function getMonstersForSense(senseIndex: string): any[] {
+  const normalized = String(senseIndex || "").trim().toLowerCase();
+  if (!normalized) return [];
+  const entry = getMonsterFacets().senses[normalized];
+  if (!entry || !entry.monsterIndexes.length) return [];
+  return getMonstersForFacetMonsterIndexes(entry.monsterIndexes);
+}
+
+export function getMonsterMovementModeOptions(): Array<{
+  index: string;
+  label: string;
+  count: number;
+}> {
+  return getMonsterFacetOptions(getMonsterFacets().movementModes);
+}
+
+export function getMonstersForMovementMode(movementModeIndex: string): any[] {
+  const normalized = String(movementModeIndex || "").trim().toLowerCase();
+  if (!normalized) return [];
+  const entry = getMonsterFacets().movementModes[normalized];
+  if (!entry || !entry.monsterIndexes.length) return [];
+  return getMonstersForFacetMonsterIndexes(entry.monsterIndexes);
+}
+
+export function getMonstersForMonsterType(typeIndex: string): any[] {
+  const normalized = String(typeIndex || "").trim().toLowerCase();
+  if (!normalized) return [];
+  const entry = getMonsterFacets().types[normalized];
+  if (!entry || !entry.monsterIndexes.length) return [];
+  return getMonstersForFacetMonsterIndexes(entry.monsterIndexes);
 }
 
 export function getMonsterCrOptions(): Array<{
@@ -412,6 +836,131 @@ export function getFeatureClassOptions(): Array<{ index: string; label: string; 
   return Array.from(counts.entries())
     .map(([index, value]) => ({ index, label: value.label, count: value.count }))
     .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function getRelatedDamageTypesForMonster(monster: any): Array<{
+  index: string;
+  label: string;
+}> {
+  const damageTypeEntries = (srdData["damage-types"] || [])
+    .map((entry: any) => ({
+      index: String(entry?.index || "").trim().toLowerCase(),
+      label: String(entry?.name || entry?.index || "").trim(),
+    }))
+    .filter((entry: { index: string; label: string }) => entry.index && entry.label);
+
+  if (!damageTypeEntries.length) return [];
+
+  const indexes = new Set<string>();
+  const matchers = damageTypeEntries.map((entry) => ({
+    ...entry,
+    pattern: new RegExp(`\\b${escapeForRegex(entry.label.toLowerCase())}\\b`, "i"),
+  }));
+
+  const groups = [monster?.actions, monster?.legendary_actions, monster?.special_abilities];
+  for (const group of groups) {
+    for (const item of group || []) {
+      for (const damageEntry of item?.damage || []) {
+        const damageTypeIndex = String(damageEntry?.damage_type?.index || "")
+          .trim()
+          .toLowerCase();
+        if (damageTypeIndex) indexes.add(damageTypeIndex);
+      }
+    }
+  }
+
+  const textValues = [
+    ...(monster?.damage_vulnerabilities || []),
+    ...(monster?.damage_resistances || []),
+    ...(monster?.damage_immunities || []),
+  ];
+  for (const value of textValues) {
+    const text = String(value || "").trim().toLowerCase();
+    if (!text) continue;
+    for (const matcher of matchers) {
+      if (matcher.pattern.test(text)) indexes.add(matcher.index);
+    }
+  }
+
+  return Array.from(indexes)
+    .map((index) => {
+      const match = damageTypeEntries.find((entry) => entry.index === index);
+      return {
+        index,
+        label: match?.label || index,
+      };
+    })
+    .sort((a, b) => a.label.localeCompare(b.label));
+}
+
+export function getClassesForSpellcastingAbility(abilityIndex: string): any[] {
+  const normalized = String(abilityIndex || "").trim().toLowerCase();
+  if (!normalized) return [];
+  const entry = getClassRelationships().spellcastingAbilities[normalized];
+  if (!entry || !entry.classIndexes.length) return [];
+
+  const classesMap = getClassesMap();
+  const classes: any[] = [];
+  for (const classIndex of entry.classIndexes) {
+    const classData = classesMap.get(classIndex);
+    if (classData) classes.push(classData);
+  }
+  return classes;
+}
+
+export function getSpellRaceAccess(spellIndex: string, spellName: string): {
+  races: string[];
+  subraces: string[];
+} {
+  const raceNameByIndex = new Map<string, string>();
+  for (const race of getRacesData()) {
+    const index = String(race?.index || "").trim().toLowerCase();
+    if (!index) continue;
+    raceNameByIndex.set(index, String(race?.name || index).trim() || index);
+  }
+
+  const subraceLabelByIndex = new Map<string, string>();
+  for (const subrace of getSubracesData()) {
+    const index = String(subrace?.index || "").trim().toLowerCase();
+    if (!index) continue;
+    const subraceName = String(subrace?.name || index).trim() || index;
+    const raceName =
+      String(
+        subrace?.race?.name ||
+          raceNameByIndex.get(String(subrace?.race?.index || "").toLowerCase()) ||
+          "",
+      ).trim() || "";
+    subraceLabelByIndex.set(index, raceName ? `${subraceName} (${raceName})` : subraceName);
+  }
+
+  const normalizedSpellIndex = String(spellIndex || "").trim().toLowerCase();
+  const normalizedSpellName = String(spellName || "").trim();
+  if (!normalizedSpellIndex || !normalizedSpellName) {
+    return { races: [], subraces: [] };
+  }
+
+  const races = new Set<string>();
+  const subraces = new Set<string>();
+
+  for (const trait of getTraitsData()) {
+    if (!traitReferencesSpell(trait, normalizedSpellIndex, normalizedSpellName)) continue;
+
+    for (const raceRef of trait?.races || []) {
+      const index = String(raceRef?.index || "").trim().toLowerCase();
+      if (!index) continue;
+      races.add(raceNameByIndex.get(index) || String(raceRef?.name || index));
+    }
+    for (const subraceRef of trait?.subraces || []) {
+      const index = String(subraceRef?.index || "").trim().toLowerCase();
+      if (!index) continue;
+      subraces.add(subraceLabelByIndex.get(index) || String(subraceRef?.name || index));
+    }
+  }
+
+  return {
+    races: Array.from(races).sort((a, b) => a.localeCompare(b)),
+    subraces: Array.from(subraces).sort((a, b) => a.localeCompare(b)),
+  };
 }
 
 export function toClassTablePartial(classIndex: string): string | null {

@@ -101,10 +101,15 @@
     <h2>Full List of D&D 5E Damage Types</h2>
     <p>D&D 5e has <strong>13 damage types</strong>: Acid, Bludgeoning, Cold, Fire, Force, Lightning, Necrotic, Piercing, Poison, Psychic, Radiant, Slashing, and Thunder. Every source of damage in D&D 5e — weapons, spells, traps, and monster abilities — deals one of these types. Creatures can have <strong>resistance</strong> (half damage), <strong>immunity</strong> (no damage), or <strong>vulnerability</strong> (double damage) to specific types.</p>
     <p>The three physical damage types in D&D 5e are <strong>Bludgeoning</strong>, <strong>Piercing</strong>, and <strong>Slashing</strong>. The other ten damage types are magical, elemental, or supernatural: Acid, Cold, Fire, Force, Lightning, Necrotic, Poison, Psychic, Radiant, and Thunder.</p>
-    <ul>
-      <% data.forEach(function(dType){ %>
+    <ul class="srd-col-list-3">
+      <% damageTypePageData.forEach(function(dType){ %>
       <li>
-        <a href="#<%= dType.index %>"><%= dType.name %></a>
+        <a href="/dnd/5e/srd/damage-types/<%= dType.index %>"><%= dType.name %></a>
+        <span class="spell-meta">
+          <%= dType.spellCount %> spells ·
+          <%= dType.immunityMonsterCount %> immune ·
+          <%= dType.resistanceMonsterCount %> resistant
+        </span>
       </li>
       <% }); %>
     </ul>
@@ -113,6 +118,10 @@
     <div class="inline-div" id="<%= dType.index %>">
       <h3><%= dType.name %></h3>
       <div class="indent">
+        <p>
+          <a href="/dnd/5e/srd/damage-types/<%= dType.index %>">Open the <%= dType.name %> damage hub</a>
+          to browse spells that deal it plus monsters that deal, resist, ignore, or are vulnerable to it.
+        </p>
         <% dType.desc.forEach((str, index) => { %>
         <p><%= str %></p>
         <% }) %>

@@ -4,7 +4,10 @@ import {
   getBackgroundsData,
   getBackgroundsMap,
   getClassesData,
+  getClassesForSpellcastingAbility,
   getClassesMap,
+  getDamageTypeRelationship,
+  getDamageTypeRelationships,
   getEquipmentData,
   getEquipmentMap,
   getFeatureClassOptions,
@@ -12,10 +15,15 @@ import {
   getFeaturesMap,
   getMagicItemsData,
   getMagicItemsMap,
+  getMonstersMap,
   getRacesData,
   getRacesMap,
   getSpellCountForClass,
+  getSpellDamageTypeOptionsForClass,
+  getSpellLevelsForClass,
+  getSpellSchoolOptionsForClass,
   getSpellsData,
+  getSpellsMap,
   getSubracesMap,
   getTraitsMap,
   sortByName,
@@ -151,12 +159,91 @@ export function registerSrdContentRoutes(router: Router) {
   );
 
   router.get(
+    "/5e/srd/damage-types/:index",
+    (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const damageTypeIndex = String(req.params.index || "").trim().toLowerCase();
+        const damageType = (srdData["damage-types"] || []).find(
+          (entry: any) => String(entry?.index || "").toLowerCase() === damageTypeIndex,
+        );
+        const relationship = getDamageTypeRelationship(damageTypeIndex);
+
+        if (!damageType || !relationship) {
+          return res.status(404).render("404", { auth: req.session.user });
+        }
+
+        const spellsMap = getSpellsMap();
+        const monstersMap = getMonstersMap();
+        const classesMap = getClassesMap();
+
+        const spells = relationship.spells.indexes
+          .map((index) => spellsMap.get(index))
+          .filter(Boolean);
+        const monsterDealers = relationship.monsters.dealsDamageIndexes
+          .map((index) => monstersMap.get(index))
+          .filter(Boolean);
+        const resistantMonsters = relationship.monsters.resistanceIndexes
+          .map((index) => monstersMap.get(index))
+          .filter(Boolean);
+        const immuneMonsters = relationship.monsters.immunityIndexes
+          .map((index) => monstersMap.get(index))
+          .filter(Boolean);
+        const vulnerableMonsters = relationship.monsters.vulnerabilityIndexes
+          .map((index) => monstersMap.get(index))
+          .filter(Boolean);
+
+        const spellClassGroups = Object.entries(relationship.spells.byClass)
+          .map(([classIndex, spellIndexes]) => {
+            const classData = classesMap.get(classIndex);
+            return {
+              index: classIndex,
+              label: String(classData?.name || classIndex),
+              count: spellIndexes.length,
+            };
+          })
+          .sort((left, right) => left.label.localeCompare(right.label));
+
+        res.render("dnd/5e/srd/damage-type", {
+          auth: req.session.user,
+          damageType,
+          relationship,
+          spells,
+          spellClassGroups,
+          monsterDealers,
+          resistantMonsters,
+          immuneMonsters,
+          vulnerableMonsters,
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.get(
     "/5e/srd/damage-types",
     (req: Request, res: Response, next: NextFunction) => {
       try {
+        const relationships = getDamageTypeRelationships();
+        const damageTypePageData = (srdData["damage-types"] || []).map((entry: any) => {
+          const relationship =
+            relationships.damageTypes[String(entry?.index || "").toLowerCase()] || null;
+          return {
+            index: entry?.index,
+            name: entry?.name,
+            spellCount: relationship?.spells?.indexes?.length || 0,
+            dealDamageMonsterCount: relationship?.monsters?.dealsDamageIndexes?.length || 0,
+            resistanceMonsterCount: relationship?.monsters?.resistanceIndexes?.length || 0,
+            immunityMonsterCount: relationship?.monsters?.immunityIndexes?.length || 0,
+            vulnerabilityMonsterCount:
+              relationship?.monsters?.vulnerabilityIndexes?.length || 0,
+          };
+        });
+
         res.render("dnd/5e/srd/damagetypes", {
           auth: req.session.user,
           data: srdData["damage-types"] || [],
+          damageTypePageData,
         });
       } catch (err) {
         next(err);
@@ -209,6 +296,16 @@ export function registerSrdContentRoutes(router: Router) {
           .sort((a, b) => a.name.localeCompare(b.name));
 
         const classSpellCount = getSpellCountForClass(classData.index);
+        const classSpellLevels = getSpellLevelsForClass(classData.index);
+        const classSpellSchoolOptions = getSpellSchoolOptionsForClass(classData.index).slice(0, 8);
+        const classSpellDamageTypeOptions = getSpellDamageTypeOptionsForClass(
+          classData.index,
+        ).slice(0, 8);
+        const relatedSpellcastingClasses = classData.spellcasting?.spellcasting_ability?.index
+          ? getClassesForSpellcastingAbility(classData.spellcasting.spellcasting_ability.index)
+              .filter((item: any) => item.index !== classData.index)
+              .sort((a: any, b: any) => a.name.localeCompare(b.name))
+          : [];
 
         res.render("dnd/5e/srd/class", {
           auth: req.session.user,
@@ -217,6 +314,10 @@ export function registerSrdContentRoutes(router: Router) {
           baseFeatures,
           subclassFeatures,
           classSpellCount,
+          classSpellLevels,
+          classSpellSchoolOptions,
+          classSpellDamageTypeOptions,
+          relatedSpellcastingClasses,
         });
       } catch (err) {
         next(err);

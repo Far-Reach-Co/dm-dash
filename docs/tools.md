@@ -53,12 +53,14 @@ npm run srd:download -- 2014
 npm run srd:download:prod -- 2014
 npm run srd:spell-class-index -- 2014
 npm run srd:spell-class-index:prod -- 2014
+npm run srd:derived-datasets -- 2014
+npm run srd:derived-datasets:prod -- 2014
 npm run srd:popular-pages:update -- --dry-run
 npm run srd:popular-pages:update:prod
 npm run guest-sandbox:import-images -- --help
 npm run guest-sandbox:import-images:prod -- --help
 ```
 
-`srd:download` and `srd:download:prod` now regenerate `5e-srd-spell-class-level-index.json` automatically after a successful download.
+`srd:download` and `srd:download:prod` now regenerate `5e-srd-spell-class-level-index.json` and the derived SRD relationship datasets automatically after a successful download.
 
 `indexnow:all` and `indexnow:all:prod` regenerate `public/sitemap.xml`, write the IndexNow key file at the site root under `public/`, and submit the full sitemap URL list to IndexNow. Configure `INDEXNOW_KEY` first.

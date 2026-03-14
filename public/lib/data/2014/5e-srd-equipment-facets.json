@@ -1,0 +1,1876 @@
+{
+  "version": 1,
+  "categories": {
+    "weapon": {
+      "index": "weapon",
+      "label": "Weapon",
+      "itemIndexes": [
+        "battleaxe",
+        "blowgun",
+        "club",
+        "crossbow-hand",
+        "crossbow-heavy",
+        "crossbow-light",
+        "dagger",
+        "dart",
+        "flail",
+        "glaive",
+        "greataxe",
+        "greatclub",
+        "greatsword",
+        "halberd",
+        "handaxe",
+        "javelin",
+        "lance",
+        "light-hammer",
+        "longbow",
+        "longsword",
+        "mace",
+        "maul",
+        "morningstar",
+        "net",
+        "pike",
+        "quarterstaff",
+        "rapier",
+        "scimitar",
+        "shortbow",
+        "shortsword",
+        "sickle",
+        "sling",
+        "spear",
+        "trident",
+        "war-pick",
+        "warhammer",
+        "whip"
+      ]
+    },
+    "armor": {
+      "index": "armor",
+      "label": "Armor",
+      "itemIndexes": [
+        "breastplate",
+        "chain-mail",
+        "chain-shirt",
+        "half-plate-armor",
+        "hide-armor",
+        "leather-armor",
+        "padded-armor",
+        "plate-armor",
+        "ring-mail",
+        "scale-mail",
+        "shield",
+        "splint-armor",
+        "studded-leather-armor"
+      ]
+    },
+    "adventuring-gear": {
+      "index": "adventuring-gear",
+      "label": "Adventuring Gear",
+      "itemIndexes": [
+        "abacus",
+        "acid-vial",
+        "alchemists-fire-flask",
+        "alms-box",
+        "amulet",
+        "antitoxin-vial",
+        "arrow",
+        "backpack",
+        "ball-bearings-bag-of-1000",
+        "barrel",
+        "basket",
+        "bedroll",
+        "bell",
+        "blanket",
+        "block-and-tackle",
+        "block-of-incense",
+        "blowgun-needle",
+        "book",
+        "bottle-glass",
+        "bucket",
+        "burglars-pack",
+        "caltrops",
+        "candle",
+        "case-crossbow-bolt",
+        "case-map-or-scroll",
+        "censer",
+        "chain-10-feet",
+        "chalk-1-piece",
+        "chest",
+        "climbers-kit",
+        "clothes-common",
+        "clothes-costume",
+        "clothes-fine",
+        "clothes-travelers",
+        "component-pouch",
+        "crossbow-bolt",
+        "crowbar",
+        "crystal",
+        "diplomats-pack",
+        "disguise-kit",
+        "dungeoneers-pack",
+        "emblem",
+        "entertainers-pack",
+        "explorers-pack",
+        "fishing-tackle",
+        "flask-or-tankard",
+        "forgery-kit",
+        "grappling-hook",
+        "hammer",
+        "hammer-sledge",
+        "healers-kit",
+        "herbalism-kit",
+        "holy-water-flask",
+        "hourglass",
+        "hunting-trap",
+        "ink-1-ounce-bottle",
+        "ink-pen",
+        "jug-or-pitcher",
+        "ladder-10-foot",
+        "lamp",
+        "lantern-bullseye",
+        "lantern-hooded",
+        "little-bag-of-sand",
+        "lock",
+        "magnifying-glass",
+        "manacles",
+        "mess-kit",
+        "mirror-steel",
+        "oil-flask",
+        "orb",
+        "paper-one-sheet",
+        "parchment-one-sheet",
+        "perfume-vial",
+        "pick-miners",
+        "piton",
+        "poison-basic-vial",
+        "poisoners-kit",
+        "pole-10-foot",
+        "pot-iron",
+        "pouch",
+        "priests-pack",
+        "quiver",
+        "ram-portable",
+        "rations-1-day",
+        "reliquary",
+        "robes",
+        "rod",
+        "rope-hempen-50-feet",
+        "rope-silk-50-feet",
+        "sack",
+        "scale-merchants",
+        "scholars-pack",
+        "sealing-wax",
+        "shovel",
+        "signal-whistle",
+        "signet-ring",
+        "sling-bullet",
+        "small-knife",
+        "soap",
+        "spellbook",
+        "spike-iron",
+        "sprig-of-mistletoe",
+        "spyglass",
+        "staff",
+        "string-10-feet",
+        "tent-two-person",
+        "tinderbox",
+        "torch",
+        "totem",
+        "vestments",
+        "vial",
+        "wand",
+        "waterskin",
+        "whetstone",
+        "wooden-staff",
+        "yew-wand"
+      ]
+    },
+    "tools": {
+      "index": "tools",
+      "label": "Tools",
+      "itemIndexes": [
+        "alchemists-supplies",
+        "bagpipes",
+        "brewers-supplies",
+        "calligraphers-supplies",
+        "carpenters-tools",
+        "cartographers-tools",
+        "cobblers-tools",
+        "cooks-utensils",
+        "dice-set",
+        "drum",
+        "dulcimer",
+        "flute",
+        "glassblowers-tools",
+        "horn",
+        "jewelers-tools",
+        "leatherworkers-tools",
+        "lute",
+        "lyre",
+        "masons-tools",
+        "navigators-tools",
+        "painters-supplies",
+        "pan-flute",
+        "playing-card-set",
+        "potters-tools",
+        "shawm",
+        "smiths-tools",
+        "thieves-tools",
+        "tinkers-tools",
+        "viol",
+        "weavers-tools",
+        "woodcarvers-tools"
+      ]
+    },
+    "mounts-and-vehicles": {
+      "index": "mounts-and-vehicles",
+      "label": "Mounts and Vehicles",
+      "itemIndexes": [
+        "animal-feed-1-day",
+        "barding-breastplate",
+        "barding-chain-mail",
+        "barding-chain-shirt",
+        "barding-half-plate",
+        "barding-hide",
+        "barding-leather",
+        "barding-padded",
+        "barding-plate",
+        "barding-ring-mail",
+        "barding-scale-mail",
+        "barding-splint",
+        "barding-studded-leather",
+        "bit-and-bridle",
+        "camel",
+        "carriage",
+        "cart",
+        "chariot",
+        "donkey",
+        "elephant",
+        "galley",
+        "horse-draft",
+        "horse-riding",
+        "keelboat",
+        "longship",
+        "mastiff",
+        "mule",
+        "pony",
+        "rowboat",
+        "saddle-exotic",
+        "saddle-military",
+        "saddle-pack",
+        "saddle-riding",
+        "saddlebags",
+        "sailing-ship",
+        "sled",
+        "stabling-1-day",
+        "wagon",
+        "warhorse",
+        "warship"
+      ]
+    }
+  },
+  "armorCategories": {
+    "light": {
+      "index": "light",
+      "label": "Light",
+      "itemIndexes": [
+        "leather-armor",
+        "padded-armor",
+        "studded-leather-armor"
+      ]
+    },
+    "medium": {
+      "index": "medium",
+      "label": "Medium",
+      "itemIndexes": [
+        "breastplate",
+        "chain-shirt",
+        "half-plate-armor",
+        "hide-armor",
+        "scale-mail"
+      ]
+    },
+    "heavy": {
+      "index": "heavy",
+      "label": "Heavy",
+      "itemIndexes": [
+        "chain-mail",
+        "plate-armor",
+        "ring-mail",
+        "splint-armor"
+      ]
+    },
+    "shield": {
+      "index": "shield",
+      "label": "Shield",
+      "itemIndexes": [
+        "shield"
+      ]
+    }
+  },
+  "weaponCategories": {
+    "simple": {
+      "index": "simple",
+      "label": "Simple",
+      "itemIndexes": [
+        "club",
+        "crossbow-light",
+        "dagger",
+        "dart",
+        "greatclub",
+        "handaxe",
+        "javelin",
+        "light-hammer",
+        "mace",
+        "quarterstaff",
+        "shortbow",
+        "sickle",
+        "sling",
+        "spear"
+      ]
+    },
+    "martial": {
+      "index": "martial",
+      "label": "Martial",
+      "itemIndexes": [
+        "battleaxe",
+        "blowgun",
+        "crossbow-hand",
+        "crossbow-heavy",
+        "flail",
+        "glaive",
+        "greataxe",
+        "greatsword",
+        "halberd",
+        "lance",
+        "longbow",
+        "longsword",
+        "maul",
+        "morningstar",
+        "net",
+        "pike",
+        "rapier",
+        "scimitar",
+        "shortsword",
+        "trident",
+        "war-pick",
+        "warhammer",
+        "whip"
+      ]
+    }
+  },
+  "weaponRanges": {
+    "melee": {
+      "index": "melee",
+      "label": "Melee",
+      "itemIndexes": [
+        "battleaxe",
+        "club",
+        "dagger",
+        "flail",
+        "glaive",
+        "greataxe",
+        "greatclub",
+        "greatsword",
+        "halberd",
+        "handaxe",
+        "javelin",
+        "lance",
+        "light-hammer",
+        "longsword",
+        "mace",
+        "maul",
+        "morningstar",
+        "pike",
+        "quarterstaff",
+        "rapier",
+        "scimitar",
+        "shortsword",
+        "sickle",
+        "spear",
+        "trident",
+        "war-pick",
+        "warhammer",
+        "whip"
+      ]
+    },
+    "ranged": {
+      "index": "ranged",
+      "label": "Ranged",
+      "itemIndexes": [
+        "blowgun",
+        "crossbow-hand",
+        "crossbow-heavy",
+        "crossbow-light",
+        "dart",
+        "longbow",
+        "net",
+        "shortbow",
+        "sling"
+      ]
+    }
+  },
+  "gearCategories": {
+    "standard-gear": {
+      "index": "standard-gear",
+      "label": "Standard Gear",
+      "itemIndexes": [
+        "abacus",
+        "acid-vial",
+        "alchemists-fire-flask",
+        "alms-box",
+        "antitoxin-vial",
+        "backpack",
+        "ball-bearings-bag-of-1000",
+        "barrel",
+        "basket",
+        "bedroll",
+        "bell",
+        "blanket",
+        "block-and-tackle",
+        "block-of-incense",
+        "book",
+        "bottle-glass",
+        "bucket",
+        "caltrops",
+        "candle",
+        "case-crossbow-bolt",
+        "case-map-or-scroll",
+        "censer",
+        "chain-10-feet",
+        "chalk-1-piece",
+        "chest",
+        "clothes-common",
+        "clothes-costume",
+        "clothes-fine",
+        "clothes-travelers",
+        "component-pouch",
+        "crowbar",
+        "fishing-tackle",
+        "flask-or-tankard",
+        "grappling-hook",
+        "hammer",
+        "hammer-sledge",
+        "holy-water-flask",
+        "hourglass",
+        "hunting-trap",
+        "ink-1-ounce-bottle",
+        "ink-pen",
+        "jug-or-pitcher",
+        "ladder-10-foot",
+        "lamp",
+        "lantern-bullseye",
+        "lantern-hooded",
+        "little-bag-of-sand",
+        "lock",
+        "magnifying-glass",
+        "manacles",
+        "mirror-steel",
+        "oil-flask",
+        "paper-one-sheet",
+        "parchment-one-sheet",
+        "perfume-vial",
+        "pick-miners",
+        "piton",
+        "poison-basic-vial",
+        "pole-10-foot",
+        "pot-iron",
+        "pouch",
+        "quiver",
+        "ram-portable",
+        "rations-1-day",
+        "robes",
+        "rope-hempen-50-feet",
+        "rope-silk-50-feet",
+        "sack",
+        "scale-merchants",
+        "sealing-wax",
+        "shovel",
+        "signal-whistle",
+        "signet-ring",
+        "small-knife",
+        "soap",
+        "spellbook",
+        "spike-iron",
+        "spyglass",
+        "string-10-feet",
+        "tent-two-person",
+        "tinderbox",
+        "torch",
+        "vestments",
+        "vial",
+        "waterskin",
+        "whetstone"
+      ]
+    },
+    "ammunition": {
+      "index": "ammunition",
+      "label": "Ammunition",
+      "itemIndexes": [
+        "arrow",
+        "blowgun-needle",
+        "crossbow-bolt",
+        "sling-bullet"
+      ]
+    },
+    "holy-symbols": {
+      "index": "holy-symbols",
+      "label": "Holy Symbols",
+      "itemIndexes": [
+        "amulet",
+        "emblem",
+        "reliquary"
+      ]
+    },
+    "arcane-foci": {
+      "index": "arcane-foci",
+      "label": "Arcane Foci",
+      "itemIndexes": [
+        "crystal",
+        "orb",
+        "rod",
+        "staff",
+        "wand"
+      ]
+    },
+    "druidic-foci": {
+      "index": "druidic-foci",
+      "label": "Druidic Foci",
+      "itemIndexes": [
+        "sprig-of-mistletoe",
+        "totem",
+        "wooden-staff",
+        "yew-wand"
+      ]
+    },
+    "kits": {
+      "index": "kits",
+      "label": "Kits",
+      "itemIndexes": [
+        "climbers-kit",
+        "disguise-kit",
+        "forgery-kit",
+        "healers-kit",
+        "herbalism-kit",
+        "mess-kit",
+        "poisoners-kit"
+      ]
+    },
+    "equipment-packs": {
+      "index": "equipment-packs",
+      "label": "Equipment Packs",
+      "itemIndexes": [
+        "burglars-pack",
+        "diplomats-pack",
+        "dungeoneers-pack",
+        "entertainers-pack",
+        "explorers-pack",
+        "priests-pack",
+        "scholars-pack"
+      ]
+    }
+  },
+  "toolCategories": {
+    "artisan-s-tools": {
+      "index": "artisan-s-tools",
+      "label": "Artisan's Tools",
+      "itemIndexes": [
+        "alchemists-supplies",
+        "brewers-supplies",
+        "calligraphers-supplies",
+        "carpenters-tools",
+        "cartographers-tools",
+        "cobblers-tools",
+        "cooks-utensils",
+        "glassblowers-tools",
+        "jewelers-tools",
+        "leatherworkers-tools",
+        "masons-tools",
+        "painters-supplies",
+        "potters-tools",
+        "smiths-tools",
+        "tinkers-tools",
+        "weavers-tools",
+        "woodcarvers-tools"
+      ]
+    },
+    "gaming-sets": {
+      "index": "gaming-sets",
+      "label": "Gaming Sets",
+      "itemIndexes": [
+        "dice-set",
+        "playing-card-set"
+      ]
+    },
+    "musical-instrument": {
+      "index": "musical-instrument",
+      "label": "Musical Instrument",
+      "itemIndexes": [
+        "bagpipes",
+        "drum",
+        "dulcimer",
+        "flute",
+        "horn",
+        "lute",
+        "lyre",
+        "pan-flute",
+        "shawm",
+        "viol"
+      ]
+    },
+    "other-tools": {
+      "index": "other-tools",
+      "label": "Other Tools",
+      "itemIndexes": [
+        "navigators-tools",
+        "thieves-tools"
+      ]
+    }
+  },
+  "weaponProperties": {
+    "light": {
+      "index": "light",
+      "label": "Light",
+      "itemIndexes": [
+        "club",
+        "crossbow-hand",
+        "dagger",
+        "handaxe",
+        "light-hammer",
+        "scimitar",
+        "shortsword",
+        "sickle"
+      ]
+    },
+    "monk": {
+      "index": "monk",
+      "label": "Monk",
+      "itemIndexes": [
+        "club",
+        "dagger",
+        "handaxe",
+        "javelin",
+        "light-hammer",
+        "mace",
+        "quarterstaff",
+        "shortsword",
+        "sickle",
+        "spear"
+      ]
+    },
+    "finesse": {
+      "index": "finesse",
+      "label": "Finesse",
+      "itemIndexes": [
+        "dagger",
+        "dart",
+        "rapier",
+        "scimitar",
+        "shortsword",
+        "whip"
+      ]
+    },
+    "thrown": {
+      "index": "thrown",
+      "label": "Thrown",
+      "itemIndexes": [
+        "dagger",
+        "dart",
+        "handaxe",
+        "javelin",
+        "light-hammer",
+        "net",
+        "spear",
+        "trident"
+      ]
+    },
+    "two-handed": {
+      "index": "two-handed",
+      "label": "Two-Handed",
+      "itemIndexes": [
+        "crossbow-heavy",
+        "crossbow-light",
+        "glaive",
+        "greataxe",
+        "greatclub",
+        "greatsword",
+        "halberd",
+        "longbow",
+        "maul",
+        "pike",
+        "shortbow"
+      ]
+    },
+    "versatile": {
+      "index": "versatile",
+      "label": "Versatile",
+      "itemIndexes": [
+        "battleaxe",
+        "longsword",
+        "quarterstaff",
+        "spear",
+        "trident",
+        "warhammer"
+      ]
+    },
+    "ammunition": {
+      "index": "ammunition",
+      "label": "Ammunition",
+      "itemIndexes": [
+        "blowgun",
+        "crossbow-hand",
+        "crossbow-heavy",
+        "crossbow-light",
+        "longbow",
+        "shortbow",
+        "sling"
+      ]
+    },
+    "loading": {
+      "index": "loading",
+      "label": "Loading",
+      "itemIndexes": [
+        "blowgun",
+        "crossbow-hand",
+        "crossbow-heavy",
+        "crossbow-light"
+      ]
+    },
+    "heavy": {
+      "index": "heavy",
+      "label": "Heavy",
+      "itemIndexes": [
+        "crossbow-heavy",
+        "glaive",
+        "greataxe",
+        "greatsword",
+        "halberd",
+        "longbow",
+        "maul",
+        "pike"
+      ]
+    },
+    "reach": {
+      "index": "reach",
+      "label": "Reach",
+      "itemIndexes": [
+        "glaive",
+        "halberd",
+        "lance",
+        "pike",
+        "whip"
+      ]
+    },
+    "special": {
+      "index": "special",
+      "label": "Special",
+      "itemIndexes": [
+        "lance",
+        "net"
+      ]
+    }
+  },
+  "magicItemRarities": {
+    "uncommon": {
+      "index": "uncommon",
+      "label": "Uncommon",
+      "itemIndexes": [
+        "adamantine-armor",
+        "elemental-gem-air",
+        "ammunition-1",
+        "amulet-of-proof-against-detection-and-location",
+        "bag-of-holding",
+        "bag-of-tricks",
+        "boots-of-elvenkind",
+        "boots-of-striding-and-springing",
+        "boots-of-the-winterlands",
+        "bracers-of-archery",
+        "brooch-of-shielding",
+        "broom-of-flying",
+        "circlet-of-blasting",
+        "cloak-of-elvenkind",
+        "cloak-of-protection",
+        "cloak-of-the-manta-ray",
+        "decanter-of-endless-water",
+        "deck-of-illusions",
+        "dust-of-disappearance",
+        "dust-of-dryness",
+        "dust-of-sneezing-and-choking",
+        "elemental-gem-earth",
+        "efficient-quiver",
+        "elemental-gem",
+        "eversmoking-bottle",
+        "eyes-of-charming",
+        "eyes-of-minute-seeing",
+        "eyes-of-the-eagle",
+        "elemental-gem-fire",
+        "gauntlets-of-ogre-power",
+        "gem-of-brightness",
+        "gloves-of-missile-snaring",
+        "gloves-of-swimming-and-climbing",
+        "goggles-of-night",
+        "bag-of-tricks-gray",
+        "hat-of-disguise",
+        "headband-of-intellect",
+        "helm-of-comprehending-languages",
+        "helm-of-telepathy",
+        "immovable-rod",
+        "javelin-of-lightning",
+        "lantern-of-revealing",
+        "medallion-of-thoughts",
+        "mithral-armor",
+        "necklace-of-adaptation",
+        "oil-of-slipperiness",
+        "pearl-of-power",
+        "periapt-of-health",
+        "periapt-of-wound-closure",
+        "philter-of-love",
+        "pipes-of-haunting",
+        "pipes-of-the-sewers",
+        "potion-of-resistance-acid",
+        "potion-of-animal-friendship",
+        "potion-of-resistance-cold",
+        "potion-of-resistance-fire",
+        "potion-of-resistance-force",
+        "potion-of-healing-greater",
+        "potion-of-growth",
+        "potion-of-giant-strength-hill",
+        "potion-of-resistance-lightning",
+        "potion-of-resistance-necrotic",
+        "potion-of-poison",
+        "potion-of-resistance-poison",
+        "potion-of-resistance-psychic",
+        "potion-of-resistance-radiant",
+        "potion-of-resistance",
+        "potion-of-resistance-thunder",
+        "potion-of-water-breathing",
+        "restorative-ointment",
+        "ring-of-jumping",
+        "ring-of-mind-shielding",
+        "ring-of-swimming",
+        "ring-of-warmth",
+        "ring-of-water-walking",
+        "robe-of-useful-items",
+        "rope-of-climbing",
+        "bag-of-tricks-rust",
+        "figurine-of-wondrous-power-silver-raven",
+        "slippers-of-spider-climbing",
+        "spell-scroll-2nd",
+        "spell-scroll-3rd",
+        "stone-of-good-luck-luckstone",
+        "bag-of-tricks-tan",
+        "trident-of-fish-command",
+        "wand-of-magic-detection",
+        "wand-of-magic-missiles",
+        "wand-of-secrets",
+        "wand-of-the-war-mage-1",
+        "wand-of-web",
+        "elemental-gem-water",
+        "weapon-1",
+        "wind-fan",
+        "winged-boots"
+      ]
+    },
+    "varies": {
+      "index": "varies",
+      "label": "Varies",
+      "itemIndexes": [
+        "ammunition",
+        "armor",
+        "belt-of-giant-strength",
+        "figurine-of-wondrous-power",
+        "horn-of-valhalla",
+        "ioun-stone",
+        "potion-of-giant-strength",
+        "potion-of-healing",
+        "spell-scroll",
+        "wand-of-the-war-mage",
+        "weapon"
+      ]
+    },
+    "rare": {
+      "index": "rare",
+      "label": "Rare",
+      "itemIndexes": [
+        "ammunition-2",
+        "amulet-of-health",
+        "feather-token-anchor",
+        "armor-of-resistance",
+        "armor-of-vulnerability",
+        "armor-1",
+        "arrow-catching-shield",
+        "bag-of-beans",
+        "bead-of-force",
+        "belt-of-dwarvenkind",
+        "belt-of-giant-strength-hill",
+        "berserker-axe",
+        "feather-token-bird",
+        "boots-of-levitation",
+        "boots-of-speed",
+        "bowl-of-commanding-water-elementals",
+        "bracers-of-defense",
+        "horn-of-valhalla-brass",
+        "brazier-of-commanding-fire-elementals",
+        "figurine-of-wondrous-power-bronze-griffon",
+        "cape-of-the-mountebank",
+        "censer-of-controlling-air-elementals",
+        "chime-of-opening",
+        "cloak-of-displacement",
+        "cloak-of-the-bat",
+        "cube-of-force",
+        "dagger-of-venom",
+        "dimensional-shackles",
+        "dragon-slayer",
+        "figurine-of-wondrous-power-ebony-fly",
+        "elven-chain",
+        "feather-token-fan",
+        "feather-token",
+        "flame-tongue",
+        "folding-boat",
+        "gem-of-seeing",
+        "giant-slayer",
+        "glamoured-studded-leather-armor",
+        "figurine-of-wondrous-power-golden-lions",
+        "handy-haversack",
+        "helm-of-teleportation",
+        "horn-of-blasting",
+        "horseshoes-of-speed",
+        "instant-fortress",
+        "ioun-stone-of-awareness",
+        "ioun-stone-of-protection",
+        "ioun-stone-of-reserve",
+        "ioun-stone-of-sustenance",
+        "iron-bands-of-binding",
+        "figurine-of-wondrous-power-ivory-goats",
+        "mace-of-disruption",
+        "mace-of-smiting",
+        "mace-of-terror",
+        "mantle-of-spell-resistance",
+        "figurine-of-wondrous-power-marble-elephant",
+        "necklace-of-fireballs",
+        "necklace-of-prayer-beads",
+        "oil-of-etherealness",
+        "figurine-of-wondrous-power-onyx-dog",
+        "periapt-of-proof-against-poison",
+        "portable-hole",
+        "potion-of-clairvoyance",
+        "potion-of-diminution",
+        "potion-of-giant-strength-fire",
+        "potion-of-giant-strength-frost",
+        "potion-of-gaseous-form",
+        "potion-of-heroism",
+        "potion-of-mind-reading",
+        "potion-of-giant-strength-stone",
+        "potion-of-healing-superior",
+        "ring-of-resistance-acid",
+        "ring-of-animal-influence",
+        "ring-of-resistance-cold",
+        "ring-of-evasion",
+        "ring-of-feather-falling",
+        "ring-of-resistance-fire",
+        "ring-of-resistance-force",
+        "ring-of-free-action",
+        "ring-of-resistance-lightning",
+        "ring-of-resistance-necrotic",
+        "ring-of-resistance-poison",
+        "ring-of-protection",
+        "ring-of-resistance-psychic",
+        "ring-of-resistance-radiant",
+        "ring-of-resistance",
+        "ring-of-spell-storing",
+        "ring-of-the-ram",
+        "ring-of-resistance-thunder",
+        "ring-of-x-ray-vision",
+        "robe-of-eyes",
+        "rod-of-rulership",
+        "rope-of-entanglement",
+        "figurine-of-wondrous-power-serpentine-owl",
+        "shield-of-missile-attraction",
+        "horn-of-valhalla-silver",
+        "spell-scroll-4th",
+        "spell-scroll-5th",
+        "staff-of-charming",
+        "staff-of-healing",
+        "staff-of-the-woodlands",
+        "staff-of-withering",
+        "stone-of-controlling-earth-elementals",
+        "sun-blade",
+        "feather-token-swan-boat",
+        "sword-of-life-stealing",
+        "sword-of-wounding",
+        "feather-token-tree",
+        "vicious-weapon",
+        "wand-of-binding",
+        "wand-of-enemy-detection",
+        "wand-of-fear",
+        "wand-of-fireballs",
+        "wand-of-lightning-bolts",
+        "wand-of-paralysis",
+        "wand-of-the-war-mage-2",
+        "wand-of-wonder",
+        "weapon-2",
+        "feather-token-whip",
+        "wings-of-flying"
+      ]
+    },
+    "very rare": {
+      "index": "very rare",
+      "label": "Very Rare",
+      "itemIndexes": [
+        "ammunition-3",
+        "amulet-of-the-planes",
+        "animated-shield",
+        "armor-2",
+        "arrow-of-slaying",
+        "bag-of-devouring",
+        "belt-of-giant-strength-fire",
+        "belt-of-giant-strength-frost",
+        "belt-of-giant-strength-stone",
+        "dragon-scale-mail-black",
+        "dragon-scale-mail-blue",
+        "dragon-scale-mail-brass",
+        "dragon-scale-mail-bronze",
+        "horn-of-valhalla-bronze",
+        "candle-of-invocation",
+        "carpet-of-flying",
+        "carpet-of-flying-3x5",
+        "carpet-of-flying-4x6",
+        "carpet-of-flying-5x7",
+        "carpet-of-flying-6x9",
+        "cloak-of-arachnida",
+        "dragon-scale-mail-copper",
+        "crystal-ball",
+        "dancing-sword",
+        "demon-armor",
+        "dragon-scale-mail",
+        "dwarven-plate",
+        "dwarven-thrower",
+        "efreeti-bottle",
+        "frost-brand",
+        "dragon-scale-mail-gold",
+        "dragon-scale-mail-green",
+        "helm-of-brilliance",
+        "horseshoes-of-a-zephyr",
+        "ioun-stone-of-absorption",
+        "ioun-stone-of-agility",
+        "ioun-stone-of-fortitude",
+        "ioun-stone-of-insight",
+        "ioun-stone-of-intellect",
+        "ioun-stone-of-leadership",
+        "ioun-stone-of-strength",
+        "manual-of-bodily-health",
+        "manual-of-golems-clay",
+        "manual-of-golems-flesh",
+        "manual-of-gainful-exercise",
+        "manual-of-golems",
+        "manual-of-golems-iron",
+        "manual-of-quickness-of-action",
+        "manual-of-golems-stone",
+        "marvelous-pigments",
+        "mirror-of-life-trapping",
+        "nine-lives-stealer",
+        "oathbow",
+        "figurine-of-wondrous-power-obsidian-steed",
+        "oil-of-sharpness",
+        "potion-of-giant-strength-cloud",
+        "potion-of-flying",
+        "potion-of-invisibility",
+        "potion-of-speed",
+        "potion-of-healing-supreme",
+        "dragon-scale-mail-red",
+        "ring-of-regeneration",
+        "ring-of-shooting-stars",
+        "ring-of-telekinesis",
+        "robe-of-scintillating-colors",
+        "robe-of-stars",
+        "rod-of-absorption",
+        "rod-of-alertness",
+        "rod-of-security",
+        "scimitar-of-speed",
+        "dragon-scale-mail-silver",
+        "spell-scroll-6th",
+        "spell-scroll-7th",
+        "spell-scroll-8th",
+        "spellguard-shield",
+        "staff-of-fire",
+        "staff-of-frost",
+        "staff-of-power",
+        "staff-of-striking",
+        "staff-of-swarming-insects",
+        "staff-of-the-python",
+        "staff-of-thunder-and-lightning",
+        "sword-of-sharpness",
+        "tome-of-clear-thought",
+        "tome-of-leadership-and-influence",
+        "tome-of-understanding",
+        "wand-of-polymorph",
+        "wand-of-the-war-mage-3",
+        "weapon-3",
+        "dragon-scale-mail-white"
+      ]
+    },
+    "legendary": {
+      "index": "legendary",
+      "label": "Legendary",
+      "itemIndexes": [
+        "apparatus-of-the-crab",
+        "armor-of-invulnerability",
+        "armor-3",
+        "belt-of-giant-strength-cloud",
+        "belt-of-giant-strength-storm",
+        "crystal-ball-of-mind-reading",
+        "crystal-ball-of-telepathy",
+        "crystal-ball-of-true-seeing",
+        "cubic-gate",
+        "deck-of-many-things",
+        "defender",
+        "hammer-of-thunderbolts",
+        "holy-avenger",
+        "ioun-stone-of-greater-absorption",
+        "ioun-stone-of-mastery",
+        "ioun-stone-of-regeneration",
+        "iron-flask",
+        "horn-of-valhalla-iron",
+        "luck-blade",
+        "plate-armor-of-etherealness",
+        "potion-of-giant-strength-storm",
+        "ring-of-elemental-command-air",
+        "ring-of-djinni-summoning",
+        "ring-of-elemental-command-earth",
+        "ring-of-elemental-command",
+        "ring-of-elemental-command-fire",
+        "ring-of-invisibility",
+        "ring-of-spell-turning",
+        "ring-of-three-wishes",
+        "ring-of-elemental-command-water",
+        "robe-of-the-archmagi",
+        "rod-of-lordly-might",
+        "scarab-of-protection",
+        "sovereign-glue",
+        "spell-scroll-9th",
+        "sphere-of-annihilation",
+        "staff-of-the-magi",
+        "talisman-of-pure-good",
+        "talisman-of-the-sphere",
+        "talisman-of-ultimate-evil",
+        "universal-solvent",
+        "vorpal-sword",
+        "well-of-many-worlds"
+      ]
+    },
+    "common": {
+      "index": "common",
+      "label": "Common",
+      "itemIndexes": [
+        "potion-of-climbing",
+        "potion-of-healing-common",
+        "spell-scroll-1st",
+        "spell-scroll-cantrip"
+      ]
+    },
+    "artifact": {
+      "index": "artifact",
+      "label": "Artifact",
+      "itemIndexes": [
+        "orb-of-dragonkind"
+      ]
+    }
+  },
+  "proficiencies": {
+    "light-armor": {
+      "index": "light-armor",
+      "label": "Light Armor",
+      "itemIndexes": [
+        "leather-armor",
+        "padded-armor",
+        "studded-leather-armor"
+      ]
+    },
+    "medium-armor": {
+      "index": "medium-armor",
+      "label": "Medium Armor",
+      "itemIndexes": [
+        "breastplate",
+        "chain-shirt",
+        "half-plate-armor",
+        "hide-armor",
+        "scale-mail"
+      ]
+    },
+    "heavy-armor": {
+      "index": "heavy-armor",
+      "label": "Heavy Armor",
+      "itemIndexes": [
+        "chain-mail",
+        "plate-armor",
+        "ring-mail",
+        "splint-armor"
+      ]
+    },
+    "all-armor": {
+      "index": "all-armor",
+      "label": "All armor",
+      "itemIndexes": [
+        "breastplate",
+        "chain-mail",
+        "chain-shirt",
+        "half-plate-armor",
+        "hide-armor",
+        "leather-armor",
+        "padded-armor",
+        "plate-armor",
+        "ring-mail",
+        "scale-mail",
+        "shield",
+        "splint-armor",
+        "studded-leather-armor"
+      ]
+    },
+    "padded-armor": {
+      "index": "padded-armor",
+      "label": "Padded Armor",
+      "itemIndexes": [
+        "padded-armor"
+      ]
+    },
+    "leather-armor": {
+      "index": "leather-armor",
+      "label": "Leather Armor",
+      "itemIndexes": [
+        "leather-armor"
+      ]
+    },
+    "studded-leather-armor": {
+      "index": "studded-leather-armor",
+      "label": "Studded Leather Armor",
+      "itemIndexes": [
+        "studded-leather-armor"
+      ]
+    },
+    "hide-armor": {
+      "index": "hide-armor",
+      "label": "Hide Armor",
+      "itemIndexes": [
+        "hide-armor"
+      ]
+    },
+    "chain-shirt": {
+      "index": "chain-shirt",
+      "label": "Chain Shirt",
+      "itemIndexes": [
+        "chain-shirt"
+      ]
+    },
+    "scale-mail": {
+      "index": "scale-mail",
+      "label": "Scale Mail",
+      "itemIndexes": [
+        "scale-mail"
+      ]
+    },
+    "breastplate": {
+      "index": "breastplate",
+      "label": "Breastplate",
+      "itemIndexes": [
+        "breastplate"
+      ]
+    },
+    "half-plate-armor": {
+      "index": "half-plate-armor",
+      "label": "Half Plate Armor",
+      "itemIndexes": [
+        "half-plate-armor"
+      ]
+    },
+    "ring-mail": {
+      "index": "ring-mail",
+      "label": "Ring Mail",
+      "itemIndexes": [
+        "ring-mail"
+      ]
+    },
+    "chain-mail": {
+      "index": "chain-mail",
+      "label": "Chain Mail",
+      "itemIndexes": [
+        "chain-mail"
+      ]
+    },
+    "splint-armor": {
+      "index": "splint-armor",
+      "label": "Splint Armor",
+      "itemIndexes": [
+        "splint-armor"
+      ]
+    },
+    "plate-armor": {
+      "index": "plate-armor",
+      "label": "Plate Armor",
+      "itemIndexes": [
+        "plate-armor"
+      ]
+    },
+    "shields": {
+      "index": "shields",
+      "label": "Shields",
+      "itemIndexes": [
+        "shield"
+      ]
+    },
+    "simple-weapons": {
+      "index": "simple-weapons",
+      "label": "Simple Weapons",
+      "itemIndexes": [
+        "club",
+        "crossbow-light",
+        "dagger",
+        "dart",
+        "greatclub",
+        "handaxe",
+        "javelin",
+        "light-hammer",
+        "mace",
+        "quarterstaff",
+        "shortbow",
+        "sickle",
+        "sling",
+        "spear"
+      ]
+    },
+    "martial-weapons": {
+      "index": "martial-weapons",
+      "label": "Martial Weapons",
+      "itemIndexes": [
+        "battleaxe",
+        "blowgun",
+        "crossbow-hand",
+        "crossbow-heavy",
+        "flail",
+        "glaive",
+        "greataxe",
+        "greatsword",
+        "halberd",
+        "lance",
+        "longbow",
+        "longsword",
+        "maul",
+        "morningstar",
+        "net",
+        "pike",
+        "rapier",
+        "scimitar",
+        "shortsword",
+        "trident",
+        "war-pick",
+        "warhammer",
+        "whip"
+      ]
+    },
+    "clubs": {
+      "index": "clubs",
+      "label": "Clubs",
+      "itemIndexes": [
+        "club"
+      ]
+    },
+    "daggers": {
+      "index": "daggers",
+      "label": "Daggers",
+      "itemIndexes": [
+        "dagger"
+      ]
+    },
+    "greatclubs": {
+      "index": "greatclubs",
+      "label": "Greatclubs",
+      "itemIndexes": [
+        "greatclub"
+      ]
+    },
+    "handaxes": {
+      "index": "handaxes",
+      "label": "Handaxes",
+      "itemIndexes": [
+        "handaxe"
+      ]
+    },
+    "javelins": {
+      "index": "javelins",
+      "label": "Javelins",
+      "itemIndexes": [
+        "javelin"
+      ]
+    },
+    "light-hammers": {
+      "index": "light-hammers",
+      "label": "Light hammers",
+      "itemIndexes": [
+        "light-hammer"
+      ]
+    },
+    "maces": {
+      "index": "maces",
+      "label": "Maces",
+      "itemIndexes": [
+        "mace"
+      ]
+    },
+    "quarterstaffs": {
+      "index": "quarterstaffs",
+      "label": "Quarterstaffs",
+      "itemIndexes": [
+        "quarterstaff"
+      ]
+    },
+    "sickles": {
+      "index": "sickles",
+      "label": "Sickles",
+      "itemIndexes": [
+        "sickle"
+      ]
+    },
+    "spears": {
+      "index": "spears",
+      "label": "Spears",
+      "itemIndexes": [
+        "spear"
+      ]
+    },
+    "crossbows-light": {
+      "index": "crossbows-light",
+      "label": "Crossbows, light",
+      "itemIndexes": [
+        "crossbow-light"
+      ]
+    },
+    "darts": {
+      "index": "darts",
+      "label": "Darts",
+      "itemIndexes": [
+        "dart"
+      ]
+    },
+    "shortbows": {
+      "index": "shortbows",
+      "label": "Shortbows",
+      "itemIndexes": [
+        "shortbow"
+      ]
+    },
+    "slings": {
+      "index": "slings",
+      "label": "Slings",
+      "itemIndexes": [
+        "sling"
+      ]
+    },
+    "battleaxes": {
+      "index": "battleaxes",
+      "label": "Battleaxes",
+      "itemIndexes": [
+        "battleaxe"
+      ]
+    },
+    "flails": {
+      "index": "flails",
+      "label": "Flails",
+      "itemIndexes": [
+        "flail"
+      ]
+    },
+    "glaives": {
+      "index": "glaives",
+      "label": "Glaives",
+      "itemIndexes": [
+        "glaive"
+      ]
+    },
+    "greataxes": {
+      "index": "greataxes",
+      "label": "Greataxes",
+      "itemIndexes": [
+        "greataxe"
+      ]
+    },
+    "greatswords": {
+      "index": "greatswords",
+      "label": "Greatswords",
+      "itemIndexes": [
+        "greatsword"
+      ]
+    },
+    "halberds": {
+      "index": "halberds",
+      "label": "Halberds",
+      "itemIndexes": [
+        "halberd"
+      ]
+    },
+    "lances": {
+      "index": "lances",
+      "label": "Lances",
+      "itemIndexes": [
+        "lance"
+      ]
+    },
+    "longswords": {
+      "index": "longswords",
+      "label": "Longswords",
+      "itemIndexes": [
+        "longsword"
+      ]
+    },
+    "mauls": {
+      "index": "mauls",
+      "label": "Mauls",
+      "itemIndexes": [
+        "maul"
+      ]
+    },
+    "morningstars": {
+      "index": "morningstars",
+      "label": "Morningstars",
+      "itemIndexes": [
+        "morningstar"
+      ]
+    },
+    "pikes": {
+      "index": "pikes",
+      "label": "Pikes",
+      "itemIndexes": [
+        "pike"
+      ]
+    },
+    "rapiers": {
+      "index": "rapiers",
+      "label": "Rapiers",
+      "itemIndexes": [
+        "rapier"
+      ]
+    },
+    "scimitars": {
+      "index": "scimitars",
+      "label": "Scimitars",
+      "itemIndexes": [
+        "scimitar"
+      ]
+    },
+    "shortswords": {
+      "index": "shortswords",
+      "label": "Shortswords",
+      "itemIndexes": [
+        "shortsword"
+      ]
+    },
+    "tridents": {
+      "index": "tridents",
+      "label": "Tridents",
+      "itemIndexes": [
+        "trident"
+      ]
+    },
+    "war-picks": {
+      "index": "war-picks",
+      "label": "War picks",
+      "itemIndexes": [
+        "war-pick"
+      ]
+    },
+    "warhammers": {
+      "index": "warhammers",
+      "label": "Warhammers",
+      "itemIndexes": [
+        "warhammer"
+      ]
+    },
+    "whips": {
+      "index": "whips",
+      "label": "Whips",
+      "itemIndexes": [
+        "whip"
+      ]
+    },
+    "blowguns": {
+      "index": "blowguns",
+      "label": "Blowguns",
+      "itemIndexes": [
+        "blowgun"
+      ]
+    },
+    "hand-crossbows": {
+      "index": "hand-crossbows",
+      "label": "Hand crossbows",
+      "itemIndexes": [
+        "crossbow-hand"
+      ]
+    },
+    "crossbows-heavy": {
+      "index": "crossbows-heavy",
+      "label": "Crossbows, heavy",
+      "itemIndexes": [
+        "crossbow-heavy"
+      ]
+    },
+    "longbows": {
+      "index": "longbows",
+      "label": "Longbows",
+      "itemIndexes": [
+        "longbow"
+      ]
+    },
+    "nets": {
+      "index": "nets",
+      "label": "Nets",
+      "itemIndexes": [
+        "net"
+      ]
+    },
+    "alchemists-supplies": {
+      "index": "alchemists-supplies",
+      "label": "Alchemist's Supplies",
+      "itemIndexes": [
+        "alchemists-supplies"
+      ]
+    },
+    "brewers-supplies": {
+      "index": "brewers-supplies",
+      "label": "Brewer's Supplies",
+      "itemIndexes": [
+        "brewers-supplies"
+      ]
+    },
+    "calligraphers-supplies": {
+      "index": "calligraphers-supplies",
+      "label": "Calligrapher's Supplies",
+      "itemIndexes": [
+        "calligraphers-supplies"
+      ]
+    },
+    "carpenters-tools": {
+      "index": "carpenters-tools",
+      "label": "Carpenter's Tools",
+      "itemIndexes": [
+        "carpenters-tools"
+      ]
+    },
+    "cartographers-tools": {
+      "index": "cartographers-tools",
+      "label": "Cartographer's Tools",
+      "itemIndexes": [
+        "cartographers-tools"
+      ]
+    },
+    "cobblers-tools": {
+      "index": "cobblers-tools",
+      "label": "Cobbler's Tools",
+      "itemIndexes": [
+        "cobblers-tools"
+      ]
+    },
+    "cooks-utensils": {
+      "index": "cooks-utensils",
+      "label": "Cook's utensils",
+      "itemIndexes": [
+        "cooks-utensils"
+      ]
+    },
+    "glassblowers-tools": {
+      "index": "glassblowers-tools",
+      "label": "Glassblower's Tools",
+      "itemIndexes": [
+        "glassblowers-tools"
+      ]
+    },
+    "jewelers-tools": {
+      "index": "jewelers-tools",
+      "label": "Jeweler's Tools",
+      "itemIndexes": [
+        "jewelers-tools"
+      ]
+    },
+    "leatherworkers-tools": {
+      "index": "leatherworkers-tools",
+      "label": "Leatherworker's Tools",
+      "itemIndexes": [
+        "leatherworkers-tools"
+      ]
+    },
+    "masons-tools": {
+      "index": "masons-tools",
+      "label": "Mason's Tools",
+      "itemIndexes": [
+        "masons-tools"
+      ]
+    },
+    "painters-supplies": {
+      "index": "painters-supplies",
+      "label": "Painter's Supplies",
+      "itemIndexes": [
+        "painters-supplies"
+      ]
+    },
+    "potters-tools": {
+      "index": "potters-tools",
+      "label": "Potter's Tools",
+      "itemIndexes": [
+        "potters-tools"
+      ]
+    },
+    "smiths-tools": {
+      "index": "smiths-tools",
+      "label": "Smith's Tools",
+      "itemIndexes": [
+        "smiths-tools"
+      ]
+    },
+    "tinkers-tools": {
+      "index": "tinkers-tools",
+      "label": "Tinker's Tools",
+      "itemIndexes": [
+        "tinkers-tools"
+      ]
+    },
+    "weavers-tools": {
+      "index": "weavers-tools",
+      "label": "Weaver's Tools",
+      "itemIndexes": [
+        "weavers-tools"
+      ]
+    },
+    "woodcarvers-tools": {
+      "index": "woodcarvers-tools",
+      "label": "Woodcarver's Tools",
+      "itemIndexes": [
+        "woodcarvers-tools"
+      ]
+    },
+    "disguise-kit": {
+      "index": "disguise-kit",
+      "label": "Disguise Kit",
+      "itemIndexes": [
+        "disguise-kit"
+      ]
+    },
+    "forgery-kit": {
+      "index": "forgery-kit",
+      "label": "Forgery Kit",
+      "itemIndexes": [
+        "forgery-kit"
+      ]
+    },
+    "dice-set": {
+      "index": "dice-set",
+      "label": "Dice Set",
+      "itemIndexes": [
+        "dice-set"
+      ]
+    },
+    "playing-card-set": {
+      "index": "playing-card-set",
+      "label": "Playing Card Set",
+      "itemIndexes": [
+        "playing-card-set"
+      ]
+    },
+    "bagpipes": {
+      "index": "bagpipes",
+      "label": "Bagpipes",
+      "itemIndexes": [
+        "bagpipes"
+      ]
+    },
+    "drum": {
+      "index": "drum",
+      "label": "Drum",
+      "itemIndexes": [
+        "drum"
+      ]
+    },
+    "dulcimer": {
+      "index": "dulcimer",
+      "label": "Dulcimer",
+      "itemIndexes": [
+        "dulcimer"
+      ]
+    },
+    "flute": {
+      "index": "flute",
+      "label": "Flute",
+      "itemIndexes": [
+        "flute"
+      ]
+    },
+    "lute": {
+      "index": "lute",
+      "label": "Lute",
+      "itemIndexes": [
+        "lute"
+      ]
+    },
+    "lyre": {
+      "index": "lyre",
+      "label": "Lyre",
+      "itemIndexes": [
+        "lyre"
+      ]
+    },
+    "horn": {
+      "index": "horn",
+      "label": "Horn",
+      "itemIndexes": [
+        "horn"
+      ]
+    },
+    "pan-flute": {
+      "index": "pan-flute",
+      "label": "Pan flute",
+      "itemIndexes": [
+        "pan-flute"
+      ]
+    },
+    "shawm": {
+      "index": "shawm",
+      "label": "Shawm",
+      "itemIndexes": [
+        "shawm"
+      ]
+    },
+    "viol": {
+      "index": "viol",
+      "label": "Viol",
+      "itemIndexes": [
+        "viol"
+      ]
+    },
+    "herbalism-kit": {
+      "index": "herbalism-kit",
+      "label": "Herbalism Kit",
+      "itemIndexes": [
+        "herbalism-kit"
+      ]
+    },
+    "navigators-tools": {
+      "index": "navigators-tools",
+      "label": "Navigator's Tools",
+      "itemIndexes": [
+        "navigators-tools"
+      ]
+    },
+    "poisoners-kit": {
+      "index": "poisoners-kit",
+      "label": "Poisoner's Kit",
+      "itemIndexes": [
+        "poisoners-kit"
+      ]
+    },
+    "thieves-tools": {
+      "index": "thieves-tools",
+      "label": "Thieves' Tools",
+      "itemIndexes": [
+        "thieves-tools"
+      ]
+    }
+  },
+  "source": "5e SRD 2014",
+  "generatedAt": "2026-03-14T04:52:31.349Z"
+}

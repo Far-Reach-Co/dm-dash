@@ -45,6 +45,8 @@
     "srd:download:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/download-5e-srd.js",
     "srd:spell-class-index": "tsx src/tools/generateSpellClassLevelIndex.ts",
     "srd:spell-class-index:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/generateSpellClassLevelIndex.js",
+    "srd:derived-datasets": "tsx src/tools/generateSrdDerivedDatasets.ts",
+    "srd:derived-datasets:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/generateSrdDerivedDatasets.js",
     "srd:popular-pages:update": "bash ./scripts/ops/run_with_env.sh tsx src/tools/updateSrdPopularPagesFromGsc.ts",
     "srd:popular-pages:update:prod": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/updateSrdPopularPagesFromGsc.js",
     "stripe:catalog:live": "npm run build:server && bash ./scripts/ops/run_with_env.sh node ./dist/tools/setupStripeLiveCatalog.js",

@@ -129,6 +129,12 @@ const dynamicRoutes: DynamicRoute[] = [
     changefreq: "monthly",
   },
   {
+    pattern: "/dnd/5e/srd/damage-types/{index}",
+    dataFile: "5e-srd-damage-types.json",
+    priority: 0.65,
+    changefreq: "monthly",
+  },
+  {
     pattern: "/dnd/5e/srd/features/{index}",
     dataFile: "5e-srd-features.json",
     priority: 0.65,
@@ -175,12 +181,16 @@ function generateSpellFilterEntries(): SitemapEntry[] {
   const levels = new Set<number>();
   const schools = new Set<string>();
   const classes = new Set<string>();
+  const damageTypes = new Set<string>();
 
   for (const spell of spells) {
     if (typeof spell.level === "number") levels.add(spell.level);
     if (spell?.school?.index) schools.add(spell.school.index);
     for (const cls of spell.classes || []) {
       if (cls?.index) classes.add(cls.index);
+    }
+    if (spell?.damage?.damage_type?.index) {
+      damageTypes.add(spell.damage.damage_type.index);
     }
   }
 
@@ -210,6 +220,14 @@ function generateSpellFilterEntries(): SitemapEntry[] {
     });
   }
 
+  for (const damageType of Array.from(damageTypes).sort()) {
+    entries.push({
+      url: `/dnd/5e/srd/spells/damage/${damageType}`,
+      priority: 0.65,
+      changefreq: "monthly",
+    });
+  }
+
   return entries;
 }
 
@@ -217,11 +235,17 @@ function generateMonsterFilterEntries(): SitemapEntry[] {
   const monsters = loadJson<Array<any>>("5e-srd-monsters.json");
   const types = new Set<string>();
   const crValues = new Set<string>();
+  const conditionImmunities = new Set<string>();
 
   for (const monster of monsters) {
     if (monster?.type) types.add(String(monster.type));
     if (monster?.challenge_rating !== undefined && monster?.challenge_rating !== null) {
       crValues.add(String(monster.challenge_rating));
+    }
+    for (const condition of monster?.condition_immunities || []) {
+      if (condition?.index) {
+        conditionImmunities.add(String(condition.index).toLowerCase());
+      }
     }
   }
 
@@ -238,6 +262,14 @@ function generateMonsterFilterEntries(): SitemapEntry[] {
   for (const cr of Array.from(crValues).sort((a, b) => Number(a) - Number(b))) {
     entries.push({
       url: `/dnd/5e/srd/monsters/cr/${toCrSlug(cr)}`,
+      priority: 0.65,
+      changefreq: "monthly",
+    });
+  }
+
+  for (const conditionIndex of Array.from(conditionImmunities).sort()) {
+    entries.push({
+      url: `/dnd/5e/srd/monsters/condition-immunity/${conditionIndex}`,
       priority: 0.65,
       changefreq: "monthly",
     });

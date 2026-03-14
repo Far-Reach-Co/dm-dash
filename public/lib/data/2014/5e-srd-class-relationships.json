@@ -1,0 +1,1635 @@
+{
+  "version": 1,
+  "classes": {
+    "barbarian": {
+      "index": "barbarian",
+      "label": "Barbarian",
+      "spellcastingAbility": null,
+      "savingThrowIndexes": [
+        "str",
+        "con"
+      ],
+      "proficiencyIndexes": [
+        "light-armor",
+        "medium-armor",
+        "shields",
+        "simple-weapons",
+        "martial-weapons",
+        "saving-throw-str",
+        "saving-throw-con"
+      ],
+      "startingEquipmentIndexes": [
+        "explorers-pack",
+        "javelin"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "rage",
+          "barbarian-unarmored-defense"
+        ],
+        "2": [
+          "danger-sense",
+          "reckless-attack"
+        ],
+        "3": [
+          "frenzy",
+          "primal-path"
+        ],
+        "4": [
+          "barbarian-ability-score-improvement-1"
+        ],
+        "5": [
+          "barbarian-extra-attack",
+          "fast-movement"
+        ],
+        "6": [
+          "mindless-rage",
+          "primal-path-improvement-1"
+        ],
+        "7": [
+          "feral-instinct"
+        ],
+        "8": [
+          "barbarian-ability-score-improvement-2"
+        ],
+        "9": [
+          "brutal-critical-1-die"
+        ],
+        "10": [
+          "intimidating-presence",
+          "primal-path-improvement-2"
+        ],
+        "11": [
+          "relentless-rage"
+        ],
+        "12": [
+          "barbarian-ability-score-improvement-3"
+        ],
+        "13": [
+          "brutal-critical-2-dice"
+        ],
+        "14": [
+          "primal-path-improvement-3",
+          "retaliation"
+        ],
+        "15": [
+          "persistent-rage"
+        ],
+        "16": [
+          "barbarian-ability-score-improvement-4"
+        ],
+        "17": [
+          "brutal-critical-3-dice"
+        ],
+        "18": [
+          "indomitable-might"
+        ],
+        "19": [
+          "barbarian-ability-score-improvement-5"
+        ],
+        "20": [
+          "primal-champion"
+        ]
+      },
+      "subclassIndexes": [
+        "berserker"
+      ],
+      "spellCount": 0,
+      "spellLevels": []
+    },
+    "bard": {
+      "index": "bard",
+      "label": "Bard",
+      "spellcastingAbility": {
+        "index": "cha",
+        "label": "CHA"
+      },
+      "savingThrowIndexes": [
+        "dex",
+        "cha"
+      ],
+      "proficiencyIndexes": [
+        "light-armor",
+        "simple-weapons",
+        "longswords",
+        "rapiers",
+        "shortswords",
+        "hand-crossbows",
+        "saving-throw-dex",
+        "saving-throw-cha"
+      ],
+      "startingEquipmentIndexes": [
+        "dagger",
+        "leather-armor"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "bardic-inspiration-d6",
+          "spellcasting-bard"
+        ],
+        "2": [
+          "jack-of-all-trades",
+          "song-of-rest-d6"
+        ],
+        "3": [
+          "bard-college",
+          "bonus-proficiencies",
+          "cutting-words",
+          "bard-expertise-1"
+        ],
+        "4": [
+          "bard-ability-score-improvement-1"
+        ],
+        "5": [
+          "bardic-inspiration-d8",
+          "font-of-inspiration"
+        ],
+        "6": [
+          "additional-magical-secrets",
+          "bard-college-improvement-1",
+          "countercharm"
+        ],
+        "8": [
+          "bard-ability-score-improvement-2"
+        ],
+        "9": [
+          "song-of-rest-d8"
+        ],
+        "10": [
+          "bardic-inspiration-d10",
+          "bard-expertise-2",
+          "magical-secrets-1"
+        ],
+        "12": [
+          "bard-ability-score-improvement-3"
+        ],
+        "13": [
+          "song-of-rest-d10"
+        ],
+        "14": [
+          "bard-college-improvement-2",
+          "magical-secrets-2",
+          "peerless-skill"
+        ],
+        "15": [
+          "bardic-inspiration-d12"
+        ],
+        "16": [
+          "bard-ability-score-improvement-4"
+        ],
+        "17": [
+          "song-of-rest-d12"
+        ],
+        "18": [
+          "magical-secrets-3"
+        ],
+        "19": [
+          "bard-ability-score-improvement-5"
+        ],
+        "20": [
+          "superior-inspiration"
+        ]
+      },
+      "subclassIndexes": [
+        "lore"
+      ],
+      "spellCount": 111,
+      "spellLevels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "cleric": {
+      "index": "cleric",
+      "label": "Cleric",
+      "spellcastingAbility": {
+        "index": "wis",
+        "label": "WIS"
+      },
+      "savingThrowIndexes": [
+        "wis",
+        "cha"
+      ],
+      "proficiencyIndexes": [
+        "light-armor",
+        "medium-armor",
+        "shields",
+        "simple-weapons",
+        "saving-throw-wis",
+        "saving-throw-cha"
+      ],
+      "startingEquipmentIndexes": [
+        "shield"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "bonus-proficiency",
+          "disciple-of-life",
+          "divine-domain",
+          "domain-spells-1",
+          "spellcasting-cleric"
+        ],
+        "2": [
+          "channel-divinity-1-rest",
+          "channel-divinity-preserve-life",
+          "channel-divinity-turn-undead",
+          "divine-domain-improvement-1"
+        ],
+        "3": [
+          "domain-spells-2"
+        ],
+        "4": [
+          "cleric-ability-score-improvement-1"
+        ],
+        "5": [
+          "destroy-undead-cr-1-2-or-below",
+          "domain-spells-3"
+        ],
+        "6": [
+          "blessed-healer",
+          "channel-divinity-2-rest",
+          "divine-domain-improvement-2"
+        ],
+        "7": [
+          "domain-spells-4"
+        ],
+        "8": [
+          "cleric-ability-score-improvement-2",
+          "destroy-undead-cr-1-or-below",
+          "divine-domain-improvement-3",
+          "divine-strike"
+        ],
+        "9": [
+          "domain-spells-5"
+        ],
+        "10": [
+          "divine-intervention"
+        ],
+        "11": [
+          "destroy-undead-cr-2-or-below"
+        ],
+        "12": [
+          "cleric-ability-score-improvement-3"
+        ],
+        "14": [
+          "destroy-undead-cr-3-or-below"
+        ],
+        "16": [
+          "cleric-ability-score-improvement-4"
+        ],
+        "17": [
+          "destroy-undead-cr-4-or-below",
+          "divine-domain-improvement-4",
+          "supreme-healing"
+        ],
+        "18": [
+          "channel-divinity-3-rest"
+        ],
+        "19": [
+          "cleric-ability-score-improvement-5"
+        ],
+        "20": [
+          "divine-intervention-improvement"
+        ]
+      },
+      "subclassIndexes": [
+        "life"
+      ],
+      "spellCount": 105,
+      "spellLevels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "druid": {
+      "index": "druid",
+      "label": "Druid",
+      "spellcastingAbility": {
+        "index": "wis",
+        "label": "WIS"
+      },
+      "savingThrowIndexes": [
+        "int",
+        "wis"
+      ],
+      "proficiencyIndexes": [
+        "light-armor",
+        "medium-armor",
+        "shields",
+        "clubs",
+        "daggers",
+        "javelins",
+        "maces",
+        "quarterstaffs",
+        "sickles",
+        "spears",
+        "darts",
+        "slings",
+        "scimitars",
+        "herbalism-kit",
+        "saving-throw-int",
+        "saving-throw-wis"
+      ],
+      "startingEquipmentIndexes": [
+        "explorers-pack",
+        "leather-armor"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "druidic",
+          "spellcasting-druid"
+        ],
+        "2": [
+          "bonus-cantrip",
+          "circle-of-the-land",
+          "circle-of-the-land-arctic",
+          "circle-of-the-land-coast",
+          "circle-of-the-land-desert",
+          "circle-of-the-land-forest",
+          "circle-of-the-land-grassland",
+          "circle-of-the-land-mountain",
+          "circle-of-the-land-swamp",
+          "druid-circle",
+          "natural-recovery",
+          "wild-shape-cr-1-4-or-below-no-flying-or-swim-speed"
+        ],
+        "3": [
+          "circle-spells-1"
+        ],
+        "4": [
+          "druid-ability-score-improvement-1",
+          "wild-shape-cr-1-2-or-below-no-flying-speed"
+        ],
+        "5": [
+          "circle-spells-2"
+        ],
+        "6": [
+          "druid-circle-improvement-1",
+          "druid-lands-stride"
+        ],
+        "7": [
+          "circle-spells-3"
+        ],
+        "8": [
+          "druid-ability-score-improvement-2",
+          "wild-shape-cr-1-or-below"
+        ],
+        "9": [
+          "circle-spells-4"
+        ],
+        "10": [
+          "druid-circle-improvement-2",
+          "natures-ward"
+        ],
+        "12": [
+          "druid-ability-score-improvement-3"
+        ],
+        "14": [
+          "druid-circle-improvement-3",
+          "natures-sanctuary"
+        ],
+        "16": [
+          "druid-ability-score-improvement-4"
+        ],
+        "18": [
+          "beast-spells",
+          "druid-timeless-body"
+        ],
+        "19": [
+          "druid-ability-score-improvement-5"
+        ],
+        "20": [
+          "archdruid"
+        ]
+      },
+      "subclassIndexes": [
+        "land"
+      ],
+      "spellCount": 106,
+      "spellLevels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "fighter": {
+      "index": "fighter",
+      "label": "Fighter",
+      "spellcastingAbility": null,
+      "savingThrowIndexes": [
+        "str",
+        "con"
+      ],
+      "proficiencyIndexes": [
+        "all-armor",
+        "shields",
+        "simple-weapons",
+        "martial-weapons",
+        "saving-throw-str",
+        "saving-throw-con"
+      ],
+      "startingEquipmentIndexes": [],
+      "featureIndexesByLevel": {
+        "1": [
+          "fighter-fighting-style",
+          "fighter-fighting-style-archery",
+          "fighter-fighting-style-defense",
+          "fighter-fighting-style-dueling",
+          "fighter-fighting-style-great-weapon-fighting",
+          "fighter-fighting-style-protection",
+          "fighter-fighting-style-two-weapon-fighting",
+          "second-wind"
+        ],
+        "2": [
+          "action-surge-1-use"
+        ],
+        "3": [
+          "improved-critical",
+          "martial-archetype"
+        ],
+        "4": [
+          "fighter-ability-score-improvement-1"
+        ],
+        "5": [
+          "extra-attack-1"
+        ],
+        "6": [
+          "fighter-ability-score-improvement-2"
+        ],
+        "7": [
+          "martial-archetype-improvement-1",
+          "remarkable-athlete"
+        ],
+        "8": [
+          "fighter-ability-score-improvement-3"
+        ],
+        "9": [
+          "indomitable-1-use"
+        ],
+        "10": [
+          "additional-fighting-style",
+          "martial-archetype-improvement-2"
+        ],
+        "11": [
+          "extra-attack-2"
+        ],
+        "12": [
+          "fighter-ability-score-improvement-4"
+        ],
+        "13": [
+          "indomitable-2-uses"
+        ],
+        "14": [
+          "fighter-ability-score-improvement-5"
+        ],
+        "15": [
+          "martial-archetype-improvement-3",
+          "superior-critical"
+        ],
+        "16": [
+          "fighter-ability-score-improvement-6"
+        ],
+        "17": [
+          "action-surge-2-uses",
+          "indomitable-3-uses"
+        ],
+        "18": [
+          "martial-archetype-improvement-4",
+          "survivor"
+        ],
+        "19": [
+          "fighter-ability-score-improvement-7"
+        ],
+        "20": [
+          "extra-attack-3"
+        ]
+      },
+      "subclassIndexes": [
+        "champion"
+      ],
+      "spellCount": 0,
+      "spellLevels": []
+    },
+    "monk": {
+      "index": "monk",
+      "label": "Monk",
+      "spellcastingAbility": null,
+      "savingThrowIndexes": [
+        "str",
+        "dex"
+      ],
+      "proficiencyIndexes": [
+        "simple-weapons",
+        "shortswords",
+        "saving-throw-dex",
+        "saving-throw-str"
+      ],
+      "startingEquipmentIndexes": [
+        "dart"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "martial-arts",
+          "monk-unarmored-defense"
+        ],
+        "2": [
+          "flurry-of-blows",
+          "ki",
+          "patient-defense",
+          "step-of-the-wind",
+          "unarmored-movement-1"
+        ],
+        "3": [
+          "deflect-missiles",
+          "monastic-tradition",
+          "open-hand-technique"
+        ],
+        "4": [
+          "monk-ability-score-improvement-1",
+          "slow-fall"
+        ],
+        "5": [
+          "monk-extra-attack",
+          "stunning-strike"
+        ],
+        "6": [
+          "ki-empowered-strikes",
+          "monastic-tradition-improvement-1",
+          "wholeness-of-body"
+        ],
+        "7": [
+          "monk-evasion",
+          "stillness-of-mind"
+        ],
+        "8": [
+          "monk-ability-score-improvement-2"
+        ],
+        "9": [
+          "unarmored-movement-2"
+        ],
+        "10": [
+          "purity-of-body"
+        ],
+        "11": [
+          "monastic-tradition-improvement-2",
+          "tranquility"
+        ],
+        "12": [
+          "monk-ability-score-improvement-3"
+        ],
+        "13": [
+          "tongue-of-the-sun-and-moon"
+        ],
+        "14": [
+          "diamond-soul"
+        ],
+        "15": [
+          "monk-timeless-body"
+        ],
+        "16": [
+          "monk-ability-score-improvement-4"
+        ],
+        "17": [
+          "monastic-tradition-improvement-3",
+          "quivering-palm"
+        ],
+        "18": [
+          "empty-body"
+        ],
+        "19": [
+          "monk-ability-score-improvement-5"
+        ],
+        "20": [
+          "perfect-self"
+        ]
+      },
+      "subclassIndexes": [
+        "open-hand"
+      ],
+      "spellCount": 0,
+      "spellLevels": []
+    },
+    "paladin": {
+      "index": "paladin",
+      "label": "Paladin",
+      "spellcastingAbility": {
+        "index": "cha",
+        "label": "CHA"
+      },
+      "savingThrowIndexes": [
+        "wis",
+        "cha"
+      ],
+      "proficiencyIndexes": [
+        "all-armor",
+        "shields",
+        "simple-weapons",
+        "martial-weapons",
+        "saving-throw-wis",
+        "saving-throw-cha"
+      ],
+      "startingEquipmentIndexes": [
+        "chain-mail"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "divine-sense",
+          "lay-on-hands"
+        ],
+        "2": [
+          "divine-smite",
+          "paladin-fighting-style",
+          "fighting-style-defense",
+          "fighting-style-dueling",
+          "fighting-style-great-weapon-fighting",
+          "fighting-style-protection",
+          "spellcasting-paladin"
+        ],
+        "3": [
+          "channel-divinity",
+          "channel-divinity-sacred-weapon",
+          "channel-divinity-turn-the-unholy",
+          "divine-health",
+          "oath-spells",
+          "sacred-oath"
+        ],
+        "4": [
+          "paladin-ability-score-improvement-1"
+        ],
+        "5": [
+          "paladin-extra-attack"
+        ],
+        "6": [
+          "aura-of-protection"
+        ],
+        "7": [
+          "aura-of-devotion",
+          "sacred-oath-improvement-1"
+        ],
+        "8": [
+          "paladin-ability-score-improvement-2"
+        ],
+        "10": [
+          "aura-of-courage"
+        ],
+        "11": [
+          "improved-divine-smite"
+        ],
+        "12": [
+          "paladin-ability-score-improvement-3"
+        ],
+        "14": [
+          "cleansing-touch"
+        ],
+        "15": [
+          "purity-of-spirit",
+          "sacred-oath-improvement-2"
+        ],
+        "16": [
+          "paladin-ability-score-improvement-4"
+        ],
+        "18": [
+          "aura-improvements"
+        ],
+        "19": [
+          "paladin-ability-score-improvement-5"
+        ],
+        "20": [
+          "holy-nimbus",
+          "sacred-oath-improvement-3"
+        ]
+      },
+      "subclassIndexes": [
+        "devotion"
+      ],
+      "spellCount": 31,
+      "spellLevels": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "ranger": {
+      "index": "ranger",
+      "label": "Ranger",
+      "spellcastingAbility": {
+        "index": "wis",
+        "label": "WIS"
+      },
+      "savingThrowIndexes": [
+        "str",
+        "dex"
+      ],
+      "proficiencyIndexes": [
+        "light-armor",
+        "medium-armor",
+        "shields",
+        "simple-weapons",
+        "martial-weapons",
+        "saving-throw-dex",
+        "saving-throw-str"
+      ],
+      "startingEquipmentIndexes": [
+        "arrow",
+        "longbow"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "favored-enemy-1-type",
+          "natural-explorer-1-terrain-type"
+        ],
+        "2": [
+          "ranger-fighting-style",
+          "ranger-fighting-style-archery",
+          "ranger-fighting-style-defense",
+          "ranger-fighting-style-dueling",
+          "ranger-fighting-style-two-weapon-fighting",
+          "spellcasting-ranger"
+        ],
+        "3": [
+          "hunters-prey",
+          "hunters-prey-colossus-slayer",
+          "hunters-prey-giant-killer",
+          "hunters-prey-horde-breaker",
+          "primeval-awareness",
+          "ranger-archetype"
+        ],
+        "4": [
+          "ranger-ability-score-improvement-1"
+        ],
+        "5": [
+          "ranger-extra-attack"
+        ],
+        "6": [
+          "favored-enemy-2-types",
+          "natural-explorer-2-terrain-types"
+        ],
+        "7": [
+          "defensive-tactics",
+          "defensive-tactics-escape-the-horde",
+          "defensive-tactics-multiattack-defense",
+          "defensive-tactics-steel-will",
+          "ranger-archetype-improvement-1"
+        ],
+        "8": [
+          "ranger-ability-score-improvement-2",
+          "ranger-lands-stride"
+        ],
+        "10": [
+          "hide-in-plain-sight",
+          "natural-explorer-3-terrain-types"
+        ],
+        "11": [
+          "multiattack",
+          "multiattack-volley",
+          "multiattack-whirlwind-attack",
+          "ranger-archetype-improvement-2"
+        ],
+        "12": [
+          "ranger-ability-score-improvement-3"
+        ],
+        "14": [
+          "favored-enemy-3-enemies",
+          "vanish"
+        ],
+        "15": [
+          "ranger-archetype-improvement-3",
+          "superior-hunters-defense",
+          "superior-hunters-defense-evasion",
+          "superior-hunters-defense-stand-against-the-tide",
+          "superior-hunters-defense-uncanny-dodge"
+        ],
+        "16": [
+          "ranger-ability-score-improvement-4"
+        ],
+        "18": [
+          "feral-senses"
+        ],
+        "19": [
+          "ranger-ability-score-improvement-5"
+        ],
+        "20": [
+          "foe-slayer"
+        ]
+      },
+      "subclassIndexes": [
+        "hunter"
+      ],
+      "spellCount": 37,
+      "spellLevels": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    "rogue": {
+      "index": "rogue",
+      "label": "Rogue",
+      "spellcastingAbility": null,
+      "savingThrowIndexes": [
+        "dex",
+        "int"
+      ],
+      "proficiencyIndexes": [
+        "light-armor",
+        "simple-weapons",
+        "longswords",
+        "rapiers",
+        "shortswords",
+        "hand-crossbows",
+        "thieves-tools",
+        "saving-throw-dex",
+        "saving-throw-int"
+      ],
+      "startingEquipmentIndexes": [
+        "dagger",
+        "leather-armor",
+        "thieves-tools"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "rogue-expertise-1",
+          "sneak-attack",
+          "thieves-cant"
+        ],
+        "2": [
+          "cunning-action"
+        ],
+        "3": [
+          "fast-hands",
+          "roguish-archetype",
+          "second-story-work"
+        ],
+        "4": [
+          "rogue-ability-score-improvement-1"
+        ],
+        "5": [
+          "uncanny-dodge"
+        ],
+        "6": [
+          "rogue-expertise-2"
+        ],
+        "7": [
+          "rogue-evasion"
+        ],
+        "8": [
+          "rogue-ability-score-improvement-2"
+        ],
+        "9": [
+          "roguish-archetype-improvement-1",
+          "supreme-sneak"
+        ],
+        "10": [
+          "rogue-ability-score-improvement-3"
+        ],
+        "11": [
+          "reliable-talent"
+        ],
+        "12": [
+          "rogue-ability-score-improvement-4"
+        ],
+        "13": [
+          "roguish-archetype-improvement-2",
+          "use-magic-device"
+        ],
+        "14": [
+          "blindsense"
+        ],
+        "15": [
+          "slippery-mind"
+        ],
+        "16": [
+          "rogue-ability-score-improvement-5"
+        ],
+        "17": [
+          "roguish-archetype-improvement-3",
+          "thiefs-reflexes"
+        ],
+        "18": [
+          "elusive"
+        ],
+        "19": [
+          "rogue-ability-score-improvement-6"
+        ],
+        "20": [
+          "stroke-of-luck"
+        ]
+      },
+      "subclassIndexes": [
+        "thief"
+      ],
+      "spellCount": 0,
+      "spellLevels": []
+    },
+    "sorcerer": {
+      "index": "sorcerer",
+      "label": "Sorcerer",
+      "spellcastingAbility": {
+        "index": "cha",
+        "label": "CHA"
+      },
+      "savingThrowIndexes": [
+        "con",
+        "cha"
+      ],
+      "proficiencyIndexes": [
+        "daggers",
+        "darts",
+        "slings",
+        "quarterstaffs",
+        "crossbows-light",
+        "saving-throw-con",
+        "saving-throw-cha"
+      ],
+      "startingEquipmentIndexes": [
+        "dagger"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "draconic-resilience",
+          "dragon-ancestor",
+          "dragon-ancestor-black---acid-damage",
+          "dragon-ancestor-blue---lightning-damage",
+          "dragon-ancestor-brass---fire-damage",
+          "dragon-ancestor-bronze---lightning-damage",
+          "dragon-ancestor-copper---acid-damage",
+          "dragon-ancestor-gold---fire-damage",
+          "dragon-ancestor-green---poison-damage",
+          "dragon-ancestor-red---fire-damage",
+          "dragon-ancestor-silver---cold-damage",
+          "dragon-ancestor-white---cold-damage",
+          "sorcerous-origin",
+          "spellcasting-sorcerer"
+        ],
+        "2": [
+          "flexible-casting-converting-spell-slot",
+          "flexible-casting-creating-spell-slots",
+          "font-of-magic"
+        ],
+        "3": [
+          "metamagic-1",
+          "metamagic-careful-spell",
+          "metamagic-distant-spell",
+          "metamagic-empowered-spell",
+          "metamagic-extended-spell",
+          "metamagic-heightened-spell",
+          "metamagic-quickened-spell",
+          "metamagic-subtle-spell",
+          "metamagic-twinned-spell"
+        ],
+        "4": [
+          "sorcerer-ability-score-improvement-1"
+        ],
+        "6": [
+          "elemental-affinity",
+          "sorcerous-origin-improvement-1"
+        ],
+        "8": [
+          "sorcerer-ability-score-improvement-2"
+        ],
+        "10": [
+          "metamagic-2"
+        ],
+        "12": [
+          "sorcerer-ability-score-improvement-3"
+        ],
+        "14": [
+          "dragon-wings",
+          "sorcerous-origin-improvement-2"
+        ],
+        "16": [
+          "sorcerer-ability-score-improvement-4"
+        ],
+        "17": [
+          "metamagic-3"
+        ],
+        "18": [
+          "draconic-presence",
+          "sorcerous-origin-improvement-3"
+        ],
+        "19": [
+          "sorcerer-ability-score-improvement-5"
+        ],
+        "20": [
+          "sorcerous-restoration"
+        ]
+      },
+      "subclassIndexes": [
+        "draconic"
+      ],
+      "spellCount": 120,
+      "spellLevels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "warlock": {
+      "index": "warlock",
+      "label": "Warlock",
+      "spellcastingAbility": {
+        "index": "cha",
+        "label": "CHA"
+      },
+      "savingThrowIndexes": [
+        "wis",
+        "cha"
+      ],
+      "proficiencyIndexes": [
+        "light-armor",
+        "simple-weapons",
+        "saving-throw-wis",
+        "saving-throw-cha"
+      ],
+      "startingEquipmentIndexes": [
+        "dagger",
+        "leather-armor"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "dark-ones-blessing",
+          "otherworldly-patron",
+          "pact-magic"
+        ],
+        "2": [
+          "eldritch-invocation-agonizing-blast",
+          "eldritch-invocation-armor-of-shadows",
+          "eldritch-invocation-beast-speech",
+          "eldritch-invocation-beguiling-influence",
+          "eldritch-invocation-book-of-ancient-secrets",
+          "eldritch-invocation-devils-sight",
+          "eldritch-invocation-eldritch-sight",
+          "eldritch-invocation-eldritch-spear",
+          "eldritch-invocation-eyes-of-the-rune-keeper",
+          "eldritch-invocation-fiendish-vigor",
+          "eldritch-invocation-gaze-of-two-minds",
+          "eldritch-invocation-mask-of-many-faces",
+          "eldritch-invocation-misty-visions",
+          "eldritch-invocation-repelling-blast",
+          "eldritch-invocation-thief-of-five-fates",
+          "eldritch-invocation-voice-of-the-chain-master",
+          "eldritch-invocations"
+        ],
+        "3": [
+          "pact-boon",
+          "pact-of-the-blade",
+          "pact-of-the-chain",
+          "pact-of-the-tome"
+        ],
+        "4": [
+          "warlock-ability-score-improvement-1"
+        ],
+        "5": [
+          "eldritch-invocation-mire-the-mind",
+          "eldritch-invocation-one-with-shadows",
+          "eldritch-invocation-sign-of-ill-omen",
+          "eldritch-invocation-thirsting-blade"
+        ],
+        "6": [
+          "dark-ones-own-luck",
+          "otherworldly-patron-improvement-1"
+        ],
+        "7": [
+          "eldritch-invocation-bewitching-whispers",
+          "eldritch-invocation-dreadful-word",
+          "eldritch-invocation-sculptor-of-flesh"
+        ],
+        "8": [
+          "warlock-ability-score-improvement-2"
+        ],
+        "9": [
+          "eldritch-invocation-ascendant-step",
+          "eldritch-invocation-minions-of-chaos",
+          "eldritch-invocation-otherworldly-leap",
+          "eldritch-invocation-whispers-of-the-grave"
+        ],
+        "10": [
+          "fiendish-resilience",
+          "otherworldly-patron-improvement-2"
+        ],
+        "11": [
+          "mystic-arcanum-6th-level"
+        ],
+        "12": [
+          "warlock-ability-score-improvement-3",
+          "eldritch-invocation-lifedrinker"
+        ],
+        "13": [
+          "mystic-arcanum-7th-level"
+        ],
+        "14": [
+          "hurl-through-hell",
+          "otherworldly-patron-improvement-3"
+        ],
+        "15": [
+          "eldritch-invocation-chains-of-carceri",
+          "eldritch-invocation-master-of-myriad-forms",
+          "eldritch-invocation-visions-of-distant-realms",
+          "eldritch-invocation-witch-sight",
+          "mystic-arcanum-8th-level"
+        ],
+        "16": [
+          "warlock-ability-score-improvement-4"
+        ],
+        "17": [
+          "mystic-arcanum-9th-level"
+        ],
+        "19": [
+          "warlock-ability-score-improvement-5"
+        ],
+        "20": [
+          "eldritch-master"
+        ]
+      },
+      "subclassIndexes": [
+        "fiend"
+      ],
+      "spellCount": 64,
+      "spellLevels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    "wizard": {
+      "index": "wizard",
+      "label": "Wizard",
+      "spellcastingAbility": {
+        "index": "int",
+        "label": "INT"
+      },
+      "savingThrowIndexes": [
+        "int",
+        "wis"
+      ],
+      "proficiencyIndexes": [
+        "daggers",
+        "darts",
+        "slings",
+        "quarterstaffs",
+        "crossbows-light",
+        "saving-throw-int",
+        "saving-throw-wis"
+      ],
+      "startingEquipmentIndexes": [
+        "spellbook"
+      ],
+      "featureIndexesByLevel": {
+        "1": [
+          "arcane-recovery",
+          "spellcasting-wizard"
+        ],
+        "2": [
+          "arcane-tradition",
+          "evocation-savant",
+          "sculpt-spells"
+        ],
+        "4": [
+          "wizard-ability-score-improvement-1"
+        ],
+        "6": [
+          "arcane-tradition-improvement-1",
+          "potent-cantrip"
+        ],
+        "8": [
+          "wizard-ability-score-improvement-2"
+        ],
+        "10": [
+          "arcane-tradition-improvement-2",
+          "empowered-evocation"
+        ],
+        "12": [
+          "wizard-ability-score-improvement-3"
+        ],
+        "14": [
+          "arcane-tradition-improvement-3",
+          "overchannel"
+        ],
+        "16": [
+          "wizard-ability-score-improvement-4"
+        ],
+        "18": [
+          "spell-mastery"
+        ],
+        "19": [
+          "wizard-ability-score-improvement-5"
+        ],
+        "20": [
+          "signature-spell"
+        ]
+      },
+      "subclassIndexes": [
+        "evocation"
+      ],
+      "spellCount": 204,
+      "spellLevels": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  "spellcastingAbilities": {
+    "cha": {
+      "index": "cha",
+      "label": "CHA",
+      "classIndexes": [
+        "bard",
+        "paladin",
+        "sorcerer",
+        "warlock"
+      ]
+    },
+    "wis": {
+      "index": "wis",
+      "label": "WIS",
+      "classIndexes": [
+        "cleric",
+        "druid",
+        "ranger"
+      ]
+    },
+    "int": {
+      "index": "int",
+      "label": "INT",
+      "classIndexes": [
+        "wizard"
+      ]
+    }
+  },
+  "savingThrows": {
+    "str": {
+      "index": "str",
+      "label": "STR",
+      "classIndexes": [
+        "barbarian",
+        "fighter",
+        "monk",
+        "ranger"
+      ]
+    },
+    "con": {
+      "index": "con",
+      "label": "CON",
+      "classIndexes": [
+        "barbarian",
+        "fighter",
+        "sorcerer"
+      ]
+    },
+    "dex": {
+      "index": "dex",
+      "label": "DEX",
+      "classIndexes": [
+        "bard",
+        "monk",
+        "ranger",
+        "rogue"
+      ]
+    },
+    "cha": {
+      "index": "cha",
+      "label": "CHA",
+      "classIndexes": [
+        "bard",
+        "cleric",
+        "paladin",
+        "sorcerer",
+        "warlock"
+      ]
+    },
+    "wis": {
+      "index": "wis",
+      "label": "WIS",
+      "classIndexes": [
+        "cleric",
+        "druid",
+        "paladin",
+        "warlock",
+        "wizard"
+      ]
+    },
+    "int": {
+      "index": "int",
+      "label": "INT",
+      "classIndexes": [
+        "druid",
+        "rogue",
+        "wizard"
+      ]
+    }
+  },
+  "proficiencies": {
+    "light-armor": {
+      "index": "light-armor",
+      "label": "Light Armor",
+      "classIndexes": [
+        "barbarian",
+        "bard",
+        "cleric",
+        "druid",
+        "ranger",
+        "rogue",
+        "warlock"
+      ]
+    },
+    "medium-armor": {
+      "index": "medium-armor",
+      "label": "Medium Armor",
+      "classIndexes": [
+        "barbarian",
+        "cleric",
+        "druid",
+        "ranger"
+      ]
+    },
+    "shields": {
+      "index": "shields",
+      "label": "Shields",
+      "classIndexes": [
+        "barbarian",
+        "cleric",
+        "druid",
+        "fighter",
+        "paladin",
+        "ranger"
+      ]
+    },
+    "simple-weapons": {
+      "index": "simple-weapons",
+      "label": "Simple Weapons",
+      "classIndexes": [
+        "barbarian",
+        "bard",
+        "cleric",
+        "fighter",
+        "monk",
+        "paladin",
+        "ranger",
+        "rogue",
+        "warlock"
+      ]
+    },
+    "martial-weapons": {
+      "index": "martial-weapons",
+      "label": "Martial Weapons",
+      "classIndexes": [
+        "barbarian",
+        "fighter",
+        "paladin",
+        "ranger"
+      ]
+    },
+    "saving-throw-str": {
+      "index": "saving-throw-str",
+      "label": "Saving Throw: STR",
+      "classIndexes": [
+        "barbarian",
+        "fighter",
+        "monk",
+        "ranger"
+      ]
+    },
+    "saving-throw-con": {
+      "index": "saving-throw-con",
+      "label": "Saving Throw: CON",
+      "classIndexes": [
+        "barbarian",
+        "fighter",
+        "sorcerer"
+      ]
+    },
+    "longswords": {
+      "index": "longswords",
+      "label": "Longswords",
+      "classIndexes": [
+        "bard",
+        "rogue"
+      ]
+    },
+    "rapiers": {
+      "index": "rapiers",
+      "label": "Rapiers",
+      "classIndexes": [
+        "bard",
+        "rogue"
+      ]
+    },
+    "shortswords": {
+      "index": "shortswords",
+      "label": "Shortswords",
+      "classIndexes": [
+        "bard",
+        "monk",
+        "rogue"
+      ]
+    },
+    "hand-crossbows": {
+      "index": "hand-crossbows",
+      "label": "Hand crossbows",
+      "classIndexes": [
+        "bard",
+        "rogue"
+      ]
+    },
+    "saving-throw-dex": {
+      "index": "saving-throw-dex",
+      "label": "Saving Throw: DEX",
+      "classIndexes": [
+        "bard",
+        "monk",
+        "ranger",
+        "rogue"
+      ]
+    },
+    "saving-throw-cha": {
+      "index": "saving-throw-cha",
+      "label": "Saving Throw: CHA",
+      "classIndexes": [
+        "bard",
+        "cleric",
+        "paladin",
+        "sorcerer",
+        "warlock"
+      ]
+    },
+    "saving-throw-wis": {
+      "index": "saving-throw-wis",
+      "label": "Saving Throw: WIS",
+      "classIndexes": [
+        "cleric",
+        "druid",
+        "paladin",
+        "warlock",
+        "wizard"
+      ]
+    },
+    "clubs": {
+      "index": "clubs",
+      "label": "Clubs",
+      "classIndexes": [
+        "druid"
+      ]
+    },
+    "daggers": {
+      "index": "daggers",
+      "label": "Daggers",
+      "classIndexes": [
+        "druid",
+        "sorcerer",
+        "wizard"
+      ]
+    },
+    "javelins": {
+      "index": "javelins",
+      "label": "Javelins",
+      "classIndexes": [
+        "druid"
+      ]
+    },
+    "maces": {
+      "index": "maces",
+      "label": "Maces",
+      "classIndexes": [
+        "druid"
+      ]
+    },
+    "quarterstaffs": {
+      "index": "quarterstaffs",
+      "label": "Quarterstaffs",
+      "classIndexes": [
+        "druid",
+        "sorcerer",
+        "wizard"
+      ]
+    },
+    "sickles": {
+      "index": "sickles",
+      "label": "Sickles",
+      "classIndexes": [
+        "druid"
+      ]
+    },
+    "spears": {
+      "index": "spears",
+      "label": "Spears",
+      "classIndexes": [
+        "druid"
+      ]
+    },
+    "darts": {
+      "index": "darts",
+      "label": "Darts",
+      "classIndexes": [
+        "druid",
+        "sorcerer",
+        "wizard"
+      ]
+    },
+    "slings": {
+      "index": "slings",
+      "label": "Slings",
+      "classIndexes": [
+        "druid",
+        "sorcerer",
+        "wizard"
+      ]
+    },
+    "scimitars": {
+      "index": "scimitars",
+      "label": "Scimitars",
+      "classIndexes": [
+        "druid"
+      ]
+    },
+    "herbalism-kit": {
+      "index": "herbalism-kit",
+      "label": "Herbalism Kit",
+      "classIndexes": [
+        "druid"
+      ]
+    },
+    "saving-throw-int": {
+      "index": "saving-throw-int",
+      "label": "Saving Throw: INT",
+      "classIndexes": [
+        "druid",
+        "rogue",
+        "wizard"
+      ]
+    },
+    "all-armor": {
+      "index": "all-armor",
+      "label": "All armor",
+      "classIndexes": [
+        "fighter",
+        "paladin"
+      ]
+    },
+    "thieves-tools": {
+      "index": "thieves-tools",
+      "label": "Thieves' Tools",
+      "classIndexes": [
+        "rogue"
+      ]
+    },
+    "crossbows-light": {
+      "index": "crossbows-light",
+      "label": "Crossbows, light",
+      "classIndexes": [
+        "sorcerer",
+        "wizard"
+      ]
+    }
+  },
+  "source": "5e SRD 2014",
+  "generatedAt": "2026-03-14T04:52:31.349Z"
+}

@@ -6,13 +6,13 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>D&D 5E Spells - Complete SRD Spell List | Far Reach Co.</title>
-  <meta name="description" content="Complete D&D 5E spell reference with <%= spellsData.length %>+ spells for all classes including Bard, Cleric, Druid, Paladin, Ranger, Sorcerer, Warlock, and Wizard. Full spell descriptions, components, and casting details." />
+  <meta name="description" content="Complete D&D 5E spell reference with <%= spellsData.length %>+ spells for all classes including Bard, Cleric, Druid, Paladin, Ranger, Sorcerer, Warlock, and Wizard. Browse by level, school, class, damage type, and casting details." />
   <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/spells" />
 
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/spells" />
   <meta property="og:title" content="D&D 5E Spells - Complete SRD Spell List" />
-  <meta property="og:description" content="Complete D&D 5E spell reference with <%= spellsData.length %>+ spells. Full descriptions and casting details." />
+  <meta property="og:description" content="Complete D&D 5E spell reference with <%= spellsData.length %>+ spells. Browse by level, school, class, damage type, and casting details." />
   <meta property="og:site_name" content="Far Reach Co." />
 
   <meta name="twitter:card" content="summary" />
@@ -41,7 +41,7 @@
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro', {
       srdPageHeading: 'D&D 5E SRD Spells',
-      srdPageSummary: 'Browse the full D&D 5E SRD spell list with filters by level, school, and class.'
+      srdPageSummary: 'Browse the full D&D 5E SRD spell list with filters by level, school, class, and damage type.'
     }) %>
     <br />
     <div class="breadcrumbs">
@@ -81,6 +81,17 @@
         <% }) %>
       </div>
     </div>
+
+    <% if (spellDamageTypeOptions && spellDamageTypeOptions.length) { %>
+      <div class="srd-filter-group">
+        <div class="srd-filter-label">By Damage Type</div>
+        <div class="srd-filter-pills">
+          <% spellDamageTypeOptions.forEach((opt) => { %>
+            <a href="/dnd/5e/srd/spells/damage/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
 
     <hr />
 

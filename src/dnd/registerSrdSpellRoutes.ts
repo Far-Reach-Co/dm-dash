@@ -1,8 +1,11 @@
 import { Request, Response, NextFunction, Router } from "express";
 import {
   getSpellClassOptions,
+  getSpellDamageTypeOptions,
   getSpellLevelOptions,
+  getSpellRaceAccess,
   getSpellSchoolOptions,
+  getSpellsForDamageType,
   getSpellsForClass,
   getSpellsData,
   getSpellsMap,
@@ -36,6 +39,7 @@ export function registerSrdSpellRoutes(router: Router) {
           spellLevelOptions: getSpellLevelOptions(),
           spellSchoolOptions: getSpellSchoolOptions(),
           spellClassOptions: getSpellClassOptions(),
+          spellDamageTypeOptions: getSpellDamageTypeOptions(),
         });
       } catch (err) {
         next(err);
@@ -68,6 +72,41 @@ export function registerSrdSpellRoutes(router: Router) {
           spellLevelOptions: getSpellLevelOptions(),
           spellSchoolOptions: schoolOptions,
           spellClassOptions: getSpellClassOptions(),
+          spellDamageTypeOptions: getSpellDamageTypeOptions(),
+        });
+      } catch (err) {
+        next(err);
+      }
+    },
+  );
+
+  router.get(
+    "/5e/srd/spells/damage/:damageType",
+    (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const damageTypeOptions = getSpellDamageTypeOptions();
+        const damageTypeOption = damageTypeOptions.find(
+          (option) => option.index === String(req.params.damageType || "").toLowerCase(),
+        );
+
+        if (!damageTypeOption) {
+          return res.status(404).render("404", { auth: req.session.user });
+        }
+
+        const spellsData = sortByName(getSpellsForDamageType(damageTypeOption.index));
+
+        res.render("dnd/5e/srd/spells-filter", {
+          auth: req.session.user,
+          spellsData,
+          title: `D&D 5E ${damageTypeOption.label} Damage Spells - SRD Spell Index | Far Reach Co.`,
+          description: `Browse ${spellsData.length} D&D 5E SRD spells that deal ${damageTypeOption.label.toLowerCase()} damage, with full descriptions, levels, and casting details.`,
+          heading: `${damageTypeOption.label} Damage Spells`,
+          intro: `SRD spells that deal ${damageTypeOption.label.toLowerCase()} damage.`,
+          canonicalPath: `/dnd/5e/srd/spells/damage/${damageTypeOption.index}`,
+          spellLevelOptions: getSpellLevelOptions(),
+          spellSchoolOptions: getSpellSchoolOptions(),
+          spellClassOptions: getSpellClassOptions(),
+          spellDamageTypeOptions: damageTypeOptions,
         });
       } catch (err) {
         next(err);
@@ -101,6 +140,7 @@ export function registerSrdSpellRoutes(router: Router) {
           spellLevelOptions: getSpellLevelOptions(),
           spellSchoolOptions: getSpellSchoolOptions(),
           spellClassOptions: classOptions,
+          spellDamageTypeOptions: getSpellDamageTypeOptions(),
         });
       } catch (err) {
         next(err);
@@ -116,9 +156,11 @@ export function registerSrdSpellRoutes(router: Router) {
         if (!spell) {
           return res.status(404).render("404", { auth: req.session.user });
         }
+        const raceAccess = getSpellRaceAccess(spell.index, spell.name);
         res.render("dnd/5e/srd/spell", {
           auth: req.session.user,
           spell,
+          raceAccess,
         });
       } catch (err) {
         next(err);
@@ -136,6 +178,7 @@ export function registerSrdSpellRoutes(router: Router) {
           spellLevelOptions: getSpellLevelOptions(),
           spellSchoolOptions: getSpellSchoolOptions(),
           spellClassOptions: getSpellClassOptions(),
+          spellDamageTypeOptions: getSpellDamageTypeOptions(),
         });
       } catch (err) {
         next(err);

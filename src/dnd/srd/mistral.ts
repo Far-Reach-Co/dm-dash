@@ -2,7 +2,24 @@ import { Mistral } from "@mistralai/mistralai";
 import { detectCategories, srdData } from "./data.js";
 import { findRelevantEntries } from "./indexer.js";
 import { SERIALIZERS, serializeGeneric } from "./serializers.js";
-import { getSpellsForClass } from "../srdCatalog.js";
+import {
+  getClassesForSpellcastingAbility,
+  getDamageTypeRelationship,
+  getMonsterConditionImmunityOptions,
+  getMonsterMovementModeOptions,
+  getMonsterSenseOptions,
+  getSpellDamageTypeOptionsForClass,
+  getSpellRaceAccess,
+  getSpellSchoolOptionsForClass,
+  getMonstersForConditionImmunity,
+  getMonstersForMonsterType,
+  getMonstersForMovementMode,
+  getMonstersForSense,
+  getMonsterTypeOptions,
+  getRelatedDamageTypesForMonster,
+  getSpellsForClass,
+  getSpellsForDamageType,
+} from "../srdCatalog.js";
 import { redisClient } from "../../lib/socketUsers.js";
 import {
   normalizeSearchContextHint,
@@ -12,97 +29,467 @@ import {
 
 // ── Mistral API ───────────────────────────────────────────────────────────────
 
-function extractSpellIndexesFromTraitSpecific(node: any, out: Set<string>) {
-  if (!node) return;
-  if (Array.isArray(node)) {
-    for (const item of node) extractSpellIndexesFromTraitSpecific(item, out);
-    return;
-  }
-  if (typeof node !== "object") return;
-
-  const candidateItem = (node as any).item;
-  if (candidateItem && typeof candidateItem === "object") {
-    const index = String(candidateItem.index || "").trim().toLowerCase();
-    const url = String(candidateItem.url || "").trim().toLowerCase();
-    if (index && url.includes("/spells/")) {
-      out.add(index);
-    }
-  }
-
-  for (const value of Object.values(node)) {
-    extractSpellIndexesFromTraitSpecific(value, out);
-  }
-}
-
 function escapeForRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function traitReferencesSpell(
-  trait: any,
-  spellIndex: string,
-  spellName: string,
-): boolean {
-  const spellIndexes = new Set<string>();
-  extractSpellIndexesFromTraitSpecific(trait?.trait_specific, spellIndexes);
-  if (spellIndexes.has(spellIndex)) return true;
-
-  const descText = Array.isArray(trait?.desc)
-    ? trait.desc.join(" ")
-    : String(trait?.desc || "");
-  const normalizedDesc = descText.toLowerCase();
-  if (!normalizedDesc) return false;
-
-  const namePattern = new RegExp(`\\b${escapeForRegex(spellName.toLowerCase())}\\b`, "i");
-  if (!namePattern.test(normalizedDesc)) return false;
-  return /\b(cast|know|learn|prepared|spell|cantrip)\b/i.test(normalizedDesc);
+function summarizeNames(values: Array<string | null | undefined>, max = 12): string {
+  const filtered = values.filter((value): value is string => Boolean(value && value.trim()));
+  if (!filtered.length) return "";
+  const slice = filtered.slice(0, max);
+  const suffix = filtered.length > max ? `, and ${filtered.length - max} more` : "";
+  return `${slice.join(", ")}${suffix}`;
 }
 
-function getSpellRaceAccess(spellIndex: string, spellName: string): {
-  races: string[];
-  subraces: string[];
-} {
-  const raceNameByIndex = new Map<string, string>();
-  for (const race of srdData.races || []) {
-    const index = String(race?.index || "").trim().toLowerCase();
-    if (!index) continue;
-    const name = String(race?.name || index).trim();
-    raceNameByIndex.set(index, name);
+function findDamageTypeIndex(query: string, context: NormalizedSearchContext | null): string | null {
+  if (context?.category === "damage-types" && context.index) return context.index;
+  const lower = query.toLowerCase();
+  for (const damageType of srdData["damage-types"] || []) {
+    const index = String(damageType?.index || "").trim().toLowerCase();
+    const name = String(damageType?.name || "").trim().toLowerCase();
+    if (!index || !name) continue;
+    const pattern = new RegExp(`\\b${escapeForRegex(name)}\\b`, "i");
+    if (pattern.test(lower) || lower.includes(index)) return index;
+  }
+  return null;
+}
+
+function findClassIndex(query: string, context: NormalizedSearchContext | null): string | null {
+  if (context?.category === "classes" && context.index) return context.index;
+  const lower = query.toLowerCase();
+  for (const classEntry of srdData.classes || []) {
+    const index = String(classEntry?.index || "").trim().toLowerCase();
+    const name = String(classEntry?.name || "").trim().toLowerCase();
+    if (!index || !name) continue;
+    const pattern = new RegExp(`\\b${escapeForRegex(name)}\\b`, "i");
+    if (pattern.test(lower) || lower.includes(index)) return index;
+  }
+  return null;
+}
+
+function findAbilityIndex(query: string): string | null {
+  const lower = query.toLowerCase();
+  const aliases: Record<string, string[]> = {
+    str: ["strength", "str"],
+    dex: ["dexterity", "dex"],
+    con: ["constitution", "con"],
+    int: ["intelligence", "int"],
+    wis: ["wisdom", "wis"],
+    cha: ["charisma", "cha"],
+  };
+
+  for (const [index, values] of Object.entries(aliases)) {
+    if (
+      values.some((value) => new RegExp(`\\b${escapeForRegex(value)}\\b`, "i").test(lower))
+    ) {
+      return index;
+    }
+  }
+  return null;
+}
+
+function getPathFacetIndex(
+  context: NormalizedSearchContext | null,
+  prefix: string,
+): string | null {
+  if (!context?.path || !context.path.startsWith(prefix)) return null;
+  const tail = context.path.slice(prefix.length).split("/")[0] || "";
+  const normalized = tail.trim().toLowerCase();
+  return normalized || null;
+}
+
+function findMonsterTypeFacetIndex(
+  query: string,
+  context: NormalizedSearchContext | null,
+): string | null {
+  const fromPath = getPathFacetIndex(context, "/dnd/5e/srd/monsters/type/");
+  if (fromPath) return fromPath;
+
+  const lower = query.toLowerCase();
+  for (const option of getMonsterTypeOptions()) {
+    const typePattern = new RegExp(`\\b${escapeForRegex(option.type.toLowerCase())}\\b`, "i");
+    const labelPattern = new RegExp(`\\b${escapeForRegex(option.label.toLowerCase())}\\b`, "i");
+    if (typePattern.test(lower) || labelPattern.test(lower) || lower.includes(option.slug)) {
+      return option.slug;
+    }
+  }
+  return null;
+}
+
+function findMonsterConditionImmunityFacetIndex(
+  query: string,
+  context: NormalizedSearchContext | null,
+): string | null {
+  const fromPath = getPathFacetIndex(
+    context,
+    "/dnd/5e/srd/monsters/condition-immunity/",
+  );
+  if (fromPath) return fromPath;
+
+  const lower = query.toLowerCase();
+  for (const option of getMonsterConditionImmunityOptions()) {
+    const pattern = new RegExp(`\\b${escapeForRegex(option.label.toLowerCase())}\\b`, "i");
+    if (pattern.test(lower) || lower.includes(option.index)) return option.index;
+  }
+  return null;
+}
+
+function findMonsterSenseFacetIndex(query: string): string | null {
+  const lower = query.toLowerCase();
+  for (const option of getMonsterSenseOptions()) {
+    const pattern = new RegExp(`\\b${escapeForRegex(option.label.toLowerCase())}\\b`, "i");
+    if (pattern.test(lower) || lower.includes(option.index)) return option.index;
+  }
+  return null;
+}
+
+function findMonsterMovementModeFacetIndex(query: string): string | null {
+  const lower = query.toLowerCase();
+  const aliases: Record<string, string[]> = {
+    walk: ["walk", "walking"],
+    fly: ["fly", "flying", "hover"],
+    swim: ["swim", "swimming"],
+    climb: ["climb", "climbing"],
+    burrow: ["burrow", "burrowing"],
+  };
+
+  for (const option of getMonsterMovementModeOptions()) {
+    const values = aliases[option.index] || [option.index, option.label.toLowerCase()];
+    if (values.some((value) => new RegExp(`\\b${escapeForRegex(value)}\\b`, "i").test(lower))) {
+      return option.index;
+    }
+  }
+  return null;
+}
+
+function intersectMonsterEntries(current: any[] | null, next: any[]): any[] {
+  if (!current) return next.slice();
+  const nextIndexes = new Set(
+    next
+      .map((monster: any) => String(monster?.index || "").trim().toLowerCase())
+      .filter(Boolean),
+  );
+  return current.filter((monster: any) =>
+    nextIndexes.has(String(monster?.index || "").trim().toLowerCase()),
+  );
+}
+
+function resolveMonsterFacetMatch(
+  query: string,
+  context: NormalizedSearchContext | null,
+): {
+  monsters: any[];
+  monsterTypeFacetIndex: string | null;
+  monsterConditionImmunityFacetIndex: string | null;
+  monsterSenseFacetIndex: string | null;
+  monsterMovementFacetIndex: string | null;
+  typeLabel: string | null;
+  conditionLabel: string | null;
+  senseLabel: string | null;
+  movementLabel: string | null;
+} | null {
+  const lower = query.toLowerCase();
+  const monsterTypeFacetIndex = findMonsterTypeFacetIndex(query, context);
+  const monsterConditionImmunityFacetIndex = findMonsterConditionImmunityFacetIndex(
+    query,
+    context,
+  );
+  const monsterSenseFacetIndex = findMonsterSenseFacetIndex(query);
+  const monsterMovementFacetIndex = findMonsterMovementModeFacetIndex(query);
+  const monsterBrowseIntent =
+    /\bmonster|monsters|creature|creatures\b/.test(lower) ||
+    context?.path?.startsWith("/dnd/5e/srd/monsters/type/") ||
+    context?.path?.startsWith("/dnd/5e/srd/monsters/cr/") ||
+    context?.path?.startsWith("/dnd/5e/srd/monsters/condition-immunity/");
+
+  if (
+    !monsterBrowseIntent ||
+    !(
+      monsterTypeFacetIndex ||
+      monsterConditionImmunityFacetIndex ||
+      monsterSenseFacetIndex ||
+      monsterMovementFacetIndex
+    )
+  ) {
+    return null;
   }
 
-  const subraceLabelByIndex = new Map<string, string>();
-  for (const subrace of srdData.subraces || []) {
-    const index = String(subrace?.index || "").trim().toLowerCase();
-    if (!index) continue;
-    const subraceName = String(subrace?.name || index).trim();
-    const raceName = String(
-      subrace?.race?.name || raceNameByIndex.get(String(subrace?.race?.index || "").toLowerCase()) || "",
-    ).trim();
-    const label = raceName ? `${subraceName} (${raceName})` : subraceName;
-    subraceLabelByIndex.set(index, label);
+  let monsters: any[] | null = null;
+
+  if (monsterTypeFacetIndex) {
+    monsters = intersectMonsterEntries(monsters, getMonstersForMonsterType(monsterTypeFacetIndex));
   }
-
-  const races = new Set<string>();
-  const subraces = new Set<string>();
-  for (const trait of srdData.traits || []) {
-    if (!traitReferencesSpell(trait, spellIndex, spellName)) continue;
-
-    for (const raceRef of trait?.races || []) {
-      const index = String(raceRef?.index || "").trim().toLowerCase();
-      if (!index) continue;
-      races.add(raceNameByIndex.get(index) || String(raceRef?.name || index));
-    }
-    for (const subraceRef of trait?.subraces || []) {
-      const index = String(subraceRef?.index || "").trim().toLowerCase();
-      if (!index) continue;
-      subraces.add(subraceLabelByIndex.get(index) || String(subraceRef?.name || index));
-    }
+  if (monsterConditionImmunityFacetIndex) {
+    monsters = intersectMonsterEntries(
+      monsters,
+      getMonstersForConditionImmunity(monsterConditionImmunityFacetIndex),
+    );
+  }
+  if (monsterSenseFacetIndex) {
+    monsters = intersectMonsterEntries(monsters, getMonstersForSense(monsterSenseFacetIndex));
+  }
+  if (monsterMovementFacetIndex) {
+    monsters = intersectMonsterEntries(
+      monsters,
+      getMonstersForMovementMode(monsterMovementFacetIndex),
+    );
   }
 
   return {
-    races: Array.from(races).sort((a, b) => a.localeCompare(b)),
-    subraces: Array.from(subraces).sort((a, b) => a.localeCompare(b)),
+    monsters: monsters || [],
+    monsterTypeFacetIndex,
+    monsterConditionImmunityFacetIndex,
+    monsterSenseFacetIndex,
+    monsterMovementFacetIndex,
+    typeLabel:
+      getMonsterTypeOptions().find((option) => option.slug === monsterTypeFacetIndex)?.label ||
+      null,
+    conditionLabel:
+      getMonsterConditionImmunityOptions().find(
+        (option) => option.index === monsterConditionImmunityFacetIndex,
+      )?.label || null,
+    senseLabel:
+      getMonsterSenseOptions().find((option) => option.index === monsterSenseFacetIndex)?.label ||
+      null,
+    movementLabel:
+      getMonsterMovementModeOptions().find(
+        (option) => option.index === monsterMovementFacetIndex,
+      )?.label || null,
   };
+}
+
+function resolveSpellFacetMatch(
+  query: string,
+  context: NormalizedSearchContext | null,
+): {
+  spells: any[];
+  classIndex: string | null;
+  classLabel: string | null;
+  damageTypeIndex: string | null;
+  damageTypeName: string | null;
+  spellBrowseIntent: boolean;
+} | null {
+  const lower = query.toLowerCase();
+  const classIndex = getPathFacetIndex(context, "/dnd/5e/srd/spells/class/") || findClassIndex(query, context);
+  const damageTypeIndex =
+    getPathFacetIndex(context, "/dnd/5e/srd/spells/damage/") || findDamageTypeIndex(query, context);
+  const spellBrowseIntent =
+    /\bspell|spells|cantrip|cantrips\b/.test(lower) ||
+    context?.path?.startsWith("/dnd/5e/srd/spells/") ||
+    context?.category === "spells";
+
+  if (!spellBrowseIntent || (!classIndex && !damageTypeIndex)) {
+    return null;
+  }
+
+  const classLabel = classIndex
+    ? String(
+        (srdData.classes || []).find(
+          (item: any) => String(item?.index || "").toLowerCase() === classIndex,
+        )?.name || classIndex,
+      )
+    : null;
+
+  let spells: any[] = [];
+  if (damageTypeIndex) {
+    spells = getSpellsForDamageType(damageTypeIndex);
+    if (classIndex) {
+      spells = spells.filter((spell: any) =>
+        Array.isArray(spell?.classes) &&
+        spell.classes.some(
+          (cls: any) => String(cls?.index || "").trim().toLowerCase() === classIndex,
+        ),
+      );
+    }
+  } else if (classIndex) {
+    spells = getSpellsForClass(classIndex);
+  }
+
+  const damageTypeName = damageTypeIndex
+    ? String(
+        (srdData["damage-types"] || []).find(
+          (item: any) => String(item?.index || "").toLowerCase() === damageTypeIndex,
+        )?.name || damageTypeIndex,
+      )
+    : null;
+
+  return {
+    spells,
+    classIndex,
+    classLabel,
+    damageTypeIndex,
+    damageTypeName,
+    spellBrowseIntent,
+  };
+}
+
+function buildDerivedQueryContext(
+  query: string,
+  context: NormalizedSearchContext | null,
+): string | null {
+  const lower = query.toLowerCase();
+  const lines: string[] = [];
+  const classIndex = findClassIndex(query, context);
+  const damageTypeIndex = findDamageTypeIndex(query, context);
+  const abilityIndex = findAbilityIndex(query);
+  const monsterFacetMatch = resolveMonsterFacetMatch(query, context);
+  const spellFacetMatch = resolveSpellFacetMatch(query, context);
+  const classLabel = classIndex
+    ? String(
+        (srdData.classes || []).find((item: any) => String(item?.index || "").toLowerCase() === classIndex)
+          ?.name || classIndex,
+      )
+    : null;
+  const specificMonsterPage = context?.category === "monsters" && Boolean(context?.index);
+  const monsterBrowseIntent =
+    /\bmonster|monsters|creature|creatures\b/.test(lower) ||
+    context?.path?.startsWith("/dnd/5e/srd/monsters/type/") ||
+    context?.path?.startsWith("/dnd/5e/srd/monsters/cr/") ||
+    context?.path?.startsWith("/dnd/5e/srd/monsters/condition-immunity/");
+
+  if (monsterFacetMatch) {
+    const descriptionParts = [
+      monsterFacetMatch.typeLabel ? `${monsterFacetMatch.typeLabel} monsters` : "SRD monsters",
+      monsterFacetMatch.conditionLabel
+        ? `immune to the ${monsterFacetMatch.conditionLabel.toLowerCase()} condition`
+        : null,
+      monsterFacetMatch.senseLabel
+        ? `with ${monsterFacetMatch.senseLabel.toLowerCase()}`
+        : null,
+      monsterFacetMatch.movementLabel
+        ? `with a ${monsterFacetMatch.movementLabel.toLowerCase()} speed`
+        : null,
+    ].filter(Boolean);
+
+    lines.push(
+      `Derived monster facet: ${descriptionParts.join(" ")}: ${monsterFacetMatch.monsters.length}.`,
+    );
+    if (monsterFacetMatch.monsters.length) {
+      lines.push(
+        `Monster examples: ${summarizeNames(
+          monsterFacetMatch.monsters.map((monster: any) => monster?.name),
+          14,
+        )}.`,
+      );
+    }
+    if (monsterFacetMatch.monsterTypeFacetIndex) {
+      lines.push(`Relevant page: /dnd/5e/srd/monsters/type/${monsterFacetMatch.monsterTypeFacetIndex}`);
+    }
+    if (monsterFacetMatch.monsterConditionImmunityFacetIndex) {
+      lines.push(
+        `Relevant page: /dnd/5e/srd/monsters/condition-immunity/${monsterFacetMatch.monsterConditionImmunityFacetIndex}`,
+      );
+    }
+  }
+
+  if (classIndex && /\bdamage\b/.test(lower)) {
+    const classDamageTypes = getSpellDamageTypeOptionsForClass(classIndex).slice(0, 8);
+    if (classDamageTypes.length) {
+      lines.push(
+        `Derived class spell damage types for ${classLabel}: ${classDamageTypes
+          .map((item) => `${item.label} (${item.count})`)
+          .join(", ")}.`,
+      );
+    }
+  }
+
+  if (classIndex && /\bschool|schools\b/.test(lower)) {
+    const classSchools = getSpellSchoolOptionsForClass(classIndex).slice(0, 8);
+    if (classSchools.length) {
+      lines.push(
+        `Derived class spell schools for ${classLabel}: ${classSchools
+          .map((item) => `${item.label} (${item.count})`)
+          .join(", ")}.`,
+      );
+    }
+  }
+
+  if (spellFacetMatch && spellFacetMatch.damageTypeIndex) {
+    const examples = summarizeNames(spellFacetMatch.spells.map((spell: any) => spell?.name), 14);
+    lines.push(
+      `Derived spell facet: ${spellFacetMatch.classLabel ? `${spellFacetMatch.classLabel} ` : ""}${spellFacetMatch.damageTypeName} damage spells in SRD: ${spellFacetMatch.spells.length}.`,
+    );
+    lines.push(`Relevant page: /dnd/5e/srd/spells/damage/${spellFacetMatch.damageTypeIndex}`);
+    if (examples) lines.push(`Spell examples: ${examples}.`);
+  }
+
+  if (
+    damageTypeIndex &&
+    (monsterBrowseIntent ||
+      (!specificMonsterPage &&
+        /\bimmune|immunity|resistant|resistance|vulnerable|vulnerability\b/.test(lower)) ||
+      context?.category === "damage-types")
+  ) {
+    const relationship = getDamageTypeRelationship(damageTypeIndex);
+    if (relationship) {
+      const wantsResistance = /\bresist|resistance|resistant\b/.test(lower);
+      const wantsImmunity = /\bimmune|immunity\b/.test(lower);
+      const wantsVulnerability = /\bvulnerable|vulnerability\b/.test(lower);
+      const wantsDeal = /\bdeal|deals|doing|does\b/.test(lower);
+
+      if (!wantsResistance && !wantsImmunity && !wantsVulnerability && !wantsDeal) {
+        lines.push(
+          `Derived monster facet for ${relationship.name}: ${relationship.monsters.resistanceIndexes.length} resistant, ${relationship.monsters.immunityIndexes.length} immune, ${relationship.monsters.vulnerabilityIndexes.length} vulnerable, ${relationship.monsters.dealsDamageIndexes.length} that deal it.`,
+        );
+      }
+      if (wantsResistance) {
+        lines.push(
+          `${relationship.name} resistant monsters in SRD: ${relationship.monsters.resistanceIndexes.length}. Examples: ${summarizeNames(
+            relationship.monsters.resistanceIndexes.map((index) =>
+              (srdData.monsters || []).find((monster: any) => monster.index === index)?.name || index,
+            ),
+          )}.`,
+        );
+      }
+      if (wantsImmunity) {
+        lines.push(
+          `${relationship.name} immune monsters in SRD: ${relationship.monsters.immunityIndexes.length}. Examples: ${summarizeNames(
+            relationship.monsters.immunityIndexes.map((index) =>
+              (srdData.monsters || []).find((monster: any) => monster.index === index)?.name || index,
+            ),
+          )}.`,
+        );
+      }
+      if (wantsVulnerability) {
+        lines.push(
+          `${relationship.name} vulnerable monsters in SRD: ${relationship.monsters.vulnerabilityIndexes.length}. Examples: ${summarizeNames(
+            relationship.monsters.vulnerabilityIndexes.map((index) =>
+              (srdData.monsters || []).find((monster: any) => monster.index === index)?.name || index,
+            ),
+          )}.`,
+        );
+      }
+      if (wantsDeal) {
+        lines.push(
+          `Monsters that deal ${relationship.name} damage in SRD: ${relationship.monsters.dealsDamageIndexes.length}. Examples: ${summarizeNames(
+            relationship.monsters.dealsDamageIndexes.map((index) =>
+              (srdData.monsters || []).find((monster: any) => monster.index === index)?.name || index,
+            ),
+          )}.`,
+        );
+      }
+      lines.push(`Relevant page: /dnd/5e/srd/damage-types/${damageTypeIndex}`);
+    }
+  }
+
+  if (
+    abilityIndex &&
+    /\bspellcasting\b/.test(lower) &&
+    /\bclass|classes|caster|casters|spellcaster|spellcasters\b/.test(lower)
+  ) {
+    const classes = getClassesForSpellcastingAbility(abilityIndex);
+    if (classes.length) {
+      const abilityLabel = abilityIndex.toUpperCase();
+      lines.push(
+        `Derived class facet: ${abilityLabel} spellcasting classes in SRD: ${classes.length}. ${summarizeNames(
+          classes.map((item: any) => item?.name),
+        )}.`,
+      );
+    }
+  }
+
+  if (!lines.length) return null;
+  return lines.join("\n");
 }
 
 function buildPageContextBlock(context: NormalizedSearchContext | null): string | null {
@@ -141,8 +528,43 @@ function buildPageContextBlock(context: NormalizedSearchContext | null): string 
         .join(", ");
       lines.push(`Class spell list for ${classLabel}: ${classSpells.length} spell(s) in SRD.`);
       if (examples) lines.push(`Class spell examples: ${examples}`);
+
+      const schoolExamples = getSpellSchoolOptionsForClass(context.index)
+        .slice(0, 6)
+        .map((item) => `${item.label} (${item.count})`)
+        .join(", ");
+      if (schoolExamples) {
+        lines.push(`Common spell schools for ${classLabel}: ${schoolExamples}.`);
+      }
+
+      const damageExamples = getSpellDamageTypeOptionsForClass(context.index)
+        .slice(0, 6)
+        .map((item) => `${item.label} (${item.count})`)
+        .join(", ");
+      if (damageExamples) {
+        lines.push(`Common spell damage types for ${classLabel}: ${damageExamples}.`);
+      }
     } else {
       lines.push(`Class spell list for ${classLabel}: none in the SRD base class spell list.`);
+    }
+
+    const spellcastingAbilityIndex = String(
+      focusedEntry?.spellcasting?.spellcasting_ability?.index || "",
+    )
+      .trim()
+      .toLowerCase();
+    if (spellcastingAbilityIndex) {
+      const siblingCasters = getClassesForSpellcastingAbility(spellcastingAbilityIndex)
+        .map((item: any) => item?.name)
+        .filter(Boolean)
+        .filter((name: string) => name.toLowerCase() !== String(classLabel).toLowerCase());
+      if (siblingCasters.length) {
+        lines.push(
+          `Other ${spellcastingAbilityIndex.toUpperCase()} spellcasting classes: ${summarizeNames(
+            siblingCasters,
+          )}.`,
+        );
+      }
     }
   }
   if (context.category === "spells" && context.index && focusedEntry) {
@@ -170,6 +592,79 @@ function buildPageContextBlock(context: NormalizedSearchContext | null): string 
       if (raceAccess.subraces.length) {
         lines.push(`Spell users (subraces): ${raceAccess.subraces.join(", ")}.`);
       }
+    }
+
+    const damageTypeIndex = String(focusedEntry?.damage?.damage_type?.index || "")
+      .trim()
+      .toLowerCase();
+    if (damageTypeIndex) {
+      lines.push(`Related spell damage filter page: /dnd/5e/srd/spells/damage/${damageTypeIndex}`);
+      lines.push(`Related damage type hub page: /dnd/5e/srd/damage-types/${damageTypeIndex}`);
+    }
+  }
+
+  if (context.category === "monsters" && context.index && focusedEntry) {
+    const typeSlug = toMonsterTypeSlug(String(focusedEntry?.type || ""));
+    if (typeSlug) {
+      lines.push(`Related monster type page: /dnd/5e/srd/monsters/type/${typeSlug}`);
+    }
+
+    const challengeRating = String(focusedEntry?.challenge_rating ?? "").trim();
+    if (challengeRating) {
+      lines.push(`Related monster CR page: /dnd/5e/srd/monsters/cr/${toCrSlug(challengeRating)}`);
+    }
+
+    const conditionImmunities = (focusedEntry?.condition_immunities || [])
+      .map((condition: any) => ({
+        index: String(condition?.index || "").trim().toLowerCase(),
+        name: String(condition?.name || condition?.index || "").trim(),
+      }))
+      .filter((condition: { index: string; name: string }) => condition.index && condition.name);
+    if (conditionImmunities.length) {
+      lines.push(
+        `Monster condition immunities: ${conditionImmunities
+          .map((condition: { name: string }) => condition.name)
+          .join(", ")}.`,
+      );
+      lines.push(
+        `Related condition immunity pages: ${conditionImmunities
+          .map(
+            (condition: { index: string }) =>
+              `/dnd/5e/srd/monsters/condition-immunity/${condition.index}`,
+          )
+          .join(", ")}.`,
+      );
+    }
+
+    const relatedDamageTypes = getRelatedDamageTypesForMonster(focusedEntry);
+    if (relatedDamageTypes.length) {
+      lines.push(
+        `Related damage type pages: ${relatedDamageTypes
+          .map((damageType) => `/dnd/5e/srd/damage-types/${damageType.index}`)
+          .join(", ")}.`,
+      );
+    }
+  }
+
+  if (context.category === "damage-types" && context.index) {
+    const relationship = getDamageTypeRelationship(context.index);
+    if (relationship) {
+      lines.push(
+        `Damage type relationships: ${relationship.spells.indexes.length} spells, ${relationship.monsters.dealsDamageIndexes.length} monsters dealing it, ${relationship.monsters.resistanceIndexes.length} resistant, ${relationship.monsters.immunityIndexes.length} immune, ${relationship.monsters.vulnerabilityIndexes.length} vulnerable.`,
+      );
+      const spellExamples = summarizeNames(
+        relationship.spells.indexes.map((index) =>
+          (srdData.spells || []).find((spell: any) => spell.index === index)?.name || index,
+        ),
+      );
+      if (spellExamples) lines.push(`Damage type spell examples: ${spellExamples}.`);
+      const monsterExamples = summarizeNames(
+        relationship.monsters.immunityIndexes.map((index) =>
+          (srdData.monsters || []).find((monster: any) => monster.index === index)?.name || index,
+        ),
+      );
+      if (monsterExamples) lines.push(`Damage type immunity examples: ${monsterExamples}.`);
+      lines.push(`Related spell filter page: /dnd/5e/srd/spells/damage/${context.index}`);
     }
   }
 
@@ -220,7 +715,7 @@ async function queryMistral(
       `FORMATTING RULES:\n` +
       `- When listing items, include a MAXIMUM of 15 items. If more exist, mention how many total and suggest the user browse the full list.\n` +
       `- Use markdown links for SRD pages whenever relevant and available.\n` +
-      `- Detail page patterns: spells → /dnd/5e/srd/spells/{index}, monsters → /dnd/5e/srd/monsters/{index}, equipment → /dnd/5e/srd/equipment/{index}, magic items → /dnd/5e/srd/magic-items/{index}, classes → /dnd/5e/srd/classes/{index}, races → /dnd/5e/srd/races/{index}, backgrounds → /dnd/5e/srd/backgrounds/{index}, features → /dnd/5e/srd/features/{index}\n` +
+      `- Detail page patterns: spells → /dnd/5e/srd/spells/{index}, monsters → /dnd/5e/srd/monsters/{index}, equipment → /dnd/5e/srd/equipment/{index}, magic items → /dnd/5e/srd/magic-items/{index}, classes → /dnd/5e/srd/classes/{index}, races → /dnd/5e/srd/races/{index}, backgrounds → /dnd/5e/srd/backgrounds/{index}, damage types → /dnd/5e/srd/damage-types/{index}, features → /dnd/5e/srd/features/{index}\n` +
       `- You may also link to spell filter pages and monster filter pages when useful.\n` +
       `- Only generate links that match the allowed SRD URL reference below.\n\n` +
       `ALLOWED SRD URL REFERENCE:\n${srdLinkReference}\n\n` +
@@ -247,7 +742,7 @@ async function queryMistral(
 
 // ── Redis cache ──────────────────────────────────────────────────────────────
 
-const CACHE_PREFIX = "srd-search:";
+const CACHE_PREFIX = "srd-search:v2:";
 const CACHE_TTL = 60 * 60; // 1 hour in seconds
 
 function getContextSignature(context: NormalizedSearchContext | null): string {
@@ -302,6 +797,7 @@ const LINKABLE_DETAIL_CATEGORIES: Record<string, string> = {
   classes: "/dnd/5e/srd/classes/",
   races: "/dnd/5e/srd/races/",
   backgrounds: "/dnd/5e/srd/backgrounds/",
+  "damage-types": "/dnd/5e/srd/damage-types/",
   features: "/dnd/5e/srd/features/",
 };
 
@@ -358,8 +854,10 @@ function generateFilterPaths(): Set<string> {
   const spellLevels = new Set<string>();
   const spellSchools = new Set<string>();
   const spellClasses = new Set<string>();
+  const spellDamageTypes = new Set<string>();
   const monsterTypes = new Set<string>();
   const monsterCrs = new Set<string>();
+  const monsterConditionImmunities = new Set<string>();
 
   for (const spell of srdData.spells || []) {
     if (spell?.level !== undefined && spell?.level !== null) {
@@ -371,6 +869,9 @@ function generateFilterPaths(): Set<string> {
     for (const cls of spell.classes || []) {
       if (cls?.index) spellClasses.add(String(cls.index));
     }
+    if (spell?.damage?.damage_type?.index) {
+      spellDamageTypes.add(String(spell.damage.damage_type.index));
+    }
   }
 
   for (const monster of srdData.monsters || []) {
@@ -379,6 +880,11 @@ function generateFilterPaths(): Set<string> {
     }
     if (monster?.challenge_rating !== undefined && monster?.challenge_rating !== null) {
       monsterCrs.add(toCrSlug(String(monster.challenge_rating)));
+    }
+    for (const condition of monster?.condition_immunities || []) {
+      if (condition?.index) {
+        monsterConditionImmunities.add(String(condition.index).toLowerCase());
+      }
     }
   }
 
@@ -391,11 +897,17 @@ function generateFilterPaths(): Set<string> {
   for (const cls of spellClasses) {
     paths.add(`/dnd/5e/srd/spells/class/${cls}`);
   }
+  for (const damageType of spellDamageTypes) {
+    paths.add(`/dnd/5e/srd/spells/damage/${damageType}`);
+  }
   for (const typeSlug of monsterTypes) {
     paths.add(`/dnd/5e/srd/monsters/type/${typeSlug}`);
   }
   for (const crSlug of monsterCrs) {
     paths.add(`/dnd/5e/srd/monsters/cr/${crSlug}`);
+  }
+  for (const conditionIndex of monsterConditionImmunities) {
+    paths.add(`/dnd/5e/srd/monsters/condition-immunity/${conditionIndex}`);
   }
 
   return paths;
@@ -414,6 +926,13 @@ function getSrdLinkReference(): string {
       ),
     ),
   ).sort();
+  const spellDamageTypeIndexes = Array.from(
+    new Set(
+      (srdData.spells || [])
+        .map((s) => s?.damage?.damage_type?.index)
+        .filter(Boolean),
+    ),
+  ).sort();
   const monsterTypeSlugs = Array.from(
     new Set((srdData.monsters || []).map((m) => toMonsterTypeSlug(m?.type)).filter(Boolean)),
   ).sort();
@@ -425,15 +944,27 @@ function getSrdLinkReference(): string {
         .map((v) => toCrSlug(String(v))),
     ),
   ).sort((a, b) => crSlugToNumeric(a) - crSlugToNumeric(b));
+  const monsterConditionImmunityIndexes = Array.from(
+    new Set(
+      (srdData.monsters || []).flatMap((monster) =>
+        (monster?.condition_immunities || [])
+          .map((condition: any) => condition?.index)
+          .filter(Boolean),
+      ),
+    ),
+  ).sort();
 
   srdLinkReferenceCache = [
     "- Core indexes: /dnd/5e/srd/contents, /dnd/5e/srd/spells, /dnd/5e/srd/monsters, /dnd/5e/srd/equipment, /dnd/5e/srd/classes, /dnd/5e/srd/races, /dnd/5e/srd/backgrounds",
+    "- Damage type detail pattern: /dnd/5e/srd/damage-types/{index}",
     "- Feature detail pattern: /dnd/5e/srd/features/{index}",
     "- Spell filter pattern: /dnd/5e/srd/spells/level/{0-9}",
     `- Spell school filter pattern: /dnd/5e/srd/spells/school/{index} where index in [${spellSchoolIndexes.join(", ")}]`,
     `- Spell class filter pattern: /dnd/5e/srd/spells/class/{index} where index in [${spellClassIndexes.join(", ")}]`,
+    `- Spell damage filter pattern: /dnd/5e/srd/spells/damage/{index} where index in [${spellDamageTypeIndexes.join(", ")}]`,
     `- Monster type filter pattern: /dnd/5e/srd/monsters/type/{slug} where slug in [${monsterTypeSlugs.join(", ")}]`,
     `- Monster CR filter pattern: /dnd/5e/srd/monsters/cr/{slug} where slug in [${monsterCrSlugs.join(", ")}]`,
+    `- Monster condition immunity filter pattern: /dnd/5e/srd/monsters/condition-immunity/{index} where index in [${monsterConditionImmunityIndexes.join(", ")}]`,
   ].join("\n");
 
   return srdLinkReferenceCache;
@@ -590,6 +1121,75 @@ function stripInvalidLinks(markdown: string): string {
   });
 }
 
+function countMarkdownLinks(markdown: string): number {
+  return (markdown.match(/\[[^\]]+\]\(([^)]+)\)/g) || []).length;
+}
+
+function buildDerivedAnswerLinkSupplement(
+  query: string,
+  context: NormalizedSearchContext | null,
+): string | null {
+  const monsterFacetMatch = resolveMonsterFacetMatch(query, context);
+  if (monsterFacetMatch && monsterFacetMatch.monsters.length) {
+    const filterLinks: string[] = [];
+    if (monsterFacetMatch.monsterTypeFacetIndex) {
+      filterLinks.push(
+        `[${monsterFacetMatch.typeLabel || "Monster Type"}](/dnd/5e/srd/monsters/type/${monsterFacetMatch.monsterTypeFacetIndex})`,
+      );
+    }
+    if (monsterFacetMatch.monsterConditionImmunityFacetIndex) {
+      filterLinks.push(
+        `[${monsterFacetMatch.conditionLabel || "Condition Immunity"}](/dnd/5e/srd/monsters/condition-immunity/${monsterFacetMatch.monsterConditionImmunityFacetIndex})`,
+      );
+    }
+
+    const monsterLinks = monsterFacetMatch.monsters
+      .slice(0, 8)
+      .map((monster: any) => {
+        const index = String(monster?.index || "").trim().toLowerCase();
+        const name = String(monster?.name || index).trim();
+        if (!index || !name) return null;
+        return `[${name}](/dnd/5e/srd/monsters/${index})`;
+      })
+      .filter((value): value is string => Boolean(value));
+
+    const allLinks = [...filterLinks, ...monsterLinks];
+    if (!allLinks.length) return null;
+
+    return `Related pages: ${allLinks.join(", ")}.`;
+  }
+
+  const spellFacetMatch = resolveSpellFacetMatch(query, context);
+  if (!spellFacetMatch || !spellFacetMatch.spells.length) return null;
+
+  const filterLinks: string[] = [];
+  if (spellFacetMatch.classIndex) {
+    filterLinks.push(
+      `[${spellFacetMatch.classLabel || "Class"} Spells](/dnd/5e/srd/spells/class/${spellFacetMatch.classIndex})`,
+    );
+  }
+  if (spellFacetMatch.damageTypeIndex) {
+    filterLinks.push(
+      `[${spellFacetMatch.damageTypeName || "Damage Type"} Damage Spells](/dnd/5e/srd/spells/damage/${spellFacetMatch.damageTypeIndex})`,
+    );
+  }
+
+  const spellLinks = spellFacetMatch.spells
+    .slice(0, 8)
+    .map((spell: any) => {
+      const index = String(spell?.index || "").trim().toLowerCase();
+      const name = String(spell?.name || index).trim();
+      if (!index || !name) return null;
+      return `[${name}](/dnd/5e/srd/spells/${index})`;
+    })
+    .filter((value): value is string => Boolean(value));
+
+  const allLinks = [...filterLinks, ...spellLinks];
+  if (!allLinks.length) return null;
+
+  return `Related pages: ${allLinks.join(", ")}.`;
+}
+
 // ── Main export ───────────────────────────────────────────────────────────────
 
 export async function searchSrd(
@@ -607,9 +1207,11 @@ export async function searchSrd(
   const categories = detectCategories(query);
 
   // Find and serialize relevant entries
-  const context = findRelevantEntries(query, categories, {
+  const rawContext = findRelevantEntries(query, categories, {
     context: normalizedContext || undefined,
   });
+  const derivedContext = buildDerivedQueryContext(query, normalizedContext);
+  const context = [derivedContext, rawContext].filter(Boolean).join("\n\n");
 
   if (!context) {
     return "I couldn't find any relevant SRD data for that query. Try asking about specific spells, monsters, equipment, conditions, or other D&D 5E rules.";
@@ -619,7 +1221,13 @@ export async function searchSrd(
 
   // Query Mistral; short mode skips auto-linking (plain text for Discord).
   const raw = await queryMistral(query, context, short, pageContext);
-  const answer = short ? raw : stripInvalidLinks(addDeterministicLinks(raw));
+  let answer = short ? raw : stripInvalidLinks(addDeterministicLinks(raw));
+  if (!short && countMarkdownLinks(answer) === 0) {
+    const supplement = buildDerivedAnswerLinkSupplement(query, normalizedContext);
+    if (supplement) {
+      answer = `${answer.trim()}\n\n${supplement}`;
+    }
+  }
 
   // Cache the result
   await setCache(query, answer, short, normalizedContext);

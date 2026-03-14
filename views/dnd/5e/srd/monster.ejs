@@ -27,6 +27,8 @@
       .trim()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+    const conditionImmunities = Array.isArray(monster.condition_immunities) ? monster.condition_immunities : [];
+    const relatedDamageTypeLinks = Array.isArray(relatedDamageTypes) ? relatedDamageTypes : [];
     const monsterImage = monster.image ? imageBaseUrl + monster.image : null;
     const monsterTitle = `${monster.name} 5e Stat Block: AC, HP, CR, and Actions`;
     const monsterSummary = `${monster.name} is a ${monster.size} ${monster.type} with ${monster.alignment} alignment and Challenge Rating ${crDisplay(monster.challenge_rating)} in D&D 5e. This stat block includes AC ${monster.armor_class[0]?.value}, ${monster.hit_points} hit points, speeds, traits, and actions.`;
@@ -54,8 +56,14 @@
     }
     if (monster.damage_immunities && monster.damage_immunities.length) {
       faqs.push({
-        q: `What is the ${monster.name} immune to in D&D 5e?`,
-        a: `The ${monster.name} is immune to: ${monster.damage_immunities.join(', ')}.`
+        q: `What damage types is the ${monster.name} immune to in D&D 5e?`,
+        a: `The ${monster.name} is immune to these damage types or sources: ${monster.damage_immunities.join(', ')}.`
+      });
+    }
+    if (conditionImmunities.length) {
+      faqs.push({
+        q: `What conditions is the ${monster.name} immune to in D&D 5e?`,
+        a: `The ${monster.name} is immune to the following conditions: ${conditionImmunities.map(condition => condition.name).join(', ')}.`
       });
     }
     if (monster.speed && monster.speed.fly) {
@@ -311,9 +319,13 @@
       </div>
       <div class="inline-div">
         <b>Condition Immunities:</b>
-        <%= monster.condition_immunities && monster.condition_immunities.length
-          ? monster.condition_immunities.map(condition => condition.name).join(', ')
-          : '—' %>
+        <% if (conditionImmunities.length) { %>
+          <% conditionImmunities.forEach((condition, idx) => { %>
+            <a href="/dnd/5e/srd/conditions#<%= condition.index %>"><%= condition.name %></a><%= idx < conditionImmunities.length - 1 ? ', ' : '' %>
+          <% }) %>
+        <% } else { %>
+          —
+        <% } %>
       </div>
       <!-- Senses -->
       <div class="inline-div">
@@ -353,6 +365,21 @@
       <div class="inline-div">
         <b>Proficiency Bonus:</b> <%= monster.proficiency_bonus%>
       </div>
+      <% if (conditionImmunities.length || relatedDamageTypeLinks.length) { %>
+      <div class="srd-filter-group">
+        <div class="srd-filter-label">Related Monster Indexes</div>
+        <div class="srd-filter-pills">
+          <a href="/dnd/5e/srd/monsters/type/<%= typeSlug %>">More <%= monster.type %> Monsters</a>
+          <a href="/dnd/5e/srd/monsters/cr/<%= crSlug(monster.challenge_rating) %>">More CR <%= crDisplay(monster.challenge_rating) %> Monsters</a>
+          <% conditionImmunities.forEach((condition) => { %>
+            <a href="/dnd/5e/srd/monsters/condition-immunity/<%= condition.index %>"><%= condition.name %> Immunity</a>
+          <% }) %>
+          <% relatedDamageTypeLinks.forEach((damageType) => { %>
+            <a href="/dnd/5e/srd/damage-types/<%= damageType.index %>"><%= damageType.label %> Damage Type</a>
+          <% }) %>
+        </div>
+      </div>
+      <% } %>
       <!-- Traits -->
       <div>
         <div>

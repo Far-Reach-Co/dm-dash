@@ -11,6 +11,7 @@
       .map((prof) => String(prof.name || '').replace(/^Skill:\s*/, ''))
       .filter(Boolean);
     const spellListLabel = classSpellCount > 0 ? `${classSpellCount} class spells` : 'no spell list';
+    const spellcastingAbilityLabel = classData.spellcasting?.spellcasting_ability?.name || null;
     const classTitle = classSpellCount > 0
       ? `${classData.name} 5e Class: Features, Hit Die, and Spell List`
       : `${classData.name} 5e Class: Features, Hit Die, and Proficiencies`;
@@ -109,6 +110,14 @@
     <h1><%= classData.name %></h1>
     <p><%= classSummary %></p>
 
+    <div class="quick-links" aria-label="<%= classData.name %> page sections">
+      <a href="#proficiencies">Proficiencies</a>
+      <a href="#equipment">Equipment</a>
+      <% if (classData.spellcasting) { %><a href="#spellcasting">Spellcasting</a><% } %>
+      <a href="#core-features">Core Features</a>
+      <% if (subclassFeatures.length) { %><a href="#subclass-features">Subclass Features</a><% } %>
+    </div>
+
     <div class="inline-div">
       <b>Hit Die:</b>
       <span>d<%= classData.hit_die %></span>
@@ -132,9 +141,58 @@
 
     <div class="inline-div">
       <b>Related Pages:</b>
+      <a href="/dnd/5e/srd/classes">Classes</a>,
+      <a href="/dnd/5e/srd/features">Features</a>,
+      <a href="/dnd/5e/srd/equipment">Equipment</a>,
+      <a href="/dnd/5e/srd/skills">Skills</a>,
       <a href="/dnd/5e/srd/races">Races</a>,
       <a href="/dnd/5e/srd/backgrounds">Backgrounds</a>
     </div>
+
+    <% if (classSpellCount > 0) { %>
+      <div class="srd-filter-group">
+        <div class="srd-filter-label"><%= classData.name %> Spell Browse</div>
+        <div class="srd-filter-pills">
+          <a href="/dnd/5e/srd/spells/class/<%= classData.index %>">All <%= classData.name %> Spells (<%= classSpellCount %>)</a>
+          <% classSpellLevels.forEach((level) => { %>
+            <a href="/dnd/5e/srd/spells/level/<%= level %>"><%= level === 0 ? 'Cantrips' : 'Level ' + level %></a>
+          <% }) %>
+        </div>
+      </div>
+
+      <% if (classSpellSchoolOptions.length) { %>
+        <div class="srd-filter-group">
+          <div class="srd-filter-label">Popular Schools In The <%= classData.name %> Spell List</div>
+          <div class="srd-filter-pills">
+            <% classSpellSchoolOptions.forEach((opt) => { %>
+              <a href="/dnd/5e/srd/spells/school/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+
+      <% if (classSpellDamageTypeOptions.length) { %>
+        <div class="srd-filter-group">
+          <div class="srd-filter-label">Common Damage Types In The <%= classData.name %> Spell List</div>
+          <div class="srd-filter-pills">
+            <% classSpellDamageTypeOptions.forEach((opt) => { %>
+              <a href="/dnd/5e/srd/spells/damage/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+            <% }) %>
+          </div>
+        </div>
+      <% } %>
+    <% } %>
+
+    <% if (relatedSpellcastingClasses.length) { %>
+      <div class="srd-see-also">
+        <h3>Other <%= spellcastingAbilityLabel %> Spellcasters</h3>
+        <ul>
+          <% relatedSpellcastingClasses.forEach((relatedClass) => { %>
+            <li><a href="/dnd/5e/srd/classes/<%= relatedClass.index %>"><%= relatedClass.name %></a></li>
+          <% }) %>
+        </ul>
+      </div>
+    <% } %>
 
     <hr class="w-75" />
     <section class="srd-faq">
@@ -157,7 +215,7 @@
       <hr class="w-75" />
     <% } %>
 
-    <h2>Starting Proficiencies</h2>
+    <h2 id="proficiencies">Starting Proficiencies</h2>
     <ul>
       <% (classData.proficiencies || []).forEach((prof) => { 
         const profName = String(prof.name || '').replace(/^Skill:\s*/, '');
@@ -191,7 +249,7 @@
 
     <hr class="w-75" />
 
-    <h2>Starting Equipment</h2>
+    <h2 id="equipment">Starting Equipment</h2>
     <ul>
       <% (classData.starting_equipment || []).forEach((entry) => { %>
         <li>
@@ -212,7 +270,7 @@
 
     <% if (classData.spellcasting) { %>
       <hr class="w-75" />
-      <h2>Spellcasting</h2>
+      <h2 id="spellcasting">Spellcasting</h2>
       <div class="inline-div">
         <b>Spellcasting Ability:</b>
         <a href="/dnd/5e/srd/ability-scores#<%= String(classData.spellcasting.spellcasting_ability.index || '').toLowerCase() %>"><%= classData.spellcasting.spellcasting_ability.name %></a>
@@ -227,7 +285,7 @@
     <% } %>
 
     <hr class="w-75" />
-    <h2>Core Features</h2>
+    <h2 id="core-features">Core Features</h2>
     <% if (!baseFeatures.length) { %>
       <p>No standalone class feature entries were found in the SRD dataset for this class.</p>
     <% } %>
@@ -245,7 +303,7 @@
 
     <% if (subclassFeatures.length) { %>
       <hr class="w-75" />
-      <h2>Subclass Features</h2>
+      <h2 id="subclass-features">Subclass Features</h2>
       <% subclassFeatures.forEach((group) => { %>
         <h3><%= group.name %></h3>
         <% group.features.forEach((feature) => { %>

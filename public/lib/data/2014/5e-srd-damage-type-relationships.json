@@ -1,0 +1,1823 @@
+{
+  "version": 1,
+  "damageTypes": {
+    "acid": {
+      "index": "acid",
+      "name": "Acid",
+      "desc": [
+        "The corrosive spray of a black dragon's breath and the dissolving enzymes secreted by a black pudding deal acid damage."
+      ],
+      "spells": {
+        "indexes": [
+          "acid-arrow",
+          "acid-splash"
+        ],
+        "byClass": {
+          "wizard": [
+            "acid-arrow",
+            "acid-splash"
+          ],
+          "sorcerer": [
+            "acid-splash"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "acid-splash"
+          ],
+          "2": [
+            "acid-arrow"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "aboleth",
+          "adult-black-dragon",
+          "ancient-black-dragon",
+          "ankheg",
+          "behir",
+          "black-dragon-wyrmling",
+          "black-pudding",
+          "gelatinous-cube",
+          "gray-ooze",
+          "mimic",
+          "ochre-jelly",
+          "young-black-dragon"
+        ],
+        "resistanceIndexes": [
+          "ghost",
+          "gray-ooze",
+          "ochre-jelly",
+          "shadow",
+          "specter",
+          "water-elemental",
+          "will-o-wisp",
+          "wraith"
+        ],
+        "immunityIndexes": [
+          "adult-black-dragon",
+          "adult-copper-dragon",
+          "ancient-black-dragon",
+          "ancient-copper-dragon",
+          "black-dragon-wyrmling",
+          "black-pudding",
+          "clay-golem",
+          "copper-dragon-wyrmling",
+          "mimic",
+          "young-black-dragon",
+          "young-copper-dragon"
+        ],
+        "vulnerabilityIndexes": []
+      }
+    },
+    "bludgeoning": {
+      "index": "bludgeoning",
+      "name": "Bludgeoning",
+      "desc": [
+        "Blunt force attacks, falling, constriction, and the like deal bludgeoning damage."
+      ],
+      "spells": {
+        "indexes": [
+          "black-tentacles",
+          "control-water",
+          "ice-storm",
+          "wind-wall"
+        ],
+        "byClass": {
+          "wizard": [
+            "black-tentacles",
+            "control-water",
+            "ice-storm"
+          ],
+          "cleric": [
+            "control-water"
+          ],
+          "druid": [
+            "control-water",
+            "ice-storm",
+            "wind-wall"
+          ],
+          "sorcerer": [
+            "ice-storm"
+          ],
+          "ranger": [
+            "wind-wall"
+          ]
+        },
+        "byLevel": {
+          "3": [
+            "wind-wall"
+          ],
+          "4": [
+            "black-tentacles",
+            "control-water",
+            "ice-storm"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "aboleth",
+          "acolyte",
+          "adult-black-dragon",
+          "adult-blue-dragon",
+          "adult-brass-dragon",
+          "adult-bronze-dragon",
+          "adult-copper-dragon",
+          "adult-gold-dragon",
+          "adult-green-dragon",
+          "adult-red-dragon",
+          "adult-silver-dragon",
+          "adult-white-dragon",
+          "air-elemental",
+          "ancient-black-dragon",
+          "ancient-blue-dragon",
+          "ancient-brass-dragon",
+          "ancient-bronze-dragon",
+          "ancient-copper-dragon",
+          "ancient-gold-dragon",
+          "ancient-green-dragon",
+          "ancient-red-dragon",
+          "ancient-silver-dragon",
+          "ancient-white-dragon",
+          "animated-armor",
+          "ape",
+          "awakened-tree",
+          "azer",
+          "behir",
+          "black-pudding",
+          "blue-dragon-wyrmling",
+          "camel",
+          "centaur",
+          "chimera",
+          "chuul",
+          "clay-golem",
+          "cloud-giant",
+          "commoner",
+          "constrictor-snake",
+          "couatl",
+          "crab",
+          "crocodile",
+          "darkmantle",
+          "death-dog",
+          "deva",
+          "doppelganger",
+          "draft-horse",
+          "dragon-turtle",
+          "drow",
+          "dryad",
+          "duergar",
+          "eagle",
+          "earth-elemental",
+          "elephant",
+          "elk",
+          "ettercap",
+          "fire-giant",
+          "flesh-golem",
+          "flying-snake",
+          "frost-giant",
+          "giant-ape",
+          "giant-constrictor-snake",
+          "giant-crab",
+          "giant-crocodile",
+          "giant-elk",
+          "giant-goat",
+          "giant-octopus",
+          "giant-scorpion",
+          "giant-sea-horse",
+          "gibbering-mouther",
+          "glabrezu",
+          "gladiator",
+          "goat",
+          "gorgon",
+          "gray-ooze",
+          "grimlock",
+          "harpy",
+          "hill-giant",
+          "hunter-shark",
+          "ice-devil",
+          "invisible-stalker",
+          "iron-golem",
+          "kobold",
+          "kraken",
+          "lemure",
+          "lizardfolk",
+          "mammoth",
+          "marilith",
+          "mimic",
+          "mule",
+          "mummy",
+          "mummy-lord",
+          "nightmare",
+          "noble",
+          "ochre-jelly",
+          "octopus",
+          "ogre",
+          "ogre-zombie",
+          "otyugh",
+          "pegasus",
+          "pit-fiend",
+          "plesiosaurus",
+          "pony",
+          "priest",
+          "rhinoceros",
+          "riding-horse",
+          "salamander",
+          "satyr",
+          "scorpion",
+          "shambling-mound",
+          "shield-guardian",
+          "stone-giant",
+          "stone-golem",
+          "storm-giant",
+          "tarrasque",
+          "thug",
+          "treant",
+          "triceratops",
+          "tyrannosaurus-rex",
+          "unicorn",
+          "vampire-vampire",
+          "warhorse",
+          "warhorse-skeleton",
+          "water-elemental",
+          "wereboar-human",
+          "wereboar-hybrid",
+          "zombie"
+        ],
+        "resistanceIndexes": [
+          "air-elemental",
+          "archmage",
+          "awakened-tree",
+          "balor",
+          "barbed-devil",
+          "bearded-devil",
+          "bone-devil",
+          "chain-devil",
+          "deva",
+          "earth-elemental",
+          "erinyes",
+          "fire-elemental",
+          "gargoyle",
+          "ghost",
+          "glabrezu",
+          "grick",
+          "gynosphinx",
+          "hezrou",
+          "horned-devil",
+          "ice-devil",
+          "imp",
+          "invisible-stalker",
+          "magmin",
+          "marilith",
+          "mummy",
+          "nalfeshnee",
+          "night-hag",
+          "pit-fiend",
+          "planetar",
+          "quasit",
+          "salamander",
+          "shadow",
+          "solar",
+          "specter",
+          "succubus-incubus",
+          "swarm-of-bats",
+          "swarm-of-beetles",
+          "swarm-of-centipedes",
+          "swarm-of-insects",
+          "swarm-of-poisonous-snakes",
+          "swarm-of-quippers",
+          "swarm-of-rats",
+          "swarm-of-ravens",
+          "swarm-of-spiders",
+          "swarm-of-wasps",
+          "treant",
+          "vampire-spawn",
+          "vampire-bat",
+          "vampire-mist",
+          "vampire-vampire",
+          "vrock",
+          "water-elemental",
+          "wight",
+          "will-o-wisp",
+          "wraith"
+        ],
+        "immunityIndexes": [
+          "androsphinx",
+          "clay-golem",
+          "couatl",
+          "flesh-golem",
+          "iron-golem",
+          "kraken",
+          "lich",
+          "mummy-lord",
+          "rakshasa",
+          "stone-golem",
+          "tarrasque",
+          "werebear-bear",
+          "werebear-human",
+          "werebear-hybrid",
+          "wereboar-boar",
+          "wereboar-human",
+          "wereboar-hybrid",
+          "wererat-human",
+          "wererat-hybrid",
+          "wererat-rat",
+          "weretiger-human",
+          "weretiger-hybrid",
+          "weretiger-tiger",
+          "werewolf-human",
+          "werewolf-hybrid",
+          "werewolf-wolf"
+        ],
+        "vulnerabilityIndexes": [
+          "ice-mephit",
+          "minotaur-skeleton",
+          "skeleton",
+          "warhorse-skeleton"
+        ]
+      }
+    },
+    "cold": {
+      "index": "cold",
+      "name": "Cold",
+      "desc": [
+        "The infernal chill radiating from an ice devil's spear and the frigid blast of a white dragon's breath deal cold damage."
+      ],
+      "spells": {
+        "indexes": [
+          "cone-of-cold",
+          "freezing-sphere",
+          "ray-of-frost",
+          "wall-of-ice"
+        ],
+        "byClass": {
+          "sorcerer": [
+            "cone-of-cold",
+            "ray-of-frost"
+          ],
+          "wizard": [
+            "cone-of-cold",
+            "freezing-sphere",
+            "ray-of-frost",
+            "wall-of-ice"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "ray-of-frost"
+          ],
+          "5": [
+            "cone-of-cold"
+          ],
+          "6": [
+            "freezing-sphere",
+            "wall-of-ice"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "adult-white-dragon",
+          "ancient-white-dragon",
+          "ice-devil",
+          "ice-mephit",
+          "lich",
+          "white-dragon-wyrmling",
+          "winter-wolf",
+          "young-white-dragon"
+        ],
+        "resistanceIndexes": [
+          "balor",
+          "barbed-devil",
+          "bearded-devil",
+          "bone-devil",
+          "chain-devil",
+          "dretch",
+          "erinyes",
+          "glabrezu",
+          "gray-ooze",
+          "hezrou",
+          "horned-devil",
+          "imp",
+          "lemure",
+          "lich",
+          "marilith",
+          "nalfeshnee",
+          "night-hag",
+          "pit-fiend",
+          "quasit",
+          "shadow",
+          "shambling-mound",
+          "specter",
+          "storm-giant",
+          "succubus-incubus",
+          "vrock",
+          "will-o-wisp",
+          "wraith"
+        ],
+        "immunityIndexes": [
+          "adult-silver-dragon",
+          "adult-white-dragon",
+          "ancient-silver-dragon",
+          "ancient-white-dragon",
+          "black-pudding",
+          "frost-giant",
+          "ghost",
+          "ice-mephit",
+          "remorhaz",
+          "silver-dragon-wyrmling",
+          "white-dragon-wyrmling",
+          "winter-wolf",
+          "young-silver-dragon",
+          "young-white-dragon"
+        ],
+        "vulnerabilityIndexes": [
+          "magma-mephit",
+          "salamander"
+        ]
+      }
+    },
+    "fire": {
+      "index": "fire",
+      "name": "Fire",
+      "desc": [
+        "Red dragons breathe fire, and many spells conjure flames to deal fire damage."
+      ],
+      "spells": {
+        "indexes": [
+          "burning-hands",
+          "delayed-blast-fireball",
+          "fire-bolt",
+          "fire-shield",
+          "fire-storm",
+          "fireball",
+          "flame-blade",
+          "flame-strike",
+          "flaming-sphere",
+          "heat-metal",
+          "hellish-rebuke",
+          "incendiary-cloud",
+          "meteor-swarm",
+          "produce-flame",
+          "scorching-ray",
+          "wall-of-fire"
+        ],
+        "byClass": {
+          "sorcerer": [
+            "burning-hands",
+            "delayed-blast-fireball",
+            "fire-bolt",
+            "fire-storm",
+            "fireball",
+            "incendiary-cloud",
+            "meteor-swarm",
+            "scorching-ray",
+            "wall-of-fire"
+          ],
+          "wizard": [
+            "burning-hands",
+            "delayed-blast-fireball",
+            "fire-bolt",
+            "fire-shield",
+            "fireball",
+            "flaming-sphere",
+            "incendiary-cloud",
+            "meteor-swarm",
+            "scorching-ray",
+            "wall-of-fire"
+          ],
+          "cleric": [
+            "fire-storm",
+            "flame-strike"
+          ],
+          "druid": [
+            "fire-storm",
+            "flame-blade",
+            "flaming-sphere",
+            "heat-metal",
+            "produce-flame",
+            "wall-of-fire"
+          ],
+          "bard": [
+            "heat-metal"
+          ],
+          "warlock": [
+            "hellish-rebuke"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "fire-bolt",
+            "produce-flame"
+          ],
+          "1": [
+            "burning-hands",
+            "hellish-rebuke"
+          ],
+          "2": [
+            "flame-blade",
+            "flaming-sphere",
+            "heat-metal",
+            "scorching-ray"
+          ],
+          "3": [
+            "fireball"
+          ],
+          "4": [
+            "fire-shield",
+            "wall-of-fire"
+          ],
+          "5": [
+            "flame-strike"
+          ],
+          "7": [
+            "delayed-blast-fireball",
+            "fire-storm"
+          ],
+          "8": [
+            "incendiary-cloud"
+          ],
+          "9": [
+            "meteor-swarm"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "adult-red-dragon",
+          "ancient-red-dragon",
+          "azer",
+          "balor",
+          "barbed-devil",
+          "chimera",
+          "dragon-turtle",
+          "efreeti",
+          "fire-elemental",
+          "half-red-dragon-veteran",
+          "hell-hound",
+          "horned-devil",
+          "magma-mephit",
+          "magmin",
+          "nightmare",
+          "red-dragon-wyrmling",
+          "remorhaz",
+          "salamander",
+          "solar",
+          "steam-mephit",
+          "young-red-dragon"
+        ],
+        "resistanceIndexes": [
+          "dragon-turtle",
+          "dretch",
+          "ghost",
+          "glabrezu",
+          "gray-ooze",
+          "half-red-dragon-veteran",
+          "hezrou",
+          "marilith",
+          "nalfeshnee",
+          "night-hag",
+          "quasit",
+          "shadow",
+          "shambling-mound",
+          "specter",
+          "succubus-incubus",
+          "vrock",
+          "will-o-wisp",
+          "wraith"
+        ],
+        "immunityIndexes": [
+          "adult-brass-dragon",
+          "adult-gold-dragon",
+          "adult-red-dragon",
+          "ancient-brass-dragon",
+          "ancient-gold-dragon",
+          "ancient-red-dragon",
+          "azer",
+          "balor",
+          "barbed-devil",
+          "bearded-devil",
+          "bone-devil",
+          "brass-dragon-wyrmling",
+          "chain-devil",
+          "efreeti",
+          "erinyes",
+          "fire-elemental",
+          "fire-giant",
+          "gold-dragon-wyrmling",
+          "hell-hound",
+          "horned-devil",
+          "ice-devil",
+          "imp",
+          "iron-golem",
+          "lemure",
+          "magma-mephit",
+          "magmin",
+          "nightmare",
+          "pit-fiend",
+          "red-dragon-wyrmling",
+          "remorhaz",
+          "salamander",
+          "steam-mephit",
+          "tarrasque",
+          "young-brass-dragon",
+          "young-gold-dragon",
+          "young-red-dragon"
+        ],
+        "vulnerabilityIndexes": [
+          "awakened-shrub",
+          "awakened-tree",
+          "dust-mephit",
+          "ice-mephit",
+          "mummy",
+          "mummy-lord",
+          "treant"
+        ]
+      }
+    },
+    "force": {
+      "index": "force",
+      "name": "Force",
+      "desc": [
+        "Force is pure magical energy focused into a damaging form. Most effects that deal force damage are spells, including magic missile and spiritual weapon."
+      ],
+      "spells": {
+        "indexes": [
+          "arcane-sword",
+          "dimension-door",
+          "disintegrate",
+          "eldritch-blast",
+          "magic-missile",
+          "spiritual-weapon"
+        ],
+        "byClass": {
+          "bard": [
+            "arcane-sword",
+            "dimension-door"
+          ],
+          "wizard": [
+            "arcane-sword",
+            "dimension-door",
+            "disintegrate",
+            "magic-missile"
+          ],
+          "sorcerer": [
+            "dimension-door",
+            "disintegrate",
+            "magic-missile"
+          ],
+          "warlock": [
+            "dimension-door",
+            "eldritch-blast"
+          ],
+          "cleric": [
+            "spiritual-weapon"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "eldritch-blast"
+          ],
+          "1": [
+            "magic-missile"
+          ],
+          "2": [
+            "spiritual-weapon"
+          ],
+          "4": [
+            "dimension-door"
+          ],
+          "6": [
+            "disintegrate"
+          ],
+          "7": [
+            "arcane-sword"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [],
+        "resistanceIndexes": [],
+        "immunityIndexes": [],
+        "vulnerabilityIndexes": []
+      }
+    },
+    "lightning": {
+      "index": "lightning",
+      "name": "Lightning",
+      "desc": [
+        "A lightning bolt spell and a blue dragon's breath deal lightning damage."
+      ],
+      "spells": {
+        "indexes": [
+          "call-lightning",
+          "chain-lightning",
+          "lightning-bolt",
+          "shocking-grasp"
+        ],
+        "byClass": {
+          "druid": [
+            "call-lightning"
+          ],
+          "sorcerer": [
+            "chain-lightning",
+            "lightning-bolt",
+            "shocking-grasp"
+          ],
+          "wizard": [
+            "chain-lightning",
+            "lightning-bolt",
+            "shocking-grasp"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "shocking-grasp"
+          ],
+          "3": [
+            "call-lightning",
+            "lightning-bolt"
+          ],
+          "6": [
+            "chain-lightning"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "adult-blue-dragon",
+          "ancient-blue-dragon",
+          "balor",
+          "behir",
+          "blue-dragon-wyrmling",
+          "kraken",
+          "storm-giant",
+          "will-o-wisp",
+          "young-blue-dragon"
+        ],
+        "resistanceIndexes": [
+          "air-elemental",
+          "balor",
+          "dretch",
+          "ghost",
+          "glabrezu",
+          "hezrou",
+          "lich",
+          "marilith",
+          "nalfeshnee",
+          "quasit",
+          "shadow",
+          "specter",
+          "succubus-incubus",
+          "vrock",
+          "wraith"
+        ],
+        "immunityIndexes": [
+          "adult-blue-dragon",
+          "adult-bronze-dragon",
+          "ancient-blue-dragon",
+          "ancient-bronze-dragon",
+          "behir",
+          "black-pudding",
+          "blue-dragon-wyrmling",
+          "bronze-dragon-wyrmling",
+          "djinni",
+          "flesh-golem",
+          "kraken",
+          "ochre-jelly",
+          "shambling-mound",
+          "storm-giant",
+          "will-o-wisp",
+          "young-blue-dragon",
+          "young-bronze-dragon"
+        ],
+        "vulnerabilityIndexes": []
+      }
+    },
+    "necrotic": {
+      "index": "necrotic",
+      "name": "Necrotic",
+      "desc": [
+        "Necrotic damage, dealt by certain undead and a spell such as chill touch, withers matter and even the soul."
+      ],
+      "spells": {
+        "indexes": [
+          "blight",
+          "chill-touch",
+          "circle-of-death",
+          "finger-of-death",
+          "harm",
+          "inflict-wounds",
+          "vampiric-touch"
+        ],
+        "byClass": {
+          "druid": [
+            "blight"
+          ],
+          "sorcerer": [
+            "blight",
+            "chill-touch",
+            "circle-of-death",
+            "finger-of-death"
+          ],
+          "warlock": [
+            "blight",
+            "chill-touch",
+            "circle-of-death",
+            "finger-of-death",
+            "vampiric-touch"
+          ],
+          "wizard": [
+            "blight",
+            "chill-touch",
+            "circle-of-death",
+            "finger-of-death",
+            "vampiric-touch"
+          ],
+          "cleric": [
+            "harm",
+            "inflict-wounds"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "chill-touch"
+          ],
+          "1": [
+            "inflict-wounds"
+          ],
+          "3": [
+            "vampiric-touch"
+          ],
+          "4": [
+            "blight"
+          ],
+          "6": [
+            "circle-of-death",
+            "harm"
+          ],
+          "7": [
+            "finger-of-death"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "ghost",
+          "lich",
+          "mummy",
+          "mummy-lord",
+          "shadow",
+          "specter",
+          "vampire-spawn",
+          "vampire-bat",
+          "vampire-vampire",
+          "violet-fungus",
+          "wight",
+          "wraith"
+        ],
+        "resistanceIndexes": [
+          "ghast",
+          "lich",
+          "vampire-spawn",
+          "vampire-bat",
+          "vampire-mist",
+          "vampire-vampire",
+          "wight",
+          "will-o-wisp"
+        ],
+        "immunityIndexes": [
+          "ghost",
+          "mummy",
+          "mummy-lord",
+          "shadow",
+          "solar",
+          "specter",
+          "wraith"
+        ],
+        "vulnerabilityIndexes": []
+      }
+    },
+    "piercing": {
+      "index": "piercing",
+      "name": "Piercing",
+      "desc": [
+        "Puncturing and impaling attacks, including spears and monsters' bites, deal piercing damage."
+      ],
+      "spells": {
+        "indexes": [
+          "faithful-hound",
+          "insect-plague",
+          "wall-of-thorns"
+        ],
+        "byClass": {
+          "wizard": [
+            "faithful-hound"
+          ],
+          "cleric": [
+            "insect-plague"
+          ],
+          "druid": [
+            "insect-plague",
+            "wall-of-thorns"
+          ],
+          "sorcerer": [
+            "insect-plague"
+          ]
+        },
+        "byLevel": {
+          "4": [
+            "faithful-hound"
+          ],
+          "5": [
+            "insect-plague"
+          ],
+          "6": [
+            "wall-of-thorns"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "adult-black-dragon",
+          "adult-blue-dragon",
+          "adult-brass-dragon",
+          "adult-bronze-dragon",
+          "adult-copper-dragon",
+          "adult-gold-dragon",
+          "adult-green-dragon",
+          "adult-red-dragon",
+          "adult-silver-dragon",
+          "adult-white-dragon",
+          "ancient-black-dragon",
+          "ancient-blue-dragon",
+          "ancient-brass-dragon",
+          "ancient-bronze-dragon",
+          "ancient-copper-dragon",
+          "ancient-gold-dragon",
+          "ancient-green-dragon",
+          "ancient-silver-dragon",
+          "ancient-white-dragon",
+          "archmage",
+          "assassin",
+          "baboon",
+          "badger",
+          "bandit",
+          "bandit-captain",
+          "barbed-devil",
+          "basilisk",
+          "bat",
+          "bearded-devil",
+          "behir",
+          "black-bear",
+          "black-dragon-wyrmling",
+          "blink-dog",
+          "blood-hawk",
+          "blue-dragon-wyrmling",
+          "bone-devil",
+          "brass-dragon-wyrmling",
+          "bronze-dragon-wyrmling",
+          "brown-bear",
+          "bugbear",
+          "bulette",
+          "centaur",
+          "chimera",
+          "cloaker",
+          "cloud-giant",
+          "cockatrice",
+          "constrictor-snake",
+          "copper-dragon-wyrmling",
+          "couatl",
+          "cult-fanatic",
+          "deep-gnome-svirfneblin",
+          "deer",
+          "dire-wolf",
+          "dragon-turtle",
+          "dretch",
+          "drider",
+          "drow",
+          "duergar",
+          "elephant",
+          "erinyes",
+          "ettercap",
+          "ettin",
+          "gargoyle",
+          "ghast",
+          "ghoul",
+          "giant-badger",
+          "giant-bat",
+          "giant-centipede",
+          "giant-constrictor-snake",
+          "giant-crocodile",
+          "giant-eagle",
+          "giant-frog",
+          "giant-hyena",
+          "giant-lizard",
+          "giant-poisonous-snake",
+          "giant-rat",
+          "giant-rat-diseased",
+          "giant-scorpion",
+          "giant-shark",
+          "giant-spider",
+          "giant-toad",
+          "giant-vulture",
+          "giant-wasp",
+          "giant-weasel",
+          "giant-wolf-spider",
+          "gnoll",
+          "goblin",
+          "gold-dragon-wyrmling",
+          "gorgon",
+          "green-dragon-wyrmling",
+          "grick",
+          "griffon",
+          "grimlock",
+          "guardian-naga",
+          "half-red-dragon-veteran",
+          "hell-hound",
+          "hezrou",
+          "hippogriff",
+          "hobgoblin",
+          "homunculus",
+          "horned-devil",
+          "hydra",
+          "hyena",
+          "ice-devil",
+          "imp",
+          "jackal",
+          "killer-whale",
+          "knight",
+          "kobold",
+          "kraken",
+          "lamia",
+          "lion",
+          "lizard",
+          "lizardfolk",
+          "mage",
+          "mammoth",
+          "manticore",
+          "mastiff",
+          "medusa",
+          "merrow",
+          "mimic",
+          "minotaur",
+          "minotaur-skeleton",
+          "nalfeshnee",
+          "ogre",
+          "orc",
+          "otyugh",
+          "owlbear",
+          "panther",
+          "phase-spider",
+          "pit-fiend",
+          "poisonous-snake",
+          "polar-bear",
+          "pseudodragon",
+          "purple-worm",
+          "quasit",
+          "quipper",
+          "rat",
+          "raven",
+          "red-dragon-wyrmling",
+          "reef-shark",
+          "remorhaz",
+          "roc",
+          "roper",
+          "rust-monster",
+          "saber-toothed-tiger",
+          "sahuagin",
+          "satyr",
+          "scout",
+          "silver-dragon-wyrmling",
+          "skeleton",
+          "solar",
+          "spider",
+          "spirit-naga",
+          "sprite",
+          "spy",
+          "stirge",
+          "swarm-of-bats",
+          "swarm-of-beetles",
+          "swarm-of-centipedes",
+          "swarm-of-insects",
+          "swarm-of-poisonous-snakes",
+          "swarm-of-quippers",
+          "swarm-of-rats",
+          "swarm-of-ravens",
+          "swarm-of-spiders",
+          "swarm-of-wasps",
+          "tarrasque",
+          "thug",
+          "tiger",
+          "triceratops",
+          "troll",
+          "tyrannosaurus-rex",
+          "unicorn",
+          "vampire-spawn",
+          "vampire-bat",
+          "vampire-vampire",
+          "veteran",
+          "vrock",
+          "vulture",
+          "weasel",
+          "werebear-bear",
+          "werebear-hybrid",
+          "wererat-human",
+          "wererat-hybrid",
+          "wererat-rat",
+          "weretiger-human",
+          "weretiger-hybrid",
+          "weretiger-tiger",
+          "werewolf-hybrid",
+          "werewolf-wolf",
+          "white-dragon-wyrmling",
+          "wight",
+          "winter-wolf",
+          "wolf",
+          "worg",
+          "wyvern",
+          "xorn",
+          "young-black-dragon",
+          "young-blue-dragon",
+          "young-brass-dragon",
+          "young-bronze-dragon",
+          "young-copper-dragon",
+          "young-gold-dragon",
+          "young-green-dragon",
+          "young-red-dragon",
+          "young-silver-dragon",
+          "young-white-dragon"
+        ],
+        "resistanceIndexes": [
+          "air-elemental",
+          "archmage",
+          "awakened-shrub",
+          "awakened-tree",
+          "balor",
+          "barbed-devil",
+          "bearded-devil",
+          "bone-devil",
+          "chain-devil",
+          "deva",
+          "earth-elemental",
+          "erinyes",
+          "fire-elemental",
+          "gargoyle",
+          "ghost",
+          "glabrezu",
+          "grick",
+          "gynosphinx",
+          "hezrou",
+          "horned-devil",
+          "ice-devil",
+          "imp",
+          "invisible-stalker",
+          "magmin",
+          "marilith",
+          "mummy",
+          "nalfeshnee",
+          "night-hag",
+          "pit-fiend",
+          "planetar",
+          "quasit",
+          "salamander",
+          "shadow",
+          "solar",
+          "specter",
+          "succubus-incubus",
+          "swarm-of-bats",
+          "swarm-of-beetles",
+          "swarm-of-centipedes",
+          "swarm-of-insects",
+          "swarm-of-poisonous-snakes",
+          "swarm-of-quippers",
+          "swarm-of-rats",
+          "swarm-of-ravens",
+          "swarm-of-spiders",
+          "swarm-of-wasps",
+          "treant",
+          "vampire-spawn",
+          "vampire-bat",
+          "vampire-mist",
+          "vampire-vampire",
+          "vrock",
+          "water-elemental",
+          "wight",
+          "will-o-wisp",
+          "wraith",
+          "xorn"
+        ],
+        "immunityIndexes": [
+          "androsphinx",
+          "clay-golem",
+          "couatl",
+          "flesh-golem",
+          "iron-golem",
+          "kraken",
+          "lich",
+          "mummy-lord",
+          "rakshasa",
+          "stone-golem",
+          "tarrasque",
+          "werebear-bear",
+          "werebear-human",
+          "werebear-hybrid",
+          "wereboar-boar",
+          "wereboar-human",
+          "wereboar-hybrid",
+          "wererat-human",
+          "wererat-hybrid",
+          "wererat-rat",
+          "weretiger-human",
+          "weretiger-hybrid",
+          "weretiger-tiger",
+          "werewolf-human",
+          "werewolf-hybrid",
+          "werewolf-wolf"
+        ],
+        "vulnerabilityIndexes": [
+          "rakshasa"
+        ]
+      }
+    },
+    "poison": {
+      "index": "poison",
+      "name": "Poison",
+      "desc": [
+        "Venomous stings and the toxic gas of a green dragon's breath deal poison damage."
+      ],
+      "spells": {
+        "indexes": [
+          "cloudkill",
+          "poison-spray"
+        ],
+        "byClass": {
+          "sorcerer": [
+            "cloudkill",
+            "poison-spray"
+          ],
+          "wizard": [
+            "cloudkill",
+            "poison-spray"
+          ],
+          "warlock": [
+            "poison-spray"
+          ],
+          "druid": [
+            "poison-spray"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "poison-spray"
+          ],
+          "5": [
+            "cloudkill"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "adult-green-dragon",
+          "ancient-green-dragon",
+          "assassin",
+          "basilisk",
+          "bone-devil",
+          "drider",
+          "erinyes",
+          "ettercap",
+          "flying-snake",
+          "giant-toad",
+          "green-dragon-wyrmling",
+          "iron-golem",
+          "kraken",
+          "medusa",
+          "young-green-dragon"
+        ],
+        "resistanceIndexes": [
+          "assassin",
+          "duergar",
+          "succubus-incubus"
+        ],
+        "immunityIndexes": [
+          "adult-green-dragon",
+          "air-elemental",
+          "ancient-green-dragon",
+          "animated-armor",
+          "azer",
+          "balor",
+          "barbed-devil",
+          "bearded-devil",
+          "bone-devil",
+          "chain-devil",
+          "chuul",
+          "clay-golem",
+          "dretch",
+          "dust-mephit",
+          "earth-elemental",
+          "erinyes",
+          "fire-elemental",
+          "flesh-golem",
+          "flying-sword",
+          "gargoyle",
+          "ghast",
+          "ghost",
+          "ghoul",
+          "glabrezu",
+          "green-dragon-wyrmling",
+          "guardian-naga",
+          "hezrou",
+          "homunculus",
+          "horned-devil",
+          "ice-devil",
+          "ice-mephit",
+          "imp",
+          "invisible-stalker",
+          "iron-golem",
+          "lemure",
+          "lich",
+          "magma-mephit",
+          "marilith",
+          "minotaur-skeleton",
+          "mummy",
+          "mummy-lord",
+          "nalfeshnee",
+          "ogre-zombie",
+          "pit-fiend",
+          "quasit",
+          "rug-of-smothering",
+          "shadow",
+          "shield-guardian",
+          "skeleton",
+          "solar",
+          "specter",
+          "spirit-naga",
+          "steam-mephit",
+          "stone-golem",
+          "tarrasque",
+          "unicorn",
+          "vrock",
+          "warhorse-skeleton",
+          "water-elemental",
+          "wight",
+          "will-o-wisp",
+          "wraith",
+          "young-green-dragon",
+          "zombie"
+        ],
+        "vulnerabilityIndexes": []
+      }
+    },
+    "psychic": {
+      "index": "psychic",
+      "name": "Psychic",
+      "desc": [
+        "Mental abilities such as a psionic blast deal psychic damage."
+      ],
+      "spells": {
+        "indexes": [
+          "dream",
+          "feeblemind",
+          "phantasmal-killer",
+          "vicious-mockery"
+        ],
+        "byClass": {
+          "bard": [
+            "dream",
+            "feeblemind",
+            "vicious-mockery"
+          ],
+          "warlock": [
+            "dream",
+            "feeblemind"
+          ],
+          "wizard": [
+            "dream",
+            "feeblemind",
+            "phantasmal-killer"
+          ],
+          "druid": [
+            "feeblemind"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "vicious-mockery"
+          ],
+          "4": [
+            "phantasmal-killer"
+          ],
+          "5": [
+            "dream"
+          ],
+          "8": [
+            "feeblemind"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "aboleth",
+          "succubus-incubus"
+        ],
+        "resistanceIndexes": [],
+        "immunityIndexes": [
+          "androsphinx",
+          "animated-armor",
+          "clay-golem",
+          "couatl",
+          "flying-sword",
+          "gynosphinx",
+          "iron-golem",
+          "rug-of-smothering",
+          "stone-golem"
+        ],
+        "vulnerabilityIndexes": []
+      }
+    },
+    "radiant": {
+      "index": "radiant",
+      "name": "Radiant",
+      "desc": [
+        "Radiant damage, dealt by a cleric's flame strike spell or an angel's smiting weapon, sears the flesh like fire and overloads the spirit with power."
+      ],
+      "spells": {
+        "indexes": [
+          "branding-smite",
+          "divine-favor",
+          "guardian-of-faith",
+          "guiding-bolt",
+          "moonbeam",
+          "sacred-flame",
+          "sunbeam",
+          "sunburst"
+        ],
+        "byClass": {
+          "paladin": [
+            "branding-smite",
+            "divine-favor"
+          ],
+          "cleric": [
+            "guardian-of-faith",
+            "guiding-bolt",
+            "sacred-flame"
+          ],
+          "druid": [
+            "moonbeam",
+            "sunbeam",
+            "sunburst"
+          ],
+          "sorcerer": [
+            "sunbeam",
+            "sunburst"
+          ],
+          "wizard": [
+            "sunbeam",
+            "sunburst"
+          ]
+        },
+        "byLevel": {
+          "0": [
+            "sacred-flame"
+          ],
+          "1": [
+            "divine-favor",
+            "guiding-bolt"
+          ],
+          "2": [
+            "branding-smite",
+            "moonbeam"
+          ],
+          "4": [
+            "guardian-of-faith"
+          ],
+          "6": [
+            "sunbeam"
+          ],
+          "8": [
+            "sunburst"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "deva",
+          "planetar",
+          "solar"
+        ],
+        "resistanceIndexes": [
+          "couatl",
+          "deva",
+          "planetar",
+          "solar"
+        ],
+        "immunityIndexes": [],
+        "vulnerabilityIndexes": [
+          "shadow"
+        ]
+      }
+    },
+    "slashing": {
+      "index": "slashing",
+      "name": "Slashing",
+      "desc": [
+        "Swords, axes, and monsters' claws deal slashing damage."
+      ],
+      "spells": {
+        "indexes": [
+          "blade-barrier"
+        ],
+        "byClass": {
+          "cleric": [
+            "blade-barrier"
+          ]
+        },
+        "byLevel": {
+          "6": [
+            "blade-barrier"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [
+          "adult-black-dragon",
+          "adult-blue-dragon",
+          "adult-brass-dragon",
+          "adult-bronze-dragon",
+          "adult-copper-dragon",
+          "adult-gold-dragon",
+          "adult-green-dragon",
+          "adult-red-dragon",
+          "adult-silver-dragon",
+          "adult-white-dragon",
+          "ancient-black-dragon",
+          "ancient-blue-dragon",
+          "ancient-brass-dragon",
+          "ancient-bronze-dragon",
+          "ancient-copper-dragon",
+          "ancient-gold-dragon",
+          "ancient-green-dragon",
+          "ancient-red-dragon",
+          "ancient-silver-dragon",
+          "ancient-white-dragon",
+          "androsphinx",
+          "ankheg",
+          "awakened-shrub",
+          "axe-beak",
+          "balor",
+          "bandit",
+          "bandit-captain",
+          "bearded-devil",
+          "behir",
+          "berserker",
+          "black-bear",
+          "boar",
+          "bone-devil",
+          "brown-bear",
+          "cat",
+          "chain-devil",
+          "chimera",
+          "cloaker",
+          "cultist",
+          "djinni",
+          "dretch",
+          "dust-mephit",
+          "efreeti",
+          "ettin",
+          "fire-giant",
+          "flying-sword",
+          "frost-giant",
+          "gargoyle",
+          "ghast",
+          "ghoul",
+          "giant-badger",
+          "giant-boar",
+          "giant-eagle",
+          "giant-fire-beetle",
+          "giant-owl",
+          "giant-vulture",
+          "goblin",
+          "green-hag",
+          "grick",
+          "griffon",
+          "gynosphinx",
+          "harpy",
+          "hawk",
+          "hezrou",
+          "hippogriff",
+          "ice-devil",
+          "ice-mephit",
+          "iron-golem",
+          "knight",
+          "lamia",
+          "lion",
+          "magma-mephit",
+          "manticore",
+          "marilith",
+          "merrow",
+          "minotaur",
+          "minotaur-skeleton",
+          "nalfeshnee",
+          "night-hag",
+          "oni",
+          "orc",
+          "owl",
+          "owlbear",
+          "panther",
+          "pit-fiend",
+          "planetar",
+          "polar-bear",
+          "rakshasa",
+          "roc",
+          "saber-toothed-tiger",
+          "sahuagin",
+          "sea-hag",
+          "sprite",
+          "steam-mephit",
+          "storm-giant",
+          "succubus-incubus",
+          "tarrasque",
+          "tiger",
+          "troll",
+          "vampire-spawn",
+          "vrock",
+          "werebear-bear",
+          "werebear-human",
+          "werebear-hybrid",
+          "wereboar-boar",
+          "wereboar-hybrid",
+          "weretiger-human",
+          "weretiger-hybrid",
+          "weretiger-tiger",
+          "werewolf-hybrid",
+          "wyvern",
+          "xorn",
+          "young-black-dragon",
+          "young-blue-dragon",
+          "young-brass-dragon",
+          "young-bronze-dragon",
+          "young-copper-dragon",
+          "young-gold-dragon",
+          "young-green-dragon",
+          "young-red-dragon",
+          "young-silver-dragon",
+          "young-white-dragon"
+        ],
+        "resistanceIndexes": [
+          "air-elemental",
+          "archmage",
+          "balor",
+          "barbed-devil",
+          "bearded-devil",
+          "bone-devil",
+          "chain-devil",
+          "deva",
+          "earth-elemental",
+          "erinyes",
+          "fire-elemental",
+          "gargoyle",
+          "ghost",
+          "glabrezu",
+          "grick",
+          "gynosphinx",
+          "hezrou",
+          "horned-devil",
+          "ice-devil",
+          "imp",
+          "invisible-stalker",
+          "magmin",
+          "marilith",
+          "mummy",
+          "nalfeshnee",
+          "night-hag",
+          "pit-fiend",
+          "planetar",
+          "quasit",
+          "salamander",
+          "shadow",
+          "solar",
+          "specter",
+          "succubus-incubus",
+          "swarm-of-bats",
+          "swarm-of-beetles",
+          "swarm-of-centipedes",
+          "swarm-of-insects",
+          "swarm-of-poisonous-snakes",
+          "swarm-of-quippers",
+          "swarm-of-rats",
+          "swarm-of-ravens",
+          "swarm-of-spiders",
+          "swarm-of-wasps",
+          "vampire-spawn",
+          "vampire-bat",
+          "vampire-mist",
+          "vampire-vampire",
+          "vrock",
+          "water-elemental",
+          "wight",
+          "will-o-wisp",
+          "wraith",
+          "xorn"
+        ],
+        "immunityIndexes": [
+          "androsphinx",
+          "black-pudding",
+          "clay-golem",
+          "couatl",
+          "flesh-golem",
+          "iron-golem",
+          "kraken",
+          "lich",
+          "mummy-lord",
+          "ochre-jelly",
+          "rakshasa",
+          "stone-golem",
+          "tarrasque",
+          "werebear-bear",
+          "werebear-human",
+          "werebear-hybrid",
+          "wereboar-boar",
+          "wereboar-human",
+          "wereboar-hybrid",
+          "wererat-human",
+          "wererat-hybrid",
+          "wererat-rat",
+          "weretiger-human",
+          "weretiger-hybrid",
+          "weretiger-tiger",
+          "werewolf-human",
+          "werewolf-hybrid",
+          "werewolf-wolf"
+        ],
+        "vulnerabilityIndexes": []
+      }
+    },
+    "thunder": {
+      "index": "thunder",
+      "name": "Thunder",
+      "desc": [
+        "A concussive burst of sound, such as the effect of the thunderwave spell, deals thunder damage."
+      ],
+      "spells": {
+        "indexes": [
+          "shatter",
+          "storm-of-vengeance",
+          "thunderwave"
+        ],
+        "byClass": {
+          "bard": [
+            "shatter",
+            "thunderwave"
+          ],
+          "sorcerer": [
+            "shatter",
+            "thunderwave"
+          ],
+          "warlock": [
+            "shatter"
+          ],
+          "wizard": [
+            "shatter",
+            "thunderwave"
+          ],
+          "druid": [
+            "storm-of-vengeance",
+            "thunderwave"
+          ]
+        },
+        "byLevel": {
+          "1": [
+            "thunderwave"
+          ],
+          "2": [
+            "shatter"
+          ],
+          "9": [
+            "storm-of-vengeance"
+          ]
+        }
+      },
+      "monsters": {
+        "dealsDamageIndexes": [],
+        "resistanceIndexes": [
+          "air-elemental",
+          "ghost",
+          "shadow",
+          "specter",
+          "will-o-wisp",
+          "wraith"
+        ],
+        "immunityIndexes": [
+          "djinni",
+          "storm-giant"
+        ],
+        "vulnerabilityIndexes": [
+          "earth-elemental"
+        ]
+      }
+    }
+  },
+  "source": "5e SRD 2014",
+  "generatedAt": "2026-03-14T04:52:31.349Z"
+}

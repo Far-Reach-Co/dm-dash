@@ -74,6 +74,15 @@
       </div>
     </div>
 
+    <div class="srd-filter-group">
+      <div class="srd-filter-label">By Condition Immunity</div>
+      <div class="srd-filter-pills">
+        <% monsterConditionImmunityOptions.forEach((opt) => { %>
+          <a href="/dnd/5e/srd/monsters/condition-immunity/<%= opt.index %>"><%= opt.label %> (<%= opt.count %>)</a>
+        <% }) %>
+      </div>
+    </div>
+
     <hr />
     <ul class="srd-col-list-3">
       <% data.forEach((mon) => { %>

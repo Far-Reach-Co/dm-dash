@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <%
+    const spellCount = relationship.spells.indexes.length;
+    const dealerCount = relationship.monsters.dealsDamageIndexes.length;
+    const resistanceCount = relationship.monsters.resistanceIndexes.length;
+    const immunityCount = relationship.monsters.immunityIndexes.length;
+    const vulnerabilityCount = relationship.monsters.vulnerabilityIndexes.length;
+    const pageTitle = `${damageType.name} Damage 5e: Spells, Resistant Monsters, and Rules`;
+    const pageSummary = `${damageType.name} damage in D&D 5e. Browse ${spellCount} SRD spell${spellCount === 1 ? '' : 's'} that deal ${damageType.name.toLowerCase()} damage, plus monsters that deal it or have resistance, immunity, or vulnerability to it.`;
+    const pageDescription = `${damageType.name} damage in D&D 5e: ${spellCount} SRD spells, ${dealerCount} monsters that deal it, ${resistanceCount} resistant monsters, ${immunityCount} immune monsters, and ${vulnerabilityCount} vulnerable monsters.`.substring(0, 160);
+    const faqs = [
+      {
+        q: `What spells deal ${damageType.name.toLowerCase()} damage in D&D 5e?`,
+        a: spellCount
+          ? `${spellCount} SRD spell${spellCount === 1 ? '' : 's'} on this page deal ${damageType.name.toLowerCase()} damage.`
+          : `No SRD spells in this dataset deal ${damageType.name.toLowerCase()} damage.`
+      },
+      {
+        q: `What monsters resist ${damageType.name.toLowerCase()} damage in D&D 5e?`,
+        a: resistanceCount
+          ? `${resistanceCount} SRD monsters on this page have resistance to ${damageType.name.toLowerCase()} damage.`
+          : `No SRD monsters in this dataset have resistance to ${damageType.name.toLowerCase()} damage.`
+      },
+      {
+        q: `What monsters are immune to ${damageType.name.toLowerCase()} damage in D&D 5e?`,
+        a: immunityCount
+          ? `${immunityCount} SRD monsters on this page are immune to ${damageType.name.toLowerCase()} damage.`
+          : `No SRD monsters in this dataset are immune to ${damageType.name.toLowerCase()} damage.`
+      },
+      {
+        q: `What monsters are vulnerable to ${damageType.name.toLowerCase()} damage in D&D 5e?`,
+        a: vulnerabilityCount
+          ? `${vulnerabilityCount} SRD monsters on this page are vulnerable to ${damageType.name.toLowerCase()} damage.`
+          : `No SRD monsters in this dataset are vulnerable to ${damageType.name.toLowerCase()} damage.`
+      }
+    ];
+    const levelLabel = (level) => level === 0 ? 'Cantrip' : `Level ${level}`;
+  %>
+  <title><%= pageTitle %> | Far Reach Co.</title>
+  <meta name="description" content="<%= pageDescription %>" />
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/damage-types/<%= damageType.index %>" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/damage-types/<%= damageType.index %>" />
+  <meta property="og:title" content="<%= pageTitle %>" />
+  <meta property="og:description" content="<%= pageDescription %>" />
+  <meta property="og:site_name" content="Far Reach Co." />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="<%= pageTitle %>" />
+  <meta name="twitter:description" content="<%= pageDescription %>" />
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": "<%= damageType.name %> Damage",
+      "name": "<%= pageTitle %>",
+      "description": "<%= pageDescription %>",
+      "url": "https://farreachco.com/dnd/5e/srd/damage-types/<%= damageType.index %>"
+    }
+  </script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": <%- JSON.stringify(faqs.map((faq) => ({
+        "@type": "Question",
+        "name": faq.q,
+        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
+      }))) %>
+    }
+  </script>
+
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../partials/icons') %>
+</head>
+<%- include('../../../partials/google') %>
+
+<body>
+  <%- include('../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../partials/dnd/srdintro', {
+      srdPageHeading: `${damageType.name} Damage 5E`,
+      srdPageSummary: pageSummary
+    }) %>
+    <br />
+
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents">Contents</a>
+      <span class="separator">→</span>
+      <a href="/dnd/5e/srd/damage-types">Damage Types</a>
+      <span class="separator">→</span>
+      <span class="current"><%= damageType.name %></span>
+    </div>
+    <hr />
+
+    <h1><%= damageType.name %> Damage</h1>
+    <p><%= pageSummary %></p>
+
+    <div class="quick-links" aria-label="Damage type sections">
+      <a href="#rules">Rules</a>
+      <a href="#spells">Spells</a>
+      <a href="#dealers">Monsters That Deal It</a>
+      <a href="#resistant">Resistance</a>
+      <a href="#immune">Immunity</a>
+      <a href="#vulnerable">Vulnerability</a>
+    </div>
+
+    <div class="inline-div">
+      <b>SRD Spells:</b>
+      <span><%= spellCount %></span>
+    </div>
+    <div class="inline-div">
+      <b>Monsters That Deal <%= damageType.name %>:</b>
+      <span><%= dealerCount %></span>
+    </div>
+    <div class="inline-div">
+      <b>Resistant Monsters:</b>
+      <span><%= resistanceCount %></span>
+    </div>
+    <div class="inline-div">
+      <b>Immune Monsters:</b>
+      <span><%= immunityCount %></span>
+    </div>
+    <div class="inline-div">
+      <b>Vulnerable Monsters:</b>
+      <span><%= vulnerabilityCount %></span>
+    </div>
+
+    <hr class="w-75" />
+    <h2 id="rules">Rules</h2>
+    <% (damageType.desc || []).forEach((paragraph) => { %>
+      <p><%= paragraph %></p>
+    <% }) %>
+
+    <% if (spellClassGroups.length) { %>
+      <div class="srd-filter-group">
+        <div class="srd-filter-label"><%= damageType.name %> Spell Lists by Class</div>
+        <div class="srd-filter-pills">
+          <a href="/dnd/5e/srd/spells/damage/<%= damageType.index %>">All <%= damageType.name %> Damage Spells (<%= spellCount %>)</a>
+          <% spellClassGroups.forEach((group) => { %>
+            <a href="/dnd/5e/srd/spells/class/<%= group.index %>"><%= group.label %> (<%= group.count %>)</a>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <hr class="w-75" />
+    <h2 id="spells">Spells That Deal <%= damageType.name %> Damage</h2>
+    <% if (!spells.length) { %>
+      <p>No SRD spells in this dataset deal <%= damageType.name.toLowerCase() %> damage.</p>
+    <% } else { %>
+      <ul class="srd-col-list-3">
+        <% spells.forEach((spell) => { %>
+          <li>
+            <a href="/dnd/5e/srd/spells/<%= spell.index %>"><%= spell.name %></a>
+            <span class="spell-meta"><%= levelLabel(Number(spell.level)) %> · <%= spell.school?.name %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <hr class="w-75" />
+    <h2 id="dealers">Monsters That Deal <%= damageType.name %> Damage</h2>
+    <% if (!monsterDealers.length) { %>
+      <p>No SRD monster action blocks in this dataset deal <%= damageType.name.toLowerCase() %> damage.</p>
+    <% } else { %>
+      <ul class="srd-col-list-3">
+        <% monsterDealers.forEach((monster) => { %>
+          <li>
+            <a href="/dnd/5e/srd/monsters/<%= monster.index %>"><%= monster.name %></a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <hr class="w-75" />
+    <h2 id="resistant">Monsters Resistant to <%= damageType.name %> Damage</h2>
+    <% if (!resistantMonsters.length) { %>
+      <p>No SRD monsters in this dataset have resistance to <%= damageType.name.toLowerCase() %> damage.</p>
+    <% } else { %>
+      <ul class="srd-col-list-3">
+        <% resistantMonsters.forEach((monster) => { %>
+          <li>
+            <a href="/dnd/5e/srd/monsters/<%= monster.index %>"><%= monster.name %></a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <hr class="w-75" />
+    <h2 id="immune">Monsters Immune to <%= damageType.name %> Damage</h2>
+    <% if (!immuneMonsters.length) { %>
+      <p>No SRD monsters in this dataset are immune to <%= damageType.name.toLowerCase() %> damage.</p>
+    <% } else { %>
+      <ul class="srd-col-list-3">
+        <% immuneMonsters.forEach((monster) => { %>
+          <li>
+            <a href="/dnd/5e/srd/monsters/<%= monster.index %>"><%= monster.name %></a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <hr class="w-75" />
+    <h2 id="vulnerable">Monsters Vulnerable to <%= damageType.name %> Damage</h2>
+    <% if (!vulnerableMonsters.length) { %>
+      <p>No SRD monsters in this dataset are vulnerable to <%= damageType.name.toLowerCase() %> damage.</p>
+    <% } else { %>
+      <ul class="srd-col-list-3">
+        <% vulnerableMonsters.forEach((monster) => { %>
+          <li>
+            <a href="/dnd/5e/srd/monsters/<%= monster.index %>"><%= monster.name %></a>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+
+    <hr class="w-75" />
+    <section class="srd-faq">
+      <p class="srd-faq-label">Frequently Asked Questions</p>
+      <% faqs.forEach((faq) => { %>
+        <details>
+          <summary><%= faq.q %></summary>
+          <p><%= faq.a %></p>
+        </details>
+      <% }) %>
+    </section>
+
+    <div class="srd-back-link">
+      <a href="/dnd/5e/srd/damage-types">&larr; All Damage Types</a>
+      &ensp;&middot;&ensp;
+      <a href="/dnd/5e/srd/spells">Spells</a>
+      &ensp;&middot;&ensp;
+      <a href="/dnd/5e/srd/monsters">Monsters</a>
+    </div>
+  </div>
+  <%- include('../../../partials/dnd/srddisclosure') %>
+  <%- include('../../../partials/footer') %>
+</body>
+
+</html>
