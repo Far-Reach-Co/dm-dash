@@ -650,33 +650,104 @@ export default class Toolbar extends Component {
   // Object action buttons (delete, move up)
   // ---------------------------------------------------------------------------
 
-  renderImageOptionButtons = () => {
-    const obj = this.tableApp.getCurrentSelectedObject();
-    if (!obj || obj.isLocationPin) return [];
+  getActionableSelection = (selectedObjects = this.getActiveObjects()) => {
+    if (!Array.isArray(selectedObjects) || !selectedObjects.length) return [];
+    return selectedObjects.filter((obj) => obj && !obj.isLocationPin);
+  };
+
+  renderSelectionActionControls = (
+    selectedObjects = this.getActiveObjects(),
+    { withSeparator = false, variant = "icon" } = {},
+  ) => {
+    const actionable = this.getActionableSelection(selectedObjects);
+    if (!actionable.length) return [];
+
     const canDelete = this.can("canDeleteCanvasObjects");
     const canManageLayers = this.can("canManageLayers");
     if (!canDelete && !canManageLayers) return [];
 
-    const actions = [createElement("div", { class: "vtt-toolbar-sep" })];
+    const controls = [];
+    const isMultiSelection = actionable.length > 1;
+    const removeTitle = isMultiSelection
+      ? "Remove the selected objects from the table"
+      : "Remove the selected object from the table";
+    const moveToTopTitle = isMultiSelection
+      ? "Move the selected objects to the top of their layers"
+      : "Move the selected object to the top of its layer";
 
-    if (canDelete) {
-      actions.push(
-        this.renderToolbarButton(ICONS.trash(), "Remove selected object", {
-          danger: true,
-          onClick: () => this.tableApp.canvasLayer.removeObjects(),
-        }),
-      );
+    if (withSeparator) {
+      controls.push(createElement("div", { class: "vtt-toolbar-sep" }));
     }
 
-    if (canManageLayers) {
-      actions.push(
-        this.renderToolbarButton(ICONS.chevronUp(), "Move to top of layer", {
-          onClick: () => this.tableApp.canvasLayer.moveObjectToTop(),
-        }),
-      );
+    if (variant === "icon") {
+      if (canDelete) {
+        controls.push(
+          this.renderToolbarButton(ICONS.trash(), removeTitle, {
+            danger: true,
+            onClick: () => this.tableApp.canvasLayer.removeObjects(),
+          }),
+        );
+      }
+
+      if (canManageLayers) {
+        controls.push(
+          this.renderToolbarButton(ICONS.chevronUp(), moveToTopTitle, {
+            onClick: () => this.tableApp.canvasLayer.moveObjectToTop(),
+          }),
+        );
+      }
+
+      return controls;
     }
 
-    return actions;
+    if (variant === "subbarIcon") {
+      if (canDelete) {
+        controls.push(
+          createElement(
+            "button",
+            {
+              type: "button",
+              class: "vtt-selected-object-action-btn is-danger",
+              title: removeTitle,
+            },
+            ICONS.trash(),
+            {
+              type: "click",
+              event: () => this.tableApp.canvasLayer.removeObjects(),
+            },
+          ),
+        );
+      }
+
+      if (canManageLayers) {
+        controls.push(
+          createElement(
+            "button",
+            {
+              type: "button",
+              class: "vtt-selected-object-action-btn",
+              title: moveToTopTitle,
+            },
+            ICONS.chevronUp(),
+            {
+              type: "click",
+              event: () => this.tableApp.canvasLayer.moveObjectToTop(),
+            },
+          ),
+        );
+      }
+
+      return controls;
+    }
+
+    return controls;
+  };
+
+  renderImageOptionButtons = () => {
+    return this.renderSelectionActionControls(this.getActiveObjects(), {
+      withSeparator: true,
+      variant: "icon",
+    });
   };
 
   // ---------------------------------------------------------------------------
