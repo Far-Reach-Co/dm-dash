@@ -170,6 +170,10 @@ function renderMultiSelectionBar(toolbar, selectedObjects) {
 
   const controls = [
     createElement("small", {}, `${actionable.length} selected`),
+    ...toolbar.renderSelectionActionControls(actionable, {
+      withSeparator: true,
+      variant: "subbarIcon",
+    }),
   ];
 
   if (toolbar.can("canDeleteCanvasObjects")) {
@@ -291,6 +295,10 @@ export async function renderSelectedObjectBar(toolbar) {
       `${idPrefix}-${truncateString(obj.id, 8, "")}`,
     ),
     nameElem,
+    ...toolbar.renderSelectionActionControls([obj], {
+      withSeparator: true,
+      variant: "subbarIcon",
+    }),
     createElement("div", { class: "vtt-toolbar-sep" }),
     createElement("small", {}, "Aura"),
     renderAuraColorPicker(toolbar, obj),

@@ -1088,6 +1088,38 @@
   background: rgba(255, 255, 255, 0.14);
 }
 
+.vtt-selected-object-action-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.82);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.vtt-selected-object-action-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+.vtt-selected-object-action-btn:hover {
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.vtt-selected-object-action-btn.is-danger {
+  border-color: rgba(206, 101, 101, 0.45);
+  background: rgba(206, 101, 101, 0.14);
+  color: var(--red1);
+}
+
 .location-pin-edit-btn {
   border-radius: var(--border-radius);
   border: 1px solid rgba(255, 255, 255, 0.25);
