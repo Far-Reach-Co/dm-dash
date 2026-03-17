@@ -37,6 +37,29 @@
     document.body.removeChild(fallbackInput);
   }
 
+  async function readErrorMessage(response) {
+    try {
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const payload = await response.json();
+        const message =
+          payload &&
+          typeof payload === "object" &&
+          payload.error &&
+          typeof payload.error === "object" &&
+          typeof payload.error.message === "string"
+            ? payload.error.message.trim()
+            : "";
+        if (message) return message;
+      }
+
+      const text = (await response.text()).trim();
+      return text;
+    } catch {
+      return "";
+    }
+  }
+
   async function handleConnectLinkFormSubmit(event) {
     event.preventDefault();
 
@@ -76,7 +99,8 @@
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate onboarding link.");
+        const message = await readErrorMessage(response);
+        throw new Error(message || "Failed to generate onboarding link.");
       }
 
       const redirectTarget = response.headers.get("HX-Redirect") || "";
