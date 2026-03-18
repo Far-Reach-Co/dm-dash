@@ -3,16 +3,11 @@ import Component from "../../lib/salt-lib/Component.js";
 import TableSidebarImageComponent from "./TableSidebarImageComponent.js";
 import { copyTextToClipboard } from "../../lib/clipboard.js";
 import modal from "../modal.js";
-import { apiPost } from "../../lib/apiUtils.js";
-import { handleApiFailure } from "../../lib/apiUiFeedback.js";
 import TableSidebarFolderComponent from "./TableSidebarFolderComponent.js";
 import { getCurrentProjectId } from "./tableApi.js";
-import { renderUploadImageModal } from "./tableSidebarUploadModal.js";
-import { renderCreateFolderModal } from "./tableSidebarFolderModal.js";
-import { renderTableSettingsModal } from "./tableSidebarSettingsModal.js";
-import { uploadImageWithContext } from "../../lib/imageUtils.js";
-import { filterFabricCompatibleImageFiles } from "../shared/fabricUploadUtils.js";
-import { dedupeUploadFiles } from "../shared/uploadQueueUtils.js";
+import TableSidebarController, {
+  bindTableSidebarControllerMethods,
+} from "./tableSidebarController.js";
 import TableSidebarPackPanel from "./tableSidebarPackPanel.js";
 import { createSvgIconFactoryMap } from "../svgIcon.js";
 
@@ -48,6 +43,8 @@ export default class TableSidebar extends Component {
     this.tableSidebarFolderComponent = null;
     this.tableSidebarImageComponent = null;
     this.packPanel = null;
+    this.controller = new TableSidebarController(this);
+    bindTableSidebarControllerMethods(this, this.controller);
 
     this.ensureChildComponents();
   }
@@ -144,32 +141,6 @@ export default class TableSidebar extends Component {
     };
   };
 
-  setActiveTab = async (tab) => {
-    const { packPanel } = this.ensureChildComponents();
-    if (tab === "installed_packs" && !this.canUseLibraryPacks()) {
-      this.activeTab = "images";
-      await this.render();
-      return;
-    }
-    this.activeTab = tab === "installed_packs" ? "installed_packs" : "images";
-    if (this.activeTab === "installed_packs") {
-      await packPanel.refreshData({
-        includeDiscover: packPanel.mode === "discover",
-      });
-    }
-    await this.render();
-  };
-
-  setPackPanelMode = async (mode) => {
-    const { packPanel } = this.ensureChildComponents();
-    packPanel.setMode(mode);
-    if (this.activeTab !== "installed_packs") return;
-    await packPanel.refreshData({
-      includeDiscover: packPanel.mode === "discover",
-    });
-    await this.render();
-  };
-
   renderCloseBtn = () => {
     return createElement(
       "div",
@@ -224,151 +195,6 @@ export default class TableSidebar extends Component {
 
   getCurrentFolderId = () => {
     return this.tableSidebarFolderComponent?.currentFolder?.id ?? null;
-  };
-
-  // Helper to handle project vs user API routing
-  postByContext = (projectEndpoint, userEndpoint, data) => {
-    if (this.projectId) {
-      return apiPost(projectEndpoint, {
-        ...data,
-        project_id: this.projectId,
-      });
-    }
-    return apiPost(userEndpoint, data);
-  };
-
-  uploadTableImage = async (file, signal = null) => {
-    if (!this.can("canManageImageAssets")) return null;
-
-    const newImage = await uploadImageWithContext({
-      image: file,
-      projectId: this.projectId,
-      tableViewId: this.tableView?.id,
-      makeImageSmall: this.makeImageSmall,
-      signal,
-    });
-
-    if (!newImage) return null;
-
-    const tableImageResult = await this.postByContext(
-      "/api/add_table_image_by_project",
-      "/api/add_table_image_by_user",
-      {
-        image_id: newImage.id,
-        folder_id: this.getCurrentFolderId(),
-        table_view_id: this.tableView?.id,
-      },
-    );
-
-    if (!tableImageResult.ok) {
-      handleApiFailure(tableImageResult, { includeResultMessage: true });
-      return null;
-    }
-    return { image: newImage, tableImage: tableImageResult.data };
-  };
-
-  resetUploadQueue = () => {
-    this.uploadState.items = [];
-    this.uploadState.running = false;
-    this.uploadState.cancelling = false;
-    this.uploadState.activeController = null;
-  };
-
-  retryFailedUploads = () => {
-    this.uploadState.items = this.uploadState.items.map((item) =>
-      item.status === "failed"
-        ? { ...item, status: "queued", error: "" }
-        : item,
-    );
-  };
-
-  addFilesToUploadQueue = async (files) => {
-    const { accepted, skipped } = await filterFabricCompatibleImageFiles(files);
-    const { uniqueFiles, duplicateCount } = dedupeUploadFiles(
-      accepted,
-      this.uploadState.items,
-    );
-
-    const queued = uniqueFiles.map((file, idx) => ({
-      id: `${Date.now()}-${idx}-${file.name}`,
-      file,
-      status: "queued",
-      error: "",
-      result: null,
-    }));
-    this.uploadState.items = [...this.uploadState.items, ...queued];
-
-    if (skipped > 0 || duplicateCount > 0) {
-      const skippedParts = [];
-      if (skipped > 0) {
-        skippedParts.push(
-          `${skipped} incompatible file${skipped === 1 ? "" : "s"}`,
-        );
-      }
-      if (duplicateCount > 0) {
-        skippedParts.push(
-          `${duplicateCount} duplicate file${duplicateCount === 1 ? "" : "s"}`,
-        );
-      }
-      window.customAlertError(`Skipped ${skippedParts.join(" and ")}.`);
-    }
-  };
-
-  addImageToSidebar = async (e) => {
-    if (!this.can("canManageImageAssets")) return;
-    if (e.target.files.length) {
-      modal.hide();
-      try {
-        this.tableSidebarImageComponent.showLoading();
-
-        if (e.target.files.length > 1) {
-          // multiple uploads
-          const results = await Promise.all(
-            Array.from(e.target.files).map(async (file) => {
-              return await this.uploadTableImage(file);
-            }),
-          );
-          // append each uploaded image to memory
-          for (const result of results) {
-            if (result) {
-              await this.tableSidebarImageComponent.appendImage(
-                result.image,
-                result.tableImage,
-              );
-            }
-          }
-        } else {
-          const result = await this.uploadTableImage(e.target.files[0]);
-          if (result) {
-            await this.tableSidebarImageComponent.appendImage(
-              result.image,
-              result.tableImage,
-            );
-          }
-        }
-
-        // Render from memory (no refetch)
-        this.tableSidebarImageComponent.hideLoading();
-      } catch (err) {
-        console.log(err);
-        this.tableSidebarImageComponent.hideLoading();
-        window.customAlertError(
-          "Something went wrong while uploading your image",
-        );
-      }
-    }
-  };
-
-  renderUploadImage = () => {
-    return renderUploadImageModal(this);
-  };
-
-  renderCreateFolder = () => {
-    return renderCreateFolderModal(this);
-  };
-
-  renderTableSettings = async () => {
-    return renderTableSettingsModal(this);
   };
 
   renderShareBtn = () => {

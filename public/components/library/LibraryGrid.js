@@ -1,17 +1,3 @@
-import createElement from "../../lib/salt-lib/createElement.js";
-import modal from "../modal.js";
-import renderImageSettingsModal from "../shared/imageSettingsModal.js";
-import { apiDelete } from "../../lib/apiUtils.js";
-import { buildFolderTree } from "../shared/folderTreeUtils.js";
-import { renderLibraryBulkToolbar } from "./LibraryBulkToolbar.js";
-import { renderLibraryPackList } from "./LibraryPackList.js";
-import {
-  normalizePackTagsInput as normalizePackTagsInputFromModal,
-  openCreatePackModal,
-  openDiscoverPacksModal,
-  openEditPackModal,
-  openPackImagesModal,
-} from "./LibraryPackModal.js";
 import {
   formatPackTags as formatPackTagsShared,
   getPackLockLabel as getPackLockLabelShared,
@@ -22,6 +8,16 @@ import {
   isPackOwnedByScope,
 } from "../shared/libraryPackUtils.js";
 import Component from "../../lib/salt-lib/Component.js";
+import LibraryGridActionController, {
+  bindLibraryGridActionMethods,
+} from "./libraryGridActionController.js";
+import {
+  renderLibraryGridBulkToolbar,
+  renderLibraryGridFolderTree,
+  renderLibraryGridHeader,
+  renderLibraryGridImageCards,
+  renderLibraryGridPacksSection,
+} from "./libraryGridRenderers.js";
 
 export default class LibraryGrid extends Component {
   constructor(props) {
@@ -72,6 +68,8 @@ export default class LibraryGrid extends Component {
     this.selectedImageIds = new Set();
     this.bulkBusy = false;
     this.renderQueued = false;
+    this.actionController = new LibraryGridActionController(this);
+    bindLibraryGridActionMethods(this, this.actionController);
   }
 
   pruneExpandedFolderIds = (folders) => {
@@ -314,34 +312,6 @@ export default class LibraryGrid extends Component {
     this.requestRender();
   };
 
-  removeFolder = async (folder) => {
-    const confirmed = await window.customConfirm(
-      `Are you sure you want to remove folder: "${folder.title}"? Images will be moved to the parent folder.`,
-      { confirmText: "Remove", danger: true },
-    );
-    if (!confirmed) return;
-
-    const result = await apiDelete(`/api/remove_table_folder/${folder.id}`);
-    if (!(result.ok && result.status === 204)) {
-      window.customAlertError("Could not remove folder.");
-      return;
-    }
-
-    if (this.currentFolder && this.currentFolder.id == folder.id) {
-      if (folder.parent_folder_id) {
-        const parent = this.libraryApp.folders.find(
-          (f) => f.id == folder.parent_folder_id,
-        );
-        this.libraryApp.setCurrentFolder(parent || null);
-      } else {
-        this.libraryApp.setCurrentFolder(null);
-      }
-    }
-
-    await this.libraryApp.loadFolders();
-    await this.libraryApp.refreshImagesForCurrentScope();
-  };
-
   countImagesInFolder = (folderId) => {
     const key = String(folderId);
     if (Object.prototype.hasOwnProperty.call(this.imageCountsByFolder, key)) {
@@ -350,90 +320,6 @@ export default class LibraryGrid extends Component {
     return this.images.filter(
       (img) => img.folder_id && img.folder_id == folderId,
     ).length;
-  };
-
-  renderFolderTreeItem = (folder, depth = 0) => {
-    const hasChildren = folder.children && folder.children.length > 0;
-    const isExpanded = this.expandedFolderIds.has(folder.id);
-    const isActive =
-      !this.showAllImages &&
-      this.currentFolder &&
-      this.currentFolder.id == folder.id;
-    const imgCount = this.countImagesInFolder(folder.id);
-
-    const toggle = createElement(
-      "span",
-      {
-        class: "library-folder-toggle" + (isExpanded ? " expanded" : ""),
-      },
-      hasChildren ? "▶" : "",
-    );
-
-    const name = createElement("span", {}, folder.title);
-
-    const count = createElement(
-      "span",
-      { class: "library-folder-count" },
-      imgCount > 0 ? `(${imgCount})` : "",
-    );
-
-    const deleteBtn = createElement(
-      "span",
-      { class: "library-folder-actions", title: "Delete folder" },
-      "×",
-      {
-        type: "click",
-        event: (e) => {
-          e.stopPropagation();
-          this.removeFolder(folder);
-        },
-      },
-    );
-
-    const item = createElement(
-      "div",
-      {
-        class:
-          "library-folder-item" +
-          (isActive ? " library-folder-item-active" : ""),
-        style: `padding-left: ${12 + depth * 18}px`,
-      },
-      [toggle, name, count, deleteBtn],
-      {
-        type: "click",
-        event: () => {
-          if (hasChildren) {
-            if (isExpanded) {
-              this.expandedFolderIds.delete(folder.id);
-            } else {
-              this.expandedFolderIds.add(folder.id);
-            }
-          }
-          this.showAllImages = false;
-          this.currentFolder = folder;
-          this.libraryApp.currentFolder = folder;
-          this.requestRender();
-          this.libraryApp.loadImagesForFolder(folder.id);
-        },
-      },
-    );
-
-    const items = [item];
-
-    if (hasChildren && isExpanded) {
-      const childContainer = createElement("div", {
-        class: "library-folder-children",
-      });
-      for (const child of folder.children) {
-        const childItems = this.renderFolderTreeItem(child, depth + 1);
-        for (const ci of childItems) {
-          childContainer.append(ci);
-        }
-      }
-      items.push(childContainer);
-    }
-
-    return items;
   };
 
   getPackVisibilityLabel = (pack) => {
@@ -474,69 +360,6 @@ export default class LibraryGrid extends Component {
     return formatPackTagsShared(tags);
   };
 
-  normalizePackTagsInput = (raw) => {
-    return normalizePackTagsInputFromModal(raw);
-  };
-
-  renderEditPackModal = (pack) => {
-    openEditPackModal(this, pack);
-  };
-
-  renderPackImagesModal = async (pack) => {
-    await openPackImagesModal(this, pack);
-  };
-
-  renderPackImageDetailModal = async (image) => {
-    const editablePacks = this.getEditablePacks();
-    const imageId = String(image.image_id ?? image.id);
-    const currentPackMemberships = await this.libraryApp.getImagePackMemberships(imageId);
-
-    return await renderImageSettingsModal({
-      image,
-      projectId: this.projectId,
-      tableImageId: null,
-      onDelete: null,
-      onUpdate: () => {},
-      onPackUpdate: async () => {
-        await this.libraryApp.discoverPacks(this.packSearchQuery);
-        modal.show(await this.renderPackImageDetailModal(image));
-      },
-      capabilities: {
-        canEditImageMetadata: true,
-        canManageFolders: false,
-        canManageImageAssets: false,
-      },
-      showFolderField: false,
-      packOptions: editablePacks,
-      currentPackMemberships,
-      onAddToPack: async (packId, targetImageId) => {
-        const result = await this.libraryApp.addImageToPack(packId, targetImageId);
-        if (!result) return false;
-        window.customAlert("Image added to pack");
-        await this.libraryApp.discoverPacks(this.packSearchQuery);
-        return true;
-      },
-      onRemoveFromPack: async (packImageId) => {
-        const ok = await this.libraryApp.removeImageFromPack(packImageId);
-        if (!ok) {
-          window.customAlertError("Could not remove image from pack");
-          return false;
-        }
-        window.customAlert("Image removed from pack");
-        await this.libraryApp.discoverPacks(this.packSearchQuery);
-        return true;
-      },
-    });
-  };
-
-  renderCreatePackModal = () => {
-    openCreatePackModal(this);
-  };
-
-  renderDiscoverPacksModal = () => {
-    openDiscoverPacksModal(this);
-  };
-
   getHeaderScopeLabel = () => {
     if (this.viewMode === "packs") return "Packs";
     if (this.showAllImages) return "All Images";
@@ -552,349 +375,17 @@ export default class LibraryGrid extends Component {
     return this.total > 0 ? `${this.total} images` : "";
   };
 
-  renderHeader = () => {
-    const packsMode = this.viewMode === "packs";
-    const title = packsMode
-      ? `Packs · ${this.scopeName}`
-      : `Image Library · ${this.scopeName}`;
-    const selectBtn = createElement(
-      "button",
-      {
-        class: "library-pack-action-btn",
-        type: "button",
-        title: "Toggle multi-select mode",
-        ...(packsMode ? { style: "display:none" } : {}),
-      },
-      this.selectMode ? "Done Selecting" : "Select",
-      {
-        type: "click",
-        event: () => this.toggleSelectMode(),
-      },
-    );
-
-    const sortSelect = createElement(
-      "select",
-      {
-        class: "library-sort-select",
-        title: "Sort images",
-        ...(packsMode ? { style: "display:none" } : {}),
-      },
-      [
-        createElement("option", { value: "newest" }, "Newest"),
-        createElement("option", { value: "name" }, "Name"),
-        createElement("option", { value: "size" }, "Size"),
-      ],
-      {
-        type: "change",
-        event: (e) => {
-          this.sortKey = e.target.value;
-          if (this.showAllImages) {
-            this.libraryApp.loadImages(true);
-          } else {
-            this.requestRender();
-          }
-        },
-      },
-    );
-    sortSelect.value = this.sortKey;
-
-    return createElement("div", { class: "library-header" }, [
-      createElement("h1", {}, title),
-      createElement("div", { class: "library-header-meta" }, [
-        createElement("span", { class: "library-scope" }, this.getHeaderScopeLabel()),
-        createElement("span", { class: "library-breadcrumb" }, this.getHeaderCountLabel()),
-      ]),
-      selectBtn,
-      sortSelect,
-    ]);
-  };
-
-  renderPacksSectionElement = () => {
-    return renderLibraryPackList(this);
-  };
-
-  renderFolderTreeElement = () => {
-    const folders = this.libraryApp.folders;
-    const tree = buildFolderTree(folders);
-
-    const unsortedCount =
-      typeof this.unsortedCount === "number"
-        ? this.unsortedCount
-        : this.images.filter((img) => !img.folder_id).length;
-
-    const allActive = this.showAllImages;
-    const allItem = createElement(
-      "div",
-      {
-        class:
-          "library-folder-item" +
-          (allActive ? " library-folder-item-active" : ""),
-        style: "padding-left: 12px",
-      },
-      [
-        createElement("span", { class: "library-folder-toggle" }, ""),
-        createElement("span", {}, "All Images"),
-        createElement(
-          "span",
-          { class: "library-folder-count" },
-          (this.allImagesTotal ?? this.images.length) > 0
-            ? `(${this.allImagesTotal ?? this.images.length})`
-            : "",
-        ),
-      ],
-      {
-        type: "click",
-        event: () => {
-          this.showAllImages = true;
-          this.currentFolder = null;
-          this.libraryApp.currentFolder = null;
-          this.requestRender();
-          this.libraryApp.loadImages(true);
-        },
-      },
-    );
-
-    const unsortedActive = !this.showAllImages && !this.currentFolder;
-    const unsortedItem = createElement(
-      "div",
-      {
-        class:
-          "library-folder-item" +
-          (unsortedActive ? " library-folder-item-active" : ""),
-        style: "padding-left: 12px",
-      },
-      [
-        createElement("span", { class: "library-folder-toggle" }, ""),
-        createElement("span", {}, "Unsorted"),
-        createElement(
-          "span",
-          { class: "library-folder-count" },
-          unsortedCount > 0 ? `(${unsortedCount})` : "",
-        ),
-      ],
-      {
-        type: "click",
-        event: () => {
-          this.showAllImages = false;
-          this.currentFolder = null;
-          this.libraryApp.currentFolder = null;
-          this.requestRender();
-          this.libraryApp.loadImagesForFolder(null);
-        },
-      },
-    );
-
-    const folderElems = [];
-    for (const root of tree) {
-      const items = this.renderFolderTreeItem(root, 0);
-      for (const item of items) {
-        folderElems.push(item);
-      }
-    }
-
-    return createElement("div", { class: "library-folder-tree" }, [
-      allItem,
-      unsortedItem,
-      ...folderElems,
-    ]);
-  };
-
-  renderBulkToolbarElement = () => {
-    return renderLibraryBulkToolbar(this);
-  };
-
-  deleteImage = async (image) => {
-    const confirmed = await window.customConfirm(
-      `Are you sure you want to delete "${image.original_name}"?`,
-      { confirmText: "Delete", danger: true },
-    );
-    if (!confirmed) return;
-
-    const ok = await this.libraryApp.removeImageById(image.image_id);
-    if (!ok) {
-      window.customAlertError("Could not delete image");
-      return;
-    }
-    this.selectedImageIds.delete(String(image.image_id));
-    modal.hide();
-    await this.libraryApp.loadImageCounts();
-    await this.libraryApp.refreshImagesForCurrentScope();
-  };
-
-  renderImageDetailModal = async (image) => {
-    const editablePacks = this.getEditablePacks();
-    const imageId = String(image.image_id ?? image.id);
-    const currentPackMemberships = await this.libraryApp.getImagePackMemberships(imageId);
-
-    return await renderImageSettingsModal({
-      image,
-      projectId: this.projectId,
-      tableImageId: image.id,
-      onDelete: () => this.deleteImage(image),
-      onUpdate: () => this.requestRender(),
-      onPackUpdate: async () => {
-        this.requestRender();
-        modal.show(await this.renderImageDetailModal(image));
-      },
-      packOptions: editablePacks,
-      currentPackMemberships,
-      onAddToPack: async (packId, targetImageId) => {
-        const result = await this.libraryApp.addImageToPack(packId, targetImageId);
-        if (!result) return false;
-        window.customAlert("Image added to pack");
-        await this.libraryApp.discoverPacks(this.packSearchQuery);
-        return true;
-      },
-      onRemoveFromPack: async (packImageId) => {
-        const ok = await this.libraryApp.removeImageFromPack(packImageId);
-        if (!ok) {
-          window.customAlertError("Could not remove image from pack");
-          return false;
-        }
-        window.customAlert("Image removed from pack");
-        await this.libraryApp.discoverPacks(this.packSearchQuery);
-        return true;
-      },
-    });
-  };
-
-  renderCard = (image, index) => {
-    const isSelected = this.isImageSelected(image);
-    const thumbElem = image.src
-      ? createElement("img", {
-          class: "library-card-thumb",
-          src: image.src,
-          alt: image.original_name,
-          loading: "lazy",
-        })
-      : createElement("div", { class: "library-card-thumb" });
-
-    const info = createElement("div", { class: "library-card-info" }, [
-      createElement("div", { class: "library-card-name" }, image.original_name),
-      createElement(
-        "div",
-        { class: "library-card-size" },
-        this.formatFileSize(image.size),
-      ),
-    ]);
-
-    const card = createElement(
-      "div",
-      { class: `library-card${isSelected ? " library-card-selected" : ""}` },
-      [thumbElem, info],
-      {
-        type: "click",
-        event: async () => {
-          if (this.selectMode) {
-            this.toggleImageSelection(image);
-            return;
-          }
-          modal.show(await this.renderImageDetailModal(image));
-        },
-      },
-    );
-
-    if (this.selectMode) {
-      const checkbox = createElement("input", {
-        type: "checkbox",
-        class: "library-card-checkbox",
-        ...(isSelected ? { checked: true } : {}),
-      });
-      checkbox.addEventListener("click", (e) => {
-        e.stopPropagation();
-        this.toggleImageSelection(image);
-      });
-      card.append(checkbox);
-    }
-
-    card.style.setProperty("--card-index", Math.min(index, 20));
-
-    return card;
-  };
-
-  renderGridElement = () => {
-    if (this.loading) {
-      const skeletons = this.useMemo(
-        "loading-skeletons",
-        () => {
-          const nextSkeletons = [];
-          const skeletonCount = 12;
-          for (let i = 0; i < skeletonCount; i += 1) {
-            nextSkeletons.push(
-              createElement(
-                "div",
-                { class: "library-card library-skeleton" },
-                [
-                  createElement("div", {
-                    class: "library-card-thumb library-skeleton-thumb",
-                  }),
-                  createElement("div", { class: "library-card-info" }, [
-                    createElement("div", { class: "library-skeleton-line" }),
-                    createElement("div", { class: "library-skeleton-line short" }),
-                  ]),
-                ],
-              ),
-            );
-          }
-          return nextSkeletons;
-        },
-        [],
-      );
-      return createElement("div", { class: "library-grid" }, skeletons);
-    }
-
-    const filtered = this.getFilteredImages();
-    if (!filtered.length) {
-      return createElement("div", { class: "library-grid" }, [
-        createElement(
-          "div",
-          { class: "library-empty" },
-          this.images.length
-            ? "No images match your search or folder."
-            : "No images yet. Upload some images to get started!",
-        ),
-      ]);
-    }
-
-    const selectedKey = Array.from(this.selectedImageIds).sort().join("|");
-    const cards = this.useMemo(
-      "library-grid-card-elements",
-      () => filtered.map((image, index) => this.renderCard(image, index)),
-      () => [filtered, this.selectMode, selectedKey],
-    );
-
-    const gridItems =
-      this.showAllImages && this.images.length < this.total
-        ? [
-            ...cards,
-            createElement("div", { class: "library-load-more" }, [
-              createElement(
-                "button",
-                { class: "library-load-more-btn" },
-                `Load More (${this.images.length} of ${this.total})`,
-                {
-                  type: "click",
-                  event: () => this.libraryApp.loadMore(),
-                },
-              ),
-            ]),
-          ]
-        : cards;
-
-    return createElement("div", { class: "library-grid" }, gridItems);
-  };
-
   render = () => {
     const packsMode = this.viewMode === "packs";
     if (packsMode) {
-      return [this.renderHeader(), this.renderPacksSectionElement()];
+      return [renderLibraryGridHeader(this), renderLibraryGridPacksSection(this)];
     }
 
     return [
-      this.renderHeader(),
-      this.renderBulkToolbarElement(),
-      this.renderFolderTreeElement(),
-      this.renderGridElement(),
+      renderLibraryGridHeader(this),
+      renderLibraryGridBulkToolbar(this),
+      renderLibraryGridFolderTree(this),
+      renderLibraryGridImageCards(this),
     ];
   };
 }
