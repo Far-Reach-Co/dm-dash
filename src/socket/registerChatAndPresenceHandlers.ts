@@ -8,6 +8,7 @@ import {
 } from "../lib/socketUsers.js";
 import { calculateDiceRollResponse } from "../lib/dice.js";
 import { searchSrd } from "../dnd/srd/mistral.js";
+import logger from "../lib/logger.js";
 import { markdownToChat } from "../lib/markdownToChat.js";
 import type { AuthorizeSocketTable } from "./tableSocketAuth";
 
@@ -37,7 +38,7 @@ export function registerChatAndPresenceHandlers(params: {
         io.to(table).emit("table-join", `Hello ${username}`);
         io.to(user.table).emit("current-users", await getTableUsers(table));
       } catch (err) {
-        console.log("SOCKET ERROR", err);
+        logger.warn({ err, socketId: socket.id, table }, "Socket join handler failed");
       }
     },
   );
@@ -67,8 +68,9 @@ export function registerChatAndPresenceHandlers(params: {
 
         const user = await getCurrentUser(socket.id);
         if (!user) {
-          console.log(
-            "Failure to fetch current user for new message on socket chat system",
+          logger.warn(
+            { socketId: socket.id, table },
+            "Failed to fetch current user for socket chat message",
           );
           return;
         }
@@ -111,7 +113,10 @@ export function registerChatAndPresenceHandlers(params: {
         await appendMessageToChatLog(table, messageObject);
         io.to(table).emit("message", messageObject);
       } catch (err) {
-        console.log("Error handling message event:", err);
+        logger.warn(
+          { err, socketId: socket.id, table },
+          "Socket message handler failed",
+        );
       }
     },
   );

@@ -1,6 +1,11 @@
 import { Request } from "express";
 import { randomUUID } from "crypto";
 import { createClient } from "redis";
+import {
+  GUEST_SANDBOX_MAX_DATA_BYTES,
+  GUEST_SANDBOX_MAX_IMAGES,
+  GUEST_SANDBOX_TTL_SECONDS,
+} from "../config";
 import logger from "./logger.js";
 import db from "../api/dbconfig";
 import { badRequestError, notFoundError } from "./httpErrors";
@@ -28,18 +33,9 @@ export interface GuestSandboxRecord {
 
 const GUEST_SANDBOX_PREFIX = "frc:guest:sandbox:";
 const DEFAULT_GUEST_SANDBOX_TITLE = "Sandbox Demo";
-const GUEST_SANDBOX_TTL_SECONDS = Math.max(
-  60,
-  Number(process.env.GUEST_SANDBOX_TTL_SECONDS || 12 * 60 * 60),
-);
-const GUEST_SANDBOX_MAX_IMAGES = Math.max(
-  1,
-  Number(process.env.GUEST_SANDBOX_MAX_IMAGES || 30),
-);
-const GUEST_SANDBOX_MAX_DATA_BYTES = Math.max(
-  1024,
-  Number(process.env.GUEST_SANDBOX_MAX_DATA_BYTES || 2 * 1024 * 1024),
-);
+const guestSandboxTtlSeconds = Math.max(60, GUEST_SANDBOX_TTL_SECONDS);
+const guestSandboxMaxImages = Math.max(1, GUEST_SANDBOX_MAX_IMAGES);
+const guestSandboxMaxDataBytes = Math.max(1024, GUEST_SANDBOX_MAX_DATA_BYTES);
 
 const guestSandboxRedisClient = createClient({ url: getRedisUrl() });
 guestSandboxRedisClient.on("error", (err) => {
@@ -69,13 +65,13 @@ function normalizeStarterImageIds(input: unknown): number[] {
     .filter((value) => Number.isFinite(value))
     .map((value) => Math.trunc(value))
     .filter((value) => value > 0);
-  return Array.from(new Set(ids)).slice(0, GUEST_SANDBOX_MAX_IMAGES);
+  return Array.from(new Set(ids)).slice(0, guestSandboxMaxImages);
 }
 
 async function loadCuratedGuestImageIds() {
   const query = {
     text: 'select id from public."Image" where is_blocked = false and file_name like $1 order by file_name asc limit $2',
-    values: ["guest-token-%", GUEST_SANDBOX_MAX_IMAGES],
+    values: ["guest-token-%", guestSandboxMaxImages],
   };
   const { rows } = await db.query<{ id: number }>(query);
   return rows
@@ -97,7 +93,7 @@ async function writeGuestSandbox(record: GuestSandboxRecord) {
   await ensureGuestSandboxRedisReady();
   await guestSandboxRedisClient.setEx(
     getGuestSandboxKey(record.id),
-    GUEST_SANDBOX_TTL_SECONDS,
+    guestSandboxTtlSeconds,
     JSON.stringify(record),
   );
 }
@@ -122,7 +118,7 @@ export function ensureGuestId(req: Request): string {
 }
 
 export function getGuestSandboxTtlSeconds() {
-  return GUEST_SANDBOX_TTL_SECONDS;
+  return guestSandboxTtlSeconds;
 }
 
 export { buildGuestSandboxCapabilities };
@@ -212,7 +208,7 @@ export async function touchGuestSandbox(id: string) {
   await ensureGuestSandboxRedisReady();
   await guestSandboxRedisClient.expire(
     getGuestSandboxKey(id),
-    GUEST_SANDBOX_TTL_SECONDS,
+    guestSandboxTtlSeconds,
   );
 }
 
@@ -221,7 +217,7 @@ export async function saveGuestSandboxData(id: string, data: unknown) {
     throw badRequestError("Invalid sandbox data");
   }
   const dataJson = JSON.stringify(data);
-  if (Buffer.byteLength(dataJson, "utf8") > GUEST_SANDBOX_MAX_DATA_BYTES) {
+  if (Buffer.byteLength(dataJson, "utf8") > guestSandboxMaxDataBytes) {
     throw badRequestError("Sandbox data exceeds size limit");
   }
 

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import { requireProjectEditor, requireUser } from "../../lib/authz";
 import { userSubscriptionStatus } from "../../lib/enums";
+import { paymentRequiredError } from "../../lib/httpErrors";
 import { normalizeTableMode } from "../../lib/tableAuthz";
 import type { TableMode } from "../../lib/tableAuthz";
 import { getProjectQuery } from "../queries/projects.js";
@@ -20,6 +20,10 @@ import {
   notFoundError,
   requireTablePermissionById,
 } from "./tableResourceUtils.js";
+import {
+  requireApiUser,
+  requireProjectEditorAccess,
+} from "./accessControl";
 
 function getTemplateTitle(rawTitle: unknown, fallbackTitle: string) {
   if (typeof rawTitle === "string" && rawTitle.trim()) return rawTitle.trim();
@@ -48,7 +52,7 @@ async function getTemplateByIdOrThrow(templateId: string | number) {
 }
 
 async function assertTemplateManageAccess(req: Request, template: TableViewTemplate) {
-  const userId = requireUser(req);
+  const userId = requireApiUser(req);
   if (template.user_id) {
     if (String(template.user_id) !== String(userId)) {
       throw badRequestError("Template does not belong to current user");
@@ -56,7 +60,7 @@ async function assertTemplateManageAccess(req: Request, template: TableViewTempl
     return;
   }
   if (template.project_id) {
-    await requireProjectEditor(req, template.project_id);
+    await requireProjectEditorAccess(req, template.project_id);
     return;
   }
   throw badRequestError("Invalid template scope");
@@ -65,14 +69,14 @@ async function assertTemplateManageAccess(req: Request, template: TableViewTempl
 async function assertUserTemplateProAccess(userId: string | number) {
   const userData = await getUserByIdQuery(userId);
   if (!userData.rows[0]?.is_pro) {
-    throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+    throw paymentRequiredError(userSubscriptionStatus.userIsNotPro);
   }
 }
 
 async function assertProjectTemplateProAccess(projectId: string | number) {
   const projectData = await getProjectQuery(projectId);
   if (!projectData.rows[0]?.is_pro) {
-    throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+    throw paymentRequiredError(userSubscriptionStatus.projectIsNotPro);
   }
 }
 
@@ -94,7 +98,7 @@ async function addTableViewTemplateByUser(
   next: NextFunction,
 ) {
   try {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     const tableViewId = req.params.table_view_id;
     const { table, auth } = await requireTablePermissionById(req, tableViewId, "view");
     if (!auth.capabilities.canManageTableSettings) {
@@ -130,7 +134,7 @@ async function addTableViewTemplateByProject(
   try {
     const tableViewId = req.params.table_view_id;
     const projectId = req.params.project_id;
-    await requireProjectEditor(req, projectId);
+    await requireProjectEditorAccess(req, projectId);
     const { table, auth } = await requireTablePermissionById(req, tableViewId, "view");
     if (!auth.capabilities.canManageTableSettings) {
       throw badRequestError("Insufficient permission to save table template");
@@ -163,7 +167,7 @@ async function getTableViewTemplatesByUser(
   next: NextFunction,
 ) {
   try {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     await assertUserTemplateProAccess(userId);
     const data = await getTableViewTemplatesByUserQuery(userId);
     res.status(200).send(data.rows.map(mapTemplateResponse));
@@ -179,7 +183,7 @@ async function getTableViewTemplatesByProject(
 ) {
   try {
     const projectId = req.params.project_id;
-    await requireProjectEditor(req, projectId);
+    await requireProjectEditorAccess(req, projectId);
     await assertProjectTemplateProAccess(projectId);
     const data = await getTableViewTemplatesByProjectQuery(projectId);
     res.status(200).send(data.rows.map(mapTemplateResponse));

@@ -1,6 +1,10 @@
 import { Request } from "express";
 import { requireUser } from "../../lib/authz";
 import {
+  forbiddenError,
+  notFoundError,
+} from "../../lib/httpErrors";
+import {
   getProjectAccessForUser,
   getProjectOrThrow as getProjectOrThrowCore,
 } from "../../lib/projectAccessCore";
@@ -12,28 +16,20 @@ import { getCalendarQuery } from "../queries/calendars";
 import { getMonthQuery } from "../queries/months";
 import { getDayQuery } from "../queries/days";
 
-function apiError(status: number, message: string) {
-  return { status, message };
-}
-
 export function requireApiUser(req: Request): string | number {
-  try {
-    return requireUser(req);
-  } catch {
-    throw apiError(401, "User is not logged in");
-  }
+  return requireUser(req);
 }
 
 export async function getProjectOrThrow(projectId: string | number) {
   return await getProjectOrThrowCore(projectId, {
-    onNotFound: () => apiError(404, "Project not found"),
+    onNotFound: () => notFoundError("Project not found"),
   });
 }
 
 export async function getProjectRole(req: Request, projectId: string | number) {
   const userId = requireApiUser(req);
   const role = await getProjectAccessForUser(userId, projectId, {
-    onNotFound: () => apiError(404, "Project not found"),
+    onNotFound: () => notFoundError("Project not found"),
   });
   return {
     userId,
@@ -50,7 +46,7 @@ export async function requireProjectMemberAccess(
   projectId: string | number,
 ) {
   const role = await getProjectRole(req, projectId);
-  if (!role.isMember) throw apiError(403, "Forbidden");
+  if (!role.isMember) throw forbiddenError();
   return role;
 }
 
@@ -59,7 +55,7 @@ export async function requireProjectEditorAccess(
   projectId: string | number,
 ) {
   const role = await getProjectRole(req, projectId);
-  if (!role.isEditor) throw apiError(403, "Forbidden");
+  if (!role.isEditor) throw forbiddenError();
   return role;
 }
 
@@ -68,7 +64,7 @@ export async function requireProjectOwnerAccess(
   projectId: string | number,
 ) {
   const role = await getProjectRole(req, projectId);
-  if (!role.isOwner) throw apiError(403, "Forbidden");
+  if (!role.isOwner) throw forbiddenError();
   return role;
 }
 
@@ -79,9 +75,9 @@ export async function requireSheetOwnerAccess(
   const userId = requireApiUser(req);
   const generalData = await get5eCharGeneralQuery(generalId);
   const general = generalData.rows[0];
-  if (!general) throw apiError(404, "Character not found");
+  if (!general) throw notFoundError("Character not found");
   if (String(general.user_id) !== String(userId)) {
-    throw apiError(403, "Forbidden");
+    throw forbiddenError();
   }
   return { userId, general };
 }
@@ -93,7 +89,7 @@ export async function getSheetAccess(
   const userId = requireApiUser(req);
   const generalData = await get5eCharGeneralQuery(generalId);
   const general = generalData.rows[0];
-  if (!general) throw apiError(404, "Character not found");
+  if (!general) throw notFoundError("Character not found");
 
   if (String(general.user_id) === String(userId)) {
     return {
@@ -153,7 +149,7 @@ export async function requireSheetViewAccess(
   generalId: string | number,
 ) {
   const access = await getSheetAccess(req, generalId);
-  if (!access.isViewer) throw apiError(403, "Forbidden");
+  if (!access.isViewer) throw forbiddenError();
   return access;
 }
 
@@ -162,14 +158,14 @@ export async function requireSheetEditAccess(
   generalId: string | number,
 ) {
   const access = await getSheetAccess(req, generalId);
-  if (!access.isEditor) throw apiError(403, "Forbidden");
+  if (!access.isEditor) throw forbiddenError();
   return access;
 }
 
 export async function getRecordOrThrow(recordId: string | number) {
   const recordData = await getRecordQuery(recordId);
   const record = recordData.rows[0];
-  if (!record) throw apiError(404, "Record not found");
+  if (!record) throw notFoundError("Record not found");
   return record;
 }
 
@@ -182,7 +178,7 @@ export async function requireRecordViewAccess(
   }
   const userId = requireApiUser(req);
   if (String(record.user_id) !== String(userId)) {
-    throw apiError(403, "Forbidden");
+    throw forbiddenError();
   }
   return { userId };
 }
@@ -196,7 +192,7 @@ export async function requireRecordEditAccess(
   }
   const userId = requireApiUser(req);
   if (String(record.user_id) !== String(userId)) {
-    throw apiError(403, "Forbidden");
+    throw forbiddenError();
   }
   return { userId };
 }
@@ -204,14 +200,14 @@ export async function requireRecordEditAccess(
 export async function resolveProjectIdByCalendarId(calendarId: string | number) {
   const calendarData = await getCalendarQuery(String(calendarId));
   const calendar = calendarData.rows[0];
-  if (!calendar) throw apiError(404, "Calendar not found");
+  if (!calendar) throw notFoundError("Calendar not found");
   return { projectId: calendar.project_id, calendar };
 }
 
 export async function resolveProjectIdByMonthId(monthId: string | number) {
   const monthData = await getMonthQuery(String(monthId));
   const month = monthData.rows[0];
-  if (!month) throw apiError(404, "Month not found");
+  if (!month) throw notFoundError("Month not found");
   const { projectId, calendar } = await resolveProjectIdByCalendarId(
     month.calendar_id,
   );
@@ -221,7 +217,7 @@ export async function resolveProjectIdByMonthId(monthId: string | number) {
 export async function resolveProjectIdByDayId(dayId: string | number) {
   const dayData = await getDayQuery(String(dayId));
   const day = dayData.rows[0];
-  if (!day) throw apiError(404, "Day not found");
+  if (!day) throw notFoundError("Day not found");
   const { projectId, calendar } = await resolveProjectIdByCalendarId(
     day.calendar_id,
   );

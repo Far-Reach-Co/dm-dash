@@ -14,15 +14,14 @@ import {
   getTableImagesByFolderQuery,
 } from "../queries/tableImages";
 import {
-  getProjectAccess,
-  requireProjectEditor,
-  requireUser,
-} from "../../lib/authz";
+  requireApiUser,
+  requireProjectEditorAccess,
+  requireProjectMemberAccess,
+} from "./accessControl";
 import {
   badRequestError,
   assertProjectIdMatchesTable,
   ensureScopedResourceEditable,
-  forbiddenError,
   getOptionalTableEditAuth,
   notFoundError,
   parsePositiveInt,
@@ -57,7 +56,7 @@ async function addTableFolderByProject(
       req.body.project_id = tableProjectId;
     } else {
       if (!req.body.project_id) throw badRequestError("project_id is required");
-      await requireProjectEditor(req, req.body.project_id);
+      await requireProjectEditorAccess(req, req.body.project_id);
     }
     const data = await addTableFolderByProjectQuery(req.body);
     res.status(201).json(data.rows[0]);
@@ -72,7 +71,7 @@ async function addTableFolderByUser(
   next: NextFunction
 ) {
   try {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     const tableAuth = await getOptionalTableAuthForFolderMutation(req);
     if (tableAuth) {
       req.body.user_id = requireUserIdFromTable(tableAuth.table);
@@ -93,8 +92,7 @@ async function getTableFoldersByProject(
   next: NextFunction
 ) {
   try {
-    const access = await getProjectAccess(req, req.params.project_id);
-    if (!access) throw forbiddenError();
+    await requireProjectMemberAccess(req, req.params.project_id);
     const data = await getTableFoldersByProjectQuery(req.params.project_id);
     res.send(data.rows);
   } catch (err) {
@@ -113,7 +111,7 @@ async function getTableFoldersByUser(
     });
     const userId =
       tableViewId === null
-        ? requireUser(req)
+        ? requireApiUser(req)
         : requireUserIdFromTable(
             (await requireTablePermissionById(req, tableViewId, "view")).table,
           );

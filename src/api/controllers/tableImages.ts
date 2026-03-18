@@ -12,7 +12,10 @@ import {
 } from "../queries/tableImages";
 import { Request, Response, NextFunction } from "express";
 import { getSignedUrls } from "./s3";
-import { requireProjectEditor, requireUser } from "../../lib/authz";
+import {
+  requireApiUser,
+  requireProjectEditorAccess,
+} from "./accessControl";
 import {
   badRequestError,
   ensureScopedResourceEditable,
@@ -49,7 +52,7 @@ async function addTableImageByProject(
       req.body.project_id = requireProjectIdFromTable(tableAuth.table);
     } else {
       if (!req.body.project_id) throw badRequestError("project_id is required");
-      await requireProjectEditor(req, req.body.project_id);
+      await requireProjectEditorAccess(req, req.body.project_id);
     }
     const existingData = await getTableImageByProjectAndImageQuery(
       req.body.project_id,
@@ -89,7 +92,7 @@ async function addTableImageByUser(
   next: NextFunction,
 ) {
   try {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     const tableAuth = await getOptionalTableAuthForAssetMutation(req);
     if (tableAuth) {
       req.body.user_id = requireUserIdFromTable(tableAuth.table);

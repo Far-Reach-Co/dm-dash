@@ -2,12 +2,14 @@ import { DiscordRequest } from "../../lib/discordUtils";
 import discordCommands from "../../lib/discordCommands";
 import { InteractionType, InteractionResponseType } from "discord-interactions";
 import { Request, Response, NextFunction } from "express";
+import { BOT_APP_ID } from "../../config";
+import logger from "../../lib/logger.js";
 import {
   characterSheetBotCommandResponse,
   characterSheetBotMessageResponse,
 } from "./botChar";
 
-const appId = process.env.BOT_APP_ID;
+const appId = BOT_APP_ID;
 const globalEndpoint = `applications/${appId}/commands`;
 
 async function getCommands(_req: Request, res: Response, _next: NextFunction) {
@@ -72,7 +74,7 @@ async function createCommands(
 
         responseList.push({ slashCommandName, res, message: "success" });
       } catch (err) {
-        console.log(err);
+        logger.warn({ err, slashCommandName }, "Failed to create Discord slash command");
         responseList.push({ slashCommandName, error: err, message: "Failed" });
       }
     })
@@ -114,7 +116,7 @@ async function interactionsController(
       return characterSheetBotMessageResponse(req, res);
     } else return;
   } catch (err) {
-    console.log(err);
+    logger.warn({ err }, "Discord interaction handler failed");
     return next(err);
   }
 }

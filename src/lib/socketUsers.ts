@@ -1,13 +1,20 @@
 import { createClient } from "redis";
+import logger from "./logger.js";
 import { getRedisUrl } from "./redisConfig.js";
 
 // Setup redis
 export const redisClient = createClient({ url: getRedisUrl() });
-redisClient.connect();
-redisClient.on("error", (err) => console.log("Redis Client Error", err));
+redisClient.connect().catch((err) => {
+  logger.error({ err }, "Failed to connect Redis client");
+});
+redisClient.on("error", (err) => {
+  logger.error({ err }, "Redis client error");
+});
 
 // on startup clear users in case of shutdown connection failure to ensure no doubles
-redisClient.del("users");
+redisClient.del("users").catch((err) => {
+  logger.warn({ err }, "Failed to clear socket user cache");
+});
 
 type User = {
   id: string;

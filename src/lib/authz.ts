@@ -7,9 +7,14 @@ import {
   getProjectAccessForUser,
   getProjectOrThrow as getProjectOrThrowCore,
 } from "./projectAccessCore";
+import {
+  forbiddenError,
+  notFoundError,
+  unauthorizedError,
+} from "./httpErrors";
 
 export function requireUser(req: Request): string | number {
-  if (!req.session?.user) throw new Error("User is not logged in");
+  if (!req.session?.user) throw unauthorizedError();
   return req.session.user;
 }
 
@@ -27,7 +32,7 @@ export function requireUserOrRedirect(
 
 async function getProjectOrThrow(projectId: string | number): Promise<Project> {
   return await getProjectOrThrowCore(projectId, {
-    onNotFound: () => new Error("Project not found"),
+    onNotFound: () => notFoundError("Project not found"),
   });
 }
 
@@ -36,7 +41,7 @@ async function getProjectAccessOrThrow(
   projectId: string | number,
 ) {
   return await getProjectAccessForUser(userId, projectId, {
-    onNotFound: () => new Error("Project not found"),
+    onNotFound: () => notFoundError("Project not found"),
   });
 }
 
@@ -117,7 +122,7 @@ export async function requireProjectOwner(
   const userId = requireUser(req);
   const role = await getProjectAccessOrThrow(userId, projectId);
   if (!role.isOwner) {
-    throw new Error("User is not owner");
+    throw forbiddenError();
   }
   return role.project;
 }
@@ -129,7 +134,7 @@ export async function requireProjectEditor(
   const userId = requireUser(req);
   const role = await getProjectAccessOrThrow(userId, projectId);
   if (!role.isEditor) {
-    throw new Error("User is not authorized");
+    throw forbiddenError();
   }
   return role.project;
 }

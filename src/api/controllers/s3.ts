@@ -16,7 +16,6 @@ import { getRecordQuery, Record } from "../queries/record";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
 import { redisClient } from "../../lib/socketUsers";
 import logger from "../../lib/logger.js";
-import { requireProjectEditor, requireUser } from "../../lib/authz";
 import { unlinkImageAndDeleteIfOrphaned } from "../../lib/imageLifecycle";
 import {
   assertProjectIdMatchesTable,
@@ -24,7 +23,11 @@ import {
   requireTablePermissionById,
   requireUserIdFromTable,
 } from "./tableResourceUtils";
-import { requireRecordViewAccess } from "./accessControl";
+import {
+  requireApiUser,
+  requireProjectEditorAccess,
+  requireRecordViewAccess,
+} from "./accessControl";
 import {
   cacheSignedUrl,
   generateSignedUrl,
@@ -87,6 +90,318 @@ interface NewImageForProjectRequestObject extends Request {
   };
 }
 
+type ImageOwnerScope =
+  | { kind: "project"; projectId: string | number }
+  | { kind: "user"; userId: string | number };
+
+type PreparedUpload = {
+  filePath: string;
+  fileSize: number;
+};
+
+function getTempUploadPath(req: Request) {
+  if (!req.file) throw new Error("Missing file");
+  return `file_uploads/${req.file.filename}`;
+}
+
+async function resolveProjectUploadScope(
+  req: NewImageForProjectRequestObject,
+): Promise<ImageOwnerScope> {
+  const tableAuth = await getOptionalTableAuthForImageMutation(req);
+  if (tableAuth) {
+    return {
+      kind: "project",
+      projectId: requireProjectIdFromTable(tableAuth.table),
+    };
+  }
+
+  await requireProjectEditorAccess(req, req.body.project_id);
+  return {
+    kind: "project",
+    projectId: req.body.project_id,
+  };
+}
+
+async function resolveUserUploadScope(
+  req: NewImageForUserRequestObject,
+): Promise<ImageOwnerScope> {
+  const userId = requireApiUser(req);
+  const tableAuth = await getOptionalTableAuthForImageMutation(req);
+  if (tableAuth) {
+    requireUserIdFromTable(tableAuth.table);
+  }
+
+  return {
+    kind: "user",
+    userId,
+  };
+}
+
+async function prepareUpload(
+  filePath: string,
+  fileSize: number,
+  makeSmall: boolean,
+): Promise<PreparedUpload> {
+  if (!makeSmall) {
+    return { filePath, fileSize };
+  }
+
+  const resizedFilePath = await makeImageSmall(filePath);
+  if (!resizedFilePath) {
+    return { filePath, fileSize };
+  }
+
+  return {
+    filePath: resizedFilePath,
+    fileSize: readFileSize(resizedFilePath),
+  };
+}
+
+async function enforceUploadLimit(
+  scope: ImageOwnerScope,
+  sessionUser: string | number | undefined,
+  fileSize: number,
+) {
+  if (scope.kind === "project") {
+    await checkProjectDataUsageLimitReachedAndAuth(
+      Number(scope.projectId),
+      sessionUser,
+      fileSize,
+    );
+    return;
+  }
+
+  await checkUserDataUsageLimitReachedAndAuth(scope.userId, fileSize);
+}
+
+async function incrementOwnerDataUsage(
+  scope: ImageOwnerScope,
+  uploadedBytes: number,
+) {
+  if (scope.kind === "project") {
+    const projectData = await getProjectQuery(scope.projectId);
+    const project = projectData.rows[0];
+    await editProjectQuery(project.id, {
+      used_data_in_bytes: project.used_data_in_bytes + uploadedBytes,
+    });
+    return;
+  }
+
+  const userData = await getUserByIdQuery(scope.userId);
+  const user = userData.rows[0];
+  await editUserQuery(user.id, {
+    used_data_in_bytes: user.used_data_in_bytes + uploadedBytes,
+  });
+}
+
+function cacheImageSignedUrl(image: Image) {
+  const signedUrl = generateSignedUrl(image.file_name);
+  cacheSignedUrl(image.id, signedUrl);
+  return signedUrl;
+}
+
+async function persistUploadedImage(
+  req: Request,
+  upload: PreparedUpload,
+): Promise<{ image: Image; signedUrl: string }> {
+  if (!req.file) throw new Error("Missing file");
+
+  const params = computeAwsImageParamsFromRequest(req);
+  const imageData = await addImageQuery({
+    original_name: req.file.originalname,
+    size: upload.fileSize,
+    file_name: params.Key,
+  });
+  const image = imageData.rows[0];
+
+  await uploadFileToS3(params, upload.filePath);
+
+  return {
+    image,
+    signedUrl: cacheImageSignedUrl(image),
+  };
+}
+
+function logImageUpload(
+  req: Request,
+  scope: ImageOwnerScope,
+  image: Image,
+) {
+  logEventAsync({
+    userId: req.session.user,
+    projectId: scope.kind === "project" ? scope.projectId : undefined,
+    eventType: EventType.IMAGE_UPLOADED,
+    eventData: {
+      imageId: image.id,
+      fileName: image.original_name,
+      fileSize: image.size,
+    },
+    req,
+  });
+}
+
+async function uploadImageForScope(
+  req: Request,
+  scope: ImageOwnerScope,
+  upload: PreparedUpload,
+) {
+  await enforceUploadLimit(scope, req.session.user, upload.fileSize);
+  const { image, signedUrl } = await persistUploadedImage(req, upload);
+  logImageUpload(req, scope, image);
+  await incrementOwnerDataUsage(scope, image.size);
+  return { image, signedUrl };
+}
+
+function cleanupTempUpload(filePath: string) {
+  try {
+    unlinkSync(filePath);
+  } catch {
+    // File may not exist if error occurred before creation
+  }
+}
+
+async function getCachedOrFreshSignedUrl(image: Image) {
+  const cacheKey = getSignedUrlCacheKey(image.id);
+  const cachedUrl = await redisClient.get(cacheKey);
+  if (cachedUrl) return cachedUrl;
+
+  return cacheImageSignedUrl(image);
+}
+
+async function getAccessibleRecordsForImage(
+  req: Request,
+  imageId: string | number,
+) {
+  const recordImageData = await getRecordImagesByImageQuery(imageId);
+  const recordsData = await Promise.all(
+    recordImageData.rows.map(async (ri) => {
+      const recordData = await getRecordQuery(ri.record_id);
+      return recordData.rows[0];
+    }),
+  );
+
+  const accessibleRecords: Record[] = [];
+  for (const record of recordsData) {
+    if (!record) continue;
+    if (!req.session?.user) {
+      if (record.is_public) accessibleRecords.push(record);
+      continue;
+    }
+    try {
+      await requireRecordViewAccess(req, record);
+      accessibleRecords.push(record);
+    } catch {
+      // Intentionally ignore records the caller cannot access.
+    }
+  }
+
+  return accessibleRecords;
+}
+
+async function unlinkImageForScope(
+  imageId: string | number,
+  scope: ImageOwnerScope,
+) {
+  if (scope.kind === "project") {
+    await ensureImageLinkedToProject(imageId, scope.projectId);
+    return await unlinkImageAndDeleteIfOrphaned({
+      imageId,
+      unlinkScope: {
+        type: "project",
+        projectId: scope.projectId,
+      },
+      ownerScope: {
+        type: "project",
+        projectId: scope.projectId,
+      },
+    });
+  }
+
+  await ensureImageLinkedToUser(imageId, scope.userId);
+  return await unlinkImageAndDeleteIfOrphaned({
+    imageId,
+    unlinkScope: {
+      type: "user",
+      userId: scope.userId,
+    },
+    ownerScope: {
+      type: "user",
+      userId: scope.userId,
+    },
+  });
+}
+
+async function cleanupOrphanedImage(
+  imageId: string | number,
+  image: { file_name: string },
+  orphaned: boolean,
+) {
+  if (!orphaned) return;
+
+  await removeImageFromBucket("wyrld/images", image);
+  invalidateSignedUrlCache(imageId).catch((err) =>
+    logger.warn(
+      { err, imageId },
+      "Failed to invalidate signed URL cache",
+    ),
+  );
+}
+
+function logImageDeletion(
+  req: Request,
+  scope: ImageOwnerScope,
+  image: Pick<Image, "id" | "original_name" | "size">,
+) {
+  logEventAsync({
+    userId: req.session.user,
+    projectId: scope.kind === "project" ? scope.projectId : undefined,
+    eventType: EventType.IMAGE_DELETED,
+    eventData: {
+      imageId: image.id,
+      fileName: image.original_name,
+      fileSize: image.size,
+    },
+    req,
+  });
+}
+
+async function removeImageForScope(
+  req: Request,
+  imageId: string | number,
+  scope: ImageOwnerScope,
+) {
+  const { image, orphaned } = await unlinkImageForScope(imageId, scope);
+  await cleanupOrphanedImage(imageId, image, orphaned);
+  logImageDeletion(req, scope, image);
+  return { image, orphaned };
+}
+
+async function clearProjectBannerImageIfRemoved(
+  projectId: string | number,
+  imageId: string | number,
+) {
+  const projectData = await getProjectQuery(projectId);
+  const project = projectData.rows[0];
+  if (String(project.image_id) !== String(imageId)) {
+    return;
+  }
+
+  await editProjectQuery(project.id, {
+    image_id: null,
+  });
+}
+
+async function editImageMetadata(
+  req: Request,
+  imageId: string | number,
+  patch: Partial<Pick<Image, "original_name" | "notes">>,
+) {
+  requireApiUser(req);
+  await ensureImageEditableWithOptionalTableContext(req, imageId);
+  const data = await editImageQuery(String(imageId), patch);
+  return data.rows[0];
+}
+
 async function newImageForProject(
   req: NewImageForProjectRequestObject,
   res: Response,
@@ -94,72 +409,22 @@ async function newImageForProject(
 ) {
   if (!req.file) return next();
 
-  let filePath = `file_uploads/${req.file.filename}`;
+  let filePath = getTempUploadPath(req);
 
   try {
-    const tableAuth = await getOptionalTableAuthForImageMutation(req);
-    if (tableAuth) {
-      req.body.project_id = Number(requireProjectIdFromTable(tableAuth.table));
-    } else {
-      await requireProjectEditor(req, req.body.project_id);
-    }
-
-    const params = computeAwsImageParamsFromRequest(req);
-    let fileSize = req.file.size;
-
-    if (req.body.make_image_small) {
-      const newFilePathFromResizedImage = await makeImageSmall(filePath);
-      if (newFilePathFromResizedImage) {
-        filePath = newFilePathFromResizedImage;
-        fileSize = readFileSize(newFilePathFromResizedImage);
-      }
-    }
-    await checkProjectDataUsageLimitReachedAndAuth(
-      req.body.project_id,
-      req.session.user,
-      fileSize,
+    const scope = await resolveProjectUploadScope(req);
+    const upload = await prepareUpload(
+      filePath,
+      req.file.size,
+      !!req.body.make_image_small,
     );
-
-    const imageData = await addImageQuery({
-      original_name: req.file.originalname,
-      size: fileSize,
-      file_name: params.Key,
-    });
-    const image = imageData.rows[0];
-
-    await uploadFileToS3(params, filePath);
-
-    logEventAsync({
-      userId: req.session.user,
-      projectId: req.body.project_id,
-      eventType: EventType.IMAGE_UPLOADED,
-      eventData: {
-        imageId: image.id,
-        fileName: image.original_name,
-        fileSize: image.size,
-      },
-      req,
-    });
-
-    // Update project data usage
-    const projectData = await getProjectQuery(req.body.project_id);
-    const project = projectData.rows[0];
-    await editProjectQuery(project.id, {
-      used_data_in_bytes: project.used_data_in_bytes + image.size,
-    });
-
-    const signedUrl = generateSignedUrl(image.file_name);
-    cacheSignedUrl(image.id, signedUrl);
-
+    filePath = upload.filePath;
+    const { image, signedUrl } = await uploadImageForScope(req, scope, upload);
     res.send({ ...image, src: signedUrl });
   } catch (err) {
     return next(err);
   } finally {
-    try {
-      unlinkSync(filePath);
-    } catch {
-      // File may not exist if error occurred before creation
-    }
+    cleanupTempUpload(filePath);
   }
 }
 
@@ -178,66 +443,22 @@ async function newImageForUser(
 ) {
   if (!req.file) return next();
 
-  let filePath = `file_uploads/${req.file.filename}`;
+  let filePath = getTempUploadPath(req);
 
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    const tableAuth = await getOptionalTableAuthForImageMutation(req);
-    if (tableAuth) {
-      requireUserIdFromTable(tableAuth.table);
-    }
-
-    const params = computeAwsImageParamsFromRequest(req);
-    let fileSize = req.file.size;
-
-    if (req.body.make_image_small) {
-      const newFilePathFromResizedImage = await makeImageSmall(filePath);
-      if (newFilePathFromResizedImage) {
-        filePath = newFilePathFromResizedImage;
-        fileSize = readFileSize(newFilePathFromResizedImage);
-      }
-    }
-    await checkUserDataUsageLimitReachedAndAuth(req.session.user, fileSize);
-
-    const imageData = await addImageQuery({
-      original_name: req.file.originalname,
-      size: fileSize,
-      file_name: params.Key,
-    });
-    const image = imageData.rows[0];
-
-    await uploadFileToS3(params, filePath);
-
-    logEventAsync({
-      userId: req.session.user,
-      eventType: EventType.IMAGE_UPLOADED,
-      eventData: {
-        imageId: image.id,
-        fileName: image.original_name,
-        fileSize: image.size,
-      },
-      req,
-    });
-
-    // Update user data usage
-    const userData = await getUserByIdQuery(req.session.user);
-    const user = userData.rows[0];
-    await editUserQuery(user.id, {
-      used_data_in_bytes: user.used_data_in_bytes + image.size,
-    });
-
-    const signedUrl = generateSignedUrl(image.file_name);
-    cacheSignedUrl(image.id, signedUrl);
-
+    const scope = await resolveUserUploadScope(req);
+    const upload = await prepareUpload(
+      filePath,
+      req.file.size,
+      !!req.body.make_image_small,
+    );
+    filePath = upload.filePath;
+    const { image, signedUrl } = await uploadImageForScope(req, scope, upload);
     res.send({ ...image, src: signedUrl });
   } catch (err) {
     return next(err);
   } finally {
-    try {
-      unlinkSync(filePath);
-    } catch {
-      // File may not exist if error occurred before creation
-    }
+    cleanupTempUpload(filePath);
   }
 }
 
@@ -253,39 +474,8 @@ async function getImage(req: Request, res: Response, next: NextFunction) {
 
     const imageData = await getImageQuery(req.params.id);
     const image = getImageOrThrow(imageData) as imageDataResObject;
-
-    const cacheKey = getSignedUrlCacheKey(image.id);
-    const cachedUrl = await redisClient.get(cacheKey);
-
-    if (cachedUrl) {
-      image.src = cachedUrl;
-    } else {
-      image.src = generateSignedUrl(image.file_name);
-      cacheSignedUrl(image.id, image.src);
-    }
-
-    const recordImageData = await getRecordImagesByImageQuery(image.id);
-    const recordsData = await Promise.all(
-      recordImageData.rows.map(async (ri) => {
-        const recordData = await getRecordQuery(ri.record_id);
-        return recordData.rows[0];
-      }),
-    );
-    const accessibleRecords: Record[] = [];
-    for (const record of recordsData) {
-      if (!record) continue;
-      if (!req.session?.user) {
-        if (record.is_public) accessibleRecords.push(record);
-        continue;
-      }
-      try {
-        await requireRecordViewAccess(req, record);
-        accessibleRecords.push(record);
-      } catch {
-        // Intentionally ignore records the caller cannot access.
-      }
-    }
-    image.records = accessibleRecords;
+    image.src = await getCachedOrFreshSignedUrl(image);
+    image.records = await getAccessibleRecordsForImage(req, image.id);
     res.send(image);
   } catch (err) {
     logger.error({ err, imageId: req.params.id }, "Failed to get image");
@@ -299,54 +489,21 @@ async function removeImageByProject(
   next: NextFunction,
 ) {
   try {
-    await requireProjectEditor(req, req.params.project_id);
+    await requireProjectEditorAccess(req, req.params.project_id);
     const tableAuth = await getOptionalTableAuthForImageMutation(req);
     if (tableAuth) {
       const tableProjectId = requireProjectIdFromTable(tableAuth.table);
       assertProjectIdMatchesTable(req.params.project_id, tableProjectId);
     }
-    await ensureImageLinkedToProject(req.params.image_id, req.params.project_id);
-    const result = await unlinkImageAndDeleteIfOrphaned({
-      imageId: req.params.image_id,
-      unlinkScope: {
-        type: "project",
-        projectId: req.params.project_id,
-      },
-      ownerScope: {
-        type: "project",
-        projectId: req.params.project_id,
-      },
-    });
-    const { image, orphaned } = result;
-    if (orphaned) {
-      await removeImageFromBucket("wyrld/images", image);
-      invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-        logger.warn(
-          { err, imageId: req.params.image_id },
-          "Failed to invalidate signed URL cache",
-        ),
-      );
-    }
 
-    const projectData = await getProjectQuery(req.params.project_id);
-    const project = projectData.rows[0];
-    if (String(project.image_id) === String(req.params.image_id)) {
-      await editProjectQuery(project.id, {
-        image_id: null,
-      });
-    }
-
-    logEventAsync({
-      userId: req.session.user,
+    await removeImageForScope(req, req.params.image_id, {
+      kind: "project",
       projectId: req.params.project_id,
-      eventType: EventType.IMAGE_DELETED,
-      eventData: {
-        imageId: req.params.image_id,
-        fileName: image.original_name,
-        fileSize: image.size,
-      },
-      req,
     });
+    await clearProjectBannerImageIfRemoved(
+      req.params.project_id,
+      req.params.image_id,
+    );
     res.status(204).send();
   } catch (err) {
     logger.error(
@@ -371,38 +528,9 @@ async function removeImageByTableUser(
     );
     const tableUserId = requireUserIdFromTable(tableForAuth, "table_id");
 
-    await ensureImageLinkedToUser(req.params.image_id, tableUserId);
-    const result = await unlinkImageAndDeleteIfOrphaned({
-      imageId: req.params.image_id,
-      unlinkScope: {
-        type: "user",
-        userId: tableUserId,
-      },
-      ownerScope: {
-        type: "user",
-        userId: tableUserId,
-      },
-    });
-    const { image, orphaned } = result;
-    if (orphaned) {
-      await removeImageFromBucket("wyrld/images", image);
-      invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-        logger.warn(
-          { err, imageId: req.params.image_id },
-          "Failed to invalidate signed URL cache",
-        ),
-      );
-    }
-
-    logEventAsync({
-      userId: req.session.user,
-      eventType: EventType.IMAGE_DELETED,
-      eventData: {
-        imageId: req.params.image_id,
-        fileName: image.original_name,
-        fileSize: image.size,
-      },
-      req,
+    await removeImageForScope(req, req.params.image_id, {
+      kind: "user",
+      userId: tableUserId,
     });
     res.status(204).send();
   } catch (err) {
@@ -420,44 +548,15 @@ async function removeImageByUser(
   next: NextFunction,
 ) {
   try {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     const tableAuth = await getOptionalTableAuthForImageMutation(req);
     if (tableAuth) {
       requireUserIdFromTable(tableAuth.table);
     }
 
-    await ensureImageLinkedToUser(req.params.image_id, userId);
-    const result = await unlinkImageAndDeleteIfOrphaned({
-      imageId: req.params.image_id,
-      unlinkScope: {
-        type: "user",
-        userId,
-      },
-      ownerScope: {
-        type: "user",
-        userId,
-      },
-    });
-    const { image, orphaned } = result;
-    if (orphaned) {
-      await removeImageFromBucket("wyrld/images", image);
-      invalidateSignedUrlCache(req.params.image_id).catch((err) =>
-        logger.warn(
-          { err, imageId: req.params.image_id },
-          "Failed to invalidate signed URL cache",
-        ),
-      );
-    }
-
-    logEventAsync({
-      userId: req.session.user,
-      eventType: EventType.IMAGE_DELETED,
-      eventData: {
-        imageId: req.params.image_id,
-        fileName: image.original_name,
-        fileSize: image.size,
-      },
-      req,
+    await removeImageForScope(req, req.params.image_id, {
+      kind: "user",
+      userId,
     });
     res.status(204).send();
   } catch (err) {
@@ -485,12 +584,10 @@ async function removeImageFromBucket(
 
 async function editImageName(req: Request, res: Response, next: NextFunction) {
   try {
-    requireUser(req);
-    await ensureImageEditableWithOptionalTableContext(req, req.params.id);
-    const data = await editImageQuery(req.params.id, {
+    const data = await editImageMetadata(req, req.params.id, {
       original_name: req.body.original_name,
     });
-    res.status(200).send(data.rows[0]);
+    res.status(200).send(data);
   } catch (err) {
     next(err);
   }
@@ -498,12 +595,10 @@ async function editImageName(req: Request, res: Response, next: NextFunction) {
 
 async function editImageNotes(req: Request, res: Response, next: NextFunction) {
   try {
-    requireUser(req);
-    await ensureImageEditableWithOptionalTableContext(req, req.params.id);
-    const data = await editImageQuery(req.params.id, {
+    const data = await editImageMetadata(req, req.params.id, {
       notes: req.body.notes,
     });
-    res.status(200).send(data.rows[0]);
+    res.status(200).send(data);
   } catch (err) {
     next(err);
   }

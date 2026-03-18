@@ -1,6 +1,11 @@
 import { createHash } from "crypto";
 import { NextFunction, Request, Response } from "express";
 import {
+  STRIPE_CONNECT_WEBHOOK_SECRET,
+  STRIPE_WEBHOOK_SECRET,
+  STRIPE_WEBHOOK_TOLERANCE_SECONDS,
+} from "../../config";
+import {
   addBillingEventLogQuery,
   removeBillingEventLogByStripeEventIdQuery,
 } from "../queries/billingEventLog";
@@ -31,6 +36,10 @@ import {
 import { notifyAffiliateCommissionCreatedAsync } from "../../lib/emailNotifications";
 import { AFFILIATE_COMMISSION_PERCENT } from "../../lib/affiliateConfig";
 import { normalizeAffiliateCode } from "../../lib/affiliate";
+import {
+  badRequestError,
+  serviceUnavailableError,
+} from "../../lib/httpErrors";
 import { verifyStripeWebhookSignature } from "../../lib/stripeWebhookAuth";
 import logger from "../../lib/logger";
 import {
@@ -278,7 +287,7 @@ async function handleStripeCheckoutSessionCompleted(session: any) {
 async function syncStripeSubscription(subscription: any) {
   const stripeSubscriptionId = readOptionalString(subscription?.id);
   if (!stripeSubscriptionId) {
-    throw { status: 400, message: "Stripe subscription id is required" };
+    throw badRequestError("Stripe subscription id is required");
   }
 
   const existingData = await getBillingSubscriptionByStripeSubscriptionIdQuery(
@@ -289,20 +298,18 @@ async function syncStripeSubscription(subscription: any) {
   const stripeCustomerId =
     readOptionalString(subscription?.customer) || existing?.stripe_customer_id || null;
   if (!stripeCustomerId) {
-    throw {
-      status: 400,
-      message: `Stripe customer id missing for subscription ${stripeSubscriptionId}`,
-    };
+    throw badRequestError(
+      `Stripe customer id missing for subscription ${stripeSubscriptionId}`,
+    );
   }
 
   const metadata = readMetadata(subscription?.metadata);
   const metadataUserId = readPositiveInt(metadata.user_id);
   const userId = await resolveStripeCustomerUserId(stripeCustomerId, metadataUserId);
   if (!userId) {
-    throw {
-      status: 400,
-      message: `Unable to resolve user for subscription ${stripeSubscriptionId}`,
-    };
+    throw badRequestError(
+      `Unable to resolve user for subscription ${stripeSubscriptionId}`,
+    );
   }
 
   await upsertStripeCustomerMapping({ stripeCustomerId, userId });
@@ -316,10 +323,9 @@ async function syncStripeSubscription(subscription: any) {
       : null;
 
   if (scope === "project" && !projectId) {
-    throw {
-      status: 400,
-      message: `Project scope subscription ${stripeSubscriptionId} is missing project_id metadata`,
-    };
+    throw badRequestError(
+      `Project scope subscription ${stripeSubscriptionId} is missing project_id metadata`,
+    );
   }
 
   const stripePriceId =
@@ -528,23 +534,20 @@ async function processStripeWebhookEvent(event: StripeWebhookEvent) {
 }
 
 function readStripeWebhookSecrets() {
-  const accountWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim() || "";
-  const connectWebhookSecret =
-    process.env.STRIPE_CONNECT_WEBHOOK_SECRET?.trim() || "";
+  const accountWebhookSecret = STRIPE_WEBHOOK_SECRET || "";
+  const connectWebhookSecret = STRIPE_CONNECT_WEBHOOK_SECRET || "";
 
   const secrets = [accountWebhookSecret, connectWebhookSecret].filter(Boolean);
   if (!secrets.length) {
-    throw {
-      status: 503,
-      message:
-        "Stripe webhook secret is not configured (STRIPE_WEBHOOK_SECRET or STRIPE_CONNECT_WEBHOOK_SECRET)",
-    };
+    throw serviceUnavailableError(
+      "Stripe webhook secret is not configured (STRIPE_WEBHOOK_SECRET or STRIPE_CONNECT_WEBHOOK_SECRET)",
+    );
   }
   return secrets;
 }
 
 function readStripeSignatureToleranceSeconds() {
-  const value = Number(process.env.STRIPE_WEBHOOK_TOLERANCE_SECONDS || 300);
+  const value = Number(STRIPE_WEBHOOK_TOLERANCE_SECONDS || 300);
   if (!Number.isFinite(value) || value <= 0) return 300;
   return value;
 }
@@ -554,11 +557,11 @@ async function handleStripeWebhook(req: Request, res: Response, next: NextFuncti
     const webhookSecrets = readStripeWebhookSecrets();
     const stripeSignature = req.headers["stripe-signature"];
     if (typeof stripeSignature !== "string" || !stripeSignature.trim()) {
-      throw { status: 400, message: "Missing Stripe-Signature header" };
+      throw badRequestError("Missing Stripe-Signature header");
     }
 
     if (!req.rawBody || !req.rawBody.length) {
-      throw { status: 400, message: "Missing raw webhook body" };
+      throw badRequestError("Missing raw webhook body");
     }
     const payload = req.rawBody;
 
@@ -572,18 +575,18 @@ async function handleStripeWebhook(req: Request, res: Response, next: NextFuncti
       }),
     );
     if (!isValid) {
-      throw { status: 400, message: "Invalid Stripe webhook signature" };
+      throw badRequestError("Invalid Stripe webhook signature");
     }
 
     let event: StripeWebhookEvent;
     try {
       event = JSON.parse(req.rawBody.toString("utf8")) as StripeWebhookEvent;
     } catch {
-      throw { status: 400, message: "Invalid Stripe webhook JSON payload" };
+      throw badRequestError("Invalid Stripe webhook JSON payload");
     }
 
     if (!readOptionalString(event?.id) || !readOptionalString(event?.type)) {
-      throw { status: 400, message: "Invalid Stripe event envelope" };
+      throw badRequestError("Invalid Stripe event envelope");
     }
 
     const payloadHash = createHash("sha256").update(req.rawBody).digest("hex");

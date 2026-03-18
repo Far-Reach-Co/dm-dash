@@ -2,6 +2,7 @@ import { genSalt, hash, compare } from "bcrypt";
 import { sign, verify, SignOptions } from "jsonwebtoken";
 import mail from "../smtp/index.js";
 import { Request, Response, NextFunction } from "express";
+import { SECRET_KEY } from "../../config";
 
 import {
   getUserByIdQuery,
@@ -28,7 +29,7 @@ declare module "express-session" {
 }
 
 function generateAccessToken(id: string | number, expires: string | number) {
-  return sign({ id }, process.env.SECRET_KEY as string, {
+  return sign({ id }, SECRET_KEY, {
     expiresIn: expires,
   } as SignOptions);
 }
@@ -61,7 +62,7 @@ interface UserPayload {
 async function verifyUserByToken(token: string) {
   const userVerifiedOrNull = verify(
     token,
-    process.env.SECRET_KEY as string
+    SECRET_KEY,
   ) as unknown as UserPayload;
 
   if (userVerifiedOrNull) {

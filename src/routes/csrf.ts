@@ -1,10 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import Tokens from "csrf";
+import { isProd } from "../config";
 import { createHttpError } from "../lib/httpErrors";
 
 const tokens = new Tokens();
 const CSRF_COOKIE = "_csrf_secret";
-const isProd = process.env.SERVER_ENV === "prod";
 
 // Middleware to generate CSRF token (for GET routes that render forms)
 export const csrfMiddleware = (

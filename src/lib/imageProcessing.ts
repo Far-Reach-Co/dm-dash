@@ -1,10 +1,14 @@
 import sharp from "sharp";
+import logger from "./logger.js";
 
 export async function getMetadata(imagePath: string) {
   try {
     return await sharp(imagePath).metadata();
   } catch (error) {
-    console.log(`An error occurred during processing image metadata: ${error}`);
+    logger.warn(
+      { err: error, imagePath },
+      "An error occurred during image metadata processing",
+    );
     return null;
   }
 }
@@ -28,7 +32,7 @@ export async function resizeImage(
       .toFile(newPath);
     return newPath;
   } catch (error) {
-    console.log(error);
+    logger.warn({ err: error, imagePath }, "Failed to resize image");
     return null;
   }
 }

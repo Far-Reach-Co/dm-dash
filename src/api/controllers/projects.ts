@@ -31,9 +31,17 @@ import { Request, Response, NextFunction } from "express";
 import { getUserByIdQuery } from "../queries/users.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
-import { requireProjectOwner, requireUser } from "../../lib/authz";
 import { getSignedUrls } from "./s3.js";
-import { requireProjectMemberAccess } from "./accessControl";
+import {
+  requireApiUser,
+  requireProjectMemberAccess,
+  requireProjectOwnerAccess,
+} from "./accessControl";
+import {
+  badRequestError,
+  notFoundError,
+  paymentRequiredError,
+} from "../../lib/httpErrors";
 import { subscriptionPlanLimits } from "../../lib/subscription";
 
 interface addProjectRequest extends Request {
@@ -49,14 +57,15 @@ async function addProject(
   next: NextFunction
 ) {
   try {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     // check if user is pro, hard limit project creation to 2
     const projectsByUserData = await getProjectsQuery(userId);
 
     if (projectsByUserData.rows.length >= subscriptionPlanLimits.freeOwnedWyrlds) {
       const userData = await getUserByIdQuery(userId);
-      if (!userData.rows[0].is_pro)
-        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+      if (!userData.rows[0].is_pro) {
+        throw paymentRequiredError(userSubscriptionStatus.userIsNotPro);
+      }
     }
     req.body.user_id = userId;
     const data = await addProjectQuery(req.body);
@@ -111,7 +120,7 @@ async function getProject(req: Request, res: Response, next: NextFunction) {
 
 async function getProjects(req: Request, res: Response, next: NextFunction) {
   try {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     const projectsData = await getProjectsQuery(userId);
     const ownedProjects = projectsData.rows;
     const ownedIds = new Set(ownedProjects.map((p) => String(p.id)));
@@ -173,7 +182,7 @@ async function getProjects(req: Request, res: Response, next: NextFunction) {
 
 async function removeProject(req: Request, res: Response, next: NextFunction) {
   try {
-    await requireProjectOwner(req, req.params.id);
+    await requireProjectOwnerAccess(req, req.params.id);
 
     // Clean up table images (S3 + database) - project_id is optional so no cascade
     const tableImages = await getTableImagesByProjectQuery(req.params.id);
@@ -205,7 +214,7 @@ async function editProjectTitle(
   next: NextFunction
 ) {
   try {
-    await requireProjectOwner(req, req.params.id);
+    await requireProjectOwnerAccess(req, req.params.id);
 
     await editProjectQuery(req.params.id, {
       title: req.body.title,
@@ -224,15 +233,14 @@ async function editProjectDescription(
   next: NextFunction
 ) {
   try {
-    await requireProjectOwner(req, req.params.id);
+    await requireProjectOwnerAccess(req, req.params.id);
     const rawDescription =
       typeof req.body?.description === "string" ? req.body.description : "";
     const description = rawDescription.trim();
     if (description.length > PROJECT_DESCRIPTION_MAX_LENGTH) {
-      throw {
-        status: 400,
-        message: `Description must be ${PROJECT_DESCRIPTION_MAX_LENGTH} characters or fewer`,
-      };
+      throw badRequestError(
+        `Description must be ${PROJECT_DESCRIPTION_MAX_LENGTH} characters or fewer`,
+      );
     }
 
     await editProjectQuery(req.params.id, {
@@ -250,7 +258,7 @@ async function editProjectBannerImage(
   next: NextFunction
 ) {
   try {
-    const project = await requireProjectOwner(req, req.params.id);
+    const { project } = await requireProjectOwnerAccess(req, req.params.id);
     const rawImageId = req.body.image_id;
 
     if (
@@ -267,11 +275,11 @@ async function editProjectBannerImage(
 
     const imageId = Number(rawImageId);
     if (!Number.isInteger(imageId) || imageId <= 0) {
-      throw { status: 400, message: "Invalid image_id" };
+      throw badRequestError("Invalid image_id");
     }
 
     if (!project.is_pro) {
-      throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+      throw paymentRequiredError(userSubscriptionStatus.projectIsNotPro);
     }
 
     const tableImagesData = await getTableImagesByImageQuery(imageId);
@@ -279,12 +287,12 @@ async function editProjectBannerImage(
       (tableImage) => String(tableImage.project_id) === String(project.id)
     );
     if (!isImageInProject) {
-      throw { status: 404, message: "Image not found in this project" };
+      throw notFoundError("Image not found in this project");
     }
 
     const imageData = await getImageQuery(imageId);
     const image = imageData.rows[0];
-    if (!image) throw { status: 404, message: "Image not found" };
+    if (!image) throw notFoundError("Image not found");
 
     await editProjectQuery(req.params.id, {
       image_id: imageId,
