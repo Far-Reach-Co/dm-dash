@@ -125,8 +125,6 @@ if [[ "$INSTALL_UNITS" == "1" ]]; then
     "dm-dash-backup.timer"
     "dm-dash-monthly-report.service"
     "dm-dash-monthly-report.timer"
-    "dm-dash-srd-daily-report.service"
-    "dm-dash-srd-daily-report.timer"
     "dm-dash-srd-popular-pages.service"
     "dm-dash-srd-popular-pages.timer"
   )
@@ -141,10 +139,24 @@ if [[ "$INSTALL_UNITS" == "1" ]]; then
     fi
   done
 
-  if [[ "$installed_any_unit" == "1" ]]; then
+  obsolete_units=(
+    "dm-dash-srd-daily-report.service"
+    "dm-dash-srd-daily-report.timer"
+  )
+
+  removed_any_unit=0
+  for unit in "${obsolete_units[@]}"; do
+    systemctl disable --now "$unit" >/dev/null 2>&1 || true
+    if [[ -f "/etc/systemd/system/$unit" ]]; then
+      rm -f "/etc/systemd/system/$unit"
+      removed_any_unit=1
+    fi
+  done
+
+  if [[ "$installed_any_unit" == "1" || "$removed_any_unit" == "1" ]]; then
     systemctl daemon-reload
   else
-    echo "No systemd unit files installed; keeping currently installed units."
+    echo "No systemd unit files changed; keeping currently installed units."
   fi
 else
   echo "Skipping systemd unit install (DM_DASH_INSTALL_UNITS=$INSTALL_UNITS)."
@@ -152,15 +164,14 @@ fi
 
 if [[ "$RESTART_SERVICES" == "1" ]]; then
   echo "Restarting services..."
-  systemctl enable dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer dm-dash-srd-daily-report.timer dm-dash-srd-popular-pages.timer
+  systemctl disable --now dm-dash-srd-daily-report.timer >/dev/null 2>&1 || true
+  systemctl enable dm-dash.service dm-dash-backup.timer dm-dash-monthly-report.timer dm-dash-srd-popular-pages.timer
   systemctl restart dm-dash.service
   systemctl restart dm-dash-backup.timer
   systemctl restart dm-dash-monthly-report.timer
-  systemctl restart dm-dash-srd-daily-report.timer
   systemctl restart dm-dash-srd-popular-pages.timer
   systemctl stop dm-dash-backup.service || true
   systemctl stop dm-dash-monthly-report.service || true
-  systemctl stop dm-dash-srd-daily-report.service || true
   systemctl stop dm-dash-srd-popular-pages.service || true
 
   echo "Service status:"
@@ -170,8 +181,6 @@ if [[ "$RESTART_SERVICES" == "1" ]]; then
   systemctl --no-pager --full status dm-dash-backup.timer | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-monthly-report.service | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-monthly-report.timer | sed -n '1,24p' || true
-  systemctl --no-pager --full status dm-dash-srd-daily-report.service | sed -n '1,24p' || true
-  systemctl --no-pager --full status dm-dash-srd-daily-report.timer | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-srd-popular-pages.service | sed -n '1,24p' || true
   systemctl --no-pager --full status dm-dash-srd-popular-pages.timer | sed -n '1,24p' || true
 else

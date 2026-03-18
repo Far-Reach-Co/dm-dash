@@ -1,8 +1,8 @@
 [Unit]
-Description=Run dm-dash postgres backup daily
+Description=Run dm-dash postgres backup weekly
 
 [Timer]
-OnCalendar=daily
+OnCalendar=weekly
 RandomizedDelaySec=30m
 Persistent=true
 Unit=dm-dash-backup.service

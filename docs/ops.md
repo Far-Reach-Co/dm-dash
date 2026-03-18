@@ -6,6 +6,7 @@
 ./ops/service.sh status all
 ./ops/service.sh logs web
 ./ops/service.sh restart backup
+./ops/service.sh restart top10
 ```
 
 ## Preflight
@@ -17,6 +18,8 @@
 Targets:
 - `web`
 - `backup`
+- `report`
+- `top10`
 - `all`
 
 Actions:
