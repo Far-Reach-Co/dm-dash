@@ -55,8 +55,6 @@
     "email:product-update": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendProductUpdateEmail.js",
     "email:monthly-report": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendMonthlyLogReportEmail.js",
     "email:monthly-report:force": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendMonthlyLogReportEmail.js --force",
-    "email:srd-daily-report": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendDailySrdIntentReportEmail.js",
-    "email:srd-daily-report:force": "bash ./scripts/ops/run_with_env.sh node ./dist/tools/sendDailySrdIntentReportEmail.js --force",
     "backup:db": "bash ./scripts/ops/run_with_env.sh node ./dist/lib/db_backups/pgBackup.js",
     "backup:db:once": "bash ./scripts/ops/run_with_env.sh node ./dist/lib/db_backups/pgBackup.js --once",
     "backup:db:once:full": "bash ./scripts/ops/run_with_env.sh node ./dist/lib/db_backups/pgBackup.js --once --full",

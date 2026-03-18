@@ -1,5 +1,5 @@
 [Unit]
-Description=dm-dash daily SRD popular pages sync
+Description=dm-dash weekly SRD popular pages sync
 After=network.target
 
 [Service]

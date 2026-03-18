@@ -36,7 +36,7 @@ run_service_action() {
       run_remote "systemctl stop $service && echo '$service stopped'"
       ;;
     *)
-      echo "Usage: $0 {restart|status|logs|stop} [web|backup|all]"
+      echo "Usage: $0 {restart|status|logs|stop} [web|backup|report|top10|all]"
       exit 1
       ;;
   esac

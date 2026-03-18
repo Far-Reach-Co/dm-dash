@@ -48,7 +48,6 @@ export enum EventType {
 
   // Reporting events
   MONTHLY_LOG_REPORT_EMAIL_SENT = "report.monthly_log_email_sent",
-  DAILY_SRD_INTENT_REPORT_EMAIL_SENT = "report.daily_srd_intent_email_sent",
 }
 
 export interface EventData {
