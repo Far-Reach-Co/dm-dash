@@ -1,4 +1,6 @@
 import { Transporter, createTransport } from "nodemailer";
+import SMTPTransport from "nodemailer/lib/smtp-transport";
+import { MAIL_PASSWORD, MAIL_USERNAME } from "../../config";
 
 interface SendMessageParams {
   user: { email: string };
@@ -11,15 +13,19 @@ interface SendMessageParams {
 class Mail {
   transporter: Transporter;
   constructor() {
-    this.transporter = createTransport({
+    const transportOptions: SMTPTransport.Options = {
       host: "smtp.googlemail.com",
       port: 587,
       secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.MAIL_USERNAME,
-        pass: process.env.MAIL_PASSWORD,
-      },
-    });
+      auth:
+        MAIL_USERNAME && MAIL_PASSWORD
+          ? {
+              user: MAIL_USERNAME,
+              pass: MAIL_PASSWORD,
+            }
+          : undefined,
+    };
+    this.transporter = createTransport(transportOptions);
   }
   sendMessage = async ({ user, title, message, footerHtml, headers }: SendMessageParams) => {
     const normalizedMessage = message.replace(/\n/g, "<br>");

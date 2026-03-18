@@ -11,6 +11,7 @@ import { userSubscriptionStatus } from "../../lib/enums.js";
 import { getUserByIdQuery } from "../queries/users.js";
 import { getProjectQuery } from "../queries/projects.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import { paymentRequiredError } from "../../lib/httpErrors";
 import {
   assertTableCapability,
   buildTableCapabilities,
@@ -19,12 +20,15 @@ import {
   requireTablePermission,
   withTableCapabilities,
 } from "../../lib/tableAuthz";
-import { getProjectAccess, requireProjectEditor } from "../../lib/authz";
 import {
-  forbiddenError,
   getTableViewByUUIDOrThrow,
   requireTablePermissionById,
 } from "./tableResourceUtils";
+import {
+  requireApiUser,
+  requireProjectEditorAccess,
+  requireProjectMemberAccess,
+} from "./accessControl";
 import { subscriptionPlanLimits } from "../../lib/subscription";
 
 function getTitle(value: unknown) {
@@ -58,8 +62,7 @@ async function addTableViewByProject(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    await requireProjectEditor(req, req.params.project_id);
+    const { userId } = await requireProjectEditorAccess(req, req.params.project_id);
 
     const tableViewsData = await getTableViewsByProjectQuery(
       req.params.project_id
@@ -67,7 +70,7 @@ async function addTableViewByProject(
     if (tableViewsData.rows.length >= subscriptionPlanLimits.freeWyrldTables) {
       const projectData = await getProjectQuery(req.params.project_id);
       if (!projectData.rows[0].is_pro) {
-        throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+        throw paymentRequiredError(userSubscriptionStatus.projectIsNotPro);
       }
     }
 
@@ -80,7 +83,7 @@ async function addTableViewByProject(
     });
     // Log table creation event
     logEventAsync({
-      userId: req.session.user,
+      userId,
       projectId: req.params.project_id,
       eventType: EventType.TABLE_CREATED,
       eventData: { tableId: data.rows[0].id, title },
@@ -100,24 +103,24 @@ async function addTableViewByUser(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    const tableViewsData = await getTableViewsByUserQuery(req.session.user);
+    const userId = requireApiUser(req);
+    const tableViewsData = await getTableViewsByUserQuery(userId);
     if (tableViewsData.rows.length >= subscriptionPlanLimits.freeUserTables) {
-      const userData = await getUserByIdQuery(req.session.user);
+      const userData = await getUserByIdQuery(userId);
       if (!userData.rows[0].is_pro) {
-        throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+        throw paymentRequiredError(userSubscriptionStatus.userIsNotPro);
       }
     }
     const title = getTitle(req.body.title);
     const mode = parseRequestedTableMode(req.body.mode);
     const data = await addTableViewByUserQuery({
-      user_id: req.session.user,
+      user_id: userId,
       title,
       mode,
     });
     // Log table creation event
     logEventAsync({
-      userId: req.session.user,
+      userId,
       eventType: EventType.TABLE_CREATED,
       eventData: { tableId: data.rows[0].id, title },
       req,
@@ -134,10 +137,7 @@ async function getTableViewsByProject(
   next: NextFunction
 ) {
   try {
-    const access = await getProjectAccess(req, req.params.project_id);
-    if (!access) {
-      throw forbiddenError();
-    }
+    const access = await requireProjectMemberAccess(req, req.params.project_id);
     const data = await getTableViewsByProjectQuery(req.params.project_id);
     const tableRows = access.isEditor
       ? data.rows
@@ -170,8 +170,8 @@ async function getTableViewsByUser(
   next: NextFunction
 ) {
   try {
-    if (!req.session.user) throw new Error("User is not logged in");
-    const data = await getTableViewsByUserQuery(req.session.user);
+    const userId = requireApiUser(req);
+    const data = await getTableViewsByUserQuery(userId);
     const response = data.rows.map((row) =>
       withTableCapabilities(
         row,

@@ -1,3 +1,4 @@
+import logger from "../lib/logger.js";
 import type { AuthorizeSocketTable } from "./tableSocketAuth";
 
 export function registerTableInteractionHandlers(params: {
@@ -80,7 +81,10 @@ export function registerTableInteractionHandlers(params: {
           socket.id,
         );
       } catch (err) {
-        console.log("Blocked unauthorized table-changed event", err);
+        logger.warn(
+          { err, socketId: socket.id, table, newTableUUID },
+          "Blocked unauthorized table-changed event",
+        );
       }
     },
   );

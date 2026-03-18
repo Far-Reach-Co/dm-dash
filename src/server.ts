@@ -4,26 +4,20 @@ import * as path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
+import { PORT } from "./config";
+import logger from "./lib/logger.js";
 import { server } from "./setupApp";
 import setupRedisAdapter from "./setupRedisAdapter.js";
 import setupSocketHandlers from "./setupSocket";
 
-function resolvePort(): number {
-  const rawPort = process.env.PORT?.trim() || "4000";
-  const port = Number(rawPort);
-  if (!Number.isInteger(port) || port <= 0) {
-    throw new Error("PORT must be a positive integer");
-  }
-  return port;
-}
-
 function main() {
   const io = setupSocketHandlers(server);
-  setupRedisAdapter(io).catch(console.error);
+  setupRedisAdapter(io).catch((err) => {
+    logger.error({ err }, "Failed to set up Redis adapter");
+  });
 
-  const PORT = resolvePort();
   server.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+    logger.info({ port: PORT }, "Server running");
   });
 }
 

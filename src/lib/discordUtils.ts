@@ -1,4 +1,5 @@
 import fetch, { RequestInit, Response } from "node-fetch";
+import { DISCORD_TOKEN } from "../config";
 
 interface DiscordRequestInputOptions extends Omit<RequestInit, "body"> {
   body?: Record<string, any>;
@@ -13,7 +14,7 @@ export async function DiscordRequest(
   const processedBody = options.body ? JSON.stringify(options.body) : undefined;
 
   const headers = {
-    Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+    Authorization: `Bot ${DISCORD_TOKEN || ""}`,
     "Content-Type": "application/json; charset=UTF-8",
     "User-Agent": "5e-bot (https://5ebot.com), 1.0.2)",
     ...options.headers,

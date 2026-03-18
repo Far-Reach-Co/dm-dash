@@ -1,4 +1,9 @@
 import mail from "../api/smtp";
+import {
+  AFFILIATE_COMMISSION_ALERT_EMAIL,
+  AFFILIATE_COMMISSION_ALERT_EMAILS,
+  isDev,
+} from "../config";
 import { get5eCharGeneralQuery } from "../api/queries/5eCharGeneral";
 import { getProjectUsersByProjectQuery } from "../api/queries/projectUsers";
 import { getProjectQuery } from "../api/queries/projects";
@@ -14,8 +19,8 @@ const DEFAULT_AFFILIATE_COMMISSION_ALERT_EMAIL = "farreachco@gmail.com";
 
 function getAffiliateCommissionAlertEmails(): string[] {
   const configuredRaw =
-    process.env.AFFILIATE_COMMISSION_ALERT_EMAIL ||
-    process.env.AFFILIATE_COMMISSION_ALERT_EMAILS ||
+    AFFILIATE_COMMISSION_ALERT_EMAIL ||
+    AFFILIATE_COMMISSION_ALERT_EMAILS ||
     "";
   const configuredValue = configuredRaw.trim().toLowerCase();
   if (
@@ -28,7 +33,6 @@ function getAffiliateCommissionAlertEmails(): string[] {
     return [];
   }
 
-  const isDev = (process.env.SERVER_ENV || "").trim().toLowerCase() === "dev";
   const raw =
     configuredRaw || (isDev ? "" : DEFAULT_AFFILIATE_COMMISSION_ALERT_EMAIL);
 

@@ -57,6 +57,8 @@ interface LibraryPackWithScopeFlags extends LibraryPackForTable {
   can_install: boolean;
 }
 
+type ProjectScopeAccessMode = "member" | "editor";
+
 function isPackProGated(pack: Pick<LibraryPack, "visibility" | "is_pro_only">) {
   return pack.visibility === "public_pro" || !!pack.is_pro_only;
 }
@@ -95,21 +97,89 @@ function annotatePacksForScope(
   });
 }
 
-async function getScopeProjectAccessFromQuery(req: Request): Promise<{
-  scopeProjectId: string | number | null;
-  scopeProjectIsPro: boolean;
+async function getPackActorContext(req: Request): Promise<{
+  userId: string | number;
+  userIsPro: boolean;
 }> {
+  const userId = requireApiUser(req);
+  const userData = await getUserByIdQuery(userId);
+  return {
+    userId,
+    userIsPro: !!userData.rows[0]?.is_pro,
+  };
+}
+
+async function buildUserPackScope(req: Request): Promise<PackScopeAccess> {
+  const actor = await getPackActorContext(req);
+  return {
+    ...actor,
+    scopeProjectId: null,
+    scopeProjectIsPro: false,
+  };
+}
+
+async function buildProjectPackScope(
+  req: Request,
+  projectId: string | number,
+  accessMode: ProjectScopeAccessMode = "member",
+) {
+  const actor = await getPackActorContext(req);
+  const role =
+    accessMode === "editor"
+      ? await requireProjectEditorAccess(req, projectId)
+      : await requireProjectMemberAccess(req, projectId);
+
+  return {
+    role,
+    scope: {
+      ...actor,
+      scopeProjectId: projectId,
+      scopeProjectIsPro: !!role.project?.is_pro,
+    } satisfies PackScopeAccess,
+  };
+}
+
+async function buildPackScopeFromQuery(req: Request): Promise<PackScopeAccess> {
+  const actor = await getPackActorContext(req);
   const scopeProjectRaw =
     typeof req.query.project_id === "string" ? req.query.project_id : "";
   if (!scopeProjectRaw.trim()) {
-    return { scopeProjectId: null, scopeProjectIsPro: false };
+    return {
+      ...actor,
+      scopeProjectId: null,
+      scopeProjectIsPro: false,
+    };
   }
+
   const scopeProjectId = parsePositiveInt(scopeProjectRaw, "project_id");
   const role = await requireProjectMemberAccess(req, scopeProjectId);
   return {
+    ...actor,
     scopeProjectId,
     scopeProjectIsPro: !!role.project?.is_pro,
   };
+}
+
+async function requireUserPackScope(req: Request) {
+  const scope = await buildUserPackScope(req);
+  assertCanUsePackFeatureForScope(scope);
+  return scope;
+}
+
+async function requireProjectPackScope(
+  req: Request,
+  projectId: string | number,
+  accessMode: ProjectScopeAccessMode = "member",
+) {
+  const access = await buildProjectPackScope(req, projectId, accessMode);
+  assertCanUsePackFeatureForScope(access.scope);
+  return access;
+}
+
+async function requireQueryPackScope(req: Request) {
+  const scope = await buildPackScopeFromQuery(req);
+  assertCanUsePackFeatureForScope(scope);
+  return scope;
 }
 
 function parsePackVisibility(value: unknown): LibraryPackVisibility {
@@ -122,6 +192,10 @@ function parsePackVisibility(value: unknown): LibraryPackVisibility {
 function getPackTitle(value: unknown) {
   if (typeof value === "string" && value.trim()) return value.trim();
   throw badRequestError("title is required");
+}
+
+function getPackDescription(value: unknown) {
+  return typeof value === "string" ? value : "";
 }
 
 function parsePackTags(value: unknown): string[] {
@@ -144,6 +218,15 @@ async function getLibraryPackByIdOrThrow(packId: string | number) {
   const data = await getLibraryPackQuery(packId);
   const pack = data.rows[0];
   if (!pack) throw notFoundError("Library pack not found");
+  return pack;
+}
+
+async function getEditableLibraryPackOrThrow(
+  req: Request,
+  packId: string | number,
+) {
+  const pack = await getLibraryPackByIdOrThrow(packId);
+  await assertCanEditLibraryPack(req, pack);
   return pack;
 }
 
@@ -191,28 +274,116 @@ async function canViewLibraryPack(
   return false;
 }
 
+async function getViewableLibraryPackOrThrow(
+  req: Request,
+  packId: string | number,
+  scope: PackScopeAccess,
+) {
+  const pack = await getLibraryPackByIdOrThrow(packId);
+  const canView = await canViewLibraryPack(req, pack, scope);
+  if (!canView) throw { status: 403, message: "Forbidden" };
+  return pack;
+}
+
+function getCreatePackVisibility(
+  value: unknown,
+  ownerType: "user" | "project",
+): LibraryPackVisibility {
+  const visibility = parsePackVisibility(value);
+  if (ownerType === "project" && visibility === "private") {
+    return "project";
+  }
+  return visibility;
+}
+
+function buildCreatePackInput(
+  body: Request["body"],
+  ownerType: "user" | "project",
+) {
+  return {
+    title: getPackTitle(body.title),
+    description: getPackDescription(body.description),
+    tags: parsePackTags(body.tags),
+    visibility: getCreatePackVisibility(body.visibility, ownerType),
+    is_pro_only: true,
+    is_published: !!body.is_published,
+  };
+}
+
+function buildEditPackPayload(body: Request["body"]) {
+  const payload: Record<string, unknown> = {};
+  if (typeof body.title === "string" && body.title.trim()) {
+    payload.title = body.title.trim();
+  }
+  if (typeof body.description === "string") {
+    payload.description = body.description;
+  }
+  if (typeof body.tags !== "undefined") {
+    payload.tags = parsePackTags(body.tags);
+  }
+  if (typeof body.visibility !== "undefined") {
+    payload.visibility = parsePackVisibility(body.visibility);
+  }
+  if (typeof body.is_published !== "undefined") {
+    payload.is_published = !!body.is_published;
+  }
+  return payload;
+}
+
+function assertPackNotAlreadyOwnedByScope(
+  pack: LibraryPack,
+  scope: PackScopeAccess,
+) {
+  if (scope.scopeProjectId) {
+    if (
+      pack.owner_project_id &&
+      String(pack.owner_project_id) === String(scope.scopeProjectId)
+    ) {
+      throw { status: 409, message: "Pack is already owned by this scope" };
+    }
+    return;
+  }
+
+  if (pack.owner_user_id && String(pack.owner_user_id) === String(scope.userId)) {
+    throw { status: 409, message: "Pack is already owned by this user" };
+  }
+}
+
+function assertPackInstallableForScope(
+  pack: LibraryPack,
+  scope: PackScopeAccess,
+) {
+  assertPackNotAlreadyOwnedByScope(pack, scope);
+
+  if (isPackProGated(pack) && !hasScopeProAccess(scope)) {
+    throw { status: 402, message: getScopeLockReason(scope) };
+  }
+}
+
+async function getDiscoverableProjectIds(userId: string | number) {
+  const [projectUsersData, ownedProjectsData] = await Promise.all([
+    getProjectUsersQuery(userId),
+    getProjectsQuery(userId),
+  ]);
+
+  return Array.from(
+    new Set([
+      ...projectUsersData.rows.map((row) => row.project_id),
+      ...ownedProjectsData.rows.map((row) => row.id),
+    ]),
+  );
+}
+
 async function addLibraryPackByUser(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const user = userData.rows[0];
-    if (!user?.is_pro) {
-      throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    }
-
-    const visibility = parsePackVisibility(req.body.visibility);
+    const scope = await requireUserPackScope(req);
     const data = await addLibraryPackByUserQuery({
-      owner_user_id: userId,
-      title: getPackTitle(req.body.title),
-      description: typeof req.body.description === "string" ? req.body.description : "",
-      tags: parsePackTags(req.body.tags),
-      visibility,
-      is_pro_only: true,
-      is_published: !!req.body.is_published,
+      owner_user_id: scope.userId,
+      ...buildCreatePackInput(req.body, "user"),
     });
     res.status(201).send(data.rows[0]);
   } catch (err) {
@@ -226,24 +397,10 @@ async function addLibraryPackByProject(
   next: NextFunction,
 ) {
   try {
-    const role = await requireProjectEditorAccess(req, req.params.project_id);
-    if (!role.project?.is_pro) {
-      throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
-    }
-
-    const visibility =
-      parsePackVisibility(req.body.visibility) === "private"
-        ? "project"
-        : parsePackVisibility(req.body.visibility);
-
+    await requireProjectPackScope(req, req.params.project_id, "editor");
     const data = await addLibraryPackByProjectQuery({
       owner_project_id: req.params.project_id,
-      title: getPackTitle(req.body.title),
-      description: typeof req.body.description === "string" ? req.body.description : "",
-      tags: parsePackTags(req.body.tags),
-      visibility,
-      is_pro_only: true,
-      is_published: !!req.body.is_published,
+      ...buildCreatePackInput(req.body, "project"),
     });
     res.status(201).send(data.rows[0]);
   } catch (err) {
@@ -253,25 +410,8 @@ async function addLibraryPackByProject(
 
 async function editLibraryPack(req: Request, res: Response, next: NextFunction) {
   try {
-    const pack = await getLibraryPackByIdOrThrow(req.params.id);
-    await assertCanEditLibraryPack(req, pack);
-
-    const payload: Record<string, unknown> = {};
-    if (typeof req.body.title === "string" && req.body.title.trim()) {
-      payload.title = req.body.title.trim();
-    }
-    if (typeof req.body.description === "string") {
-      payload.description = req.body.description;
-    }
-    if (typeof req.body.tags !== "undefined") {
-      payload.tags = parsePackTags(req.body.tags);
-    }
-    if (typeof req.body.visibility !== "undefined") {
-      payload.visibility = parsePackVisibility(req.body.visibility);
-    }
-    if (typeof req.body.is_published !== "undefined") {
-      payload.is_published = !!req.body.is_published;
-    }
+    const pack = await getEditableLibraryPackOrThrow(req, req.params.id);
+    const payload = buildEditPackPayload(req.body);
 
     if (!Object.keys(payload).length) {
       res.status(200).send(pack);
@@ -287,8 +427,7 @@ async function editLibraryPack(req: Request, res: Response, next: NextFunction) 
 
 async function removeLibraryPack(req: Request, res: Response, next: NextFunction) {
   try {
-    const pack = await getLibraryPackByIdOrThrow(req.params.id);
-    await assertCanEditLibraryPack(req, pack);
+    await getEditableLibraryPackOrThrow(req, req.params.id);
     const data = await removeLibraryPackQuery(req.params.id);
     res.status(200).send(data.rows[0] || { removed: true });
   } catch (err) {
@@ -302,8 +441,7 @@ async function addLibraryPackImage(
   next: NextFunction,
 ) {
   try {
-    const pack = await getLibraryPackByIdOrThrow(req.body.pack_id);
-    await assertCanEditLibraryPack(req, pack);
+    const pack = await getEditableLibraryPackOrThrow(req, req.body.pack_id);
 
     const imageId = parsePositiveInt(req.body.image_id, "image_id");
     if (pack.owner_project_id) {
@@ -335,8 +473,7 @@ async function removeLibraryPackImage(
     const packImage = (await getLibraryPackImageQuery(req.params.id)).rows[0];
     if (!packImage) throw notFoundError("Library pack image not found");
 
-    const pack = await getLibraryPackByIdOrThrow(packImage.pack_id);
-    await assertCanEditLibraryPack(req, pack);
+    await getEditableLibraryPackOrThrow(req, packImage.pack_id);
 
     const data = await removeLibraryPackImageQuery(req.params.id);
     res.status(200).send(data.rows[0] || { removed: true });
@@ -351,23 +488,12 @@ async function getLibraryPackImages(
   next: NextFunction,
 ) {
   try {
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-    const scopeProject = await getScopeProjectAccessFromQuery(req);
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: scopeProject.scopeProjectId,
-      scopeProjectIsPro: scopeProject.scopeProjectIsPro,
-    };
-    assertCanUsePackFeatureForScope(scope);
-
-    const pack = await getLibraryPackByIdOrThrow(req.params.pack_id);
-    const canView = await canViewLibraryPack(req, pack, scope);
-    if (!canView) {
-      throw { status: 403, message: "Forbidden" };
-    }
+    const scope = await requireQueryPackScope(req);
+    const pack = await getViewableLibraryPackOrThrow(
+      req,
+      req.params.pack_id,
+      scope,
+    );
 
     const data = await getLibraryPackImagesQuery(pack.id);
     const imageRows = data.rows.map((row) => ({
@@ -406,8 +532,8 @@ async function getLibraryPackMembershipsByImage(
   next: NextFunction,
 ) {
   try {
-    const userId = requireApiUser(req);
     const imageId = parsePositiveInt(req.params.image_id, "image_id");
+    const userId = requireApiUser(req);
     const projectIdRaw =
       typeof req.query.project_id === "string" ? req.query.project_id : "";
     const projectId = projectIdRaw.trim()
@@ -440,39 +566,18 @@ async function discoverLibraryPacks(
   next: NextFunction,
 ) {
   try {
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-
-    const [projectUsersData, ownedProjectsData] = await Promise.all([
-      getProjectUsersQuery(userId),
-      getProjectsQuery(userId),
-    ]);
-    const projectIds = Array.from(
-      new Set([
-        ...projectUsersData.rows.map((row) => row.project_id),
-        ...ownedProjectsData.rows.map((row) => row.id),
-      ]),
-    );
-
+    const scope = await requireQueryPackScope(req);
+    const projectIds = await getDiscoverableProjectIds(scope.userId);
     const limit = Math.min(parseInt(String(req.query.limit || 50), 10) || 50, 100);
     const offset = parseInt(String(req.query.offset || 0), 10) || 0;
     const q = typeof req.query.q === "string" ? req.query.q : "";
     const publishedOnly =
       String(req.query.published || "").toLowerCase() === "true";
-    const scopeProject = await getScopeProjectAccessFromQuery(req);
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: scopeProject.scopeProjectId,
-      scopeProjectIsPro: scopeProject.scopeProjectIsPro,
-    };
-    assertCanUsePackFeatureForScope(scope);
 
     const data = await discoverLibraryPacksQuery({
-      userId,
+      userId: scope.userId,
       projectIds,
-      scopeProjectId: scopeProject.scopeProjectId,
+      scopeProjectId: scope.scopeProjectId,
       includePublicPro: true,
       publishedOnly,
       q,
@@ -491,31 +596,16 @@ async function installLibraryPackByUser(
   next: NextFunction,
 ) {
   try {
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-    const pack = await getLibraryPackByIdOrThrow(req.params.pack_id);
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: null,
-      scopeProjectIsPro: false,
-    };
-    assertCanUsePackFeatureForScope(scope);
-
-    const canView = await canViewLibraryPack(req, pack, scope);
-    if (!canView) throw { status: 403, message: "Forbidden" };
-
-    if (pack.owner_user_id && String(pack.owner_user_id) === String(userId)) {
-      throw { status: 409, message: "Pack is already owned by this user" };
-    }
-
-    if ((pack.is_pro_only || pack.visibility === "public_pro") && !userIsPro) {
-      throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
-    }
+    const scope = await requireUserPackScope(req);
+    const pack = await getViewableLibraryPackOrThrow(
+      req,
+      req.params.pack_id,
+      scope,
+    );
+    assertPackInstallableForScope(pack, scope);
 
     const data = await addLibraryPackInstallByUserQuery({
-      owner_user_id: userId,
+      owner_user_id: scope.userId,
       pack_id: req.params.pack_id,
     });
     res.status(201).send(data.rows[0]);
@@ -530,34 +620,17 @@ async function installLibraryPackByProject(
   next: NextFunction,
 ) {
   try {
-    const role = await requireProjectEditorAccess(req, req.params.project_id);
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-    const pack = await getLibraryPackByIdOrThrow(req.params.pack_id);
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: req.params.project_id,
-      scopeProjectIsPro: !!role.project?.is_pro,
-    };
-    assertCanUsePackFeatureForScope(scope);
-
-    const canView = await canViewLibraryPack(req, pack, scope);
-    if (!canView) throw { status: 403, message: "Forbidden" };
-
-    if (
-      pack.owner_project_id &&
-      String(pack.owner_project_id) === String(req.params.project_id)
-    ) {
-      throw { status: 409, message: "Pack is already owned by this scope" };
-    }
-
-    if (pack.is_pro_only || pack.visibility === "public_pro") {
-      if (!role.project?.is_pro) {
-        throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
-      }
-    }
+    const { scope } = await requireProjectPackScope(
+      req,
+      req.params.project_id,
+      "editor",
+    );
+    const pack = await getViewableLibraryPackOrThrow(
+      req,
+      req.params.pack_id,
+      scope,
+    );
+    assertPackInstallableForScope(pack, scope);
 
     const data = await addLibraryPackInstallByProjectQuery({
       owner_project_id: req.params.project_id,
@@ -609,17 +682,8 @@ async function getInstalledLibraryPacksByUser(
   next: NextFunction,
 ) {
   try {
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: null,
-      scopeProjectIsPro: false,
-    };
-    assertCanUsePackFeatureForScope(scope);
-    const data = await getInstalledLibraryPacksByUserQuery(userId);
+    const scope = await requireUserPackScope(req);
+    const data = await getInstalledLibraryPacksByUserQuery(scope.userId);
     res.status(200).send(annotatePacksForScope(data.rows, scope));
   } catch (err) {
     next(err);
@@ -632,17 +696,8 @@ async function getOwnedLibraryPacksByUser(
   next: NextFunction,
 ) {
   try {
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: null,
-      scopeProjectIsPro: false,
-    };
-    assertCanUsePackFeatureForScope(scope);
-    const data = await getOwnedLibraryPacksByUserQuery(userId);
+    const scope = await requireUserPackScope(req);
+    const data = await getOwnedLibraryPacksByUserQuery(scope.userId);
     res.status(200).send(annotatePacksForScope(data.rows, scope));
   } catch (err) {
     next(err);
@@ -655,17 +710,11 @@ async function getInstalledLibraryPacksByProject(
   next: NextFunction,
 ) {
   try {
-    const role = await requireProjectMemberAccess(req, req.params.project_id);
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: req.params.project_id,
-      scopeProjectIsPro: !!role.project?.is_pro,
-    };
-    assertCanUsePackFeatureForScope(scope);
+    const { scope } = await requireProjectPackScope(
+      req,
+      req.params.project_id,
+      "member",
+    );
     const data = await getInstalledLibraryPacksByProjectQuery(
       req.params.project_id,
     );
@@ -681,17 +730,11 @@ async function getOwnedLibraryPacksByProject(
   next: NextFunction,
 ) {
   try {
-    const role = await requireProjectMemberAccess(req, req.params.project_id);
-    const userId = requireApiUser(req);
-    const userData = await getUserByIdQuery(userId);
-    const userIsPro = !!userData.rows[0]?.is_pro;
-    const scope: PackScopeAccess = {
-      userId,
-      userIsPro,
-      scopeProjectId: req.params.project_id,
-      scopeProjectIsPro: !!role.project?.is_pro,
-    };
-    assertCanUsePackFeatureForScope(scope);
+    const { scope } = await requireProjectPackScope(
+      req,
+      req.params.project_id,
+      "member",
+    );
     const data = await getOwnedLibraryPacksByProjectQuery(req.params.project_id);
     res.status(200).send(annotatePacksForScope(data.rows, scope));
   } catch (err) {

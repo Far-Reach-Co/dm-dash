@@ -6,8 +6,20 @@ import {
 } from "@aws-sdk/client-s3";
 import { createReadStream, statSync, unlinkSync } from "fs";
 import { Request } from "express";
+import {
+  AWS_ACCESS_KEY_ID,
+  AWS_REGION,
+  AWS_SECRET_ACCESS_KEY,
+} from "../../config";
 import { splitAtIndex } from "../../lib/utils";
 import { userSubscriptionStatus } from "../../lib/enums";
+import {
+  badRequestError,
+  notFoundError,
+  payloadTooLargeError,
+  paymentRequiredError,
+  unauthorizedError,
+} from "../../lib/httpErrors";
 import { getUserByIdQuery } from "../queries/users";
 import { getProjectQuery } from "../queries/projects";
 import {
@@ -17,16 +29,13 @@ import {
 import { getMetadata, resizeImage } from "../../lib/imageProcessing";
 import logger from "../../lib/logger.js";
 
-const awsRegion = process.env.AWS_REGION || "us-east-1";
-const awsAccessKeyId = process.env.AWS_ACCESS_KEY_ID;
-const awsSecretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 const s3 = new S3Client({
-  region: awsRegion,
-  ...(awsAccessKeyId && awsSecretAccessKey
+  region: AWS_REGION,
+  ...(AWS_ACCESS_KEY_ID && AWS_SECRET_ACCESS_KEY
     ? {
         credentials: {
-          accessKeyId: awsAccessKeyId,
-          secretAccessKey: awsSecretAccessKey,
+          accessKeyId: AWS_ACCESS_KEY_ID,
+          secretAccessKey: AWS_SECRET_ACCESS_KEY,
         },
       }
     : {}),
@@ -38,8 +47,8 @@ function normalizeS3BucketAndKey(
 ): { bucket: string; key: string } {
   const normalizedBucket = rawBucket.trim().replace(/^\/+|\/+$/g, "");
   const normalizedKey = rawKey.trim().replace(/^\/+/g, "");
-  if (!normalizedBucket) throw new Error("Missing S3 bucket name");
-  if (!normalizedKey) throw new Error("Missing S3 object key");
+  if (!normalizedBucket) throw badRequestError("Missing S3 bucket name");
+  if (!normalizedKey) throw badRequestError("Missing S3 object key");
 
   const slashIndex = normalizedBucket.indexOf("/");
   if (slashIndex === -1) {
@@ -51,7 +60,7 @@ function normalizeS3BucketAndKey(
     .slice(slashIndex + 1)
     .trim()
     .replace(/^\/+|\/+$/g, "");
-  if (!bucket) throw new Error("Invalid S3 bucket configuration");
+  if (!bucket) throw badRequestError("Invalid S3 bucket configuration");
   return {
     bucket,
     key: prefix ? `${prefix}/${normalizedKey}` : normalizedKey,
@@ -60,7 +69,7 @@ function normalizeS3BucketAndKey(
 
 async function uploadToS3(params: PutObjectCommandInput): Promise<void> {
   if (!params.Bucket || !params.Key) {
-    throw new Error("S3 upload requires Bucket and Key");
+    throw badRequestError("S3 upload requires Bucket and Key");
   }
 
   const { bucket, key } = normalizeS3BucketAndKey(
@@ -100,7 +109,7 @@ export async function deleteFromS3(bucket: string, key: string): Promise<void> {
 }
 
 export function computeAwsImageParamsFromRequest(req: Request) {
-  if (!req.file) throw new Error("Missing file");
+  if (!req.file) throw badRequestError("Missing file");
   const name = req.file.originalname;
   var ind2 = name.lastIndexOf(".");
   const type = splitAtIndex(name, ind2);
@@ -116,21 +125,18 @@ export async function checkUserDataUsageLimitReachedAndAuth(
   sessionUser: string | number | undefined,
   incomingBytes = 0,
 ) {
-  if (!sessionUser) throw new Error("User is not logged in");
+  if (!sessionUser) throw unauthorizedError();
   const userData = await getUserByIdQuery(sessionUser);
   const user = userData.rows[0];
-  if (!user) throw { status: 404, message: "User not found" };
+  if (!user) throw notFoundError("User not found");
   const limitBytes = getUserDataUsageLimitBytes(Boolean(user.is_pro));
   const projectedUsage = Number(user.used_data_in_bytes || 0) + incomingBytes;
 
   if (projectedUsage > limitBytes) {
     if (!user.is_pro) {
-      throw { status: 402, message: userSubscriptionStatus.userIsNotPro };
+      throw paymentRequiredError(userSubscriptionStatus.userIsNotPro);
     }
-    throw {
-      status: 413,
-      message: userSubscriptionStatus.userDataHardLimitReached,
-    };
+    throw payloadTooLargeError(userSubscriptionStatus.userDataHardLimitReached);
   }
 }
 
@@ -139,23 +145,20 @@ export async function checkProjectDataUsageLimitReachedAndAuth(
   sessionUser: string | number | undefined,
   incomingBytes = 0,
 ) {
-  if (!sessionUser) throw new Error("User is not logged in");
-  if (!projectId) throw new Error("Missing project ID");
+  if (!sessionUser) throw unauthorizedError();
+  if (!projectId) throw badRequestError("Missing project ID");
 
   const projectData = await getProjectQuery(projectId);
   const project = projectData.rows[0];
-  if (!project) throw { status: 404, message: "Project not found" };
+  if (!project) throw notFoundError("Project not found");
   const limitBytes = getWyrldDataUsageLimitBytes(Boolean(project.is_pro));
   const projectedUsage = Number(project.used_data_in_bytes || 0) + incomingBytes;
 
   if (projectedUsage > limitBytes) {
     if (!project.is_pro) {
-      throw { status: 402, message: userSubscriptionStatus.projectIsNotPro };
+      throw paymentRequiredError(userSubscriptionStatus.projectIsNotPro);
     }
-    throw {
-      status: 413,
-      message: userSubscriptionStatus.projectDataHardLimitReached,
-    };
+    throw payloadTooLargeError(userSubscriptionStatus.projectDataHardLimitReached);
   }
 }
 

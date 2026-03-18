@@ -8,7 +8,6 @@ import {
   isImageInInstalledPacksByProjectQuery,
   isImageInInstalledPacksByUserQuery,
 } from "../queries/libraryPacks";
-import { getProjectAccess, requireUser } from "../../lib/authz";
 import { requireGuestSandboxAccess } from "../../lib/guestSandbox.js";
 import {
   badRequestError,
@@ -18,6 +17,7 @@ import {
   parsePositiveInt,
   requireTablePermissionById,
 } from "./tableResourceUtils";
+import { getProjectRole, requireApiUser } from "./accessControl";
 
 export async function getOptionalTableAuthForImageMutation(req: Request) {
   return await getOptionalTableEditAuth(req, "canManageImageAssets");
@@ -49,7 +49,7 @@ async function ensureImageEditableWithoutTableContext(
   req: Request,
   imageId: string | number,
 ) {
-  const userId = requireUser(req);
+  const userId = requireApiUser(req);
   const tableImages = (await getTableImagesByImageQuery(imageId)).rows;
   if (!tableImages.length) throw notFoundError("Image not found");
 
@@ -62,8 +62,8 @@ async function ensureImageEditableWithoutTableContext(
     if (!tableImage.project_id) continue;
     const key = String(tableImage.project_id);
     if (!checkedProjects.has(key)) {
-      const access = await getProjectAccess(req, tableImage.project_id);
-      checkedProjects.set(key, Boolean(access?.isEditor));
+      const access = await getProjectRole(req, tableImage.project_id);
+      checkedProjects.set(key, access.isEditor);
     }
     if (checkedProjects.get(key)) return;
   }
@@ -174,7 +174,7 @@ export async function resolveImageViewScope(req: Request): Promise<ImageViewScop
     throw forbiddenError();
   }
 
-  return { kind: "user", userId: requireUser(req) };
+  return { kind: "user", userId: requireApiUser(req) };
 }
 
 async function isImageViewableForUser(
@@ -194,8 +194,8 @@ async function isImageViewableForUser(
     if (!tableImage.project_id) continue;
     const key = String(tableImage.project_id);
     if (!checkedProjects.has(key)) {
-      const access = await getProjectAccess(req, tableImage.project_id);
-      checkedProjects.set(key, Boolean(access?.isMember));
+      const access = await getProjectRole(req, tableImage.project_id);
+      checkedProjects.set(key, access.isMember);
     }
     if (checkedProjects.get(key)) return true;
   }

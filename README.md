@@ -7,6 +7,7 @@ Core app for Far Reach Co. (dashboard, VTT, character sheets, Discord integratio
 - Development: `docs/dev.md`
 - Deployment: `docs/deploy.md`
 - Operations: `docs/ops.md`
+- Architecture: `docs/architecture.md`
 - Tools: `docs/tools.md`
 
 ## Quick Start

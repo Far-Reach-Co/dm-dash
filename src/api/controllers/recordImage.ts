@@ -20,6 +20,80 @@ interface addRecordImageRequest extends Request {
   };
 }
 
+function recordImageNotFound() {
+  return { status: 404, message: "Record image not found" };
+}
+
+async function getRecordImageOrThrow(recordImageId: number | string) {
+  const data = await getRecordImageQuery(recordImageId);
+  const recordImage = data.rows[0];
+  if (!recordImage) throw recordImageNotFound();
+  return recordImage;
+}
+
+async function findExistingRecordImageLink(
+  recordId: number | string,
+  imageId: number | string,
+) {
+  const existingData = await getRecordImageByRecordAndImageQuery(recordId, imageId);
+  return existingData.rows[0] || null;
+}
+
+async function findOrCreateRecordImageLink(
+  recordId: number | string,
+  imageId: number | string,
+) {
+  const existingRecordImage = await findExistingRecordImageLink(recordId, imageId);
+  if (existingRecordImage) return { recordImage: existingRecordImage, created: false };
+
+  try {
+    const data = await addRecordImageQuery({
+      record_id: recordId,
+      image_id: imageId,
+    });
+    return { recordImage: data.rows[0], created: true };
+  } catch (err: any) {
+    if (err?.code === "23505") {
+      const retryRecordImage = await findExistingRecordImageLink(recordId, imageId);
+      if (retryRecordImage) {
+        return { recordImage: retryRecordImage, created: false };
+      }
+    }
+    throw err;
+  }
+}
+
+async function getVisibleRecordImageRowsForImage(
+  req: Request,
+  imageId: number | string,
+) {
+  const data = await getRecordImagesByImageQuery(imageId);
+  const visibleRows = [];
+
+  for (const row of data.rows) {
+    const record = await getRecordOrThrow(row.record_id);
+    try {
+      await requireRecordViewAccess(req, record);
+      visibleRows.push(row);
+    } catch {
+      // no-op, skip records viewer cannot access
+    }
+  }
+
+  return visibleRows;
+}
+
+async function getEditableRecordImageByImageOrThrow(
+  req: Request,
+  imageId: number | string,
+) {
+  const recordImage = (await getRecordImagesByImageQuery(imageId)).rows[0];
+  if (!recordImage) throw recordImageNotFound();
+  const record = await getRecordOrThrow(recordImage.record_id);
+  await requireRecordEditAccess(req, record);
+  return recordImage;
+}
+
 async function addRecordImage(
   req: addRecordImageRequest,
   res: Response,
@@ -28,39 +102,13 @@ async function addRecordImage(
   try {
     const record = await getRecordOrThrow(req.body.record_id);
     await requireRecordEditAccess(req, record);
-    const existingData = await getRecordImageByRecordAndImageQuery(
+    const { recordImage, created } = await findOrCreateRecordImageLink(
       req.body.record_id,
       req.body.image_id,
     );
-    const existingRecordImage = existingData.rows[0];
-    if (existingRecordImage) {
-      res.status(200).send(existingRecordImage);
-      return;
-    }
-
-    let recordImage:
-      | Awaited<ReturnType<typeof addRecordImageQuery>>["rows"][number]
-      | undefined;
-    try {
-      const data = await addRecordImageQuery(req.body);
-      recordImage = data.rows[0];
-    } catch (err: any) {
-      if (err?.code === "23505") {
-        const retryData = await getRecordImageByRecordAndImageQuery(
-          req.body.record_id,
-          req.body.image_id,
-        );
-        const retryRecordImage = retryData.rows[0];
-        if (retryRecordImage) {
-          res.status(200).send(retryRecordImage);
-          return;
-        }
-      }
-      throw err;
-    }
     if (!recordImage) throw { status: 500, message: "Failed to link record image" };
 
-    res.status(201).send(recordImage);
+    res.status(created ? 201 : 200).send(recordImage);
   } catch (err) {
     next(err);
   }
@@ -68,9 +116,7 @@ async function addRecordImage(
 
 async function getRecordImage(req: Request, res: Response, next: NextFunction) {
   try {
-    const data = await getRecordImageQuery(req.params.id);
-    const recordImage = data.rows[0];
-    if (!recordImage) throw { status: 404, message: "Record image not found" };
+    const recordImage = await getRecordImageOrThrow(req.params.id);
     const record = await getRecordOrThrow(recordImage.record_id);
     await requireRecordViewAccess(req, record);
     res.send(recordImage);
@@ -101,18 +147,10 @@ async function getRecordImagesByImage(
   next: NextFunction
 ) {
   try {
-    const data = await getRecordImagesByImageQuery(req.params.image_id);
-    const visibleRows = [];
-
-    for (const row of data.rows) {
-      const record = await getRecordOrThrow(row.record_id);
-      try {
-        await requireRecordViewAccess(req, record);
-        visibleRows.push(row);
-      } catch {
-        // no-op, skip records viewer cannot access
-      }
-    }
+    const visibleRows = await getVisibleRecordImageRowsForImage(
+      req,
+      req.params.image_id,
+    );
     res.send(visibleRows);
   } catch (err) {
     next(err);
@@ -125,14 +163,10 @@ async function removeRecordImageByImage(
   next: NextFunction
 ) {
   try {
-    const recordImageData = await getRecordImagesByImageQuery(
-      req.params.image_id
+    const recordImage = await getEditableRecordImageByImageOrThrow(
+      req,
+      req.params.image_id,
     );
-    const recordImage = recordImageData.rows[0];
-    if (!recordImage) throw { status: 404, message: "Record image not found" };
-    const record = await getRecordOrThrow(recordImage.record_id);
-    await requireRecordEditAccess(req, record);
-
     await removeRecordImageQuery(recordImage.id);
 
     res.status(204).send();

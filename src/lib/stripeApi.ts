@@ -1,5 +1,22 @@
 import fetch from "node-fetch";
+import {
+  STRIPE_AFFILIATE_DISCOUNT_COUPON_ID,
+  STRIPE_CONNECT_ACCOUNT_COUNTRY,
+  STRIPE_PRICE_ID_PRO_USER_MONTHLY,
+  STRIPE_PRICE_ID_PRO_USER_YEARLY,
+  STRIPE_PRICE_ID_PRO_WYRLD_MONTHLY,
+  STRIPE_PRICE_ID_PRO_WYRLD_YEARLY,
+  STRIPE_PRICE_LOOKUP_PRO_USER_MONTHLY,
+  STRIPE_PRICE_LOOKUP_PRO_USER_YEARLY,
+  STRIPE_PRICE_LOOKUP_PRO_WYRLD_MONTHLY,
+  STRIPE_PRICE_LOOKUP_PRO_WYRLD_YEARLY,
+  STRIPE_SECRET_KEY,
+} from "../config";
 import { getPublicAppUrl } from "./emailPreferences";
+import {
+  createHttpError,
+  serviceUnavailableError,
+} from "./httpErrors";
 
 export type BillingInterval = "monthly" | "yearly";
 export type BillingScope = "user" | "project";
@@ -44,17 +61,15 @@ interface StripeConnectAccount {
 }
 
 function readStripeConnectDefaultCountry() {
-  const value = process.env.STRIPE_CONNECT_ACCOUNT_COUNTRY?.trim() || "US";
-  return value.toUpperCase();
+  return STRIPE_CONNECT_ACCOUNT_COUNTRY;
 }
 
 function readStripeSecretKey() {
-  const key = process.env.STRIPE_SECRET_KEY?.trim() || "";
+  const key = STRIPE_SECRET_KEY || "";
   if (!key) {
-    throw {
-      status: 503,
-      message: "Stripe secret key is not configured (STRIPE_SECRET_KEY)",
-    };
+    throw serviceUnavailableError(
+      "Stripe secret key is not configured (STRIPE_SECRET_KEY)",
+    );
   }
   return key;
 }
@@ -73,37 +88,29 @@ function getDefaultLookupKey(scope: BillingScope, interval: BillingInterval) {
 function getPriceLookupKey(scope: BillingScope, interval: BillingInterval) {
   if (scope === "user") {
     return (
-      process.env[
-        interval === "yearly"
-          ? "STRIPE_PRICE_LOOKUP_PRO_USER_YEARLY"
-          : "STRIPE_PRICE_LOOKUP_PRO_USER_MONTHLY"
-      ]?.trim() || getDefaultLookupKey(scope, interval)
+      (interval === "yearly"
+        ? STRIPE_PRICE_LOOKUP_PRO_USER_YEARLY
+        : STRIPE_PRICE_LOOKUP_PRO_USER_MONTHLY) || getDefaultLookupKey(scope, interval)
     );
   }
 
   return (
-    process.env[
-      interval === "yearly"
-        ? "STRIPE_PRICE_LOOKUP_PRO_WYRLD_YEARLY"
-        : "STRIPE_PRICE_LOOKUP_PRO_WYRLD_MONTHLY"
-    ]?.trim() || getDefaultLookupKey(scope, interval)
+    (interval === "yearly"
+      ? STRIPE_PRICE_LOOKUP_PRO_WYRLD_YEARLY
+      : STRIPE_PRICE_LOOKUP_PRO_WYRLD_MONTHLY) || getDefaultLookupKey(scope, interval)
   );
 }
 
 function getPriceIdOverride(scope: BillingScope, interval: BillingInterval) {
   if (scope === "user") {
-    return process.env[
-      interval === "yearly"
-        ? "STRIPE_PRICE_ID_PRO_USER_YEARLY"
-        : "STRIPE_PRICE_ID_PRO_USER_MONTHLY"
-    ]?.trim();
+    return interval === "yearly"
+      ? STRIPE_PRICE_ID_PRO_USER_YEARLY || undefined
+      : STRIPE_PRICE_ID_PRO_USER_MONTHLY || undefined;
   }
 
-  return process.env[
-    interval === "yearly"
-      ? "STRIPE_PRICE_ID_PRO_WYRLD_YEARLY"
-      : "STRIPE_PRICE_ID_PRO_WYRLD_MONTHLY"
-  ]?.trim();
+  return interval === "yearly"
+    ? STRIPE_PRICE_ID_PRO_WYRLD_YEARLY || undefined
+    : STRIPE_PRICE_ID_PRO_WYRLD_MONTHLY || undefined;
 }
 
 function buildStripeHeaders() {
@@ -114,13 +121,11 @@ function buildStripeHeaders() {
 }
 
 export function readStripeAffiliateDiscountCouponId() {
-  const couponId = process.env.STRIPE_AFFILIATE_DISCOUNT_COUPON_ID?.trim() || "";
+  const couponId = STRIPE_AFFILIATE_DISCOUNT_COUPON_ID || "";
   if (!couponId) {
-    throw {
-      status: 503,
-      message:
-        "Affiliate discount coupon is not configured (STRIPE_AFFILIATE_DISCOUNT_COUPON_ID)",
-    };
+    throw serviceUnavailableError(
+      "Affiliate discount coupon is not configured (STRIPE_AFFILIATE_DISCOUNT_COUPON_ID)",
+    );
   }
   return couponId;
 }
@@ -147,11 +152,10 @@ async function stripeRequest(path: string, options: {
   const parsed = text ? (JSON.parse(text) as StripeErrorResponse & Record<string, unknown>) : {};
 
   if (!response.ok) {
-    throw {
-      status: 502,
-      message:
-        parsed?.error?.message || `Stripe API request failed with status ${response.status}`,
-    };
+    throw createHttpError(
+      502,
+      parsed?.error?.message || `Stripe API request failed with status ${response.status}`,
+    );
   }
 
   return parsed;
@@ -181,10 +185,9 @@ export async function resolveStripePriceIdForScope(params: {
   ) || (response.data || [])[0];
 
   if (!price?.id) {
-    throw {
-      status: 503,
-      message: `No active Stripe price found for lookup key '${lookupKey}'`,
-    };
+    throw serviceUnavailableError(
+      `No active Stripe price found for lookup key '${lookupKey}'`,
+    );
   }
 
   return price.id;
@@ -254,7 +257,7 @@ export async function createStripeCheckoutSession(params: {
 
   const url = typeof response.url === "string" ? response.url : "";
   if (!url) {
-    throw { status: 502, message: "Stripe did not return a checkout session URL" };
+    throw createHttpError(502, "Stripe did not return a checkout session URL");
   }
 
   return { url };
@@ -296,7 +299,7 @@ export async function createStripeConnectExpressAccount(params?: {
 
   const id = typeof response.id === "string" ? response.id : "";
   if (!id) {
-    throw { status: 502, message: "Stripe did not return a Connect account id" };
+    throw createHttpError(502, "Stripe did not return a Connect account id");
   }
 
   return {
@@ -312,7 +315,7 @@ export async function retrieveStripeConnectAccount(accountId: string) {
 
   const id = typeof response.id === "string" ? response.id : "";
   if (!id) {
-    throw { status: 502, message: "Stripe did not return a Connect account id" };
+    throw createHttpError(502, "Stripe did not return a Connect account id");
   }
 
   return {
@@ -340,7 +343,7 @@ export async function createStripeConnectOnboardingLink(params: {
 
   const url = typeof response.url === "string" ? response.url : "";
   if (!url) {
-    throw { status: 502, message: "Stripe did not return a Connect onboarding URL" };
+    throw createHttpError(502, "Stripe did not return a Connect onboarding URL");
   }
 
   return { url };
@@ -381,7 +384,7 @@ export async function createStripeTransferToConnectedAccount(params: {
 
   const id = typeof response.id === "string" ? response.id : "";
   if (!id) {
-    throw { status: 502, message: "Stripe did not return a transfer id" };
+    throw createHttpError(502, "Stripe did not return a transfer id");
   }
 
   return { id };
@@ -453,7 +456,7 @@ export async function createStripeBillingPortalSession(params: {
 
   const url = typeof response.url === "string" ? response.url : "";
   if (!url) {
-    throw { status: 502, message: "Stripe did not return a customer portal URL" };
+    throw createHttpError(502, "Stripe did not return a customer portal URL");
   }
 
   return { url };

@@ -2,6 +2,11 @@ import { getSignedUrl as getCloudFrontSignedUrl } from "@aws-sdk/cloudfront-sign
 import path = require("path");
 import fs = require("fs");
 import { Image } from "../queries/images";
+import {
+  CLOUDFRONT_DISTRIBUTION_DOMAIN,
+  CLOUDFRONT_KEY_ID,
+} from "../../config";
+import { serviceUnavailableError } from "../../lib/httpErrors";
 import { redisClient } from "../../lib/socketUsers";
 import logger from "../../lib/logger.js";
 
@@ -14,11 +19,28 @@ const cloudFrontPrivateKeyPath = path.join(
   "private_frc_cloudfront_key.pem",
 );
 const cloudFrontPrivateKey = fs.readFileSync(cloudFrontPrivateKeyPath, "utf8");
-const cloudFrontKeyId = process.env.CLOUDFRONT_KEY_ID as string;
 
 // Signed URL cache settings - cache for 2.5 days (URLs expire in 3 days)
 const SIGNED_URL_CACHE_TTL_SECONDS = 60 * 60 * 24 * 2.5; // 2.5 days
 const SIGNED_URL_CACHE_PREFIX = "signed_url:v2:";
+
+function getCloudFrontDistributionDomainOrThrow(): string {
+  if (!CLOUDFRONT_DISTRIBUTION_DOMAIN) {
+    throw serviceUnavailableError(
+      "CloudFront distribution domain is not configured (CLOUDFRONT_DISTRIBUTION_DOMAIN)",
+    );
+  }
+  return CLOUDFRONT_DISTRIBUTION_DOMAIN;
+}
+
+function getCloudFrontKeyIdOrThrow(): string {
+  if (!CLOUDFRONT_KEY_ID) {
+    throw serviceUnavailableError(
+      "CloudFront key id is not configured (CLOUDFRONT_KEY_ID)",
+    );
+  }
+  return CLOUDFRONT_KEY_ID;
+}
 
 export function getSignedUrlCacheKey(imageId: number | string): string {
   return `${SIGNED_URL_CACHE_PREFIX}${imageId}`;
@@ -31,11 +53,11 @@ export async function invalidateSignedUrlCache(
 }
 
 export function generateSignedUrl(fileName: string): string {
-  const cloudFrontUrl = `https://${process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN}/images/${fileName}`;
+  const cloudFrontUrl = `https://${getCloudFrontDistributionDomainOrThrow()}/images/${fileName}`;
   const expiresAt = new Date(Date.now() + 60 * 60 * 24 * 3 * 1000); // 3 days
   return getCloudFrontSignedUrl({
     url: cloudFrontUrl,
-    keyPairId: cloudFrontKeyId,
+    keyPairId: getCloudFrontKeyIdOrThrow(),
     privateKey: cloudFrontPrivateKey,
     dateLessThan: expiresAt.toISOString(),
   });
@@ -44,13 +66,13 @@ export function generateSignedUrl(fileName: string): string {
 function isCachedSignedUrlUsable(cachedUrl: string): boolean {
   try {
     const parsed = new URL(cachedUrl);
-    const expectedHost = String(process.env.CLOUDFRONT_DISTRIBUTION_DOMAIN || "").trim();
+    const expectedHost = String(CLOUDFRONT_DISTRIBUTION_DOMAIN || "").trim();
     if (!expectedHost) return false;
     if (parsed.hostname !== expectedHost) return false;
     if (!parsed.pathname.startsWith("/images/")) return false;
 
     const cachedKeyPairId = parsed.searchParams.get("Key-Pair-Id");
-    if (!cachedKeyPairId || cachedKeyPairId !== cloudFrontKeyId) {
+    if (!cachedKeyPairId || cachedKeyPairId !== CLOUDFRONT_KEY_ID) {
       return false;
     }
 

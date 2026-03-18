@@ -1,4 +1,5 @@
 import { sign, verify, SignOptions } from "jsonwebtoken";
+import { isProd, PUBLIC_BASE_URL, SECRET_KEY } from "../config";
 
 const EMAIL_PREFERENCES_TOKEN_PURPOSE = "email-preferences";
 
@@ -8,9 +9,8 @@ interface EmailPreferencesTokenPayload {
 }
 
 export function getPublicAppUrl(): string {
-  const envBaseUrl = process.env.PUBLIC_BASE_URL?.trim();
-  if (envBaseUrl) return envBaseUrl.replace(/\/+$/, "");
-  if (process.env.SERVER_ENV === "prod") return "https://farreachco.com";
+  if (PUBLIC_BASE_URL) return PUBLIC_BASE_URL.replace(/\/+$/, "");
+  if (isProd) return "https://farreachco.com";
   return "http://localhost:4000";
 }
 
@@ -23,7 +23,7 @@ export function createEmailPreferencesToken(
       purpose: EMAIL_PREFERENCES_TOKEN_PURPOSE,
       userId: String(userId),
     },
-    process.env.SECRET_KEY as string,
+    SECRET_KEY,
     { expiresIn } as SignOptions,
   );
 }
@@ -34,7 +34,7 @@ export function verifyEmailPreferencesToken(
   try {
     const payload = verify(
       token,
-      process.env.SECRET_KEY as string,
+      SECRET_KEY,
     ) as EmailPreferencesTokenPayload;
 
     if (

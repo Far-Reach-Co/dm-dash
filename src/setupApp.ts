@@ -15,6 +15,7 @@ import compression from "compression";
 import pinoHttp from "pino-http";
 import { randomUUID } from "crypto";
 import logger from "./lib/logger.js";
+import { createHttpError, toHttpError } from "./lib/httpErrors";
 import RedisSessionStore from "./lib/redisSessionStore.js";
 import { getRedisUrl } from "./lib/redisConfig.js";
 
@@ -181,24 +182,36 @@ app.use((req: Request, res: Response) => {
 
 //Error
 app.use((error: any, req: Request, res: Response, next: NextFunction) => {
+  if (res.headersSent) {
+    next(error);
+    return;
+  }
+
+  let normalizedError = toHttpError(error);
+
+  if (normalizedError.code === "EBADCSRFTOKEN") {
+    normalizedError = createHttpError(403, "Form has expired or was tampered with.", {
+      code: "EBADCSRFTOKEN",
+    });
+  } else if (String(normalizedError.code || "") === "23505") {
+    normalizedError = createHttpError(400, "This email has already been registered", {
+      code: normalizedError.code,
+    });
+  }
+
   logger.error(
-    { err: error, url: req.url, method: req.method, requestId: req.id },
+    {
+      err: normalizedError,
+      url: req.url,
+      method: req.method,
+      requestId: req.id,
+    },
     "Request error",
   );
-  if (error.code === "EBADCSRFTOKEN") {
-    // CSRF token validation failed
-    error.status = 403;
-    error.message = "Form has expired or was tampered with.";
-  }
-  // code for unique constraint on user registration email
-  if (error.code == 23505) {
-    error.status = 400;
-    error.message = "This email has already been registered";
-  }
-  res.status(error.status || 500);
+  res.status(normalizedError.status);
   res.json({
     error: {
-      message: error.message || "There was an Error",
+      message: normalizedError.message,
     },
   });
 });

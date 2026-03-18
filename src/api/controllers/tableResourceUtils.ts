@@ -7,13 +7,13 @@ import {
   TableCapabilities,
   TableViewAuthResource,
 } from "../../lib/tableAuthz";
-import { getProjectAccess, requireUser } from "../../lib/authz";
 import {
   badRequestError,
   createHttpError,
   forbiddenError,
   notFoundError,
 } from "../../lib/httpErrors";
+import { getProjectRole, requireApiUser } from "./accessControl";
 
 export type TableViewRecord = TableViewAuthResource & {
   uuid?: string;
@@ -146,13 +146,13 @@ export async function ensureScopedResourceEditable(
   }
 
   if (resource.project_id) {
-    const access = await getProjectAccess(req, resource.project_id);
-    if (!access?.isEditor) throw forbiddenError();
+    const access = await getProjectRole(req, resource.project_id);
+    if (!access.isEditor) throw forbiddenError();
     return;
   }
 
   if (resource.user_id) {
-    const userId = requireUser(req);
+    const userId = requireApiUser(req);
     if (String(resource.user_id) !== String(userId)) {
       throw forbiddenError();
     }
