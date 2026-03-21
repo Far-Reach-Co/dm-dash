@@ -299,11 +299,13 @@ export default async function getContextualSuggestions({
         metadata,
       );
 
-      if (spellIndexSet) {
-        if (!spellIndexSet.size) return [];
-        candidateData = data.filter((item) =>
+      if (spellIndexSet && spellIndexSet.size > 0) {
+        const filteredData = data.filter((item) =>
           spellIndexSet.has(normalizeSpellIndex(item?.index)),
         );
+        if (filteredData.length) {
+          candidateData = filteredData;
+        }
       }
     }
 
