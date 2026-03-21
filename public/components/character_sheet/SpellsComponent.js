@@ -342,16 +342,31 @@ class SingleSpell extends Component {
     this.render();
   };
 
-  loadSpellsForSlot = async () => {
+  loadSpellsForSlot = async (sheetData = null) => {
     const sheetId = this.generalData?.id || this.general_id;
-    if (!sheetId) return;
-    const sheetData = await getSheet(sheetId);
-    const allSpells = sortByNumericId(readSheetArraySection(sheetData, "spells"));
+    if (!sheetId && !sheetData) {
+      this.spells = [];
+      return;
+    }
+
+    const resolvedSheetData = sheetData || (await getSheet(sheetId));
+    const allSpells = sortByNumericId(
+      readSheetArraySection(resolvedSheetData, "spells"),
+    );
     this.spells = allSpells.filter(
       (spell) =>
         String(spell.type || "").toLowerCase() ===
         String(this.spellSlot.title || "").toLowerCase(),
     );
+  };
+
+  destroySpellElements = () => {
+    for (const spellElement of this.spellElements) {
+      if (spellElement && typeof spellElement.destroy === "function") {
+        spellElement.destroy();
+      }
+    }
+    this.spellElements = [];
   };
 
   toggleLoadingNewSpell = () => {
@@ -379,23 +394,28 @@ class SingleSpell extends Component {
       components: "",
     });
     if (spellData) {
-      await this.loadSpellsForSlot();
+      await this.loadSpellsForSlot(spellData);
     }
     this.toggleLoadingNewSpell();
   };
 
-  removeItem = (id) => {
-    this.spellElements = this.spellElements.filter((item) => item.id != id);
-    this.spells = this.spells.filter((spell) => spell.id != id);
+  removeItem = async ({ id = null, sheetData = null } = {}) => {
+    if (sheetData) {
+      await this.loadSpellsForSlot(sheetData);
+    } else if (id !== null && typeof id !== "undefined") {
+      const index = this.spells.findIndex((spell) => spell.id == id);
+      if (index !== -1) {
+        this.spells.splice(index, 1);
+      }
+    }
     this.render();
   };
 
   renderSpells = () => {
+    this.destroySpellElements();
+
     if (!this.spells.length)
       return [createElement("small", {}, "No spells yet...")];
-
-    // Clear the spellElements array to ensure fresh rendering
-    this.spellElements = [];
 
     return this.spells.map((spell) => {
       const elem = createElement("div");
@@ -592,9 +612,42 @@ class SingleSpellElement extends Component {
     this.parentRemoveItem = props.parentRemoveItem;
 
     this.hidden = false;
+    this.onCleanup(() => {
+      const suggElem = this.getSuggestionElement();
+      if (suggElem?.parentNode) {
+        suggElem.parentNode.removeChild(suggElem);
+      }
+    });
 
     this.render();
   }
+
+  getSuggestionElementId = () => `suggestions-spells-${this.id}`;
+
+  getSuggestionElement = () =>
+    document.getElementById(this.getSuggestionElementId());
+
+  ensureSuggestionElement = () => {
+    const existing = this.getSuggestionElement();
+    if (existing) return existing;
+
+    const suggElem = createElement(
+      "div",
+      { class: "suggestions", id: this.getSuggestionElementId() },
+      renderLoadingWithMessage(),
+      {
+        type: "mouseout",
+        event: (e) => {
+          e.preventDefault();
+          if (e.target.childNodes.length) {
+            this.resetSpellInfoToCurrentValues();
+          }
+        },
+      },
+    );
+    document.body.appendChild(suggElem);
+    return suggElem;
+  };
 
   hide = () => {
     this.hidden = true;
@@ -653,7 +706,8 @@ class SingleSpellElement extends Component {
   };
 
   resetAndHideSpellSuggestions() {
-    const suggElem = document.getElementById(`suggestions-spells-${this.id}`);
+    const suggElem = this.getSuggestionElement();
+    if (!suggElem) return;
     suggElem.innerHTML = "";
     suggElem.appendChild(renderLoadingWithMessage());
     suggElem.style.display = "none";
@@ -734,8 +788,7 @@ class SingleSpellElement extends Component {
   };
 
   showSpellSuggestions = async (e) => {
-    const suggElem = document.getElementById(`suggestions-spells-${this.id}`);
-    if (!suggElem) return;
+    const suggElem = this.ensureSuggestionElement();
 
     const query = String(e?.target?.value || "");
     suggElem.style.display = "block";
@@ -943,22 +996,7 @@ class SingleSpellElement extends Component {
   };
 
   renderSuggestionElem = () => {
-    document.body.appendChild(
-      createElement(
-        "div",
-        { class: "suggestions", id: `suggestions-spells-${this.id}` },
-        renderLoadingWithMessage(),
-        {
-          type: "mouseout",
-          event: (e) => {
-            e.preventDefault();
-            if (e.target.childNodes.length) {
-              this.resetSpellInfoToCurrentValues();
-            }
-          },
-        },
-      ),
-    );
+    this.ensureSuggestionElement();
   };
 
   render = () => {
@@ -1042,7 +1080,10 @@ class SingleSpellElement extends Component {
                       this.id,
                     );
                     if (!removed) return;
-                    this.parentRemoveItem(this.id);
+                    await this.parentRemoveItem({
+                      id: this.id,
+                      sheetData: removed,
+                    });
                   },
                 },
               ),
