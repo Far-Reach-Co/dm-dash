@@ -45,6 +45,45 @@ export function renderAuraColorPicker(toolbar, obj) {
 }
 
 function renderSelectedLocationPinBar(toolbar, obj, pin) {
+  const renderPortalAttachmentItem = (target) => {
+    const label = target.title || target.uuid;
+    const meta = target.uuid
+      ? `Table ${truncateString(target.uuid, 12)}`
+      : "Portal destination";
+    const content = [
+      createElement("div", { class: "location-pin-attachment-icon" }, ICONS.pin()),
+      createElement("div", { class: "location-pin-attachment-body" }, [
+        createElement("span", { class: "location-pin-attachment-title" }, label),
+        createElement("span", { class: "location-pin-attachment-meta" }, meta),
+      ]),
+    ];
+
+    if (toolbar.can("canManagePins") && toolbar.can("canUsePinPortals")) {
+      content.push(
+        createElement(
+          "span",
+          { class: "location-pin-attachment-arrow", "aria-hidden": "true" },
+          "↗",
+        ),
+      );
+      return createElement(
+        "button",
+        {
+          class: "location-pin-attachment-link",
+          type: "button",
+          title: `Open ${label}`,
+        },
+        content,
+        {
+          type: "click",
+          event: () => toolbar.tableApp.handleLocationPinPortal(target),
+        },
+      );
+    }
+
+    return createElement("div", { class: "location-pin-attachment" }, content);
+  };
+
   const iconElem = pin.image_src
     ? createElement("img", {
         class: "location-pin-icon location-pin-icon-img",
@@ -105,29 +144,7 @@ function renderSelectedLocationPinBar(toolbar, obj, pin) {
   const attachments = pin.attachments || [];
   const attachmentsContent =
     attachments.length > 0
-      ? attachments.map((target) => {
-          const label = target.title || target.uuid;
-          if (toolbar.can("canManagePins") && toolbar.can("canUsePinPortals")) {
-            return createElement(
-              "button",
-              {
-                class: "location-pin-attachment-link",
-                type: "button",
-                title: `Open ${label}`,
-              },
-              label,
-              {
-                type: "click",
-                event: () => toolbar.tableApp.handleLocationPinPortal(target),
-              },
-            );
-          }
-          return createElement(
-            "div",
-            { class: "location-pin-attachment" },
-            createElement("span", { class: "location-pin-attachment-title" }, label),
-          );
-        })
+      ? attachments.map((target) => renderPortalAttachmentItem(target))
       : [
           createElement(
             "span",

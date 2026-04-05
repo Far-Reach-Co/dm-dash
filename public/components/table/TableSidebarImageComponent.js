@@ -448,6 +448,15 @@ export default class TableSidebarImageComponent extends Component {
   };
 
   createImageListItem = async (tableImage, image) => {
+    const focusNameInputWithoutSelection = (input) => {
+      if (!(input instanceof HTMLInputElement)) return;
+      input.focus();
+      const end = input.value.length;
+      requestAnimationFrame(() => {
+        input.setSelectionRange(end, end);
+      });
+    };
+
     const editableNameInput = this.can("canEditImageMetadata")
       ? createElement(
           "input",
@@ -457,24 +466,34 @@ export default class TableSidebarImageComponent extends Component {
             title: "Click to edit image name",
           },
           null,
-          {
-            type: "focusout",
-            event: async (e) => {
-              const nextName = e.target.value;
-              const prevName = image.original_name;
-              const response = await apiPost(`/api/edit_image_name/${image.id}`, {
-                original_name: e.target.value,
-                table_view_id: this.tableView?.id,
-              });
-              if (!response.ok) {
-                image.original_name = prevName;
-                e.target.value = prevName;
-                return;
-              }
-              image.original_name = nextName;
-              e.target.title = "Click to edit image name";
+          [
+            {
+              type: "mousedown",
+              event: (e) => {
+                if (document.activeElement === e.currentTarget) return;
+                e.preventDefault();
+                focusNameInputWithoutSelection(e.currentTarget);
+              },
             },
-          },
+            {
+              type: "focusout",
+              event: async (e) => {
+                const nextName = e.target.value;
+                const prevName = image.original_name;
+                const response = await apiPost(`/api/edit_image_name/${image.id}`, {
+                  original_name: e.target.value,
+                  table_view_id: this.tableView?.id,
+                });
+                if (!response.ok) {
+                  image.original_name = prevName;
+                  e.target.value = prevName;
+                  return;
+                }
+                image.original_name = nextName;
+                e.target.title = "Click to edit image name";
+              },
+            },
+          ],
         )
       : createElement(
           "small",

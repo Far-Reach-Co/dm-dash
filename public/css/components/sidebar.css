@@ -194,6 +194,8 @@
   border-bottom: 1px solid rgba(116, 167, 215, 0.06);
   transition: background-color var(--transition-fast);
   min-width: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .sidebar-image-item:hover {
@@ -205,6 +207,8 @@
   align-items: center;
   gap: var(--space-xs);
   flex-shrink: 0;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .sidebar-image-place-btn {

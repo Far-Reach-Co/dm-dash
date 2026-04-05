@@ -648,6 +648,8 @@
   font-size: 16px;
   border: none;
   background-color: inherit;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .image-name:hover {
@@ -655,7 +657,9 @@
 }
 
 .image-name:focus {
-  border: 1px solid var(--main-gray)
+  border: 1px solid var(--main-gray);
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .sidebar-image-container {
@@ -665,6 +669,8 @@
   height: 40px;
   width: 40px;
   padding: 2px;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .sidebar-image-container:hover {
@@ -672,16 +678,29 @@
 }
 
 .table-sidebar-folder-component {
+  --table-sidebar-folder-height: clamp(160px, 24vh, 260px);
   padding: 5px;
   width: 100%;
-  max-height: 120px;
+  height: var(--table-sidebar-folder-height);
+  min-height: 132px;
+  max-height: min(44vh, 360px);
   display: flex;
   flex-direction: column;
   background-color: var(--main-dark);
   border-bottom: 1px solid var(--main-gray);
   border-top: 1px solid var(--main-gray);
-  overflow: auto;
+  overflow: hidden;
   flex-shrink: 0;
+  resize: vertical;
+}
+
+.table-sidebar-folder-component .library-folder-tree {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .table-sidebar-filters {
@@ -699,6 +718,8 @@
   border-radius: var(--border-radius);
   color: var(--main-white);
   font-size: 0.8rem;
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 .table-sidebar-load-more-wrap {
@@ -1174,42 +1195,102 @@
   width: 100%;
 }
 
+.location-pin-attachments-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  min-width: min(280px, 36vw);
+}
+
 .location-pin-attachment {
+  width: 100%;
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.84);
   font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.location-pin-attachment-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid rgba(222, 199, 174, 0.45);
+  background: rgba(222, 199, 174, 0.12);
+  color: var(--orange3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.location-pin-attachment-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.location-pin-attachment-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .location-pin-attachment-title {
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--main-white);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.location-pin-attachment-meta {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.58);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .location-pin-attachment-link {
   width: 100%;
   text-align: left;
-  background: transparent;
-  border: none;
-  color: var(--link-blue);
-  padding: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--border-radius);
+  color: rgba(255, 255, 255, 0.84);
+  padding: 6px 10px;
   font-size: 12px;
   display: inline-flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 6px;
+  gap: var(--space-sm);
   cursor: pointer;
   text-decoration: none;
-  transition: color var(--transition-normal), opacity var(--transition-normal);
+  transition:
+    color var(--transition-normal),
+    opacity var(--transition-normal),
+    background var(--transition-normal),
+    border-color var(--transition-normal);
 }
 
 .location-pin-attachment-link:hover {
   color: var(--orange3);
-  background: rgba(255, 255, 255, 0.08);
-  text-decoration: underline;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.42);
+  text-decoration: none;
 }
 
-.location-pin-attachment-link::after {
-  content: "↗";
-  font-size: 0.9em;
+.location-pin-attachment-arrow {
+  margin-left: auto;
   color: currentColor;
+  flex-shrink: 0;
 }
 
 .location-pin-attachment-note {
