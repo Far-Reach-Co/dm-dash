@@ -662,9 +662,9 @@ export default class Toolbar extends Component {
     const actionable = this.getActionableSelection(selectedObjects);
     if (!actionable.length) return [];
 
-    const canDelete = this.can("canDeleteCanvasObjects");
+    const canRemove = this.tableApp.canRemoveCanvasObjects();
     const canManageLayers = this.can("canManageLayers");
-    if (!canDelete && !canManageLayers) return [];
+    if (!canRemove && !canManageLayers) return [];
 
     const controls = [];
     const isMultiSelection = actionable.length > 1;
@@ -680,7 +680,7 @@ export default class Toolbar extends Component {
     }
 
     if (variant === "icon") {
-      if (canDelete) {
+      if (canRemove) {
         controls.push(
           this.renderToolbarButton(ICONS.trash(), removeTitle, {
             danger: true,
@@ -701,7 +701,7 @@ export default class Toolbar extends Component {
     }
 
     if (variant === "subbarIcon") {
-      if (canDelete) {
+      if (canRemove) {
         controls.push(
           createElement(
             "button",

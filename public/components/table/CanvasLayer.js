@@ -711,7 +711,7 @@ export default class CanvasLayer {
   };
 
   undoLastDraw = async () => {
-    if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return false;
+    if (!this.tableApp?.canRemoveCanvasObjects?.()) return false;
 
     while (this.drawUndoStack.length) {
       const objectId = this.drawUndoStack.pop();
@@ -886,7 +886,7 @@ export default class CanvasLayer {
   };
 
   removeObjects = () => {
-    if (!this.tableApp?.capabilities?.canDeleteCanvasObjects) return;
+    if (!this.tableApp?.canRemoveCanvasObjects?.()) return;
     if (this.canvasEngine.getActiveObjects().length) {
       this.canvasEngine.getActiveObjects().forEach((object) => {
         if (object.isLocationPin) return;

@@ -59,6 +59,9 @@
 %>
 <script src="/lib/customUi.js"></script>
 <div id="nav-links-container-mobile">
+  <% if (!isAuthed) { %>
+  <a class="top-nav-btn mobile-nav-priority-btn" href="/login">Login</a>
+  <% } %>
   <% if (isAuthed) { %>
   <button id="mobile-notification-bell" class="top-nav-btn nav-bell-button" type="button" title="Notifications">
     <span class="nav-bell-icon" aria-hidden="true">&#128276;</span>
@@ -86,9 +89,9 @@
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
   <% }) %>
   <% } %>
-  <% accountLinks.forEach((link) => { %>
+  <% if (isAuthed) { accountLinks.forEach((link) => { %>
   <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
-  <% }) %>
+  <% }) } %>
 </div>
 <nav>
   <a id="frlogo-container" class="d-flex align-items-center" href="/index">
@@ -99,12 +102,25 @@
     <% primaryLinks.forEach((link) => { %>
     <a class="top-nav-btn" href="<%= link.href %>"><%= link.label %></a>
     <% }) %>
-    <div class="nav-products-menu">
-      <button class="top-nav-btn nav-products-trigger" type="button" aria-haspopup="true">
+    <div class="nav-products-menu" data-nav-menu="resources">
+      <button
+        id="nav-trigger-resources"
+        class="top-nav-btn nav-products-trigger"
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls="nav-dropdown-resources"
+      >
         Resources
         <span class="nav-products-caret" aria-hidden="true">&#9662;</span>
       </button>
-      <div class="nav-products-dropdown nav-resources-dropdown" role="menu">
+      <div
+        id="nav-dropdown-resources"
+        class="nav-products-dropdown nav-resources-dropdown"
+        role="menu"
+        aria-hidden="true"
+        aria-labelledby="nav-trigger-resources"
+      >
         <% resourceSections.forEach((section) => { %>
         <div class="nav-dropdown-section"><%= section.label %></div>
         <% section.links.forEach((link) => { %>
@@ -113,24 +129,50 @@
         <% }) %>
       </div>
     </div>
-    <div class="nav-products-menu">
-      <button class="top-nav-btn nav-products-trigger" type="button" aria-haspopup="true">
+    <div class="nav-products-menu" data-nav-menu="products">
+      <button
+        id="nav-trigger-products"
+        class="top-nav-btn nav-products-trigger"
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls="nav-dropdown-products"
+      >
         Products
         <span class="nav-products-caret" aria-hidden="true">&#9662;</span>
       </button>
-      <div class="nav-products-dropdown" role="menu">
+      <div
+        id="nav-dropdown-products"
+        class="nav-products-dropdown"
+        role="menu"
+        aria-hidden="true"
+        aria-labelledby="nav-trigger-products"
+      >
         <% productLinks.forEach((link) => { %>
         <a class="nav-dropdown-link" href="<%= link.href %>" role="menuitem"><%= link.label %></a>
         <% }) %>
       </div>
     </div>
     <% if (dashboardLinks.length) { %>
-    <div class="nav-products-menu">
-      <button class="top-nav-btn nav-products-trigger" type="button" aria-haspopup="true">
+    <div class="nav-products-menu" data-nav-menu="dashboard">
+      <button
+        id="nav-trigger-dashboard"
+        class="top-nav-btn nav-products-trigger"
+        type="button"
+        aria-haspopup="true"
+        aria-expanded="false"
+        aria-controls="nav-dropdown-dashboard"
+      >
         Dashboard
         <span class="nav-products-caret" aria-hidden="true">&#9662;</span>
       </button>
-      <div class="nav-products-dropdown" role="menu">
+      <div
+        id="nav-dropdown-dashboard"
+        class="nav-products-dropdown"
+        role="menu"
+        aria-hidden="true"
+        aria-labelledby="nav-trigger-dashboard"
+      >
         <% dashboardLinks.forEach((link) => { %>
         <a class="nav-dropdown-link" href="<%= link.href %>" role="menuitem"><%= link.label %></a>
         <% }) %>
