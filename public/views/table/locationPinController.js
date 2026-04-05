@@ -3,6 +3,10 @@ import { getPresignedUrlsForImages } from "../../lib/imageUtils.js";
 import showLocationPinModal from "../../components/table/locationPinModal.js";
 import socketIntegration from "../../components/table/socketIntegration.js";
 import { getTablesEndpoint } from "../../components/table/tableApi.js";
+import {
+  applyBaseLocationPinStyle,
+  applySelectedLocationPinStyle,
+} from "../../components/table/locationPinTheme.js";
 
 export default class LocationPinController {
   constructor(tableApp) {
@@ -86,6 +90,7 @@ export default class LocationPinController {
       object.lockInPosition = true;
     }
     const isLocked = !!object.lockInPosition;
+    applyBaseLocationPinStyle(object);
     object.set({
       hasControls: false,
       hasBorders: true,
@@ -164,17 +169,15 @@ export default class LocationPinController {
 
     if (!object.pinHighlightBackup) {
       object.pinHighlightBackup = {
+        fill: object.fill,
         stroke: object.stroke,
         strokeWidth: object.strokeWidth,
         strokeLineJoin: object.strokeLineJoin,
+        shadow: object.shadow,
       };
     }
 
-    object.set({
-      stroke: "#e74c3c",
-      strokeWidth: 4,
-      strokeLineJoin: "round",
-    });
+    applySelectedLocationPinStyle(object);
     this.tableApp.lastHighlightedPinObject = object;
     if (this.tableApp.canvasLayer?.hasRenderContext()) {
       this.tableApp.canvasLayer.render();
@@ -186,9 +189,11 @@ export default class LocationPinController {
     const object = this.tableApp.lastHighlightedPinObject;
     if (object.pinHighlightBackup) {
       object.set({
+        fill: object.pinHighlightBackup.fill,
         stroke: object.pinHighlightBackup.stroke,
         strokeWidth: object.pinHighlightBackup.strokeWidth,
         strokeLineJoin: object.pinHighlightBackup.strokeLineJoin,
+        shadow: object.pinHighlightBackup.shadow,
       });
       delete object.pinHighlightBackup;
     }

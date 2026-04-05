@@ -12,6 +12,7 @@ import {
   hasCanvasObjects,
   hydrateCanvasImageSources,
 } from "./canvasDataUtils.js";
+import { LOCATION_PIN_STYLE } from "./locationPinTheme.js";
 import {
   normalizeGridObjectVisuals,
   updateCanvasObjectProperties,
@@ -127,10 +128,14 @@ export default class CanvasLayer {
       top: centerY,
       originX: props.originX ?? "center",
       originY: props.originY ?? "center",
-      fill: props.fill ?? "rgba(246, 211, 101, 0.95)",
-      stroke: props.stroke ?? "#f4c430",
+      fill: props.fill ?? LOCATION_PIN_STYLE.fill,
+      stroke: props.stroke ?? LOCATION_PIN_STYLE.stroke,
       strokeWidth:
-        typeof props.strokeWidth === "number" ? props.strokeWidth : 3,
+        typeof props.strokeWidth === "number"
+          ? props.strokeWidth
+          : LOCATION_PIN_STYLE.strokeWidth,
+      strokeLineJoin:
+        props.strokeLineJoin ?? LOCATION_PIN_STYLE.strokeLineJoin,
       scaleX: typeof props.scaleX === "number" ? props.scaleX : 1,
       scaleY: typeof props.scaleY === "number" ? props.scaleY : 1,
       angle: props.angle ?? 0,
