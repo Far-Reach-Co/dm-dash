@@ -251,6 +251,10 @@ class Table extends Component {
     return !!this.capabilities?.[capability];
   };
 
+  canRemoveCanvasObjects = () => {
+    return this.can("canDeleteCanvasObjects") || this.can("canEditTableData");
+  };
+
   setCurrentSelectedObject = (obj) => {
     // canvas obj
     this.currentSelectedObject = obj;

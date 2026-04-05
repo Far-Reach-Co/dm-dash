@@ -106,13 +106,13 @@ export function registerTableInteractionHandlers(params: {
   socket.on(
     "image-removed",
     async ({ table, id }: { table: string; id: string }) => {
-      const canDeleteObjects = await authorizeSocketTable(
+      const canEditTableData = await authorizeSocketTable(
         socket,
         table,
-        "edit",
-        "canDeleteCanvasObjects",
+        "view",
+        "canEditTableData",
       );
-      if (!canDeleteObjects) return;
+      if (!canEditTableData) return;
       socket.broadcast.to(table).emit("image-remove", id);
     },
   );

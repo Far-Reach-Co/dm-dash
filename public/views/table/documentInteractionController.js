@@ -50,7 +50,7 @@ export default class DocumentInteractionController {
 
       if ((e.ctrlKey || e.metaKey) && key === "z") {
         if (
-          this.tableApp.can("canDeleteCanvasObjects") &&
+          this.tableApp.canRemoveCanvasObjects() &&
           this.tableApp.canvasLayer.isDrawingMode()
         ) {
           e.preventDefault();
@@ -64,7 +64,7 @@ export default class DocumentInteractionController {
 
       if (key === "Backspace" || key === "Delete") {
         if (
-          this.tableApp.can("canDeleteCanvasObjects") &&
+          this.tableApp.canRemoveCanvasObjects() &&
           !isTypingInDomInput(e.target) &&
           !isEditingCanvasText()
         ) {
