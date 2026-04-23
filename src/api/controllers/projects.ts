@@ -16,7 +16,6 @@ import {
   getProjectUserByUserAndProjectQuery,
 } from "../queries/projectUsers.js";
 import { getImageQuery } from "../queries/images.js";
-import { removeImageFromBucket } from "./s3.js";
 import {
   addTableViewByProjectQuery,
   getTableViewsByProjectQuery,
@@ -27,16 +26,24 @@ import {
   getTableImagesByImageQuery,
   removeTableImageQuery,
 } from "../queries/tableImages.js";
+import {
+  getLibraryPackImagesQuery,
+  getOwnedLibraryPacksByProjectQuery,
+} from "../queries/libraryPacks.js";
+import { getRecordsByProjectQuery } from "../queries/record.js";
 import { Request, Response, NextFunction } from "express";
 import { getUserByIdQuery } from "../queries/users.js";
 import { userSubscriptionStatus } from "../../lib/enums.js";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import { deleteImagesIfOrphaned } from "../../lib/imageLifecycle";
 import { getSignedUrls } from "./s3.js";
 import {
   requireApiUser,
   requireProjectMemberAccess,
   requireProjectOwnerAccess,
 } from "./accessControl";
+import { cleanupDeletedImageAssets } from "./imageCleanup.js";
+import { removeRecordWithOrphanCleanup } from "./record.js";
 import {
   badRequestError,
   notFoundError,
@@ -180,27 +187,55 @@ async function getProjects(req: Request, res: Response, next: NextFunction) {
   }
 }
 
+function dedupePositiveIds(ids: Array<string | number | null | undefined>) {
+  const normalized = ids
+    .map((id) => Number(id))
+    .filter((id) => Number.isInteger(id) && id > 0);
+  return [...new Set(normalized)];
+}
+
+async function getOwnedProjectPackImageIds(projectId: string | number) {
+  const ownedPacksData = await getOwnedLibraryPacksByProjectQuery(projectId);
+  const packImageDataList = await Promise.all(
+    ownedPacksData.rows.map((pack) => getLibraryPackImagesQuery(pack.id)),
+  );
+  return dedupePositiveIds(
+    packImageDataList.flatMap((data) => data.rows.map((image) => image.image_id)),
+  );
+}
+
 async function removeProject(req: Request, res: Response, next: NextFunction) {
   try {
     await requireProjectOwnerAccess(req, req.params.id);
 
-    // Clean up table images (S3 + database) - project_id is optional so no cascade
     const tableImages = await getTableImagesByProjectQuery(req.params.id);
+    const recordsData = await getRecordsByProjectQuery(req.params.id);
+    const candidateImageIds = dedupePositiveIds([
+      ...tableImages.rows.map((tableImage) => tableImage.image_id),
+      ...(await getOwnedProjectPackImageIds(req.params.id)),
+    ]);
+
+    for (const record of recordsData.rows) {
+      await removeRecordWithOrphanCleanup(record);
+    }
+
+    // Clean up table images - project_id is optional so there is no project cascade
     for (const tableImage of tableImages.rows) {
-      const imageData = await getImageQuery(tableImage.image_id);
-      const image = imageData.rows[0];
-      await removeImageFromBucket("wyrld/images", image);
       await removeTableImageQuery(tableImage.id);
     }
 
-    // Clean up table views - project_id is optional so no cascade
+    // Clean up table views - project_id is optional so there is no project cascade
     const tableViews = await getTableViewsByProjectQuery(req.params.id);
     for (const tableView of tableViews.rows) {
       await removeTableViewQuery(tableView.id);
     }
 
-    // Remove project - CASCADE handles Calendar, Month, Day, ProjectInvite, ProjectUser, ProjectPlayer
+    // Remove project - CASCADE handles calendars, invites, members, players, packs, installs, discussion, and related log FKs
     await removeProjectQuery(req.params.id);
+    const deletedImages = await deleteImagesIfOrphaned({
+      imageIds: candidateImageIds,
+    });
+    await cleanupDeletedImageAssets(deletedImages);
 
     res.status(200).json({ redirect: "/dash" });
   } catch (err) {

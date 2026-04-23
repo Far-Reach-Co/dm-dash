@@ -12,6 +12,9 @@ import {
   requireRecordEditAccess,
   requireRecordViewAccess,
 } from "./accessControl";
+import { deleteImagesIfOrphaned } from "../../lib/imageLifecycle";
+import { cleanupDeletedImageAssets } from "./imageCleanup";
+import type { Record as RecordRow } from "../queries/record";
 
 interface addRecordImageRequest extends Request {
   body: {
@@ -91,7 +94,23 @@ async function getEditableRecordImageByImageOrThrow(
   if (!recordImage) throw recordImageNotFound();
   const record = await getRecordOrThrow(recordImage.record_id);
   await requireRecordEditAccess(req, record);
-  return recordImage;
+  return { recordImage, record };
+}
+
+function resolveRecordOwnerScope(record: RecordRow) {
+  if (record.project_id) {
+    return {
+      type: "project" as const,
+      projectId: record.project_id,
+    };
+  }
+  if (record.user_id) {
+    return {
+      type: "user" as const,
+      userId: record.user_id,
+    };
+  }
+  return null;
 }
 
 async function addRecordImage(
@@ -163,11 +182,16 @@ async function removeRecordImageByImage(
   next: NextFunction
 ) {
   try {
-    const recordImage = await getEditableRecordImageByImageOrThrow(
+    const { recordImage, record } = await getEditableRecordImageByImageOrThrow(
       req,
       req.params.image_id,
     );
     await removeRecordImageQuery(recordImage.id);
+    const deletedImages = await deleteImagesIfOrphaned({
+      imageIds: [recordImage.image_id],
+      ownerScope: resolveRecordOwnerScope(record),
+    });
+    await cleanupDeletedImageAssets(deletedImages);
 
     res.status(204).send();
   } catch (err) {
