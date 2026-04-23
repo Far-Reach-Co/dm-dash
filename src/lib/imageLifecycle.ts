@@ -31,6 +31,13 @@ export interface UnlinkImageResult {
   removedLinks: number;
 }
 
+export interface DeletedOrphanImage {
+  id: number;
+  original_name: string;
+  size: number;
+  file_name: string;
+}
+
 let hasLibraryPackImageTable: boolean | null = null;
 
 async function resolveHasLibraryPackImageTable(client: QueryClient) {
@@ -134,6 +141,56 @@ async function updateOwnerUsageIfNeeded(
      where id = $1`,
     [ownerScope.userId, size],
   );
+}
+
+function normalizeImageIds(imageIds: Array<string | number>) {
+  const normalized = imageIds
+    .map((imageId) => Number(imageId))
+    .filter((imageId) => Number.isInteger(imageId) && imageId > 0);
+  return [...new Set(normalized)];
+}
+
+export async function deleteImagesIfOrphaned(params: {
+  imageIds: Array<string | number>;
+  ownerScope?: ImageLifecycleOwnerScope | null;
+}): Promise<DeletedOrphanImage[]> {
+  const imageIds = normalizeImageIds(params.imageIds);
+  if (!imageIds.length) return [];
+
+  const client = await pool.connect();
+  try {
+    await client.query("begin");
+    const deletedImages: DeletedOrphanImage[] = [];
+
+    for (const imageId of imageIds) {
+      const imageData = await client.query<DeletedOrphanImage>(
+        `select id, original_name, size, file_name
+         from public."Image"
+         where id = $1 and is_blocked = false
+         for update`,
+        [imageId],
+      );
+      const image = imageData.rows[0];
+      if (!image) continue;
+
+      const orphaned = await isImageOrphaned(imageId, client);
+      if (!orphaned) continue;
+
+      await client.query(`delete from public."Image" where id = $1`, [imageId]);
+      if (params.ownerScope) {
+        await updateOwnerUsageIfNeeded(params.ownerScope, image.size, client);
+      }
+      deletedImages.push(image);
+    }
+
+    await client.query("commit");
+    return deletedImages;
+  } catch (err) {
+    await client.query("rollback");
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function unlinkImageAndDeleteIfOrphaned(params: {

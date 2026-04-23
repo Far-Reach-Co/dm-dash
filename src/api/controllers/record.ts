@@ -6,8 +6,11 @@ import {
   getRecordsByProjectQuery,
   getRecordsByUserQuery,
   removeRecordQuery,
+  Record as RecordRow,
 } from "../queries/record";
+import { getRecordImagesByRecordQuery } from "../queries/recordImage";
 import { logEventAsync, EventType } from "../../lib/eventLogger";
+import { deleteImagesIfOrphaned } from "../../lib/imageLifecycle";
 import {
   getRecordOrThrow,
   requireApiUser,
@@ -16,6 +19,7 @@ import {
   requireRecordEditAccess,
   requireRecordViewAccess,
 } from "./accessControl";
+import { cleanupDeletedImageAssets } from "./imageCleanup";
 
 interface RecordMutationBody {
   title: string;
@@ -34,6 +38,11 @@ interface addRecordByProjectRequest extends Request {
 type RecordScope =
   | { kind: "user"; userId: string | number }
   | { kind: "project"; userId: string | number; projectId: string | number };
+
+type RecordOwnerScope =
+  | { type: "user"; userId: string | number }
+  | { type: "project"; projectId: string | number }
+  | null;
 
 function buildRecordCreatePayload(body: RecordMutationBody) {
   return {
@@ -98,6 +107,36 @@ async function getRecordListForScope(scope: RecordScope) {
     return (await getRecordsByProjectQuery(scope.projectId)).rows;
   }
   return (await getRecordsByUserQuery(scope.userId)).rows;
+}
+
+function resolveRecordOwnerScope(record: RecordRow): RecordOwnerScope {
+  if (record.project_id) {
+    return {
+      type: "project",
+      projectId: record.project_id,
+    };
+  }
+  if (record.user_id) {
+    return {
+      type: "user",
+      userId: record.user_id,
+    };
+  }
+  return null;
+}
+
+async function removeRecordWithOrphanCleanup(record: RecordRow) {
+  const recordImageData = await getRecordImagesByRecordQuery(record.id);
+  const imageIds = recordImageData.rows.map((recordImage) => recordImage.image_id);
+
+  await removeRecordQuery(record.id);
+
+  const ownerScope = resolveRecordOwnerScope(record);
+  const deletedImages = await deleteImagesIfOrphaned({
+    imageIds,
+    ownerScope,
+  });
+  await cleanupDeletedImageAssets(deletedImages);
 }
 
 async function resolveUserRecordScope(req: Request): Promise<RecordScope> {
@@ -211,7 +250,7 @@ async function removeRecord(req: Request, res: Response, next: NextFunction) {
   try {
     const record = await getRecordOrThrow(req.params.id);
     await requireRecordEditAccess(req, record);
-    await removeRecordQuery(req.params.id);
+    await removeRecordWithOrphanCleanup(record);
 
     res.setHeader("HX-Redirect", "/dash");
     res.send();
@@ -228,4 +267,5 @@ export {
   getRecord,
   editRecord,
   removeRecord,
+  removeRecordWithOrphanCleanup,
 };
