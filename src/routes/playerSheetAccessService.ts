@@ -3,7 +3,10 @@ import {
   get5eCharGeneralUserIdQuery,
   get5eCharNamesQuery,
 } from "../api/queries/5eCharGeneral";
-import { getPlayerUserByUserAndPlayerQuery } from "../api/queries/playerUsers";
+import {
+  addPlayerUserQuery,
+  getPlayerUserByUserAndPlayerQuery,
+} from "../api/queries/playerUsers";
 import { getPlayerInviteByUUIDQuery } from "../api/queries/playerInvites";
 import { getProjectQuery } from "../api/queries/projects";
 import { getProjectUserByUserAndProjectQuery } from "../api/queries/projectUsers";
@@ -15,6 +18,26 @@ export interface SheetAccessResult {
   playerSheetName: string;
   projectId: string | null;
   inviteId: string | null;
+}
+
+async function ensurePlayerUserAccess(
+  userId: string | number,
+  playerSheetId: string,
+) {
+  const existingPlayerUserData = await getPlayerUserByUserAndPlayerQuery(
+    userId,
+    playerSheetId,
+  );
+  if (existingPlayerUserData.rows.length) return;
+
+  try {
+    await addPlayerUserQuery({
+      user_id: String(userId),
+      player_id: playerSheetId,
+    });
+  } catch (err: any) {
+    if (err?.code !== "23505") throw err;
+  }
 }
 
 export async function resolvePlayerSheetAccess(
@@ -73,6 +96,7 @@ export async function resolvePlayerSheetAccess(
       res.render("forbidden", { auth: userId });
       return null;
     }
+    await ensurePlayerUserAccess(userId, playerSheetId);
     return { userId, playerSheetId, playerSheetName, projectId, inviteId };
   }
 

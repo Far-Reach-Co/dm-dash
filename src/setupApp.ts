@@ -42,6 +42,7 @@ app.use(
         imgSrc: ["'self'", "data:", "blob:", "https://*.amazonaws.com", "https://*.cloudfront.net", "https://www.dnd5eapi.co"],
         connectSrc: [
           "'self'",
+          "https://www.google.com",
           "https://www.google-analytics.com",
           "https://cloudflareinsights.com",
           "wss://*.farreachco.com",
