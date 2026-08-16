@@ -93,6 +93,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 });
 
+app.get("/healthz", (_req: Request, res: Response) => {
+  res.status(200).type("text/plain").send("ok\n");
+});
+
 // Set view engine to EJS
 app.set("view engine", "ejs");
 

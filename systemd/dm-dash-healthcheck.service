@@ -1,0 +1,12 @@
+[Unit]
+Description=dm-dash web healthcheck
+Wants=dm-dash.service
+After=dm-dash.service
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/bin/bash -c 'set -euo pipefail; for i in 1 2 3; do if /usr/bin/curl --fail --silent --show-error --max-time 5 http://127.0.0.1:4000/healthz >/dev/null; then exit 0; fi; /bin/sleep 5; done; /usr/bin/systemctl restart dm-dash.service; exit 1'
+TimeoutStartSec=30s
+StandardOutput=journal
+StandardError=journal
