@@ -95,3 +95,9 @@ ssh "$DM_DASH_SERVER" "systemctl daemon-reload && systemctl restart dm-dash.serv
 ./ops/preflight.sh
 ./ops/deploy.sh
 ```
+
+### Healthcheck timer
+
+`dm-dash-healthcheck.timer` runs every minute and calls `http://127.0.0.1:4000/healthz`.
+After three failed attempts, it restarts `dm-dash.service`. This catches wedged Node
+processes that are still running but no longer accepting HTTP responses.
