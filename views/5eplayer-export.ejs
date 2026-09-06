@@ -570,6 +570,18 @@
       total += parseSafeNumber(pro ? pro[skill.modKey] : 0, 0);
       return total;
     };
+    const isSaveProficient = (key) => {
+      if (!pro) return false;
+      if (key === "sv_cha") return Boolean(pro.sv_cha || pro.sv_char);
+      return Boolean(pro[key]);
+    };
+    const getSavingThrowModifier = (save) => {
+      let total = abilityModifier(general[save.ability]);
+      if (isSaveProficient(save.key)) {
+        total += proficiencyBonus;
+      }
+      return total;
+    };
     const abilityStats = [
       { label: "STR", key: "strength" },
       { label: "DEX", key: "dexterity" },
@@ -595,12 +607,12 @@
     const spellAttackBonus = proficiencyBonus + castingAbilityModifier;
     const savedAt = new Date().toLocaleString();
     const savingThrows = [
-      ["STR", "sv_str"],
-      ["DEX", "sv_dex"],
-      ["CON", "sv_con"],
-      ["INT", "sv_int"],
-      ["WIS", "sv_wis"],
-      ["CHA", "sv_char"],
+      { label: "STR", key: "sv_str", ability: "strength" },
+      { label: "DEX", key: "sv_dex", ability: "dexterity" },
+      { label: "CON", key: "sv_con", ability: "constitution" },
+      { label: "INT", key: "sv_int", ability: "intelligence" },
+      { label: "WIS", key: "sv_wis", ability: "wisdom" },
+      { label: "CHA", key: "sv_cha", ability: "charisma" },
     ];
     const skills = [
       { label: "Acrobatics", key: "acrobatics", modKey: "acrobatics_mod", ability: "dexterity" },
@@ -730,8 +742,8 @@
           <p class="empty">No proficiency data found.</p>
           <% } else { %>
           <div>
-            <% savingThrows.forEach(([label, key]) => { %>
-            <span class="pill"><%= label %>: <%= pro[key] ? "Proficient" : "Not Proficient" %></span>
+            <% savingThrows.forEach((save) => { %>
+            <span class="pill"><%= save.label %>: <%= formatSigned(getSavingThrowModifier(save)) %> (<%= isSaveProficient(save.key) ? "Proficient" : "Not Proficient" %>)</span>
             <% }); %>
           </div>
           <% } %>

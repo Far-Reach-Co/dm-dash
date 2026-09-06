@@ -15,7 +15,8 @@ export interface DndFiveEPro {
   sv_con: boolean,
   sv_int: boolean,
   sv_wis: boolean,
-  sv_char: boolean,
+  sv_cha: boolean,
+  sv_char?: boolean,
   acrobatics: boolean,
   animal_handling: boolean,
   arcana: boolean,
@@ -60,7 +61,7 @@ const DEFAULT_PROFICIENCIES: Record<string, unknown> = {
   sv_con: false,
   sv_int: false,
   sv_wis: false,
-  sv_char: false,
+  sv_cha: false,
   acrobatics: false,
   animal_handling: false,
   arcana: false,
@@ -107,6 +108,9 @@ function ensureProficiencySection(
   if (existing) {
     if (!("id" in existing)) existing.id = asNumber(generalId) || 0;
     if (!("general_id" in existing)) existing.general_id = asNumber(generalId) || 0;
+    if (!("sv_cha" in existing) && "sv_char" in existing) {
+      existing.sv_cha = existing.sv_char;
+    }
     return existing;
   }
   const created: Record<string, unknown> = {
