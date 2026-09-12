@@ -29,6 +29,12 @@ import {
 
 // ── Mistral API ───────────────────────────────────────────────────────────────
 
+const DEFAULT_MISTRAL_MODEL = "ministral-3b-latest";
+
+function getMistralModel(): string {
+  return process.env.MISTRAL_MODEL?.trim() || DEFAULT_MISTRAL_MODEL;
+}
+
 function escapeForRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -680,6 +686,32 @@ function getClient(): Mistral {
   return new Mistral({ apiKey });
 }
 
+export function getSrdProviderStatus(error: unknown): number | null {
+  if (!error || typeof error !== "object") return null;
+  const value = error as {
+    status?: unknown;
+    statusCode?: unknown;
+    response?: { status?: unknown };
+  };
+  const status = Number(value.status ?? value.statusCode ?? value.response?.status);
+  if (!Number.isInteger(status) || status < 400 || status > 599) return null;
+  return status;
+}
+
+export function getSrdSearchFailureMessage(error: unknown): string {
+  const status = getSrdProviderStatus(error);
+  if (status === 429) {
+    return "The SRD assistant is temporarily rate-limited. Please wait a few minutes and try again.";
+  }
+  if (status === 401 || status === 403) {
+    return "The SRD assistant is not configured correctly right now. Please try again later.";
+  }
+  if (error instanceof Error && error.message.includes("MISTRAL_API_KEY")) {
+    return "The SRD assistant is missing its Mistral configuration. Please try again later.";
+  }
+  return "The SRD assistant could not answer right now. Please try again later.";
+}
+
 async function queryMistral(
   question: string,
   context: string,
@@ -725,7 +757,7 @@ async function queryMistral(
   }
 
   const response = await client.chat.complete({
-    model: "mistral-small-latest",
+    model: getMistralModel(),
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: question },

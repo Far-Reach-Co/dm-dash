@@ -218,12 +218,18 @@
       body: JSON.stringify(buildSearchPayload(query)),
     })
       .then(function (res) {
-        if (res.status === 429) {
-          throw new Error(
-            "Too many requests. Please wait a few minutes and try again.",
-          );
+        if (!res.ok) {
+          return res
+            .json()
+            .catch(function () {
+              return {};
+            })
+            .then(function (data) {
+              throw new Error(
+                data.message || "Something went wrong. Please try again.",
+              );
+            });
         }
-        if (!res.ok) throw new Error("Something went wrong. Please try again.");
         return res.json();
       })
       .then(function (data) {
