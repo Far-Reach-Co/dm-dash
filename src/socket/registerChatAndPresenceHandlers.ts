@@ -7,7 +7,10 @@ import {
   userLeave,
 } from "../lib/socketUsers.js";
 import { calculateDiceRollResponse } from "../lib/dice.js";
-import { searchSrd } from "../dnd/srd/mistral.js";
+import {
+  getSrdSearchFailureMessage,
+  searchSrd,
+} from "../dnd/srd/mistral.js";
 import logger from "../lib/logger.js";
 import { markdownToChat } from "../lib/markdownToChat.js";
 import type { AuthorizeSocketTable } from "./tableSocketAuth";
@@ -95,7 +98,15 @@ export function registerChatAndPresenceHandlers(params: {
                   "Usage: /5e <question>\nEx: /5e what spells deal fire damage at level 3?";
                 break;
               }
-              content = markdownToChat(await searchSrd(tail));
+              try {
+                content = markdownToChat(await searchSrd(tail));
+              } catch (err) {
+                logger.warn(
+                  { err, socketId: socket.id, table },
+                  "Socket SRD search command failed",
+                );
+                content = getSrdSearchFailureMessage(err);
+              }
               break;
             }
             default:

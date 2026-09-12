@@ -1,6 +1,10 @@
 import { Request, Response, NextFunction, Router } from "express";
 import { rateLimit } from "express-rate-limit";
-import { searchSrd } from "./srd/mistral.js";
+import {
+  getSrdProviderStatus,
+  getSrdSearchFailureMessage,
+  searchSrd,
+} from "./srd/mistral.js";
 import { createSrdQuestionEvent } from "../api/queries/srdQuestionEvents.js";
 import logger from "../lib/logger.js";
 import {
@@ -110,6 +114,23 @@ export function registerSrdSearchRoute(router: Router) {
         });
         res.json({ answer });
       } catch (err) {
+        const providerStatus = getSrdProviderStatus(err);
+        if (providerStatus === 429) {
+          const message = getSrdSearchFailureMessage(err);
+          logger.warn({ err }, "SRD search provider rate limited");
+          res.status(429).json({ message });
+          return;
+        }
+        if (
+          providerStatus === 401 ||
+          providerStatus === 403 ||
+          (err instanceof Error && err.message.includes("MISTRAL_API_KEY"))
+        ) {
+          const message = getSrdSearchFailureMessage(err);
+          logger.error({ err }, "SRD search provider configuration failed");
+          res.status(503).json({ message });
+          return;
+        }
         next(err);
       }
     },
