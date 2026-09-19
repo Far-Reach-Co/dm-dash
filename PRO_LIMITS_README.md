@@ -13,14 +13,14 @@ Source: `src/lib/enums.ts`
   - `PROJECT_DATA_HARD_LIMIT_REACHED`
 - `megabytesInBytes`
   - `fifty = 52428800` (50 MB)
-  - `fiveHundred = 524288000` (500 MB)
+  - `oneGigabyte = 1000000000` (1 GB)
 
 Source of effective plan limits: `src/lib/subscription.ts`
 
 - Free user data cap: `50 MB`
-- Pro user hard data cap: `500 MB`
+- Pro user hard data cap: `1 GB`
 - Free Wyrld data cap: `50 MB`
-- Pro Wyrld hard data cap: `500 MB`
+- Pro Wyrld hard data cap: `1 GB`
 - Free owned Wyrlds: `2`
 - Free personal tables: `5`
 - Free Wyrld tables: `5`
@@ -35,13 +35,13 @@ Limits are enforced against projected post-upload usage (`current_used_data_in_b
 - User-level usage cap
   - Function: `checkUserDataUsageLimitReachedAndAuth`
   - Free logic: if projected usage exceeds `50 MB` and user is not Pro, reject with HTTP `402` and `USER_IS_NOT_PRO`.
-  - Pro logic: if projected usage exceeds `500 MB`, reject with HTTP `413` and `USER_DATA_HARD_LIMIT_REACHED`.
+  - Pro logic: if projected usage exceeds `1 GB`, reject with HTTP `413` and `USER_DATA_HARD_LIMIT_REACHED`.
   - Used by: `newImageForUser`
 
 - Wyrld/project-level usage cap
   - Function: `checkProjectDataUsageLimitReachedAndAuth`
   - Free logic: if projected usage exceeds `50 MB` and project is not Pro, reject with HTTP `402` and `PROJECT_IS_NOT_PRO`.
-  - Pro logic: if projected usage exceeds `500 MB`, reject with HTTP `413` and `PROJECT_DATA_HARD_LIMIT_REACHED`.
+  - Pro logic: if projected usage exceeds `1 GB`, reject with HTTP `413` and `PROJECT_DATA_HARD_LIMIT_REACHED`.
   - Used by: `newImageForProject`
 
 ## Wyrlds Created (Enforced)

@@ -9,8 +9,8 @@ const subscriptionPlanLimits = {
   freeUserDataBytes: megabytesInBytes.fifty,
   freeWyrldDataBytes: megabytesInBytes.fifty,
   // Pro hard caps
-  proUserDataBytes: megabytesInBytes.fiveHundred,
-  proWyrldDataBytes: megabytesInBytes.fiveHundred,
+  proUserDataBytes: megabytesInBytes.oneGigabyte,
+  proWyrldDataBytes: megabytesInBytes.oneGigabyte,
 } as const;
 
 function getUserDataUsageLimitBytes(isPro: boolean): number {
