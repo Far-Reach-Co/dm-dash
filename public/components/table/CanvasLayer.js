@@ -913,20 +913,36 @@ export default class CanvasLayer {
     }
   };
 
-  moveObjectToTop = () => {
+  moveObjectToTop = async () => {
     if (!this.tableApp?.capabilities?.canManageLayers) return;
-    if (this.canvasEngine.getActiveObjects().length) {
-      this.canvasEngine.getActiveObjects().forEach((object) => {
-        // if (object.hasOwnProperty("_objects")) {
-        //   for (var subObj of object._objects) {
-        //     //
-        //   }
-        // }
-        this.placeObjectOnLayer(object);
-        socketIntegration.objectChangeLayer(object.id);
-        return this.saveToDatabase();
-      });
-    }
+    const activeObjects = this.canvasEngine.getActiveObjects();
+    if (!activeObjects.length) return;
+
+    activeObjects.forEach((object) => {
+      this.placeObjectOnLayer(object);
+      socketIntegration.objectChangeLayer(object);
+    });
+    await this.saveToDatabase();
+  };
+
+  moveObjectsToLayer = async (objects, layer) => {
+    if (!this.tableApp?.capabilities?.canManageLayers) return;
+    if (!["Map", "Object", "Fog"].includes(layer)) return;
+
+    const actionable = (objects || []).filter(
+      (object) => object && !object.isLocationPin,
+    );
+    if (!actionable.length) return;
+
+    actionable.forEach((object) => {
+      this.setObjectLayer(object, layer);
+      socketIntegration.objectChangeLayer(object);
+    });
+
+    this.canvasEngine.discardActiveObject();
+    this.tableApp.setCurrentSelectedObject(null);
+    this.canvasEngine.requestRender();
+    await this.saveToDatabase();
   };
 
   centerViewOnObject = (obj) => {

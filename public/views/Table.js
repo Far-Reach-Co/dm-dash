@@ -314,21 +314,18 @@ class Table extends Component {
     await this.sidebar.render();
   };
 
-  changeLayer = () => {
+  setCurrentLayer = (layer) => {
     if (!this.can("canManageLayers")) return;
-    switch (this.currentLayer) {
-      case "Map":
-        this.currentLayer = "Object";
-        break;
-      case "Object":
-        this.currentLayer = "Fog";
-        break;
-      case "Fog":
-        this.currentLayer = "Map";
-        break;
-    }
+    if (!["Map", "Object", "Fog"].includes(layer)) return;
+    this.currentLayer = layer;
 
     this.canvasLayer.changeLayer();
+  };
+
+  changeLayer = () => {
+    const layers = ["Map", "Object", "Fog"];
+    const currentIndex = layers.indexOf(this.currentLayer);
+    this.setCurrentLayer(layers[(currentIndex + 1) % layers.length]);
   };
 
   addImageToCanvas = (image) => {

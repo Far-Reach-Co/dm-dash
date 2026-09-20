@@ -32,15 +32,22 @@ export function buildSocketEventHandlers(integration) {
       }
     },
 
-    "object-change-layer": (id) => {
+    "object-change-layer": (payload) => {
       const canvasLayer = integration.tableApp?.canvasLayer;
       const canvasEngine = canvasLayer?.canvasEngine;
       if (!canvasLayer || !canvasEngine) return;
+      const id = typeof payload === "string" ? payload : payload?.id;
+      const layer = typeof payload === "object" ? payload?.layer : null;
       canvasEngine.getObjects().forEach((object) => {
         if (object.id === id) {
-          canvasLayer.placeObjectOnLayer(object);
+          if (layer) {
+            canvasLayer.setObjectLayer(object, layer);
+          } else {
+            canvasLayer.placeObjectOnLayer(object);
+          }
         }
       });
+      canvasEngine.requestRender();
     },
 
     "current-users": (list) => {

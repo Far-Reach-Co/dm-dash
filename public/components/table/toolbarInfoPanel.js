@@ -162,7 +162,7 @@ export function renderInfoMenu(toolbar) {
           createElement(
             "small",
             {},
-            " - Switch between Map, Object, and Fog layers.",
+            " - Choose Map, Object, or Fog directly. Select object(s) and use Move to to change their layer.",
           ),
           createElement("br"),
           createElement("b", {}, "Grid (GM)"),
@@ -322,7 +322,7 @@ export function renderInfoMenu(toolbar) {
           createElement(
             "small",
             {},
-            " - Cycle selected object(s) through layers",
+            " - Move selected object(s) to the top of their current layer",
           ),
           createElement("br"),
           createElement("b", {}, "Ctrl/Cmd + D"),

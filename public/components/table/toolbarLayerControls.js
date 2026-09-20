@@ -1,6 +1,39 @@
 import createElement from "../../lib/salt-lib/createElement.js";
 import { ICONS } from "./toolbarConfig.js";
 
+const LAYERS = ["Map", "Object", "Fog"];
+
+export function renderLayerSegment({ activeLayer, onSelect, label }) {
+  return createElement("div", { class: "vtt-layer-control" }, [
+    label
+      ? createElement("small", { class: "vtt-layer-control-label" }, label)
+      : null,
+    createElement(
+      "div",
+      {
+        class: "vtt-layer-segment",
+        role: "group",
+        "aria-label": label || "Layer",
+      },
+      LAYERS.map((layer) =>
+        createElement(
+          "button",
+          {
+            type: "button",
+            class: `vtt-layer-segment-btn vtt-layer-${layer.toLowerCase()}${
+              activeLayer === layer ? " is-active" : ""
+            }`,
+            "aria-pressed": activeLayer === layer ? "true" : "false",
+            title: `${label || "Use"} ${layer} layer`,
+          },
+          layer,
+          { type: "click", event: () => onSelect(layer) },
+        ),
+      ),
+    ),
+  ]);
+}
+
 export function renderStyledLayerInfoElem(toolbar) {
   const style = toolbar.layerStyles[toolbar.tableApp.currentLayer];
   return createElement("small", { class: style.class }, style.label);
@@ -27,17 +60,13 @@ export function renderLayersPanel(toolbar) {
 
   return createElement("div", { class: "vtt-toolbar-panel open" }, [
     renderStyledLayerInfoElem(toolbar),
-    createElement(
-      "button",
-      { title: "Change the layer you are interacting with" },
-      "Switch Layer",
-      {
-        type: "click",
-        event: () => {
-          toolbar.tableApp.changeLayer();
-          void toolbar._updateLayersAnchor();
-        },
+    renderLayerSegment({
+      activeLayer: toolbar.tableApp.currentLayer,
+      label: "Work on",
+      onSelect: (layer) => {
+        toolbar.tableApp.setCurrentLayer(layer);
+        void toolbar._updateLayersAnchor();
       },
-    ),
+    }),
   ]);
 }
