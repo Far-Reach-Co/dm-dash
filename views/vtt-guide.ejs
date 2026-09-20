@@ -6,7 +6,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VTT Guide - Virtual Table Top Tutorial | Far Reach Co.</title>
-  <meta name="description" content="Complete guide to using the Far Reach Co. Virtual Table Top (VTT). Learn how to set up tables, navigate the canvas, manage images, use layers, draw, roll dice, and share with players." />
+  <meta name="description" content="Complete guide to using the Far Reach Co. Virtual Table Top (VTT). Set up tables, navigate the canvas, manage images and layers, conceal and reveal maps, draw, roll dice, and share with players." />
   <link rel="canonical" href="https://farreachco.com/vtt-guide" />
 
   <!-- Open Graph / Facebook -->
@@ -89,6 +89,7 @@
       <a href="#images">Images & Folders</a>
       <a href="#tokens">Placing Tokens</a>
       <a href="#layers">Layers</a>
+      <a href="#concealment">Concealment</a>
       <a href="#grid">Grid Controls</a>
       <a href="#drawing">Drawing Tools</a>
       <a href="#pins">Location Pins</a>
@@ -148,6 +149,7 @@
       <ul>
         <li><strong>Layers</strong> &mdash; You can switch between Map, Object, and Fog layers.</li>
         <li><strong>Grid Controls</strong> &mdash; You can show/hide the grid and resize it.</li>
+        <li><strong>Concealment</strong> &mdash; Managers can cover the configured grid and reveal or restore areas during play.</li>
       </ul>
       <h3>What Sandbox Restricts</h3>
       <ul>
@@ -204,6 +206,7 @@
       <h3>Desktop</h3>
       <ul>
         <li><strong>Pan</strong> &mdash; Click and drag on empty canvas space to move around.</li>
+        <li><strong>Pan from anywhere</strong> &mdash; Hold <strong>Space</strong> while dragging to temporarily bypass object selection.</li>
         <li><strong>Zoom</strong> &mdash; Use the scroll wheel or toolbar zoom controls (<strong>- / + / Reset</strong>) to zoom in and out. Zoom is capped at <strong>300%</strong>.</li>
         <li><strong>Select</strong> &mdash; Click on any object to select it. A selected object shows handles for resizing and rotating.</li>
         <li><strong>Move</strong> &mdash; Click and drag a selected object to reposition it (if the object is unlocked).</li>
@@ -261,7 +264,7 @@
     <!-- 7. Using Layers -->
     <section id="layers">
       <h2>Using Layers (Map, Object, Fog)</h2>
-      <p>Layers let GMs control the stacking order and visibility of objects. There are three layers:</p>
+      <p>Layers let GMs control the stacking order and visibility of objects. There are three object layers:</p>
       <ul>
         <li><strong>Map Layer</strong> &mdash; Place background maps and terrain here. Map objects sit behind everything else.</li>
         <li><strong>Object Layer</strong> &mdash; The default layer for tokens, NPCs, and interactive pieces. These sit on top of the map.</li>
@@ -275,6 +278,34 @@
         <li>With object(s) selected, use <strong>Move to</strong> to send them directly to another layer.</li>
         <li>Press <strong>Ctrl/Cmd + T</strong> with object(s) selected to move them to the top of their current layer.</li>
       </ul>
+    </section>
+
+    <!-- Concealment Layer -->
+    <section id="concealment">
+      <h2>Concealment Layer (GM)</h2>
+      <p>The Concealment Layer is a separate opaque overlay above the Map, Object, and Fog layers. It gives the GM direct control over which grid areas players can see without requiring automated walls, token vision, or light-source calculations.</p>
+      <h3>Conceal the Map</h3>
+      <ul>
+        <li>Configure the table grid first, then click the <strong>Concealment</strong> button (crossed-eye icon) in the toolbar.</li>
+        <li>Click <strong>Cover Grid</strong> to conceal the entire configured grid. The GM sees a translucent preview; players see an opaque dark overlay.</li>
+        <li>The overlay sits above every object layer, so it conceals maps, tokens, drawings, and Fog-layer effects together.</li>
+      </ul>
+      <h3>Reveal and Restore Areas</h3>
+      <ul>
+        <li>Choose <strong>Reveal</strong>, then click one grid square or drag a grid-snapped rectangle to expose a larger room, corridor, or custom area.</li>
+        <li>Choose <strong>Conceal</strong> to restore individual squares or rectangular areas.</li>
+        <li>Edges are softly feathered. The revealed state is saved with the table and synchronized to connected players when a gesture finishes.</li>
+        <li>Click <strong>Done</strong>, press <strong>Escape</strong>, or click the Concealment button again to leave editing mode.</li>
+        <li><strong>Clear All</strong> removes the concealment overlay from the table.</li>
+      </ul>
+      <h3>Player Interaction</h3>
+      <ul>
+        <li>Players cannot select or move objects through concealed grid squares.</li>
+        <li>Objects become interactive as soon as their squares are revealed.</li>
+        <li>Players can still drag concealed areas to pan the canvas, or hold <strong>Space</strong> and drag to pan from anywhere without selecting an object.</li>
+      </ul>
+      <h3>Concealment vs. Dynamic Lighting</h3>
+      <p>Concealment is a lightweight, DM-directed alternative to dynamic lighting and automated fog of war. It does not calculate line of sight, walls, doors, vision ranges, or light sources. Instead, the GM reveals exactly what the party should see, when they should see it. This keeps setup simple and client performance predictable.</p>
     </section>
 
     <!-- 8. Grid Controls -->
@@ -391,6 +422,10 @@
           </tr>
         </thead>
         <tbody>
+          <tr>
+            <td><strong>Space</strong></td>
+            <td>Hold + drag to pan from anywhere without selecting objects</td>
+          </tr>
           <tr>
             <td><strong>Alt / Option</strong></td>
             <td>Hold + drag to box-select multiple objects</td>

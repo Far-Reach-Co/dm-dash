@@ -77,6 +77,12 @@ export function buildSocketEventHandlers(integration) {
       canvasLayer.resizeGrid(gridState);
     },
 
+    "concealment-update": (state) => {
+      void integration.tableApp?.canvasLayer?.applyConcealmentStateFromSocket(
+        state,
+      );
+    },
+
     "image-add": (newImg) => {
       const canvasLayer = integration.tableApp?.canvasLayer;
       const canvasEngine = canvasLayer?.canvasEngine;
@@ -156,7 +162,9 @@ export function buildSocketEventHandlers(integration) {
         canvasEngine.addObject(vectorObject);
         canvasLayer.placeObjectOnLayer(vectorObject);
         canvasLayer.updateObjectProperties(vectorObject);
+        vectorObject.setCoords();
         canvasLayer.setupObjectEventListeners(vectorObject);
+        canvasEngine.requestRender();
         return;
       }
 
@@ -167,7 +175,9 @@ export function buildSocketEventHandlers(integration) {
         canvasEngine.addObject(img);
         canvasLayer.placeObjectOnLayer(img);
         canvasLayer.updateObjectProperties(img);
+        img.setCoords();
         canvasLayer.setupObjectEventListeners(img);
+        canvasEngine.requestRender();
       });
     },
 

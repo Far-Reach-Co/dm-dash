@@ -7,9 +7,11 @@ export function renderDrawModeToggle(toolbar) {
     active: isDrawing,
     onClick: () => {
       toolbar.clearSelection();
+      toolbar.tableApp.canvasLayer.setConcealmentMode(null);
       toolbar.tableApp.canvasLayer.setDrawingMode(!isDrawing);
       void toolbar._updateDrawToggle();
       void toolbar._updateDrawBar();
+      void toolbar._updateConcealmentAnchor();
     },
   });
 }

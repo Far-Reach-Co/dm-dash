@@ -123,6 +123,14 @@ class SocketIntegration {
     });
   };
 
+  concealmentUpdated = (state) => {
+    if (!this.tableApp?.capabilities?.canManageLayers) return;
+    this.socket.emit("concealment-updated", {
+      table: `table-${this.tableApp.tableId}`,
+      state,
+    });
+  };
+
   // ANIMATION
   indicatorAnimation = (x, y) => {
     this.socket.emit("indicator-animation", {

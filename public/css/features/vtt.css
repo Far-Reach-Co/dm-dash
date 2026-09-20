@@ -252,6 +252,18 @@
   background: var(--light-gray);
 }
 
+.vtt-concealment-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-xs);
+}
+
+.vtt-toolbar-panel .vtt-concealment-mode.is-active {
+  background: var(--green);
+  color: var(--blue5);
+  font-weight: bold;
+}
+
 /* ==========================================================================
    Draw sub-bar (persistent when draw mode is active)
    ========================================================================== */

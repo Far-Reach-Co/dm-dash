@@ -1,4 +1,4 @@
-const KNOWN_LAYERS = new Set(["Map", "Object", "Fog"]);
+const KNOWN_LAYERS = new Set(["Map", "Object", "Fog", "Concealment"]);
 
 export default class LayerStackService {
   constructor({ canvasEngine, gridManager }) {
@@ -35,6 +35,7 @@ export default class LayerStackService {
     const mapIndices = [];
     const objectIndices = [];
     const fogIndices = [];
+    const concealmentIndices = [];
 
     withoutObj.forEach((item, index) => {
       switch (this.getLayerForObject(item)) {
@@ -47,6 +48,9 @@ export default class LayerStackService {
         case "Fog":
           fogIndices.push(index);
           break;
+        case "Concealment":
+          concealmentIndices.push(index);
+          break;
       }
     });
 
@@ -56,6 +60,7 @@ export default class LayerStackService {
       mapIndices,
       objectIndices,
       fogIndices,
+      concealmentIndices,
     };
   };
 
@@ -105,16 +110,27 @@ export default class LayerStackService {
       }
 
       case "Fog": {
+        const firstConcealmentIndex = ctx.concealmentIndices.length
+          ? Math.min(...ctx.concealmentIndices)
+          : ctx.withoutObj.length;
         const fogStart = ctx.fogIndices.length
           ? Math.min(...ctx.fogIndices)
-          : ctx.withoutObj.length;
+          : firstConcealmentIndex;
         return {
           min: fogStart,
-          max: ctx.withoutObj.length,
-          top: ctx.withoutObj.length,
+          max: firstConcealmentIndex,
+          top: firstConcealmentIndex,
           bottom: fogStart,
         };
       }
+
+      case "Concealment":
+        return {
+          min: ctx.withoutObj.length,
+          max: ctx.withoutObj.length,
+          top: ctx.withoutObj.length,
+          bottom: ctx.withoutObj.length,
+        };
     }
   };
 
@@ -160,6 +176,7 @@ export default class LayerStackService {
     const mapObjects = [];
     const objectObjects = [];
     const fogObjects = [];
+    const concealmentObjects = [];
 
     stack.forEach((obj) => {
       switch (this.getLayerForObject(obj)) {
@@ -172,6 +189,9 @@ export default class LayerStackService {
         case "Fog":
           fogObjects.push(obj);
           break;
+        case "Concealment":
+          concealmentObjects.push(obj);
+          break;
       }
     });
 
@@ -182,6 +202,9 @@ export default class LayerStackService {
     }
     objectObjects.forEach((obj) => this.canvasEngine.moveObjectTo(obj, index++));
     fogObjects.forEach((obj) => this.canvasEngine.moveObjectTo(obj, index++));
+    concealmentObjects.forEach((obj) =>
+      this.canvasEngine.moveObjectTo(obj, index++),
+    );
 
     if (render) {
       this.canvasEngine.requestRender();
@@ -211,10 +234,17 @@ export default class LayerStackService {
       if (layer === "Fog" && index !== all.length - 1) {
         const hasNonFogAbove = all
           .slice(index + 1)
-          .some((item) => item !== gridObject && this.getLayerForObject(item) !== "Fog");
+          .some(
+            (item) =>
+              item !== gridObject &&
+              !["Fog", "Concealment"].includes(this.getLayerForObject(item)),
+          );
         if (hasNonFogAbove) {
           violations.push({ type: "fog-not-top-band", id: obj.id, index });
         }
+      }
+      if (layer === "Concealment" && index !== all.length - 1) {
+        violations.push({ type: "concealment-not-top", id: obj.id, index });
       }
     });
 

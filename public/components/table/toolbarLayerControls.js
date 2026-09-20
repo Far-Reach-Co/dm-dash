@@ -48,9 +48,11 @@ export function renderLayersButton(toolbar) {
     layerColor,
     onClick: () => {
       toolbar.clearSelection();
+      toolbar.tableApp.canvasLayer.setConcealmentMode(null);
       toolbar.activePanel = toolbar.activePanel === "layers" ? null : "layers";
       void toolbar._updateLayersAnchor();
       void toolbar._updateGridAnchor();
+      void toolbar._updateConcealmentAnchor();
     },
   });
 }

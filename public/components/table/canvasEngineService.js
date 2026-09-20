@@ -59,6 +59,10 @@ export default class CanvasEngineService {
     return new fabric.Group(objects, props);
   };
 
+  createImageFromElement = (element, props = {}) => {
+    return new fabric.Image(element, props);
+  };
+
   loadImageFromURL = (src) => {
     return new Promise((resolve) => {
       fabric.Image.fromURL(src, (image) => resolve(image));
@@ -168,6 +172,12 @@ export default class CanvasEngineService {
   setSelection = (enabled) => {
     if (this.canvas) {
       this.canvas.selection = !!enabled;
+    }
+  };
+
+  setSkipTargetFind = (enabled) => {
+    if (this.canvas) {
+      this.canvas.skipTargetFind = !!enabled;
     }
   };
 

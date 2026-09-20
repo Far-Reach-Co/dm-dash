@@ -110,6 +110,13 @@ export function renderInfoMenu(toolbar) {
           createElement("b", {}, "Pan"),
           createElement("small", {}, " - Click + drag on empty space"),
           createElement("br"),
+          createElement("b", {}, "Pan from anywhere"),
+          createElement(
+            "small",
+            {},
+            " - Hold Space + drag to bypass object selection",
+          ),
+          createElement("br"),
           createElement("b", {}, "Zoom"),
           createElement("small", {}, " - Scroll wheel or pinch"),
           createElement("br"),
@@ -270,6 +277,31 @@ export function renderInfoMenu(toolbar) {
           createElement("br"),
           createElement("br"),
 
+          createElement("h2", {}, "Concealment (Manager)"),
+          createElement("hr"),
+          createElement("b", {}, "Cover Grid"),
+          createElement(
+            "small",
+            {},
+            " - Use the crossed-eye toolbar button to conceal the configured grid above every object layer.",
+          ),
+          createElement("br"),
+          createElement("b", {}, "Reveal / Conceal"),
+          createElement(
+            "small",
+            {},
+            " - Click one square or drag a grid-snapped rectangle, then release to sync the change.",
+          ),
+          createElement("br"),
+          createElement("b", {}, "Player view"),
+          createElement(
+            "small",
+            {},
+            " - Hidden squares block object interaction; revealed squares remain playable.",
+          ),
+          createElement("br"),
+          createElement("br"),
+
           createElement("h2", {}, "Chat"),
           createElement("hr"),
           createElement("b", {}, "/roll"),
@@ -301,6 +333,13 @@ export function renderInfoMenu(toolbar) {
 
           createElement("h2", {}, "Keyboard Shortcuts"),
           createElement("hr"),
+          createElement("b", {}, "Space"),
+          createElement(
+            "small",
+            {},
+            " - Hold + drag to pan without selecting objects",
+          ),
+          createElement("br"),
           createElement("b", {}, "Alt/Option (Option)"),
           createElement(
             "small",

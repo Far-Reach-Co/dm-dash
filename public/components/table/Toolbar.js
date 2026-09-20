@@ -27,6 +27,10 @@ import {
   renderGridButton as renderGridButtonUI,
   renderGridPanel as renderGridPanelUI,
 } from "./toolbarGridControls.js";
+import {
+  renderConcealmentButton as renderConcealmentButtonUI,
+  renderConcealmentPanel as renderConcealmentPanelUI,
+} from "./toolbarConcealmentControls.js";
 
 class ToolbarSlot extends Component {
   constructor({ domElem, renderContent }) {
@@ -65,6 +69,7 @@ export default class Toolbar extends Component {
     this._drawToggleSlot = null;
     this._layersAnchorSlot = null;
     this._gridAnchorSlot = null;
+    this._concealmentAnchorSlot = null;
     this._objectActionsSlot = null;
     this._zoomSlot = null;
     this._sidebarSlot = null;
@@ -277,6 +282,7 @@ export default class Toolbar extends Component {
     this._drawToggleSlot?.destroy?.();
     this._layersAnchorSlot?.destroy?.();
     this._gridAnchorSlot?.destroy?.();
+    this._concealmentAnchorSlot?.destroy?.();
     this._objectActionsSlot?.destroy?.();
     this._zoomSlot?.destroy?.();
     this._sidebarSlot?.destroy?.();
@@ -287,6 +293,7 @@ export default class Toolbar extends Component {
     this._drawToggleSlot = null;
     this._layersAnchorSlot = null;
     this._gridAnchorSlot = null;
+    this._concealmentAnchorSlot = null;
     this._objectActionsSlot = null;
     this._zoomSlot = null;
     this._sidebarSlot = null;
@@ -547,6 +554,14 @@ export default class Toolbar extends Component {
     return renderGridPanelUI(this);
   };
 
+  renderConcealmentButton = () => {
+    return renderConcealmentButtonUI(this);
+  };
+
+  renderConcealmentPanel = () => {
+    return renderConcealmentPanelUI(this);
+  };
+
   renderLocationPinButton = () => {
     if (!this.can("canManagePins")) {
       return this.hiddenElement();
@@ -789,6 +804,11 @@ export default class Toolbar extends Component {
     await this._gridAnchorSlot.render();
   };
 
+  _updateConcealmentAnchor = async () => {
+    if (!this._concealmentAnchorSlot) return;
+    await this._concealmentAnchorSlot.render();
+  };
+
   _updateObjectActions = async () => {
     if (!this._objectActionsSlot) return;
     await this._objectActionsSlot.render();
@@ -847,6 +867,15 @@ export default class Toolbar extends Component {
       }),
       renderContent: () => [this.renderGridButton(), this.renderGridPanel()],
     });
+    this._concealmentAnchorSlot = new ToolbarSlot({
+      domElem: createElement("div", {
+        class: "vtt-toolbar-panel-anchor",
+      }),
+      renderContent: () => [
+        this.renderConcealmentButton(),
+        this.renderConcealmentPanel(),
+      ],
+    });
     this._objectActionsSlot = new ToolbarSlot({
       domElem: createElement("div", {
         style: "display: contents;",
@@ -878,6 +907,7 @@ export default class Toolbar extends Component {
       this.renderManagePinsButton(),
       this._layersAnchorSlot.domElem,
       this._gridAnchorSlot.domElem,
+      this._concealmentAnchorSlot.domElem,
       this._objectActionsSlot.domElem,
       this._zoomSlot.domElem,
       createElement("div", { style: "flex: 1;" }),
@@ -906,6 +936,7 @@ export default class Toolbar extends Component {
     await this._updateDrawToggle();
     await this._updateLayersAnchor();
     await this._updateGridAnchor();
+    await this._updateConcealmentAnchor();
     await this._updateObjectActions();
     await this._updateZoomControls();
     await this._updateSidebarToggle();

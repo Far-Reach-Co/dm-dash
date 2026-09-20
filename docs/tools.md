@@ -34,6 +34,13 @@ npm run email:product-update -- --campaign 2026-02-public-wyrlds-community --dry
 npm run email:product-update -- --campaign 2026-02-public-wyrlds-community
 ```
 
+Prepared Concealment Layer campaign:
+
+```bash
+npm run email:product-update -- --campaign 2026-09-vtt-concealment-layer --dry-run
+npm run email:product-update -- --campaign 2026-09-vtt-concealment-layer
+```
+
 ## Monthly Log Report Email
 
 ```bash

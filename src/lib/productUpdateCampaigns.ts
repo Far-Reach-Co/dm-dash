@@ -155,6 +155,34 @@ const campaigns: ProductUpdateCampaign[] = [
     ctaText: "Open your dashboard",
     ctaUrl: "https://farreachco.com/dash",
   },
+  {
+    slug: "2026-09-vtt-concealment-layer",
+    subject: "New in Far Reach Co: reveal maps your way",
+    intro:
+      "The new VTT Concealment Layer gives GMs a fast, lightweight way to hide a prepared map and reveal it as the party explores.",
+    recent: [
+      {
+        title: "DM-controlled map concealment",
+        body: "Cover the configured grid with one opaque layer above maps, tokens, drawings, and effects. Unlike dynamic lighting, Concealment does not require walls, vision ranges, or light sources: the GM decides exactly what the party can see.",
+        linkText: "Read the Concealment guide",
+        linkUrl: "https://farreachco.com/vtt-guide#concealment",
+      },
+      {
+        title: "Reveal rooms and corridors quickly",
+        body: "Reveal or restore one grid square with a click, or drag a grid-snapped rectangle across a larger area. Feathered edges keep the transition readable without adding heavy client-side lighting calculations.",
+      },
+      {
+        title: "Live, player-safe updates",
+        body: "Concealment changes synchronize to connected players when each gesture finishes. Hidden areas block token interaction, revealed areas remain playable, and Space-drag lets everyone pan without accidentally selecting an object.",
+      },
+    ],
+    upcoming: [
+      "Continued tuning for concealment workflows across desktop and mobile browsers.",
+      "More VTT quality-of-life improvements that keep session setup and client performance light.",
+    ],
+    ctaText: "Open the VTT guide",
+    ctaUrl: "https://farreachco.com/vtt-guide#concealment",
+  },
 ];
 
 export function getProductUpdateCampaigns(): ProductUpdateCampaign[] {
