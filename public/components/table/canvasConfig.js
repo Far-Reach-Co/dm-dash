@@ -16,6 +16,8 @@ export function configureFabricDefaults() {
         evented: this.evented,
         lockInPosition: this.lockInPosition,
         hiddenFromPlayers: this.hiddenFromPlayers,
+        isConcealment: this.isConcealment,
+        concealmentState: this.concealmentState,
       });
     };
   })(fabric.Object.prototype.toObject);

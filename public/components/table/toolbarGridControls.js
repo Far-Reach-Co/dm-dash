@@ -9,9 +9,11 @@ export function renderGridButton(toolbar) {
     active: toolbar.activePanel === "grid",
     onClick: () => {
       toolbar.clearSelection();
+      toolbar.tableApp.canvasLayer.setConcealmentMode(null);
       toolbar.activePanel = toolbar.activePanel === "grid" ? null : "grid";
       void toolbar._updateGridAnchor();
       void toolbar._updateLayersAnchor();
+      void toolbar._updateConcealmentAnchor();
     },
   });
 }

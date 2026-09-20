@@ -34,8 +34,23 @@ export default class DocumentInteractionController {
     this.addListener("keydown", (e) => {
       const key = (e.key || "").toLowerCase();
 
+      if (
+        (key === " " || key === "spacebar") &&
+        !isTypingInDomInput(e.target) &&
+        !isEditingCanvasText()
+      ) {
+        e.preventDefault();
+        this.tableApp.canvasLayer.setSpacebarPan(true);
+        return;
+      }
+
       if (e.altKey) {
         this.tableApp.canvasLayer.setCursorCrosshair();
+      }
+
+      if (key === "escape") {
+        this.tableApp.canvasLayer.setConcealmentMode(null);
+        void this.tableApp.topLayer?.toolbar?._updateConcealmentAnchor?.();
       }
 
       if ((e.ctrlKey || e.metaKey) && key === "d") {
@@ -61,6 +76,12 @@ export default class DocumentInteractionController {
 
     this.addListener("keyup", (e) => {
       const key = e.key;
+
+      if (key === " " || key === "Spacebar") {
+        e.preventDefault();
+        this.tableApp.canvasLayer.setSpacebarPan(false);
+        return;
+      }
 
       if (key === "Backspace" || key === "Delete") {
         if (

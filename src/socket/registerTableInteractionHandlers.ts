@@ -1,6 +1,40 @@
 import logger from "../lib/logger.js";
 import type { AuthorizeSocketTable } from "./tableSocketAuth";
 
+type ConcealmentState = {
+  version: number;
+  columns: number;
+  rows: number;
+  cellSize: number;
+  cells: string;
+};
+
+function isValidConcealmentState(
+  state: unknown,
+): state is ConcealmentState | null {
+  if (state === null) return true;
+  if (!state || typeof state !== "object") return false;
+  const value = state as Partial<ConcealmentState>;
+  if (
+    value.version !== 1 ||
+    !Number.isInteger(value.columns) ||
+    !Number.isInteger(value.rows) ||
+    (value.columns ?? 0) <= 0 ||
+    (value.rows ?? 0) <= 0 ||
+    !Number.isFinite(value.cellSize) ||
+    (value.cellSize ?? 0) <= 0 ||
+    typeof value.cells !== "string"
+  ) {
+    return false;
+  }
+  const cellCount = value.columns! * value.rows!;
+  return (
+    cellCount <= 4_000_000 &&
+    value.cells.length === cellCount &&
+    !/[^01]/.test(value.cells)
+  );
+}
+
 export function registerTableInteractionHandlers(params: {
   socket: any;
   authorizeSocketTable: AuthorizeSocketTable;
@@ -49,6 +83,20 @@ export function registerTableInteractionHandlers(params: {
       );
       if (!canManageGrid) return;
       socket.broadcast.to(table).emit("grid-resize", gridState);
+    },
+  );
+
+  socket.on(
+    "concealment-updated",
+    async ({ table, state }: { table: string; state: unknown }) => {
+      const canManageLayers = await authorizeSocketTable(
+        socket,
+        table,
+        "edit",
+        "canManageLayers",
+      );
+      if (!canManageLayers || !isValidConcealmentState(state)) return;
+      socket.broadcast.to(table).emit("concealment-update", state);
     },
   );
 

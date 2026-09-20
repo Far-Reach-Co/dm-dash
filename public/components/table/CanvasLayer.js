@@ -19,6 +19,9 @@ import {
 } from "./canvasLayering.js";
 import CanvasEngineService from "./canvasEngineService.js";
 import LayerStackService from "./layerStackService.js";
+import ConcealmentLayer, {
+  MANAGER_CONCEALMENT_OPACITY,
+} from "./ConcealmentLayer.js";
 import { loadCanvasFromData, saveCanvasState } from "./canvasPersistence.js";
 import {
   endCanvasDrag,
@@ -44,6 +47,8 @@ export default class CanvasLayer {
     this.gridManager = null;
     this.canvasEngine = null;
     this.layerStack = null;
+    this.concealmentLayer = null;
+    this.spacebarPanActive = false;
     this.drawingModeEnabled = false;
     this.drawingTool = "freehand";
     this.shapeDrawing = {
@@ -74,6 +79,11 @@ export default class CanvasLayer {
     this.layerStack = new LayerStackService({
       canvasEngine: this.canvasEngine,
       gridManager: this.gridManager,
+    });
+    this.concealmentLayer = new ConcealmentLayer({
+      canvasEngine: this.canvasEngine,
+      gridManager: this.gridManager,
+      canManage: !!this.tableApp?.capabilities?.canManageLayers,
     });
 
     await this.createNewOrSetupSaved();
@@ -228,6 +238,7 @@ export default class CanvasLayer {
     this.canvasEngine = null;
     this.gridManager = null;
     this.layerStack = null;
+    this.concealmentLayer = null;
   };
 
   handleObjectMoving = (options) => {
@@ -281,6 +292,20 @@ export default class CanvasLayer {
   handleMouseDown = (opt) => {
     const evt = opt.e;
 
+    if (
+      this.spacebarPanActive ||
+      this.isPlayerConcealmentTarget(opt.target)
+    ) {
+      this.startDragging(evt.clientX, evt.clientY);
+      return;
+    }
+
+    if (this.concealmentLayer?.startStroke(evt)) {
+      this.canvasEngine.discardActiveObject();
+      this.canvasEngine.requestRender();
+      return;
+    }
+
     // Handle mobile double-tap
     if (detectMob()) {
       this.handleMobileDoubleTap(evt);
@@ -316,9 +341,13 @@ export default class CanvasLayer {
   };
 
   handleDoubleClick = (e) => {
+    if (this.isPlayerConcealmentTarget(e.target)) return;
     const pointer = this.canvasEngine.getPointer(e.e);
     this.triggerIndicatorAnimation(pointer.x, pointer.y);
   };
+
+  isPlayerConcealmentTarget = (target) =>
+    !this.tableApp?.capabilities?.canManageLayers && !!target?.isConcealment;
 
   triggerIndicatorAnimation = (x, y) => {
     this.runIndicatorAnimation(x, y);
@@ -330,6 +359,7 @@ export default class CanvasLayer {
   };
 
   handleMouseMove = (opt) => {
+    if (this.concealmentLayer?.continueStroke(opt.e)) return;
     if (
       this.drawingModeEnabled &&
       this.drawingTool !== "freehand" &&
@@ -348,6 +378,15 @@ export default class CanvasLayer {
   };
 
   handleMouseUp = () => {
+    if (this.concealmentLayer?.isPainting) {
+      if (this.concealmentLayer.endStroke()) {
+        socketIntegration.concealmentUpdated(
+          this.concealmentLayer.getState(),
+        );
+        this.scheduleSaveToDatabase();
+      }
+      return;
+    }
     if (
       this.drawingModeEnabled &&
       this.drawingTool !== "freehand" &&
@@ -357,6 +396,9 @@ export default class CanvasLayer {
       return;
     }
     endCanvasDrag(this.canvasEngine);
+    if (this.spacebarPanActive) {
+      this.canvasEngine.setSelection(false);
+    }
   };
 
   handlePathCreated = (opt) => {
@@ -452,7 +494,25 @@ export default class CanvasLayer {
   };
 
   setCursorDefault = () => {
+    if (this.spacebarPanActive) return;
     this.applyCurrentCursor();
+  };
+
+  setSpacebarPan = (enabled) => {
+    this.spacebarPanActive = !!enabled;
+    this.canvasEngine.setSkipTargetFind(this.spacebarPanActive);
+    this.canvasEngine.setSelection(
+      !this.spacebarPanActive && !this.concealmentLayer?.mode,
+    );
+
+    if (this.spacebarPanActive) {
+      this.canvasEngine.discardActiveObject();
+      this.canvasEngine.setDefaultCursor("grab");
+      this.canvasEngine.setCursor("grab");
+    } else {
+      this.applyCurrentCursor();
+    }
+    this.canvasEngine.requestRender();
   };
 
   isDrawingMode = () => {
@@ -843,6 +903,7 @@ export default class CanvasLayer {
         } else if (options.centerInViewport !== false) {
           this.canvasEngine.viewportCenterObject(newImg);
         }
+        newImg.setCoords();
         // Place image on layer
         this.placeObjectOnLayer(newImg);
         this.updateObjectProperties(newImg);
@@ -1032,6 +1093,44 @@ export default class CanvasLayer {
     return this.layerStack?.assertInvariants() ?? { ok: true, violations: [] };
   };
 
+  coverGridWithConcealment = async () => {
+    if (!this.tableApp?.capabilities?.canManageLayers) return;
+    await this.concealmentLayer?.coverGrid();
+    this.layerStack?.reconcile();
+    socketIntegration.concealmentUpdated(this.concealmentLayer?.getState());
+    await this.saveToDatabase();
+  };
+
+  clearConcealment = async () => {
+    if (!this.tableApp?.capabilities?.canManageLayers) return;
+    this.setConcealmentMode(null);
+    this.concealmentLayer?.clear();
+    socketIntegration.concealmentUpdated(null);
+    await this.saveToDatabase();
+  };
+
+  applyConcealmentStateFromSocket = async (state) => {
+    await this.concealmentLayer?.applyState(state);
+    this.layerStack?.reconcile();
+    this.canvasEngine.requestRender();
+  };
+
+  setConcealmentMode = (mode) => {
+    if (!this.tableApp?.capabilities?.canManageLayers) return;
+    this.concealmentLayer?.setMode(mode);
+    this.canvasEngine.discardActiveObject();
+    this.canvasEngine.getObjects().forEach((object) => {
+      if (object?.isConcealment) return;
+      if (mode) {
+        object.selectable = false;
+        object.evented = false;
+      } else {
+        this.updateObjectProperties(object);
+      }
+    });
+    this.canvasEngine.requestRender();
+  };
+
   changeLayer = () => {
     this.canvasEngine.getObjects().forEach((object) => {
       this.updateObjectProperties(object);
@@ -1046,6 +1145,18 @@ export default class CanvasLayer {
 
   // Function to update object properties based on current layer
   updateObjectProperties = (object) => {
+    if (object?.isConcealment) {
+      object.set({
+        visible: true,
+        selectable: false,
+        evented: !this.tableApp?.capabilities?.canManageLayers,
+        perPixelTargetFind: false,
+        opacity: this.tableApp?.capabilities?.canManageLayers
+          ? MANAGER_CONCEALMENT_OPACITY
+          : 1,
+      });
+      return;
+    }
     updateCanvasObjectProperties({
       object,
       gridManager: this.gridManager,
@@ -1168,6 +1279,10 @@ export default class CanvasLayer {
 
   renderSavedData = async () => {
     await loadCanvasFromData(this.canvasEngine, this.tableView.data, (object) => {
+      if (object.isConcealment) {
+        this.concealmentLayer?.hydrate(object);
+        return;
+      }
       if (object.type === "group") {
         this.restoreGridFromObject(object);
         return;
