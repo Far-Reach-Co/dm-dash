@@ -115,10 +115,11 @@ class SocketIntegration {
     });
   };
 
-  objectChangeLayer = (id) => {
+  objectChangeLayer = (object) => {
     this.socket.emit("object-changed-layer", {
       table: `table-${this.tableApp.tableId}`,
-      id,
+      id: object?.id,
+      layer: object?.layer,
     });
   };
 

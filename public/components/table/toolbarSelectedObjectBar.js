@@ -3,6 +3,20 @@ import socketIntegration from "./socketIntegration.js";
 import truncateString from "../../lib/truncateString.js";
 import { ICONS } from "./toolbarConfig.js";
 import showRecordPreviewModal from "./recordPreviewModal.js";
+import { renderLayerSegment } from "./toolbarLayerControls.js";
+
+function renderMoveSelectionToLayer(toolbar, objects) {
+  if (!toolbar.can("canManageLayers")) return null;
+  const layers = new Set(objects.map((obj) => obj.layer));
+  const activeLayer = layers.size === 1 ? objects[0]?.layer : null;
+
+  return renderLayerSegment({
+    activeLayer,
+    label: "Move to",
+    onSelect: (layer) =>
+      toolbar.tableApp.canvasLayer.moveObjectsToLayer(objects, layer),
+  });
+}
 
 export function renderAuraColorPicker(toolbar, obj) {
   const setAura = (color) => {
@@ -186,6 +200,7 @@ function renderMultiSelectionBar(toolbar, selectedObjects) {
   const allHidden = actionable.every((obj) => !!obj.hiddenFromPlayers);
 
   const controls = [
+    renderMoveSelectionToLayer(toolbar, actionable),
     createElement("small", {}, `${actionable.length} selected`),
     ...toolbar.renderSelectionActionControls(actionable, {
       withSeparator: true,
@@ -305,6 +320,7 @@ export async function renderSelectedObjectBar(toolbar) {
     : createElement("small", {}, `"${displayName}"`);
 
   return createElement("div", { class: "vtt-draw-bar" }, [
+    renderMoveSelectionToLayer(toolbar, [obj]),
     thumbnailElem,
     createElement(
       "small",

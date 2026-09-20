@@ -133,7 +133,9 @@ export function registerTableInteractionHandlers(params: {
 
   socket.on(
     "object-changed-layer",
-    async ({ table, id }: { table: string; id: string }) => {
+    async (
+      { table, id, layer }: { table: string; id: string; layer?: string },
+    ) => {
       const canManageLayers = await authorizeSocketTable(
         socket,
         table,
@@ -141,7 +143,8 @@ export function registerTableInteractionHandlers(params: {
         "canManageLayers",
       );
       if (!canManageLayers) return;
-      socket.broadcast.to(table).emit("object-change-layer", id);
+      if (layer && !["Map", "Object", "Fog"].includes(layer)) return;
+      socket.broadcast.to(table).emit("object-change-layer", { id, layer });
     },
   );
 

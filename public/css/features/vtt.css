@@ -185,6 +185,73 @@
   padding: 2px var(--space-xs);
 }
 
+.vtt-layer-control {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.vtt-layer-control-label {
+  color: var(--light-gray) !important;
+  font-weight: normal !important;
+  white-space: nowrap;
+}
+
+.vtt-toolbar-panel .vtt-layer-control {
+  width: 100%;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.vtt-layer-segment {
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(40px, 1fr));
+  overflow: hidden;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--border-radius);
+}
+
+.vtt-layer-segment .vtt-layer-segment-btn {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 4px 8px;
+  border: 0;
+  border-right: 1px solid var(--surface-border);
+  border-radius: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--light-gray);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.vtt-layer-segment .vtt-layer-segment-btn:last-child {
+  border-right: 0;
+}
+
+.vtt-layer-segment .vtt-layer-segment-btn:hover {
+  background: rgba(255, 255, 255, 0.13);
+}
+
+.vtt-layer-segment .vtt-layer-segment-btn.is-active {
+  color: var(--blue5);
+  font-weight: bold;
+}
+
+.vtt-layer-segment .vtt-layer-map.is-active {
+  background: var(--orange3);
+}
+
+.vtt-layer-segment .vtt-layer-object.is-active {
+  background: var(--green);
+}
+
+.vtt-layer-segment .vtt-layer-fog.is-active {
+  background: var(--light-gray);
+}
+
 /* ==========================================================================
    Draw sub-bar (persistent when draw mode is active)
    ========================================================================== */
