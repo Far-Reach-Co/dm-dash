@@ -135,7 +135,7 @@ export default class ChatBoxComponent extends Component {
         this.chatBoxMessagesComponent = child;
       },
     );
-    queueMicrotask(() => chatMessagesComponent.scrollDown());
+    chatMessagesComponent.scrollDown();
 
     return [
       createElement("div", { class: "chat-box-top-row" }, [
@@ -193,25 +193,38 @@ class ChatBoxMessagesComponent extends Component {
 
     this.chatBoxMessages = [];
     this.hidden = false;
+    this.scrollFrame = null;
+    this.onCleanup(() => {
+      if (this.scrollFrame !== null) cancelAnimationFrame(this.scrollFrame);
+      this.scrollFrame = null;
+    });
 
     this.render();
   }
 
   scrollDown = () => {
-    this.domElem.scrollTop = this.domElem.scrollHeight;
+    if (this._destroyed) return;
+    if (this.scrollFrame !== null) cancelAnimationFrame(this.scrollFrame);
+    // Parent renders can temporarily detach the list. Wait until it is mounted
+    // and its new messages have a layout before measuring the scroll height.
+    this.scrollFrame = requestAnimationFrame(() => {
+      this.scrollFrame = null;
+      if (this._destroyed || this.hidden) return;
+      this.domElem.scrollTop = this.domElem.scrollHeight;
+    });
   };
 
-  setMessages = (messages) => {
+  setMessages = async (messages) => {
     // Keep message updates immutable so memo deps are reliable.
     this.chatBoxMessages = Array.isArray(messages) ? [...messages] : [];
-    void this.render();
+    await this.render();
     this.scrollDown();
   };
 
-  appendMessage = (message) => {
+  appendMessage = async (message) => {
     if (!message) return;
     this.chatBoxMessages = [...this.chatBoxMessages, message];
-    void this.render();
+    await this.render();
     this.scrollDown();
   };
 
