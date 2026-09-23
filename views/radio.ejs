@@ -8,7 +8,7 @@
   <title>Tabletop RPG Music Streaming For TTRPG Sessions | Discord Music Bot Alternative | Far Reach Radio</title>
   <meta
     name="description"
-    content="Far Reach Radio is a browser-based tabletop RPG music streaming tool for TTRPG sessions with synced listening, one host panel, one link, and no player accounts."
+    content="Share synchronized tabletop RPG music through one listener link. Choose scene playlists for your next session. No player accounts or Discord bot setup required."
   />
   <link rel="canonical" href="https://farreachco.com/radio" />
 
@@ -17,7 +17,7 @@
   <meta property="og:title" content="Tabletop RPG Music Streaming For TTRPG Sessions | Far Reach Radio" />
   <meta
     property="og:description"
-    content="Run synced tabletop RPG music with one host panel, one listener link, 200+ original pieces, and a cleaner alternative to bot-driven audio setup."
+    content="Share synchronized tabletop RPG music through one listener link. Choose scene playlists for your next session. No player accounts or Discord bot setup required."
   />
   <meta property="og:site_name" content="Far Reach Co." />
   <meta property="og:image" content="https://farreachco.com/assets/screen_shots/radio_host_control.png" />
@@ -26,91 +26,79 @@
   <meta name="twitter:title" content="Tabletop RPG Music Streaming For TTRPG Sessions | Far Reach Radio" />
   <meta
     name="twitter:description"
-    content="Run synced tabletop RPG music with one host panel, one listener link, 200+ original pieces, and a cleaner alternative to bot-driven audio setup."
+    content="Share synchronized tabletop RPG music through one listener link. Choose scene playlists for your next session. No player accounts or Discord bot setup required."
   />
   <meta name="twitter:image" content="https://farreachco.com/assets/screen_shots/radio_host_control.png" />
 
   <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Far Reach Radio",
+  "description": "Share synchronized tabletop RPG music through one listener link. Choose scene playlists for your next session. No player accounts or Discord bot setup required.",
+  "url": "https://radio.farreachco.com",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Web Browser",
+  "offers": [
     {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Far Reach Radio",
-      "description": "Browser-based tabletop RPG music streaming with synced listener playback, one-link joining, and 200+ original scene-ready pieces for live sessions.",
-      "url": "https://radio.farreachco.com",
-      "applicationCategory": "MultimediaApplication",
-      "operatingSystem": "Web Browser",
-      "offers": [{
-        "@type": "Offer",
-        "name": "Free",
-        "price": "0",
-        "priceCurrency": "USD",
-        "description": "Standard playlist library access"
-      }, {
-        "@type": "Offer",
-        "name": "Pro",
-        "description": "Full playlist catalog including exclusive pro playlists"
-      }],
-      "creator": {
-        "@type": "Organization",
-        "name": "Far Reach Co.",
-        "url": "https://farreachco.com"
-      }
+      "@type": "Offer",
+      "name": "Free",
+      "price": "0",
+      "priceCurrency": "USD",
+      "description": "Standard playlist library access"
+    },
+    {
+      "@type": "Offer",
+      "name": "Pro",
+      "description": "Full playlist catalog including exclusive pro playlists"
     }
+  ],
+  "creator": {
+    "@type": "Organization",
+    "name": "Far Reach Co.",
+    "url": "https://farreachco.com"
+  }
+}
   </script>
   <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
     {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [{
-          "@type": "Question",
-          "name": "How do I play D&D music online with my players?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Create a channel, choose a playlist, and share the listener link. Players open the link and hear the same stream in sync."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Do players need an account?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No. Only the host needs an account. Listeners can join with the listener link."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is Far Reach Radio an alternative to Discord music bots?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Instead of bot commands and voice-channel routing, hosts run one music channel and share one listener link."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "When is Far Reach Radio a better fit than Syrinscape?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Far Reach Radio is a strong fit when you want lighter playlist-driven session music, faster host control, and a simpler link-based listening flow during live play."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can I use this for in-person games?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Open the listener link on a speaker-connected device and control music from the host panel."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does the music keep playing if I close the host panel?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Once started, the server stream continues while listeners are connected."
-          }
-        }
-      ]
+      "@type": "Question",
+      "name": "Do my players need accounts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Only the host needs to sign in."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the music stop if I close the host panel?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Streaming continues while listeners are connected. The stream goes idle after ten minutes without listeners."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can someone else take over the music?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Another signed-in user can open the host panel using the same channel name and control playback."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What\u2019s included for free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The standard music library. Pro adds access to the full catalog, including additional exclusive playlists."
+      }
     }
+  ]
+}
   </script>
 
   <link rel="stylesheet" href="/style.css" />
@@ -123,212 +111,80 @@
 
 <body>
   <%- include('./partials/nav') %>
-  <div class="container-fluid p-3 info-container">
+  <main class="container-fluid p-3 info-container">
     <div class="radio-hero">
       <div class="radio-hero-icon">
         <svg viewBox="0 0 80 80" width="80" height="80" fill="none">
-          <circle cx="40" cy="40" r="36" stroke="var(--orange2)" stroke-width="1.5" opacity="0.25"/>
-          <circle cx="40" cy="40" r="26" stroke="var(--blue6)" stroke-width="1" opacity="0.35"/>
-          <circle cx="40" cy="40" r="16" stroke="var(--orange3)" stroke-width="1.5" opacity="0.5"/>
-          <circle cx="40" cy="40" r="5" fill="var(--orange2)"/>
-          <path d="M52 28a18 18 0 0 1 0 24" stroke="var(--orange3)" stroke-width="2" stroke-linecap="round" class="radio-wave radio-wave-1"/>
-          <path d="M56 22a26 26 0 0 1 0 36" stroke="var(--blue6)" stroke-width="1.5" stroke-linecap="round" class="radio-wave radio-wave-2"/>
-          <path d="M60 16a34 34 0 0 1 0 48" stroke="var(--orange2)" stroke-width="1" stroke-linecap="round" class="radio-wave radio-wave-3"/>
+        <circle cx="40" cy="40" r="36" stroke="var(--orange2)" stroke-width="1.5" opacity="0.25"/>
+        <circle cx="40" cy="40" r="26" stroke="var(--blue6)" stroke-width="1" opacity="0.35"/>
+        <circle cx="40" cy="40" r="16" stroke="var(--orange3)" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="40" cy="40" r="5" fill="var(--orange2)"/>
+        <path d="M52 28a18 18 0 0 1 0 24" stroke="var(--orange3)" stroke-width="2" stroke-linecap="round" class="radio-wave radio-wave-1"/>
+        <path d="M56 22a26 26 0 0 1 0 36" stroke="var(--blue6)" stroke-width="1.5" stroke-linecap="round" class="radio-wave radio-wave-2"/>
+        <path d="M60 16a34 34 0 0 1 0 48" stroke="var(--orange2)" stroke-width="1" stroke-linecap="round" class="radio-wave radio-wave-3"/>
         </svg>
       </div>
-      <h1>Tabletop RPG Music Streaming For TTRPG Sessions</h1>
-      <p class="radio-hero-tagline">
-        Run synced session music with one host panel, one listener link, and 200+ original pieces built for combat,
-        travel, horror, towns, mystery, and more.
-      </p>
-      <small>
-        <a href="/discord-music-bot-alternative">Discord Music Bot Alternative</a>
-        |
-        <a href="/syrinscape-alternative">Syrinscape Alternative</a>
-      </small>
-      <hr>
-      <a href="https://radio.farreachco.com" target="_blank" rel="noopener" class="radio-cta">
-        <span>Open FRC Radio</span>
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-        </svg>
-      </a>
+      <h1>Set the scene. Share the soundtrack.</h1>
+      <p>Choose music for the road ahead, the mystery unfolding, or the battle about to begin.</p>
+      <p>Far Reach Radio streams session music in sync through one listener link. Your players open it, press play, and listen together.</p>
+      <div class="seo-cta-block"><a class="seo-cta-primary" href="https://radio.farreachco.com">Open Far Reach Radio</a>
+        <p><small>Hosting requires a free Far Reach Co. account. Listeners don’t need accounts.</small></p>
+      </div>
     </div>
-
-    <div class="quick-links" aria-label="Page sections">
-      <a href="#why-radio">Why It Fits Live Play</a>
-      <a href="#host-flow">Host Workflow</a>
-      <a href="#playlist-library">Playlist Library</a>
-      <a href="#discord-alternative">Discord Bot Alternative</a>
-      <a href="#syrinscape-comparison">Syrinscape Comparison</a>
-      <a href="#online-and-in-person">Online And In-Person</a>
-      <a href="#connected-stack">Connected Products</a>
-      <a href="#faq">FAQ</a>
-    </div>
-
-    <section id="why-radio">
-      <h2>Why Far Reach Radio Fits Live Play</h2>
-      <p>
-        Far Reach Radio is built for session music and ambience, not for managing bot permissions or spending game
-        time inside a heavy audio control surface.
-      </p>
-      <ul>
-        <li><strong>One host panel</strong> - control the session soundtrack from one browser tab.</li>
-        <li><strong>One listener link</strong> - players open the same link and hear the same stream timeline.</li>
-        <li><strong>No player accounts</strong> - only the host needs to log in.</li>
-        <li><strong>Scene-ready playlists</strong> - jump between combat, tavern, travel, horror, mystery, and victory moods without rebuilding audio from scratch.</li>
-        <li><strong>Works online or in person</strong> - share the link remotely or run it through a speaker at the table.</li>
-      </ul>
-    </section>
-
-    <section id="host-flow">
-      <h2>How Hosts Run Music Fast</h2>
-      <p>Far Reach Radio is designed for fast setup before session start and quick control while scenes are moving.</p>
-      <figure class="toolshot-card toolshot-card--smallshot">
-        <img
-          src="/assets/screen_shots/radio_host_control.png"
-          alt="Far Reach Radio host control panel with shareable listener link and playlist controls."
-          loading="lazy"
-        />
-        <figcaption>Host control panel for sharing the listener URL, starting playlists, and tracking what is currently playing.</figcaption>
-      </figure>
-
-      <h3>1. Start A Channel</h3>
-      <p>
-        Head to <a href="https://radio.farreachco.com" target="_blank" rel="noopener">radio.farreachco.com</a> and enter a channel name.
-        That opens your host control panel.
-      </p>
-
-      <h3>2. Choose Session Music</h3>
-      <p>
-        Pick a playlist for the current scene. Music starts immediately, and you can switch playlists as the tone changes.
-      </p>
-
-      <h3>3. Share The Listener Link</h3>
-      <p>
-        Copy the listener URL and send it to players in Discord, text, or email. They click, press play, and join the live session audio.
-      </p>
-
-      <h3>4. Run Music During Play</h3>
-      <p>
-        As host, you can switch playlists, skip tracks, or stop the stream. The panel always shows what is currently playing.
-      </p>
-    </section>
-
     <section id="playlist-library">
-      <h2>RPG Music Playlist Library With 200+ Original Pieces</h2>
-      <p>
-        The library is organized around scene types, so you can move with the session instead of digging through generic playlists.
-      </p>
+      <h2>From tavern to final battle</h2>
+      <p>Find music organized around the scenes you run:</p>
       <ul>
-        <li><strong>Combat and battle</strong> - stronger energy for fights and major encounters.</li>
-        <li><strong>Exploration and travel</strong> - movement-friendly music for wilderness, dungeon, and road scenes.</li>
-        <li><strong>Tavern and town</strong> - lighter social music for downtime and roleplay.</li>
-        <li><strong>Horror and suspense</strong> - darker ambience for tension, dread, and weird scenes.</li>
-        <li><strong>Mystery and intrigue</strong> - subtler sound for investigation and social pressure.</li>
-        <li><strong>Triumph and celebration</strong> - stronger payoff music for victories and milestones.</li>
+        <li><strong>Combat:</strong> bring energy to a skirmish or a major confrontation.</li>
+        <li><strong>Exploration:</strong> accompany wilderness journeys, dungeon crawls, and unfamiliar roads.</li>
+        <li><strong>Taverns and towns:</strong> leave room for conversation and downtime.</li>
+        <li><strong>Horror:</strong> build tension when something feels wrong.</li>
+        <li><strong>Mystery:</strong> support investigation, secrets, and intrigue.</li>
+        <li><strong>Victory:</strong> give the party’s achievements a moment to land.</li>
       </ul>
-      <p>
-        Free accounts get the standard library. Pro unlocks the full catalog with additional exclusive playlists and deeper coverage across moods and scenarios.
-      </p>
+      <p>The catalog includes more than 200 original pieces. Free accounts have access to the standard library; Pro unlocks the full catalog and exclusive playlists.</p>
+      <a class="seo-cta-secondary" href="/pricing">See plans</a>
     </section>
-
-    <section id="discord-alternative">
-      <h2>Alternative To Discord Music Bots For D&amp;D Sessions</h2>
-      <p>
-        The strongest search signal we have so far is around Discord bot alternatives, and that makes sense: this tool removes the bot-management layer from the workflow.
-      </p>
-      <ul>
-        <li><strong>Less setup friction</strong> - no bot installs, slash commands, or permission troubleshooting.</li>
-        <li><strong>Cleaner session control</strong> - use one host surface built for moving between RPG scenes quickly.</li>
-        <li><strong>Predictable listening</strong> - everyone hears the same server stream instead of manually lining up tracks.</li>
-        <li><strong>Link-based access</strong> - players join by URL instead of navigating bot-specific commands.</li>
-      </ul>
-      <p>
-        If that is the comparison you are making, read <a href="/discord-music-bot-alternative">Discord Music Bot Alternative</a>.
-      </p>
+    <section id="host-workflow">
+      <h2>Your soundtrack in three steps</h2>
+      <h3>1. Start a channel</h3>
+      <p>Sign in and enter a channel name to open the host panel.</p>
+      <h3>2. Choose a playlist</h3>
+      <p>Pick the mood for your current scene. Switch playlists or skip tracks as the adventure changes.</p>
+      <h3>3. Share the listener link</h3>
+      <p>Send it through Discord, text, or email. Players open the link and press play to join the stream.</p>
+      <figure class="toolshot-card">
+        <img src="/assets/screen_shots/radio_host_control.png" alt="Far Reach Radio host panel with playlist controls and listener link." loading="lazy" />
+        <figcaption>Choose a playlist and share the listener link from the host panel.</figcaption>
+      </figure>
     </section>
-
-    <section id="syrinscape-comparison">
-      <h2>Where Far Reach Radio Sits Against Syrinscape</h2>
-      <p>
-        If you are comparing this against Syrinscape, the main difference is workflow. Far Reach Radio is lighter and more playlist-driven during live play.
-      </p>
-      <ul>
-        <li><strong>Far Reach Radio fits better when</strong> you want one host panel, one listener link, original scene playlists, and less table-time spent operating audio software.</li>
-        <li><strong>Far Reach Radio fits better when</strong> you want a straightforward session soundtrack layer that supports play without becoming its own mini-game.</li>
-        <li><strong>Syrinscape may still fit better when</strong> you want a deeper sound-set ecosystem, more elaborate audio construction, or a bigger long-established sound library.</li>
-      </ul>
-      <p>
-        For the direct comparison page, see <a href="/syrinscape-alternative">Syrinscape Alternative</a>.
-      </p>
+    <section id="why-radio">
+      <h2>Keep the music close at hand</h2>
+      <p>Control playlists, skip tracks, and stop playback from one browser tab.</p>
+      <p>There’s no Discord bot to install or configure. Keep talking wherever your group already meets, and share the music through Radio.</p>
     </section>
-
     <section id="online-and-in-person">
-      <h2>Use It For Online Groups Or In-Person Tables</h2>
-      <p>
-        Far Reach Radio works well for remote sessions, hybrid games, and in-person tables that still want centralized music control.
-      </p>
-      <ul>
-        <li><strong>Online groups</strong> - send the listener link to everyone and keep the soundtrack in sync.</li>
-        <li><strong>In-person games</strong> - open the listener link on a speaker-connected device and control playlists from your laptop or phone.</li>
-        <li><strong>Recurring campaigns</strong> - reuse channel names for the same group and keep your music flow consistent from session to session.</li>
-      </ul>
-      <p>
-        Hosting requires a free <a href="https://farreachco.com/register">Far Reach Co. account</a>. Listeners do not need accounts.
-      </p>
+      <h2>Play online or around the same table</h2>
+      <p>For remote sessions, send each player the listener link.</p>
+      <p>For in-person games, open the listener link on a device connected to your speakers and control the music from your laptop or phone.</p>
     </section>
-
-    <section id="connected-stack">
-      <h2>How Radio Fits The Rest Of The Product Stack</h2>
-      <ul>
-        <li><strong>Live sessions:</strong> pair music with the <a href="/simple-virtual-tabletop-no-player-accounts">No-Signup Virtual Tabletop</a>.</li>
-        <li><strong>Persistent campaigns:</strong> use <a href="/wyrlds">Wyrlds</a> to keep long-term groups organized between sessions.</li>
-        <li><strong>Product hub:</strong> browse the rest of the stack in <a href="/product-guide">Tabletop RPG Tools And Products</a>.</li>
-      </ul>
-    </section>
-
     <section id="faq">
-      <h2>Common Questions About Tabletop RPG Music Online</h2>
-
-      <h3>How do I play D&amp;D music online with my players?</h3>
-      <p>Create a channel, choose a playlist, and share the listener link. Players open the link and hear the same stream in sync.</p>
-
-      <h3>Do my players need an account?</h3>
-      <p>No. Only the host needs an account. Listeners can tune in with just the link.</p>
-
-      <h3>Is this an alternative to Discord music bots?</h3>
-      <p>Yes. It replaces bot commands and voice-channel routing with one host panel and one listener link.</p>
-
-      <h3>Is this an alternative to Syrinscape?</h3>
-      <p>It can be, especially if you want a lighter playlist-driven workflow. If you want a bigger sound-set ecosystem and deeper audio construction, Syrinscape may still be the better fit.</p>
-
-      <h3>Can I use this for in-person games?</h3>
-      <p>Yes. Open the listener link on a speaker-connected device and use the host panel on your phone or laptop.</p>
-
-      <h3>Does the music keep playing if I close the host panel?</h3>
-      <p>Yes. Once a playlist is started, the server continues streaming while listeners are connected. The stream goes idle after 10 minutes with no listeners.</p>
-
-      <h3>Can multiple people host on the same channel?</h3>
-      <p>Any logged-in user can send commands to a channel. If another GM needs to take over music duties, they can open the host panel for the same channel name.</p>
+      <h2>A few things to know</h2>
+      <h3>Do my players need accounts?</h3>
+      <p>No. Only the host needs to sign in.</p>
+      <h3>Does the music stop if I close the host panel?</h3>
+      <p>No. Streaming continues while listeners are connected. The stream goes idle after ten minutes without listeners.</p>
+      <h3>Can someone else take over the music?</h3>
+      <p>Yes. Another signed-in user can open the host panel using the same channel name and control playback.</p>
+      <h3>What’s included for free?</h3>
+      <p>The standard music library. Pro adds access to the full catalog, including additional exclusive playlists.</p>
     </section>
-
-    <div class="radio-bottom-cta">
-      <p>Ready to add synced music to your next session?</p>
-      <a href="https://radio.farreachco.com" target="_blank" rel="noopener" class="radio-cta">
-        <span>Open FRC Radio</span>
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" />
-        </svg>
-      </a>
-      <p>
-        Want the comparison pages?
-        <a href="/discord-music-bot-alternative">Discord Music Bot Alternative</a>
-        |
-        <a href="/syrinscape-alternative">Syrinscape Alternative</a>
-      </p>
-    </div>
-  </div>
+    <section id="get-started">
+      <h2>Bring your next scene to life</h2>
+      <div class="seo-cta-block"><a class="seo-cta-primary" href="https://radio.farreachco.com">Open Far Reach Radio</a>
+      </div>
+    </section>
+  </main>
   <%- include('./partials/footer') %>
 </body>
 

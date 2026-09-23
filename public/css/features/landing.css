@@ -78,10 +78,16 @@
   padding: 84px 0;
 }
 
-.landing-section h1 {
+.landing-section h1,
+.landing-section h2 {
   margin: 0;
   color: var(--landing-text);
   letter-spacing: 0.7px;
+}
+
+.landing-section h2 {
+  font-size: 1.75rem;
+  line-height: 1.2;
 }
 
 .landing-section p {
