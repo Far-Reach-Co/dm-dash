@@ -12,6 +12,7 @@
       ? srdPageSummary
       : '';
 %>
+<%- include('srdeditiontoggle') %>
 <div class="intro">
   <% if (introHeading !== introLabel) { %>
     <small class="text-center intro-label"><%= introLabel %></small>
@@ -24,6 +25,13 @@
 
 <% if (typeof showSrdGrowthRail === 'undefined' || showSrdGrowthRail !== false) { %>
   <aside class="srd-growth-rail" aria-label="SRD tools">
+    <% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
+      <div class="srd-growth-card">
+        <h3>2024 Rules Reference</h3>
+        <p>Browse this SRD data here, or read the complete rules text in the official SRD 5.2.1.</p>
+        <a class="srd-growth-link-btn" href="https://www.dndbeyond.com/srd">Open Official SRD</a>
+      </div>
+    <% } else { %>
     <div class="srd-growth-card">
       <h3>Ask the Archives</h3>
       <p>Ask our AI assistant about rules, monsters, spells, classes, and more.</p>
@@ -40,6 +48,7 @@
         Open full response
       </button>
     </div>
+    <% } %>
 
     <div class="srd-growth-card srd-growth-card-vtt">
       <h3>Try The VTT Sandbox</h3>
@@ -48,6 +57,7 @@
     </div>
   </aside>
 
+  <% if (typeof srdEdition === 'undefined' || srdEdition !== '2024') { %>
   <div id="srd-search-modal" class="srd-search-modal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="srd-search-modal-card">
       <button type="button" class="srd-search-modal-close" data-close-srd-search aria-label="Close Ask the Archives">×</button>
@@ -69,4 +79,5 @@
   <script src="/lib/marked.min.js" defer></script>
   <script src="/lib/purify.min.js" defer></script>
   <script src="/lib/srdSearch.js" defer></script>
+  <% } %>
 <% } %>

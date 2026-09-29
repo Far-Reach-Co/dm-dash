@@ -203,3 +203,59 @@ tr:hover {
   margin-bottom: 0.75rem;
 }
 
+
+.srd-edition-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin: 1rem auto 1.5rem;
+}
+
+.srd-edition-toggle a,
+.srd-edition-toggle strong,
+.srd-edition-unavailable {
+  padding: 0.4rem 0.65rem;
+}
+
+.srd-edition-toggle strong {
+  border-bottom: 2px solid var(--orange3);
+}
+
+.srd-edition-unavailable {
+  color: var(--light-gray);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.srd-edition-field-list {
+  margin: 0;
+}
+
+.srd-edition-field-list > div {
+  margin: 0.7rem 0;
+}
+
+.srd-edition-field-list dt {
+  font-weight: 600;
+}
+
+.srd-edition-field-list dd {
+  margin: 0.25rem 0 0;
+}
+
+.srd-edition-prose {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.srd-edition-table-scroll {
+  overflow-x: auto;
+}
+
+.srd-filter-pills a[aria-current="page"] {
+  color: var(--orange3);
+  border-color: rgba(209, 158, 116, 0.65);
+  background: rgba(209, 158, 116, 0.14);
+  font-weight: 700;
+}

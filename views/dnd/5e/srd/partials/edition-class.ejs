@@ -1,0 +1,45 @@
+<p><%= editionEntry.name %> is a 2024 D&D class. Its progression, starting choices, and class features are listed below.</p>
+
+<div class="quick-links" aria-label="<%= editionEntry.name %> page sections">
+  <a href="#progression">Progression</a>
+  <a href="#proficiencies">Proficiencies</a>
+  <a href="#equipment">Equipment</a>
+  <a href="#core-features">Core Features</a>
+</div>
+
+<% if (editionEntry.primary_ability?.desc) { %><div class="inline-div"><b>Primary Ability:</b> <span><%= editionEntry.primary_ability.desc %></span></div><% } %>
+<% if (editionEntry.hit_die) { %><div class="inline-div"><b>Hit Die:</b> <span>d<%= editionEntry.hit_die %></span></div><% } %>
+<% if (editionEntry.saving_throws?.length) { %><div class="inline-div"><b>Saving Throws:</b> <span><%= editionEntry.saving_throws.map((score) => score.name).join(', ') %></span></div><% } %>
+<% if (editionClassSpellCount) { %><div class="inline-div"><b>Class Spell List:</b> <a href="/dnd/5e/srd/spells/class/<%= editionEntry.index %>?edition=2024"><%= editionEntry.name %> Spells (<%= editionClassSpellCount %>)</a></div><% } %>
+<div class="inline-div"><b>Related Pages:</b> <a href="/dnd/5e/srd/classes?edition=2024">Classes</a>, <a href="/dnd/5e/srd/features?edition=2024">Features</a>, <a href="/dnd/5e/srd/equipment?edition=2024">Equipment</a>, <a href="/dnd/5e/srd/skills?edition=2024">Skills</a>, <a href="/dnd/5e/srd/races?edition=2024">Species</a></div>
+
+<hr class="w-75" />
+<% if (editionClassLevels.length) { %>
+  <h2 id="progression">Progression Table</h2>
+  <div class="srd-edition-table-scroll"><table>
+    <thead><tr><th>Level</th><th>Proficiency Bonus</th><th>Features</th></tr></thead>
+    <tbody><% for (const level of editionClassLevels) { %><tr>
+      <td><%= level.level %></td><td>+<%= level.prof_bonus %></td>
+      <td><% for (const feature of level.features || []) { const href = editionReferenceHref(feature); %><% if (href) { %><a href="<%= href %>"><%= feature.name %></a><% } else { %><%= feature.name %><% } %><br /><% } %></td>
+    </tr><% } %></tbody>
+  </table></div>
+  <hr class="w-75" />
+<% } %>
+
+<h2 id="proficiencies">Starting Proficiencies</h2>
+<% if (editionEntry.proficiencies?.length) { %><%- include('edition-field', { value: editionEntry.proficiencies }) %><% } %>
+<% if (editionEntry.proficiency_choices?.length) { %><h3>Proficiency Choices</h3><%- include('edition-field', { value: editionEntry.proficiency_choices }) %><% } %>
+
+<h2 id="equipment">Starting Equipment</h2>
+<% if (editionEntry.starting_equipment?.length) { %><%- include('edition-field', { value: editionEntry.starting_equipment }) %><% } %>
+<% if (editionEntry.starting_equipment_options?.length) { %><%- include('edition-field', { value: editionEntry.starting_equipment_options }) %><% } %>
+
+<% if (editionEntry.spellcasting) { %><h2>Spellcasting</h2><%- include('edition-field', { value: editionEntry.spellcasting }) %><% } %>
+<% if (editionEntry.multi_classing) { %><h2>Multiclassing</h2><%- include('edition-field', { value: editionEntry.multi_classing }) %><% } %>
+
+<h2 id="core-features">Core Features</h2>
+<ul class="srd-col-list-2"><% for (const feature of editionClassFeatures) { %>
+  <li><a href="/dnd/5e/srd/features/<%= feature.index %>?edition=2024"><%= feature.name %><%= feature.level?.name?.match(/\d+$/)?.[0] ? ` (Lvl ${feature.level.name.match(/\d+$/)[0]})` : '' %></a></li>
+<% } %></ul>
+
+<% if (editionEntry.subclasses?.length) { %><h2>Subclasses</h2><%- include('edition-field', { value: editionEntry.subclasses }) %><% } %>

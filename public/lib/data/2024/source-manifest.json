@@ -1,0 +1,140 @@
+{
+  "edition": "2024",
+  "language": "en",
+  "source": "5e-bits/5e-database",
+  "sourceCommit": "6f6299e75b4fa56ed882bfb1429f6dc6b4c65330",
+  "importedAt": "2026-09-29T20:18:10.010Z",
+  "categories": [
+    {
+      "file": "5e-srd-ability-scores.json",
+      "count": 6,
+      "sha256": "27f117bcef477273774f8e1c6554ac6a4d2e43551d5a2cb6d4277fb0945e0a6e"
+    },
+    {
+      "file": "5e-srd-alignments.json",
+      "count": 10,
+      "sha256": "9dddd583e53ba11cef7f377384d5bd78e050fbaf67b093eed811ac41a65e5ba5"
+    },
+    {
+      "file": "5e-srd-backgrounds.json",
+      "count": 4,
+      "sha256": "8cf80b14ddbfb82e596d51fb9b4d5ece0627297251cb1e99f56d89f5059da7c2"
+    },
+    {
+      "file": "5e-srd-classes.json",
+      "count": 12,
+      "sha256": "0f3bd5dd5931a561a9c5da6bdec1ba2279ad03261ac2dbe7dae23a11273f678e"
+    },
+    {
+      "file": "5e-srd-conditions.json",
+      "count": 15,
+      "sha256": "8c1d49897efa0f8cfd366f36f8cee62ed10b1bff051d3c6ce5827dfbb02a737a"
+    },
+    {
+      "file": "5e-srd-damage-types.json",
+      "count": 13,
+      "sha256": "83f074f17afe6ec272b09eab6ac4305171e93cecf77584bd32b21f2e0123321f"
+    },
+    {
+      "file": "5e-srd-equipment-categories.json",
+      "count": 30,
+      "sha256": "0da95910d367820e98354ed1fb7486a4637ba8449536bbab91658ca556ae470a"
+    },
+    {
+      "file": "5e-srd-equipment.json",
+      "count": 182,
+      "sha256": "4219c83f945f2c1a9a0029ee1bd8ff492d70d1eefd8d42546630ef6b5eef4f22"
+    },
+    {
+      "file": "5e-srd-feats.json",
+      "count": 17,
+      "sha256": "f80bf64d46b4addb5d991c6b4b1e05e8c0f9209ffbae297222c5439022abcbc3"
+    },
+    {
+      "file": "5e-srd-features.json",
+      "count": 232,
+      "sha256": "6390b3a1ad2ae68ad21516c38309799f610f893cb008cd3ad920d0eed89f8249"
+    },
+    {
+      "file": "5e-srd-languages.json",
+      "count": 19,
+      "sha256": "56c0577430418d3cb6993f8e475ab9e60db8b0cc154fff9d0cbaf988a0ff92d5"
+    },
+    {
+      "file": "5e-srd-levels.json",
+      "count": 287,
+      "sha256": "963a7b1c597e51f2d6e22068940344193fbb78bf2f0a81274777dec06b3a3fb1"
+    },
+    {
+      "file": "5e-srd-magic-items.json",
+      "count": 262,
+      "sha256": "c97abb7d570656f9329007f17d5bb4fddbe0d65d62abd141f66c1ff3b9c39d2f"
+    },
+    {
+      "file": "5e-srd-magic-schools.json",
+      "count": 8,
+      "sha256": "e828b264e4a7a3d9fa0a5f33bd8cd61690ae9cac4344502a23c0f7ece45b61f6"
+    },
+    {
+      "file": "5e-srd-monsters.json",
+      "count": 341,
+      "sha256": "34ec39f2b384a5e1ed11ac6d9e17601a19579ed67fd1775d21588d186714346f"
+    },
+    {
+      "file": "5e-srd-proficiencies.json",
+      "count": 74,
+      "sha256": "70af1e839a7d735ff877333452622cbe2064e6394f827e20845d32a4c2618be9"
+    },
+    {
+      "file": "5e-srd-skills.json",
+      "count": 18,
+      "sha256": "f3aa1afd9c2f132882cbb17f72a41482f7578d167e72d166259d1455c4b73887"
+    },
+    {
+      "file": "5e-srd-spells.json",
+      "count": 339,
+      "sha256": "16aa8e47a84c6b21ccc101c1ee7ab5b8a026da940985bc826b6b58aa1fe0b6bc"
+    },
+    {
+      "file": "5e-srd-subclasses.json",
+      "count": 12,
+      "sha256": "eac4c9f975490f0953e389eeae28bc655527f6ed277146eff6757a9fe1953178"
+    },
+    {
+      "file": "5e-srd-traits.json",
+      "count": 67,
+      "sha256": "acbe77b03e08959b6d8901b10d7d9eaad57a2624af121c4ef72157c708bf9427"
+    },
+    {
+      "file": "5e-srd-weapon-properties.json",
+      "count": 10,
+      "sha256": "a881e9fd8de5e332483871aa9a4e66756cef305582f96a5ff26198477a833db2"
+    },
+    {
+      "file": "5e-srd-species.json",
+      "count": 9,
+      "sha256": "bfb1beb2a61925a496b6d4c9bfe37bf58c735e2c6e6b8e4ad7310b44b4cb1d70"
+    },
+    {
+      "file": "5e-srd-subspecies.json",
+      "count": 24,
+      "sha256": "c3d758e9ae42ddb2de71a6ad23863f785266843337c52b386d250781a92cc159"
+    },
+    {
+      "file": "5e-srd-poisons.json",
+      "count": 14,
+      "sha256": "e0aa4d9eba7f90d1344d4e36f95232b312cbb991afa86b8f1f7627bd4d8b160d"
+    },
+    {
+      "file": "5e-srd-weapon-mastery-properties.json",
+      "count": 8,
+      "sha256": "0932ec552adfc63fdf87d8e5c3fad4035a728092c78e1c8a32a8712c4ce6d969"
+    }
+  ],
+  "unavailableCategories": [
+    "rules",
+    "rule-sections"
+  ],
+  "unresolvedReferences": [],
+  "completeness": "Source snapshot; not certified complete against the official SRD."
+}

@@ -1,0 +1,12 @@
+<% if (typeof srdEdition !== 'undefined') { %>
+  <div class="srd-edition-toggle" role="group" aria-label="SRD rules version">
+    <span>Rules version</span>
+    <% if (srdEdition === '2014') { %>
+      <strong aria-current="true">2014</strong>
+      <% if (srd2024Available) { %><a href="<%= srd2024Url %>">2024</a><% } else { %><span class="srd-edition-unavailable" title="Unavailable" aria-disabled="true">2024</span><% } %>
+    <% } else { %>
+      <% if (srd2014Available) { %><a href="<%= srdBaseUrl %>">2014</a><% } else { %><span class="srd-edition-unavailable" title="Unavailable" aria-disabled="true">2014</span><% } %>
+      <strong aria-current="true">2024</strong>
+    <% } %>
+  </div>
+<% } %>

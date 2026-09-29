@@ -1,0 +1,21 @@
+<% if (value === null || value === undefined) { %>
+  <span>—</span>
+<% } else if (typeof value === 'string') { %>
+  <div class="srd-edition-prose"><%- include('edition-prose', { text: value }) %></div>
+<% } else if (typeof value === 'number' || typeof value === 'boolean') { %>
+  <span><%= typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value %></span>
+<% } else if (Array.isArray(value)) { %>
+  <ul><% for (const item of value) { %><li><%- include('edition-field', { value: item }) %></li><% } %></ul>
+<% } else if (value.desc && value.from && value.choose) { %>
+  <p class="srd-edition-prose"><%= value.desc %></p>
+<% } else if (value.name && value.url && Object.keys(value).every((key) => ['index','name','url'].includes(key))) { %>
+  <% const href = editionReferenceHref(value); %>
+  <% if (href) { %><a href="<%= href %>"><%= value.name %></a><% } else { %><span><%= value.name %></span><% } %>
+<% } else { %>
+  <% if (value.name) { %><strong><%= value.name %></strong><% } %>
+  <dl class="srd-edition-field-list">
+  <% for (const [key, item] of editionFields(value)) { %>
+    <div><dt><%= editionLabel(key) %></dt><dd><%- include('edition-field', { value: item }) %></dd></div>
+  <% } %>
+  </dl>
+<% } %>

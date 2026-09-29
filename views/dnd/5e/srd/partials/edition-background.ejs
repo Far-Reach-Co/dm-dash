@@ -1,0 +1,14 @@
+<p><%= editionEntry.name %> is a 2024 D&D background. Its ability scores, origin feat, proficiencies, and starting equipment are below.</p>
+
+<div class="inline-div"><b>Ability Scores:</b> <span><%= (editionEntry.ability_scores || []).map((score) => score.name).join(', ') %></span></div>
+<% if (editionEntry.feat) { %><div class="inline-div"><b>Origin Feat:</b> <span><%= editionEntry.feat.name %><%= editionEntry.feat.note ? ` (${editionEntry.feat.note})` : '' %></span></div><% } %>
+
+<hr class="w-75" />
+<h2>Starting Proficiencies</h2>
+<ul><% for (const proficiency of editionEntry.proficiencies || []) { %><li><%= proficiency.name %></li><% } %></ul>
+<% if (editionEntry.proficiency_choices?.length) { %><h3>Proficiency Choices</h3><%- include('edition-field', { value: editionEntry.proficiency_choices }) %><% } %>
+
+<h2>Starting Equipment</h2>
+<% for (const option of editionEntry.equipment_options || []) { %><p><%= option.desc %></p><% } %>
+
+<div class="srd-back-link"><a href="/dnd/5e/srd/backgrounds?edition=2024">&larr; All Backgrounds</a> &ensp;&middot;&ensp; <a href="/dnd/5e/srd/races?edition=2024">Species</a> &ensp;&middot;&ensp; <a href="/dnd/5e/srd/classes?edition=2024">Classes</a></div>
