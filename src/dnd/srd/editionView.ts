@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
 import type { Request, Response, NextFunction, Router } from "express";
+import { editionIdMatches } from "./editionIdMatches";
+import { DND_API_BASE } from "../srdCatalog";
 
 const ROOT = path.join(__dirname, "../../../public/lib/data");
 const PREFIX = "/5e/srd/";
@@ -11,7 +13,7 @@ const CATEGORIES: Record<string, string> = {
   equipment: "equipment", "magic-items": "magic-items", feats: "feats",
   features: "features", languages: "languages", monsters: "monsters", races: "species",
   skills: "skills", spells: "spells", "weapon-properties": "weapon-properties",
-  levels: "levels", poisons: "poisons", "weapon-mastery-properties": "weapon-mastery-properties",
+  levels: "levels", subclasses: "subclasses", poisons: "poisons", "weapon-mastery-properties": "weapon-mastery-properties",
 };
 const DETAIL_VIEWS: Record<string, string> = {
   backgrounds: "background", classes: "class", "damage-types": "damage-type",
@@ -99,9 +101,25 @@ function resolveView(parts: string[]): { view: string; category: string; items: 
   if (parts.length === 3 && category === "monsters") return items.length ? { view: "monsters-filter", category, items } : null;
   return null;
 }
-function editionlessUrl(req: Request): string {
+const reverseEditionIdMatches = Object.fromEntries(
+  Object.entries(editionIdMatches).map(([category, matches]) => [
+    category,
+    Object.fromEntries(Object.entries(matches).map(([oldId, newId]) => [newId, oldId])),
+  ]),
+) as Record<string, Record<string, string>>;
+
+function counterpartParts(parts: string[], edition: "2014" | "2024"): string[] {
+  if (parts.length !== 2 || !DETAIL_VIEWS[parts[0]]) return parts;
+  const matches = edition === "2024" ? editionIdMatches : reverseEditionIdMatches;
+  const mappedId = matches[parts[0]]?.[parts[1]];
+  return mappedId ? [parts[0], mappedId] : parts;
+}
+
+function editionUrl(req: Request, parts: string[], edition: "2014" | "2024"): string {
   const url = new URL(req.originalUrl, "http://localhost");
-  url.searchParams.delete("edition");
+  url.pathname = `${PUBLIC_PREFIX}${parts.map(encodeURIComponent).join("/")}`;
+  if (edition === "2024") url.searchParams.set("edition", "2024");
+  else url.searchParams.delete("edition");
   return url.pathname + url.search + url.hash;
 }
 function known2014(parts: string[]): boolean {
@@ -132,15 +150,22 @@ export function registerSrdEditionView(router: Router): void {
   router.use((req: Request, res: Response, next: NextFunction) => {
     if (!["GET", "HEAD"].includes(req.method) || !req.path.startsWith(PREFIX)) return next();
     const parts = req.path.slice(PREFIX.length).split("/").filter(Boolean);
-    const resolved = resolveView(parts);
+    const requested2024 = req.query.edition === "2024";
+    const parts2024 = requested2024 ? parts : counterpartParts(parts, "2024");
+    const parts2014 = requested2024 ? counterpartParts(parts, "2014") : parts;
+    const resolved = resolveView(parts2024);
     const available = !!resolved;
-    res.locals.srdEdition = req.query.edition === "2024" ? "2024" : "2014";
+    res.locals.srdEdition = requested2024 ? "2024" : "2014";
     res.locals.srd2024Available = available;
-    res.locals.srd2014Available = known2014(parts);
-    res.locals.srdBaseUrl = editionlessUrl(req);
-    res.locals.srd2024Url = `${editionlessUrl(req)}${editionlessUrl(req).includes("?") ? "&" : "?"}edition=2024`;
-    if (req.query.edition !== "2024") return next();
-    if (!available) return res.redirect(302, editionlessUrl(req));
+    res.locals.srd2014Available = known2014(parts2014);
+    res.locals.srdBaseUrl = editionUrl(req, parts2014, "2014");
+    res.locals.srd2024Url = editionUrl(req, parts2024, "2024");
+    if (!requested2024) return next();
+    if (!available) {
+      const mapped = counterpartParts(parts, "2024");
+      if (mapped !== parts && resolveView(mapped)) return res.redirect(302, editionUrl(req, mapped, "2024"));
+      return res.redirect(302, editionUrl(req, parts, "2014"));
+    }
     try {
       const { view, category, items, entry } = resolved!;
       const heading = filterHeading(category, parts, items) || (category === "features" && entry?.class
@@ -153,11 +178,15 @@ export function registerSrdEditionView(router: Router): void {
       const featurePosition = classFeatures.findIndex((feature) => feature.index === entry?.index);
       res.render(`dnd/5e/srd/${view}`, {
         auth: req.session.user, heading,
+        monster: category === "monsters" ? entry : undefined,
+        imageBaseUrl: DND_API_BASE,
+        relatedDamageTypes: [],
         editionCategory: category, editionItems: items.slice().sort((a, b) => a.name.localeCompare(b.name)),
         editionEntry: entry, editionParts: parts, editionData: data, editionLabel: label,
         editionFields: displayFields, editionReferenceHref: referenceHref,
         editionClassLevels: category === "classes" && entry ? data("2024", "levels").filter((level) => level.class?.index === entry.index && !level.subclass).sort((a, b) => a.level - b.level) : [],
         editionClassFeatures: category === "classes" && entry ? data("2024", "features").filter((feature) => feature.class?.index === entry.index).sort((a, b) => (Number(a.level?.name?.match(/\d+$/)?.[0]) || 0) - (Number(b.level?.name?.match(/\d+$/)?.[0]) || 0) || a.name.localeCompare(b.name)) : [],
+        editionClassSubclasses: category === "classes" && entry ? data("2024", "subclasses").filter((subclass) => subclass.class?.index === entry.index) : [],
         editionClassSpellCount: category === "classes" && entry ? data("2024", "spells").filter((spell) => (spell.classes || []).some((ref: any) => ref.index === entry.index)).length : 0,
         editionFeatureLevel: entry?.level?.name?.match(/\d+$/)?.[0],
         editionFeaturePrevious: featurePosition > 0 ? classFeatures[featurePosition - 1] : null,

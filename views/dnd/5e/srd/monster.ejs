@@ -1,6 +1,3 @@
-<% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
-<%- include('partials/edition-page') %>
-<% } else { %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,6 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <%
+    const edition2024 = typeof srdEdition !== 'undefined' && srdEdition === '2024';
+    const editionSuffix = edition2024 ? '?edition=2024' : '';
     // Helper for CR display
     const crDisplay = cr => {
       const decimalCR = Number(cr);
@@ -33,57 +32,19 @@
     const conditionImmunities = Array.isArray(monster.condition_immunities) ? monster.condition_immunities : [];
     const relatedDamageTypeLinks = Array.isArray(relatedDamageTypes) ? relatedDamageTypes : [];
     const monsterImage = monster.image ? imageBaseUrl + monster.image : null;
-    const monsterTitle = `${monster.name} 5e Stat Block: AC, HP, CR, and Actions`;
-    const monsterSummary = `${monster.name} is a ${monster.size} ${monster.type} with ${monster.alignment} alignment and Challenge Rating ${crDisplay(monster.challenge_rating)} in D&D 5e. This stat block includes AC ${monster.armor_class[0]?.value}, ${monster.hit_points} hit points, speeds, traits, and actions.`;
+    const monsterTitle = `${monster.name} 5e${edition2024 ? ' (2024)' : ''} Stat Block: AC, HP, CR, and Actions`;
+    const monsterSummary = `${monster.name} is a ${monster.size} ${monster.type} with ${monster.alignment} alignment and Challenge Rating ${crDisplay(monster.challenge_rating)} in the ${edition2024 ? '2024' : '2014'} SRD. This stat block includes AC ${monster.armor_class[0]?.value}, ${monster.hit_points} hit points, speeds, traits, and actions.`;
 
-    // Build FAQ entries from monster data
-    const faqs = [];
-    const ac = monster.armor_class && monster.armor_class.length ? monster.armor_class[0].value : null;
-    faqs.push({
-      q: `What type of creature is the ${monster.name} in D&D 5e?`,
-      a: `The ${monster.name} is a ${monster.size} ${monster.type} with ${monster.alignment} alignment in D&D 5th Edition.`
-    });
-    faqs.push({
-      q: `What is the ${monster.name}'s challenge rating in D&D 5e?`,
-      a: `The ${monster.name} has a Challenge Rating (CR) of ${crDisplay(monster.challenge_rating)}, worth ${monster.xp} XP.`
-    });
-    faqs.push({
-      q: `What are the ${monster.name}'s hit points and armor class in D&D 5e?`,
-      a: `The ${monster.name} has ${monster.hit_points} hit points (${monster.hit_points_roll}) and an Armor Class of ${ac} in D&D 5th Edition.`
-    });
-    if (monster.damage_resistances && monster.damage_resistances.length) {
-      faqs.push({
-        q: `What is the ${monster.name} resistant to in D&D 5e?`,
-        a: `The ${monster.name} has resistance to: ${monster.damage_resistances.join(', ')}.`
-      });
-    }
-    if (monster.damage_immunities && monster.damage_immunities.length) {
-      faqs.push({
-        q: `What damage types is the ${monster.name} immune to in D&D 5e?`,
-        a: `The ${monster.name} is immune to these damage types or sources: ${monster.damage_immunities.join(', ')}.`
-      });
-    }
-    if (conditionImmunities.length) {
-      faqs.push({
-        q: `What conditions is the ${monster.name} immune to in D&D 5e?`,
-        a: `The ${monster.name} is immune to the following conditions: ${conditionImmunities.map(condition => condition.name).join(', ')}.`
-      });
-    }
-    if (monster.speed && monster.speed.fly) {
-      faqs.push({
-        q: `Can the ${monster.name} fly in D&D 5e?`,
-        a: `Yes, the ${monster.name} has a flying speed of ${monster.speed.fly}${monster.speed.hover ? ' (hover)' : ''} in D&D 5th Edition.`
-      });
-    }
   %>
 
   <title><%= monsterTitle %> | Far Reach Co.</title>
   <meta name="description" content="<%= monster.name %> is a <%= monster.size %> <%= monster.type %> with CR <%= crDisplay(monster.challenge_rating) %>. Complete 5e stat block with AC <%= monster.armor_class[0]?.value %>, HP <%= monster.hit_points %>, abilities, actions, and more." />
-  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>" />
+  <% if (edition2024) { %><meta name="robots" content="noindex,follow" /><% } %>
+  <link rel="canonical" href="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %><%= editionSuffix %>" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="article" />
-  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>" />
+  <meta property="og:url" content="https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %><%= editionSuffix %>" />
   <meta property="og:title" content="<%= monsterTitle %>" />
   <meta property="og:description" content="<%= monsterSummary %>" />
   <meta property="og:site_name" content="Far Reach Co." />
@@ -107,7 +68,7 @@
       "name": "<%= monsterTitle %>",
       "headline": "<%= monster.name %>",
       "description": "<%= monsterSummary %>",
-      "url": "https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>",
+      "url": "https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %><%= editionSuffix %>",
       <% if (monsterImage) { %> "image": "<%= monsterImage %>",
       <% } %> "breadcrumb": {
         "@type": "BreadcrumbList",
@@ -133,31 +94,18 @@
             "@type": "ListItem",
             "position": 4,
             "name": "<%= monster.name %>",
-            "item": "https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %>"
+            "item": "https://farreachco.com/dnd/5e/srd/monsters/<%= monster.index %><%= editionSuffix %>"
           }
         ]
       },
       "about": {
         "@type": "Game",
-        "name": "Dungeons & Dragons 5th Edition",
+        "name": "Dungeons & Dragons 5th Edition<%= edition2024 ? ' (2024 SRD)' : '' %>",
         "gamePlatform": "Tabletop"
       }
     }
   </script>
 
-  <% if (faqs.length > 0) { %>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": <%- JSON.stringify(faqs.map(f => ({
-        "@type": "Question",
-        "name": f.q,
-        "acceptedAnswer": { "@type": "Answer", "text": f.a }
-      }))) %>
-    }
-  </script>
-  <% } %>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
@@ -170,14 +118,15 @@
   <%- include('../../../partials/nav') %>
   <div class="container-fluid p-3 info-container">
     <%- include('../../../partials/dnd/srdintro', {
+      srdSectionLabel: edition2024 ? 'Dungeons & Dragons · 2024 SRD' : undefined,
       srdPageHeading: monsterTitle,
       srdPageSummary: monsterSummary
     }) %>
     <br />
     <div class="breadcrumbs">
-      <a href="/dnd/5e/srd/contents">Contents</a>
+      <a href="/dnd/5e/srd/contents<%= editionSuffix %>">Contents</a>
       <span class="separator">→</span>
-      <a href="/dnd/5e/srd/monsters">Monsters</a>
+      <a href="/dnd/5e/srd/monsters<%= editionSuffix %>">Monsters</a>
       <span class="separator">→</span>
       <div class="text-green"><%= monster.name %></div>
     </div>
@@ -196,7 +145,7 @@
         <h2><%= monster.name %></h2>
         <div class="inline-div">
           <i><%= monster.size %>,</i>
-          <i><a href="/dnd/5e/srd/monsters/type/<%= typeSlug %>"><%= monster.type %></a>,</i>
+          <i><a href="/dnd/5e/srd/monsters/type/<%= typeSlug %><%= editionSuffix %>"><%= monster.type %></a>,</i>
           <i><%= monster.alignment %></i>
         </div>
       </div>
@@ -209,7 +158,7 @@
         <div>
           <% if (monster.armor_class && monster.armor_class.length) { %>
           <% monster.armor_class.forEach((acEntry, acIndex) => { %>
-          <span><%= acEntry.value %> (<%= acEntry.type %>)</span>
+          <span><%= acEntry.value %><%= acEntry.type ? ` (${acEntry.type})` : '' %></span>
           <%= acIndex < monster.armor_class.length - 1 ? ', ' : '' %>
           <% }) %>
           <% } else { %>
@@ -324,7 +273,7 @@
         <b>Condition Immunities:</b>
         <% if (conditionImmunities.length) { %>
           <% conditionImmunities.forEach((condition, idx) => { %>
-            <a href="/dnd/5e/srd/conditions#<%= condition.index %>"><%= condition.name %></a><%= idx < conditionImmunities.length - 1 ? ', ' : '' %>
+            <a href="/dnd/5e/srd/conditions<%= editionSuffix %>#<%= condition.index %>"><%= condition.name %></a><%= idx < conditionImmunities.length - 1 ? ', ' : '' %>
           <% }) %>
         <% } else { %>
           —
@@ -356,12 +305,16 @@
       <div class="inline-div">
         <b>Languages:</b> <%= monster.languages || "-" %>
       </div>
+      <% if (edition2024 && monster.gear) { %>
+      <div class="inline-div"><b>Gear:</b> <%= monster.gear %></div>
+      <% } %>
       <!-- CR -->
       <div>
         <div class="inline-div">
           <b>CR:</b>
-          <div><a href="/dnd/5e/srd/monsters/cr/<%= crSlug(monster.challenge_rating) %>"><%= crDisplay(monster.challenge_rating) %></a></div>
+          <div><a href="/dnd/5e/srd/monsters/cr/<%= crSlug(monster.challenge_rating) %><%= editionSuffix %>"><%= crDisplay(monster.challenge_rating) %></a></div>
           <i>(<%= monster.xp %> XP)</i>
+          <% if (edition2024 && monster.xp_in_lair) { %><i>(<%= monster.xp_in_lair %> XP in lair)</i><% } %>
         </div>
       </div>
       <!-- Profs -->
@@ -372,13 +325,13 @@
       <div class="srd-filter-group">
         <div class="srd-filter-label">Related Monster Indexes</div>
         <div class="srd-filter-pills">
-          <a href="/dnd/5e/srd/monsters/type/<%= typeSlug %>">More <%= monster.type %> Monsters</a>
-          <a href="/dnd/5e/srd/monsters/cr/<%= crSlug(monster.challenge_rating) %>">More CR <%= crDisplay(monster.challenge_rating) %> Monsters</a>
+          <a href="/dnd/5e/srd/monsters/type/<%= typeSlug %><%= editionSuffix %>">More <%= monster.type %> Monsters</a>
+          <a href="/dnd/5e/srd/monsters/cr/<%= crSlug(monster.challenge_rating) %><%= editionSuffix %>">More CR <%= crDisplay(monster.challenge_rating) %> Monsters</a>
           <% conditionImmunities.forEach((condition) => { %>
-            <a href="/dnd/5e/srd/monsters/condition-immunity/<%= condition.index %>"><%= condition.name %> Immunity</a>
+            <a href="/dnd/5e/srd/monsters/condition-immunity/<%= condition.index %><%= editionSuffix %>"><%= condition.name %> Immunity</a>
           <% }) %>
           <% relatedDamageTypeLinks.forEach((damageType) => { %>
-            <a href="/dnd/5e/srd/damage-types/<%= damageType.index %>"><%= damageType.label %> Damage Type</a>
+            <a href="/dnd/5e/srd/damage-types/<%= damageType.index %><%= editionSuffix %>"><%= damageType.label %> Damage Type</a>
           <% }) %>
         </div>
       </div>
@@ -451,7 +404,7 @@
             <p>Cantrips</p><i>(at will)</i>
             <ul><% cantrips.forEach(spell => { %>
               <li>
-                <a href="<%= spellsPageBase %><%= (spell.url || '').split('/').pop() %>" target="_blank" rel="noopener noreferrer"><%= spell.name %></a>
+                <a href="<%= spellsPageBase %><%= (spell.url || '').split('/').pop() %><%= editionSuffix %>" target="_blank" rel="noopener noreferrer"><%= spell.name %></a>
               </li><% }) %>
             </ul>
             <% } %>
@@ -474,7 +427,7 @@
             <ul>
               <% spellsAtThisLevel.forEach(spellItem => { %>
               <li>
-                <a href="<%= spellsPageBase %><%= (spellItem.url || '').split('/').pop() %>" target="_blank" rel="noopener noreferrer"><%= spellItem.name %></a>
+                <a href="<%= spellsPageBase %><%= (spellItem.url || '').split('/').pop() %><%= editionSuffix %>" target="_blank" rel="noopener noreferrer"><%= spellItem.name %></a>
               </li>
               <% }) %>
             </ul>
@@ -533,7 +486,7 @@
               <% } else { %>
               <i>At will</i>
               <% } %>
-              <a href="<%= spellsPageBase %><%= (spellEntry.url || '').split('/').pop() %>" target="_blank" rel="noopener noreferrer"><%= spellEntry.name %></a>
+              <a href="<%= spellsPageBase %><%= (spellEntry.url || '').split('/').pop() %><%= editionSuffix %>" target="_blank" rel="noopener noreferrer"><%= spellEntry.name %></a>
               <i>(lvl <%= spellEntry.level %>)</i>
             </li>
             <% }) %>
@@ -561,13 +514,33 @@
         —
         <% } %>
       </div>
+      <% if (edition2024 && monster.bonus_actions?.length) { %>
+      <div>
+        <h3>Bonus Actions:</h3>
+        <ul>
+          <% monster.bonus_actions.forEach(action => { %>
+          <li><b><%= action.name %>.</b> <%= action.desc %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
+      <% if (edition2024 && monster.reactions?.length) { %>
+      <div>
+        <h3>Reactions:</h3>
+        <ul>
+          <% monster.reactions.forEach(reaction => { %>
+          <li><b><%= reaction.name %>.</b> <%= reaction.desc %></li>
+          <% }) %>
+        </ul>
+      </div>
+      <% } %>
       <!-- Legendary Actions -->
       <div>
         <% if (monster.legendary_actions && monster.legendary_actions.length) { %>
         <h3>Legendary Actions:</h3>
         <ul>
           <div>
-            <p> The <%= monster.name %> can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The <%= monster.name %> regains spent legendary actions at the start of its turn.</p>
+            <% if (!edition2024) { %><p> The <%= monster.name %> can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The <%= monster.name %> regains spent legendary actions at the start of its turn.</p><% } %>
             <% monster.legendary_actions.forEach(legAct => { %>
             <li>
               <b><%= legAct.name %>.</b> <%= legAct.desc %>
@@ -577,29 +550,29 @@
           <% } %>
         </ul>
       </div>
-
-      <% if (faqs.length > 0) { %>
-      <hr class="w-75" />
-      <section class="srd-faq">
-        <p class="srd-faq-label">Frequently Asked Questions</p>
-        <% faqs.forEach(faq => { %>
-        <details>
-          <summary><%= faq.q %></summary>
-          <p><%= faq.a %></p>
-        </details>
-        <% }) %>
-      </section>
+      <% if (edition2024 && monster.forms?.length) { %>
+      <div class="srd-filter-group">
+        <div class="srd-filter-label">Other Forms</div>
+        <div class="srd-filter-pills">
+          <% monster.forms.forEach(form => { %>
+          <a href="/dnd/5e/srd/monsters/<%= form.index %>?edition=2024"><%= form.name %></a>
+          <% }) %>
+        </div>
+      </div>
       <% } %>
 
+
       <div class="srd-back-link">
-        <a href="/dnd/5e/srd/monsters">&larr; Back to Monster List</a>
+        <a href="/dnd/5e/srd/monsters<%= editionSuffix %>">&larr; Back to Monster List</a>
       </div>
     </div>
   </div>
+  <% if (edition2024) { %>
+  <div class="srd-disclosure-wrap"><div class="srd-disclosure"><small>This work includes material from the <a href="https://www.dndbeyond.com/srd">System Reference Document 5.2.1</a> by Wizards of the Coast LLC, licensed under <a href="https://creativecommons.org/licenses/by/4.0/legalcode">CC BY 4.0</a>.</small></div></div>
+  <% } else { %>
   <%- include('../../../partials/dnd/srddisclosure') %>
+  <% } %>
   <%- include('../../../partials/footer') %>
 </body>
 
 </html>
-
-<% } %>

@@ -16,30 +16,6 @@
     const raceTitle = `${race.name} 5e Race: Traits, Ability Scores, and Languages`;
     const raceMetaDesc = `${race.name} in D&D 5e: ${race.size} race with speed ${race.speed} ft.${raceAbilityBonuses.length ? ` Ability bonuses: ${raceAbilityBonuses.join(', ')}.` : ''}${raceLanguages.length ? ` Languages: ${raceLanguages.join(', ')}.` : ''}${hasSubraces ? ' Includes subraces and racial traits.' : ' Includes racial traits and rules.'}`.substring(0, 160);
     const raceSummary = `${race.name} is a ${race.size.toLowerCase()} D&D 5e race with a speed of ${race.speed} feet.${raceAbilityBonuses.length ? ` Its SRD ability bonuses are ${raceAbilityBonuses.join(', ')}.` : ''}${raceLanguages.length ? ` It typically speaks ${raceLanguages.join(' and ')}.` : ''}`;
-    const raceFaqs = [
-      {
-        q: `What ability bonuses does the ${race.name} get in D&D 5e?`,
-        a: raceAbilityBonuses.length
-          ? `The ${race.name} gets the following ability bonuses in D&D 5e: ${raceAbilityBonuses.join(', ')}.`
-          : `See the ability bonus section on this page for the ${race.name}'s D&D 5e racial bonuses.`
-      },
-      {
-        q: `What languages does the ${race.name} speak in D&D 5e?`,
-        a: raceLanguages.length
-          ? `The ${race.name} speaks ${raceLanguages.join(' and ')} in D&D 5e.`
-          : `See the language section on this page for the ${race.name}'s D&D 5e languages.`
-      },
-      {
-        q: `What size and speed is the ${race.name} in D&D 5e?`,
-        a: `The ${race.name} is ${race.size.toLowerCase()} and has a speed of ${race.speed} feet in D&D 5e.`
-      }
-    ];
-    if (hasSubraces) {
-      raceFaqs.push({
-        q: `Does the ${race.name} have subraces in D&D 5e?`,
-        a: `Yes. The ${race.name} has ${subraceDetails.length} subrace option${subraceDetails.length === 1 ? '' : 's'} in this SRD page: ${subraceDetails.map((subrace) => subrace.name).join(', ')}.`
-      });
-    }
   %>
   <title><%= raceTitle %> | Far Reach Co.</title>
   <meta name="description" content="<%= raceMetaDesc %>" />
@@ -63,17 +39,6 @@
       "name": "<%= raceTitle %>",
       "description": "<%= raceMetaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/races/<%= race.index %>"
-    }
-  </script>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": <%- JSON.stringify(raceFaqs.map((faq) => ({
-        "@type": "Question",
-        "name": faq.q,
-        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
-      }))) %>
     }
   </script>
 
@@ -136,16 +101,6 @@
       </div>
     <% } %>
 
-    <hr class="w-75" />
-    <section class="srd-faq">
-      <p class="srd-faq-label">Frequently Asked Questions</p>
-      <% raceFaqs.forEach((faq) => { %>
-        <details>
-          <summary><%= faq.q %></summary>
-          <p><%= faq.a %></p>
-        </details>
-      <% }) %>
-    </section>
 
     <hr class="w-75" />
 

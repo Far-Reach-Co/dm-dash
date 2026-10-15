@@ -63,11 +63,11 @@ test('2024 class, monster, and filter content comes from the chosen edition', as
   const base = `http://127.0.0.1:${server.address().port}/dnd/5e/srd/`;
   const checks = [
     ['classes/barbarian', ['Progression Table', 'Proficiency Bonus', 'Core Features']],
-    ['monsters/aboleth', ['Hit Points:', '150']],
+    ['monsters/aboleth', ['Hit Points', '150']],
     ['spells/level/2', ['Acid Arrow']],
     ['equipment', ['Magic item', 'Poisons']],
     ['weapon-properties', ['Weapon Mastery Properties']],
-    ['features/monk-evasion', ['Class:', 'Level:', 'Frequently Asked Questions', 'More Monk Features', '2024 Rules Reference']],
+    ['features/monk-evasion', ['Class:', 'Level:', 'More Monk Features']],
     ['skills', ['id="acrobatics"', '[DEX]', 'Stay on your feet in a tricky situation']],
     ['languages', ['Full List of D&amp;D 5E Languages', '19 languages', 'id="primordial"', 'Primordial includes the Aquan']],
     ['feats', ['id="boon-of-spell-recall"', 'Level 19 or higher', 'Spellcasting feature', 'Free Casting.']],

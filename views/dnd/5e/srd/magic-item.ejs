@@ -20,33 +20,6 @@
       ? item.variants.map((variant) => variant.name)
       : [];
 
-    // Build FAQ entries
-    const faqs = [];
-    faqs.push({
-      q: `What does the ${item.name} do in D&D 5e?`,
-      a: firstRuleSentence
-    });
-    faqs.push({
-      q: `What rarity is the ${item.name} in D&D 5e?`,
-      a: `The ${item.name} is a ${rarity} magic item in D&D 5th Edition.`
-    });
-    faqs.push({
-      q: `What type of magic item is the ${item.name} in D&D 5e?`,
-      a: `The ${item.name} is a ${category}${typeAttunementLine ? ' — ' + typeAttunementLine : ''}.`
-    });
-    faqs.push({
-      q: `Does the ${item.name} require attunement in D&D 5e?`,
-      a: requiresAttunement
-        ? `Yes, the ${item.name} requires attunement. Check the item description for any specific attunement requirements.`
-        : `No, the ${item.name} does not require attunement and can be used immediately when held or worn.`
-    });
-    if (item.variants && item.variants.length) {
-      faqs.push({
-        q: `What variants of the ${item.name} exist in D&D 5e?`,
-        a: `The following variants are available: ${item.variants.map(v => v.name).join(', ')}.`
-      });
-    }
-
     const pageTitle = variantNames.length
       ? `${item.name} 5e Magic Item: Variants, Attunement, and Rules`
       : `${item.name} 5e Magic Item: Rarity, Attunement, and Rules`;
@@ -115,19 +88,6 @@
     }
   </script>
 
-  <% if (faqs.length > 0) { %>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": <%- JSON.stringify(faqs.map(f => ({
-        "@type": "Question",
-        "name": f.q,
-        "acceptedAnswer": { "@type": "Answer", "text": f.a }
-      }))) %>
-    }
-  </script>
-  <% } %>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
@@ -188,18 +148,6 @@
     </ul>
     <% } %>
 
-    <% if (faqs.length > 0) { %>
-    <hr class="w-75" />
-    <section class="srd-faq">
-      <p class="srd-faq-label">Frequently Asked Questions</p>
-      <% faqs.forEach(faq => { %>
-      <details>
-        <summary><%= faq.q %></summary>
-        <p><%= faq.a %></p>
-      </details>
-      <% }) %>
-    </section>
-    <% } %>
 
     <div class="srd-back-link">
       <a href="/dnd/5e/srd/equipment">&larr; Back to Equipment List</a>

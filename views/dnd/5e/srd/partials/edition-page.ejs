@@ -22,7 +22,7 @@
       srdPageSummary: editionCategory === 'features' && editionEntry?.class
         ? `${editionEntry.name} is a ${editionEntry.class.name} feature${editionFeatureLevel ? ` gained at level ${editionFeatureLevel}` : ''} in the 2024 SRD. ${String(editionEntry.description || '').split(/(?<=[.!?])\s+/)[0]}`
         : editionCategory === 'classes' && editionEntry
-        ? `${editionEntry.name} is a 2024 D&D class${editionEntry.primary_ability?.desc ? ` with ${editionEntry.primary_ability.desc} as its primary ability` : ''}. Browse its progression, proficiencies, equipment, and features below.`
+        ? `${editionEntry.name} is a D&D 5e class with a d${editionEntry.hit_die} hit die and ${(editionEntry.saving_throws || []).map((score) => score.name).join(' and ')} saving throws.`
         : editionCategory === 'skills' ? 'Browse the 2024 D&D SRD skills with linked ability scores and quick-reference descriptions.'
         : editionCategory === 'languages' ? 'Browse the 2024 SRD languages and the notes available in this data source.'
         : editionCategory === 'spells' && editionParts.length === 3 ? `Browse ${editionItems.length} ${heading.toLowerCase()} from the 2024 SRD.`
@@ -50,12 +50,6 @@
     <% } else if (editionEntry) { %>
       <h2><%= editionEntry.name %></h2>
       <% if (editionCategory === 'features') { %>
-        <% const featureFirstSentence = String(editionEntry.description || '').split(/(?<=[.!?])\s+/)[0]; %>
-        <% const featureFaqs = [
-          { q: `What does ${editionEntry.name} do in the 2024 SRD?`, a: featureFirstSentence || `See the ${editionEntry.name} rules text above.` },
-          { q: `What level do you get ${editionEntry.name}?`, a: editionFeatureLevel ? `You gain ${editionEntry.name} at level ${editionFeatureLevel} as a ${editionEntry.class?.name || 'class'} feature.` : `See the ${editionEntry.class?.name || 'class'} progression for when this feature becomes available.` },
-          { q: `Which class has ${editionEntry.name}?`, a: `${editionEntry.name} is a ${editionEntry.class?.name || 'class'} feature in the 2024 SRD.` }
-        ]; %>
         <% if (editionEntry.class) { %>
           <div class="inline-div"><b>Class:</b> <a href="/dnd/5e/srd/classes/<%= editionEntry.class.index %>?edition=2024"><%= editionEntry.class.name %></a></div>
         <% } %>
@@ -63,10 +57,6 @@
         <% if (editionFeatureLevel) { %><div class="inline-div"><b>Level:</b> <span><%= editionFeatureLevel %></span></div><% } %>
         <hr class="w-75" />
         <%- include('edition-prose', { text: editionEntry.description }) %>
-        <hr class="w-75" />
-        <section class="srd-faq"><p class="srd-faq-label">Frequently Asked Questions</p>
-          <% for (const faq of featureFaqs) { %><details><summary><%= faq.q %></summary><p><%= faq.a %></p></details><% } %>
-        </section>
         <% if (editionEntry.prerequisites?.length) { %><div class="inline-div"><b>Prerequisites:</b> <%- include('edition-field', { value: editionEntry.prerequisites }) %></div><% } %>
         <% if (editionEntry.parent) { const parentHref = editionReferenceHref(editionEntry.parent); %>
           <hr class="w-75" /><div class="inline-div"><b>Parent Feature:</b> <% if (parentHref) { %><a href="<%= parentHref %>"><%= editionEntry.parent.name %></a><% } else { %><%= editionEntry.parent.name %><% } %></div>
@@ -109,20 +99,6 @@
         <% } %>
         <% if (editionEntry.damage?.damage_at_slot_level) { %><div class="inline-div"><b>Damage by Slot Level:</b> <%= Object.entries(editionEntry.damage.damage_at_slot_level).map(([level, dice]) => `Level ${level}: ${dice}`).join(' · ') %></div><% } %>
         <% if (editionEntry.classes?.length) { %><div class="inline-div"><b>Classes:</b> <% for (const ref of editionEntry.classes) { %><a href="/dnd/5e/srd/classes/<%= ref.index %>?edition=2024"><%= ref.name %></a> <% } %></div><% } %>
-      <% } else if (editionCategory === 'monsters') { %>
-        <div class="inline-div"><i><%= editionEntry.size %>,</i> <i><%= editionEntry.type %>,</i> <i><%= editionEntry.alignment %></i></div>
-        <div class="inline-div"><b>Armor Class:</b> <%= (editionEntry.armor_class || []).map((item) => item.value).join(', ') || '—' %></div>
-        <div class="inline-div"><b>Hit Points:</b> <%= editionEntry.hit_points %> (<%= editionEntry.hit_points_roll || editionEntry.hit_dice %>)</div>
-        <div class="inline-div"><b>Speed:</b> <%= Object.entries(editionEntry.speed || {}).map(([mode, value]) => `${mode}: ${value}`).join(', ') %></div>
-        <div class="monster-ability-grid">
-          <% for (const [abbreviation, key] of [['STR','strength'],['DEX','dexterity'],['CON','constitution'],['INT','intelligence'],['WIS','wisdom'],['CHA','charisma']]) { const score = editionEntry[key]; const modifier = Math.floor((score - 10) / 2); %>
-            <div class="ability-cell"><span class="ability-label"><%= abbreviation %></span><span class="ability-score"><%= score %></span><span class="ability-mod">(<%= modifier >= 0 ? '+' : '' %><%= modifier %>)</span></div>
-          <% } %>
-        </div>
-        <% for (const [key, value] of editionFields(editionEntry)) { %>
-          <% if (['size','type','alignment','armor_class','hit_points','hit_points_roll','hit_dice','speed','strength','dexterity','constitution','intelligence','wisdom','charisma'].includes(key)) continue; %>
-          <div class="inline-div"><b><%= editionLabel(key) %>:</b> <%- include('edition-field', { value }) %></div>
-        <% } %>
       <% } else { %>
         <% for (const [key, value] of editionFields(editionEntry)) { %>
           <section><h3><%= editionLabel(key) %></h3><%- include('edition-field', { value }) %></section>

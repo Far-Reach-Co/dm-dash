@@ -1,6 +1,7 @@
 import { Mistral } from "@mistralai/mistralai";
-import { detectCategories, srdData } from "./data.js";
+import { detectCategories, getSrdDataForEdition, srdData, type SrdEdition } from "./data.js";
 import { findRelevantEntries } from "./indexer.js";
+import { buildSourceComparison } from "./comparison.js";
 import { SERIALIZERS, serializeGeneric } from "./serializers.js";
 import {
   getClassesForSpellcastingAbility,
@@ -498,10 +499,11 @@ function buildDerivedQueryContext(
   return lines.join("\n");
 }
 
-function buildPageContextBlock(context: NormalizedSearchContext | null): string | null {
+function buildPageContextBlock(context: NormalizedSearchContext | null, edition: SrdEdition): string | null {
   if (!context) return null;
 
   const lines: string[] = [];
+  lines.push(`Selected SRD edition: ${edition}.`);
   if (context.path) lines.push(`Path: ${context.path}`);
   if (context.category) lines.push(`Category: ${context.category}`);
 
@@ -509,19 +511,21 @@ function buildPageContextBlock(context: NormalizedSearchContext | null): string 
   let focusedEntryName: string | null = null;
   if (context.category && context.index) {
     const category = context.category;
-    const entry = (srdData[category] || []).find(
+    const entry = getSrdDataForEdition(edition, category).find(
       (value: any) => String(value?.index || "").toLowerCase() === context.index,
     );
     if (entry) {
       focusedEntry = entry;
       focusedEntryName = String(entry?.name || "").trim() || null;
       const serializer =
-        SERIALIZERS[category] ||
+        (edition === "2014" ? SERIALIZERS[category] : null) ||
         ((value: any) => serializeGeneric(value, category.toUpperCase()));
       lines.push(`Focused entry index: ${context.index}`);
-      lines.push(serializer(entry).slice(0, 1400));
+      lines.push(serializer(entry).slice(0, 3000));
     }
   }
+
+  if (edition === "2024") return lines.join("\n");
 
   if (context.category === "classes" && context.index) {
     const classSpells = getSpellsForClass(context.index);
@@ -717,6 +721,7 @@ async function queryMistral(
   context: string,
   short = false,
   pageContext: string | null = null,
+  edition: "2014" | "2024" | "both" = "2014",
 ): Promise<string> {
   const client = getClient();
 
@@ -726,6 +731,13 @@ async function queryMistral(
   const pageContextSection = pageContext
     ? `--- CURRENT PAGE CONTEXT ---\n${pageContext}\n\n`
     : "";
+  const editionInstruction =
+    `EDITION SCOPE: ${edition}. Use only records explicitly labelled with this edition. ` +
+    `Treat 2014 and 2024 records as separate rules; never infer equivalence from similar names or IDs. ` +
+    (edition === "both" ? `Keep each edition's answer separate and label it. ` : "") +
+    `Copy conditions, durations, and numerical values exactly from the relevant record. ` +
+    `Do not add a condition or effect that the record does not state. ` +
+    `If the requested edition lacks the needed record, say so instead of substituting the other edition.\n\n`;
 
   if (short) {
     systemPrompt =
@@ -734,23 +746,22 @@ async function queryMistral(
       `If CURRENT PAGE CONTEXT is provided, use it as the default scope unless the user explicitly names another entity. ` +
       `Be direct and specific. Do NOT use markdown links. Do NOT use bullet lists. ` +
       `If the data is insufficient, say so in one sentence.\n\n` +
+      editionInstruction +
       pageContextSection +
       `--- SRD REFERENCE DATA ---\n${context}`;
     maxTokens = 300;
   } else {
-    const srdLinkReference = getSrdLinkReference();
     systemPrompt =
       `You are a knowledgeable D&D 5th Edition rules assistant. Answer the user's question using ONLY the SRD reference data provided below. ` +
       `If CURRENT PAGE CONTEXT is provided, treat it as the default scope unless the user explicitly names another entity. ` +
       `Be specific, cite names and stats when relevant, and keep answers concise. ` +
       `If the data doesn't contain enough information to answer, say so honestly and provide a helpful suggestion to the user about where they might find more information.\n\n` +
+      editionInstruction +
       `FORMATTING RULES:\n` +
       `- When listing items, include a MAXIMUM of 15 items. If more exist, mention how many total and suggest the user browse the full list.\n` +
-      `- Use markdown links for SRD pages whenever relevant and available.\n` +
-      `- Detail page patterns: spells → /dnd/5e/srd/spells/{index}, monsters → /dnd/5e/srd/monsters/{index}, equipment → /dnd/5e/srd/equipment/{index}, magic items → /dnd/5e/srd/magic-items/{index}, classes → /dnd/5e/srd/classes/{index}, races → /dnd/5e/srd/races/{index}, backgrounds → /dnd/5e/srd/backgrounds/{index}, damage types → /dnd/5e/srd/damage-types/{index}, features → /dnd/5e/srd/features/{index}\n` +
-      `- You may also link to spell filter pages and monster filter pages when useful.\n` +
-      `- Only generate links that match the allowed SRD URL reference below.\n\n` +
-      `ALLOWED SRD URL REFERENCE:\n${srdLinkReference}\n\n` +
+      (edition === "2014"
+        ? `- Use markdown links for SRD pages when relevant. Follow only the allowed paths listed below.\n\nALLOWED SRD URL REFERENCE:\n${getSrdLinkReference()}\n\n`
+        : `- Do not include SRD page links.\n\n`) +
       pageContextSection +
       `--- SRD REFERENCE DATA ---\n${context}`;
     maxTokens = 1024;
@@ -762,7 +773,7 @@ async function queryMistral(
       { role: "system", content: systemPrompt },
       { role: "user", content: question },
     ],
-    temperature: 0.3,
+    temperature: 0,
     maxTokens,
   });
 
@@ -774,22 +785,23 @@ async function queryMistral(
 
 // ── Redis cache ──────────────────────────────────────────────────────────────
 
-const CACHE_PREFIX = "srd-search:v2:";
+const CACHE_PREFIX = "srd-search:v4:";
 const CACHE_TTL = 60 * 60; // 1 hour in seconds
 
-function getContextSignature(context: NormalizedSearchContext | null): string {
-  if (!context) return "global";
-  const parts: string[] = [];
+function getContextSignature(context: NormalizedSearchContext | null, edition: string): string {
+  const parts: string[] = [`e=${edition}`];
+  if (!context) return parts.join("|");
   if (context.path) parts.push(`p=${context.path}`);
   if (context.category) parts.push(`c=${context.category}`);
   if (context.index) parts.push(`i=${context.index}`);
+  if (context.edition) parts.push(`ce=${context.edition}`);
   if (!parts.length) return "global";
   return parts.join("|");
 }
 
-function cacheKey(query: string, short: boolean, context: NormalizedSearchContext | null): string {
+function cacheKey(query: string, short: boolean, context: NormalizedSearchContext | null, edition: string): string {
   const base = CACHE_PREFIX + (short ? "short:" : "") + query.toLowerCase().trim();
-  const signature = getContextSignature(context);
+  const signature = getContextSignature(context, edition);
   if (signature === "global") return base;
   return `${base}:ctx:${Buffer.from(signature).toString("base64url")}`;
 }
@@ -798,9 +810,10 @@ async function getCached(
   query: string,
   short: boolean,
   context: NormalizedSearchContext | null,
+  edition: string,
 ): Promise<string | null> {
   try {
-    return await redisClient.get(cacheKey(query, short, context));
+    return await redisClient.get(cacheKey(query, short, context, edition));
   } catch {
     return null;
   }
@@ -811,9 +824,10 @@ async function setCache(
   answer: string,
   short: boolean,
   context: NormalizedSearchContext | null,
+  edition: string,
 ): Promise<void> {
   try {
-    await redisClient.setEx(cacheKey(query, short, context), CACHE_TTL, answer);
+    await redisClient.setEx(cacheKey(query, short, context, edition), CACHE_TTL, answer);
   } catch {
     // Cache write failure is non-fatal
   }
@@ -1224,37 +1238,83 @@ function buildDerivedAnswerLinkSupplement(
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
+type EditionScope = "2014" | "2024" | "both";
+
+function resolveEditionScope(
+  query: string,
+  context: NormalizedSearchContext | null,
+  requested?: unknown,
+): EditionScope {
+  const lower = query.toLowerCase();
+  const asks2014 = /\b2014\b|\bold(?:er)? rules\b|\boriginal rules\b|\blegacy rules\b/.test(lower);
+  const asks2024 = /\b2024\b|\bnew(?:er)? rules\b|\brevised rules\b|\bcurrent rules\b/.test(lower);
+  const asksBoth =
+    (/\b(compare|comparison|difference|differences|versus|vs\.?|both editions)\b/.test(lower) &&
+      asks2014 && asks2024) ||
+    /\b(?:old|2014)\b.{0,24}\b(?:vs\.?|versus|and|compared? with|compared? to)\b.{0,24}\b(?:new|2024)\b/.test(lower) ||
+    /\b(?:new|2024)\b.{0,24}\b(?:vs\.?|versus|and|compared? with|compared? to)\b.{0,24}\b(?:old|2014)\b/.test(lower);
+  if (asksBoth || /\bcompare\s+(?:the\s+)?(?:old|2014)\s+(?:and|vs\.?|versus|to)\s+(?:new|2024)\b/.test(lower)) return "both";
+  if (asks2024) return "2024";
+  if (asks2014) return "2014";
+  if (requested === "both" || requested === "2014" || requested === "2024") return requested;
+  if (context?.edition) return context.edition;
+  return "2014";
+}
+
 export async function searchSrd(
   query: string,
   short = false,
   contextHint?: SearchContextHint,
+  requestedEdition?: unknown,
 ): Promise<string> {
   const normalizedContext = normalizeSearchContextHint(contextHint);
+  const editionScope = resolveEditionScope(query, normalizedContext, requestedEdition);
+  if (editionScope === "both") return buildSourceComparison(query, short);
 
   // Check cache
-  const cached = await getCached(query, short, normalizedContext);
+  const cached = await getCached(query, short, normalizedContext, editionScope);
   if (cached) return cached;
 
   // Detect relevant categories
   const categories = detectCategories(query);
 
-  // Find and serialize relevant entries
-  const rawContext = findRelevantEntries(query, categories, {
-    context: normalizedContext || undefined,
-  });
-  const derivedContext = buildDerivedQueryContext(query, normalizedContext);
+  // Retrieve from each selected edition independently. No cross-edition ID matching is used.
+  const editions: SrdEdition[] = [editionScope];
+  const currentEntryTerms: Record<string, RegExp> = {
+    features: /\bthis feature\b/i,
+    spells: /\bthis spell\b/i,
+    monsters: /\bthis monster\b/i,
+    equipment: /\bthis item\b/i,
+    conditions: /\bthis condition\b/i,
+  };
+  const asksAboutCurrentEntry = Boolean(
+    normalizedContext?.category && normalizedContext.index &&
+    currentEntryTerms[normalizedContext.category]?.test(query) &&
+    editions.every((edition) => getSrdDataForEdition(edition, normalizedContext.category!).some(
+      (entry: any) => entry.index === normalizedContext.index,
+    )),
+  );
+  const rawContext = asksAboutCurrentEntry ? "" : editions.map((edition) =>
+    findRelevantEntries(query, categories, {
+      context: normalizedContext || undefined,
+      edition,
+      maxContextChars: 32000,
+    }),
+  ).filter(Boolean).join("\n\n--- SEPARATE EDITION DATA ---\n\n");
+  const derivedContext = editionScope === "2014" && !asksAboutCurrentEntry ? buildDerivedQueryContext(query, normalizedContext) : null;
   const context = [derivedContext, rawContext].filter(Boolean).join("\n\n");
 
-  if (!context) {
-    return "I couldn't find any relevant SRD data for that query. Try asking about specific spells, monsters, equipment, conditions, or other D&D 5E rules.";
+  if (!context && !asksAboutCurrentEntry) {
+    if (editionScope === "2024") return "I couldn't find relevant 2024 SRD data for that query. I won't substitute 2014 rules.";
+    return "I couldn't find any relevant 2014 SRD data for that query. Try asking about specific spells, monsters, equipment, conditions, or other D&D 5E rules.";
   }
 
-  const pageContext = buildPageContextBlock(normalizedContext);
+  const pageContext = buildPageContextBlock(normalizedContext, editionScope);
 
   // Query Mistral; short mode skips auto-linking (plain text for Discord).
-  const raw = await queryMistral(query, context, short, pageContext);
-  let answer = short ? raw : stripInvalidLinks(addDeterministicLinks(raw));
-  if (!short && countMarkdownLinks(answer) === 0) {
+  const raw = await queryMistral(query, context, short, pageContext, editionScope);
+  let answer = short || editionScope !== "2014" ? stripInvalidLinks(raw) : stripInvalidLinks(addDeterministicLinks(raw));
+  if (!short && editionScope === "2014" && countMarkdownLinks(answer) === 0) {
     const supplement = buildDerivedAnswerLinkSupplement(query, normalizedContext);
     if (supplement) {
       answer = `${answer.trim()}\n\n${supplement}`;
@@ -1262,7 +1322,7 @@ export async function searchSrd(
   }
 
   // Cache the result
-  await setCache(query, answer, short, normalizedContext);
+  await setCache(query, answer, short, normalizedContext, editionScope);
 
   return answer;
 }

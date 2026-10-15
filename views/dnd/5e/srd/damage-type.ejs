@@ -17,32 +17,6 @@
     const pageTitle = `${damageType.name} Damage 5e: Spells, Resistant Monsters, and Rules`;
     const pageSummary = `${damageType.name} damage in D&D 5e. Browse ${spellCount} SRD spell${spellCount === 1 ? '' : 's'} that deal ${damageType.name.toLowerCase()} damage, plus monsters that deal it or have resistance, immunity, or vulnerability to it.`;
     const pageDescription = `${damageType.name} damage in D&D 5e: ${spellCount} SRD spells, ${dealerCount} monsters that deal it, ${resistanceCount} resistant monsters, ${immunityCount} immune monsters, and ${vulnerabilityCount} vulnerable monsters.`.substring(0, 160);
-    const faqs = [
-      {
-        q: `What spells deal ${damageType.name.toLowerCase()} damage in D&D 5e?`,
-        a: spellCount
-          ? `${spellCount} SRD spell${spellCount === 1 ? '' : 's'} on this page deal ${damageType.name.toLowerCase()} damage.`
-          : `No SRD spells in this dataset deal ${damageType.name.toLowerCase()} damage.`
-      },
-      {
-        q: `What monsters resist ${damageType.name.toLowerCase()} damage in D&D 5e?`,
-        a: resistanceCount
-          ? `${resistanceCount} SRD monsters on this page have resistance to ${damageType.name.toLowerCase()} damage.`
-          : `No SRD monsters in this dataset have resistance to ${damageType.name.toLowerCase()} damage.`
-      },
-      {
-        q: `What monsters are immune to ${damageType.name.toLowerCase()} damage in D&D 5e?`,
-        a: immunityCount
-          ? `${immunityCount} SRD monsters on this page are immune to ${damageType.name.toLowerCase()} damage.`
-          : `No SRD monsters in this dataset are immune to ${damageType.name.toLowerCase()} damage.`
-      },
-      {
-        q: `What monsters are vulnerable to ${damageType.name.toLowerCase()} damage in D&D 5e?`,
-        a: vulnerabilityCount
-          ? `${vulnerabilityCount} SRD monsters on this page are vulnerable to ${damageType.name.toLowerCase()} damage.`
-          : `No SRD monsters in this dataset are vulnerable to ${damageType.name.toLowerCase()} damage.`
-      }
-    ];
     const levelLabel = (level) => level === 0 ? 'Cantrip' : `Level ${level}`;
   %>
   <title><%= pageTitle %> | Far Reach Co.</title>
@@ -67,17 +41,6 @@
       "name": "<%= pageTitle %>",
       "description": "<%= pageDescription %>",
       "url": "https://farreachco.com/dnd/5e/srd/damage-types/<%= damageType.index %>"
-    }
-  </script>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": <%- JSON.stringify(faqs.map((faq) => ({
-        "@type": "Question",
-        "name": faq.q,
-        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
-      }))) %>
     }
   </script>
 
@@ -228,16 +191,6 @@
       </ul>
     <% } %>
 
-    <hr class="w-75" />
-    <section class="srd-faq">
-      <p class="srd-faq-label">Frequently Asked Questions</p>
-      <% faqs.forEach((faq) => { %>
-        <details>
-          <summary><%= faq.q %></summary>
-          <p><%= faq.a %></p>
-        </details>
-      <% }) %>
-    </section>
 
     <div class="srd-back-link">
       <a href="/dnd/5e/srd/damage-types">&larr; All Damage Types</a>

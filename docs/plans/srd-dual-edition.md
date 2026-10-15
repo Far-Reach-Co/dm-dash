@@ -19,8 +19,12 @@ Existing SRD categories, details, and spell/monster filters use 2024 records whe
 
 `src/dnd/srd/editionView.ts` resolves 2024 requests and supplies the toggle state. The original 2014 route handlers and template bodies remain in use for the default edition; the same EJS files render the shared 2024 view when selected. 2024 pages use `noindex,follow` and are not added to the sitemap. No separate 2024 route tree or browser-side library was added.
 
-This work changes the SRD information pages. Search, derived relationships outside these pages, character sheets, `/5e`, Monster Codex, and other integrations still need separate edition decisions and implementation. The paused dice tray project is unrelated.
+The current scope is the SRD information pages, edition-aware SRD assistant retrieval, and character-sheet autofill. Preserve the source IDs as edition-specific records. The toggle connects 64 explicit one-to-one ID pairs whose names and class/subclass context match uniquely in the pinned source data, such as `rage` and `barbarian-rage`; ambiguous and repeated features remain unavailable. Keep the existing 2014 derived datasets as they are for now. Character-sheet feature, spell, and equipment suggestions offer separate edition-labelled choices and copy the selected edition's text into the existing sheet fields. Class features put the class last, for example, “Unarmored Defense (2024) — Barbarian.” Monster Codex is out of scope. The paused dice tray project is unrelated and kept on its own branch.
+
+The SRD assistant now receives the selected page edition and can use explicit 2014/2024 wording for standalone questions. Comparisons show the named source records separately with links, without a model-generated comparison. The assistant and VTT promotion cards can be dismissed and restored. Repetitive FAQ sections and FAQPage metadata were removed from SRD templates while preserving the rules text. Keep the shared page design and the `?edition=2024` toggle.
+
+Monster detail pages now share the original stat-block layout across editions. The 2024 data keeps its own rules text and adds its available gear, bonus actions, reactions, lair XP, and forms without reusing 2014 derived relationships.
 
 ## Verification and status
 
-Route tests cover toggling, unavailable entries, redirects, and representative 2024 content. A local HTTP crawl rendered all 1,394 available 2024 detail URLs without failures. Typecheck, tests, server build, and stylesheet lint passed. The changes are local and uncommitted; nothing has been published.
+The SRD pages, assistant comparison behavior, page cleanup, and character-sheet autofill are on `feat/srd-2024-edition-toggle` for PR review. They have not been merged or deployed.
