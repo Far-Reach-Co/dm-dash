@@ -12,6 +12,7 @@
       ? srdPageSummary
       : '';
 %>
+<%- include('srdeditiontoggle') %>
 <div class="intro">
   <% if (introHeading !== introLabel) { %>
     <small class="text-center intro-label"><%= introLabel %></small>
@@ -24,9 +25,14 @@
 
 <% if (typeof showSrdGrowthRail === 'undefined' || showSrdGrowthRail !== false) { %>
   <aside class="srd-growth-rail" aria-label="SRD tools">
-    <div class="srd-growth-card">
+    <div class="srd-growth-card" data-srd-tool="assistant">
+      <button type="button" class="srd-growth-card-close" data-dismiss-srd-tool="assistant" aria-label="Dismiss Ask the Archives">×</button>
       <h3>Ask the Archives</h3>
-      <p>Ask our AI assistant about rules, monsters, spells, classes, and more.</p>
+      <% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
+        <p>Ask about available 2024 SRD data. Missing source material will be called out.</p>
+      <% } else { %>
+        <p>Ask about rules, monsters, spells, classes, and more.</p>
+      <% } %>
       <form id="srd-mini-search-form" class="srd-mini-search-form">
         <input
           type="text"
@@ -41,12 +47,14 @@
       </button>
     </div>
 
-    <div class="srd-growth-card srd-growth-card-vtt">
+    <div class="srd-growth-card srd-growth-card-vtt" data-srd-tool="vtt">
+      <button type="button" class="srd-growth-card-close" data-dismiss-srd-tool="vtt" aria-label="Dismiss VTT Sandbox offer">×</button>
       <h3>Try The VTT Sandbox</h3>
       <p>Jump into our guest table and test the VTT tools with no signup required.</p>
       <a class="srd-vtt-sandbox-link" href="/vtt/guest/start">Open Guest Sandbox</a>
     </div>
   </aside>
+  <button type="button" class="srd-tools-reopen" data-show-srd-tools hidden>Show SRD tools</button>
 
   <div id="srd-search-modal" class="srd-search-modal" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="srd-search-modal-card">
@@ -69,4 +77,5 @@
   <script src="/lib/marked.min.js" defer></script>
   <script src="/lib/purify.min.js" defer></script>
   <script src="/lib/srdSearch.js" defer></script>
+  <script src="/lib/srdGrowthRail.js" defer></script>
 <% } %>

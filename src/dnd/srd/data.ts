@@ -4,6 +4,7 @@ import fs = require("fs");
 // ── Lazy-load SRD JSON on first access ───────────────────────────────────────
 
 const DATA_DIR = path.join(__dirname, "../../../public/lib/data/2014");
+const EDITION_DATA_DIR = path.join(__dirname, "../../../public/lib/data");
 
 const SRD_FILES: Record<string, string> = {
   spells: "5e-srd-spells.json",
@@ -70,6 +71,37 @@ for (const key of Object.keys(SRD_FILES)) {
 
 export function getSrdData(key: string): any[] {
   return loadSrdCategory(key);
+}
+
+export type SrdEdition = "2014" | "2024";
+
+const EDITION_CATEGORY_FILES: Record<string, string> = {
+  races: "species",
+  subraces: "subspecies",
+  "magic-schools": "magic-schools",
+  "equipment-categories": "equipment-categories",
+};
+const editionDataCache: Record<string, any[]> = {};
+
+export function getSrdDataForEdition(edition: SrdEdition, key: string): any[] {
+  if (edition === "2014") return loadSrdCategory(key);
+  const source = EDITION_CATEGORY_FILES[key] || key;
+  const cacheKey = `${edition}:${key}`;
+  if (Object.prototype.hasOwnProperty.call(editionDataCache, cacheKey)) return editionDataCache[cacheKey];
+  try {
+    editionDataCache[cacheKey] = JSON.parse(
+      fs.readFileSync(path.join(EDITION_DATA_DIR, edition, `5e-srd-${source}.json`), "utf8"),
+    );
+  } catch {
+    editionDataCache[cacheKey] = [];
+  }
+  return editionDataCache[cacheKey];
+}
+
+export function getSrdCategoriesForEdition(edition: SrdEdition): string[] {
+  if (edition === "2014") return Object.keys(SRD_FILES);
+  return [...Object.keys(SRD_FILES), "poisons", "weapon-mastery-properties"]
+    .filter((key) => getSrdDataForEdition(edition, key).length > 0);
 }
 
 export function getLoadedSrdCategoryCount(): number {

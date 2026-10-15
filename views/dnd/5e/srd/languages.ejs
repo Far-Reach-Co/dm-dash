@@ -1,3 +1,6 @@
+<% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
+<%- include('partials/edition-page') %>
+<% } else { %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -42,44 +45,6 @@
           }
         ]
       }
-    }
-  </script>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "How many languages are in D&D 5e?",
-          "acceptedAnswer": { "@type": "Answer", "text": "The D&D 5e SRD includes 16 languages divided into Standard languages (Common, Dwarvish, Elvish, Giant, Gnomish, Goblin, Halfling, Orc) and Exotic languages (Abyssal, Celestial, Draconic, Deep Speech, Infernal, Primordial, Sylvan, Undercommon)." }
-        },
-        {
-          "@type": "Question",
-          "name": "What language do fiends speak in D&D 5e?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Demons speak Abyssal and devils speak Infernal. Both are Exotic languages in D&D 5e. Warlocks with fiendish patrons often learn Infernal as a bonus language." }
-        },
-        {
-          "@type": "Question",
-          "name": "What is the oldest language in D&D 5e?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Draconic is considered one of the oldest languages in D&D, predating most other languages. It is used by dragons and is the basis for many arcane scripts." }
-        },
-        {
-          "@type": "Question",
-          "name": "What languages do elves speak in D&D 5e?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Elves speak Common and Elvish. Drow (dark elves) also speak Elvish, and some learn Undercommon due to their underground society." }
-        },
-        {
-          "@type": "Question",
-          "name": "What is the difference between Standard and Exotic languages in D&D 5e?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Standard languages are spoken by common humanoid races and are widely available as starting languages. Exotic languages are associated with monsters, outsiders, or ancient cultures — they typically require a special background, race, or DM approval to learn." }
-        },
-        {
-          "@type": "Question",
-          "name": "What languages can player characters start with in D&D 5e?",
-          "acceptedAnswer": { "@type": "Answer", "text": "Most player characters start with Common plus any additional languages granted by their race, background, or class features. Elves usually start with Common and Elvish, dwarves with Common and Dwarvish, and similar race-based language pairs." }
-        }
-      ]
     }
   </script>
   <link rel="stylesheet" href="/style.css" />
@@ -143,37 +108,11 @@
     <br>
     <% }); %>
 
-    <hr class="w-75" />
-    <section class="srd-faq">
-      <p class="srd-faq-label">Frequently Asked Questions</p>
-      <details>
-        <summary>How many languages are in D&D 5e?</summary>
-        <p>The D&D 5e SRD includes 16 languages: 8 Standard (Common, Dwarvish, Elvish, Giant, Gnomish, Goblin, Halfling, Orc) and 8 Exotic (Abyssal, Celestial, Draconic, Deep Speech, Infernal, Primordial, Sylvan, Undercommon).</p>
-      </details>
-      <details>
-        <summary>What language do fiends speak in D&D 5e?</summary>
-        <p>Demons speak Abyssal and devils speak Infernal. Both are Exotic languages. Warlocks with fiendish patrons often learn Infernal as a bonus language.</p>
-      </details>
-      <details>
-        <summary>What is the oldest language in D&D 5e?</summary>
-        <p>Draconic is one of the oldest languages in D&D, predating most others. It is spoken by dragons and is the basis for many arcane scripts used by wizards.</p>
-      </details>
-      <details>
-        <summary>What languages do elves speak in D&D 5e?</summary>
-        <p>Elves speak Common and Elvish. Drow (dark elves) also speak Elvish, and many learn Undercommon due to their underground society.</p>
-      </details>
-      <details>
-        <summary>What is the difference between Standard and Exotic languages in D&D 5e?</summary>
-        <p>Standard languages are spoken by common humanoid races and widely available as starting languages. Exotic languages are tied to monsters, outsiders, or ancient cultures and typically require a special race, background, or DM permission to learn.</p>
-      </details>
-      <details>
-        <summary>What languages can player characters start with in D&D 5e?</summary>
-        <p>Most player characters start with Common plus any additional languages granted by their race, background, or class features. For example, elves usually start with Common and Elvish, while dwarves start with Common and Dwarvish.</p>
-      </details>
-    </section>
   </div>
   <%- include('../../../partials/dnd/srddisclosure') %>
   <%- include('../../../partials/footer') %>
 </body>
 
 </html>
+
+<% } %>

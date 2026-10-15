@@ -2,6 +2,7 @@ import createElement from "../../lib/salt-lib/createElement.js";
 import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
 import getContextualSuggestions from "../../lib/getContextualSuggestions.js";
+import { loadSrdSuggestions, suggestionDescription, suggestionLabel } from "../../lib/srdSuggestionData.js";
 import {
   getSheet,
   insertSheetItem,
@@ -11,13 +12,16 @@ import {
   updateSheetItem,
 } from "../../lib/sheetApi.js";
 
-// load spells for suggestions on input
-let spellSuggestions = [];
-fetch("/lib/data/2014/5e-srd-spells.json")
-  .then((res) => res.json())
-  .then((data) => {
-    spellSuggestions = data;
-  });
+let spellSuggestionsPromise = null;
+function getSpellSuggestions() {
+  if (!spellSuggestionsPromise) {
+    spellSuggestionsPromise = Promise.all([
+      loadSrdSuggestions("2014", "spells"),
+      loadSrdSuggestions("2024", "spells"),
+    ]).then((groups) => groups.flat());
+  }
+  return spellSuggestionsPromise;
+}
 
 export default class SpellsComponent extends Component {
   constructor(props = {}) {
@@ -772,7 +776,7 @@ class SingleSpellElement extends Component {
     const descriptionInput = document.getElementById(
       `spell-description-input-${this.id}`,
     );
-    titleInput.value = item.name;
+    titleInput.value = suggestionLabel(item);
     if (item.casting_time) castingTimeInput.value = item.casting_time;
     if (item.duration) durationInput.value = item.duration;
     if (item.range) rangeInput.value = item.range;
@@ -783,8 +787,15 @@ class SingleSpellElement extends Component {
     ) {
       damageTypeInput.value = item.damage.damage_type.name;
     } else damageTypeInput.value = "";
-    if (item.components) componentsInput.value = item.components;
-    if (item.desc) descriptionInput.value = item.desc.join("");
+    const components = Array.isArray(item.components) ? item.components.join(", ") : item.components || "";
+    componentsInput.value = item.material ? `${components} (${item.material})` : components;
+    const higherLevel = Array.isArray(item.higher_level)
+      ? item.higher_level.join("\n\n")
+      : String(item.higher_level || "");
+    descriptionInput.value = [
+      suggestionDescription(item),
+      higherLevel ? `At Higher Levels: ${higherLevel}` : "",
+    ].filter(Boolean).join("\n\n");
   };
 
   showSpellSuggestions = async (e) => {
@@ -799,6 +810,7 @@ class SingleSpellElement extends Component {
     suggElem.style.top = rect.bottom + window.scrollY + "px"; // You can add an offset here
     suggElem.style.left = rect.left + window.scrollX + "px"; // You can add an offset here
 
+    const spellSuggestions = await getSpellSuggestions();
     if (spellSuggestions.length) {
       // clear
       suggElem.innerHTML = "";
@@ -819,7 +831,7 @@ class SingleSpellElement extends Component {
         const elem = createElement(
           "div",
           { class: "suggestions-item" },
-          item.name,
+          suggestionLabel(item),
           [
             {
               type: "mouseover",

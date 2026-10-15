@@ -1,3 +1,6 @@
+<% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
+<%- include('partials/edition-page') %>
+<% } else { %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -30,62 +33,6 @@
       ? `${spell.name} 5e Spell: Damage, Range, and Rules`
       : `${spell.name} 5e Spell: Range, Duration, and Rules`;
     const spellSummary = `${spell.name} is a ${levelDisplay(spell.level)} ${spell.school.name} spell for ${classesStr}. Casting time: ${spell.casting_time}. Range: ${spell.range}. Duration: ${spell.duration}.${hasDamage ? ` It deals ${baseDamage} ${spell.damage.damage_type.name} damage at its base level.` : ''}`;
-
-    // Build FAQ entries from spell data
-    const faqs = [];
-    if (spell.classes.length) {
-      const subclassStr = spell.subclasses && spell.subclasses.length ? ` It is also available to these subclasses: ${spell.subclasses.map(s => s.name).join(', ')}.` : '';
-      const raceStr = raceNames.length ? ` SRD races with trait-based access include ${raceNames.join(', ')}.` : '';
-      const subraceStr = subraceNames.length ? ` SRD subraces with trait-based access include ${subraceNames.join(', ')}.` : '';
-      faqs.push({
-        q: `Who can cast ${spell.name} in D&D 5e?`,
-        a: `${spell.name} is available to the following classes: ${classesStr}.${subclassStr}${raceStr}${subraceStr}`
-      });
-    }
-    if (raceNames.length || subraceNames.length) {
-      const raceParts = [];
-      if (raceNames.length) raceParts.push(`races: ${raceNames.join(', ')}`);
-      if (subraceNames.length) raceParts.push(`subraces: ${subraceNames.join(', ')}`);
-      faqs.push({
-        q: `Are there SRD races or subraces that can use ${spell.name} in D&D 5e?`,
-        a: `Yes. Trait-based SRD access for ${spell.name} includes ${raceParts.join('; ')}.`
-      });
-    }
-    faqs.push({
-      q: `Is ${spell.name} a concentration spell in D&D 5e?`,
-      a: spell.concentration
-        ? `Yes, ${spell.name} requires concentration and lasts up to ${spell.duration}.`
-        : `No, ${spell.name} does not require concentration. It lasts ${spell.duration}.`
-    });
-    faqs.push({
-      q: `What level is ${spell.name} in D&D 5e?`,
-      a: spell.level === 0
-        ? `${spell.name} is a cantrip (0th-level) ${spell.school.name} spell.`
-        : `${spell.name} is a ${levelDisplay(spell.level)} ${spell.school.name} spell.`
-    });
-    if (hasDamage) {
-      const scalingParts = [];
-      if (spell.damage.damage_at_character_level) {
-        scalingParts.push('Its damage increases with character level.');
-      }
-      if (spell.damage.damage_at_slot_level) {
-        scalingParts.push('Its damage increases when you cast it with a higher-level slot.');
-      }
-      faqs.push({
-        q: `How much damage does ${spell.name} do in D&D 5e?`,
-        a: `${spell.name} deals ${baseDamage} ${spell.damage.damage_type.name} damage at its base level in D&D 5th Edition.${scalingParts.length ? ` ${scalingParts.join(' ')}` : ''}`
-      });
-    }
-    faqs.push({
-      q: `What is the range and casting time of ${spell.name} in D&D 5e?`,
-      a: `${spell.name} has a range of ${spell.range} and a casting time of ${spell.casting_time} in D&D 5th Edition.`
-    });
-    if (spell.ritual) {
-      faqs.push({
-        q: `Can ${spell.name} be cast as a ritual in D&D 5e?`,
-        a: `Yes, ${spell.name} can be cast as a ritual. Ritual casting takes an extra 10 minutes but does not expend a spell slot.`
-      });
-    }
 
     // Build richer meta description
     const damageSnippet = hasDamage ? ` Damage: ${baseDamage} ${spell.damage.damage_type.name}.` : '';
@@ -153,19 +100,6 @@
     }
   </script>
 
-  <% if (faqs.length > 0) { %>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": <%- JSON.stringify(faqs.map(f => ({
-        "@type": "Question",
-        "name": f.q,
-        "acceptedAnswer": { "@type": "Answer", "text": f.a }
-      }))) %>
-    }
-  </script>
-  <% } %>
 
   <link rel="stylesheet" href="/style.css" />
   <link rel="stylesheet" href="/css/features/info.css" />
@@ -356,18 +290,6 @@
     </div>
     <% } %>
 
-    <% if (faqs.length > 0) { %>
-    <hr class="w-75" />
-    <section class="srd-faq">
-      <p class="srd-faq-label">Frequently Asked Questions</p>
-      <% faqs.forEach(faq => { %>
-      <details>
-        <summary><%= faq.q %></summary>
-        <p><%= faq.a %></p>
-      </details>
-      <% }) %>
-    </section>
-    <% } %>
 
     <div class="srd-back-link">
       <a href="/dnd/5e/srd/spells">&larr; Back to Spell List</a>
@@ -378,3 +300,5 @@
 </body>
 
 </html>
+
+<% } %>

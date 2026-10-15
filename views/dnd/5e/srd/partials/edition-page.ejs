@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= heading %> · 2024 SRD | Far Reach Co.</title>
+  <meta name="description" content="<%= heading %> in the 2024 D&D System Reference Document." />
+  <meta name="robots" content="noindex,follow" />
+  <link rel="canonical" href="https://farreachco.com<%= srd2024Url %>" />
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/css/features/info.css" />
+  <script src="/lib/MobileNavHandler.js" defer></script>
+  <%- include('../../../../partials/icons') %>
+</head>
+<%- include('../../../../partials/google') %>
+<body>
+  <%- include('../../../../partials/nav') %>
+  <div class="container-fluid p-3 info-container">
+    <%- include('../../../../partials/dnd/srdintro', {
+      srdSectionLabel: 'Dungeons & Dragons · 2024 SRD',
+      srdPageHeading: editionCategory === 'skills' ? 'D&D 5E SRD Skills' : editionCategory === 'languages' ? 'D&D 5E Languages List' : heading,
+      srdPageSummary: editionCategory === 'features' && editionEntry?.class
+        ? `${editionEntry.name} is a ${editionEntry.class.name} feature${editionFeatureLevel ? ` gained at level ${editionFeatureLevel}` : ''} in the 2024 SRD. ${String(editionEntry.description || '').split(/(?<=[.!?])\s+/)[0]}`
+        : editionCategory === 'classes' && editionEntry
+        ? `${editionEntry.name} is a D&D 5e class with a d${editionEntry.hit_die} hit die and ${(editionEntry.saving_throws || []).map((score) => score.name).join(' and ')} saving throws.`
+        : editionCategory === 'skills' ? 'Browse the 2024 D&D SRD skills with linked ability scores and quick-reference descriptions.'
+        : editionCategory === 'languages' ? 'Browse the 2024 SRD languages and the notes available in this data source.'
+        : editionCategory === 'spells' && editionParts.length === 3 ? `Browse ${editionItems.length} ${heading.toLowerCase()} from the 2024 SRD.`
+        : editionEntry ? `2024 rules reference for ${editionEntry.name}.` : `Browse ${editionCategory === 'races' ? 'species' : editionCategory} in the 2024 SRD.`
+    }) %>
+    <br />
+    <div class="breadcrumbs">
+      <a href="/dnd/5e/srd/contents?edition=2024">Contents</a>
+      <% if (editionCategory !== 'contents') { %>
+        <span class="separator">→</span>
+        <% if (editionEntry) { %><a href="/dnd/5e/srd/<%= editionCategory %>?edition=2024"><%= editionLabel(editionCategory) %></a><span class="separator">→</span><span class="current"><%= editionEntry.name %></span>
+        <% } else if (editionParts.length === 3) { %><a href="/dnd/5e/srd/<%= editionCategory %>?edition=2024"><%= editionLabel(editionCategory) %></a><span class="separator">→</span><span class="current"><%= heading %></span>
+        <% } else { %><span class="current"><%= editionLabel(editionCategory) %></span><% } %>
+      <% } %>
+    </div>
+    <hr />
+    <% if (editionCategory === 'contents') { %>
+      <h2>Table of Contents</h2>
+      <p>Choose a category to browse the available 2024 SRD data. General rules chapters are unavailable from the current data source; the <a href="https://www.dndbeyond.com/srd">official SRD 5.2.1</a> has the complete rules text.</p>
+      <ul>
+        <% for (const category of editionCategories) { %>
+          <li><a href="/dnd/5e/srd/<%= category.key %>?edition=2024"><%= category.label %></a> · <%= category.count %></li>
+        <% } %>
+      </ul>
+    <% } else if (editionEntry) { %>
+      <h2><%= editionEntry.name %></h2>
+      <% if (editionCategory === 'features') { %>
+        <% if (editionEntry.class) { %>
+          <div class="inline-div"><b>Class:</b> <a href="/dnd/5e/srd/classes/<%= editionEntry.class.index %>?edition=2024"><%= editionEntry.class.name %></a></div>
+        <% } %>
+        <% if (editionEntry.subclass) { %><div class="inline-div"><b>Subclass:</b> <span><%= editionEntry.subclass.name %></span></div><% } %>
+        <% if (editionFeatureLevel) { %><div class="inline-div"><b>Level:</b> <span><%= editionFeatureLevel %></span></div><% } %>
+        <hr class="w-75" />
+        <%- include('edition-prose', { text: editionEntry.description }) %>
+        <% if (editionEntry.prerequisites?.length) { %><div class="inline-div"><b>Prerequisites:</b> <%- include('edition-field', { value: editionEntry.prerequisites }) %></div><% } %>
+        <% if (editionEntry.parent) { const parentHref = editionReferenceHref(editionEntry.parent); %>
+          <hr class="w-75" /><div class="inline-div"><b>Parent Feature:</b> <% if (parentHref) { %><a href="<%= parentHref %>"><%= editionEntry.parent.name %></a><% } else { %><%= editionEntry.parent.name %><% } %></div>
+        <% } %>
+        <div class="srd-prev-next">
+          <% if (editionFeaturePrevious) { %><a href="/dnd/5e/srd/features/<%= editionFeaturePrevious.index %>?edition=2024">&larr; <%= editionFeaturePrevious.name %></a><% } else { %><span></span><% } %>
+          <% if (editionFeatureNext) { %><a href="/dnd/5e/srd/features/<%= editionFeatureNext.index %>?edition=2024"><%= editionFeatureNext.name %> &rarr;</a><% } %>
+        </div>
+        <% if (editionFeatureRelated.length) { %>
+          <div class="srd-see-also"><h3>More <%= editionEntry.class?.name || 'Class' %> Features</h3><ul>
+            <% for (const feature of editionFeatureRelated) { %><li><a href="/dnd/5e/srd/features/<%= feature.index %>?edition=2024"><%= feature.name %><%= feature.level?.name?.match(/\d+$/)?.[0] ? ` (Lvl ${feature.level.name.match(/\d+$/)[0]})` : '' %></a></li><% } %>
+          </ul></div>
+        <% } %>
+      <% } else if (editionCategory === 'classes') { %>
+        <%- include('edition-class') %>
+      <% } else if (editionCategory === 'backgrounds') { %>
+        <%- include('edition-background') %>
+      <% } else if (editionCategory === 'races') { %>
+        <%- include('edition-species') %>
+      <% } else if (editionCategory === 'equipment' || editionCategory === 'magic-items') { %>
+        <%- include('edition-equipment') %>
+      <% } else if (editionCategory === 'spells') { %>
+        <div class="inline-div">
+          <i><a href="/dnd/5e/srd/spells/level/<%= editionEntry.level %>?edition=2024"><%= editionEntry.level === 0 ? 'Cantrip' : `Level ${editionEntry.level}` %></a></i>
+          <i><a href="/dnd/5e/srd/spells/school/<%= editionEntry.school.index %>?edition=2024"><%= editionEntry.school.name %></a></i>
+          <% if (editionEntry.ritual) { %><i class="text-green">Ritual</i><% } %>
+        </div>
+        <div class="spell-stat-block">
+          <% for (const [label, value] of [
+            ['Casting Time', editionEntry.casting_time], ['Range', editionEntry.range],
+            ['Components', (editionEntry.components || []).join(', ') + (editionEntry.material ? ` (${editionEntry.material})` : '')],
+            ['Duration', `${editionEntry.concentration ? 'Concentration, ' : ''}${editionEntry.duration}`]
+          ]) { %><div class="spell-stat-field"><span class="spell-stat-label"><%= label %></span><span class="spell-stat-value"><%= value %></span></div><% } %>
+        </div>
+        <div class="spell-description srd-edition-prose"><%= editionEntry.description %></div>
+        <% if (editionEntry.higher_level) { %><div class="higher-level"><b>At Higher Levels</b><p><%= editionEntry.higher_level %></p></div><% } %>
+        <hr class="w-75" />
+        <% if (editionEntry.damage?.damage_type) { %>
+          <div class="inline-div"><b>Damage Type:</b> <a href="/dnd/5e/srd/damage-types/<%= editionEntry.damage.damage_type.index %>?edition=2024"><%= editionEntry.damage.damage_type.name %></a></div>
+        <% } %>
+        <% if (editionEntry.damage?.damage_at_slot_level) { %><div class="inline-div"><b>Damage by Slot Level:</b> <%= Object.entries(editionEntry.damage.damage_at_slot_level).map(([level, dice]) => `Level ${level}: ${dice}`).join(' · ') %></div><% } %>
+        <% if (editionEntry.classes?.length) { %><div class="inline-div"><b>Classes:</b> <% for (const ref of editionEntry.classes) { %><a href="/dnd/5e/srd/classes/<%= ref.index %>?edition=2024"><%= ref.name %></a> <% } %></div><% } %>
+      <% } else { %>
+        <% for (const [key, value] of editionFields(editionEntry)) { %>
+          <section><h3><%= editionLabel(key) %></h3><%- include('edition-field', { value }) %></section>
+        <% } %>
+      <% } %>
+    <% } else { %>
+      <h2><%= editionCategory === 'languages' ? 'Full List of D&D 5E Languages' : heading %></h2>
+      <% if (editionCategory === 'spells' && editionParts.length === 3) { %><p><b><%= editionItems.length %></b> spells matched this filter. <a href="/dnd/5e/srd/spells?edition=2024">Clear filter</a></p>
+      <% } else if (!['skills','languages'].includes(editionCategory)) { %><p><%= editionItems.length %> <%= editionCategory === 'races' ? 'species' : editionCategory %> entries<%= editionCategory === 'equipment' && editionParts.length === 1 ? `, plus ${editionData('2024', 'magic-items').length} magic items` : '' %> in this 2024 view.</p><% } %>
+      <% if (editionCategory === 'spells') { %><%- include('edition-spell-filters') %><% } %>
+      <% if (editionParts.length === 1 && editionCategory === 'monsters') { %>
+        <div class="srd-filter-group">
+          <div class="srd-filter-label">Browse by <%= editionCategory === 'spells' ? 'level' : 'type' %></div>
+          <div class="srd-filter-pills">
+              <% const types = [...new Set(editionItems.map((item) => item.type))].sort(); %>
+              <% for (const type of types) { const slug = String(type).toLowerCase().replace(/[^a-z0-9]+/g, '-'); %>
+                <a href="/dnd/5e/srd/monsters/type/<%= slug %>?edition=2024"><%= type %> (<%= editionItems.filter((item) => item.type === type).length %>)</a>
+              <% } %>
+          </div>
+        </div>
+      <% } %>
+      <% if (editionCategory === 'languages') { const standard = editionItems.filter((item) => !item.is_rare); const rare = editionItems.filter((item) => item.is_rare); %>
+        <p>The 2024 SRD data lists <strong><%= editionItems.length %> languages</strong>: <%= standard.length %> not marked Rare and <%= rare.length %> marked Rare. This source does not provide typical speakers or scripts for these entries.</p>
+        <div class="inline-div"><b>Not Marked Rare:</b> <div><%= standard.map((item) => item.name).join(', ') %></div></div>
+        <div class="inline-div"><b>Rare Languages:</b> <div><%= rare.map((item) => item.name).join(', ') %></div></div>
+        <ul><% for (const language of editionItems) { %><li><a href="#<%= language.index %>"><%= language.name %></a></li><% } %></ul>
+        <br />
+        <% for (const language of editionItems) { %>
+          <div id="<%= language.index %>"><h3><%= language.name %></h3><div class="indent">
+            <p><i><%= language.is_rare ? 'Rare language' : 'Not marked Rare in this source' %></i></p>
+            <% if (language.note) { %><p><%= language.note %></p><% } %>
+          </div></div><br />
+        <% } %>
+      <% } else if (editionCategory === 'skills') { %>
+        <ul><% for (const skill of editionItems) { %><li><a href="#<%= skill.index %>"><%= skill.name %></a></li><% } %></ul>
+        <br />
+        <% for (const skill of editionItems) { %>
+          <div class="inline-div" id="<%= skill.index %>">
+            <h3><%= skill.name %></h3>
+            <div class="text-bright-white">[<%= skill.ability_score?.name || '—' %>]<br />
+              <div class="indent"><p><%= skill.description %></p><br /></div>
+            </div>
+          </div>
+        <% } %>
+      <% } else if (editionCategory === 'feats') { %>
+        <ul class="srd-col-list-2"><% for (const feat of editionItems) { %><li><a href="#<%= feat.index %>"><%= feat.name %></a></li><% } %></ul>
+        <hr />
+        <% for (const feat of editionItems) { %>
+          <section id="<%= feat.index %>">
+            <h3><%= feat.name %></h3>
+            <% if (feat.type) { %><p><i><%= feat.type.split('-').map((word) => word[0].toUpperCase() + word.slice(1)).join(' ') %> Feat</i></p><% } %>
+            <% if (feat.prerequisites) { %>
+              <h4>Prerequisites</h4>
+              <ul>
+                <% if (feat.prerequisites.minimum_level) { %><li>Level <%= feat.prerequisites.minimum_level %> or higher</li><% } %>
+                <% if (feat.prerequisites.feature_named) { %><li><%= feat.prerequisites.feature_named %> feature</li><% } %>
+                <% for (const [key, value] of Object.entries(feat.prerequisites)) { if (['minimum_level','feature_named'].includes(key)) continue; %><li><%= editionLabel(key) %>: <%- include('edition-field', { value }) %></li><% } %>
+              </ul>
+            <% } %>
+            <%- include('edition-prose', { text: feat.description }) %>
+            <hr />
+          </section>
+        <% } %>
+      <% } else if (['spells','monsters','classes','backgrounds','features','races','equipment','magic-items'].includes(editionCategory)) { %>
+        <ul class="srd-col-list-3">
+          <% for (const item of editionItems) { %>
+            <li><a href="/dnd/5e/srd/<%= editionCategory %>/<%= encodeURIComponent(item.index) %>?edition=2024"><%= item.name %></a><% if (editionCategory === 'spells') { %><span class="spell-meta"><%= item.level === 0 ? 'Cantrip' : `Lvl ${item.level}` %> · <%= item.school?.name || '' %></span><% } %></li>
+          <% } %>
+          <% if (editionCategory === 'equipment' && editionParts.length === 1) { %>
+            <% for (const item of editionData('2024','magic-items')) { %>
+              <li><a href="/dnd/5e/srd/magic-items/<%= encodeURIComponent(item.index) %>?edition=2024"><%= item.name %> · Magic item</a></li>
+            <% } %>
+          <% } %>
+        </ul>
+      <% } else { %>
+        <ul><% for (const item of editionItems) { %><li><a href="#<%= item.index %>"><%= item.name %></a></li><% } %></ul>
+        <br />
+        <% for (const item of editionItems) { %>
+          <div class="inline-div" id="<%= item.index %>"><h3><%= item.full_name ? `${item.full_name} (${item.name})` : item.name %></h3>
+            <div class="text-bright-white indent">
+              <% if (item.type) { %><p><i><%= editionLabel(item.type) %><%= editionCategory === 'feats' ? ' Feat' : '' %></i></p><% } %>
+              <% if (item.abbreviation) { %><p><i><%= item.abbreviation %></i></p><% } %>
+              <% if (item.description) { %><%- include('edition-prose', { text: item.description }) %><% } %>
+              <% for (const [key, value] of editionFields(item)) { if (['full_name','type','abbreviation','description'].includes(key)) continue; %>
+                <h4><%= editionLabel(key) %></h4><%- include('edition-field', { value }) %>
+              <% } %>
+              <br />
+            </div>
+          </div>
+        <% } %>
+      <% } %>
+      <% if (editionCategory === 'weapon-properties' && editionParts.length === 1) { %>
+        <h2>Weapon Mastery Properties</h2>
+        <% for (const item of editionData('2024', 'weapon-mastery-properties')) { %>
+          <div class="inline-div" id="<%= item.index %>"><h3><%= item.name %></h3><div class="indent"><%- include('edition-prose', { text: item.description }) %></div></div>
+        <% } %>
+      <% } %>
+      <% if (editionCategory === 'equipment' && editionParts.length === 1) { %>
+        <h2>Poisons</h2>
+        <% for (const item of editionData('2024', 'poisons')) { %>
+          <section><h3><%= item.name %></h3><% for (const [key, value] of editionFields(item)) { %><h4><%= editionLabel(key) %></h4><%- include('edition-field', { value }) %><% } %></section>
+        <% } %>
+      <% } %>
+    <% } %>
+  </div>
+  <div class="srd-disclosure-wrap"><div class="srd-disclosure"><small>This work includes material from the <a href="https://www.dndbeyond.com/srd">System Reference Document 5.2.1</a> by Wizards of the Coast LLC, licensed under <a href="https://creativecommons.org/licenses/by/4.0/legalcode">CC BY 4.0</a>.</small></div></div>
+  <%- include('../../../../partials/footer') %>
+</body>
+</html>

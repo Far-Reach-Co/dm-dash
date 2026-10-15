@@ -52,6 +52,7 @@ function normalizeSearchContext(value: unknown): SearchContextHint | null {
     category: readBodyText(payload.category, 60),
     index: readBodyText(payload.index, 120),
     title: readBodyText(payload.title, 120),
+    edition: payload.edition === "2024" || payload.edition === "2014" ? payload.edition : null,
   });
   if (!normalized) return null;
   return {
@@ -59,6 +60,7 @@ function normalizeSearchContext(value: unknown): SearchContextHint | null {
     ...(normalized.category ? { category: normalized.category } : {}),
     ...(normalized.index ? { index: normalized.index } : {}),
     ...(normalized.title ? { title: normalized.title } : {}),
+    ...(normalized.edition ? { edition: normalized.edition } : {}),
   };
 }
 
@@ -69,7 +71,7 @@ export function registerSrdSearchRoute(router: Router) {
     async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         const requestId = (req as Request & { id?: string | number }).id;
-        const { query, short, context } = req.body || {};
+        const { query, short, context, edition } = req.body || {};
         if (!query || typeof query !== "string") {
           res.status(400).json({ message: "Query is required" });
           return;
@@ -80,7 +82,7 @@ export function registerSrdSearchRoute(router: Router) {
           return;
         }
         const normalizedContext = normalizeSearchContext(context);
-        const answer = await searchSrd(trimmed, short === true, normalizedContext || undefined);
+        const answer = await searchSrd(trimmed, short === true, normalizedContext || undefined, edition);
         createSrdQuestionEvent({
           source: resolveSearchSource(req),
           queryText: trimmed,
@@ -101,6 +103,7 @@ export function registerSrdSearchRoute(router: Router) {
             contextPath: normalizedContext?.path || null,
             contextCategory: normalizedContext?.category || null,
             contextIndex: normalizedContext?.index || null,
+            edition: edition === "2014" || edition === "2024" || edition === "both" ? edition : normalizedContext?.edition || "auto",
           },
         }).catch((err) => {
           logger.warn(

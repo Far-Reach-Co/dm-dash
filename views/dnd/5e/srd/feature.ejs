@@ -1,3 +1,6 @@
+<% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
+<%- include('partials/edition-page') %>
+<% } else { %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,24 +15,6 @@
     const featureTitle = `${feature.name} 5e: ${featureOwner} Feature`;
     const featureMetaDesc = `${feature.name} in D&D 5e: ${featureOwner}${feature.level ? ` level ${feature.level}` : ''} feature. ${firstSentence}`.substring(0, 160);
     const featureSummary = `${feature.name} is a ${featureOwner} feature${feature.level ? ` gained at level ${feature.level}` : ''} in D&D 5e. ${firstSentence}`;
-    const faqs = [
-      {
-        q: `What does ${feature.name} do in D&D 5e?`,
-        a: firstSentence
-      },
-      {
-        q: `What level do you get ${feature.name} in D&D 5e?`,
-        a: feature.level
-          ? `You gain ${feature.name} at level ${feature.level}${feature.subclass ? ` as part of the ${feature.subclass.name}` : ''} ${feature.class.name} progression.`
-          : `${feature.name} is a ${feature.class.name} feature in D&D 5e. See the class progression for when it becomes available.`
-      },
-      {
-        q: `Is ${feature.name} a ${feature.class.name} feature in D&D 5e?`,
-        a: feature.subclass
-          ? `Yes. ${feature.name} is part of the ${feature.subclass.name} subclass for the ${feature.class.name} in D&D 5e.`
-          : `Yes. ${feature.name} is a ${feature.class.name} class feature in D&D 5e.`
-      }
-    ];
   %>
   <title><%= featureTitle %> | Far Reach Co.</title>
   <meta name="description" content="<%= featureMetaDesc %>" />
@@ -53,17 +38,6 @@
       "name": "<%= featureTitle %>",
       "description": "<%= featureMetaDesc %>",
       "url": "https://farreachco.com/dnd/5e/srd/features/<%= feature.index %>"
-    }
-  </script>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": <%- JSON.stringify(faqs.map((faq) => ({
-        "@type": "Question",
-        "name": faq.q,
-        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
-      }))) %>
     }
   </script>
 
@@ -117,17 +91,6 @@
       <p><%= paragraph %></p>
     <% }) %>
 
-    <hr class="w-75" />
-    <section class="srd-faq">
-      <p class="srd-faq-label">Frequently Asked Questions</p>
-      <% faqs.forEach((faq) => { %>
-        <details>
-          <summary><%= faq.q %></summary>
-          <p><%= faq.a %></p>
-        </details>
-      <% }) %>
-    </section>
-
     <% if (feature.parent) { %>
       <hr class="w-75" />
       <div class="inline-div">
@@ -174,3 +137,5 @@
 </body>
 
 </html>
+
+<% } %>

@@ -1,0 +1,30 @@
+<p><%= editionEntry.name %> is a 2024 D&D species. Its size, speed, and traits are listed below.</p>
+
+<% if (editionEntry.type) { %><div class="inline-div"><b>Creature Type:</b> <span><%= editionEntry.type %></span></div><% } %>
+<% if (editionEntry.size) { %><div class="inline-div"><b>Size:</b> <span><%= editionEntry.size %></span></div><% } %>
+<% if (editionEntry.size_options) { %><div class="inline-div"><b>Size Options:</b> <span><%= editionEntry.size_options.desc || 'Choose a size' %></span></div><% } %>
+<div class="inline-div"><b>Speed:</b> <span><%= editionEntry.speed %> ft.</span></div>
+
+<hr class="w-75" />
+<h2>Species Traits</h2>
+<% for (const trait of editionEntry.traits || []) { const detail = editionData('2024','traits').find((item) => item.index === trait.index); %>
+  <div id="<%= trait.index %>"><h3><%= trait.name %></h3>
+    <% if (detail?.description) { %><%- include('edition-prose', { text: detail.description }) %><% } %>
+    <% if (detail?.proficiencies?.length) { %><h4>Proficiencies</h4><%- include('edition-field', { value: detail.proficiencies }) %><% } %>
+    <% if (detail?.trait_specific) { %><%- include('edition-field', { value: detail.trait_specific }) %><% } %>
+  </div>
+<% } %>
+
+<% if (editionEntry.subspecies?.length) { %>
+  <hr class="w-75" /><h2>Subspecies</h2>
+  <% for (const subspecies of editionEntry.subspecies) { const detail = editionData('2024','subspecies').find((item) => item.index === subspecies.index); %>
+    <div id="<%= subspecies.index %>"><h3><%= subspecies.name %></h3>
+      <% if (detail?.description) { %><%- include('edition-prose', { text: detail.description }) %><% } %>
+      <% for (const trait of detail?.traits || []) { const traitDetail = editionData('2024','traits').find((item) => item.index === trait.index); %>
+        <h4><%= trait.name %></h4><% if (traitDetail?.description) { %><%- include('edition-prose', { text: traitDetail.description }) %><% } %>
+      <% } %>
+    </div>
+  <% } %>
+<% } %>
+
+<div class="srd-back-link"><a href="/dnd/5e/srd/races?edition=2024">&larr; All Species</a></div>

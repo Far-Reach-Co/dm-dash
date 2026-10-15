@@ -1,4 +1,5 @@
 import getContextualSuggestions from "../../lib/getContextualSuggestions.js";
+import { loadSrdSuggestions, suggestionDescription, suggestionLabel } from "../../lib/srdSuggestionData.js";
 import createElement from "../../lib/salt-lib/createElement.js";
 import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../loadingWithMessage.js";
@@ -11,8 +12,7 @@ import {
   updateSheetItem,
 } from "../../lib/sheetApi.js";
 
-// load features for suggestions on input
-let featSuggestions = [];
+let featSuggestionsPromise = null;
 
 function isFilteredFeatureSuggestion(item) {
   const name = String(item?.name || "").toLowerCase();
@@ -23,20 +23,17 @@ function isFilteredFeatureSuggestion(item) {
   );
 }
 
-fetch("/lib/data/2014/5e-srd-features.json")
-  .then((res) => res.json())
-  .then((data) => {
-    const filteredFeatures = Array.isArray(data)
-      ? data.filter((item) => !isFilteredFeatureSuggestion(item))
-      : [];
-    featSuggestions = [...featSuggestions, ...filteredFeatures];
-  });
-// add traits
-fetch("/lib/data/2014/5e-srd-traits.json")
-  .then((res) => res.json())
-  .then((data) => {
-    featSuggestions = [...featSuggestions, ...data];
-  });
+function getFeatSuggestions() {
+  if (!featSuggestionsPromise) {
+    featSuggestionsPromise = Promise.all([
+      loadSrdSuggestions("2014", "features"),
+      loadSrdSuggestions("2014", "traits"),
+      loadSrdSuggestions("2024", "features"),
+      loadSrdSuggestions("2024", "traits"),
+    ]).then((groups) => groups.flat().filter((item) => !isFilteredFeatureSuggestion(item)));
+  }
+  return featSuggestionsPromise;
+}
 
 export default class FeatComponent extends Component {
   constructor(props = {}) {
@@ -277,8 +274,8 @@ class SingleFeatComponent extends Component {
     const descriptionInput = document.getElementById(
       `feat-description-input-${this.id}`,
     );
-    titleInput.value = item.name;
-    descriptionInput.value = item.desc.join("");
+    titleInput.value = suggestionLabel(item);
+    descriptionInput.value = suggestionDescription(item);
   };
 
   resetFeatInfoToCurrentValues = () => {
@@ -310,6 +307,7 @@ class SingleFeatComponent extends Component {
     suggElem.style.top = rect.bottom + window.scrollY + "px"; // You can add an offset here
     suggElem.style.left = rect.left + window.scrollX + "px"; // You can add an offset here
 
+    const featSuggestions = await getFeatSuggestions();
     if (featSuggestions.length) {
       // clear
       suggElem.innerHTML = "";
@@ -329,7 +327,7 @@ class SingleFeatComponent extends Component {
         const elem = createElement(
           "div",
           { class: "suggestions-item" },
-          item.name,
+          suggestionLabel(item),
           [
             {
               type: "mouseover",

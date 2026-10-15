@@ -78,6 +78,7 @@
   function getPageContext() {
     var pathname = normalizePath(window.location.pathname || "");
     if (!pathname || pathname.indexOf("/dnd/5e/srd/") !== 0) return null;
+    var edition = new URLSearchParams(window.location.search).get("edition") === "2024" ? "2024" : "2014";
 
     var segments = pathname.split("/").filter(Boolean).slice(3);
     var category = String(segments[0] || "").trim().toLowerCase() || null;
@@ -93,6 +94,7 @@
         category: null,
         index: null,
         title: title || "SRD Contents",
+        edition: edition,
         isDetailPage: false,
       };
     }
@@ -104,6 +106,7 @@
       category: category,
       index: index,
       title: title,
+      edition: edition,
       isDetailPage: Boolean(index),
     };
   }
@@ -194,13 +197,14 @@
   }
 
   function buildSearchPayload(query) {
-    var payload = { query: query };
+    var payload = { query: query, edition: pageContext ? pageContext.edition : "2014" };
     if (contextEnabled && pageContext) {
       payload.context = {
         path: pageContext.path,
         category: pageContext.category || undefined,
         index: pageContext.index || undefined,
         title: pageContext.title || undefined,
+        edition: pageContext.edition,
         enabled: true,
       };
     }

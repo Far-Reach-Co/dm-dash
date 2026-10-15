@@ -2,6 +2,7 @@ import createElement from "../../lib/salt-lib/createElement.js";
 import Component from "../../lib/salt-lib/Component.js";
 import renderLoadingWithMessage from "../../components/loadingWithMessage.js";
 import getDataByQuery from "../../lib/getDataByQuery.js";
+import { loadSrdSuggestions, parseSuggestionQuery, suggestionDescription, suggestionLabel } from "../../lib/srdSuggestionData.js";
 import parseUrlTextContent from "../../components/parseUrlTextContent.js";
 import modal from "../../components/modal.js";
 import tooltip from "../../components/Tooltip.js";
@@ -34,6 +35,7 @@ function generateWeaponDescription(item) {
     const propNames = item.properties.map((p) => p.name).join(", ");
     parts.push(`Properties: ${propNames}`);
   }
+  if (item.mastery?.name) parts.push(`Mastery: ${item.mastery.name}`);
 
   // Range
   if (item.range) {
@@ -97,36 +99,34 @@ function generateArmorDescription(item) {
 
 // Generate description from item data when desc field is missing
 function generateItemDescription(item) {
+  const categories = Array.isArray(item.equipment_categories)
+    ? item.equipment_categories.map((category) => category.index)
+    : [];
   // Check if it's a weapon
-  if (item.equipment_category?.index === "weapon" || item.weapon_category) {
+  if (item.equipment_category?.index === "weapon" || item.weapon_category || categories.includes("weapons")) {
     return generateWeaponDescription(item);
   }
 
   // Check if it's armor
-  if (item.equipment_category?.index === "armor" || item.armor_category) {
+  if (item.equipment_category?.index === "armor" || item.armor_category || categories.includes("armor")) {
     return generateArmorDescription(item);
   }
 
   return null;
 }
 
-// load equipment and magic items for suggestions on input
-let equipmentSuggestions = [];
-Promise.all([
-  fetch("/lib/data/2014/5e-srd-equipment.json").then((res) => res.json()),
-  fetch("/lib/data/2014/5e-srd-magic-items.json").then((res) => res.json()),
-]).then(([equipment, magicItems]) => {
-  // Add item type to distinguish between equipment and magic items
-  const equipmentWithType = equipment.map((item) => ({
-    ...item,
-    itemType: "equipment",
-  }));
-  const magicItemsWithType = magicItems.map((item) => ({
-    ...item,
-    itemType: "magic-items",
-  }));
-  equipmentSuggestions = [...equipmentWithType, ...magicItemsWithType];
-});
+let equipmentSuggestionsPromise = null;
+function getEquipmentSuggestions() {
+  if (!equipmentSuggestionsPromise) {
+    equipmentSuggestionsPromise = Promise.all([
+      loadSrdSuggestions("2014", "equipment"),
+      loadSrdSuggestions("2014", "magic-items"),
+      loadSrdSuggestions("2024", "equipment"),
+      loadSrdSuggestions("2024", "magic-items"),
+    ]).then((groups) => groups.flat());
+  }
+  return equipmentSuggestionsPromise;
+}
 
 export default class EquipmentComponent extends Component {
   constructor(props = {}) {
@@ -174,15 +174,13 @@ export default class EquipmentComponent extends Component {
       `equipment-weight-input-${equipmentItem.id}`,
     );
 
-    titleInput.value = item.name;
+    titleInput.value = suggestionLabel(item);
     if (item.weight) weightInput.value = item.weight;
 
     // Populate description from JSON data if available, or generate from structured data
     let description = null;
-    if (item.desc && item.desc.length) {
-      description = Array.isArray(item.desc)
-        ? item.desc.join("\n\n")
-        : item.desc;
+    if (suggestionDescription(item)) {
+      description = suggestionDescription(item);
     } else {
       // Generate description from structured data (weapons, armor, etc.)
       description = generateItemDescription(item);
@@ -191,7 +189,8 @@ export default class EquipmentComponent extends Component {
     if (description) {
       // Add link to SRD page
       const itemType = item.itemType || "equipment";
-      const srdLink = `\n\nView full details: https://farreachco.com/dnd/5e/srd/${itemType}/${item.index}`;
+      const editionQuery = item.srdEdition === "2024" ? "?edition=2024" : "";
+      const srdLink = `\n\nView full details: https://farreachco.com/dnd/5e/srd/${itemType}/${item.index}${editionQuery}`;
       this.equipmentData[
         this.equipmentData.indexOf(equipmentItem)
       ].description = description + srdLink;
@@ -245,7 +244,7 @@ export default class EquipmentComponent extends Component {
     suggElem.style.display = "none";
   }
 
-  showEquipmentSuggestions = (e, equipmentItem) => {
+  showEquipmentSuggestions = async (e, equipmentItem) => {
     const suggElem = document.getElementById(
       `suggestions-equipment-${equipmentItem.id}`,
     );
@@ -257,20 +256,24 @@ export default class EquipmentComponent extends Component {
     suggElem.style.top = rect.bottom + window.scrollY + "px"; // You can add an offset here
     suggElem.style.left = rect.left + window.scrollX + "px"; // You can add an offset here
 
+    const queryText = String(e?.target?.value || "");
+    const equipmentSuggestions = await getEquipmentSuggestions();
     if (equipmentSuggestions.length) {
       // clear
       suggElem.innerHTML = "";
       // get suggestions form data
-      const searchSuggestionsList = getDataByQuery(
-        equipmentSuggestions,
-        e.target.value,
-      );
+      const query = parseSuggestionQuery(queryText);
+      const candidates = query.edition
+        ? equipmentSuggestions.filter((item) => item.srdEdition === query.edition)
+        : equipmentSuggestions;
+      const searchSuggestionsList = getDataByQuery(candidates, query.name);
+      if (String(e?.target?.value || "") !== queryText) return;
       // populate list
       for (const item of searchSuggestionsList) {
         const elem = createElement(
           "div",
           { class: "suggestions-item" },
-          item.name,
+          suggestionLabel(item),
           [
             {
               type: "mouseover",

@@ -1,0 +1,9 @@
+<% const proseLines = String(text || '').split(/\n\s*/).map((line) => line.trim()).filter(Boolean); let proseListOpen = false; %>
+<% for (const proseLine of proseLines) { const isBullet = proseLine.startsWith('- '); const parts = (isBullet ? proseLine.slice(2) : proseLine).split('**'); %>
+  <% if (isBullet && !proseListOpen) { proseListOpen = true; %><ul><% } %>
+  <% if (!isBullet && proseListOpen) { proseListOpen = false; %></ul><% } %>
+  <% if (isBullet) { %><li><% } else { %><p><% } %>
+  <% for (let i = 0; i < parts.length; i++) { %><% if (i % 2) { %><strong><%= parts[i] %></strong><% } else { %><%= parts[i] %><% } %><% } %>
+  <% if (isBullet) { %></li><% } else { %></p><% } %>
+<% } %>
+<% if (proseListOpen) { %></ul><% } %>

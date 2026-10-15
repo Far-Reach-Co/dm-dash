@@ -1,0 +1,22 @@
+<div class="inline-div"><i><%= editionCategory === 'magic-items' ? 'Magic Item' : (editionEntry.equipment_categories || []).map((category) => category.name).join(', ') %></i><% if (editionEntry.equipment_category) { %><i> — <%= editionEntry.equipment_category.name %></i><% } %></div>
+<hr class="w-75" />
+
+<div class="equipment-stats">
+  <% if (editionEntry.cost) { %><div class="inline-div"><b>Cost:</b> <span><%= editionEntry.cost.quantity %> <%= editionEntry.cost.unit %></span></div><% } %>
+  <% if (editionEntry.weight) { %><div class="inline-div"><b>Weight:</b> <span><%= editionEntry.weight %> lb.</span></div><% } %>
+  <% if (editionEntry.damage) { %><div class="inline-div"><b>Damage:</b> <span><%= editionEntry.damage.damage_dice %> <%= editionEntry.damage.damage_type?.name || '' %></span></div><% } %>
+  <% if (editionEntry.range) { %><div class="inline-div"><b>Range:</b> <span><%= editionEntry.range.normal %><%= editionEntry.range.long ? `/${editionEntry.range.long}` : '' %> ft.</span></div><% } %>
+  <% if (editionEntry.armor_class) { %><div class="inline-div"><b>Armor Class:</b> <span><%= editionEntry.armor_class.base %><%= editionEntry.armor_class.dex_bonus ? ' + Dex' : '' %></span></div><% } %>
+  <% if (editionEntry.rarity) { %><div class="inline-div"><b>Rarity:</b> <span><%= editionEntry.rarity.name %></span></div><% } %>
+  <% if (editionEntry.attunement) { %><div class="inline-div"><b>Attunement:</b> <span>Required</span></div><% } %>
+</div>
+
+<% if (editionEntry.description) { %><hr class="w-75" /><%- include('edition-prose', { text: editionEntry.description }) %><% } %>
+<% if (editionEntry.desc) { %><hr class="w-75" /><%- include('edition-prose', { text: editionEntry.desc }) %><% } %>
+
+<% for (const [key, value] of editionFields(editionEntry)) { %>
+  <% if (['equipment_categories','equipment_category','cost','weight','damage','range','armor_class','rarity','attunement','description','desc','variant'].includes(key)) continue; %>
+  <h2><%= editionLabel(key) %></h2><%- include('edition-field', { value }) %>
+<% } %>
+
+<div class="srd-back-link"><a href="/dnd/5e/srd/equipment?edition=2024">&larr; All Equipment</a></div>

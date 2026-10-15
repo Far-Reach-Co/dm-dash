@@ -1,4 +1,4 @@
-import { srdData } from "./data.js";
+import { getSrdCategoriesForEdition, getSrdDataForEdition, type SrdEdition } from "./data.js";
 import { SERIALIZERS, serializeGeneric } from "./serializers.js";
 import { normalizeSearchContextHint, type SearchContextHint } from "./context.js";
 
@@ -373,29 +373,26 @@ type TitleIndexRecord = {
   normalizedIndex: string;
 };
 
-let titleIndexRecords: TitleIndexRecord[] | null = null;
-let exactTitleMap: Map<string, TitleIndexRecord[]> | null = null;
-let exactIndexMap: Map<string, TitleIndexRecord[]> | null = null;
+const titleIndexes = new Map<SrdEdition, {
+  records: TitleIndexRecord[];
+  titles: Map<string, TitleIndexRecord[]>;
+  indexes: Map<string, TitleIndexRecord[]>;
+}>();
 
-function getAllSrdCategories(): string[] {
-  return Object.keys(srdData);
+function getAllSrdCategories(edition: SrdEdition): string[] {
+  return getSrdCategoriesForEdition(edition);
 }
 
-function ensureTitleIndex() {
-  if (titleIndexRecords && exactTitleMap && exactIndexMap) {
-    return {
-      records: titleIndexRecords,
-      titles: exactTitleMap,
-      indexes: exactIndexMap,
-    };
-  }
+function ensureTitleIndex(edition: SrdEdition) {
+  const cached = titleIndexes.get(edition);
+  if (cached) return cached;
 
   const records: TitleIndexRecord[] = [];
   const titles = new Map<string, TitleIndexRecord[]>();
   const indexes = new Map<string, TitleIndexRecord[]>();
 
-  for (const category of getAllSrdCategories()) {
-    for (const entry of srdData[category] || []) {
+  for (const category of getAllSrdCategories(edition)) {
+    for (const entry of getSrdDataForEdition(edition, category)) {
       const rawName = String(entry.name || entry.full_name || entry.index || "");
       const normalizedName = normalizeForMatch(rawName);
       const normalizedIndex = normalizeForMatch(String(entry.index || ""));
@@ -423,20 +420,47 @@ function ensureTitleIndex() {
     }
   }
 
-  titleIndexRecords = records;
-  exactTitleMap = titles;
-  exactIndexMap = indexes;
-
-  return { records, titles, indexes };
+  const index = { records, titles, indexes };
+  titleIndexes.set(edition, index);
+  return index;
 }
 
-function findTitleHints(query: string, queryTokens: string[]) {
+const COMPARISON_PAGE_CATEGORIES = new Set([
+  "backgrounds", "classes", "conditions", "damage-types", "equipment", "feats",
+  "features", "languages", "magic-items", "monsters", "races", "skills", "spells",
+  "weapon-properties",
+]);
+
+export function findNamedSourceEntry(
+  query: string,
+  edition: SrdEdition,
+  categories: string[],
+): { category: string; entry: any } | null {
+  const normalizedQuery = ` ${normalizeForMatch(query)} `;
+  const requestedCategories = new Set(categories);
+  const candidates = ensureTitleIndex(edition).records
+    .filter((record) => COMPARISON_PAGE_CATEGORIES.has(record.category) &&
+      record.normalizedName.length >= 4 && normalizedQuery.includes(` ${record.normalizedName} `))
+    .map((record) => {
+      const className = normalizeForMatch(String(record.entry.class?.name || ""));
+      const classAndName = className && ` ${className} ${record.normalizedName} `;
+      const score = record.normalizedName.length +
+        (classAndName && normalizedQuery.includes(classAndName) ? 100 : 0) +
+        (requestedCategories.has(record.category) ? 20 : 0);
+      return { record, score };
+    })
+    .sort((a, b) => b.score - a.score);
+  if (!candidates.length || candidates[0].score === candidates[1]?.score) return null;
+  return { category: candidates[0].record.category, entry: candidates[0].record.entry };
+}
+
+function findTitleHints(query: string, queryTokens: string[], edition: SrdEdition) {
   const normalizedQuery = normalizeForMatch(query);
   const hintedCategories = new Set<string>();
   const boostedEntryKeys = new Set<string>();
   if (!normalizedQuery) return { hintedCategories, boostedEntryKeys };
 
-  const { records, titles, indexes } = ensureTitleIndex();
+  const { records, titles, indexes } = ensureTitleIndex(edition);
   const addMatch = (record: TitleIndexRecord) => {
     hintedCategories.add(record.category);
     boostedEntryKeys.add(record.key);
@@ -595,14 +619,15 @@ const MAX_CONTEXT_CHARS = 32000;
 export function findRelevantEntries(
   query: string,
   categories: string[],
-  opts?: { context?: SearchContextHint },
+  opts?: { context?: SearchContextHint; edition?: SrdEdition; maxContextChars?: number },
 ): string {
+  const edition = opts?.edition || "2014";
   const queryTokens = tokenize(query);
   const normalizedQuery = normalizeForMatch(query);
   const queryIntent = detectQueryIntent(queryTokens, normalizedQuery);
   const hasLikelyExplicitEntity = isLikelyExplicitEntityQuery(queryTokens);
   const { hintedCategories, boostedEntryKeys } = hasLikelyExplicitEntity
-    ? findTitleHints(query, queryTokens)
+    ? findTitleHints(query, queryTokens, edition)
     : { hintedCategories: new Set<string>(), boostedEntryKeys: new Set<string>() };
   const contextHint = resolveContextHint(opts?.context);
   const hasCompetingExplicitEntity =
@@ -616,14 +641,17 @@ export function findRelevantEntries(
   for (const category of hintedCategories) searchCategories.add(category);
   if (applyContextBoost && contextHint.category) searchCategories.add(contextHint.category);
   if (isTitleLikeQuery(query, queryTokens) || searchCategories.size === 0) {
-    for (const category of getAllSrdCategories()) searchCategories.add(category);
+    for (const category of getAllSrdCategories(edition)) searchCategories.add(category);
   }
 
   const scored: { text: string; score: number }[] = [];
 
   for (const cat of searchCategories) {
-    const entries = srdData[cat] || [];
-    const serialize = SERIALIZERS[cat] || ((e: any) => serializeGeneric(e, cat.toUpperCase()));
+    const entries = getSrdDataForEdition(edition, cat);
+    const editionAwareSerializers = new Set(["spells", "monsters", "magic-items"]);
+    const serialize = SERIALIZERS[cat] && (edition === "2014" || editionAwareSerializers.has(cat))
+      ? SERIALIZERS[cat]
+      : (e: any) => serializeGeneric(e, cat.toUpperCase());
 
     for (const entry of entries) {
       const score = scoreEntry(
@@ -639,7 +667,7 @@ export function findRelevantEntries(
         queryIntent,
       );
       if (score > 0) {
-        scored.push({ text: serialize(entry), score });
+        scored.push({ text: `[SRD EDITION ${edition}]\n${serialize(entry)}`, score });
       }
     }
   }
@@ -651,7 +679,7 @@ export function findRelevantEntries(
   let totalChars = 0;
   const selected: string[] = [];
   for (const item of scored) {
-    if (totalChars + item.text.length > MAX_CONTEXT_CHARS) break;
+    if (totalChars + item.text.length > (opts?.maxContextChars || MAX_CONTEXT_CHARS)) break;
     selected.push(item.text);
     totalChars += item.text.length;
   }

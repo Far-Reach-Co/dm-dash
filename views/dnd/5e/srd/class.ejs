@@ -1,3 +1,6 @@
+<% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
+<%- include('partials/edition-page') %>
+<% } else { %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,30 +20,6 @@
       : `${classData.name} 5e Class: Features, Hit Die, and Proficiencies`;
     const classMetaDesc = `${classData.name} in D&D 5e: hit die d${classData.hit_die}, saving throws ${savingThrowNames.join(' and ')}.${classSpellCount > 0 ? ` Includes the ${classData.name.toLowerCase()} spell list with ${classSpellCount} SRD spells.` : ''} Full class features, proficiencies, and starting equipment.`.substring(0, 160);
     const classSummary = `${classData.name} is a D&D 5e class with a d${classData.hit_die} hit die and ${savingThrowNames.join(' and ')} saving throws.${classSpellCount > 0 ? ` This page also links the full ${classData.name.toLowerCase()} spell list.` : ''}`;
-    const classFaqs = [
-      {
-        q: `What hit die does the ${classData.name} use in D&D 5e?`,
-        a: `The ${classData.name} uses a d${classData.hit_die} hit die in D&D 5e.`
-      },
-      {
-        q: `What saving throws does the ${classData.name} get in D&D 5e?`,
-        a: savingThrowNames.length
-          ? `The ${classData.name} is proficient in ${savingThrowNames.join(' and ')} saving throws in D&D 5e.`
-          : `See the class details on this page for the ${classData.name}'s saving throw proficiencies in D&D 5e.`
-      },
-      {
-        q: `What proficiencies does the ${classData.name} start with in D&D 5e?`,
-        a: proficiencyNames.length
-          ? `The ${classData.name} starts with proficiencies such as ${proficiencyNames.slice(0, 6).join(', ')}${proficiencyNames.length > 6 ? ', and more' : ''}.`
-          : `See the starting proficiencies section on this page for the ${classData.name}'s SRD proficiencies.`
-      }
-    ];
-    if (classSpellCount > 0) {
-      classFaqs.push({
-        q: `Does the ${classData.name} have spells in D&D 5e?`,
-        a: `Yes. The ${classData.name} has a D&D 5e spell list, and this page links ${classSpellCount} SRD ${classData.name.toLowerCase()} spells.`
-      });
-    }
   %>
   <title><%= classTitle %> | Far Reach Co.</title>
   <meta name="description" content="<%= classMetaDesc %>" />
@@ -68,17 +47,6 @@
         "@type": "Game",
         "name": "Dungeons & Dragons 5th Edition"
       }
-    }
-  </script>
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": <%- JSON.stringify(classFaqs.map((faq) => ({
-        "@type": "Question",
-        "name": faq.q,
-        "acceptedAnswer": { "@type": "Answer", "text": faq.a }
-      }))) %>
     }
   </script>
 
@@ -194,16 +162,6 @@
       </div>
     <% } %>
 
-    <hr class="w-75" />
-    <section class="srd-faq">
-      <p class="srd-faq-label">Frequently Asked Questions</p>
-      <% classFaqs.forEach((faq) => { %>
-        <details>
-          <summary><%= faq.q %></summary>
-          <p><%= faq.a %></p>
-        </details>
-      <% }) %>
-    </section>
 
     <hr class="w-75" />
 
@@ -325,3 +283,5 @@
 </body>
 
 </html>
+
+<% } %>

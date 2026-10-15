@@ -1,5 +1,6 @@
 import getDataByQuery from "./getDataByQuery.js";
 import { getSuggestionContext } from "./suggestionContext.js";
+import { parseSuggestionQuery } from "./srdSuggestionData.js";
 
 const DEFAULT_LIMIT = 20;
 const SPELL_CLASS_LEVEL_INDEX_URL =
@@ -189,7 +190,7 @@ function scoreFeatContext(item, context, metadata) {
   const contextRaceIndexes = toArray(context?.raceIndexes);
 
   const featClassIndex = normalizeString(item?.class?.index);
-  const featRaceIndexes = toArray(item?.races)
+  const featRaceIndexes = toArray(item?.races || item?.species)
     .map((race) => normalizeString(race?.index))
     .filter(Boolean);
 
@@ -218,7 +219,11 @@ function scoreFeatContext(item, context, metadata) {
     if (raceMatch) score += 20;
   }
 
-  const featLevel = parseNumber(item?.level);
+  const featLevel = parseNumber(
+    typeof item?.level === "object"
+      ? String(item.level?.name || "").match(/\d+$/)?.[0]
+      : item?.level,
+  );
   if (featLevel !== null && featClassIndex) {
     const classLevelsByIndex =
       context && typeof context.classLevelsByIndex === "object"
@@ -285,12 +290,17 @@ export default async function getContextualSuggestions({
 } = {}) {
   if (!Array.isArray(data) || !data.length) return [];
 
+  const parsedQuery = parseSuggestionQuery(query);
+  const editionData = parsedQuery.edition
+    ? data.filter((item) => item.srdEdition === parsedQuery.edition)
+    : data;
+
   try {
     const context = await getSuggestionContext({
       generalId,
       generalData,
     });
-    let candidateData = data;
+    let candidateData = editionData;
     if (domain === "spell") {
       const spellClassLevelIndex = await loadSpellClassLevelIndex();
       const spellIndexSet = getSpellIndexSetFromContext(
@@ -300,8 +310,13 @@ export default async function getContextualSuggestions({
       );
 
       if (spellIndexSet && spellIndexSet.size > 0) {
-        const filteredData = data.filter((item) =>
-          spellIndexSet.has(normalizeSpellIndex(item?.index)),
+        const targetSpellLevel = inferSpellLevel(metadata?.spellType);
+        const filteredData = candidateData.filter((item) =>
+          item.srdEdition === "2024"
+            ? toArray(item.classes).some((cls) =>
+                toArray(context.classIndexes).includes(normalizeString(cls?.index))) &&
+              (targetSpellLevel === null || Number(item.level) === targetSpellLevel)
+            : spellIndexSet.has(normalizeSpellIndex(item?.index)),
         );
         if (filteredData.length) {
           candidateData = filteredData;
@@ -309,10 +324,10 @@ export default async function getContextualSuggestions({
       }
     }
 
-    const ranked = rankSuggestions(candidateData, query, domain, context, metadata);
+    const ranked = rankSuggestions(candidateData, parsedQuery.name, domain, context, metadata);
     return ranked.slice(0, limit);
   } catch {
     // Hard fallback to current behavior when context/ranking fails.
-    return getDataByQuery(data, query).slice(0, limit);
+    return getDataByQuery(editionData, parsedQuery.name).slice(0, limit);
   }
 }

@@ -5,6 +5,7 @@ export type SearchContextHint = {
   category?: string | null;
   index?: string | null;
   title?: string | null;
+  edition?: "2014" | "2024" | null;
 };
 
 export type NormalizedSearchContext = {
@@ -12,6 +13,7 @@ export type NormalizedSearchContext = {
   category: string | null;
   index: string | null;
   title: string | null;
+  edition: "2014" | "2024" | null;
 };
 
 const SRD_PATH_PREFIX = "/dnd/5e/srd/";
@@ -80,12 +82,22 @@ export function normalizeSearchContextHint(
   const index =
     normalizeText(context.index, 120)?.toLowerCase() || fromPath.index;
   const title = normalizeText(context.title, 120);
+  let edition = context.edition === "2024" || context.edition === "2014" ? context.edition : null;
+  if (!edition && context.path) {
+    try {
+      const queryEdition = new URL(context.path, "https://farreachco.com").searchParams.get("edition");
+      if (queryEdition === "2014" || queryEdition === "2024") edition = queryEdition;
+    } catch {
+      // Ignore malformed paths; the normalized path checks the SRD origin separately.
+    }
+  }
 
-  if (!path && !category && !index && !title) return null;
+  if (!path && !category && !index && !title && !edition) return null;
   return {
     path: path || null,
     category: category || null,
     index: index || null,
     title: title || null,
+    edition,
   };
 }

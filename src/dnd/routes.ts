@@ -5,7 +5,10 @@ import { registerSrdMonsterRoutes } from "./registerSrdMonsterRoutes";
 import { registerSrdSearchRoute } from "./registerSrdSearchRoute";
 import { registerSrdCommandEventRoute } from "./registerSrdCommandEventRoute";
 
+import { registerSrdEditionView } from "./srd/editionView";
+
 const router = Router();
+registerSrdEditionView(router);
 
 registerSrdContentRoutes(router);
 registerSrdSpellRoutes(router);

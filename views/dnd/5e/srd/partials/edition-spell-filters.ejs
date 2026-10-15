@@ -1,0 +1,42 @@
+<%
+  const allSpells = editionData('2024', 'spells');
+  const activeGroup = editionParts[1];
+  const activeValue = editionParts[2];
+  const schools = [...new Map(allSpells.filter((spell) => spell.school).map((spell) => [spell.school.index, spell.school.name])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const classes = [...new Map(allSpells.flatMap((spell) => spell.classes || []).map((ref) => [ref.index, ref.name])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+  const damageTypes = [...new Map(allSpells.filter((spell) => spell.damage?.damage_type).map((spell) => [spell.damage.damage_type.index, spell.damage.damage_type.name])).entries()].sort((a, b) => a[1].localeCompare(b[1]));
+%>
+<div class="srd-filter-group">
+  <div class="srd-filter-label">Browse by Level</div>
+  <div class="srd-filter-pills">
+    <% for (let level = 0; level <= 9; level++) { const count = allSpells.filter((spell) => spell.level === level).length; if (!count) continue; %>
+      <a href="/dnd/5e/srd/spells/level/<%= level %>?edition=2024" <% if (activeGroup === 'level' && activeValue === String(level)) { %>aria-current="page"<% } %>><%= level === 0 ? 'Cantrips' : `Level ${level}` %> (<%= count %>)</a>
+    <% } %>
+  </div>
+</div>
+<div class="srd-filter-group">
+  <div class="srd-filter-label">Browse by School</div>
+  <div class="srd-filter-pills">
+    <% for (const [index, name] of schools) { const count = allSpells.filter((spell) => spell.school?.index === index).length; %>
+      <a href="/dnd/5e/srd/spells/school/<%= index %>?edition=2024" <% if (activeGroup === 'school' && activeValue === index) { %>aria-current="page"<% } %>><%= name %> (<%= count %>)</a>
+    <% } %>
+  </div>
+</div>
+<div class="srd-filter-group">
+  <div class="srd-filter-label">Browse by Class</div>
+  <div class="srd-filter-pills">
+    <% for (const [index, name] of classes) { const count = allSpells.filter((spell) => (spell.classes || []).some((ref) => ref.index === index)).length; %>
+      <a href="/dnd/5e/srd/spells/class/<%= index %>?edition=2024" <% if (activeGroup === 'class' && activeValue === index) { %>aria-current="page"<% } %>><%= name %> (<%= count %>)</a>
+    <% } %>
+  </div>
+</div>
+<% if (damageTypes.length) { %>
+  <div class="srd-filter-group">
+    <div class="srd-filter-label">Browse by Damage Type</div>
+    <div class="srd-filter-pills">
+      <% for (const [index, name] of damageTypes) { const count = allSpells.filter((spell) => spell.damage?.damage_type?.index === index).length; %>
+        <a href="/dnd/5e/srd/spells/damage/<%= index %>?edition=2024" <% if (activeGroup === 'damage' && activeValue === index) { %>aria-current="page"<% } %>><%= name %> (<%= count %>)</a>
+      <% } %>
+    </div>
+  </div>
+<% } %>

@@ -1,3 +1,6 @@
+<% if (typeof srdEdition !== 'undefined' && srdEdition === '2024') { %>
+<%- include('partials/edition-page') %>
+<% } else { %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -270,3 +273,5 @@
 </body>
 
 </html>
+
+<% } %>

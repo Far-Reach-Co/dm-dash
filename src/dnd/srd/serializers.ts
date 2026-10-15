@@ -4,8 +4,10 @@ function serializeSpell(s: any): string {
   const classes = (s.classes || []).map((c: any) => c.name).join(", ");
   const subclasses = (s.subclasses || []).map((c: any) => c.name).join(", ");
   const school = s.school?.name || "";
-  const desc = Array.isArray(s.desc) ? s.desc.join(" ") : s.desc || "";
-  const higherLevel = Array.isArray(s.higher_level) ? s.higher_level.join(" ") : "";
+  const rawDescription = s.desc ?? s.description ?? "";
+  const desc = Array.isArray(rawDescription) ? rawDescription.join(" ") : String(rawDescription);
+  const rawHigherLevel = s.higher_level ?? "";
+  const higherLevel = Array.isArray(rawHigherLevel) ? rawHigherLevel.join(" ") : String(rawHigherLevel);
   const dmgType = s.damage?.damage_type?.name || "";
   const dmgAtSlot = s.damage?.damage_at_slot_level;
   const dmgSlotStr = dmgAtSlot
@@ -104,23 +106,54 @@ function serializeEquipment(e: any): string {
 
 function serializeMagicItem(m: any): string {
   const rarity = m.rarity?.name || "";
-  const desc = Array.isArray(m.desc) ? m.desc.join(" ") : "";
+  const rawDescription = m.desc ?? m.description ?? "";
+  const desc = Array.isArray(rawDescription) ? rawDescription.join(" ") : String(rawDescription);
   return (
     `MAGIC ITEM: ${m.name} [index: ${m.index}] (${rarity})` +
-    `\n${desc.slice(0, 400)}`
+    (m.attunement ? `\nAttunement: ${m.attunement}` : "") +
+    `\n${desc.slice(0, 1200)}`
   );
 }
 
+function compactValue(value: any): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return String(value);
+  if (Array.isArray(value)) return value.map(compactValue).filter(Boolean).join(", ");
+  if (typeof value === "object") {
+    return Object.entries(value)
+      .filter(([key, child]) => !["index", "url", "image"].includes(key) && child !== null && child !== undefined)
+      .map(([key, child]) => `${key.replace(/_/g, " ")}: ${compactValue(child)}`)
+      .filter((part) => !part.endsWith(": "))
+      .join("; ");
+  }
+  return "";
+}
+
 export function serializeGeneric(entry: any, label: string): string {
-  const desc = Array.isArray(entry.desc) ? entry.desc.join(" ") : entry.desc || "";
+  const rawDescription = entry.desc ?? entry.description ?? "";
+  const desc = Array.isArray(rawDescription) ? rawDescription.join(" ") : String(rawDescription);
   const extra: string[] = [];
   const index = entry.index ? ` [index: ${entry.index}]` : "";
   if (entry.class?.name) extra.push(`Class: ${entry.class.name}`);
-  if (entry.level !== undefined) extra.push(`Level: ${entry.level}`);
+  if (entry.subclass?.name) extra.push(`Subclass: ${entry.subclass.name}`);
+  if (entry.level !== undefined) {
+    const level = typeof entry.level === "object" ? entry.level.name || entry.level.level : entry.level;
+    extra.push(`Level: ${level}`);
+  }
+  const factKeys = [
+    "primary_ability", "ability_scores", "feat", "proficiencies", "saving_throws",
+    "starting_equipment", "starting_equipment_options", "equipment_categories", "prerequisites",
+    "type", "size", "speed", "armor_class", "hit_points", "challenge_rating", "cost", "weight",
+  ];
+  const facts = factKeys
+    .filter((key) => entry[key] !== undefined && entry[key] !== null)
+    .map((key) => `${key.replace(/_/g, " ")}: ${compactValue(entry[key])}`)
+    .join("\n");
   return (
     `${label}: ${entry.name}${index}` +
     (extra.length ? ` (${extra.join(", ")})` : "") +
-    `\n${desc.slice(0, 400)}`
+    (facts ? `\n${facts.slice(0, 1000)}` : "") +
+    (desc ? `\n${desc.slice(0, 1400)}` : "")
   );
 }
 
