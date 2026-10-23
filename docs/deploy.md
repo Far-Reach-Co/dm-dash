@@ -28,7 +28,7 @@ Flow:
 - `DM_DASH_SERVER` (default: `root@165.227.88.65`)
 - `DM_DASH_REMOTE_DIR` (default: `/root/dm-dash`)
 - `DM_DASH_SSH_KEY`
-- `DM_DASH_REMOTE_NPM_BIN` (default: `/root/.nvm/versions/node/v24.13.0/bin/npm`)
+- `DM_DASH_REMOTE_NPM_BIN` (default: `/root/.nvm/versions/node/v24.22.1/bin/npm`)
 - `DM_DASH_ALLOW_DIRTY` (default: `0`; require clean git tree)
 - `DM_DASH_BUILD_LOCAL` (default: `1`; set `0` to skip local build)
 - `DM_DASH_FORCE_DELETE` (default: `0`; enable `rsync --delete` on first artifact deploy)

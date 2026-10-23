@@ -8,7 +8,7 @@ User=root
 WorkingDirectory=/root/dm-dash
 Environment=NODE_ENV=production
 EnvironmentFile=/root/dm-dash/.env
-ExecStart=/root/.nvm/versions/node/v24.13.0/bin/node /root/dm-dash/dist/lib/db_backups/pgBackup.js --once
+ExecStart=/root/.nvm/versions/node/v24.22.1/bin/node /root/dm-dash/dist/lib/db_backups/pgBackup.js --once
 TimeoutStartSec=30min
 StandardOutput=journal
 StandardError=journal

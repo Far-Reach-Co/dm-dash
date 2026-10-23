@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js `24.13.0` (`.nvmrc`)
+- Node.js `24.22.1` (`.nvmrc`)
 - PostgreSQL
 - Redis
 

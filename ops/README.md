@@ -46,7 +46,7 @@ SERVER_ENV=prod npm run build:client
 ### 4. Remote `npm ci --omit=dev` fails
 
 - Ensure remote node/npm paths are valid:
-  - `DM_DASH_REMOTE_NPM_BIN=/root/.nvm/versions/node/v24.13.0/bin/npm`
+  - `DM_DASH_REMOTE_NPM_BIN=/root/.nvm/versions/node/v24.22.1/bin/npm`
 - Ensure that same directory contains `node` (deploy prepends npm bin dir to `PATH`).
 - Verify package files were synced:
   - `ssh "$DM_DASH_SERVER" "ls -l /root/dm-dash/package.json /root/dm-dash/package-lock.json"`
