@@ -8,7 +8,7 @@ User=root
 WorkingDirectory=/root/dm-dash
 Environment=NODE_ENV=production
 EnvironmentFile=/root/dm-dash/.env
-ExecStart=/root/.nvm/versions/node/v24.13.0/bin/node /root/dm-dash/dist/tools/sendMonthlyLogReportEmail.js
+ExecStart=/root/.nvm/versions/node/v24.22.1/bin/node /root/dm-dash/dist/tools/sendMonthlyLogReportEmail.js
 TimeoutStartSec=15min
 StandardOutput=journal
 StandardError=journal

@@ -4,7 +4,7 @@ set -euo pipefail
 SERVER="${DM_DASH_SERVER:-root@165.227.88.65}"
 REMOTE_DIR="${DM_DASH_REMOTE_DIR:-/root/dm-dash}"
 SSH_KEY="${DM_DASH_SSH_KEY:-}"
-REMOTE_NPM_BIN="${DM_DASH_REMOTE_NPM_BIN:-/root/.nvm/versions/node/v24.13.0/bin/npm}"
+REMOTE_NPM_BIN="${DM_DASH_REMOTE_NPM_BIN:-/root/.nvm/versions/node/v24.22.1/bin/npm}"
 
 if [[ -n "$SSH_KEY" ]]; then
   SSH_CMD=(ssh -i "$SSH_KEY" "$SERVER")
